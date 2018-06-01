@@ -81,6 +81,7 @@ import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -2439,35 +2440,52 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         }
         PostDTO post = new PostDTO();
-        if (cmd.getUpdateId() == null) {
-            if (cmd.getForumId() == null ||
-                    cmd.getVisibleRegionType() == null ||
-                    cmd.getContentCategory() == null ||
-                    cmd.getCreatorTag() == null || cmd.getCreatorTag().equals("") ||
-                    cmd.getTargetTag() == null || cmd.getTargetTag().equals("") ||
-                    cmd.getSubject() == null || cmd.getSubject().equals("")) {
-                LOGGER.error("ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
-            }
-            this.convertNewTopicCommand(cmd);
 
-            //不检查org，新的发布方式可以发布到几个园区、公司和全部，不方便检查 edit by yanjun 20170823
+        if (null == cmd.getOldId()) {
+            post = updateOrCreateTopic(cmd);
+        }else {
+            Post temp = forumProvider.findPostById(cmd.getOldId());
+            if (null == temp) {
+                LOGGER.error("post is null.");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "post is null.");
+            }
+            ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(temp.getEmbeddedJson(),
+                    ActivityPostCommand.class);
+            if (tempCmd.getStatus() == (byte)2) {
+                post = forumService.updateTopic(cmd);
+            } else {
+                post = updateOrCreateTopic(cmd);
+            }
+        }
+        return post;
+    }
+
+    private PostDTO updateOrCreateTopic(NewTopicCommand cmd) {
+        if (cmd.getForumId() == null ||
+                cmd.getVisibleRegionType() == null ||
+                cmd.getContentCategory() == null ||
+                cmd.getCreatorTag() == null || cmd.getCreatorTag().equals("") ||
+                cmd.getTargetTag() == null || cmd.getTargetTag().equals("") ||
+                cmd.getSubject() == null || cmd.getSubject().equals("")) {
+            LOGGER.error("ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
+        }
+        this.convertNewTopicCommand(cmd);
+
+        //不检查org，新的发布方式可以发布到几个园区、公司和全部，不方便检查 edit by yanjun 20170823
 //        Organization organization = getOrganization(cmd);
 //        if (organization == null) {
 //            LOGGER.error("Unable to find the organization.");
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 //                    "Unable to find the organization.");
 //        }
-            //Temporarily do not check, delete by sfyan, 20160511
+        //Temporarily do not check, delete by sfyan, 20160511
 //		this.checkUserHaveRightToNewTopic(cmd,organization);
         /*if(cmd.getEmbeddedAppId() == null)
             cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);*/
-            post = forumService.createTopic(cmd);
-        } else {
-            post = forumService.updateTopic(cmd);
-        }
-        return post;
+        return forumService.createTopic(cmd);
     }
 
     private void convertNewTopicCommand(NewTopicCommand cmd) {

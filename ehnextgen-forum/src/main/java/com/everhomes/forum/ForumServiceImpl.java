@@ -303,12 +303,12 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO updateTopic(NewTopicCommand cmd) {
-        if (null == cmd.getUpdateId()) {
-            LOGGER.error("updateId is null.");
+        if (null == cmd.getOldId()) {
+            LOGGER.error("oldId is null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "updateId is null.");
+                    "oldId is null.");
         }
-        Post post = this.forumProvider.findPostById(cmd.getUpdateId());
+        Post post = this.forumProvider.findPostById(cmd.getOldId());
         if (null == post) {
             LOGGER.error("post is null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -6936,6 +6936,10 @@ public class ForumServiceImpl implements ForumService {
 		    list.forEach(r ->{
 		        //更新帖子
                 r.setStatus(PostStatus.ACTIVE.getCode());
+                ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(r.getEmbeddedJson(),
+                        ActivityPostCommand.class);
+                tempCmd.setStatus(PostStatus.ACTIVE.getCode());
+                r.setEmbeddedJson(StringHelper.toJsonString(tempCmd));
                 forumProvider.updatePost(r);
 
                 //更新活动

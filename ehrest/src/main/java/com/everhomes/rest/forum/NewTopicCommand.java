@@ -11,7 +11,6 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>oldId: 老ID，当暂存过后提交时要传来老的Id用于删除老数据</li>
- *     <li>updateId: 发布后，传入updateId进行修改帖子</li>
  *     <li>ownerType: ownerType</li>
  *     <li>ownerId: ownerId</li>
  *     <li>currentOrgId: currentOrgId</li>
@@ -51,8 +50,6 @@ import com.everhomes.util.StringHelper;
  */
 public class NewTopicCommand {
     private Long oldId;
-
-    private Long updateId;
 
     private String ownerType;
 
@@ -423,13 +420,6 @@ public class NewTopicCommand {
         this.moduleCategoryId = moduleCategoryId;
     }
 
-    public Long getUpdateId() {
-        return updateId;
-    }
-
-    public void setUpdateId(Long updateId) {
-        this.updateId = updateId;
-    }
 
     @Override
     public String toString() {
