@@ -371,8 +371,8 @@ public class DecorationServiceImpl implements  DecorationService {
         if (requests == null || requests.size() == 0)
             return null;
         if (requests.size()>pageSize){
-            response.setNextPageAnchor(requests.get(requests.size()-1).getId());
             requests.remove(requests.size()-1);
+            response.setNextPageAnchor(requests.get(requests.size()-1).getId());
         }
         response.setRequests(processSearchResult(requests));
 
@@ -410,8 +410,8 @@ public class DecorationServiceImpl implements  DecorationService {
         if (requests == null || requests.size() == 0)
             return null;
         if (requests.size()>pageSize){
-            response.setNextPageAnchor(requests.get(requests.size()-1).getId());
             requests.remove(requests.size()-1);
+            response.setNextPageAnchor(requests.get(requests.size()-1).getId());
         }
         response.setRequests(requests.stream().map(r->{
             DecorationRequestDTO dto = new DecorationRequestDTO();

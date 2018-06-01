@@ -193,7 +193,7 @@ public class DecorationProviderImpl implements  DecorationProvider {
         step.where(condition);
         if (pageSize != null)
             step.limit(pageSize);
-        return step.fetch().map(r->{
+        return step.orderBy(Tables.EH_DECORATION_REQUESTS.ID.desc()).fetch().map(r->{
             DecorationRequest request = new DecorationRequest();
             request.setId(r.getValue(Tables.EH_DECORATION_REQUESTS.ID));
             request.setCreateTime(r.getValue(Tables.EH_DECORATION_REQUESTS.CREATE_TIME));
