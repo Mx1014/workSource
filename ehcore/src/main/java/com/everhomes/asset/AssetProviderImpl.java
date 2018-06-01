@@ -1093,9 +1093,11 @@ public class AssetProviderImpl implements AssetProvider {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            //根据billGroup获得时间，如需重复使用，则请抽象出来
+            SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
             //获取所需要的cmd的数据
             BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
-            String dateStr = cmd.getDateStr();
             Byte isSettled = cmd.getIsSettled();
             String noticeTel = cmd.getNoticeTel();
             Long ownerId = cmd.getOwnerId();
@@ -1107,6 +1109,14 @@ public class AssetProviderImpl implements AssetProvider {
             Long contractId = cmd.getContractId();
             String dateStrBegin = cmd.getDateStrBegin();
             String dateStrEnd = cmd.getDateStrEnd();
+            //账期取的是账单开始时间的yyyy-MM
+            String dateStr;
+			try {
+				dateStr = yyyyMM.format(yyyyMM.parse(dateStrBegin));
+			}catch (Exception e){
+				dateStr = null;
+                LOGGER.error(e.toString());
+            }
             Byte isOwed = cmd.getIsOwed();
             String customerTel = cmd.getCustomerTel();
             String invoiceNum = cmd.getInvoiceNum();
@@ -1124,9 +1134,6 @@ public class AssetProviderImpl implements AssetProvider {
             }
             //需要billGroup查看生成账单周期
             PaymentBillGroup group = getBillGroupById(billGroupId);
-            //根据billGroup获得时间，如需重复使用，则请抽象出来
-            SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
-            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
             List<String> dates = new ArrayList<>();
             Byte balanceDateType = group.getBalanceDateType();
             byte dueDayType = group.getDueDayType();
