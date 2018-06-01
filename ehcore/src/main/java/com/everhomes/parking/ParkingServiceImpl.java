@@ -713,7 +713,8 @@ public class ParkingServiceImpl implements ParkingService {
 		if(parkingLot!=null){
 			Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
 			if(community!=null){
-				extendInfo = community.getName()+parkingLot.getName();
+				//项目：$项目名称$；停车场：$停车场名称$
+				extendInfo ="项目："+community.getName()+"；停车场："+parkingLot.getName();
 			}
 		}
 		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
