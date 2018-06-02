@@ -1265,6 +1265,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             cmd.setOwnerType("community");
             cmd.setOwnerId(ownerId);
             cmd.setIsSettled(billSwitch);
+            //个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
+            if(targetType.equals(AssetTargetType.USER.getCode())){
+            	for(CreateBillCommand createBillCommand : cmds) {
+            		
+            	}
+            }
             cmds.add(cmd);
         }
         map.put(cmds, datas);
