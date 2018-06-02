@@ -1091,7 +1091,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             CreateBillCommand cmd = new CreateBillCommand();
             cmd.setTargetType(targetType);//客户属性
             BillGroupDTO billGroupDTO = new BillGroupDTO(cmd);
-            List<BillItemDTO> billItemDTOList = new ArrayList<>();
+            List<BillItemDTO> billItemDTOList = new ArrayList<BillItemDTO>();
             List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
             ExemptionItemDTO exemptionItemDTO = null;
             ExemptionItemDTO increaseItemDTO = null;
@@ -1259,6 +1259,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             billGroupDTO.setBillItemDTOList(billItemDTOList);
             billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
             billGroupDTO.setBillGroupName(assetProvider.findBillGroupNameById(billGroupId));
+            cmd.setBillGroupDTO(billGroupDTO);
             if(cmd.getTargetId() == null){
                 // 没有找到用户，也可以导入
             }
@@ -1267,8 +1268,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             cmd.setIsSettled(billSwitch);
             //个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
             if(targetType.equals(AssetTargetType.USER.getCode())){
-            	for(CreateBillCommand createBillCommand : cmds) {
-            		
+            	for(int m = 0;m < cmds.size();m++) {
+            		CreateBillCommand createBillCommand = cmds.get(m);
+            		if(cmd.getTargetName().equals(createBillCommand.getTargetName()) 
+        				&& cmd.getDateStrBegin().equals(createBillCommand.getDateStrBegin())
+        				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
+            			BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
+            			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
+            			newBillItemDTOList.addAll(billItemDTOList);
+            			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
+            			createBillCommand.setBillGroupDTO(newBillGroupDTO);
+            			cmds.set(m, createBillCommand);
+            			continue bill;
+            		}
             	}
             }
             cmds.add(cmd);
