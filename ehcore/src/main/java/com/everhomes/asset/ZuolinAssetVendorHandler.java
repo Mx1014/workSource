@@ -11,6 +11,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractService;
 import com.everhomes.contract.ContractServiceImpl;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -32,7 +33,14 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.EhPaymentBills;
+import com.everhomes.server.schema.tables.EhPaymentLateFine;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentBillsRecord;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
@@ -43,6 +51,9 @@ import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.jooq.DSLContext;
+import org.jooq.GroupConcatOrderByStep;
+import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1041,8 +1052,56 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 createBillCommands = entry.getKey();
                 datas = entry.getValue();
             }
+            DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+            EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+            EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
             for(CreateBillCommand command : createBillCommands){
-                createBill(command);
+            	List<Boolean> isCreate = new ArrayList<Boolean>();
+            	isCreate.add(true);
+            	//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+            	if(cmd.getTargetType() != null && cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
+                    List<Long> addressIds = new ArrayList<>();
+                    for(BillItemDTO billItemDTO : command.getBillGroupDTO().getBillItemDTOList()) {
+                    	if(!addressIds.contains(billItemDTO.getAddressId())) {
+                    		addressIds.add(billItemDTO.getAddressId());//一个账单可能有多个楼栋门牌
+                    	}
+                    }
+                    context.selectDistinct(t.ID)
+	                    .from(t)
+	                    .leftOuterJoin(t2)
+	                    .on(t.ID.eq(t2.BILL_ID))
+	                    .where(t.DATE_STR_BEGIN.eq(command.getDateStrBegin()))
+	                    .and(t.DATE_STR_END.eq(command.getDateStrEnd()))
+	                    .and(t.BILL_GROUP_ID.eq(command.getBillGroupDTO().getBillGroupId()))//已在导入做非空校验
+	                    .fetch()
+                    	.forEach(r ->{
+                        //根据账单时间、账单组查询出来的账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
+                        List<Long> queryAddressIds = new ArrayList<>();
+                    	context.selectDistinct(t2.ADDRESS_ID)
+                    		.from(t2)
+                    		.where(t2.BILL_ID.eq(r.getValue(t.ID)))
+                    		.fetch()
+                        	.forEach(r2 ->{
+                        		queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
+                        });
+                    	System.out.println("比较");
+                    	System.out.println(addressIds.containsAll(queryAddressIds) && queryAddressIds.containsAll(addressIds));
+                    	for(int i = 0;i < addressIds.size();i++) {
+                    		System.out.println("打印addressIds:" + addressIds.get(i));
+                    	}
+                    	for(int i = 0;i < queryAddressIds.size();i++) {
+                    		System.out.println("打印queryAddressIds:" + queryAddressIds.get(i));
+                    	}
+                    	if(addressIds.containsAll(queryAddressIds) && queryAddressIds.containsAll(addressIds)) {
+                    		//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+                    		assetProvider.modifyBillForImport(r.getValue(t.ID), command);
+                    		isCreate.set(0, false);
+                    	}
+                    });
+            	}
+            	if(isCreate.get(0)) {
+            		createBill(command);
+            	}
             }
             //设置导出报错的结果excel的标
             importTaskResponse.setTitle(datas.get(0).getData());

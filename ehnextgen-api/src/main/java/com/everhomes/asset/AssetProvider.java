@@ -318,4 +318,6 @@ public interface AssetProvider {
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
     
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+    
+    void modifyBillForImport(Long billId, CreateBillCommand cmd);
 }
