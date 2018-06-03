@@ -1055,9 +1055,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             for(CreateBillCommand command : createBillCommands){
             	List<Boolean> isCreate = new ArrayList<Boolean>();
             	isCreate.add(true);
-            	//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
             	if(cmd.getTargetType() != null && cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
+            		//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
             		modifyBillForUser(command,isCreate);
+            	}else {
+            		//企业客户时，以账单时间、账单组、企业名称3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+            		modifyBillForOrg(command,isCreate);
             	}
             	if(isCreate.get(0)) {
             		createBill(command);
@@ -1096,6 +1099,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             .and(t.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))//不可以跨域空间
             .and(t.OWNER_ID.eq(command.getOwnerId()))//不可以跨园区/项目
             .and(t.SWITCH.eq(new Byte(command.getIsSettled())))//账单的状态，0:未出账单;1:已出账单
+            .and(t.TARGET_TYPE.eq(AssetTargetType.USER.getCode()))//个人客户情况下
             .fetch()
         	.forEach(r ->{
             //根据账单时间、账单组查询出来的账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
@@ -1114,6 +1118,32 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         		isCreate.set(0, false);
         	}
         });
+    }
+    
+    private void modifyBillForOrg(CreateBillCommand command, List<Boolean> isCreate){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+        //企业客户时，以账单时间、账单组、企业名称3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+        context.selectDistinct(t.ID)
+	        .from(t)
+	        .leftOuterJoin(t2)
+	        .on(t.ID.eq(t2.BILL_ID))
+	        .where(t.DATE_STR_BEGIN.eq(command.getDateStrBegin())) 
+	        .and(t.DATE_STR_END.eq(command.getDateStrEnd()))
+	        .and(t.BILL_GROUP_ID.eq(command.getBillGroupDTO().getBillGroupId()))//已在导入做非空校验
+	        .and(t.STATUS.eq(new Byte("0")))//账单状态，0:待缴;1:已缴（如果已缴，不允许覆盖，所以是新增账单）
+	        .and(t.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))//不可以跨域空间
+	        .and(t.OWNER_ID.eq(command.getOwnerId()))//不可以跨园区/项目
+	        .and(t.SWITCH.eq(new Byte(command.getIsSettled())))//账单的状态，0:未出账单;1:已出账单
+	        .and(t.TARGET_TYPE.eq(AssetTargetType.ORGANIZATION.getCode()))//企业客户情况下
+	        .and(t.TARGET_ID.eq(command.getTargetId()))
+	        .fetch()
+	    	.forEach(r ->{
+	    		Long billId = r.getValue(t.ID);
+        		assetProvider.modifyBillForImport(billId, command);
+        		isCreate.set(0, false);
+    	});
     }
 
     private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch, String targetType) {
