@@ -582,7 +582,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //            cmd.setTargetId(targetDto.getTargetId());
 //        }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        return assetProvider.creatPropertyBill(cmd);
+        return assetProvider.creatPropertyBill(cmd, null);
     }
 
     @Override
@@ -1052,52 +1052,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 createBillCommands = entry.getKey();
                 datas = entry.getValue();
             }
-            DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-            EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-            EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
             for(CreateBillCommand command : createBillCommands){
             	List<Boolean> isCreate = new ArrayList<Boolean>();
             	isCreate.add(true);
             	//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
             	if(cmd.getTargetType() != null && cmd.getTargetType().equals(AssetTargetType.USER.getCode())){
-                    List<Long> addressIds = new ArrayList<>();
-                    for(BillItemDTO billItemDTO : command.getBillGroupDTO().getBillItemDTOList()) {
-                    	if(!addressIds.contains(billItemDTO.getAddressId())) {
-                    		addressIds.add(billItemDTO.getAddressId());//一个账单可能有多个楼栋门牌
-                    	}
-                    }
-                    context.selectDistinct(t.ID)
-	                    .from(t)
-	                    .leftOuterJoin(t2)
-	                    .on(t.ID.eq(t2.BILL_ID))
-	                    .where(t.DATE_STR_BEGIN.eq(command.getDateStrBegin()))
-	                    .and(t.DATE_STR_END.eq(command.getDateStrEnd()))
-	                    .and(t.BILL_GROUP_ID.eq(command.getBillGroupDTO().getBillGroupId()))//已在导入做非空校验
-	                    .fetch()
-                    	.forEach(r ->{
-                        //根据账单时间、账单组查询出来的账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
-                        List<Long> queryAddressIds = new ArrayList<>();
-                    	context.selectDistinct(t2.ADDRESS_ID)
-                    		.from(t2)
-                    		.where(t2.BILL_ID.eq(r.getValue(t.ID)))
-                    		.fetch()
-                        	.forEach(r2 ->{
-                        		queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
-                        });
-                    	System.out.println("比较");
-                    	System.out.println(addressIds.containsAll(queryAddressIds) && queryAddressIds.containsAll(addressIds));
-                    	for(int i = 0;i < addressIds.size();i++) {
-                    		System.out.println("打印addressIds:" + addressIds.get(i));
-                    	}
-                    	for(int i = 0;i < queryAddressIds.size();i++) {
-                    		System.out.println("打印queryAddressIds:" + queryAddressIds.get(i));
-                    	}
-                    	if(addressIds.containsAll(queryAddressIds) && queryAddressIds.containsAll(addressIds)) {
-                    		//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
-                    		assetProvider.modifyBillForImport(r.getValue(t.ID), command);
-                    		isCreate.set(0, false);
-                    	}
-                    });
+            		modifyBillForUser(command,isCreate);
             	}
             	if(isCreate.get(0)) {
             		createBill(command);
@@ -1113,6 +1073,47 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         }, task);
         response.setId(task.getId());
         return response;
+    }
+    
+    private void modifyBillForUser(CreateBillCommand command, List<Boolean> isCreate){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+    	List<Long> addressIds = new ArrayList<>();
+        for(BillItemDTO billItemDTO : command.getBillGroupDTO().getBillItemDTOList()) {
+        	if(!addressIds.contains(billItemDTO.getAddressId())) {
+        		addressIds.add(billItemDTO.getAddressId());//一个账单可能有多个楼栋门牌
+        	}
+        }
+        context.selectDistinct(t.ID)
+            .from(t)
+            .leftOuterJoin(t2)
+            .on(t.ID.eq(t2.BILL_ID))
+            .where(t.DATE_STR_BEGIN.eq(command.getDateStrBegin()))
+            .and(t.DATE_STR_END.eq(command.getDateStrEnd()))
+            .and(t.BILL_GROUP_ID.eq(command.getBillGroupDTO().getBillGroupId()))//已在导入做非空校验
+            .and(t.STATUS.eq(new Byte("0")))//账单状态，0:待缴;1:已缴（如果已缴，不允许覆盖，所以是新增账单）
+            .and(t.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))//不可以跨域空间
+            .and(t.OWNER_ID.eq(command.getOwnerId()))//不可以跨园区/项目
+            .and(t.SWITCH.eq(new Byte(command.getIsSettled())))//账单的状态，0:未出账单;1:已出账单
+            .fetch()
+        	.forEach(r ->{
+            //根据账单时间、账单组查询出来的账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
+            List<Long> queryAddressIds = new ArrayList<>();
+        	context.selectDistinct(t2.ADDRESS_ID)
+        		.from(t2)
+        		.where(t2.BILL_ID.eq(r.getValue(t.ID)))
+        		.fetch()
+            	.forEach(r2 ->{
+            		queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
+            });
+        	if(addressIds.containsAll(queryAddressIds) && queryAddressIds.containsAll(addressIds)) {
+        		//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+        		Long billId = r.getValue(t.ID);
+        		assetProvider.modifyBillForImport(billId, command);
+        		isCreate.set(0, false);
+        	}
+        });
     }
 
     private Map<List<CreateBillCommand>, List<ImportFileResultLog<List<String>>>> handleImportBillData(ArrayList resultList, Long billGroupId, Integer namespaceId, Long ownerId, Byte billSwitch, String targetType) {

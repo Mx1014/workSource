@@ -1090,7 +1090,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillsDTO creatPropertyBill( CreateBillCommand cmd) {
+    public ListBillsDTO creatPropertyBill( CreateBillCommand cmd, Long billId) {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -1197,9 +1197,14 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal amountOwed = new BigDecimal("0");
             BigDecimal zero = new BigDecimal("0");
 
-            long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
-            if(nextBillId == 0){
-                nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+            long nextBillId;
+            if(billId != null) {
+            	nextBillId = billId;
+            }else {
+            	nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+                if(nextBillId == 0){
+                    nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+                }
             }
 
             if(list2!=null) {
@@ -2075,85 +2080,25 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     public void modifyBillForImport(Long billId, CreateBillCommand cmd) {
-        this.dbProvider.execute((TransactionStatus status) -> {
+    	deleteBillForImport(billId);//先删除原来的账单
+		creatPropertyBill(cmd, billId);//新增一个账单，账单id为原来的账单id
+        reCalBillById(billId);//重新计算账单
+    }
+    
+    public void deleteBillForImport(Long billId) {
+    	this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
-            EhPaymentExemptionItems t2 = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t2");
-            BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
-            Long billGroupId = billGroupDTO.getBillGroupId();
-            List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
-            List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
-            
-            //先删除原来的收费细项
-            context.delete(t1)
-                    .where(t1.BILL_ID.eq(billId))
-                    .execute();
-		    //list1为收费细项的列表
-            List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> paymentBillItems = new ArrayList<>();
-		    if(list1!=null){
-		    	for(int i = 0; i < list1.size(); i++){
-		    		BillItemDTO billItemDTO = list1.get(i);
-                    long nextId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
-                    PaymentBillItems paymentBillItem = new PaymentBillItems();
-                    /*private Long billItemId;
-                    private String billItemName;
-                    private BigDecimal amountReceivable;
-                    private String description;
-                    private String dateStr;
-                    private Long addressId;
-                    private String apartmentName;
-                    private String buildingName;
-                    private Long billGroupRuleId;
-                    private BigDecimal lateFineAmount;
-                    private Long chargingItemsId;*/
-                    paymentBillItem.setId(nextId);
-                    paymentBillItem.setNamespaceId(cmd);
-                    paymentBillItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    paymentBillItems.add(paymentBillItem);
-                }
-		    }
-		    EhPaymentBillItemsDao ehPaymentBillItemsDao = new EhPaymentBillItemsDao(context.configuration());
-		    ehPaymentBillItemsDao.insert(paymentBillItems);
-            
-            //先删除原来的减免增收
-            context.delete(t2)
-                    .where(t2.BILL_ID.eq(billId))
-                    .execute();
-            //减免项列表list2
-            List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
-            if(list2!=null){
-                //bill exemption
-                for(int i = 0; i < list2.size(); i++){
-                    ExemptionItemDTO exemptionItemDTO = list2.get(i);
-                    long nextId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
-                    PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
-                    BigDecimal amount = exemptionItemDTO.getAmount();
-                    exemptionItem.setAmount(amount);
-                    exemptionItem.setBillGroupId(billGroupId);
-                    exemptionItem.setBillId(billId);
-                    exemptionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    exemptionItem.setCreatorUid(UserContext.currentUserId());
-                    exemptionItem.setId(nextId);
-                    exemptionItem.setRemarks(exemptionItemDTO.getRemark());
-                    exemptionItem.setTargetType(cmd.getTargetType());
-                    exemptionItem.setTargetId(cmd.getTargetId());
-                    exemptionItem.setTargetname(cmd.getTargetName());
-                    exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    exemptionItems.add(exemptionItem);
-                }
-            }
-            EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
-            exemptionItemsDao.insert(exemptionItems);
-            reCalBillById(billId);//重新计算账单
-            //更新客户名称、客户id、合同编号、客户手机号、催缴手机号、发票单号
-            context.update(Tables.EH_PAYMENT_BILLS)
-            		.set(Tables.EH_PAYMENT_BILLS.TARGET_NAME, cmd.getTargetName())
-            		.set(Tables.EH_PAYMENT_BILLS.TARGET_ID, cmd.getTargetId())
-            		.set(Tables.EH_PAYMENT_BILLS.CONTRACT_NUM, cmd.getContractNum())
-            		.set(Tables.EH_PAYMENT_BILLS.CUSTOMER_TEL, cmd.getCustomerTel())
-            		.set(Tables.EH_PAYMENT_BILLS.NOTICETEL, cmd.getNoticeTel())
-                    .set(Tables.EH_PAYMENT_BILLS.INVOICE_NUMBER, cmd.getInvoiceNum())
+            int execute = context.delete(Tables.EH_PAYMENT_BILLS)
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .execute();
+            if(execute == 0){
+                throw new RuntimeException("删除账单失败，无法找到此账单");
+            }
+            context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                    .execute();
+            context.delete(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                    .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.eq(billId))
                     .execute();
             return null;
         });
