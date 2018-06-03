@@ -1258,6 +1258,10 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         datas.add(log);
                         continue bill;
                     }
+                	UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
+                    if(claimedIdentifierByToken!=null){
+                        cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
+                    }
                 	cmd.setCustomerTel(data[j]);
                 }else if(headers[j].contains("合同编号")){
                     cmd.setContractNum(data[j]);
