@@ -63,6 +63,7 @@ import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeField;
 import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -299,7 +300,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 switch (sheet) {
                     case CUSTOMER:
                         failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns);
-                        continue;
+                        break;
                     case CUSTOMER_TAX:
                         CustomerTax tax = new CustomerTax();
                         tax.setCustomerId(customerId);
@@ -757,6 +758,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         enterpriseCustomer.setCreatorUid(UserContext.currentUserId());
         String customerAdminString = "";
         String customerAddressString = "";
+        Class<?> clz = EnterpriseCustomer.class.getSuperclass();//校验数字日期格式
 
         if (columns != null && columns.size() > 0) {
             for (DynamicColumnDTO column : columns) {
@@ -775,6 +777,47 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_MANDATORY_ERROR);
                     break;
                 }
+                //校验数字格式及日期格式
+                try {
+                    String type = clz.getDeclaredField(column.getFieldName()).getType().getSimpleName();
+                    switch (type) {
+                        case "Integer":
+                        case "Long":
+                        case "BigDecimal":
+                            if (!NumberUtils.isNumber(column.getValue())) {
+                                Map<String, String> dataMap = new HashMap<>();
+                                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                                LOGGER.error("customer import data number format error : field ={}", column.getHeaderDisplay());
+                                importLogs.setData(dataMap);
+                                importLogs.setErrorDescription("customer import data format error ");
+                                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_NUM_FORMAT_ERROR);
+                                break;
+                            }
+                        case "Timestamp":
+                            String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";
+                            String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";
+                            String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";
+                            String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";
+                            Pattern pattern1 = Pattern.compile(regex1);
+                            Pattern pattern2 = Pattern.compile(regex2);
+                            Pattern pattern3 = Pattern.compile(regex3);
+                            Pattern pattern4 = Pattern.compile(regex4);
+                            if (!(pattern1.matcher(column.getValue()).matches() || pattern2.matcher(column.getValue()).matches()
+                                    || pattern4.matcher(column.getValue()).matches() || pattern4.matcher(column.getValue()).matches())) {
+                                Map<String, String> dataMap = new HashMap<>();
+                                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                                LOGGER.error("customer import data timestamp format error : field ={}", column.getHeaderDisplay());
+                                importLogs.setData(dataMap);
+                                importLogs.setErrorDescription("customer import data timestamp format error ");
+                                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_DATE_FORMAT_ERROR);
+                                break;
+                            }
+                    }
+                } catch (NoSuchFieldException e) {
+                    LOGGER.error("no such field exceltion : field ={}", column.getHeaderDisplay());
+                    break;
+                }
+
                 try {
                     if (!"enterpriseAdmins".equals(column.getFieldName()) && !"entryInfos".equals(column.getFieldName())) {
                         // 非企业管理员和楼栋门牌字段 直接invoke

@@ -34,4 +34,6 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_ADMIN_FORMAT_ERROR = 10026;  //管理员格式错误
     int ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR = 10027;  //楼栋门牌格式错误
     int ERROR_CUSTOMER_ADDRESS_NOT_EXIST_ERROR = 10028;  //楼栋门牌不存在
+    int ERROR_CUSTOMER_NUM_FORMAT_ERROR = 10029;  //数字格式不对
+    int ERROR_CUSTOMER_DATE_FORMAT_ERROR = 10030;  //日期格式不对
 }
