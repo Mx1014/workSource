@@ -4647,26 +4647,24 @@ public class PunchServiceImpl implements PunchService {
         locator.setAnchor(cmd.getPageAnchor());
 
         //注释掉直接查询公司人员的部分,改为还是查询现有考勤月统计数据
-//        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
-//        		months.get(0), pageSize, cmd.getPageAnchor(),cmd.getUserName());
-//        if (members == null || members.size() == 0) {
-//            return response;
-//        }
+        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
+        		months.get(0), Integer.MAX_VALUE-1, cmd.getPageAnchor(),cmd.getUserName());
+        if (members == null || members.size() == 0) {
+            return response;
+        }
 //        Long nextPageAnchor = null;
 //        if (members != null && members.size() > pageSize) {
 //            members.remove(members.size() - 1);
 //            nextPageAnchor = members.get(members.size() - 1).getId();
 //        }
+        List<Long> detailIds = new ArrayList<>();
+////        List<Long> userIds = new ArrayList<>();
+        for (OrganizationMemberDetails member : members) {
+        	detailIds.add(member.getId());
 
-//        List<Long> userIds = new ArrayList<>();
-//        for (OrganizationMemberDetails member : members) {
-//            if (member.getTargetId() > 0) {
-//                userIds.add(member.getTargetId());
-//            }
+        }
 //
-//        }
-
-      List<Long> detailIds = listDptDetailIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
+//      List<Long> detailIds = listDptDetailIds(org, cmd.getOwnerId(), cmd.getUserName(), cmd.getIncludeSubDpt());
       if (null == detailIds || detailIds.size() == 0)
           return response;
       //分页查询
