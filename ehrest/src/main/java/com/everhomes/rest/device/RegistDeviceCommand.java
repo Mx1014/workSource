@@ -11,6 +11,9 @@ import javax.validation.constraints.NotNull;
  * <li>deviceModel: 设备模型信息</li>
  * <li>systemVersion: 设备系统版本</li>
  * <li>meta: 额外要添加的信息</li>
+ * <li>pusherServiceType: 推送服务类型develop和productiom</li>
+ * <li>bundleId: 关联应用</li>
+ * <li>namespaceId: 域空间ID</li>
  * </ul>
  *
  */
@@ -30,6 +33,13 @@ public class RegistDeviceCommand {
     private String systemVersion;
     
     private String meta;
+    
+    //add by huanglm for IOS pusher update
+    private String pusherServiceType;
+    
+    private String bundleId;
+    
+    private Integer namespaceId;
 
     public String getDeviceId() {
         return deviceId;
@@ -86,6 +96,30 @@ public class RegistDeviceCommand {
     public void setMeta(String meta) {
         this.meta = meta;
     }
+
+	public String getPusherServiceType() {
+		return pusherServiceType;
+	}
+
+	public void setPusherServiceType(String pusherServiceType) {
+		this.pusherServiceType = pusherServiceType;
+	}
+
+	public String getBundleId() {
+		return bundleId;
+	}
+
+	public void setBundleId(String bundleId) {
+		this.bundleId = bundleId;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
     
     
 }
