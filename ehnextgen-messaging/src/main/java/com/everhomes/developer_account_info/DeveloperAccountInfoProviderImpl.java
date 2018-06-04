@@ -29,7 +29,7 @@ public class DeveloperAccountInfoProviderImpl implements DeveloperAccountInfoPro
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhDeveloperAccountInfoRecord> query = context.selectQuery(Tables.EH_DEVELOPER_ACCOUNT_INFO);
 		if(namespaceId == null)return null;
-		query.addConditions(Tables.EH_DEVELOPER_ACCOUNT_INFO.NAMESPACE_ID.eq(namespaceId));
+		//query.addConditions(Tables.EH_DEVELOPER_ACCOUNT_INFO.NAMESPACE_ID.eq(namespaceId));
 		query.addOrderBy(Tables.EH_DEVELOPER_ACCOUNT_INFO.ID.asc());
 		//获取结果集，但我们只要一条
 		List<DeveloperAccountInfo> resultList = query.fetch().map(r -> ConvertHelper.convert(r, DeveloperAccountInfo.class));
