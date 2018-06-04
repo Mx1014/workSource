@@ -2,7 +2,7 @@
 -- 创建 开发者账号信息表
 CREATE TABLE `eh_developer_account_info` (
   `id` INT(11)  NOT NULL COMMENT '主键',
-  `namespace_id` INT(11) NOT NULL COMMENT '域空间ID',
+  `bundle_ids` varchar(200)  COMMENT '关联应用（多个，靠逗号“,”连接)',
   `team_id` VARCHAR(100)  COMMENT '关联开发者帐号',
   `authkey_id` VARCHAR(100)  COMMENT 'authkey_id',
   `authkey`  BLOB COMMENT  'authkey',
@@ -16,6 +16,5 @@ CREATE TABLE `eh_developer_account_info` (
 -- 设备注册信息表新增3列（字段 ）
 ALTER  TABLE eh_devices  ADD  pusher_service_type  VARCHAR(40)   COMMENT '推送服务类型：develop或productiom';
 ALTER  TABLE eh_devices  ADD  bundle_id  VARCHAR(100)    COMMENT '关联应用';
-ALTER  TABLE eh_devices  ADD  namespace_id  INT(11)  COMMENT '域空间ID';
 
 -- 20180601-huangliangming
