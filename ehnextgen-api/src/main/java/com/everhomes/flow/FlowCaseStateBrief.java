@@ -1,13 +1,32 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.util.StringHelper;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FlowCaseStateBrief {
+/**
+ * <ul>
+ *     <li>flow: 工作流 {@link com.everhomes.flow.Flow}</li>
+ *     <li>module: 模块信息 {@link com.everhomes.flow.FlowModuleInfo}</li>
+ *     <li>flowCase: flowCase {@link com.everhomes.flow.FlowCase}</li>
+ *     <li>operator: 处理人 {@link com.everhomes.rest.user.UserInfo}</li>
+ *     <li>stepType: 步骤类型 {@link com.everhomes.rest.flow.FlowStepType}</li>
+ *     <li>prefixNode: 上一个节点{@link com.everhomes.flow.FlowNode}</li>
+ *     <li>currentNode: 当前节点{@link com.everhomes.flow.FlowNode}</li>
+ *     <li>nextNode: 下一个节点{@link com.everhomes.flow.FlowNode}</li>
+ *     <li>subject: 用户输入{@link com.everhomes.flow.FlowSubject}</li>
+ *     <li>currentLane: 当前泳道{@link com.everhomes.flow.FlowLane}</li>
+ *     <li>extra: 附加信息 from FlowCaseState</li>
+ *     <li>action: 触发脚本调用的 flowAction {@link com.everhomes.flow.FlowAction}</li>
+ *     <li>firedButtonId: 触发的按钮id</li>
+ * </ul>
+ */
+public class FlowCaseStateBrief implements Serializable {
 
     private Flow flow;
     private FlowModuleInfo module;
@@ -20,6 +39,10 @@ public class FlowCaseStateBrief {
     private FlowSubject subject;
     private FlowLane currentLane;
     private Map<String, Object> extra;
+
+    private FlowAction action;
+
+    private Long firedButtonId;
 
     public FlowCaseStateBrief() {
         extra = new ConcurrentHashMap<>();
@@ -125,6 +148,30 @@ public class FlowCaseStateBrief {
 
     public void setFlow(Flow flow) {
         this.flow = flow;
+    }
+
+    public Long getFiredButtonId() {
+        return firedButtonId;
+    }
+
+    public void setFiredButtonId(Long firedButtonId) {
+        this.firedButtonId = firedButtonId;
+    }
+
+    public FlowAction getAction() {
+        return action;
+    }
+
+    public void setAction(FlowAction action) {
+        this.action = action;
+    }
+
+    public Long getFlowActionId() {
+        return this.action.getId();
+    }
+
+    public String getFlowActionType() {
+        return FlowEntityType.FLOW_ACTION.getCode();
     }
 
     @Override

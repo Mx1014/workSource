@@ -3,12 +3,12 @@ package com.everhomes.flow;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.action.FlowGraphScriptAction;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.flow.nashornfunc.NashornScriptMain;
+import com.everhomes.flow.nashornfunc.NashornScriptMappingCall;
 import com.everhomes.rest.flow.*;
-import com.everhomes.sequence.SequenceService;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.records.EhFlowScriptsRecord;
-import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
@@ -23,9 +23,12 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.request.async.DeferredResult;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class FlowScriptTest extends LoginAuthTestCase {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowScriptTest.class);
@@ -48,34 +51,14 @@ public class FlowScriptTest extends LoginAuthTestCase {
     private FlowService flowService;
 
     @Autowired
-    private FlowNodeProvider flowNodeProvider;
-
-    @Autowired
-    private FlowButtonProvider flowButtonProvider;
-
-    @Autowired
-    private OrganizationService organizationService;
-
-    @Autowired
-    private FlowListenerManager flowListenerManager;
-
-    @Autowired
-    private FlowScriptProvider flowScriptProvider;
-
-    @Autowired
-    private FlowTimeoutService flowTimeoutService;
-
-    @Autowired
-    private UserService userService;
+    private NashornEngineService nashornEngineService;
 
     @Autowired
     private DbProvider dbProvider;
 
-    @Autowired
-    private SequenceService sequenceService;
-
     private final static String SCRIPT = "var configService = require(\"configService\");\n" +
             "var apiService = require(\"apiService\");\n" +
+            "var fetch = require(\"fetch\");\n" +
             "\n" +
             "var app = {};\n" +
             "\n" +
@@ -96,22 +79,28 @@ public class FlowScriptTest extends LoginAuthTestCase {
             "\n" +
             "// 入口函数，工作流后台启用脚本后，一旦满足触发条件，则会调用此函数，主要业务逻辑所在\n" +
             "app.main = function (ctx) {\n" +
-            "    print(\"-------------------------\");\n" +
             "    // 提供的API用于获取管理员在后台配置的属性值\n" +
-            "    var config = configService(ctx.flow.flowId, ctx.flow.flowVersion);\n" +
+            "    var config = configService(ctx.flow.id, ctx.flow.flowVersion);\n" +
             "\n" +
             "    // 通过 apiService 获取 api 提供对象\n" +
             "    var flowService = apiService.get(\"flowService\");\n" +
             "    var moduleService = apiService.get(\"moduleService\");\n" +
             "\n" +
-            "    var vendor = config.getString(\"vendor\") || \"通联支付\";\n" +
-            "    var vendorURL = config.getObject(\"vendorURL\") || \"http://zzz.com\";\n" +
-            "    var vendorKey = config.getInt(\"vendorKey\") || 1;\n" +
+            "    var vendor = config.getString(\"vendor\");\n" +
+            "    var vendorURL = config.getObject(\"vendorURL\");\n" +
+            "    var vendorKey = config.getInt(\"vendorKey\");\n" +
             "\n" +
-            "    print(\"=================================\");\n" +
+            "    fetch(\"http://www.baidu.com\", function (result) {\n" +
+            "        print(result);\n" +
+            "    }, function (reason) {\n" +
+            "        print(reason);\n" +
+            "    });\n" +
+            "\n" +
             "    print(vendor);\n" +
             "    print(vendorURL);\n" +
             "    print(vendorKey);\n" +
+            "\n" +
+            "    flowService.testDummyCall();\n" +
             "\n" +
             "    return vendorURL;\n" +
             "};\n" +
@@ -191,8 +180,8 @@ public class FlowScriptTest extends LoginAuthTestCase {
         Long flowNodeId = flowGraph.getIdToNode().entrySet().iterator().next().getKey();
         cmd.setFlowNodeId(flowNodeId);
 
-        FlowNodeScriptCommand flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVA);
-        cmd.setScript(flowScriptCommand);
+        FlowActionInfo flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVA);
+        cmd.setEnterScript(flowScriptCommand);
 
         FlowNodeDTO flowNodeDTO = flowService.updateFlowNode(cmd);
         assertNotNull(flowNodeDTO);
@@ -238,8 +227,8 @@ public class FlowScriptTest extends LoginAuthTestCase {
 
         UpdateFlowButtonCommand cmd = new UpdateFlowButtonCommand();
         cmd.setFlowButtonId(flowGraph.getNodes().iterator().next().getProcessorButtons().iterator().next().getFlowButton().getId());
-        FlowNodeScriptCommand flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVA);
-        cmd.setScript(flowScriptCommand.getEnterScript());
+        FlowActionInfo flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVA);
+        cmd.setScript(flowScriptCommand);
 
         FlowButtonDetailDTO flowButton = flowService.updateFlowButton(cmd);
         assertNotNull(flowButton);
@@ -253,11 +242,11 @@ public class FlowScriptTest extends LoginAuthTestCase {
 
         UpdateFlowButtonCommand cmd = new UpdateFlowButtonCommand();
         cmd.setFlowButtonId(flowGraph.getNodes().iterator().next().getProcessorButtons().iterator().next().getFlowButton().getId());
-        FlowNodeScriptCommand flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVASCRIPT);
+        FlowActionInfo flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVASCRIPT);
         // for (FlowScriptConfigInfo info : flowScriptCommand.getEnterScript().getScriptConfigs().getConfigs()) {
         //     info.setFieldValue("不合法的配置值");
         // }
-        cmd.setScript(flowScriptCommand.getEnterScript());
+        cmd.setScript(flowScriptCommand);
 
         FlowButtonDetailDTO flowButton = flowService.updateFlowButton(cmd);
         assertNotNull(flowButton);
@@ -265,8 +254,7 @@ public class FlowScriptTest extends LoginAuthTestCase {
         LOGGER.debug(flowButton.toString());
     }
 
-    private FlowNodeScriptCommand getFlowScriptCommand(Flow flow, FlowScriptType scriptType) {
-        FlowNodeScriptCommand scriptCmd = new FlowNodeScriptCommand();
+    private FlowActionInfo getFlowScriptCommand(Flow flow, FlowScriptType scriptType) {
         FlowActionInfo enterScript = new FlowActionInfo();
         enterScript.setEnabled(FlowActionStatus.ENABLED.getCode());
 
@@ -278,25 +266,25 @@ public class FlowScriptTest extends LoginAuthTestCase {
 
         ListFlowScriptsResponse response = flowService.listFlowScripts(listCmd);
 
-        FlowScriptDTO next = response.getDtos().iterator().next();
-        LOGGER.debug("FlowScriptDTO: " + next);
-        scriptConfigCmd.setScriptType(next.getScriptType());
-        scriptConfigCmd.setId(next.getId());
-        scriptConfigCmd.setScriptVersion(next.getScriptVersion());
+       response.getDtos().stream().max(Comparator.comparingLong(FlowScriptDTO::getId)).ifPresent(next -> {
+            LOGGER.debug("FlowScriptDTO: " + next);
+            scriptConfigCmd.setScriptType(next.getScriptType());
+            scriptConfigCmd.setId(next.getId());
+            scriptConfigCmd.setScriptVersion(next.getScriptVersion());
 
-        List<FlowScriptConfigInfo> configs = new ArrayList<>();
-        for (FlowScriptConfigDTO dto : next.getConfigs()) {
-            FlowScriptConfigInfo e = new FlowScriptConfigInfo();
-            e.setFieldName(dto.getFieldName());
-            e.setFieldValue(dto.getFieldValue());
-            configs.add(e);
-        }
-        scriptConfigCmd.setConfigs(configs);
+            List<FlowScriptConfigInfo> configs = new ArrayList<>();
+            for (FlowScriptConfigDTO dto : next.getConfigs()) {
+                FlowScriptConfigInfo e = new FlowScriptConfigInfo();
+                e.setFieldName(dto.getFieldName());
+                e.setFieldValue(dto.getFieldValue());
+                configs.add(e);
+            }
+           scriptConfigCmd.setConfigs(configs);
+       });
 
         enterScript.setScript(scriptConfigCmd);
-        scriptCmd.setEnterScript(enterScript);
-        LOGGER.debug("scriptCmd: " + scriptCmd);
-        return scriptCmd;
+        LOGGER.debug("enterScript: " + enterScript);
+        return enterScript;
     }
 
     // private ListFlowScriptConfigsResponse getFlowScriptConfigs(FlowScriptDTO next) {
@@ -323,8 +311,8 @@ public class FlowScriptTest extends LoginAuthTestCase {
         Long flowNodeId = flowGraph.getIdToNode().entrySet().iterator().next().getKey();
         cmd.setFlowNodeId(flowNodeId);
 
-        FlowNodeScriptCommand flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVA);
-        cmd.setScript(flowScriptCommand);
+        FlowActionInfo flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVASCRIPT);
+        cmd.setEnterScript(flowScriptCommand);
 
         FlowNodeDTO flowNodeDTO = flowService.updateFlowNode(cmd);
         assertNotNull(flowNodeDTO);
@@ -333,9 +321,9 @@ public class FlowScriptTest extends LoginAuthTestCase {
         LOGGER.debug("flowNodeDetail: {}", flowNodeDetail);
 
         FlowGraphScriptAction scriptAction = new FlowGraphScriptAction();
-        FlowAction flowAction = ConvertHelper.convert(flowNodeDetail.getScript().getEnterScript().getScript(), FlowAction.class);
-        flowAction.setScriptId(flowNodeDetail.getScript().getEnterScript().getScript().getScriptMainId());
-        flowAction.setScriptVersion(flowNodeDetail.getScript().getEnterScript().getScript().getScriptVersion());
+        FlowAction flowAction = ConvertHelper.convert(flowNodeDetail.getEnterScript().getScript(), FlowAction.class);
+        flowAction.setScriptMainId(flowNodeDetail.getEnterScript().getScript().getScriptMainId());
+        flowAction.setScriptVersion(flowNodeDetail.getEnterScript().getScript().getScriptVersion());
 
         LOGGER.debug("flowAction: {}", flowAction);
 
@@ -361,8 +349,8 @@ public class FlowScriptTest extends LoginAuthTestCase {
         Long flowNodeId = flowGraph.getIdToNode().entrySet().iterator().next().getKey();
         cmd.setFlowNodeId(flowNodeId);
 
-        FlowNodeScriptCommand flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVASCRIPT);
-        cmd.setScript(flowScriptCommand);
+        FlowActionInfo flowScriptCommand = getFlowScriptCommand(flowGraph.getFlow(), FlowScriptType.JAVASCRIPT);
+        cmd.setEnterScript(flowScriptCommand);
 
         FlowNodeDTO flowNodeDTO = flowService.updateFlowNode(cmd);
         assertNotNull(flowNodeDTO);
@@ -371,9 +359,9 @@ public class FlowScriptTest extends LoginAuthTestCase {
         LOGGER.debug("flowNodeDetail: {}", flowNodeDetail);
 
         FlowGraphScriptAction scriptAction = new FlowGraphScriptAction();
-        FlowAction flowAction = ConvertHelper.convert(flowNodeDetail.getScript().getEnterScript().getScript(), FlowAction.class);
-        flowAction.setScriptId(flowNodeDetail.getScript().getEnterScript().getScript().getScriptMainId());
-        flowAction.setScriptVersion(flowNodeDetail.getScript().getEnterScript().getScript().getScriptVersion());
+        FlowAction flowAction = ConvertHelper.convert(flowNodeDetail.getEnterScript().getScript(), FlowAction.class);
+        flowAction.setScriptMainId(flowNodeDetail.getEnterScript().getScript().getScriptMainId());
+        flowAction.setScriptVersion(flowNodeDetail.getEnterScript().getScript().getScriptVersion());
 
         LOGGER.debug("flowAction: {}", flowAction);
 
@@ -394,5 +382,44 @@ public class FlowScriptTest extends LoginAuthTestCase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testScriptMain() {
+        FlowAction flowAction = new FlowAction();
+        FlowCaseState state = new FlowCaseState();
+        state.setFlowCase(new FlowCase());
+        FlowGraph flowGraph = new FlowGraph();
+        flowGraph.setFlow(new Flow());
+        state.setFlowGraph(flowGraph);
+        state.setOperator(new UserInfo());
+
+        FlowScript script = new FlowScript();
+        script.setScriptMainId(1L);
+        script.setScriptVersion(0);
+
+        String js = new Scanner(this.getClass().getResourceAsStream("/flow/demo.js")).useDelimiter("\\A").next();
+        script.setScript(js);
+
+        NashornScriptMain main = new NashornScriptMain(state, script, flowAction);
+
+        main.process(nashornEngineService);
+    }
+
+    @Test
+    public void testScriptMapping() {
+        FlowScript script = new FlowScript();
+        script.setScriptMainId(1L);
+        script.setScriptVersion(0);
+
+        String js = new Scanner(this.getClass().getResourceAsStream("/flow/demo.js")).useDelimiter("\\A").next();
+        script.setScript(js);
+
+        Map<String, String[]> paramMap = new HashMap<>();
+        paramMap.put("a", new String[]{"b"});
+
+
+        Object result = new NashornScriptMappingCall(script, "https", paramMap, "body1", new DeferredResult<>()).process(nashornEngineService);
+        LOGGER.info("script mapping: {}", result);
     }
 }

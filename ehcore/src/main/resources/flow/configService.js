@@ -1,13 +1,13 @@
 var javaService = Java.type("com.everhomes.flow.NashornConfigService");
 
-function Config(flowId, flowVer) {
-    this.flowId = flowId;
-    this.flowVer = flowVer;
+function Config(ownerType, ownerId) {
+    this.ownerType = ownerType;
+    this.ownerId = ownerId;
 }
 
 Config.prototype = {
     getString: function(key) {
-        return javaService.getConfigByKey(this.flowId, this.flowVer, key);
+        return javaService.getConfigByKey(this.ownerType, this.ownerId, key);
     },
     getInt: function(key) {
         var str = this.getString(key);

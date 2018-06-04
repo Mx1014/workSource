@@ -35,6 +35,8 @@ import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.news.*;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,7 +167,7 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
-					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
+					1080010800L, cmd.getAppId(), null, cmd.getOwnerId());// 全部权限
 		}
 
 		final Long userId = UserContext.current().getUser().getId();
@@ -179,7 +181,7 @@ public class NewsServiceImpl implements NewsService {
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
 		// 检查用户的项目权限是否合法
-		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getCurrentProjectId(), cmd.getAppId());
+		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getOwnerId(), cmd.getAppId());
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
 
@@ -218,7 +220,7 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
-					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
+					1080010800L, cmd.getAppId(), null, cmd.getOwnerId());// 全部权限
 		}
 
 		// 获取要修改的news
@@ -227,10 +229,10 @@ public class NewsServiceImpl implements NewsService {
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
 		}
-
+		
 		// 进行权限判断
 		final Long userId = UserContext.current().getUser().getId();
-		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getCurrentProjectId(), cmd.getAppId());
+		checkUserProjectLegal(userId, cmd.getCurrentPMId(), news.getOwnerId(), cmd.getAppId());
 
 		// 设置新的值
 		news.setTitle(cmd.getTitle());
@@ -398,13 +400,14 @@ public class NewsServiceImpl implements NewsService {
 		if (cmd.getCurrentPMId() != null && cmd.getAppId() != null
 				&& configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(),
-					1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());// 全部权限
+					1080010800L, cmd.getAppId(), null, cmd.getOwnerId());// 全部权限
 		}
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
-		// 权限核实
-		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getCurrentProjectId(), cmd.getAppId());
+		// 权限核实 
+		// 这里就不用projectId了，冗余了
+		checkUserProjectLegal(userId, cmd.getCurrentPMId(), cmd.getOwnerId(), cmd.getAppId());
 
 		// 读取Excel数据
 		List<News> newsList = getNewsFromExcel(userId, namespaceId, cmd, files);
@@ -1229,6 +1232,42 @@ public class NewsServiceImpl implements NewsService {
 
 		return response;
 	}
+	
+	@Override
+	public GetNewsCommentResponse getNewsComment(GetNewsCommentCommand cmd) {
+
+		// 获取评论
+		Comment comment = commentProvider.findCommentById(EhNewsComment.class, cmd.getCommentId());
+		if (null == comment) {
+			return new GetNewsCommentResponse();
+		}
+
+		List<NewsCommentDTO> dtos = new ArrayList<>();
+		List<Comment> comments = new ArrayList<>(1);
+		comments.add(comment);
+
+		// 添加附件
+		populateCommentAttachment(comment.getCreatorUid(), comments, dtos);
+
+		// 添加头像等信息
+		populateCommentUser(comment.getCreatorUid(), dtos);
+
+		// 获取评论数
+		Long commentCount = 0L;
+		News news = newsProvider.findNewsById(comment.getOwnerId());
+		if (null != news) {
+			commentCount = news.getChildCount();
+		}
+
+		// 组装返回信息
+		GetNewsCommentResponse resp = new GetNewsCommentResponse();
+		if (!CollectionUtils.isEmpty(dtos)) {
+			resp.setComment(dtos.get(0));
+		}
+		resp.setCommentCount(commentCount);
+		return resp;
+
+	}
 
 	private void populateCommentUser(Long userId, List<NewsCommentDTO> list) {
 		list.forEach(c -> {
@@ -1845,6 +1884,10 @@ public class NewsServiceImpl implements NewsService {
 		}
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		News news = findNewsById(userId, newsId);
+		if (null == news) {
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "news is not exist");
+		}
 
 		// 权限限制
 		checkUserProjectLegal(userId, cmd.getCurrentPMId(), news.getOwnerId(), cmd.getAppId());
@@ -1946,7 +1989,10 @@ public class NewsServiceImpl implements NewsService {
 	 * @date: 2018年4月20日 下午3:45:54
 	 *
 	 */
-	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, Long groupId, String widget, Long categoryId) {
+	private void filledRenderUrl(ListNewsBySceneResponse response, Integer namespaceId, Long groupId, String widget, Long inputCategoryId) {
+		
+		//旧版本可能传空
+		Long categoryId = inputCategoryId == null ? 0L : inputCategoryId;
 		
 		//旧版本无法获得groupId
 		if (null == groupId) {

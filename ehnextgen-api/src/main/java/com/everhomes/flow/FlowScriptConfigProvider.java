@@ -16,7 +16,7 @@ public interface FlowScriptConfigProvider {
 
     List<FlowScriptConfig> listByOwner(String ownerType, Long ownerId);
 
-    String getConfig(Long flowMainId, Integer flowVersion, String fieldName);
+    String getConfig(String ownerType, Long ownerId, String fieldName);
 
     void createFlowScriptConfigs(List<FlowScriptConfig> scriptConfigs);
 

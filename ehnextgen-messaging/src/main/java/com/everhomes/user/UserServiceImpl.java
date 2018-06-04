@@ -5603,6 +5603,9 @@ public class UserServiceImpl implements UserService {
 
 		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
+		//查询不显示的更多地址信息的标志
+		Integer addressDialogStyle = configurationProvider.getIntValue(namespaceId, "zhifuhui.display.flag", 2);
+		resp.setAddressDialogStyle(addressDialogStyle);
 
 		resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", SCAN_FOR_LOGON_SERVER));
 
@@ -6121,5 +6124,12 @@ public class UserServiceImpl implements UserService {
 		SearchUserByIdentifierResponse response = new SearchUserByIdentifierResponse();
 		response.setDtos(dtos);
 		return response;
+	}
+
+	@Override
+	public Byte isUserAuth() {
+		User user = UserContext.current().getUser();
+		int amount = this.organizationProvider.getUserOrgAmount(user.getId());
+		return amount > 0 ? (byte) 1 : (byte) 0;
 	}
 }

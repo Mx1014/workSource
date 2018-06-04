@@ -9,7 +9,7 @@ public interface FlowScriptProvider {
 
 	Long getNextId();
 
-	void createFlowScriptWithoutId(FlowScript obj);
+	void createFlowScriptWithId(FlowScript obj);
 
 	void updateFlowScript(FlowScript obj);
 
@@ -18,9 +18,9 @@ public interface FlowScriptProvider {
 	List<FlowScript> queryFlowScripts(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
-	List<FlowScript> findFlowScriptByModuleId(Long moduleId, String moduleType);
+	FlowScript findNewestFlowScript(Long scriptMainId);
 
-    FlowScript findByMainIdAndVersion(Long scriptMainId, Integer scriptVersion);
+	FlowScript findByMainIdAndVersion(Long scriptMainId, Integer scriptVersion);
 
     FlowScript findById(Long id);
 

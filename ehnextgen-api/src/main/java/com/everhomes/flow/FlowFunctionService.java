@@ -1,7 +1,6 @@
 package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowScriptInfo;
-import com.everhomes.rest.flow.FlowScriptConfigDTO;
 import com.everhomes.rest.flow.FlowScriptDTO;
 
 import java.lang.reflect.InvocationTargetException;
@@ -10,7 +9,7 @@ import java.util.List;
 
 public interface FlowFunctionService {
 
-    void invoke(FlowCaseState ctx, Long functionId) throws InvocationTargetException, IllegalAccessException;
+    void invoke(FlowCaseState ctx, Long functionId, FlowAction flowAction) throws InvocationTargetException, IllegalAccessException;
 
     List<FlowScriptDTO> listFlowFunctions(Long moduleId, String keyword);
 

@@ -10,6 +10,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
 
@@ -443,7 +444,9 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 
-	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId);
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId, int pageSize, ListingLocator locator);
+
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Integer pageSize, ListingLocator locator);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId);
 
@@ -495,4 +498,17 @@ public interface OrganizationProvider {
 	List<Organization> listPMOrganizations(Integer namespaceId);
 
 	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId);
+
+	OrganizationCommunityRequest getOrganizationRequest(Long organizationId);
+
+    void deleteAllOrganizationAddressById(Long organizationId);
+
+	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
+
+	Integer getUserOrgAmount(Long targetId);
+
+    OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
+            Long targetId, Long organizationId);
+    OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
+            Long organizationId, String contactToken);
 }

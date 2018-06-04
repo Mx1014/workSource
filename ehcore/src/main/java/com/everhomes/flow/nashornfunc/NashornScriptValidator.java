@@ -1,19 +1,15 @@
 package com.everhomes.flow.nashornfunc;
 
-import com.everhomes.flow.FlowNashornEngineService;
+import com.everhomes.flow.NashornEngineService;
 import com.everhomes.flow.FlowScript;
 import com.everhomes.flow.NashornScript;
-import com.everhomes.rest.flow.FlowScriptConfigInfo;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 
-public class NashornScriptValidator implements NashornScript<FlowNashornEngineService, Boolean> {
+public class NashornScriptValidator implements NashornScript<Boolean> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NashornScriptValidator.class);
 
@@ -31,14 +27,14 @@ public class NashornScriptValidator implements NashornScript<FlowNashornEngineSe
     }
 
     @Override
-    public FlowScript getScript() {
-        return script;
+    public String getScript() {
+        return script.getScript();
     }
 
     @Override
-    public Boolean process(FlowNashornEngineService input) {
+    public Boolean process(NashornEngineService input) {
         // 编译
-        input.getCompliedScriptHolder().compile(script);
+        input.getCompliedScriptHolder().compile(script.getScriptMainId(), script.getScriptVersion(), script.getScript());
         return Boolean.TRUE;
     }
 

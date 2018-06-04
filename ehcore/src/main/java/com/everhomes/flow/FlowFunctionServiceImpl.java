@@ -1,6 +1,7 @@
 package com.everhomes.flow;
 
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowScriptDTO;
 import com.everhomes.rest.flow.FlowScriptInfo;
 import com.everhomes.rest.flow.FlowScriptType;
@@ -31,7 +32,7 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() != null) {
+        if (event.getApplicationContext().getParent() != null || functionListeners == null) {
             return;
         }
         for (FlowFunctionListener listener : functionListeners) {
@@ -66,7 +67,7 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
 
             // 检查已经使用的函数是否还在
             List<FlowScriptConfig> scriptConfigs = flowScriptConfigProvider.listByModule(moduleId, FlowScriptType.JAVA);
-            Set<Long> functionIdSet = scriptConfigs.stream().map(FlowScriptConfig::getId).collect(Collectors.toSet());
+            Set<Long> functionIdSet = scriptConfigs.stream().map(FlowScriptConfig::getScriptMainId).collect(Collectors.toSet());
             for (Long funcId : functionIdSet) {
                 if (methodMap.get(funcId) == null) {
                     throw new FlowFunctionException(
@@ -83,14 +84,13 @@ public class FlowFunctionServiceImpl implements FlowFunctionService, Application
     }
 
     @Override
-    public void invoke(FlowCaseState ctx, Long functionId) throws InvocationTargetException, IllegalAccessException {
+    public void invoke(FlowCaseState ctx, Long functionId, FlowAction flowAction) throws InvocationTargetException, IllegalAccessException {
         FlowFunctionInfo functionInfo = moduleIdToFunctionMap.get(ctx.getModuleId());
         if (functionInfo != null) {
             Method method = functionInfo.getMethodMap().get(functionId);
             if (method != null) {
-                FlowCase flowCase = ctx.getFlowCase();
                 List<FlowScriptConfig> configList = flowScriptConfigProvider
-                        .listByFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+                        .listByOwner(FlowEntityType.FLOW_ACTION.getCode(), flowAction.getId());
 
                 Map<String, String> config = configList.stream()
                         .collect(Collectors.toMap(FlowScriptConfig::getFieldName, FlowScriptConfig::getFieldValue));

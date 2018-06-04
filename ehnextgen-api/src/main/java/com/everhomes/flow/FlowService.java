@@ -9,6 +9,8 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface FlowService {
 	
 	/**
@@ -395,8 +397,6 @@ public interface FlowService {
 
 	FlowEvaluateDTO getEvaluateInfo(Long flowCaseId);
 
-	ListScriptsResponse listScripts(ListScriptsCommand cmd);
-
 	FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd);
 
 	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
@@ -520,4 +520,6 @@ public interface FlowService {
     ListFlowModuleAppsResponse listFlowModuleApps(ListFlowModuleAppsCommand cmd);
 
 	ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(ListFlowModuleAppServiceTypesCommand cmd);
+
+    DeferredResult<Object> flowScriptMappingCall(Byte mode, Long id1, Long id2, String functionName, HttpServletRequest request);
 }

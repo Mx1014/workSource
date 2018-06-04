@@ -47,7 +47,7 @@ public class EnterpriseApprovalExportTaskHandler implements FileDownloadTaskHand
             endTime = (Long) params.get("endTime");
         Byte approvalStatus = null;
         if (params.get("approvalStatus") != null)
-            approvalStatus = (Byte) params.get("approvalStatus");
+            approvalStatus = Byte.valueOf(String.valueOf(params.get("approvalStatus")));
         ApprovalFilter filter = null;
         if (params.get("filter") != null)
             filter = (ApprovalFilter) StringHelper.fromJsonString((String) params.get("approvalId"), ApprovalFilter.class);
@@ -78,7 +78,7 @@ public class EnterpriseApprovalExportTaskHandler implements FileDownloadTaskHand
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
         OutputStream outputStream = enterpriseApprovalService.getEnterpriseApprovalOutputStream(cmd, taskId);
-        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 

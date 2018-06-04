@@ -32,6 +32,8 @@ public class CreatePmsyBillOrderCommand {
 	private List<String> billIds;
 	private Long pmPayerId;
 	
+	private String clientAppName;
+	
 	
 	public String getProjectId() {
 		return projectId;
@@ -87,4 +89,10 @@ public class CreatePmsyBillOrderCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public String getClientAppName() {
+		return clientAppName;
+	}
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
+	}
 }

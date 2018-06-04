@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Component
-public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctionListener {
+// @Component
+public class FlowModuleListenerDummy1 implements FlowFunctionListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowModuleListenerDummy1.class);
 
@@ -26,11 +26,6 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctio
         module.setModuleName("Dummy1");
         module.setModuleId(moduleId);
         return module;
-    }
-
-    @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
-        return null;
     }
 
     @ExportFunction(
@@ -64,48 +59,4 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener, FlowFunctio
     public void testExportFlowFunction(FlowCaseState ctx, Map<String, String> param) {
         LOGGER.debug("testExportFlowFunction: param = {}", param);
     }
-
-    @Override
-    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-        List<FlowCaseEntity> entities = new ArrayList<>();
-        FlowCaseEntity e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setKey("test-list-key");
-        e.setValue("test-list-value");
-        entities.add(e);
-
-        e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setKey("test-list-key2");
-        e.setValue("test-list-value2");
-        entities.add(e);
-
-        e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-        e.setKey("test-multi-key3");
-        e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
-        entities.add(e);
-
-        e = new FlowCaseEntity();
-        e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-        e.setKey("test-text-key2");
-        e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
-        entities.add(e);
-
-        return entities;
-    }
-
-    @Override
-    public void onFlowButtonFired(FlowCaseState ctx) {
-
-    }
-
-    /*@Override
-    public Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
-        Map<String, String> map = new HashMap<>();
-        for (String var : vars) {
-            map.put(var, "1");
-        }
-        return map;
-    }*/
 }

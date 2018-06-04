@@ -538,19 +538,6 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/flow/listScripts</b>
-     * <p> 获取工作流的评分信息 </p>
-     */
-    @RequestMapping("listScripts")
-    @RestReturn(value = ListScriptsResponse.class)
-    public RestResponse listScripts(@Valid ListScriptsCommand cmd) {
-        RestResponse response = new RestResponse(flowService.listScripts(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /admin/flow/listSMSTemplates</b>
      * <p>获取消息提醒里的短信模板</p>
      */

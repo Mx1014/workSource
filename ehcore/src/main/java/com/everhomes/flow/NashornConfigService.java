@@ -9,8 +9,8 @@ public class NashornConfigService {
     @Autowired
     private static FlowScriptConfigProvider flowScriptConfigProvider;
 
-    public static String getConfigByKey(Long flowMainId, Integer flowVersion, String configName) {
-        return flowScriptConfigProvider.getConfig(flowMainId, flowVersion, configName);
+    public static String getConfigByKey(String ownerType, Long ownerId, String configName) {
+        return flowScriptConfigProvider.getConfig(ownerType, ownerId, configName);
     }
 
     @Autowired

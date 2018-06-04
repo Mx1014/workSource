@@ -47,13 +47,27 @@ public class FileManagementController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /fileManagement/updateFileCatalogName</b>
-     * <p>1-3.修改文件目录名称</p>
+     * <b>URL: /fileManagement/updateFileCatalog</b>
+     * <p>1-3.修改文件目录</p>
      */
-    @RequestMapping("updateFileCatalogName")
+    @RequestMapping("updateFileCatalog")
     @RestReturn(value = FileCatalogDTO.class)
-    public RestResponse updateFileCatalogName(UpdateFileCatalogNameCommand cmd) {
-        FileCatalogDTO res = fileManagementService.updateFileCatalogName(cmd);
+    public RestResponse updateFileCatalog(UpdateFileCatalogCommand cmd) {
+        FileCatalogDTO res = fileManagementService.updateFileCatalog(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /fileManagement/getFileCatalog</b>
+     * <p>1-4.查看文件目录</p>
+     */
+    @RequestMapping("getFileCatalog")
+    @RestReturn(value = FileCatalogDTO.class)
+    public RestResponse getFileCatalog(FileCatalogIdCommand cmd) {
+        FileCatalogDTO res = fileManagementService.getFileCatalog(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -62,7 +76,7 @@ public class FileManagementController extends ControllerBase {
 
     /**
      * <b>URL: /fileManagement/listFileCatalogs</b>
-     * <p>1-4.文件目录列表</p>
+     * <p>2-1.文件目录列表</p>
      */
     @RequestMapping("listFileCatalogs")
     @RestReturn(value = ListFileCatalogResponse.class)
@@ -77,7 +91,7 @@ public class FileManagementController extends ControllerBase {
 
     /**
      * <b>URL: /fileManagement/listAvailableFileCatalogs</b>
-     * <p>1-5.有效文件目录列表</p>
+     * <p>2-2.有效文件目录列表</p>
      */
     @RequestMapping("listAvailableFileCatalogs")
     @RestReturn(value = ListFileCatalogResponse.class)
@@ -92,83 +106,12 @@ public class FileManagementController extends ControllerBase {
 
     /**
      * <b>URL: /fileManagement/searchFiles</b>
-     * <p>1-6.目录全局搜索</p>
+     * <p>2-3.目录全局搜索</p>
      */
     @RequestMapping("searchFiles")
     @RestReturn(value = SearchFileResponse.class)
     public RestResponse searchFiles(SearchFileCommand cmd) {
         SearchFileResponse res = fileManagementService.searchFiles(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-
-    /**
-     * <b>URL: /fileManagement/addFileCatalogScopes</b>
-     * <p>2-1.新增目录可见人员</p>
-     */
-    @RequestMapping("addFileCatalogScopes")
-    @RestReturn(value = FileCatalogScopeDTO.class, collection = true)
-    public RestResponse addFileCatalogScopes(AddFileCatalogScopesCommand cmd) {
-        List<FileCatalogScopeDTO> res = fileManagementService.addFileCatalogScopes(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /fileManagement/deleteFileCatalogScopes</b>
-     * <p>2-2.删除目录可见人员</p>
-     */
-    @RequestMapping("deleteFileCatalogScopes")
-    @RestReturn(value = String.class)
-    public RestResponse deleteFileCatalogScopes(FileCatalogScopesIdCommand cmd) {
-        fileManagementService.deleteFileCatalogScopes(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /fileManagement/enableFileCatalogScopeDownload</b>
-     * <p>2-3.添加人员下载权限</p>
-     */
-    @RequestMapping("enableFileCatalogScopeDownload")
-    @RestReturn(value = String.class)
-    public RestResponse enableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
-        fileManagementService.enableFileCatalogScopeDownload(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /fileManagement/disableFileCatalogScopeDownload</b>
-     * <p>2-4.取消人员下载权限</p>
-     */
-    @RequestMapping("disableFileCatalogScopeDownload")
-    @RestReturn(value = String.class)
-    public RestResponse disableFileCatalogScopeDownload(FileCatalogScopesIdCommand cmd) {
-        fileManagementService.disableFileCatalogScopeDownload(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /fileManagement/listFileCatalogScopes</b>
-     * <p>2-5.查看目录可见人员</p>
-     */
-    @RequestMapping("listFileCatalogScopes")
-    @RestReturn(value = ListFileCatalogScopeResponse.class)
-    public RestResponse listFileCatalogScopes(ListFileCatalogScopeCommand cmd) {
-        ListFileCatalogScopeResponse res = fileManagementService.listFileCatalogScopes(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

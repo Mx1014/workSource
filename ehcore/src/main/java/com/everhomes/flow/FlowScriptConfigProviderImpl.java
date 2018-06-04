@@ -88,12 +88,12 @@ public class FlowScriptConfigProviderImpl implements FlowScriptConfigProvider {
     }
 
     @Override
-    public String getConfig(Long flowMainId, Integer flowVersion, String fieldName) {
+    public String getConfig(String ownerType, Long ownerId, String fieldName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhFlowScriptConfigs t = Tables.EH_FLOW_SCRIPT_CONFIGS;
         return context.select(t.FIELD_VALUE).from(t)
-                .where(t.FLOW_MAIN_ID.eq(flowMainId))
-                .and(t.FLOW_VERSION.eq(flowVersion))
+                .where(t.OWNER_TYPE.eq(ownerType))
+                .and(t.OWNER_ID.eq(ownerId))
                 .and(t.FIELD_NAME.eq(fieldName))
                 .fetchAnyInto(String.class);
     }

@@ -49,10 +49,12 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //        }
         Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
         Byte angetSwitch = pmTaskInstanceConfig.getAgentSwitch();
-        if(0 == angetSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
-        } else if (1 == angetSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
+        if(null != taskCategoryId && null != angetSwitch){
+            if(0 == angetSwitch.byteValue()){
+                configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
+            } else if (1 == angetSwitch.byteValue()){
+                configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
+            }
         }
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
@@ -121,7 +123,8 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //            }
         }
 
-        return instanceConfig;
+        //edit by 马世亨
+        return null;
     }
 
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){

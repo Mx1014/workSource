@@ -1,60 +1,104 @@
 // @formatter:off
 package com.everhomes.contract;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-
-
+import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
-
-
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.appurl.AppUrlService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.customer.*;
+import com.everhomes.customer.CustomerService;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.customer.IndividualCustomerProvider;
+import com.everhomes.customer.SyncDataTask;
+import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.openapi.*;
-import com.everhomes.organization.*;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
-import com.everhomes.rest.address.AddressLivingStatus;
-import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.asset.*;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.asset.ContractProperty;
+import com.everhomes.rest.asset.FeeRules;
+import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.PaymentVariable;
+import com.everhomes.rest.asset.RentAdjust;
+import com.everhomes.rest.asset.RentFree;
+import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
-import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ChangeType;
+import com.everhomes.rest.contract.ChargingVariablesDTO;
+import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractAttachmentDTO;
+import com.everhomes.rest.contract.ContractChargingChangeDTO;
+import com.everhomes.rest.contract.ContractChargingItemDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractLogDTO;
+import com.everhomes.rest.contract.ContractParamDTO;
+import com.everhomes.rest.contract.ContractParamGroupMapDTO;
+import com.everhomes.rest.contract.ContractParamGroupType;
+import com.everhomes.rest.contract.ContractPaymentPlanDTO;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractType;
+import com.everhomes.rest.contract.CreateContractCommand;
+import com.everhomes.rest.contract.CreatePaymentContractCommand;
+import com.everhomes.rest.contract.DeleteContractCommand;
+import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EntryContractCommand;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.GetContractParamCommand;
+import com.everhomes.rest.contract.GetUserGroupsCommand;
+import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
+import com.everhomes.rest.contract.ListContractsBySupplierCommand;
+import com.everhomes.rest.contract.ListContractsBySupplierResponse;
+import com.everhomes.rest.contract.ListContractsCommand;
+import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
+import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
+import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.contract.ReviewContractCommand;
+import com.everhomes.rest.contract.SetContractParamCommand;
+import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
+import com.everhomes.rest.contract.UpdateContractCommand;
+import com.everhomes.rest.contract.UpdatePaymentContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -62,24 +106,30 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
-
 import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-
+import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
-
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
-
-
 import com.everhomes.search.ContractSearcher;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.OSType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
@@ -89,27 +139,29 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMappingProvider;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.rest.appurl.AppUrlDTO;
-import com.everhomes.rest.appurl.GetAppInfoCommand;
-import com.everhomes.rest.organization.OrganizationServiceUser;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
 import org.springframework.transaction.TransactionStatus;
 
+import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService {
@@ -225,6 +277,17 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private RequisitionProvider requisitionProvider;
+
+	@Autowired
+	private CustomerService customerService;
+
+	@Autowired
+	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+
+	@Autowired
+	private BigCollectionProvider bigCollectionProvider;
+
+	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 //		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -633,7 +696,30 @@ public class ContractServiceImpl implements ContractService {
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
 		ContractDetailDTO contractDetailDTO = findContract(command);
+		// 签合同的customer 同步到organization
+		syncCustomerToOrganization(cmd.getCustomerId());
 		return contractDetailDTO;
+	}
+
+	private void syncCustomerToOrganization(Long customerId) {
+		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(customerId);
+		if (customer != null) {
+			Organization organization = null;
+			if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+				organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+				if (null == organization){
+					com.everhomes.rest.organization.OrganizationDTO organizationDTO = customerService.createOrganization(customer);
+					customer.setOrganizationId(organizationDTO.getId());
+					enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+					enterpriseCustomerSearcher.feedDoc(customer);
+				}
+			}else {
+				com.everhomes.rest.organization.OrganizationDTO organizationDTO = customerService.createOrganization(customer);
+				customer.setOrganizationId(organizationDTO.getId());
+				enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+				enterpriseCustomerSearcher.feedDoc(customer);
+			}
+		}
 	}
 
 	@Override
@@ -772,7 +858,7 @@ public class ContractServiceImpl implements ContractService {
 //		assetService.paymentExpectancies(command);
 
 		command.setIsEffectiveImmediately((byte)0);
-		assetService.paymentExpectancies_re_struct(command);
+		assetService.paymentExpectanciesCalculate(command);
 	}
 
 
@@ -1204,25 +1290,25 @@ public class ContractServiceImpl implements ContractService {
 					"contractNumber is already exist");
 		}
 		if(cmd.getContractStartDate() != null) {
-			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+			contract.setContractStartDate(setToBegin(cmd.getContractStartDate()));
 		}
 		if(cmd.getContractEndDate() != null) {
-			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+			contract.setContractEndDate(setToEnd(cmd.getContractEndDate()));
 		}
 		if(cmd.getDecorateBeginDate() != null) {
-			contract.setDecorateBeginDate(new Timestamp(cmd.getDecorateBeginDate()));
+			contract.setDecorateBeginDate(setToBegin(cmd.getDecorateBeginDate()));
 		}
 		if(cmd.getDecorateEndDate() != null) {
-			contract.setDecorateEndDate(new Timestamp(cmd.getDecorateEndDate()));
+			contract.setDecorateEndDate(setToEnd(cmd.getDecorateEndDate()));
 		}
 		if(cmd.getSignedTime() != null) {
 			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
 		}
 		if(cmd.getDepositTime() != null) {
-			contract.setDepositTime(new Timestamp(cmd.getDepositTime()));
+			contract.setDepositTime(setToEnd(cmd.getDepositTime()));
 		}
 		if(cmd.getDownpaymentTime() != null) {
-			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
+			contract.setDownpaymentTime(setToEnd(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
 		Double rentSize = dealContractApartments(contract, cmd.getApartments());
@@ -1241,6 +1327,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 		contract.setPaymentFlag(exist.getPaymentFlag());
 		contractSearcher.feedDoc(contract);
+		
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
@@ -1249,6 +1336,27 @@ public class ContractServiceImpl implements ContractService {
 		});
 
 		return ConvertHelper.convert(contract, ContractDetailDTO.class);
+	}
+
+	private Timestamp setToEnd(Long date) {
+		try{
+			Timestamp stp = new Timestamp(date);
+			LocalDateTime time = stp.toLocalDateTime();
+			return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MAX).format(dateTimeFormat));
+		}catch (Exception e){
+			return new Timestamp(date);
+		}
+	}
+
+	private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private Timestamp setToBegin(Long date) {
+		try{
+			Timestamp stp = new Timestamp(date);
+			LocalDateTime time = stp.toLocalDateTime();
+			return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MIN).format(dateTimeFormat));
+		}catch (Exception e){
+			return new Timestamp(date);
+		}
 	}
 
 	@Override
@@ -2008,17 +2116,47 @@ public class ContractServiceImpl implements ContractService {
 	 * */
 	@Scheduled(cron = "1 50 2 * * ?")
 	public void contractAutoSync() {
-		List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
-		if(communities != null) {
-			for(Community community : communities) {
-				SyncContractsFromThirdPartCommand command = new SyncContractsFromThirdPartCommand();
-				command.setNamespaceId(community.getNamespaceId());
-				command.setCommunityId(community.getId());
-				syncContractsFromThirdPart(command, false);
+		Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode() + System.currentTimeMillis(), "");
+		RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+		Map<String,String> runningMap  =new HashMap<>();
+		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()).tryEnter(() -> {
+			String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
+			runningMap.put(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), runningFlag);
+			if(StringUtils.isBlank(runningFlag))
+			redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), "executing", 5, TimeUnit.HOURS);
+		});
+		if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()))) {
+			List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
+			if (communities != null) {
+				for (Community community : communities) {
+					SyncContractsFromThirdPartCommand command = new SyncContractsFromThirdPartCommand();
+					command.setNamespaceId(community.getNamespaceId());
+					command.setCommunityId(community.getId());
+					syncContractsFromThirdPart(command, false);
+				}
 			}
-
 		}
 	}
+
+	private String getSyncTaskToken(RedisTemplate redisTemplate,String code) {
+		Map<String, String> map = makeSyncTaskToken(redisTemplate,code);
+		if(map == null) {
+			return null;
+		}
+		return  map.get(code);
+	}
+
+	private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate,String code) {
+		Object o = redisTemplate.opsForValue().get(code);
+		if(o != null) {
+			Map<String, String> keys = new HashMap<>();
+			keys.put(code, (String)o);
+			return keys;
+		} else {
+			return null;
+		}
+	}
+
 
 	@Override
 	public String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd, Boolean authFlag) {
