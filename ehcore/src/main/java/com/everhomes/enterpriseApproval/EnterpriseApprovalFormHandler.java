@@ -252,29 +252,8 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
     @Override
     public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
-        GeneralFormReminderDTO dto = new GeneralFormReminderDTO();
-        Long userId = UserContext.currentUserId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-        SearchFlowCaseCommand command = new SearchFlowCaseCommand();
-        command.setOrganizationId(cmd.getOwnerId());
-        command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
-        command.setNamespaceId(namespaceId);
-        command.setModuleId(EnterpriseApprovalController.MODULE_ID);
-        command.setUserId(userId);
-
-        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(new ListingLocator(), Integer.MAX_VALUE - 1, command, (locator1, query) -> {
-            query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(cmd.getSourceId()));
-            query.addConditions(Tables.EH_FLOW_CASES.REFER_TYPE.eq("approval"));
-            query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
-            return query;
-        });
-        if (details != null && details.size() > 0){
-            dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
-
-        }
-        dto.setFlag(TrueOrFalseFlag.FALSE.getCode());
-        return dto;
+        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(cmd.getSourceId());
+        return handler.getGeneralFormReminder(cmd);
     }
 
 }

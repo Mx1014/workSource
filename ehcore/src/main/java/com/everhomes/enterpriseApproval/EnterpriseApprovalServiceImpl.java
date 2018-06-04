@@ -775,7 +775,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return res;
     }
 
-    @Override
+    /*@Override
     public CheckArchivesApprovalResponse checkArchivesApproval(CheckArchivesApprovalCommand cmd) {
         CheckArchivesApprovalResponse response = new CheckArchivesApprovalResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -797,7 +797,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         if (details != null && details.size() > 0)
             response.setFlag(TrueOrFalseFlag.TRUE.getCode());
         return response;
-    }
+    }*/
 
     private EnterpriseApprovalDTO processEnterpriseApproval(Integer namespaceId, GeneralApproval r) {
         EnterpriseApproval ea = ConvertHelper.convert(r, EnterpriseApproval.class);
@@ -853,5 +853,29 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
                 results.add(approval);
         }
         group.setApprovals(results);
+    }
+
+    @Override
+    public List<FlowCaseDetail> listActiveFlowCasesByApprovalId(GetTemplateBySourceIdCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.currentUserId();
+        SearchFlowCaseCommand command = new SearchFlowCaseCommand();
+
+        command.setOrganizationId(cmd.getOwnerId());
+        command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+        command.setNamespaceId(namespaceId);
+        command.setModuleId(EnterpriseApprovalController.MODULE_ID);
+        command.setUserId(userId);
+
+        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(new ListingLocator(), Integer.MAX_VALUE - 1, command, (locator1, query) -> {
+            query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(cmd.getSourceId()));
+            query.addConditions(Tables.EH_FLOW_CASES.REFER_TYPE.eq("approval"));
+            query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
+            query.addOrderBy(Tables.EH_FLOW_CASES.CREATE_TIME.asc());
+            return query;
+        });
+        if (details != null && details.size() > 0)
+            return details;
+        return null;
     }
 }

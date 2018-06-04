@@ -1,8 +1,10 @@
 package com.everhomes.enterpriseApproval;
 
 import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.rest.enterpriseApproval.*;
 import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 
 import java.io.OutputStream;
@@ -52,8 +54,10 @@ public interface EnterpriseApprovalService {
 
     ListEnterpriseApprovalsResponse listEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);
 
-    CheckArchivesApprovalResponse checkArchivesApproval(CheckArchivesApprovalCommand cmd);
+//    CheckArchivesApprovalResponse checkArchivesApproval(CheckArchivesApprovalCommand cmd);
 
     ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);
+
+    List<FlowCaseDetail> listActiveFlowCasesByApprovalId(GetTemplateBySourceIdCommand cmd);
 
 }

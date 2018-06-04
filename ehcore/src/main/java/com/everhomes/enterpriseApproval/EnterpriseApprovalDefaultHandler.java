@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.flow.FlowCase;
 
-import java.text.SimpleDateFormat;
-
 /**
  * 
  * <ul>
@@ -37,17 +35,6 @@ public class EnterpriseApprovalDefaultHandler implements EnterpriseApprovalHandl
 	@Autowired
 	protected GeneralFormProvider generalFormProvider;
 
-	protected static ThreadLocal<SimpleDateFormat> datetimeSF = new ThreadLocal<SimpleDateFormat>() {
-		protected SimpleDateFormat initialValue() {
-			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		}
-	};
-
-	protected static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>() {
-		protected SimpleDateFormat initialValue() {
-			return new SimpleDateFormat("yyyy-MM-dd");
-		}
-	};
 	protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApprovalDefaultHandler.class);
 
 	@Override
