@@ -1958,14 +1958,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				continue;
 			}
 
-            Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+            /*Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
 			if(address != null) {
                 log.setData(data);
                 log.setErrorLog("apartment name is exist in building");
                 log.setCode(AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME);
                 errorLogs.add(log);
                 continue;
-            }
+            }*/
 
             double areaSize = 0;
             double chargeArea = 0;
@@ -2046,7 +2046,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             }
         }
 
-        Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());
+        //Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());
+        Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+
         if (address == null) {
         	address = new Address();
             address.setCommunityId(community.getId());
@@ -2062,10 +2064,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
-            address.setNamespaceAddressType(data.getNamespaceAddressType());
-            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
+//            address.setNamespaceAddressType(data.getNamespaceAddressType());
+//            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
+            address.setOrientation(data.getOrientation());
         	addressProvider.createAddress(address);
 		}else {
 //            address.setBuildArea(buildArea);
@@ -2073,9 +2076,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setSharedArea(shareArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
-            address.setNamespaceAddressType(data.getNamespaceAddressType());
-            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
+//            address.setNamespaceAddressType(data.getNamespaceAddressType());
+//            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            if (StringUtils.isNotBlank(data.getOrientation())) {
+            	address.setOrientation(data.getOrientation());
+			}
             addressProvider.updateAddress(address);
 		}
 
@@ -2099,9 +2105,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 data.setChargeArea(trim(r.getE()));
                 data.setSharedArea(trim(r.getF()));
                 data.setRentArea(trim(r.getG()));
+                data.setOrientation(trim(r.getH()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
-                data.setNamespaceAddressType(trim(r.getH()));
-                data.setNamespaceAddressToken(trim(r.getI()));
+//                data.setNamespaceAddressType(trim(r.getH()));
+//                data.setNamespaceAddressToken(trim(r.getI()));
 				list.add(data);
 			}
 		}
