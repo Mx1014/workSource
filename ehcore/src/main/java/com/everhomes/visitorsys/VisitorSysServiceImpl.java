@@ -1131,8 +1131,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 )
                 && visitStatus!=VisitorsysStatus.DELETED //访客状态不是已删除
                 && visitStatus!=VisitorsysStatus.REJECTED_VISIT //访客状态不是已拒绝
-                && visitStatus!=VisitorsysStatus.HIDDEN //访客状态不是隐藏
-                && visitorQrcodeFlag == VisitorsysFlagType.YES; //公司访客设置的邀请函二维码显示
+                && visitStatus!=VisitorsysStatus.HIDDEN; //访客状态不是隐藏
+//                && visitorQrcodeFlag == VisitorsysFlagType.YES; //公司访客设置的邀请函二维码显示
         showQrcode = showQrcode &&
                 (communityVisitor.getDoorGuardEndTime()==null //门禁失效时间为空，则门禁二维码永久有效
                         || communityVisitor.getDoorGuardEndTime().getTime()>System.currentTimeMillis());//门禁失效时间未到，则二维码有效

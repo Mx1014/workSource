@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *<li>followUpNumbersFlag : (必填)是否允许输入随访人员数量，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  *<li>doorGuardsFlag : (必填)是否对接门禁授权，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  *<li>doorGuardsValidAfterConfirmedFlag : (选填)大堂门禁权限需要被确认到访后生效，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
+ *<li>allowPassportQrcodeFlag : (选填)允许通行证显示基于访客二维码的专属信息，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  *<li>doorGuardId : (选填)门禁id</li>
  *<li>doorGuardName : (选填)门禁名称</li>
   *</ul>
@@ -32,6 +33,7 @@ public class VisitorsysBaseConfig {
     private Byte followUpNumbersFlag;
     private Byte doorGuardsFlag;
     private Byte doorGuardsValidAfterConfirmedFlag;
+    private Byte allowPassportQrcodeFlag;
     private String doorGuardId;
     private String doorGuardName;
 
@@ -47,6 +49,7 @@ public class VisitorsysBaseConfig {
         followUpNumbersFlag=1;
         doorGuardsFlag=0;
         doorGuardsValidAfterConfirmedFlag=0;
+        allowPassportQrcodeFlag = 1;
     }
 
     public Byte getVisitorQrcodeFlag() {
@@ -151,6 +154,14 @@ public class VisitorsysBaseConfig {
 
     public void setDoorGuardName(String doorGuardName) {
         this.doorGuardName = doorGuardName;
+    }
+
+    public Byte getAllowPassportQrcodeFlag() {
+        return allowPassportQrcodeFlag;
+    }
+
+    public void setAllowPassportQrcodeFlag(Byte allowPassportQrcodeFlag) {
+        this.allowPassportQrcodeFlag = allowPassportQrcodeFlag;
     }
 
     @Override
