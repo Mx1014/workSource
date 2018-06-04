@@ -6856,7 +6856,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 //			cmd.setCounts(1.0);
 //		}
 		if (cmd.getSitePackages()!=null && !cmd.getSitePackages().isEmpty()) {
-			Long sitePackageId = createCellPricePackage(cmd.getSitePackages(), rs.getResourceType());
 			if (RentalUserPriceType.UNIFICATION.getCode() == cmd.getUserPriceType())
 				cmd.getSitePackages().forEach(r->{
 					r.setOrgMemberPrice(r.getPrice());
@@ -6866,6 +6865,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					r.setApprovingUserInitiatePrice(r.getInitiatePrice());
 					r.setApprovingUserOriginalPrice(r.getOriginalPrice());
 				});
+			Long sitePackageId = createCellPricePackage(cmd.getSitePackages(), rs.getResourceType());
 			cmd.setSitePackageId(sitePackageId);
 		}
 
