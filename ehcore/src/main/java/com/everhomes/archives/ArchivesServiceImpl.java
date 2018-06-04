@@ -60,15 +60,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -1655,7 +1653,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void createArchivesOperation(
             Integer namespaceId, Long organizationId, Long detailId, Byte operationType, Date date, String cmd) {
         //  1.若有上一次配置则先取消
-        ArchivesOperationalConfiguration oldConfig = archivesProvider.findPendingConfiguration(namespaceId, detailId, operationType);
+        ArchivesOperationalConfiguration oldConfig = archivesProvider.findPendingConfigurationByDetailId(namespaceId, detailId, operationType);
         if (oldConfig != null) {
             oldConfig.setStatus(ArchivesOperationStatus.CANCEL.getCode());
             archivesProvider.updateOperationalConfiguration(oldConfig);
@@ -1677,6 +1675,16 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void executeArchivesConfiguration() {
         if (scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
             return;
+        List<ArchivesOperationalConfiguration> configurations = archivesProvider.listPendingConfigurations(ArchivesUtil.currentDate());
+        if(configurations.size() == 0)
+            return;
+        coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_CONFIGURATION.getCode()).tryEnter(() -> {
+            for (ArchivesOperationalConfiguration configuration : configurations) {
+                // todo: 转入相应的配置执行
+//                sendArchivesNotification(result, nowDateTime);
+            }
+        });
+
 /*        List<ArchivesConfigurations> configurations = archivesProvider.listArchivesConfigurations(ArchivesUtil.currentDate());
         if (configurations != null && configurations.size() > 0) {
             for (ArchivesConfigurations configuration : configurations) {
@@ -1698,7 +1706,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     public CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd) {
         CheckOperationResponse response = new CheckOperationResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ArchivesOperationalConfiguration> results = archivesProvider.listPendingConfigurations(namespaceId, cmd.getDetailIds(), cmd.getOperationType());
+        List<ArchivesOperationalConfiguration> results = archivesProvider.listPendingConfigurationsInDetailIds(namespaceId, cmd.getDetailIds(), cmd.getOperationType());
         if (results.size() == 0) {
             response.setFlag(TrueOrFalseFlag.FALSE.getCode());
             return response;
@@ -1722,7 +1730,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         OrganizationMember employee = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, organizationId);
         if (employee == null)
             return null;
-        ArchivesOperationalConfiguration config = archivesProvider.findPendingConfiguration(employee.getNamespaceId(), employee.getDetailId(), operationType);
+        ArchivesOperationalConfiguration config = archivesProvider.findPendingConfigurationByDetailId(employee.getNamespaceId(), employee.getDetailId(), operationType);
         if (config != null){
             ArchivesOperationalConfigurationDTO dto = ConvertHelper.convert(config, ArchivesOperationalConfigurationDTO.class);
             dto.setContactName(employee.getContactName());

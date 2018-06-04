@@ -47,9 +47,11 @@ public interface ArchivesProvider {
 
     ArchivesOperationalConfiguration findConfigurationByDetailId(Integer namespaceId, Long organizationId, Byte type, Long detailId);
 
-    ArchivesOperationalConfiguration findPendingConfiguration(Integer namespaceId, Long detailId, Byte operationType);
+    ArchivesOperationalConfiguration findPendingConfigurationByDetailId(Integer namespaceId, Long detailId, Byte operationType);
 
-    List<ArchivesOperationalConfiguration> listPendingConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType);
+    List<ArchivesOperationalConfiguration> listPendingConfigurationsInDetailIds(Integer namespaceId, List<Long> detailIds, Byte operationType);
+
+    List<ArchivesOperationalConfiguration> listPendingConfigurations(Date date);
 
     void createOperationalLog(ArchivesOperationalLog log);
 

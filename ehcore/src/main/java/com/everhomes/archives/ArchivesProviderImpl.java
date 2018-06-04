@@ -21,6 +21,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,7 +89,6 @@ public class ArchivesProviderImpl implements ArchivesProvider {
 
     @Override
     public List<Long> listArchivesStickyContactsIds(Integer namespaceId, Long organizationId, Integer stickCount) {
-        List<Long> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select(Tables.EH_ARCHIVES_STICKY_CONTACTS.DETAIL_ID)
                 .from(Tables.EH_ARCHIVES_STICKY_CONTACTS)
@@ -161,7 +161,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
             results.add(ConvertHelper.convert(r, ArchivesDismissEmployees.class));
             return null;
         });
-        if (null != results && 0 != results.size()) {
+        if (0 != results.size()) {
             return results;
         }
         return null;
@@ -262,7 +262,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public ArchivesOperationalConfiguration findPendingConfiguration(Integer namespaceId, Long detailId, Byte operationType) {
+    public ArchivesOperationalConfiguration findPendingConfigurationByDetailId(Integer namespaceId, Long detailId, Byte operationType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
@@ -274,7 +274,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<ArchivesOperationalConfiguration> listPendingConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType) {
+    public List<ArchivesOperationalConfiguration> listPendingConfigurationsInDetailIds(Integer namespaceId, List<Long> detailIds, Byte operationType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
@@ -283,6 +283,20 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.gt(ArchivesUtil.currentDate()));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
         List<ArchivesOperationalConfiguration> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, ArchivesOperationalConfiguration.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<ArchivesOperationalConfiguration> listPendingConfigurations(Date date){
+        List<ArchivesOperationalConfiguration> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.eq(date));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, ArchivesOperationalConfiguration.class));
             return null;
@@ -422,7 +436,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
             results.add(ConvertHelper.convert(r, ArchivesNotifications.class));
             return null;
         });
-        if (null != results && 0 != results.size()) {
+        if (0 != results.size()) {
             return results;
         }
         return null;
