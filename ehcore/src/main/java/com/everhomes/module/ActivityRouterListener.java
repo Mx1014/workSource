@@ -1,7 +1,9 @@
 package com.everhomes.module;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.rest.common.ActivityActionData;
 import com.everhomes.rest.module.RouterInfo;
+import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -12,22 +14,22 @@ import java.util.Map;
 @Component
 public class ActivityRouterListener implements RouterListener {
 
-    @Override
-    public List<RouterInfo> listRouterInfos(){
+    @RouterPath(path = "/index")
+    public RouterInfo getIndexRouterInfo(String queryJson){
+        RouterInfo routerInfo = new RouterInfo();
+        routerInfo.setPath("/index");
+        String query = getQueryString(queryJson);
+        routerInfo.setQuery(query);
+        return routerInfo;
+    }
 
-        List<RouterInfo> routerInfos = new ArrayList<>();
-
-        RouterInfo index = new RouterInfo();
-        index.setName(INDEX_NAME);
-        index.setPath("list-nearby");
-        routerInfos.add(index);
-
-        RouterInfo detail = new RouterInfo();
-        detail.setName("detail");
-        detail.setPath("d");
-        routerInfos.add(index);
-
-        return routerInfos;
+    @RouterPath(path = "/detail")
+    public RouterInfo getDetailRouterInfo(String queryJson){
+        RouterInfo routerInfo = new RouterInfo();
+        routerInfo.setPath("/detail");
+        String query = getQueryString(queryJson);
+        routerInfo.setQuery(query);
+        return routerInfo;
     }
 
     @Override
@@ -36,12 +38,12 @@ public class ActivityRouterListener implements RouterListener {
     }
 
     @Override
-    public void setQueryString(RouterInfo routerInfo, String jsonStr){
+    public String getQueryString(String queryJson){
 
-        Map<String, Object> parse = (Map) JSON.parse(jsonStr);
+        Map<String, Object> parse = (Map) JSON.parse(queryJson);
 
         if(parse.size() == 0){
-            return;
+            return null;
         }
         StringBuffer queryBuffer = new StringBuffer();
 
@@ -55,9 +57,7 @@ public class ActivityRouterListener implements RouterListener {
             queryBuffer.append("&");
         }
 
-        String queryString = queryBuffer.substring(0, queryBuffer.length() - 1);
-
-        routerInfo.setQuery(queryString);
+        return queryBuffer.substring(0, queryBuffer.length() - 1);
     }
 
 }

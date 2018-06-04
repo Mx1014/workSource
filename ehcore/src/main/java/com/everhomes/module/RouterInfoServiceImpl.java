@@ -21,7 +21,11 @@ public class RouterInfoServiceImpl implements RouterService {
         }
 
         for (RouterListener listener: routerListeners){
-            if(listener.getModuleId().equals(moduleId) && listener.listRouterInfos() != null){
+
+            if(listener.getModuleId().equals(moduleId)){
+                RouterPath declaredAnnotation = listener.getClass().getDeclaredAnnotation(RouterPath.class);
+                declaredAnnotation.path();
+
                 for (RouterInfo routerInfo: listener.listRouterInfos()){
                     if(routerInfo.getName().equals(name)){
                         listener.setQueryString(routerInfo, jsonStr);
