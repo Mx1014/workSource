@@ -455,7 +455,7 @@ public class GroupProviderImpl implements GroupProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
         EhGroupMembersRecord record = (EhGroupMembersRecord)context.select().from(EH_GROUP_MEMBERS)
             .where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
-            .and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(memberType))
+                .and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(memberType))
             .and(EH_GROUP_MEMBERS.MEMBER_ID.eq(memberId))
             .fetchAny();
         return ConvertHelper.convert(record, GroupMember.class);

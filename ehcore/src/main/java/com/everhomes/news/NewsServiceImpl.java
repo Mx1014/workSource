@@ -35,6 +35,8 @@ import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.news.*;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1229,6 +1231,42 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		return response;
+	}
+	
+	@Override
+	public GetNewsCommentResponse getNewsComment(GetNewsCommentCommand cmd) {
+
+		// 获取评论
+		Comment comment = commentProvider.findCommentById(EhNewsComment.class, cmd.getCommentId());
+		if (null == comment) {
+			return new GetNewsCommentResponse();
+		}
+
+		List<NewsCommentDTO> dtos = new ArrayList<>();
+		List<Comment> comments = new ArrayList<>(1);
+		comments.add(comment);
+
+		// 添加附件
+		populateCommentAttachment(comment.getCreatorUid(), comments, dtos);
+
+		// 添加头像等信息
+		populateCommentUser(comment.getCreatorUid(), dtos);
+
+		// 获取评论数
+		Long commentCount = 0L;
+		News news = newsProvider.findNewsById(comment.getOwnerId());
+		if (null != news) {
+			commentCount = news.getChildCount();
+		}
+
+		// 组装返回信息
+		GetNewsCommentResponse resp = new GetNewsCommentResponse();
+		if (!CollectionUtils.isEmpty(dtos)) {
+			resp.setComment(dtos.get(0));
+		}
+		resp.setCommentCount(commentCount);
+		return resp;
+
 	}
 
 	private void populateCommentUser(Long userId, List<NewsCommentDTO> list) {
