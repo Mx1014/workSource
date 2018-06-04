@@ -107,7 +107,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.security.auth.Subject;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -7266,15 +7265,32 @@ public class ForumServiceImpl implements ForumService {
     }
 
     @Override
-    public PostDTO previewPost(PreviewPostCommand cmd) {
-        Post post = this.forumProvider.findPostById(cmd.getPostId());
-        if (null == post) {
-            LOGGER.error("post is null.");
+    public PostDTO getPreviewTopic(NewTopicCommand cmd) {
+        if (null == cmd) {
+            LOGGER.error("cmd is null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "post is null.");
+                    "cmd is null.");
         }
-        PostDTO postDTO = new PostDTO();
-        postDTO.setEmbeddedJson(post.getEmbeddedJson());
+        PostDTO postDTO = ConvertHelper.convert(cmd, PostDTO.class);
+        if (cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
+            List<AttachmentDTO> attachmentDTOList = new ArrayList<>();
+            for (AttachmentDescriptor attachmentDescriptor : cmd.getAttachments()) {
+                AttachmentDTO attachmentDTO = new AttachmentDTO();
+                attachmentDTO.setContentUri(attachmentDescriptor.getContentUri());
+                String url =  contentServerService.parserUri(attachmentDescriptor.getContentUri(), EntityType.TOPIC.getCode(), 0L);
+                attachmentDTO.setContentUrl(url);
+                attachmentDTO.setContentType(attachmentDescriptor.getContentType());
+                attachmentDTOList.add(attachmentDTO);
+            }
+            postDTO.setAttachments(attachmentDTOList);
+        }
+        ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                ActivityPostCommand.class);
+        if (null != activityPostCommand) {
+            String url =  contentServerService.parserUri(activityPostCommand.getPosterUri(), EntityType.TOPIC.getCode(), 0L);
+            activityPostCommand.setPosterUrl(url);
+        }
+        postDTO.setEmbeddedJson(StringHelper.toJsonString(activityPostCommand));
         return postDTO;
     }
 }

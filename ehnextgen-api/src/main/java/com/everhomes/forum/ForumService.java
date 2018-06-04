@@ -148,6 +148,6 @@ public interface ForumService {
 
     ListTopicsByForumEntryIdResponse listTopicsByForumEntryId(ListTopicsByForumEntryIdCommand cmd);
 
-    PostDTO previewPost(PreviewPostCommand cmd);
+    PostDTO getPreviewTopic(NewTopicCommand cmd);
 
 }
