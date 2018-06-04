@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.dynamicExcel;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * Created by Wentian Wang on 2018/1/12.
  */
@@ -8,7 +10,10 @@ package com.everhomes.rest.dynamicExcel;
 public class DynamicImportResponse {
     private Integer successRowNumber = 0;
     private Integer failedRowNumber = 0;
+    private  Long taskId;
+    @Deprecated
     private Object storage;
+    @Deprecated
     private String failCause;
 
     public String getFailCause() {
@@ -51,5 +56,18 @@ public class DynamicImportResponse {
         }else{
             this.failCause = "导入了"+numOfSheet+"个sheet页," +"共导入" + "成功了" + successRowNumber +"行,"+"失败了"+ failedRowNumber+"行";
         }
+    }
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
