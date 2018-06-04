@@ -1,21 +1,24 @@
 package com.everhomes.enterpriseApproval;
 
-import com.alibaba.fastjson.JSON;
-import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.archives.ArchivesService;
+import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.*;
 import com.everhomes.general_approval.*;
-import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.archives.ArchivesOperationalConfigurationDTO;
+import com.everhomes.rest.archives.ArchivesParameter;
 import com.everhomes.rest.enterpriseApproval.*;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -27,7 +30,6 @@ import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -40,24 +42,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
 public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApprovalServiceImpl.class);
+
+    @Autowired
+    private ArchivesService archivesService;
 
     @Autowired
     private EnterpriseApprovalProvider enterpriseApprovalProvider;
@@ -88,6 +88,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private LocaleStringService localeStringService;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -692,11 +698,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         //  4.delete the scope which is not in the array
         if (detailIds.size() == 0)
             detailIds.add(0L);
-        generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
+        generalApprovalProvider.deleteOddGeneralApprovalScope(namespaceId, approvalId, UniongroupTargetType.MEMBERDETAIL.getCode(), detailIds);
 
         if (organizationIds.size() == 0)
             organizationIds.add(0L);
-        generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+        generalApprovalProvider.deleteOddGeneralApprovalScope(namespaceId, approvalId, UniongroupTargetType.ORGANIZATION.getCode(), organizationIds);
     }
 
     @Override
@@ -773,6 +779,38 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
         res.setGroups(groups);
         return res;
+    }
+
+    @Override
+    public GeneralFormReminderDTO checkArchivesApproval(Long userId, Long organizationId, Long approvalId, Byte operationType) {
+        GeneralFormReminderDTO dto = new GeneralFormReminderDTO();
+        ArchivesOperationalConfigurationDTO archives = archivesService.getArchivesOperationByUserId(userId, organizationId, operationType);
+        if (archives != null) {
+            dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
+            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalChineseCode.SCOPE, EnterpriseApprovalChineseCode.ARCHIVES_TITLE, "zh_CN", "Remind"));
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("operationTime", archives.getOperateDate());
+            map.put("operationType", ArchivesUtil.resolveArchivesEnum(archives.getOperateType(),
+                    ArchivesParameter.OPERATION_TYPE));
+            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalChineseCode.SCOPE,
+                    EnterpriseApprovalChineseCode.ARCHIVES_CONTENT, "zh_CN", map, "Content!"));
+            return dto;
+        }
+
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(approvalId);
+        List<FlowCaseDetail> details = listActiveFlowCasesByApprovalId(organizationId, approvalId);
+        if (details != null && details.size() > 0) {
+            dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
+            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalChineseCode.SCOPE, EnterpriseApprovalChineseCode.APPROVAL_TITLE, "zh_CN", "Remind"));
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("approvalName", ga.getApprovalName());
+            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalChineseCode.SCOPE,
+                    EnterpriseApprovalChineseCode.APPROVAL_CONTENT, "zh_CN", map, "Content!"));
+            return dto;
+        }
+
+        dto.setFlag(TrueOrFalseFlag.FALSE.getCode());
+        return dto;
     }
 
     /*@Override

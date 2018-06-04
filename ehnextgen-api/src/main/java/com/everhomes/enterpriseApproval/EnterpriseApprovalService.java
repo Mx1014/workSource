@@ -4,6 +4,7 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.rest.enterpriseApproval.*;
 import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 
@@ -54,7 +55,7 @@ public interface EnterpriseApprovalService {
 
     ListEnterpriseApprovalsResponse listEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);
 
-//    CheckArchivesApprovalResponse checkArchivesApproval(CheckArchivesApprovalCommand cmd);
+    GeneralFormReminderDTO checkArchivesApproval(Long userId, Long organizationId, Long approvalId, Byte operationType);
 
     ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);
 

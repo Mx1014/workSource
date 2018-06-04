@@ -92,6 +92,8 @@ public interface ArchivesParameter {
 
     String NATIVE_PLACE = "nativePlace";
 
+    String OPERATION_TYPE = "operationType";
+
     String POLITICAL_FLAG = "politicalFlag";
 
     String PROCREATIVE = "procreative";

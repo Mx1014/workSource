@@ -4,6 +4,7 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.archives.ArchivesOperationType;
 import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.user.UserContext;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component(EnterpriseApprovalDismissHandler.ENTERPRISE_APPROVAL_DISMISS_HANDLER_NAME)
-public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandler{
+public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandler {
 
     static final String ENTERPRISE_APPROVAL_DISMISS_HANDLER_NAME = EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX + "DISMISS_APPLICATION";
 
@@ -33,22 +34,8 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
 
     @Override
     public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
-
-        GeneralFormReminderDTO dto = new GeneralFormReminderDTO();
-
-        dto.setFlag(TrueOrFalseFlag.FALSE.getCode());
         Long userId = UserContext.currentUserId();
-        List<FlowCaseDetail> details = enterpriseApprovalService.listActiveFlowCasesByApprovalId(cmd.getOwnerId(), cmd.getSourceId());
-        if (details != null && details.size() > 0) {
-            dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            dto.setTitle("还有审批中的人事申请");
-            dto.setContent("您的转正申请正在审批中\n" +
-                    "\n" +
-                    "现在发起申请将使该申请作废\n" +
-                    "\n" +
-                    "确定仍要提交吗？");
-            return dto;
-        }
-        return dto;
+        return enterpriseApprovalService.checkArchivesApproval(userId, cmd.getOwnerId(), cmd.getSourceId(),
+                ArchivesOperationType.DISMISS.getCode());
     }
 }

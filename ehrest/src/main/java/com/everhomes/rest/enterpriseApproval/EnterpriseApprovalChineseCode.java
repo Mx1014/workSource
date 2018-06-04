@@ -1,6 +1,6 @@
 package com.everhomes.rest.enterpriseApproval;
 
-public interface EnterpriseApprovalTemplateCode {
+public interface EnterpriseApprovalChineseCode {
     String SCOPE = "enterpriseApproval";
 
     String APPLIER = "10001";          //  申请人
@@ -33,8 +33,10 @@ public interface EnterpriseApprovalTemplateCode {
     String DISMISS_REMARK = "20063";   //  离职原因备注
 
     String ARCHIVES_TITLE = "30001"; //  还有未生效的人事操作
-    String ARCHIVES_CONTENT = "1";   //  您原定于{生效时间}{操作动作}，现在发起申请将使该{操作动作}计划作废，确定仍要提交吗？
     String APPROVAL_TITLE = "3002";  //  还有审批中的人事申请
-    String APPROVAL_CONTENT = "2";   //  您的{申请名称}正在审批中，现在发起申请将使该申请作废，确定仍要提交吗？
+
+
+    int ARCHIVES_CONTENT = 1;   //  您原定于{生效时间}{操作动作}，现在发起申请将使该{操作动作}计划作废，确定仍要提交吗？
+    int APPROVAL_CONTENT = 2;   //  您的{申请名称}正在审批中，现在发起申请将使该申请作废，确定仍要提交吗？
 
 }

@@ -15,24 +15,20 @@ public enum ArchivesOperationType {
     CHECK_IN((byte) 0), EMPLOY((byte) 1), TRANSFER((byte) 2), DISMISS((byte) 3);
     private Byte code;
 
-    private ArchivesOperationType(Byte code) {
+    private ArchivesOperationType(byte code) {
         this.code = code;
     }
 
-    public Byte getCode() {
-        return code;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public byte getCode() {
+        return this.code;
     }
 
     public static ArchivesOperationType fromCode(Byte code) {
-        if (code != null) {
-            for (ArchivesOperationType a : ArchivesOperationType.values()) {
-                if (code.byteValue() == a.getCode().byteValue()) {
-                    return a;
+        if(code != null) {
+            ArchivesOperationType[] values = ArchivesOperationType.values();
+            for(ArchivesOperationType value : values) {
+                if(code.byteValue() == value.code) {
+                    return value;
                 }
             }
         }

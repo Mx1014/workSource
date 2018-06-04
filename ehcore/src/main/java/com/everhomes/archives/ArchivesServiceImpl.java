@@ -1655,7 +1655,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void createArchivesOperation(
             Integer namespaceId, Long organizationId, Long detailId, Byte operationType, Date date, String cmd) {
         //  1.若有上一次配置则先取消
-        ArchivesOperationalConfiguration oldConfig = archivesProvider.findPendingConfiguration(namespaceId, organizationId, detailId);
+        ArchivesOperationalConfiguration oldConfig = archivesProvider.findPendingConfiguration(namespaceId, detailId, operationType);
         if (oldConfig != null) {
             oldConfig.setStatus(ArchivesOperationStatus.CANCEL.getCode());
             archivesProvider.updateOperationalConfiguration(oldConfig);
@@ -1715,6 +1715,20 @@ public class ArchivesServiceImpl implements ArchivesService {
             }).collect(Collectors.toList()));
             return response;
         }
+    }
+
+    @Override
+    public ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType) {
+        OrganizationMember employee = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, organizationId);
+        if (employee == null)
+            return null;
+        ArchivesOperationalConfiguration config = archivesProvider.findPendingConfiguration(employee.getNamespaceId(), employee.getDetailId(), operationType);
+        if (config != null){
+            ArchivesOperationalConfigurationDTO dto = ConvertHelper.convert(config, ArchivesOperationalConfigurationDTO.class);
+            dto.setContactName(employee.getContactName());
+            return dto;
+        }
+        return null;
     }
 
     @Override

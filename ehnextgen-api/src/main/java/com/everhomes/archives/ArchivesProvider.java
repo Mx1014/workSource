@@ -47,7 +47,7 @@ public interface ArchivesProvider {
 
     ArchivesOperationalConfiguration findConfigurationByDetailId(Integer namespaceId, Long organizationId, Byte type, Long detailId);
 
-    ArchivesOperationalConfiguration findPendingConfiguration(Integer namespaceId, Long organizationId, Long detailId);
+    ArchivesOperationalConfiguration findPendingConfiguration(Integer namespaceId, Long detailId, Byte operationType);
 
     List<ArchivesOperationalConfiguration> listPendingConfigurations(Integer namespaceId, List<Long> detailIds, Byte operationType);
 

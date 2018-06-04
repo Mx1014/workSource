@@ -3,10 +3,7 @@ package com.everhomes.archives;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.archives.ArchivesDismissReason;
-import com.everhomes.rest.archives.ArchivesDismissType;
-import com.everhomes.rest.archives.ArchivesParameter;
-import com.everhomes.rest.archives.ArchivesTransferType;
+import com.everhomes.rest.archives.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldAttribute;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.organization.EmployeeStatus;
@@ -228,7 +225,15 @@ public class ArchivesUtil {
                 else if (value == ArchivesTransferType.OTHER.getCode())
                     return "其他";
                 break;
-
+            case ArchivesParameter.OPERATION_TYPE:
+                if (value == ArchivesOperationType.CHECK_IN.getCode())
+                    return "入职";
+                else if (value == ArchivesOperationType.EMPLOY.getCode())
+                    return "转正";
+                else if (value == ArchivesOperationType.TRANSFER.getCode())
+                    return "调动";
+                else if (value == ArchivesOperationType.DISMISS.getCode())
+                    return "离职";
             /*case ArchivesParameter.DEPARTMENT:
                 List<OrganizationDTO> departments = (List<OrganizationDTO>) obj;
                 if (departments != null && departments.size() > 0) {
