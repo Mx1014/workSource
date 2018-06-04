@@ -4,6 +4,8 @@ import com.everhomes.rest.module.RouterInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 @Service
@@ -13,23 +15,37 @@ public class RouterInfoServiceImpl implements RouterService {
     private List<RouterListener> routerListeners;
 
 
-    @Override
-    public RouterInfo getRouterInfo(Long moduleId, String name, String jsonStr){
 
-        if(routerListeners == null){
-            return null;
+    @Override
+    public RouterInfo getRouterInfo(Long moduleId, String path, String jsonStr) {
+
+        RouterInfo routerInfo = null;
+        if (routerListeners == null) {
+            return routerInfo;
         }
 
-        for (RouterListener listener: routerListeners){
+        String[] splits = path.split("/");
+        String tempPath = "";
+        //根据最长路径开始依次匹配
+        for (int i = splits.length; i > 0; i--) {
 
-            if(listener.getModuleId().equals(moduleId)){
-                RouterPath declaredAnnotation = listener.getClass().getDeclaredAnnotation(RouterPath.class);
-                declaredAnnotation.path();
+            for (int j = 0; j < i; j++) {
+                tempPath = "/" + splits[j];
+            }
 
-                for (RouterInfo routerInfo: listener.listRouterInfos()){
-                    if(routerInfo.getName().equals(name)){
-                        listener.setQueryString(routerInfo, jsonStr);
-                        return routerInfo;
+            for (RouterListener listener : routerListeners) {
+                if (listener.getModuleId().equals(moduleId)) {
+                    Method[] methods = listener.getClass().getMethods();
+                    for (Method method : methods) {
+                        if (checkRouterPathMethod(method, tempPath)) {
+                            method.setAccessible(true);
+                            try {
+                                routerInfo = (RouterInfo) method.invoke(listener, jsonStr);
+                                return routerInfo;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
             }
@@ -38,4 +54,27 @@ public class RouterInfoServiceImpl implements RouterService {
         return null;
     }
 
+    private boolean checkRouterPathMethod(Method method, String path){
+        RouterPath declaredAnnotation = method.getDeclaredAnnotation(RouterPath.class);
+        if(declaredAnnotation == null || !path.equals(declaredAnnotation.path())){
+            return false;
+        }
+        int parameterCount = method.getParameterCount();
+
+        if(parameterCount != 1){
+            return false;
+        }
+
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        if(!parameterTypes[0].equals(String.class)){
+            return false;
+        }
+
+        Class<?> returnType = method.getReturnType();
+        if(returnType != RouterInfo.class){
+            return false;
+        }
+
+        return true;
+    }
 }

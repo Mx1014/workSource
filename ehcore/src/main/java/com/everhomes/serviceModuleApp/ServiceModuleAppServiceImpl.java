@@ -446,7 +446,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				appDTO.setClientHandlerType(serviceModule.getClientHandlerType());
 
 				if(ClientHandlerType.fromCode(serviceModule.getClientHandlerType()) == ClientHandlerType.NATIVE){
-					RouterInfo routerInfo = routerService.getRouterInfo(app.getModuleId(), RouterListener.INDEX_NAME, app.getInstanceConfig());
+					RouterInfo routerInfo = routerService.getRouterInfo(app.getModuleId(), "/index", app.getInstanceConfig());
 					if(routerInfo != null){
 						appDTO.setRouterPath(routerInfo.getPath());
 						appDTO.setRouterQuery(routerInfo.getQuery());
