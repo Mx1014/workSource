@@ -3223,6 +3223,7 @@ public class AssetServiceImpl implements AssetService {
     }
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
         out:{
+    		//企业客户是所有企业管理员可以查看和支付，校验企业管理员的权限
             if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
                 Long userId = UserContext.currentUserId();
                 ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
@@ -3260,6 +3261,7 @@ public class AssetServiceImpl implements AssetService {
     public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
         //企业用户的话判断是否为企业管理员
         out:{
+    		//企业客户是所有企业管理员可以查看和支付，校验企业管理员的权限
             if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
                 Long userId = UserContext.currentUserId();
                 ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();

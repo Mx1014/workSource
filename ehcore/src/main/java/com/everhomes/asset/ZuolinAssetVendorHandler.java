@@ -23,6 +23,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderCommand;
@@ -32,6 +33,8 @@ import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
+import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -47,6 +50,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RegularExpressionUtils;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -118,6 +122,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Autowired
     private ContractProvider contractProvider;
+    
+    @Autowired
+    private UserService userService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -788,11 +795,52 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //        List<PaymentBills> bills = assetProvider.findSettledBillsByContractIds(contractIds);
 
         //定位用户，如果是个人用户，前端拿不到用户id，从会话中获得
-        if(cmd.getTargetType().equals(AssetPaymentStrings.EH_USER)){
-            cmd.setTargetId(UserContext.currentUserId());
+//        if(cmd.getTargetType().equals(AssetPaymentStrings.EH_USER)){
+//            cmd.setTargetId(UserContext.currentUserId());
+//        }
+        
+        List<PaymentBills> paymentBills = new ArrayList<PaymentBills>();
+        if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        	//企业客户是所有企业管理员可以查看和支付，校验企业管理员的权限
+            paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId(),cmd.getOwnerType(),cmd.getOwnerId());
+        }else {
+        	//个人客户所属家庭全员可以查看和支付（新增个人客户时会关联楼栋门牌，导入个人客户账单时，找到此门牌关联的所有个人客户，无论是任何身份，均可以查看和支付）
+        	ListUserRelatedScenesCommand listUserRelatedScenesCommand = new ListUserRelatedScenesCommand();
+        	List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(listUserRelatedScenesCommand);
+        	List<Long> addressIds = new ArrayList<>();
+        	//获取到当前个人客户所有关联的楼栋门牌
+        	for(SceneDTO sceneDTO : sceneDtoList) {
+        		FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
+        		addressIds.add(familyDTO.getAddressId());
+        	}
+        	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+            EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+        	paymentBills = context.selectFrom(Tables.EH_PAYMENT_BILLS)
+	            .where(Tables.EH_PAYMENT_BILLS.TARGET_TYPE.eq(cmd.getTargetType()))
+	            .and(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte)1))//账单的状态，0:未出账单;1:已出账单
+	            .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))//账单状态，0:待缴;1:已缴
+	            .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(cmd.getOwnerType()))
+	            .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(cmd.getOwnerId()))
+	            .fetchInto(PaymentBills.class);
+        	Iterator<PaymentBills> iter = paymentBills.iterator();  
+        	while (iter.hasNext()) {
+        		PaymentBills paymentBillsDTO = iter.next();
+        	   //个人客户可以关联多个楼栋门牌，账单也可以关联多个楼栋门牌，账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
+        		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
+                List<Long> queryAddressIds = new ArrayList<>();
+            	context.selectDistinct(t2.ADDRESS_ID)
+            		.from(t2)
+            		.where(t2.BILL_ID.eq(paymentBillsDTO.getId()))
+            		.fetch()
+                	.forEach(r2 ->{
+                		queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
+                });
+            	//账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
+            	if(!addressIds.containsAll(queryAddressIds)) {
+            		iter.remove();
+            	}
+        	}
         }
-        //获得此用户的所有账单
-        List<PaymentBills> paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId(),cmd.getOwnerType(),cmd.getOwnerId());
         //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
         List<Map<?,?>> maps = new ArrayList<>();
         tryMakeCategory:{
@@ -930,7 +978,46 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         if(cmd.getIsOnlyOwedBill().byteValue() == (byte)1){
             status= 0;
         }
-        return assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getOwnerType().equals(AssetPaymentConstants.EH_USER)?UserContext.currentUserId():cmd.getTargetId(), status, cmd.getBillGroupId());
+        List<ListAllBillsForClientDTO> listAllBillsForClientDTOs = new ArrayList<>();
+        if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        	//企业客户是所有企业管理员可以查看和支付，校验企业管理员的权限
+        	listAllBillsForClientDTOs = assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),
+        			cmd.getTargetType(),cmd.getTargetId(), status, cmd.getBillGroupId());
+        }else {
+        	//个人客户所属家庭全员可以查看和支付（新增个人客户时会关联楼栋门牌，导入个人客户账单时，找到此门牌关联的所有个人客户，无论是任何身份，均可以查看和支付）
+        	ListUserRelatedScenesCommand listUserRelatedScenesCommand = new ListUserRelatedScenesCommand();
+        	List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(listUserRelatedScenesCommand);
+        	List<Long> addressIds = new ArrayList<>();
+        	//获取到当前个人客户所有关联的楼栋门
+        	for(SceneDTO sceneDTO : sceneDtoList) {
+        		FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
+        		addressIds.add(familyDTO.getAddressId());
+        	}
+        	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+            EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+            listAllBillsForClientDTOs = assetProvider.listAllBillsForClient(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),
+        			cmd.getTargetType(), null, status, cmd.getBillGroupId());
+            Iterator<ListAllBillsForClientDTO> iter = listAllBillsForClientDTOs.iterator();  
+        	while (iter.hasNext()) {
+        		ListAllBillsForClientDTO ListAllBillsForClientDTO = iter.next();
+        	    //个人客户可以关联多个楼栋门牌，账单也可以关联多个楼栋门牌，账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
+        		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
+                List<Long> queryAddressIds = new ArrayList<>();
+            	context.selectDistinct(t2.ADDRESS_ID)
+            		.from(t2)
+            		.where(t2.BILL_ID.eq(Long.parseLong(ListAllBillsForClientDTO.getBillId())))
+            		.fetch()
+                	.forEach(r2 ->{
+                		queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
+                });
+            	//账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
+            	if(!addressIds.containsAll(queryAddressIds)) {
+            		iter.remove();
+            	}
+        	}
+            
+        }
+        return listAllBillsForClientDTOs;
     }
 
     @Override

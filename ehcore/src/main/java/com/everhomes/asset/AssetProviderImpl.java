@@ -4135,9 +4135,6 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListAllBillsForClientDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         ArrayList<Long> groupIds = new ArrayList<>();
-        if(targetType.equals(AssetPaymentStrings.EH_USER)){
-            targetId = UserContext.currentUserId();
-        }
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(bill);
@@ -4164,10 +4161,10 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(bill.BILL_GROUP_ID.eq(billGroupId));
         }
         query.addConditions(bill.TARGET_TYPE.eq(targetType));
-        if(targetType.equals(AssetPaymentStrings.EH_USER)){
-            targetId = UserContext.currentUserId();
+        //如果是企业客户，可以通过targetId查询
+        if(targetType.equals(AssetPaymentStrings.EH_ORGANIZATION)) {
+        	query.addConditions(bill.TARGET_ID.eq(targetId));
         }
-        query.addConditions(bill.TARGET_ID.eq(targetId));
         query.addConditions(bill.SWITCH.eq((byte)1));
         query.addOrderBy(bill.DATE_STR.desc());
 
@@ -4214,7 +4211,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
                 .fetchInto(PaymentBills.class);
     }
-
+    
     @Override
     public List<PaymentBills> findPaidBillsByIds(List<String> billIds) {
         return getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
