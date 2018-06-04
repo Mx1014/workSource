@@ -4677,7 +4677,7 @@ public class GroupServiceImpl implements GroupService {
                         //说明该员工所在的公司之前都没有开启工作台，那么我们就该该员工发送消息，说将要开启工作台
                     //在这里是这样设置的，不管是开启工作台还是关闭工作台都需要分别发送两条消息，一条是带有meta_object_type的，一条是不带有meta_object_type的
                     //首先我们来发送一条不带有meta_object_type的消息
-
+/*
                 MessageDTO messageDto = new MessageDTO();
                 messageDto.setAppId(AppConstants.APPID_MESSAGING);
                 messageDto.setSenderUid(User.SYSTEM_UID);
@@ -4687,7 +4687,7 @@ public class GroupServiceImpl implements GroupService {
                 messageDto.setMetaAppId(AppConstants.APPID_GROUP);
 //                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                        uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                        uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());*/
                 //再发送一条带有meta_object_type的消息
                 MessageDTO messageDto1 = new MessageDTO();
                 messageDto1.setAppId(AppConstants.APPID_MESSAGING);
@@ -4722,7 +4722,7 @@ public class GroupServiceImpl implements GroupService {
 //                    if(openWorkBench == true){
                 //说明该员工所在的公司之前都已经开启工作台，那么我们就该该员工发送消息，说将要关闭工作台
 
-                MessageDTO messageDto = new MessageDTO();
+/*                MessageDTO messageDto = new MessageDTO();
                 messageDto.setAppId(AppConstants.APPID_MESSAGING);
                 messageDto.setSenderUid(User.SYSTEM_UID);
                 messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
@@ -4731,7 +4731,7 @@ public class GroupServiceImpl implements GroupService {
                 messageDto.setMetaAppId(AppConstants.APPID_GROUP);
 //                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                        uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                        uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());*/
 
                 MessageDTO messageDto1 = new MessageDTO();
                 messageDto1.setAppId(AppConstants.APPID_MESSAGING);

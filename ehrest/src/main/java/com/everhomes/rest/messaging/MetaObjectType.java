@@ -33,7 +33,7 @@ public enum MetaObjectType {
     FAMILY_AGREE_TO_JOIN("family.agreeToJoin"),
     GROUP_MEMBER_DELETE("group.member.delete"),
     GROUP_INVITE_TO_JOIN_FREE("group.inviteToJoin.free"),
-    WORK_BENCH_FLAG_OPEN("workBeanchFlag.open"),
+    WORK_BENCH_FLAG_OPEN("workBenchFlag.open"),
     WORK_BENCH_FLAG_CLOSE("workBenchFlag.close");
     
     private String code;
