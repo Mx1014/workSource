@@ -856,24 +856,24 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public List<FlowCaseDetail> listActiveFlowCasesByApprovalId(GetTemplateBySourceIdCommand cmd) {
+    public List<FlowCaseDetail> listActiveFlowCasesByApprovalId(Long ownerId, Long approvalId) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.currentUserId();
-        SearchFlowCaseCommand command = new SearchFlowCaseCommand();
 
-        command.setOrganizationId(cmd.getOwnerId());
+        SearchFlowCaseCommand command = new SearchFlowCaseCommand();
+        command.setOrganizationId(ownerId);
         command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
         command.setNamespaceId(namespaceId);
         command.setModuleId(EnterpriseApprovalController.MODULE_ID);
         command.setUserId(userId);
-
         List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(new ListingLocator(), Integer.MAX_VALUE - 1, command, (locator1, query) -> {
-            query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(cmd.getSourceId()));
+            query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(approvalId));
             query.addConditions(Tables.EH_FLOW_CASES.REFER_TYPE.eq("approval"));
             query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
             query.addOrderBy(Tables.EH_FLOW_CASES.CREATE_TIME.asc());
             return query;
         });
+
         if (details != null && details.size() > 0)
             return details;
         return null;

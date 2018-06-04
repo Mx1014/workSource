@@ -2,26 +2,20 @@ package com.everhomes.enterpriseApproval;
 
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
-import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowCaseState;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component(EnterpriseApprovalEmployHandler.ENTERPRISE_APPROVAL_EMPLOY_HANDLER_NAME)
-public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandler{
+@Component(EnterpriseApprovalDismissHandler.ENTERPRISE_APPROVAL_DISMISS_HANDLER_NAME)
+public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandler{
 
-    static final String ENTERPRISE_APPROVAL_EMPLOY_HANDLER_NAME = EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX + "EMPLOY_APPLICATION";
+    static final String ENTERPRISE_APPROVAL_DISMISS_HANDLER_NAME = EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX + "DISMISS_APPLICATION";
 
     @Autowired
     private EnterpriseApprovalService enterpriseApprovalService;
@@ -35,6 +29,7 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
     public void onFlowCaseAbsorted(FlowCaseState flowCase) {
 
     }
+
 
     @Override
     public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
