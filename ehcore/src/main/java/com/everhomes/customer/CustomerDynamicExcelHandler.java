@@ -910,10 +910,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 LOGGER.error("create enterprise admin error :{}", e);
             }
             enterpriseCustomer.setId(exist.getId());
+            enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             if ((exist.getOrganizationId() == null || exist.getOrganizationId() == 0) && StringUtils.isNotBlank(customerAddressString)) {
                 syncCustomerInfoIntoOrganization(exist);
             }
-            enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
             //修改了客户名称则要同步修改合同里面的客户名称
@@ -947,6 +947,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     private void syncCustomerInfoIntoOrganization(EnterpriseCustomer exist) {
         //这里增加入驻信息后自动同步到企业管理
         OrganizationDTO organizationDTO = customerService.createOrganization(exist);
+        exist.setOrganizationId(organizationDTO.getId());
         dbProvider.execute((TransactionStatus status) -> {
             List<CustomerAdminRecord> untrackAdmins = customerProvider.listEnterpriseCustomerAdminRecords(exist.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
             if (untrackAdmins != null && untrackAdmins.size() > 0) {
@@ -962,7 +963,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             }
             return null;
         });
-        exist.setOrganizationId(organizationDTO.getId());
+
         List<EnterpriseAttachment> attachments = customerProvider.listEnterpriseCustomerPostUri(exist.getId());
         if (attachments != null && attachments.size() > 0) {
             List<AttachmentDescriptor> bannerUrls = new ArrayList<>();

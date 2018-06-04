@@ -2233,6 +2233,7 @@ public class CustomerServiceImpl implements CustomerService {
     private void syncCustomerInfoIntoOrganization(CustomerEntryInfo entryInfo, EnterpriseCustomer customer) {
         //这里增加入驻信息后自动同步到企业管理
         OrganizationDTO organizationDTO = createOrganization(customer);
+        customer.setOrganizationId(organizationDTO.getId());
         //管理员同步过去
         dbProvider.execute((TransactionStatus status) -> {
             List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
@@ -2250,7 +2251,6 @@ public class CustomerServiceImpl implements CustomerService {
             }
             return null;
         });
-        customer.setOrganizationId(organizationDTO.getId());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
@@ -2325,15 +2325,22 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos == null || entryInfos.size() == 0) {
-            if (organization != null && organization.getId() != 0) {
-                organizationSearcher.deleteById(organization.getId());
-                organizationProvider.deleteOrganization(organization);
+            if (organization != null && organization.getId() != 0 && organization.getId()!=null) {
+//                organizationSearcher.deleteById(organization.getId());
+//                organizationProvider.deleteOrganization(organization);
+                DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
+                command.setCommunityId(cmd.getCommunityId());
+                command.setId(organization.getId());
+                command.setManageOrganizationId(cmd.getOrgId());
+                command.setEnterpriseId(cmd.getOrgId());
+                organizationService.deleteOrganization(command);
                 if (customer != null) {
                     customer.setOrganizationId(0L);
                 }
             }
         }
         //sync to es
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         organizationSearcher.feedDoc(organization);
     }
