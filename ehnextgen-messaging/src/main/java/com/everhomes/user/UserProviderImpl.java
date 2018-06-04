@@ -123,7 +123,6 @@ public class UserProviderImpl implements UserProvider {
         user.setId(id);
         if(user.getAccountName() == null) {
             long accountSeq = this.sequenceProvider.getNextSequence("usr");
-            accountSeq += 1000000;
             user.setAccountName(String.valueOf(accountSeq));
         }
         if(user.getUuid() == null)
