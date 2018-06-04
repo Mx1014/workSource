@@ -32,4 +32,9 @@ public interface PropertyServiceErrorCode {
     int ERROR_OWNER_ADDRESS_ALREADY_IS_THIS_STATUS = 17002;// 用户楼栋门牌已经处于某种状态
 
     int ERROR_OWNER_ADDRESS_ALREADY_INACTIVE = 18001;// 该记录已经处于未认证状态
+
+    int ERROR_IMPORT_MANDATORY_COLUMN    = 18002;// 必填项未填写
+    int ERROR_IMPORT_ADDRESS_NOT_EXISTS    = 18003;// 楼栋门牌不存在
+    int ERROR_IMPORT_DATE_FORMAT_ERROR    = 18004;//  时间格式不正确
+
 }
