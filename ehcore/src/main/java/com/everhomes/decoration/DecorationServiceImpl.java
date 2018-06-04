@@ -196,6 +196,7 @@ public class DecorationServiceImpl implements  DecorationService {
             attachments.forEach(r->{
                 DecorationAttachment attachment = ConvertHelper.convert(r,DecorationAttachment.class);
                 attachment.setSettingId(settingId);
+                attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
                 this.decorationProvider.createDecorationAttachment(attachment);
             });
         }
@@ -234,6 +235,7 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
             cmd1.setPhone(worker.getPhone());
             worker.setUid(0l);//注册未登陆
+            worker.setNamespaceId(UserContext.getCurrentNamespaceId());
 
             OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(dc.getOrganizationId(),
                     worker.getPhone());
@@ -647,10 +649,12 @@ public class DecorationServiceImpl implements  DecorationService {
             DecorationFee fee = new DecorationFee();
             fee.setRequestId(cmd.getRequestId());
             fee.setTotalPrice(cmd.getTotalAmount());
+            fee.setNamespaceId(UserContext.getCurrentNamespaceId());
             this.decorationProvider.createDecorationFee(fee);
             if (cmd.getDecorationFee()!=null)
                 for (DecorationFeeDTO dto : cmd.getDecorationFee()){
                     fee = new DecorationFee();
+                    fee.setNamespaceId(UserContext.getCurrentNamespaceId());
                     fee.setRequestId(cmd.getRequestId());
                     fee.setAmount(dto.getAmount());
                     fee.setFeeName(dto.getFeeName());
@@ -730,6 +734,7 @@ public class DecorationServiceImpl implements  DecorationService {
             val.setRequestId(cmd.getRequestId());
             val.setFormOriginId(ga.getFormOriginId());
             val.setFormVersion(ga.getFormVersion());
+            val.setNamespaceId(UserContext.getCurrentNamespaceId());
             this.decorationProvider.createApprovalVals(val);
 
             //创建工作流
