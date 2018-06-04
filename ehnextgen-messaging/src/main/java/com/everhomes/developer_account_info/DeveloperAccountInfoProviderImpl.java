@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +26,11 @@ public class DeveloperAccountInfoProviderImpl implements DeveloperAccountInfoPro
     private DbProvider dbProvider;
 
 	@Override
-	public DeveloperAccountInfo getDeveloperAccountInfoByNamespaceId(Integer namespaceId) {
+	public DeveloperAccountInfo getDeveloperAccountInfoByBundleId(String  bundleId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhDeveloperAccountInfoRecord> query = context.selectQuery(Tables.EH_DEVELOPER_ACCOUNT_INFO);
-		if(namespaceId == null)return null;
-		//query.addConditions(Tables.EH_DEVELOPER_ACCOUNT_INFO.NAMESPACE_ID.eq(namespaceId));
+		if(StringUtils.isBlank(bundleId))return null;
+		query.addConditions(Tables.EH_DEVELOPER_ACCOUNT_INFO.BUNDLE_IDS.like("%"+bundleId+"%"));
 		query.addOrderBy(Tables.EH_DEVELOPER_ACCOUNT_INFO.ID.asc());
 		//获取结果集，但我们只要一条
 		List<DeveloperAccountInfo> resultList = query.fetch().map(r -> ConvertHelper.convert(r, DeveloperAccountInfo.class));

@@ -48,6 +48,7 @@ import com.notnoop.exceptions.NetworkIOException;
 import com.xiaomi.xmpush.server.Result;
 import com.xiaomi.xmpush.server.Sender;
 
+import org.jooq.tools.StringUtils;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -374,7 +375,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         namespaceId = UserContext.getCurrentNamespaceId(namespaceId);        
         try {
 		        ApnsClient client;
-		        client = getApnsClient(namespaceId ,identify);
+		        client = getApnsClient(destLogin);
 			    if(client != null ){
 			    	//3.消息推送
 				    NotificationResponse result = client.push(notif);
@@ -698,19 +699,44 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
      * @param identify
      * @return
      */
-    public ApnsClient getApnsClient(Integer namespaceId , String identify) {   
-    	
-    	if(namespaceId == null){
-    		LOGGER.warn("namespaceId is null  and Unable to establish a connection");
+    public ApnsClient getApnsClient(UserLogin destLogin) {   
+    	String identify = destLogin.getDeviceIdentifier();
+    	if(identify == null){
+    		LOGGER.warn("identify is null  and Unable to establish a connection");
     		return null ;
     	}
+    	//bundleId 一般从Device中取，但为了兼容旧数据，Device中取不到的话可以namespaceId + pusherIdentify
+        String bundleId = null ;
+        //推送服务器类型默认为开发
+        boolean isProductionGateway =  false ;
+        //获取设备注册时保存的bundleId
+        Device device = this.deviceProvider.findDeviceByDeviceId(identify);
+        if(device ==null ){
+        	LOGGER.warn("device is null  and Unable to establish a connection");
+    		return null ;
+        }
+        	bundleId = device.getBundleId();
+        	String pusherServiceType = device.getPusherServiceType();
+        	//设置为生产服务器类型
+        	if(TYPE_PRODUCTION.equals(pusherServiceType)){
+        		isProductionGateway = true ;
+        	}
+        
+        if(StringUtils.isBlank(bundleId)){
+        	//获取域空间ID，该值无论如何都得有值
+            Integer namespaceId = destLogin.getNamespaceId() ;
+            namespaceId = UserContext.getCurrentNamespaceId(namespaceId); 
+        	bundleId=namespaceId +"";
+        }
+        
     	//优先从http2ClientMaps 中   取，如没有再创建新的连接
-        ApnsClient client = this.http2ClientMaps.get(namespaceId.toString());
+        ApnsClient client = this.http2ClientMaps.get(bundleId);
         if(client != null ){
         	return client;
         }
+        		
                 //获取开发者信息
-                DeveloperAccountInfo  dlaInfo = developerAccountInfoProvider.getDeveloperAccountInfoByNamespaceId(namespaceId);
+                DeveloperAccountInfo  dlaInfo = developerAccountInfoProvider.getDeveloperAccountInfoByBundleId(bundleId);
                 if(dlaInfo == null ){
                 	//查询不到开发者信息，则不往下走了，因为没法建立与APNs服务的连接
                     LOGGER.warn("DeveloperAccountInfo is null  and Unable to establish a connection");
@@ -719,19 +745,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 byte[] authkey = dlaInfo.getAuthkey();
                 String teamId = dlaInfo.getTeamId();
                 String authKeyId = dlaInfo.getAuthkeyId();
-                String bundleId = null ;
-                //推送服务器类型默认为开发
-                boolean isProductionGateway =  false ;
-                //获取设备注册时保存的bundleId
-                Device device = this.deviceProvider.findDeviceByDeviceId(identify);
-                if(device !=null ){
-                	bundleId = device.getBundleId();
-                	String pusherServiceType = device.getPusherServiceType();
-                	//设置为生产服务器类型
-                	if(TYPE_PRODUCTION.equals(pusherServiceType)){
-                		isProductionGateway = true ;
-                	}
-                }
+               
                 try {        		
         			    client = new ApnsClientBuilder()
         		        .inSynchronousMode()
@@ -747,7 +761,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     LOGGER.warn("apns error deviceId not correct", ex);
                 }
                                     
-        	    ApnsClient tmp = this.http2ClientMaps.putIfAbsent(namespaceId.toString(), client);
+        	    ApnsClient tmp = this.http2ClientMaps.putIfAbsent(bundleId, client);
                 if(tmp != null) {                   
                     client = tmp;
                 }

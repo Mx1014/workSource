@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
  * <li>meta: 额外要添加的信息</li>
  * <li>pusherServiceType: 推送服务类型develop和productiom</li>
  * <li>bundleId: 关联应用</li>
- * <li>namespaceId: 域空间ID</li>
  * </ul>
  *
  */
@@ -39,8 +38,6 @@ public class RegistDeviceCommand {
     
     private String bundleId;
     
-    private Integer namespaceId;
-
     public String getDeviceId() {
         return deviceId;
     }
@@ -112,14 +109,5 @@ public class RegistDeviceCommand {
 	public void setBundleId(String bundleId) {
 		this.bundleId = bundleId;
 	}
-
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-    
-    
+   
 }

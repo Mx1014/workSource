@@ -150,7 +150,7 @@ public class PusherController extends ControllerBase {
             device.setSystemVersion(cmd.getSystemVersion());
             device.setMeta(cmd.getMeta());
            
-            //add by huanglm IOS推送升级需在注册设备时多传三个参数
+            //add by huanglm IOS推送升级需在注册设备时多传两个参数
             device.setBundleId(cmd.getBundleId());
             device.setPusherServiceType(cmd.getPusherServiceType());
             
