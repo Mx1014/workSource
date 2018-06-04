@@ -4,6 +4,7 @@ package com.everhomes.organization.pm;
 import com.everhomes.community.Community;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 public interface PropertyMgrService {
@@ -71,7 +73,7 @@ public interface PropertyMgrService {
     void createPropBill(CommunityPmBill bill);
     void sendPropertyBillById(PropCommunityBillIdCommand cmd);
     void sendPropertyBillByMonth(PropCommunityBillDateCommand cmd);
-    void sendNotice(SendNoticeCommand cmd);
+    void sendNoticeToFamily(PropCommunityBuildAddessCommand cmd);
     void sendMsgToPMGroup(PropCommunityIdMessageCommand cmd);
     //物业帖子相关
 	PostDTO createTopic(NewTopicCommand cmd);
@@ -136,11 +138,11 @@ public interface PropertyMgrService {
 
 	OrganizationOrderDTO createPmBillOrder(CreatePmBillOrderCommand cmd);
 
-	void sendNoticeToOrganizationMember(SendNoticeCommand cmd, User user);
+	void sendNoticeToOrganizationMember(PropCommunityBuildAddessCommand cmd, User user);
 
 	CommonOrderDTO createPmBillOrderDemo(CreatePmBillOrderCommand cmd);
 
-	void pushMessage(SendNoticeCommand cmd, User operator);
+	void pushMessage(PropCommunityBuildAddessCommand cmd,User user);
 
     // 自动审核group member
     void autoApprovalGroupMember(Long userId, Long communityId, Long groupId, Long addressId);

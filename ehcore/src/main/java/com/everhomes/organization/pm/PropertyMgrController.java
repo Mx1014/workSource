@@ -386,15 +386,15 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}*/
 	/**
-	 * <b>URL: /pm/sendNotice</b>
+	 * <b>URL: /pm/sendNoticeToFamily</b>
 	 * 物业一键推送消息（是左邻用户则发消息、不是左邻用户则发短信）。
 	 * 按小区，楼栋，门牌号范围
 	 */
 	//checked
-	@RequestMapping("sendNotice")
+	@RequestMapping("sendNoticeToFamily")
 	@RestReturn(value= java.lang.String.class)
-	public RestResponse sendNotice(SendNoticeCommand cmd) {
-		propertyMgrService.sendNotice(cmd);
+	public RestResponse sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
+		propertyMgrService.sendNoticeToFamily(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1482,7 +1482,7 @@ public class PropertyMgrController extends ControllerBase {
 
 	@RequestMapping("sendNoticeToOrganizationMember")
     @RestReturn(value= java.lang.String.class)
-    public RestResponse sendNoticeToOrganizationMember(@Valid SendNoticeCommand cmd){
+    public RestResponse sendNoticeToOrganizationMember(@Valid PropCommunityBuildAddessCommand cmd){
 		propertyMgrService.sendNoticeToOrganizationMember(cmd,UserContext.current().getUser());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

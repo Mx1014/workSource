@@ -19,9 +19,7 @@ public enum ImportFileTaskType {
     PERSONNEL_FILE("psersonnel_file"),
     PERSONNEL_ARCHIVES("personnel_archives"),
     SOCIAL_SERCURITY_PAYMENTS("social_sercurity_payments"),
-    SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter"), ENERGY_PLAN_TASK("energy_plan_task"),
-    FIXED_ASSET("fixed_asset_"),
-    PUNCH_VACATION("punch_vacation");
+    SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter"), ENERGY_PLAN_TASK("energy_plan_task");
 
 	private String code;
 
