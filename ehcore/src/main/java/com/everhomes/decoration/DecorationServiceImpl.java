@@ -325,6 +325,8 @@ public class DecorationServiceImpl implements  DecorationService {
                 DecorationController.moduleId, DecorationController.moduleType, cmd.getCommunityId(), DecorationRequestStatus.APPLY.getFlowOwnerType());
             if (flow == null) {
                 LOGGER.error("Enable decoration flow not found, moduleId={}", FlowConstants.DECORATION_MODULE);
+                request.setCancelFlag((byte)1);
+                decorationProvider.updateDecorationRequest(request);
                 throw RuntimeErrorException.errorWith("decoration",
                         10001, "请开启工作流后重试");
             }
@@ -856,8 +858,6 @@ public class DecorationServiceImpl implements  DecorationService {
             decorationSMSProcessor.applySuccess(request);
         }catch (Exception e){
             LOGGER.error("DecorationApplySuccess error e:",e);
-            request.setCancelFlag((byte)1);
-            this.decorationProvider.updateDecorationRequest(request);
             throw e;
         }
     }
