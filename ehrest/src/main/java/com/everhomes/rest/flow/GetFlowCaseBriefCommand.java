@@ -7,12 +7,14 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>flowCaseId: flowCaseId</li>
+ *     <li>flowUserType: flowUserType</li>
  * </ul>
  */
 public class GetFlowCaseBriefCommand {
 
-    @NotNull private Long flowCaseId;
-    // private String flowUserType;
+    @NotNull
+    private Long flowCaseId;
+    private String flowUserType;
 
     public Long getFlowCaseId() {
         return flowCaseId;
@@ -20,6 +22,14 @@ public class GetFlowCaseBriefCommand {
 
     public void setFlowCaseId(Long flowCaseId) {
         this.flowCaseId = flowCaseId;
+    }
+
+    public String getFlowUserType() {
+        return flowUserType;
+    }
+
+    public void setFlowUserType(String flowUserType) {
+        this.flowUserType = flowUserType;
     }
 
     @Override
