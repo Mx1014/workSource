@@ -2532,7 +2532,7 @@ public class FlowServiceImpl implements FlowService {
             //check if the step is processed
             if (!flowCase.getStepCount().equals(dto.getStepCount())
                     || !flowCase.getCurrentNodeId().equals(dto.getFlowNodeId())
-                    || FlowCaseStatus.fromCode(flowCase.getStatus()) == FlowCaseStatus.SUSPEND) {
+                    || FlowCaseStatus.SUSPEND == FlowCaseStatus.fromCode(flowCase.getStatus())) {
                 //NOT OK
                 LOGGER.info("ft timeout occur but step is processed! ft=" + ft.getId());
                 return;
@@ -6134,36 +6134,6 @@ public class FlowServiceImpl implements FlowService {
         flowCases.add(fc);
 
         return flowCases;
-    }
-
-    public static void main(String[] args) {
-        // FlowServiceImpl impl = new FlowServiceImpl();
-        // FlowCaseTree processingFlowCaseTree = impl.getProcessingFlowCaseTree(1L);
-        //
-        // System.out.println(processingFlowCaseTree);
-        //
-        // System.out.println(processingFlowCaseTree.getLeafNodes());
-        int a = 1;
-        ArrayList list = new ArrayList(10);
-        list.add(a++);
-        list.add(a++);
-        list.add(a++);
-        list.add(a++);
-        list.add(a++);
-        list.add(a++);
-        list.add(a++);
-        list.add(a++);
-        list.add(a++);
-        list.add(a++);
-
-        System.out.println(list.subList(0, 4));
-        System.out.println(list.subList(4, list.size()));
-
-
-        System.out.println("----");
-        System.out.println(" ");
-        System.out.println(" ".trim());
-        System.out.println("----");
     }
 
     private FlowCaseTree toFlowCaseTree(Map<Long, List<FlowCase>> parentIdToFlowCase, FlowCaseTree tree, Long parentId) {
