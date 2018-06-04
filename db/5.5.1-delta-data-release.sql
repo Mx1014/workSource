@@ -67,7 +67,7 @@ update eh_service_module_apps set  module_control_type='community_control' where
 -- 新建事件  #26469 add by huangmingbo  2018/05/29
 SET @flow_predefined_params_id = IFNULL((SELECT MAX(id) FROM `eh_flow_predefined_params`), 1);
 INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
-  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', @module_id, 'any-module', 'flow_node', '新建事件', 'new event', '{"nodeType":"NEW_EVENT"}', 2, NULL, NULL, NULL, NULL);  
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', @module_id, 'any-module', 'flow_button', '新建事件', 'new event', '{"nodeType":"NEW_EVENT"}', 2, NULL, NULL, NULL, NULL);  
 
 -- “停车缴费”、“物业报修”、“物品放行”、“园区入驻”  #26469 add by huangmingbo  2018/05/29
 SET @jump_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_jump_module`), 1);
