@@ -85,6 +85,4 @@ ehpay-rest-response.version=1.0.0-SNAPSHOT
 oauth2-client.version=1.0.0-SNAPSHOT
 
 okhttp3.version = 3.2.0
-jackson-core.version = 2.7.0
-jackson-databind.version = 2.1.4
 alpn-boot.version = 8.1.12.v20180117
