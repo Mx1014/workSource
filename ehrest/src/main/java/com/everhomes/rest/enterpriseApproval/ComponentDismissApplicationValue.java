@@ -5,9 +5,9 @@ package com.everhomes.rest.enterpriseApproval;
  * <li>applierName: 申请人名称</li>
  * <li>applierDepartment: 申请人部门</li>
  * <li>applierJobPosition: 申请人职位</li>
+ * <li>dismissTime: 离职日期</li>
  * <li>dismissReason: 离职原因</li>
  * <li>dismissRemark: 申请理由</li>
- * <li>dismissTime: 离职日期</li>
  * </ul>
  */
 public class ComponentDismissApplicationValue {
@@ -18,11 +18,11 @@ public class ComponentDismissApplicationValue {
 
     private String applierJobPosition;
 
+    private String dismissTime;
+
     private String dismissReason;
 
     private String dismissRemark;
-
-    private String dismissTime;
 
     public ComponentDismissApplicationValue() {
     }

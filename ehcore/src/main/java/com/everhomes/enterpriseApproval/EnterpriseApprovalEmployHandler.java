@@ -4,8 +4,12 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalTemplateCode;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
@@ -26,6 +30,12 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
     @Autowired
     private EnterpriseApprovalService enterpriseApprovalService;
 
+    @Autowired
+    private LocaleStringService localeStringService;
+
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+
     @Override
     public void onApprovalCreated(FlowCase flowCase) {
 
@@ -40,13 +50,14 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
     public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
 
         GeneralFormReminderDTO dto = new GeneralFormReminderDTO();
-
         dto.setFlag(TrueOrFalseFlag.FALSE.getCode());
+
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
         Long userId = UserContext.currentUserId();
         List<FlowCaseDetail> details = enterpriseApprovalService.listActiveFlowCasesByApprovalId(cmd.getOwnerId(), cmd.getSourceId());
         if (details != null && details.size() > 0) {
             dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            dto.setTitle("还有审批中的人事申请");
+            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.APPROVAL_TITLE, "zh_CN", "Remind"));
             dto.setContent("您的转正申请正在审批中\n" +
                     "\n" +
                     "现在发起申请将使该申请作废\n" +

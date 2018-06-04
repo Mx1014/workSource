@@ -84,7 +84,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     }
 
     @Override
-    public void onFlowCaseAbsorted(FlowCaseState ctx){
+    public void onFlowCaseAbsorted(FlowCaseState ctx) {
         FlowCase flowCase = ctx.getRootState().getFlowCase();
         LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted  userType : " + ctx.getCurrentEvent().getUserType());
         EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(flowCase.getReferId());
@@ -93,7 +93,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
 
     private EnterpriseApprovalHandler getEnterpriseApprovalHandler(Long referId) {
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
-        if(ga!=null){
+        if (ga != null) {
             EnterpriseApprovalHandler handler = PlatformContext.getComponent(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX
                     + ga.getApprovalAttribute());
             if (handler != null) {
@@ -120,14 +120,14 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         flowCase.setContent(content.toString());
     }
 
-    private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values){
+    private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {
         List<FlowCaseEntity> entities = new ArrayList<>();
-        for(PostApprovalFormItem value : values){
+        for (PostApprovalFormItem value : values) {
             FlowCaseEntity e = new FlowCaseEntity();
             e.setKey(value.getFieldDisplayName() == null ? value.getFieldName() : value.getFieldDisplayName());
             //  just process the item which is not default
-            if(!DEFAULT_FIELDS.contains(value.getFieldName())){
-                switch (GeneralFormFieldType.fromCode(value.getFieldType())){
+            if (!DEFAULT_FIELDS.contains(value.getFieldName())) {
+                switch (GeneralFormFieldType.fromCode(value.getFieldType())) {
                     case SINGLE_LINE_TEXT:
                     case NUMBER_TEXT:
                     case DATE:
@@ -152,23 +152,29 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
                         break;
                     case ASK_FOR_LEAVE:
                         //请假
-                        processAskForLeaveField(entities, e, value.getFieldValue());
+                        processAskForLeaveField(entities, value.getFieldValue());
                         break;
                     case BUSINESS_TRIP:
                         //出差
-                        processBusinessTripField(entities, e, value.getFieldValue());
+                        processBusinessTripField(entities, value.getFieldValue());
                         break;
                     case OVERTIME:
                         //加班
-                        processOverTimeField(entities, e, value.getFieldValue());
+                        processOverTimeField(entities, value.getFieldValue());
                         break;
                     case GO_OUT:
                         //外出
-                        processGoOutField(entities, e, value.getFieldValue());
+                        processGoOutField(entities, value.getFieldValue());
                         break;
                     case ABNORMAL_PUNCH:
                         //打卡异常
-                        processAbnormalPunchField(entities, e, value.getFieldValue());
+                        processAbnormalPunchField(entities, value.getFieldValue());
+                        break;
+                    case EMPLOY_APPLICATION:
+                        processEmployApplicationField(entities, value.getFieldValue());
+                        break;
+                    case DISMISS_APPLICATION:
+                        processDismissApplicationField(entities, value.getFieldValue());
                         break;
                 }
             }
@@ -177,9 +183,9 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         return entities;
     }
 
-    private void processAskForLeaveField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+    private void processAskForLeaveField(List<FlowCaseEntity> entities, String jsonVal) {
         ComponentAskForLeaveValue leaveValue = JSON.parseObject(jsonVal, ComponentAskForLeaveValue.class);
-        e = new FlowCaseEntity();
+        FlowCaseEntity e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.ASK_FOR_LEAVE_TYPE, "zh_CN", "Type"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(leaveValue.getRestName());
@@ -204,9 +210,9 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         entities.add(3, e);
     }
 
-    private void processBusinessTripField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+    private void processBusinessTripField(List<FlowCaseEntity> entities, String jsonVal) {
         ComponentBusinessTripValue tripValue = JSON.parseObject(jsonVal, ComponentBusinessTripValue.class);
-        e = new FlowCaseEntity();
+        FlowCaseEntity e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.START_TIME, "zh_CN", "Start Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(tripValue.getStartTime());
@@ -225,9 +231,9 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         entities.add(2, e);
     }
 
-    private void processOverTimeField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+    private void processOverTimeField(List<FlowCaseEntity> entities, String jsonVal) {
         ComponentOverTimeValue overTimeValue = JSON.parseObject(jsonVal, ComponentOverTimeValue.class);
-        e = new FlowCaseEntity();
+        FlowCaseEntity e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.START_TIME, "zh_CN", "Start Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(overTimeValue.getStartTime());
@@ -246,9 +252,9 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         entities.add(2, e);
     }
 
-    private void processGoOutField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+    private void processGoOutField(List<FlowCaseEntity> entities, String jsonVal) {
         ComponentGoOutValue outValue = JSON.parseObject(jsonVal, ComponentGoOutValue.class);
-        e = new FlowCaseEntity();
+        FlowCaseEntity e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.START_TIME, "zh_CN", "Start Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(outValue.getStartTime());
@@ -267,9 +273,9 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         entities.add(2, e);
     }
 
-    private void processAbnormalPunchField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal) {
+    private void processAbnormalPunchField(List<FlowCaseEntity> entities, String jsonVal) {
         ComponentAbnormalPunchValue punchValue = JSON.parseObject(jsonVal, ComponentAbnormalPunchValue.class);
-        e = new FlowCaseEntity();
+        FlowCaseEntity e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.ABNORMAL_PUNCH_DATE, "zh_CN", "Abnormal Date"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(punchValue.getAbnormalDate());
@@ -280,6 +286,60 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
         e.setValue(punchValue.getAbnormalItem());
         entities.add(1, e);
+    }
+
+    private void processEmployApplicationField(List<FlowCaseEntity> entities, String jsonVal) {
+        ComponentEmployApplicationValue value = JSON.parseObject(jsonVal, ComponentEmployApplicationValue.class);
+        FlowCaseEntity e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.APPLIER_JOB_POSITION, "zh_CN", "Job Position"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(value.getApplierJobPosition());
+        entities.add(0, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.CHECK_IN_TIME, "zh_CN", "Check In Time"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(value.getCheckInTime());
+        entities.add(1, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.EMPLOY_TIME, "zh_CN", "Employ Time"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(value.getEmploymentTime());
+        entities.add(2, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.EMPLOY_REASON, "zh_CN", "Employ Reason"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(value.getEmploymentReason());
+        entities.add(3, e);
+    }
+
+    private void processDismissApplicationField(List<FlowCaseEntity> entities, String jsonVal) {
+        ComponentDismissApplicationValue value = JSON.parseObject(jsonVal, ComponentDismissApplicationValue.class);
+        FlowCaseEntity e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.APPLIER_JOB_POSITION, "zh_CN", "Job Position"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(value.getApplierJobPosition());
+        entities.add(0, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.DISMISS_TIME, "zh_CN", "Dismiss Time"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(value.getDismissTime());
+        entities.add(1, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.DISMISS_REASON, "zh_CN", "Dismiss Reason"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(value.getDismissReason());
+        entities.add(2, e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalTemplateCode.SCOPE, EnterpriseApprovalTemplateCode.DISMISS_REMARK, "zh_CN", "Dismiss Remark"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(value.getDismissRemark());
+        entities.add(3, e);
     }
 
     @Override
@@ -396,23 +456,29 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
                             break;
                         case ASK_FOR_LEAVE:
                             //请假
-                            processAskForLeaveField(entities, e, val.getFieldStr3());
+                            processAskForLeaveField(entities, val.getFieldStr3());
                             break;
                         case BUSINESS_TRIP:
                             //出差
-                            processBusinessTripField(entities, e, val.getFieldStr3());
+                            processBusinessTripField(entities, val.getFieldStr3());
                             break;
                         case OVERTIME:
                             //加班
-                            processOverTimeField(entities, e, val.getFieldStr3());
+                            processOverTimeField(entities, val.getFieldStr3());
                             break;
                         case GO_OUT:
                             //外出
-                            processGoOutField(entities, e, val.getFieldStr3());
+                            processGoOutField(entities, val.getFieldStr3());
                             break;
                         case ABNORMAL_PUNCH:
                             //打卡异常
-                            processAbnormalPunchField(entities, e, val.getFieldStr3());
+                            processAbnormalPunchField(entities, val.getFieldStr3());
+                            break;
+                        case EMPLOY_APPLICATION:
+                            processEmployApplicationField(entities, val.getFieldStr3());
+                            break;
+                        case DISMISS_APPLICATION:
+                            processDismissApplicationField(entities, val.getFieldStr3());
                             break;
                     }
                 }
@@ -487,7 +553,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         return flowFormDTOS;
     }
 
-    private FlowFormDTO getFlowFormDTO(String formName, Long formVersion, Long formOriginId){
+    private FlowFormDTO getFlowFormDTO(String formName, Long formVersion, Long formOriginId) {
         FlowFormDTO dto = new FlowFormDTO();
         dto.setName(formName);
         dto.setFormVersion(formVersion);
