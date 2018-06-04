@@ -298,7 +298,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 Boolean flag = true;
                 switch (sheet) {
                     case CUSTOMER:
-                        failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns, flag);
+                        failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns);
                         continue;
                     case CUSTOMER_TAX:
                         CustomerTax tax = new CustomerTax();
@@ -743,7 +743,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
     }
 
-    private int importCustomerInfo(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, int failedNumber, List<DynamicColumnDTO> columns, Boolean flag) {
+    private int importCustomerInfo(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, int failedNumber, List<DynamicColumnDTO> columns) {
         if (customerInfo.getCustomerId() != 0) {
             //不为0时为管理里面导入的 直接break
             return failedNumber;
@@ -758,11 +758,21 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         String customerAdminString = "";
         String customerAddressString = "";
 
-        if(columns != null && columns.size() > 0) {
-            for(DynamicColumnDTO column : columns) {
+        if (columns != null && columns.size() > 0) {
+            for (DynamicColumnDTO column : columns) {
                 LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName());
-                if (dealDynamicItemsAndTrackingUidField(customerInfo, importLogs, columns, enterpriseCustomer, column)){
-                    //如果发生异常 break
+                if (dealDynamicItemsAndTrackingUidField(customerInfo, importLogs, columns, enterpriseCustomer, column)) {
+                    //如果发生异常 break 日志在校验函数中
+                    break;
+                }
+                // 校验必填项
+                if (!column.getMandatoryFlag()) {
+                    Map<String, String> dataMap = new HashMap<>();
+                    columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                    LOGGER.error("customer mandatory error : field ={}", column.getHeaderDisplay());
+                    importLogs.setData(dataMap);
+                    importLogs.setErrorDescription("customer mandatory error ");
+                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_MANDATORY_ERROR);
                     break;
                 }
                 try {
@@ -776,9 +786,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if ("entryInfos".equals(column.getFieldName())) {
                             customerAddressString = column.getValue();
                         }
-                        // 校验 admin address
-                       boolean dealResult =  dealCustomerAdminsAndAddress(customerAddressString,customerAdminString,importLogs,enterpriseCustomer,column,columns);
-                        if(dealResult){
+                        // 校验 admin address  异常日志在校验中
+                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, customerAdminString, importLogs, enterpriseCustomer, column, columns);
+                        if (dealResult) {
                             break;
                         }
                     }
@@ -800,29 +810,26 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 for (EnterpriseCustomer customer : customers) {
                     updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
                 }
-                return failedNumber;
             }
         }
 
-        if(flag) {
-            if(null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()){
-                String geohash  = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
-                enterpriseCustomer.setGeohash(geohash);
-            }
-            customerProvider.createEnterpriseCustomer(enterpriseCustomer);
-
-            //企业客户新增成功,保存客户事件
-            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null,(byte)0);
-            if (StringUtils.isNotEmpty(customerAddressString)) {
-                OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
-                enterpriseCustomer.setOrganizationId(organizationDTO.getId());
-            }
-            customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-            customerSearcher.feedDoc(enterpriseCustomer);
-            //这里还需要增加企业管理员的record和role  & address buildings 呵
-            createEnterpriseCustomerAdmin(enterpriseCustomer,customerAdminString);
-            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+        if (null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()) {
+            String geohash = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
+            enterpriseCustomer.setGeohash(geohash);
         }
+        customerProvider.createEnterpriseCustomer(enterpriseCustomer);
+
+        //企业客户新增成功,保存客户事件
+        customerService.saveCustomerEvent(1, enterpriseCustomer, null, (byte) 0);
+        if (StringUtils.isNotEmpty(customerAddressString)) {
+            OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+            enterpriseCustomer.setOrganizationId(organizationDTO.getId());
+        }
+        customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+        customerSearcher.feedDoc(enterpriseCustomer);
+        //这里还需要增加企业管理员的record和role  & address buildings 呵
+        createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
+        createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
         return failedNumber;
     }
 

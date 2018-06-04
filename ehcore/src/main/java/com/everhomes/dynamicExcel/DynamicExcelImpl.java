@@ -269,11 +269,10 @@ public class DynamicExcelImpl implements DynamicExcelService{
                 String cellValue = ExcelUtils.getCellValue(cell, dynamicFields.get(k));
                 //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
                 //必填项校验
-                if (dynamicFields.get(k).isMandatory() && StringUtils.isBlank(cellValue)) {
-
-                    continue;
-                }
                 DynamicColumnDTO dto = new DynamicColumnDTO();
+                if (dynamicFields.get(k).isMandatory() && StringUtils.isBlank(cellValue)) {
+                    dto.setMandatoryFlag(false);
+                }
                 dto.setValue(cellValue);
                 dto.setHeaderDisplay(headers.get(k));
                 dto.setFieldName(dynamicFields.get(k).getFieldName());
