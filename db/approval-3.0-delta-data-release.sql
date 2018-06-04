@@ -39,6 +39,22 @@ UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '加班
 UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '出差申请', `icon_uri` = 'cs://1/image/aW1hZ2UvTVRveVpHTm1ZekpqWlRRME5EZzRNamc1WkRBeE16RXdNVGcxT0RNeU5qbGhNUQ' WHERE `approval_attribute`='BUSINESS_TRIP';
 UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '外出申请', `icon_uri` = 'cs://1/image/aW1hZ2UvTVRvelpHTm1NemxtTm1SbVlURmhNVFl5Tm1VNE1UUTRZbU16Wm1WallqRTFOZw' WHERE `approval_attribute`='GO_OUT';
 UPDATE `eh_general_approvals` SET `integral_tag1`='1', `approval_name` = '异常申请', `icon_uri` = 'cs://1/image/aW1hZ2UvTVRvNE9XSXpNbVEwWTJJMFkyVXdPVGxqTkRCbFpHWTNPRE5pTlRSak0yUmtNZw' WHERE `approval_attribute`='ABNORMAL_PUNCH';
+
+SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10001', 'zh_CN', '申请人');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10002', 'zh_CN', '审批编号');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10003', 'zh_CN', '申请时间');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10004', 'zh_CN', '所在部门');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10011', 'zh_CN', '开始时间');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10012', 'zh_CN', '结束时间');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20001', 'zh_CN', '请假类型');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20002', 'zh_CN', '请假时长');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20011', 'zh_CN', '出差时长');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20021', 'zh_CN', '加班时长');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20031', 'zh_CN', '外出时长');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20041', 'zh_CN', '异常日期');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20042', 'zh_CN', '异常班次');
+
 -- 审批3.0 end.
 
 -- 人事2.7 数据同步 start
