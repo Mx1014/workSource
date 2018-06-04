@@ -2233,6 +2233,22 @@ public class CustomerServiceImpl implements CustomerService {
     private void syncCustomerInfoIntoOrganization(CustomerEntryInfo entryInfo, EnterpriseCustomer customer) {
         //这里增加入驻信息后自动同步到企业管理
         OrganizationDTO organizationDTO = createOrganization(customer);
+        //管理员同步过去
+        dbProvider.execute((TransactionStatus status) -> {
+            List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
+            if (untrackAdmins != null && untrackAdmins.size() > 0) {
+                untrackAdmins.forEach((r)->{
+                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                    cmd.setContactName(r.getContactName());
+                    cmd.setContactToken(r.getContactToken());
+                    cmd.setOrganizationId(customer.getOrganizationId());
+                    rolePrivilegeService.createOrganizationAdmin(cmd);
+                });
+                enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
+                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+            }
+            return null;
+        });
         customer.setOrganizationId(organizationDTO.getId());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
