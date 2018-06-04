@@ -2242,6 +2242,7 @@ public class CustomerServiceImpl implements CustomerService {
                     cmd.setContactName(r.getContactName());
                     cmd.setContactToken(r.getContactToken());
                     cmd.setOrganizationId(customer.getOrganizationId());
+                    cmd.setNamespaceId(customer.getNamespaceId());
                     rolePrivilegeService.createOrganizationAdmin(cmd);
                 });
                 enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
