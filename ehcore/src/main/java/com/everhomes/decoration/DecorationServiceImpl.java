@@ -403,6 +403,8 @@ public class DecorationServiceImpl implements  DecorationService {
                 case CHECK:
                     flowCase = this.flowCaseProvider.findFlowCaseByReferId(r.getId(), status.getFlowOwnerType(),
                             DecorationController.moduleId);
+                    if (flowCase == null)
+                        break;
                     dto.setFlowCasees(new ArrayList<>());
                     flowCaseDTO = new DecorationFlowCaseDTO();
                     flowCaseDTO.setFlowCaseId(flowCase.getId());
@@ -525,6 +527,8 @@ public class DecorationServiceImpl implements  DecorationService {
             case CHECK:
                  flowCase = this.flowCaseProvider.findFlowCaseByReferId(request.getId(),status.getFlowOwnerType(),
                         DecorationController.moduleId);
+                 if (flowCase == null)
+                     break;
                 dto.setFlowCasees(new ArrayList<>());
                 flowCaseDTO = new DecorationFlowCaseDTO();
                 flowCaseDTO.setFlowCaseId(flowCase.getId());
@@ -540,6 +544,8 @@ public class DecorationServiceImpl implements  DecorationService {
                         flowCaseDTO.setApprovalName(val.getApprovalName());
                         flowCase = this.flowCaseProvider.findFlowCaseByReferId(val.getId(),status.getFlowOwnerType(),
                                 DecorationController.moduleId);
+                        if (flowCase == null)
+                            continue;
                         flowCaseDTO.setStatus(flowCase.getStatus());
                         flowCaseDTO.setFlowCaseId(flowCase.getId());
                         if (ProcessorType.ROOT.getCode() == processorType)
