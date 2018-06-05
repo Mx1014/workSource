@@ -795,7 +795,7 @@ public class AssetServiceImpl implements AssetService {
 //            }
             detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
             detail.setTargetName(dto.getTargetName());
-            detail.setDateStr(dto.getDateStr());
+            detail.setDateStr(dto.getDateStr()); 
             // 增加发票单号 by wentian 2018/4/27
             detail.setInvoiceNum(dto.getInvoiceNum());
             // 增加账单开始时间、账单结束时间、楼栋名称、门牌名称、客户手机号
@@ -808,10 +808,9 @@ public class AssetServiceImpl implements AssetService {
             dataList.add(detail);
         }
 
-        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","addresses","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
-        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋门牌","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
-                , "发票单号"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","addresses","amountReceivable","amountReceived","amountOwed","status","invoiceNum"};
+        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋门牌","应收(元)","已收(元)","欠收(元)","缴费状态", "发票单号"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
@@ -837,47 +836,49 @@ public class AssetServiceImpl implements AssetService {
 	        //组装datalist来确定propertyNames的值
 	        for(int i = 0; i < dtos.size(); i++) {
 	        	List<PaymentOrderBillDTO> paymentOrderBillDTOs = dtos.get(i).getChildren();
-	        	for(int j = 0;j < paymentOrderBillDTOs.size();j++) {
-	        		PaymentOrderBillDTO dto = paymentOrderBillDTOs.get(j);
-		        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
-		            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
-		            detail.setBillGroupName(dto.getBillGroupName());
-		            //组装所有的收费项信息
-		            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
-		            String billItemListMsg = "";
-		            if(billItemDTOList != null) {
-		            	for(int k = 0; k < billItemDTOList.size();k++) {
-		            		BillItemDTO billItemDTO = billItemDTOList.get(k);
-		            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
-		            	}
-		            }
-		            detail.setBillItemListMsg(billItemListMsg);
-		            detail.setTargetName(dto.getTargetName());
-		            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
-		            detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
-		            switch (dto.getPaymentType()) {
-						case 0:
-							detail.setPaymentType("微信");
-							break;
-						case 1:
-							detail.setPaymentType("支付宝");
-							break;
-						case 2:
-							detail.setPaymentType("对公转账");
-							break;
-						default:
-							break;
-					}
-		            detail.setAmountReceived(dto.getAmountReceived());
-		            detail.setAmountReceivable(dto.getAmountReceivable());
-		            detail.setAmoutExemption(dto.getAmountExemption());
-		            detail.setAmountSupplement(dto.getAmountSupplement());
-		            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
-		            detail.setPayTime(dto.getPayTime());
-		            detail.setPayerTel(dto.getPayerTel());
-		            detail.setPayerName(dto.getPayerName());
-		            detail.setAddresses(dto.getAddresses());
-		            dataList.add(detail);
+	        	if(paymentOrderBillDTOs != null) {
+	        		for(int j = 0;j < paymentOrderBillDTOs.size();j++) {
+		        		PaymentOrderBillDTO dto = paymentOrderBillDTOs.get(j);
+			        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
+			            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+			            detail.setBillGroupName(dto.getBillGroupName());
+			            //组装所有的收费项信息
+			            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
+			            String billItemListMsg = "";
+			            if(billItemDTOList != null) {
+			            	for(int k = 0; k < billItemDTOList.size();k++) {
+			            		BillItemDTO billItemDTO = billItemDTOList.get(k);
+			            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
+			            	}
+			            }
+			            detail.setBillItemListMsg(billItemListMsg);
+			            detail.setTargetName(dto.getTargetName());
+			            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
+			            detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
+			            switch (dto.getPaymentType()) {
+							case 0:
+								detail.setPaymentType("微信");
+								break;
+							case 1:
+								detail.setPaymentType("支付宝");
+								break;
+							case 2:
+								detail.setPaymentType("对公转账");
+								break;
+							default:
+								break;
+						}
+			            detail.setAmountReceived(dto.getAmountReceived());
+			            detail.setAmountReceivable(dto.getAmountReceivable());
+			            detail.setAmoutExemption(dto.getAmountExemption());
+			            detail.setAmountSupplement(dto.getAmountSupplement());
+			            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
+			            detail.setPayTime(dto.getPayTime());
+			            detail.setPayerTel(dto.getPayerTel());
+			            detail.setPayerName(dto.getPayerName());
+			            detail.setAddresses(dto.getAddresses());
+			            dataList.add(detail);
+		        	}
 	        	}
 	        }
 	        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
