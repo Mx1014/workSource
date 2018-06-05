@@ -25,6 +25,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModuleScope;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationAddress;
@@ -909,6 +910,11 @@ public class AssetServiceImpl implements AssetService {
         // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
+        }
+        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
+           // 转换
+            Long assetCategoryId = serviceModuleAppService.getOriginIdFromMappingApp(cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+            cmd.setCategoryId(assetCategoryId);
         }
         return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId());
     }
