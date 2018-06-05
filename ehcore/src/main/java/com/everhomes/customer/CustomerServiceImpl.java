@@ -813,6 +813,9 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setCreatorUid(customer.getCreatorUid());
         updateCustomer.setNamespaceCustomerToken(customer.getNamespaceCustomerToken());
         updateCustomer.setNamespaceCustomerType(customer.getNamespaceCustomerType());
+        updateCustomer.setLastTrackingTime(customer.getLastTrackingTime());
+        updateCustomer.setAdminFlag(customer.getAdminFlag());
+        updateCustomer.setVersion(customer.getVersion());
 
         if (cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
@@ -2231,6 +2234,23 @@ public class CustomerServiceImpl implements CustomerService {
         //这里增加入驻信息后自动同步到企业管理
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
+        //管理员同步过去
+        dbProvider.execute((TransactionStatus status) -> {
+            List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
+            if (untrackAdmins != null && untrackAdmins.size() > 0) {
+                untrackAdmins.forEach((r)->{
+                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                    cmd.setContactName(r.getContactName());
+                    cmd.setContactToken(r.getContactToken());
+                    cmd.setOrganizationId(customer.getOrganizationId());
+                    cmd.setNamespaceId(customer.getNamespaceId());
+                    rolePrivilegeService.createOrganizationAdmin(cmd);
+                });
+                enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
+                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+            }
+            return null;
+        });
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
@@ -2305,15 +2325,22 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos == null || entryInfos.size() == 0) {
-            if (organization != null && organization.getId() != 0) {
-                organizationSearcher.deleteById(organization.getId());
-                organizationProvider.deleteOrganization(organization);
+            if (organization != null && organization.getId() != 0 && organization.getId()!=null) {
+//                organizationSearcher.deleteById(organization.getId());
+//                organizationProvider.deleteOrganization(organization);
+                DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
+                command.setCommunityId(cmd.getCommunityId());
+                command.setId(organization.getId());
+                command.setManageOrganizationId(cmd.getOrgId());
+                command.setEnterpriseId(cmd.getOrgId());
+                organizationService.deleteOrganization(command);
                 if (customer != null) {
                     customer.setOrganizationId(0L);
                 }
             }
         }
         //sync to es
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         organizationSearcher.feedDoc(organization);
     }
