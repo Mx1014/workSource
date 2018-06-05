@@ -2,15 +2,21 @@ package com.everhomes.module;
 
 import com.alibaba.fastjson.JSON;
 import com.everhomes.rest.module.RouterInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.util.*;
 
 @Service
 public class RouterInfoServiceImpl implements RouterService {
+
+    private static final Logger logger = LoggerFactory.getLogger(RouterInfoServiceImpl.class);
 
     @Autowired(required = false)
     private List<RouterListener> routerListeners;
@@ -42,6 +48,7 @@ public class RouterInfoServiceImpl implements RouterService {
                             method.setAccessible(true);
                             try {
                                 routerInfo = (RouterInfo) method.invoke(listener, jsonStr);
+                                routerInfo.setQuery(URLEncoder.encode(routerInfo.getQuery(),"UTF-8"));
                                 return routerInfo;
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -101,6 +108,13 @@ public class RouterInfoServiceImpl implements RouterService {
             queryBuffer.append("&");
         }
 
-        return queryBuffer.substring(0, queryBuffer.length() - 1);
+        String query = queryBuffer.substring(0, queryBuffer.length() - 1);
+        try {
+            query = URLEncoder.encode(query,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            //给出错误提示信息
+            logger.error("RouterQuery进行转码失败");
+        }
+        return query;
     }
 }
