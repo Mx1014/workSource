@@ -764,8 +764,15 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         Boolean flag = true;
 
         if (columns != null && columns.size() > 0) {
-            List<DynamicColumnDTO> originColumns = columns;
-            for (DynamicColumnDTO column : columns) {
+            List<DynamicColumnDTO> originColumns = new ArrayList<>();
+            columns.forEach((c) -> {
+                try {
+                    originColumns.add((DynamicColumnDTO) c.clone());
+                } catch (CloneNotSupportedException e) {
+                    LOGGER.error("clone cast not supported exception:{}", e);
+                }
+            });
+          columnLoop:  for (DynamicColumnDTO column : columns) {
                 LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName());
                 if (dealDynamicItemsAndTrackingUidField(customerInfo, importLogs, originColumns, enterpriseCustomer, column)) {
                     //如果发生异常 break 日志在校验函数中
@@ -799,8 +806,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     importLogs.setErrorDescription("customer import data format error ");
                                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_NUM_FORMAT_ERROR);
                                     flag = false;
-                                    break;
+                                    break columnLoop;
                                 }
+                                break;
                             case "Timestamp":
                                 if (StringUtils.isNotBlank(column.getValue())) {
                                     String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";
@@ -820,9 +828,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                         importLogs.setErrorDescription("customer import data timestamp format error ");
                                         importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_DATE_FORMAT_ERROR);
                                         flag = false;
-                                        break;
+                                        break columnLoop;
                                     }
-                                }
+                                } break ;
                         }
                     }
 

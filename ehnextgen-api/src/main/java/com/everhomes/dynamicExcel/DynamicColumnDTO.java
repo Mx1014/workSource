@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * Created by Wentian Wang on 2018/1/18.
  */
 
-public class DynamicColumnDTO {
+public class DynamicColumnDTO implements  Cloneable {
     /**
      * fieldName 字段的逻辑值
      */
@@ -71,5 +71,10 @@ public class DynamicColumnDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
