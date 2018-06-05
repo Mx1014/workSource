@@ -18,7 +18,6 @@ import com.everhomes.device.DeviceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhDevicesDao;
 import com.everhomes.server.schema.tables.pojos.EhDevices;
-import com.everhomes.server.schema.tables.records.EhBordersRecord;
 import com.everhomes.server.schema.tables.records.EhDevicesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;

@@ -34,7 +34,7 @@ public class DeveloperAccountInfoProviderImpl implements DeveloperAccountInfoPro
 		query.addOrderBy(Tables.EH_DEVELOPER_ACCOUNT_INFO.ID.asc());
 		//获取结果集，但我们只要一条
 		List<DeveloperAccountInfo> resultList = query.fetch().map(r -> ConvertHelper.convert(r, DeveloperAccountInfo.class));
-		if(resultList != null && resultList.get(0) != null ){
+		if(resultList != null && resultList.size() >0 ){
 			return resultList.get(0) ;
 		}else{
 			return null;
