@@ -5055,11 +5055,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
         List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
-        EnergyPlan autoPlans = energyPlanProvider.listNewestAutoReadingPlans(cmd.getNamespaceId());
+        EnergyPlan autoPlans = energyPlanProvider.listNewestAutoReadingPlans(cmd.getNamespaceId(),cmd.getCommunityId());
         List<Long> planIds = new ArrayList<>();
+        planIds.add(0L);
         if (autoPlans != null) {
             planIds.add(autoPlans.getId());
-            planIds.add(0L);
         }
         if (maps != null && maps.size() > 0) {
             List<Long> plans = maps.stream().map(EnergyPlanGroupMap::getPlanId).collect(Collectors.toList());
