@@ -473,24 +473,34 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
         Domain domain = UserContext.current().getDomain();
 
-        if(null != currentOrgId){
+        if(currentOrgId == null || (null != domain && EntityType.fromCode(domain.getPortalType()) == EntityType.ZUOLIN_ADMIN)) {//如果currentOrgId为空，则按照用户-角色体系查询
+            if (this.aclProvider.checkAccess("system", null, com.everhomes.server.schema.tables.pojos.EhUsers.class.getSimpleName(), UserContext.current().getUser().getId(), Privilege.Write, null)) {
+                LOGGER.debug("check root privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}", userId, ownerType, ownerId, currentOrgId, privilegeId);
+                return true;
+            }
+            
+            if(checkRoleAccess(userId, ownerType, ownerId, null, privilegeId)){
+                LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, currentOrgId = {}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
+                return true;
+            }
+        } else if(null != currentOrgId){
             Organization organization = organizationProvider.findOrganizationById(currentOrgId);
             //子公司的时候 需要获取root 总公司的id
             if(0L != organization.getParentId()){
                 currentOrgId = Long.valueOf(organization.getPath().split("/")[1]);
             }
             if(null != organization){
+                if (this.aclProvider.checkAccess("system", null, com.everhomes.server.schema.tables.pojos.EhUsers.class.getSimpleName(), UserContext.current().getUser().getId(), Privilege.Write, null)) {
+                        LOGGER.debug("check root privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}", userId, ownerType, ownerId, currentOrgId, privilegeId);
+                        return true;
+                    }
+
                 // modify start
                 if(checkCommunityId != null){
                     if(!serviceModuleAppAuthorizationService.checkCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), currentOrgId, checkCommunityId))
                         return false;
                 }
                 // modify end
-
-                if (this.aclProvider.checkAccess("system", null, com.everhomes.server.schema.tables.pojos.EhUsers.class.getSimpleName(), UserContext.current().getUser().getId(), Privilege.Write, null)) {
-                    LOGGER.debug("check root privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}", userId, ownerType, ownerId, currentOrgId, privilegeId);
-                    return true;
-                }
 
                 if(checkSuperAdmin(userId, currentOrgId)){
                     LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
@@ -519,11 +529,6 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                 LOGGER.error("Unable to find the organization.organizationId = {}",  currentOrgId);
             }
 
-        }else if(null != domain && EntityType.fromCode(domain.getPortalType()) == EntityType.ZUOLIN_ADMIN){//如果currentOrgId为空，则按照用户-角色体系查询
-            if(checkRoleAccess(userId, ownerType, ownerId, null, privilegeId)){
-                LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, currentOrgId = {}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
-                return true;
-            }
         }
 
         LOGGER.debug("check privilege error. userId={}, ownerType={}, ownerId={}, currentOrgId = {}, privilegeId={}" , userId, ownerType, ownerId, currentOrgId, privilegeId);
