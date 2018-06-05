@@ -2122,9 +2122,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 	/**
-	 * 每天早上2点50,自动同步合同信息
+	 * 每天早上4点50,自动同步合同信息
 	 * */
-	@Scheduled(cron = "1 50 2 * * ?")
+	@Scheduled(cron = "1 50 4 * * ?")
 	public void contractAutoSync() {
 		Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode() + System.currentTimeMillis(), "");
 		RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);

@@ -5805,7 +5805,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             /**创建企业级的member/detail/user_organiztion记录**/
             OrganizationMember tempMember = createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
             member.setId(tempMember.getId());
-
+            //增加customer admin record 状态
+            try {
+                customerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(), member.getNamespaceId());
+            } catch (Exception e) {
+                LOGGER.error("update enterprise customer admins status error:{}", e);
+            }
             return member;
         });
 

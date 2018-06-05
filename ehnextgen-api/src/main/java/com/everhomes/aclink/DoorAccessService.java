@@ -153,7 +153,7 @@ public interface DoorAccessService {
 
     GetVisitorResponse getAlipayQR(HttpServletRequest r);
 
-	public void excuteMessage(String payLoad);
+	public void excuteMessage(AclinkWebSocketMessage cmd);
 
     DoorAccessGroupResp listDoorAccessByUser(ListDoorAccessByUserCommand cmd);
 

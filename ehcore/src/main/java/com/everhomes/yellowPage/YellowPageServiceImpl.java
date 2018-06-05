@@ -767,9 +767,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040510L, cmd.getAppId(), null,0L);//样式设置权限
-		}
+
 		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(null,null,cmd.getType());
 		if (null == sa){
 			LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = " + cmd.getType()); 
@@ -808,8 +806,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceListResponse getServiceAllianceEnterpriseList(
 			GetServiceAllianceEnterpriseListCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040520L, cmd.getAppId(), null,0L);//服务管理权限
+		if(cmd.getAppId()!=null ){
+			checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 		}
 		if(null != cmd.getCommunityId()) {
 			cmd.setOwnerId(cmd.getCommunityId());
@@ -1138,6 +1136,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public void updateServiceAllianceEnterprise(
 			UpdateServiceAllianceEnterpriseCommand cmd) {
 		
+		//校验权限
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
+		
 		ServiceAlliances serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliances.class);
 
 		if(null != serviceAlliance.getCategoryId()) {
@@ -1319,6 +1320,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public void addTarget(AddNotifyTargetCommand cmd) {
 		
+		//校验权限
+		checkPrivilege(PrivilegeType.INFO_NOTIFY, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
+		
 		ServiceAllianceNotifyTargets isExist = this.yellowPageProvider.findNotifyTarget(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getCategoryId(), cmd.getContactType() , cmd.getContactToken());
 		if(isExist != null) {
@@ -1344,6 +1348,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void deleteNotifyTarget(DeleteNotifyTargetCommand cmd) {
+		
+		//权限限制
+		checkPrivilege(PrivilegeType.INFO_NOTIFY, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 
 //		ServiceAllianceNotifyTargets target = verifyNotifyTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
 		this.yellowPageProvider.deleteNotifyTarget(cmd.getId());
@@ -1371,8 +1378,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public ListNotifyTargetsResponse listNotifyTargets(
 			ListNotifyTargetsCommand cmd) {
 		
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040530L, cmd.getAppId(), null,0L);//消息通知权限
+		if(cmd.getAppId()!=null ){
+			checkPrivilege(PrivilegeType.INFO_NOTIFY, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 		}
 		ListNotifyTargetsResponse response = new ListNotifyTargetsResponse();
 		
@@ -2498,6 +2505,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	 * */
 	public ListServiceAllianceProvidersResponse listServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd) {
 
+		if (null != cmd.getAppId()) {
+			checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
+		}
+		
 		if (cmd.getNamespaceId() == null) {
 			cmd.setNamespaceId(UserContext.current().getNamespaceId());
 		}
@@ -2516,6 +2527,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Override
 	public void exportServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd, HttpServletResponse response) {
+		
+		//校验权限
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 
 		// 获取记录
 		List<ServiceAllianceProvid> providerList = allianceProvidProvider.listServiceAllianceProviders(
@@ -2633,8 +2647,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public void addServiceAllianceProvider(AddServiceAllianceProviderCommand cmd) {
 
 		// 校验权限
-
-		// 检查合法性
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 
 		// 获取参数
 		ServiceAllianceProvid provider = ConvertHelper.convert(cmd, ServiceAllianceProvid.class);
@@ -2655,13 +2668,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 		
 		// 校验权限
-		
-
-		// 检查合法性
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), provider.getOwnerId());
 		
 		//删除
 		allianceProvidProvider.deleteServiceAllianceProvid(provider);
-		
 		
 		return;
 		
@@ -2678,6 +2688,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 
 		// 校验权限
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), provider.getOwnerId());
 
 		// 检查合法性
 
@@ -3188,15 +3199,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 	/**
 	 * 校验当前请求是否符合权限
 	 * @param privilegeType
-	 * @param currentOrgId
+	 * @param currentPMId
 	 * @param appId
 	 * @param checkOrgId
 	 * @param checkCommunityId
 	 */
-	private void checkPrivilege(PrivilegeType privilegeType, Long currentOrgId, Long appId,
+	public void checkPrivilege(PrivilegeType privilegeType, Long currentPMId, Long appId,
 			Long checkCommunityId) {
 		if (configProvider.getBooleanValue("privilege.community.checkflag", true)) {
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), currentOrgId,
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), currentPMId,
 					privilegeType.getCode(), appId, null, checkCommunityId);
 		}
 	}

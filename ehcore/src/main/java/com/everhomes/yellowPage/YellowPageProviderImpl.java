@@ -383,7 +383,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAlliances.class));
         sa.setId(id);
       //设置序号默认是id，by dengs,20170524.
-        sa.setDefaultOrder(id);
+        sa.setDefaultOrder(-id); //缺陷 #29826：旧的排序保持，新的排序按id倒叙排
         if(sa.getStatus() == null) {
             sa.setStatus(YellowPageStatus.ACTIVE.getCode());    
         }
