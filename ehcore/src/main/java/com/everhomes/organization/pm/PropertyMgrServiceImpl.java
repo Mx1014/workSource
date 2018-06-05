@@ -138,6 +138,7 @@ import com.everhomes.rest.organization.AccountType;
 import com.everhomes.rest.organization.BillTransactionResult;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
@@ -6605,7 +6606,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }*/
 
     @Override
-    public void importOrganizationOwners(@Valid ImportOrganizationsOwnersCommand cmd, MultipartFile[] file) {
+    public ImportFileTaskDTO importOrganizationOwners(@Valid ImportOrganizationsOwnersCommand cmd, MultipartFile[] file) {
         User user = UserContext.current().getUser();
 		if(cmd.getNamespaceId() == 999971) {
 			LOGGER.error("Insufficient privilege, importOrganizationOwners");
@@ -6618,8 +6619,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         ArrayList resultList = processorExcel(file[0]);
-        List<CommunityPmOwner> ownerList = dbProvider.execute(status -> processorOrganizationOwner(user.getId(),
-                cmd.getOrganizationId(), cmd.getCommunityId(), cmd.getNamespaceId(), resultList));
+		ImportFileTask task =  processorOrganizationOwner(user.getId(), cmd.getOrganizationId(), cmd.getCommunityId(), cmd.getNamespaceId(), resultList);
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 		//用 bulkUpdate不会更新 by xiongying20171009
 //        pmOwnerSearcher.bulkUpdate(ownerList);
     }
@@ -6635,9 +6636,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
 	}
 
-	private List<CommunityPmOwner> processorOrganizationOwner(long userId, long organizationId, Long communityId, Integer namespaceId, ArrayList resultList) {
+	private ImportFileTask processorOrganizationOwner(long userId, long organizationId, Long communityId, Integer namespaceId, ArrayList resultList) {
 		if (resultList != null && resultList.size() > 0) {
-			List<CommunityPmOwner> ownerList = new ArrayList<>();
 			//增加导入错误提示信息
 			ImportFileTask task = new ImportFileTask();
 			task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
@@ -6660,8 +6660,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				response.setLogs(results);
 				return response;
 			}, task);
-
-			return ownerList;
+			return task;
 		} else {
 			LOGGER.error("excel data format is not correct.rowCount=" + resultList);
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
