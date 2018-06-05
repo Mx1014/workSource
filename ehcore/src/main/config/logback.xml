@@ -81,6 +81,23 @@
         </rollingPolicy>
     </appender>
 
+    <appender name="messagelog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/message.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS}  %-5level %msg%n
+            </Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover monthly -->
+            <fileNamePattern>logs/message.%d{yyyy-MM}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
@@ -95,6 +112,9 @@
 
     <logger name="com.everhomes.controller.ResponseLoggingFilter" level="DEBUG">
         <appender-ref ref="restlog" />
+    </logger>
+    <logger name="com.everhomes.util.MessagePersistWorker" level="INFO" additivity="false">
+        <appender-ref ref="messagelog" />
     </logger>
 
     <logger name="com.everhomes" level="DEBUG">

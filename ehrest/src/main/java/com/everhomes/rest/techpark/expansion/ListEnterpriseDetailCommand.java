@@ -9,6 +9,9 @@ public class ListEnterpriseDetailCommand {
     private Long communityId;
     
     private String buildingName;
+
+    // 客户端暂时不做分页
+    private  Byte allFlag;
     
     public Long getCommunityId() {
 		return communityId;
@@ -16,8 +19,6 @@ public class ListEnterpriseDetailCommand {
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	
-	
 	public String getBuildingName() {
 		return buildingName;
 	}
@@ -35,6 +36,14 @@ public class ListEnterpriseDetailCommand {
     }
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Byte getAllFlag() {
+        return allFlag;
+    }
+
+    public void setAllFlag(Byte allFlag) {
+        this.allFlag = allFlag;
     }
 
     @Override

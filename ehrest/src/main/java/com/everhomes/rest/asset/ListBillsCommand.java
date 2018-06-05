@@ -28,6 +28,9 @@ import javax.validation.constraints.NotNull;
  * <li>contractNum:合同编号</li>
  * <li>paymentType:账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）</li>
  * <li>isUploadCertificate:账单是否附带缴费凭证（0：否，1：是）</li>
+ * <li>contractNum: 合同编号</li>
+ * <li>organizationId: 企业id</li>
+ * <li>customerTel: 客户手机号</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -47,6 +50,7 @@ public class ListBillsCommand {
     private String billGroupName;
 
     private Long billGroupId;
+    
     private String buildingName;
     private String apartmentName;
     private Byte status;
@@ -56,6 +60,7 @@ public class ListBillsCommand {
     
     private Integer paymentType;
     private Byte isUploadCertificate;
+    private String customerTel;
 
 	public Byte getIsUploadCertificate() {
 		return isUploadCertificate;
@@ -235,4 +240,12 @@ public class ListBillsCommand {
     public ListBillsCommand() {
 
     }
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
+	}
 }

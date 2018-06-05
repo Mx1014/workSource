@@ -3,13 +3,7 @@ package com.everhomes.order;
 
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PaymentWithdrawCommand;
-import com.everhomes.rest.order.PreOrderCommand;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.order.ListPaymentWithdrawOrderCommand;
-import com.everhomes.rest.order.ListPaymentWithdrawOrderResponse;
-import com.everhomes.rest.order.PaymentBalanceDTO;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.user.User;
 
@@ -37,6 +31,8 @@ public interface PayService {
     PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId);
 
     PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId, Long expiration);
+
+    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId, Long expiration, String extendInfo);
 
     PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO);
 
@@ -127,4 +123,18 @@ public interface PayService {
      * @return 订单信息
      */
     ListPaymentWithdrawOrderResponse listPaymentWithdrawOrders(ListPaymentWithdrawOrderCommand cmd);
+
+    /**
+     * 为h5支付界面提供转发支付订单接口
+     * @param cmd 参数
+     * @return 订单信息
+     */
+    PayOrderCommandResponse payOrder(PayOrderCommand cmd);
+
+    /**
+     * 为h5支付界面提供转发查询订单支付状态接口
+     * @param cmd 参数
+     * @return 订单信息
+     */
+    QueryOrderPaymentStatusCommandResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd);
 }

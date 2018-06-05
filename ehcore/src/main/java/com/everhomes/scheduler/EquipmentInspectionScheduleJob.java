@@ -126,25 +126,23 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		equipmentProvider.closeExpiredReviewTasks();
 	}
 
-    private void sendErrorMessage(Exception e, Long planId) {
+	private void sendErrorMessage(Exception e, Long planId) {
 		String targetEmailAddress = "rui.jia@zuolin.com";
 		String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
 		MailHandler handler = PlatformContext.getComponent(handlerName);
 		String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
-
-		try (ByteArrayOutputStream out = new ByteArrayOutputStream(); PrintStream stream = new PrintStream(out)) {
-			e.printStackTrace(stream);
-			String message = out.toString("UTF-8");
-			handler.sendMail(0, account, targetEmailAddress, "Equipment Task Schedule Error,planId:", planId.toString());
-			// out.reset();
-			e.getCause().printStackTrace(stream);
-			message = out.toString("UTF-8");
-			handler.sendMail(0, account, targetEmailAddress, "Equipment Task Schedule Error.Cause By", message);
-
-		} catch (Exception ignored) {
-			//
+		if ("core.zuolin.com".equals(configurationProvider.getValue(0,"home.url", ""))) {
+			try (ByteArrayOutputStream out = new ByteArrayOutputStream(); PrintStream stream = new PrintStream(out)) {
+				e.printStackTrace(stream);
+				String message = out.toString("UTF-8");
+				handler.sendMail(0, account, targetEmailAddress, "Equipment Task Schedule Error,planId:", planId.toString());
+				// out.reset();
+				e.getCause().printStackTrace(stream);
+				message = out.toString("UTF-8");
+				handler.sendMail(0, account, targetEmailAddress, "Equipment Task Schedule Error.Cause By", message);
+			} catch (Exception ignored) {
+				//
+			}
 		}
 	}
-
-
 }

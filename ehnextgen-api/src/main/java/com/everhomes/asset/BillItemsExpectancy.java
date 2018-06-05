@@ -26,6 +26,15 @@ public class BillItemsExpectancy {
     private String billCycleStart;
     private String billCycleEnd;
     private Long lateFineStandardId;
+    private Date dateStrFakeEnd;
+
+    public Date getDateStrFakeEnd() {
+        return dateStrFakeEnd;
+    }
+
+    public void setDateStrFakeEnd(Date dateStrFakeEnd) {
+        this.dateStrFakeEnd = dateStrFakeEnd;
+    }
 
     public Long getLateFineStandardId() {
         return lateFineStandardId;

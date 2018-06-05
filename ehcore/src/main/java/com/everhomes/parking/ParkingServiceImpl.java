@@ -20,6 +20,8 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -133,6 +135,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+	@Autowired
+	public CommunityProvider communityProvider;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -550,6 +554,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
+		param.setClientAppName(cmd.getClientAppName());
 
 		return (PreOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V2);
 
@@ -680,11 +685,11 @@ public class ParkingServiceImpl implements ParkingService {
 		if (ActivityRosterPayVersionFlag.V1 == version) {
 			return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
 		}else {
-			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName());
+			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName(),parkingLot);
 		}
 	}
 
-	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName) {
+	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName,ParkingLot parkingLot ) {
 //        PreOrderCommand preOrderCommand = new PreOrderCommand();
 //
 //        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
@@ -705,9 +710,17 @@ public class ParkingServiceImpl implements ParkingService {
 //        preOrderCommand.setClientAppName(clientAppName);
 //
 //        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		String extendInfo = null;
+		if(parkingLot!=null){
+			Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
+			if(community!=null){
+				//项目：$项目名称$；停车场：$停车场名称$
+				extendInfo ="项目："+community.getName()+"；停车场："+parkingLot.getName();
+			}
+		}
 		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
-				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount);
+				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount,null, null, null,extendInfo);
 
 
 		return callBack;
@@ -1482,6 +1495,7 @@ public class ParkingServiceImpl implements ParkingService {
 			long pastTime = now - entryTime;
 			int pastMinute = (int) (pastTime / (60 * 1000));
 
+			// 还未计费时，只显示剩余时间
 			if (pastMinute <= delayTime) {
 				dto.setRemainingTime(delayTime - pastMinute);
 
@@ -1494,6 +1508,7 @@ public class ParkingServiceImpl implements ParkingService {
 						cmd.getParkingLotId(), cmd.getPlateNumber(), startDate, endDate);
 
 				if (null != order) {
+					//如果已缴费，显示剩余离场时间
 					Timestamp rechargeTime = order.getRechargeTime();
 					pastTime = now - rechargeTime.getTime();
 					pastMinute = (int) (pastTime / (60 * 1000));

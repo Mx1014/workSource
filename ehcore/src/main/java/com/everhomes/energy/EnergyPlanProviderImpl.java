@@ -290,4 +290,18 @@ public class EnergyPlanProviderImpl implements EnergyPlanProvider {
 
         return map;
     }
+
+    @Override
+    public EnergyPlan listNewestAutoReadingPlans(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<EnergyPlan> plans = context.selectFrom(Tables.EH_ENERGY_PLANS)
+                .where(Tables.EH_ENERGY_PLANS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENERGY_PLANS.STATUS.eq(CommonStatus.AUTO.getCode()))
+                .orderBy(Tables.EH_ENERGY_PLANS.ID.desc())
+                .fetchInto(EnergyPlan.class);
+        if (plans != null && plans.size() > 0) {
+            return plans.get(0);
+        }
+        return null;
+    }
 }

@@ -21,11 +21,12 @@ public class FlowGraphNodeCondition extends FlowGraphNode {
 
     @Override
     public void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException {
-        ctx.getFlowCase().setCurrentNodeId(this.getFlowNode().getId());
-        ctx.getFlowCase().setCurrentLaneId(this.getFlowNode().getFlowLaneId());
-        ctx.getFlowCase().incrStepCount();
-
         FlowGraph flowGraph = ctx.getFlowGraph();
+
+        ctx.flushCurrentNode(this);
+        ctx.flushCurrentLane(flowGraph.getGraphLane(this.getFlowLaneId()));
+        ctx.incrStepCount();
+
         FlowGraphBranch branch = flowGraph.getBranchByOriginalNode(this.getFlowNode().getId());
         if (branch.isConcurrent()) {
             List<FlowGraphNode> nextNodes = getLinksOut().stream()
