@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 public @interface RouterPath {
 
 	/**
-	 * mapping名称
+	 * 路由路径，已跟客户端约定应用首页使用"/index"，应用内容详情使用"/detail"。
 	 */
 	String path() default "/";
 
