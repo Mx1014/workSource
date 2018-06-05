@@ -4507,4 +4507,11 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return judgeAppShowPayResponse;
 	}
+	
+	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.listPayeeAccounts(cmd);
+    }
 }

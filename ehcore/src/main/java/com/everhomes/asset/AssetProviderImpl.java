@@ -10,6 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
@@ -89,7 +90,9 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private ContractProvider contractProvider;
-
+    
+    @Autowired 
+    private PayService payService;
 
     @Override
     public void creatAssetBill(AssetBill bill) {
@@ -944,10 +947,12 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType) {
-        List<ListBillGroupsDTO> list = new ArrayList<>();
+    	List<ListBillGroupsDTO> list = new ArrayList<>();
+        List<Long> userIds = new ArrayList<Long>();
+        ListBusinessUserByIdsCommand cmd = new ListBusinessUserByIdsCommand();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-        context.select(t.ID, t.NAME, t.DEFAULT_ORDER, t.BILLS_DAY, t.DUE_DAY, t.DUE_DAY_TYPE, t.BILLS_DAY_TYPE, t.BALANCE_DATE_TYPE)
+        context.select()
                 .from(t)
                 .where(t.OWNER_ID.eq(ownerId))
                 .and(t.OWNER_TYPE.eq(ownerType))
@@ -963,9 +968,28 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDueDay(r.getValue(t.DUE_DAY));
                     dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
                     dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
+                    //dto.setBizPayeeAccount(r.getValue(t.BIZ_PAYEE_ACCOUNT));//收款方账户名称
+                    dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
+                    if(r.getValue(t.BIZ_PAYEE_ID) != null && r.getValue(t.BIZ_PAYEE_ID) != "") {
+                    	userIds.add(Long.parseLong(r.getValue(t.BIZ_PAYEE_ID)));
+                    }else {
+                    	userIds.add(null);
+                    }
+                    dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
                     list.add(dto);
                     return null;
                 });
+        //由于收款方账户名称可能存在修改的情况，故重新请求电商
+        cmd.setUserIds(userIds);
+        List<UserAccountInfo> result = payService.listBusinessUserByIds(cmd);
+        for(int i = 0;i < result.size();i++) {
+        	for(int j = 0;j < list.size();j++) {
+        		if(result.get(i).getUserId() != null && list.get(j).getBizPayeeId() != null &&
+        				String.valueOf(result.get(i).getUserId()).equals(list.get(j).getBizPayeeId())){
+        			list.get(j).setBizPayeeAccount(result.get(i).getRemark());
+        		}
+        	}
+        }
         return list;
     }
 
@@ -3113,6 +3137,9 @@ public class AssetProviderImpl implements AssetProvider {
         group.setOwnerId(cmd.getOwnerId());
         group.setOwnerType(cmd.getOwnerType());
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        group.setBizPayeeAccount(cmd.getBizPayeeAccount());//增加收款方账户
+        group.setBizPayeeId(cmd.getBizPayeeId());//增加收款方id
+        group.setBizPayeeType(cmd.getBizPayeeType());//增加收款方类型
         EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
         dao.insert(group);
     }
@@ -3127,6 +3154,9 @@ public class AssetProviderImpl implements AssetProvider {
         updates.put(t.BALANCE_DATE_TYPE,cmd.getBillingCycle());
         updates.put(t.DUE_DAY,cmd.getDueDay());
         updates.put(t.DUE_DAY_TYPE,cmd.getDueDayType());
+        updates.put(t.BIZ_PAYEE_ACCOUNT,cmd.getBizPayeeAccount());//更新收款方账户
+        updates.put(t.BIZ_PAYEE_ID,cmd.getBizPayeeId());//更新收款方账户id
+        updates.put(t.BIZ_PAYEE_TYPE,cmd.getBizPayeeType());//更新收款方账户类型
         if(cmd.getBillDayType()!= null){
             updates.put(t.BILLS_DAY_TYPE, cmd.getBillDayType());
         }

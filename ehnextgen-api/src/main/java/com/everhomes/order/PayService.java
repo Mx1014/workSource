@@ -24,21 +24,19 @@ public interface PayService {
      * @param amount
      * @return
      */
-    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount);
+	PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount);
 
-    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, Long expiration);
+    //PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, Long expiration);
 
-    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId);
+    //PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId);
 
     PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId, Long expiration);
 
-    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId, Long expiration, String extendInfo);
+    //PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO);
 
-    PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO);
+    //PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, Long expiration);
 
-    PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, Long expiration);
-
-    PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId);
+    //PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId);
 
     PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId, Long expiration);
 
@@ -137,4 +135,25 @@ public interface PayService {
      * @return 订单信息
      */
     QueryOrderPaymentStatusCommandResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd);
+    
+    /**
+     * 列出对应公司的所有支付帐号列表。
+     * @param orgnizationId 公司ID
+     * @param tags 标签，标签有三种情况：
+     * <ul>
+     * <li>1. 当业务要为全部查询帐号列表时，此时标签标识可指定为0</li>
+     * <li>2. 当业务要为某个项目查询帐号列表时，此时标签标识可指定为项目ID</li>
+     * <li>3. 当业务既要包含全部、又要包含某一个或多个项目查询帐号列表时，此时标签标识可指定为：一个0标签、一个或多个项目ID标签</li>
+     * </ul>
+     * @return 帐号列表
+     */
+    List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags);
+    
+    /**
+     * 查询支付服务器地址
+     * @return 订单信息
+     */
+    String getPayServerHomeURL();
+    
+    List<UserAccountInfo> listBusinessUserByIds(ListBusinessUserByIdsCommand cmd);
 }

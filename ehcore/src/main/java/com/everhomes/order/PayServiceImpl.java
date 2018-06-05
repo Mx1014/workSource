@@ -89,12 +89,12 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         String payHomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
-        PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
-        if(paymentAccount == null){
-            LOGGER.error("payment account no find system_id={}", SYSTEMID);
+        EhNamespacePayMappingsRecord payMapping = payProvider.getNamespacePayMapping(UserContext.getCurrentNamespaceId());
+        if(payMapping == null){
+            LOGGER.error("pay account mapping not found for namespaceId={}", UserContext.getCurrentNamespaceId());
             return;
         }
-        restClient = new RestClient(payHomeUrl, paymentAccount.getAppKey(), paymentAccount.getSecretKey());
+        restClient = new RestClient(payHomeUrl, payMapping.getAppKey(), payMapping.getSecretKey());
     }
 
     /**
@@ -123,10 +123,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param expiration 过期时间
      * @return
      */
-    @Override
-    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, Long expiration) {
-        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , null, null, expiration);
-    }
+//    @Override
+//    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, Long expiration) {
+//        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , null, null, expiration);
+//    }
 
     /**
      *
@@ -140,10 +140,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param resourceId  订单资源类型ID
      * @return
      */
-    @Override
-    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId) {
-        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , resourceType, resourceId, null);
-    }
+//    @Override
+//    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId) {
+//        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , resourceType, resourceId, null);
+//    }
 
     /**
      *
@@ -208,10 +208,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param paramsDTO 微信支付的参数
      * @return
      */
-    @Override
-    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO) {
-        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, null);
-    }
+//    @Override
+//    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO) {
+//        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, null);
+//    }
 
     /**
      *
@@ -226,10 +226,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param expiration 过期时间
      * @return
      */
-    @Override
-    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, Long expiration) {
-        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, expiration);
-    }
+//    @Override
+//    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, Long expiration) {
+//        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, expiration);
+//    }
 
     /**
      *
@@ -245,10 +245,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      * @param resourceId 订单资源类型ID
      * @return
      */
-    @Override
-    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount,  String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId) {
-        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, resourceType, resourceId, null);
-    }
+//    @Override
+//    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount,  String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId) {
+//        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, resourceType, resourceId, null);
+//    }
 
     /**
      *
@@ -1266,4 +1266,95 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         
         return orderDto;
     }
+    
+    @Override
+    public List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags){
+        ListBusinessUsersCommand cmd = new ListBusinessUsersCommand();
+        // 给支付系统的bizUserId的形式：EhBizBusinesses1037001
+        String userPrefix = "EhBizBusinesses";
+        cmd.setBizUserId(userPrefix + orgnizationId);
+        if(tags != null && tags.length > 0) {
+            cmd.setTag1s(Arrays.asList(tags));
+        }
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List biz payee accounts(request), orgnizationId={}, tags={}, cmd={}", orgnizationId, tags, cmd);
+        }
+        ListBusinessUsersRestResponse response = restClient.restCall(
+                "POST",
+                ApiConstants.MEMBER_LISTBUSINESSUSERS_URL,
+                cmd,
+                ListBusinessUsersRestResponse.class);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List biz payee accounts(response), orgnizationId={}, tags={}, response={}", orgnizationId, tags, GsonUtil.toJson(response));
+        }
+        
+        List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();        
+        if(response != null && response.getErrorCode() != null && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201)
+                && response.getResponse() != null) {
+            List<BusinessUserDTO>  bizUserList = response.getResponse();
+            for(BusinessUserDTO bizUser : bizUserList) {
+                ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+                // 支付系统中的用户ID
+                dto.setAccountId(bizUser.getId());
+                // 用户向支付系统注册帐号时填写的帐号名称
+                //dto.setAccountName(bizUser.getManageIdentifierToken());
+                dto.setAccountName(bizUser.getRemark());
+                // 支付系统中用户类型com.everhomes.pay.user.UserType: MANAGEMENT(0), PERSONAL(1), BUSINESS(2);
+                // 由于可能涉及到业务系统不支付的用户类型（如MANAGEMENT），故当是企业是使用企业类型，其它则对应到普通用户
+                Integer userType = bizUser.getUserType();
+                if(userType != null && userType == 2) {
+                    dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+                } else {
+                    dto.setAccountType(OwnerType.USER.getCode());
+                }
+                
+                // 支付系统中状态：0-未审核、1-已审核(支付系统并没有提供枚举）
+                Integer checkResult = bizUser.getBusinessCheckResult();
+                if(checkResult != null && checkResult.intValue() == 1) {
+                    dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                } else {
+                    dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                }
+                result.add(dto);
+            }
+        }
+        
+        /*//杨崇鑫用于前端测试开始
+        ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+        dto.setAccountId(Long.parseLong("666666666"));
+        dto.setAccountName("账户名称");
+        dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+        dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+        result.add(dto);
+        //杨崇鑫用于前端测试结束*/   
+        return result;
+    }
+
+    @Override
+    public String getPayServerHomeURL() {
+        return configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "pay.v2.home.url", "");
+    }
+    
+    public List<UserAccountInfo> listBusinessUserByIds(ListBusinessUserByIdsCommand cmd){
+    	if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBusinessUserByIds(request), cmd={}", cmd);
+        }
+		ListBusinessUseByIdsRestResponse  response =  restClient.restCall(
+				"POST", 
+				ApiConstants.MEMBER_LISTBUSINESSUSERBYIDS_URL, 
+				cmd,
+				ListBusinessUseByIdsRestResponse.class);
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBusinessUserByIds(response), response={}", GsonUtil.toJson(response));
+        }
+		List<UserAccountInfo> result = new ArrayList<UserAccountInfo>();        
+		if(response != null && response.getErrorCode() != null && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201)
+                && response.getResponse() != null) {
+			result = response.getResponse();
+		}
+		return result;
+    }
+}
+
 }

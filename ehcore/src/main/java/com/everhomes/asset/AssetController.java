@@ -1,29 +1,35 @@
 
 package com.everhomes.asset;
 
-import com.everhomes.constants.ErrorCodes;
-   import com.everhomes.controller.ControllerBase;
-   import com.everhomes.discover.RestDoc;
-   import com.everhomes.discover.RestReturn;
-   import com.everhomes.rest.RestResponse;
-   import com.everhomes.rest.asset.*;
-   import com.everhomes.rest.order.PreOrderDTO;
-   import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-   import com.everhomes.rest.user.UserServiceErrorCode;
-   import com.everhomes.rest.user.admin.ImportDataResponse;
-   import com.everhomes.user.User;
-   import com.everhomes.user.UserContext;
-   import com.everhomes.util.RuntimeErrorException;
-   import org.slf4j.Logger;
-   import org.slf4j.LoggerFactory;
-   import org.springframework.beans.factory.annotation.Autowired;
-   import org.springframework.web.bind.annotation.*;
-   import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
-   import javax.servlet.http.HttpServletRequest;
-   import javax.servlet.http.HttpServletResponse;
-   import javax.validation.Valid;
-   import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 
 /**
 **************************************************************
@@ -1333,6 +1339,20 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         return null;
+    }
+    
+    /**
+     * <b>URL: /asset/listPayeeAccounts</b>
+     * <p>列出当前项目下所有的收款方账户</p>
+     */
+    @RequestMapping("listPayeeAccounts")
+    @RestReturn(value = ListBizPayeeAccountDTO.class, collection = true)
+    public RestResponse listPayeeAccounts(ListPayeeAccountsCommand cmd){
+    	List<ListBizPayeeAccountDTO> list = assetService.listPayeeAccounts(cmd);
+        RestResponse restResponse = new RestResponse(list);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
     }
     
 }
