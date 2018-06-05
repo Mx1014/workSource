@@ -4753,7 +4753,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
 	@Override
-	public void excuteMessage(String msg) {
+	public void excuteMessage(AclinkWebSocketMessage cmd) {
+		String msg = cmd.getPayload();
+		String uuid = cmd.getUuid();
+		DoorAccess door = doorAccessProvider.queryDoorAccessByUuid(uuid);
+		if(door == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND,
+                    "sender not found ");
+		}
 		byte[] msgArr = Base64.decodeBase64(msg);
 		byte cmdNumber = msgArr[0];
 		if(cmdNumber == 0x10){
@@ -4765,6 +4772,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(authId);
 				if (doorAuth != null && doorAuth.getStatus().equals(DoorAuthStatus.VALID.getCode())
 						&& doorAuth.getValidAuthAmount() > 0 && doorAuth.getValidEndMs() > System.currentTimeMillis()) {
+					if(doorAuth.getDoorId().longValue() != door.getId().longValue() && doorAuth.getDoorId().longValue() != door.getGroupid().longValue()){
+						throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR,
+		                        "sender and msg not pair ");
+					}
 					doorAuth.setValidAuthAmount(doorAuth.getValidAuthAmount() - 1);
 					doorAuthProvider.updateDoorAuth(doorAuth);
 					validResult = "true";
