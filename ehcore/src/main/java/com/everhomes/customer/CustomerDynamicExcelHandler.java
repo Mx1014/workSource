@@ -786,43 +786,46 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 //校验数字格式及日期格式
                 try {
                     String type = clz.getDeclaredField(column.getFieldName()).getType().getSimpleName();
-                    switch (type) {
-                        case "Integer":
-                        case "Long":
-                        case "BigDecimal":
-                            if (column.getValue() != null && !NumberUtils.isNumber(column.getValue())) {
-                                Map<String, String> dataMap = new LinkedHashMap<>();
-                                originColumns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
-                                LOGGER.error("customer import data number format error : field ={}", column.getHeaderDisplay());
-                                importLogs.setData(dataMap);
-                                importLogs.setErrorDescription("customer import data format error ");
-                                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_NUM_FORMAT_ERROR);
-                                flag = false;
-                                break;
-                            }
-                        case "Timestamp":
-                            if (StringUtils.isNotBlank(column.getValue())) {
-                                String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";
-                                String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";
-                                String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";
-                                String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";
-                                Pattern pattern1 = Pattern.compile(regex1);
-                                Pattern pattern2 = Pattern.compile(regex2);
-                                Pattern pattern3 = Pattern.compile(regex3);
-                                Pattern pattern4 = Pattern.compile(regex4);
-                                if (!(pattern1.matcher(column.getValue()).matches() || pattern2.matcher(column.getValue()).matches()
-                                        || pattern3.matcher(column.getValue()).matches() || pattern4.matcher(column.getValue()).matches())) {
+                    if(!"enterpriseAdmins".equals(column.getFieldName()) && !"entryInfos".equals(column.getFieldName())){
+                        switch (type) {
+                            case "Integer":
+                            case "Long":
+                            case "BigDecimal":
+                                if (column.getValue() != null && !NumberUtils.isNumber(column.getValue())) {
                                     Map<String, String> dataMap = new LinkedHashMap<>();
                                     originColumns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
-                                    LOGGER.error("customer import data timestamp format error : field ={}", column.getHeaderDisplay());
+                                    LOGGER.error("customer import data number format error : field ={}", column.getHeaderDisplay());
                                     importLogs.setData(dataMap);
-                                    importLogs.setErrorDescription("customer import data timestamp format error ");
-                                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_DATE_FORMAT_ERROR);
+                                    importLogs.setErrorDescription("customer import data format error ");
+                                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_NUM_FORMAT_ERROR);
                                     flag = false;
                                     break;
                                 }
-                            }
+                            case "Timestamp":
+                                if (StringUtils.isNotBlank(column.getValue())) {
+                                    String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";
+                                    String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";
+                                    String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";
+                                    String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";
+                                    Pattern pattern1 = Pattern.compile(regex1);
+                                    Pattern pattern2 = Pattern.compile(regex2);
+                                    Pattern pattern3 = Pattern.compile(regex3);
+                                    Pattern pattern4 = Pattern.compile(regex4);
+                                    if (!(pattern1.matcher(column.getValue()).matches() || pattern2.matcher(column.getValue()).matches()
+                                            || pattern3.matcher(column.getValue()).matches() || pattern4.matcher(column.getValue()).matches())) {
+                                        Map<String, String> dataMap = new LinkedHashMap<>();
+                                        originColumns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                                        LOGGER.error("customer import data timestamp format error : field ={}", column.getHeaderDisplay());
+                                        importLogs.setData(dataMap);
+                                        importLogs.setErrorDescription("customer import data timestamp format error ");
+                                        importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_DATE_FORMAT_ERROR);
+                                        flag = false;
+                                        break;
+                                    }
+                                }
+                        }
                     }
+
                 } catch (NoSuchFieldException e) {
                     LOGGER.error("no such field exceltion : field ={}", column.getHeaderDisplay());
                     flag = false;
