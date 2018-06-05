@@ -468,8 +468,8 @@ public class NewsServiceImpl implements NewsService {
 	 * <p>isSearchDraft: true 检索草稿出来，false 不检索草稿</p>
 	 */
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1080010800L, cmd.getAppId(), null,0L);//全部权限
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && cmd.getCurrentProjectId() != null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 1080010800L, cmd.getAppId(), null, cmd.getCurrentProjectId());//全部权限
 		}
 		final Long userId = UserContext.current().getUser().getId();
 		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());

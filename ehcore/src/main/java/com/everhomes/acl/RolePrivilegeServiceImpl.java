@@ -1607,8 +1607,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(),"admin", adminPrivilegeId);
 
 			UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(member.getTargetId(), member.getNamespaceId());
+			Integer namespaceId = member.getNamespaceId();
+			Long ownerUid = member.getTargetId();
+			if(userIdentifier != null) {
+			    namespaceId = userIdentifier.getNamespaceId();
+			    ownerUid = userIdentifier.getOwnerUid();
+			    
+			}
 			//添加角色 同时删除角色
-			assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), userIdentifier.getNamespaceId(), userIdentifier.getOwnerUid(), roleId);
+			assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), namespaceId, ownerUid, roleId);
 		}
 
 		//fix 13633 by xiongying
