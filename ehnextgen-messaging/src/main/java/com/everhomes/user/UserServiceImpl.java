@@ -6220,12 +6220,14 @@ public class UserServiceImpl implements UserService {
 					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
 					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
 
-					List<CommunityInfoDTO> communityUserDtos = new ArrayList<>();
-
 					List<AddressSiteDTO> addressSiteDtos = new ArrayList<>();
 					Community community = communityProvider.findCommunityById(family.getCommunityId());
 					if(community !=null){
 						AddressSiteDTO addressSiteDTO = ConvertHelper.convert(community, AddressSiteDTO.class);
+						addressSiteDTO.setCommunityName(community.getName());
+						addressSiteDTO.setWholeAddressName(community.getProvinceName() + community.getCityName()
+								+ community.getAreaName() + community.getAddress());
+						addressSiteDtos.add(addressSiteDTO);
 					}
 
 					dto.setAddressSiteDtos(addressSiteDtos);
