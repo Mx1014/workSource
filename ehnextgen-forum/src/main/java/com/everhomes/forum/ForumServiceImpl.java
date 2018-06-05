@@ -7292,6 +7292,8 @@ public class ForumServiceImpl implements ForumService {
                 activityPostCommand.setPosterUrl(url);
             }
             postDTO.setEmbeddedJson(StringHelper.toJsonString(activityPostCommand));
+            String embeddedJson = postDTO.getEmbeddedJson().replace("endTime","stopTime");
+            postDTO.setEmbeddedJson(embeddedJson);
         }
         return postDTO;
     }
