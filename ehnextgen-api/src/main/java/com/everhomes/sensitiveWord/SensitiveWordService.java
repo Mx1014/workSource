@@ -2,10 +2,11 @@
 package com.everhomes.sensitiveWord;
 
 import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
+import com.everhomes.rest.sensitiveWord.InitSensitiveWordTrieCommand;
 
 public interface SensitiveWordService {
 
-    void filterWords(FilterWordsCommand cmd);
+    void initSensitiveWords(InitSensitiveWordTrieCommand cmd);
 
-    void uploadFileToContentServer();
+    void filterWords(FilterWordsCommand cmd);
 }

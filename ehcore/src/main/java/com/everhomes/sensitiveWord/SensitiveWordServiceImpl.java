@@ -4,6 +4,7 @@ package com.everhomes.sensitiveWord;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
+import com.everhomes.rest.sensitiveWord.InitSensitiveWordTrieCommand;
 import com.everhomes.user.User;
 import com.everhomes.util.WebTokenGenerator;
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
@@ -25,7 +26,8 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
     @Autowired
     private ContentServerService contentServerService;
 
-    private void initSensitiveWords(String url) {
+    @Override
+    public void initSensitiveWords(InitSensitiveWordTrieCommand cmd) {
 
         TreeMap<String, String> map = new TreeMap<String, String>();
 
@@ -34,7 +36,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
         }
         BufferedReader in = null;
         try{
-            URL realUrl = new URL(url);
+            URL realUrl = new URL(cmd.getUrl());
             String s = null;
             URLConnection connection = realUrl.openConnection();
             // 设置通用的请求属性
@@ -60,26 +62,14 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
     @Override
     public void filterWords(FilterWordsCommand cmd) {
         List<String> wordList = new ArrayList<>();
-
+        if (null == acdat) {
+            acdat = new AhoCorasickDoubleArrayTrie<String>();
+        }
         List<AhoCorasickDoubleArrayTrie.Hit<String>> hits = acdat.parseText(cmd.getText().toUpperCase());
         for (AhoCorasickDoubleArrayTrie.Hit<String> hit : hits) {
             wordList.add(hit.value);
         }
     }
 
-
-    @Override
-    public void uploadFileToContentServer() {
-        String token = WebTokenGenerator.getInstance().toWebToken(User.SYSTEM_USER_LOGIN);
-        File file = new File("D:\\dict.txt");
-        try {
-            InputStream inputStream = new FileInputStream(file);
-            UploadCsFileResponse fileResponse = contentServerService.uploadFileToContentServer(inputStream,"dict.txt",token);
-            System.out.println(fileResponse.getResponse().getUrl());
-            initSensitiveWords(fileResponse.getResponse().getUrl());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
 
 }
