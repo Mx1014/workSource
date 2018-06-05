@@ -1,5 +1,6 @@
 package com.everhomes.module;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.rest.module.RouterInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -76,5 +77,26 @@ public class RouterInfoServiceImpl implements RouterService {
         }
 
         return true;
+    }
+
+
+    @Override
+    public String getQueryInDefaultWay(String queryJson){
+
+        Map<String, Object> parse = (Map)JSON.parse(queryJson);
+
+        if(parse.size() == 0){
+            return null;
+        }
+        StringBuffer queryBuffer = new StringBuffer();
+
+        for (Map.Entry entry: parse.entrySet()){
+            queryBuffer.append(entry.getKey());
+            queryBuffer.append("=");
+            queryBuffer.append(entry.getValue());
+            queryBuffer.append("&");
+        }
+
+        return queryBuffer.substring(0, queryBuffer.length() - 1);
     }
 }

@@ -37,6 +37,7 @@ public class ActivityRouterListener implements RouterListener {
         return 10600L;
     }
 
+
     @Override
     public String getQueryString(String queryJson){
 

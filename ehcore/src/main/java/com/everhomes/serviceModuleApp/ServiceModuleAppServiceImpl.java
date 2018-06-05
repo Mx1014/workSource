@@ -450,6 +450,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 					if(routerInfo != null){
 						appDTO.setRouterPath(routerInfo.getPath());
 						appDTO.setRouterQuery(routerInfo.getQuery());
+					}else {
+						//没有实现接口的模块默认的返回
+						appDTO.setRouterPath("/index");
+						appDTO.setRouterQuery(routerService.getQueryInDefaultWay(app.getInstanceConfig()));
 					}
 				}
 
