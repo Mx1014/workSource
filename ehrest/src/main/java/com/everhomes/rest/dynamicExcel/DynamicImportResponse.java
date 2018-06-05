@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 public class DynamicImportResponse {
     private Integer successRowNumber = 0;
     private Integer failedRowNumber = 0;
-    private  Long taskId;
+    private  Long id;
     @Deprecated
     private Object storage;
     @Deprecated
@@ -58,12 +58,12 @@ public class DynamicImportResponse {
         }
     }
 
-    public Long getTaskId() {
-        return taskId;
+    public Long getId() {
+        return id;
     }
 
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

@@ -226,7 +226,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                     return importFileResponse;
                 }, task);
                 // 返回给web
-                response.setTaskId(task.getId());
+                response.setId(task.getId());
             } catch (Exception e) {
                 LOGGER.info("sheet = {}, failed to import,error = {}", sheet==null?"":sheet.getSheetName(), e);
                 if (response.getFailCause() != null) {
