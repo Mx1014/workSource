@@ -6,4 +6,6 @@ import com.everhomes.rest.module.RouterInfo;
 public interface RouterService {
 
 	RouterInfo getRouterInfo(Long moduleId, String path, String jsonStr);
+
+	String getQueryInDefaultWay(String queryJson);
 }
