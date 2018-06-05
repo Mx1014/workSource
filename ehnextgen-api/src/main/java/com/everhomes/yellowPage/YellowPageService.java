@@ -1,9 +1,13 @@
 package com.everhomes.yellowPage;
 
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.yellowPage.*;
 
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 public interface YellowPageService {
 
@@ -50,7 +54,7 @@ public interface YellowPageService {
     ServiceAllianceDisplayModeDTO getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd);
 
 
-	List<JumpModuleDTO> listJumpModules();
+	List<JumpModuleDTO> listJumpModules(ListJumpModulesCommand cmd);
 	
 	ListAttachmentsResponse listAttachments(ListAttachmentsCommand cmd);
 	
@@ -72,4 +76,16 @@ public interface YellowPageService {
 	
 	SearchRequestInfoResponse listSeviceAllianceAppRecordsByEnterpriseId(Long enterpriseId, Long pageAnchor,
 			Integer pageSize);
+	
+	ListServiceAllianceProvidersResponse listServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd);
+	void addServiceAllianceProvider(AddServiceAllianceProviderCommand cmd);
+	void deleteServiceAllianceProvider(DeleteServiceAllianceProviderCommand cmd);
+	void updateServiceAllianceProvider(UpdateServiceAllianceProviderCommand cmd);
+	
+	void applyExtraAllianceEvent(ApplyExtraAllianceEventCommand cmd);
+	GetExtraAllianceEventResponse getExtraAllianceEvent(GetExtraAllianceEventCommand cmd);
+	
+	void exportServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd,  HttpServletResponse httpResp);
+	
+	String transferServiceToCommunity();
 }

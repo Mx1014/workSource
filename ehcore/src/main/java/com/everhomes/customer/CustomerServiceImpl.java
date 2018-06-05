@@ -4,6 +4,8 @@ import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -170,6 +172,7 @@ import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.customer.QuarterStatistics;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomerDataCommand;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.customer.SyncResultViewedCommand;
@@ -195,6 +198,8 @@ import com.everhomes.rest.customer.YearQuarter;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.equipment.AdminFlag;
+import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.launchpad.ActionType;
@@ -221,6 +226,7 @@ import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
@@ -257,17 +263,30 @@ import com.everhomes.varField.ScopeFieldItem;
 import com.everhomes.yellowPage.YellowPageService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -278,6 +297,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -286,6 +306,9 @@ import java.util.stream.Collectors;
 @Component
 public class CustomerServiceImpl implements CustomerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerServiceImpl.class);
+
+    final String downloadDir = "\\download\\";
+
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
 
@@ -387,6 +410,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private OrganizationSearcher organizationSearcher;
+
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
 
     @Override
@@ -554,27 +582,36 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
+        //数据库冗余又从动态表单查的 又要删除不显示  暂时这样
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
         if (categoryItem != null) {
             dto.setCategoryItemName(categoryItem.getItemDisplayName());
+        }else {
+            dto.setCategoryItemName(null);
         }
 //        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
         ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
         if (levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
+        }else {
+            dto.setLevelItemName(null);
         }
         if (null != dto.getCorpIndustryItemId()) {
             ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpIndustryItemId());
             if (null != corpIndustryItem) {
                 dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
+            }else {
+                dto.setCorpIndustryItemName(null);
             }
         }
         if (null != dto.getContactGenderItemId()) {
             ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getContactGenderItemId());
             if (null != contactGenderItem) {
                 dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+            }else {
+                dto.setContactGenderItemName(null);
             }
         }
         if (dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
@@ -584,6 +621,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getPropertyType());
             if (null != propertyTypeItem) {
                 dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+            }else{
+                dto.setPropertyTypeName(null);
             }
         }
 
@@ -591,6 +630,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRegistrationTypeId());
             if (null != registrationTypeItem) {
                 dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
+            }else {
+                dto.setRegistrationTypeName(null);
             }
         }
 
@@ -598,6 +639,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTechnicalFieldId());
             if (null != technicalFieldItem) {
                 dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
+            }else {
+                dto.setTechnicalFieldName(null);
             }
         }
 
@@ -605,6 +648,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTaxpayerTypeId());
             if (null != taxpayerTypeItem) {
                 dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
+            }else {
+                dto.setTaxpayerTypeName(null);
             }
         }
 
@@ -612,6 +657,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRelationWillingId());
             if (null != relationWillingItem) {
                 dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
+            }else {
+                dto.setRelationWillingName(null);
             }
         }
 
@@ -619,6 +666,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getHighAndNewTechId());
             if (null != highAndNewTechItem) {
                 dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
+            }else {
+                dto.setHighAndNewTechName(null);
             }
         }
 
@@ -626,6 +675,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
             if (null != entrepreneurialCharacteristicsItem) {
                 dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
+            }else {
+                dto.setEntrepreneurialCharacteristicsName(null);
             }
         }
 
@@ -633,6 +684,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSerialEntrepreneurId());
             if (null != serialEntrepreneurItem) {
                 dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
+            }else {
+                dto.setSerialEntrepreneurName(null);
             }
         }
 
@@ -798,37 +851,40 @@ public class CustomerServiceImpl implements CustomerService {
         saveCustomerEvent(3, updateCustomer, customer,cmd.getDeviceType());
 
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
-            UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
-            command.setId(updateCustomer.getOrganizationId());
-            command.setName(updateCustomer.getName());
-            command.setDisplayName(updateCustomer.getNickName());
-            command.setNamespaceId(updateCustomer.getNamespaceId());
-            command.setAvatar(updateCustomer.getCorpLogoUri());
-            command.setDescription(updateCustomer.getCorpDescription());
-            command.setCommunityId(updateCustomer.getCommunityId());
-            command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
-            command.setAddress(updateCustomer.getContactAddress());
-            command.setLongitude(updateCustomer.getLongitude());
-            command.setLatitude(updateCustomer.getLatitude());
-            command.setWebsite(updateCustomer.getCorpWebsite());
-            command.setAttachments(cmd.getBanner());
-            command.setPostUri(cmd.getPostUri());
-            command.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
-            command.setContactsPhone(cmd.getHotline());
-            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
-            List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
-            if(entryInfos!=null && entryInfos.size()>0){
-                entryInfos.forEach((e)->{
-                    OrganizationAddressDTO addressDTO = new OrganizationAddressDTO();
-                    addressDTO.setAddressId(e.getAddressId());
-                    addressDTO.setBuildingId(e.getBuildingId());
-                    addressDTO.setEnterpriseId(customer.getOrganizationId());
-                    addressDTOs.add(addressDTO);
-                });
+            Organization org = organizationProvider.findOrganizationById(updateCustomer.getOrganizationId());
+            if (org != null) {
+                UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
+                command.setId(updateCustomer.getOrganizationId());
+                command.setName(updateCustomer.getName());
+                command.setDisplayName(updateCustomer.getNickName());
+                command.setNamespaceId(updateCustomer.getNamespaceId());
+                command.setAvatar(updateCustomer.getCorpLogoUri());
+                command.setDescription(updateCustomer.getCorpDescription());
+                command.setCommunityId(updateCustomer.getCommunityId());
+                command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : (long) updateCustomer.getCorpEmployeeAmount());
+                command.setAddress(updateCustomer.getContactAddress());
+                command.setLongitude(updateCustomer.getLongitude());
+                command.setLatitude(updateCustomer.getLatitude());
+                command.setWebsite(updateCustomer.getCorpWebsite());
                 command.setAttachments(cmd.getBanner());
-                command.setAddressDTOs(addressDTOs);
+                command.setPostUri(cmd.getPostUri());
+                command.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+                command.setContactsPhone(cmd.getHotline());
+                List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+                List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
+                if (entryInfos != null && entryInfos.size() > 0) {
+                    entryInfos.forEach((e) -> {
+                        OrganizationAddressDTO addressDTO = new OrganizationAddressDTO();
+                        addressDTO.setAddressId(e.getAddressId());
+                        addressDTO.setBuildingId(e.getBuildingId());
+                        addressDTO.setEnterpriseId(customer.getOrganizationId());
+                        addressDTOs.add(addressDTO);
+                    });
+                    command.setAttachments(cmd.getBanner());
+                    command.setAddressDTOs(addressDTOs);
+                }
+                organizationService.updateEnterprise(command, true);
             }
-            organizationService.updateEnterprise(command, true);
         }
 //        else {//没有企业的要新增一个
 //            OrganizationDTO dto = createOrganization(updateCustomer);
@@ -883,9 +939,12 @@ public class CustomerServiceImpl implements CustomerService {
         saveCustomerEvent(2, customer, null,cmd.getDeviceType());
 
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
-            DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
-            command.setId(customer.getOrganizationId());
-            organizationService.deleteEnterpriseById(command, false);
+            Organization org = organizationProvider.findOrganizationById(customer.getOrganizationId());
+            if (org != null && org.getId() != null) {
+                DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
+                command.setId(customer.getOrganizationId());
+                organizationService.deleteEnterpriseById(command, false);
+            }
         }
 
     }
@@ -2159,27 +2218,36 @@ public class CustomerServiceImpl implements CustomerService {
             if (organization != null) {
                 updateOrganizationAddress(organization.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
                 organizationSearcher.feedDoc(organization);
-            }else {
-                //这里增加入驻信息后自动同步到企业管理
-                OrganizationDTO organizationDTO = createOrganization(customer);
-                customer.setOrganizationId(organizationDTO.getId());
-                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-                enterpriseCustomerSearcher.feedDoc(customer);
-                updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
-                Organization createOrganization = organizationProvider.findOrganizationById(customer.getOrganizationId());
-                organizationSearcher.feedDoc(createOrganization);
+            } else {
+                syncCustomerInfoIntoOrganization(entryInfo, customer);
             }
         } else if (customer != null) {
-            //这里增加入驻信息后自动同步到企业管理
-            OrganizationDTO organizationDTO = createOrganization(customer);
-            customer.setOrganizationId(organizationDTO.getId());
-            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-            enterpriseCustomerSearcher.feedDoc(customer);
-            updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+            syncCustomerInfoIntoOrganization(entryInfo, customer);
+        }
+        enterpriseCustomerSearcher.feedDoc(customer);
+    }
+
+    private void syncCustomerInfoIntoOrganization(CustomerEntryInfo entryInfo, EnterpriseCustomer customer) {
+        //这里增加入驻信息后自动同步到企业管理
+        OrganizationDTO organizationDTO = createOrganization(customer);
+        customer.setOrganizationId(organizationDTO.getId());
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+        updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
+        List<EnterpriseAttachment> attachments = enterpriseCustomerProvider.listEnterpriseCustomerPostUri(customer.getId());
+        if (attachments != null && attachments.size() > 0) {
+            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
+            attachments.forEach((a) -> {
+                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
+                bannerUrl.setContentType(a.getContentType());
+                bannerUrl.setContentUri(a.getContentUri());
+                bannerUrl.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), customer.getId()));
+                bannerUrls.add(bannerUrl);
+            });
+            addAttachments(customer.getOrganizationId(), bannerUrls, UserContext.currentUserId());
             Organization createOrganization = organizationProvider.findOrganizationById(customer.getOrganizationId());
             organizationSearcher.feedDoc(createOrganization);
         }
-        enterpriseCustomerSearcher.feedDoc(customer);
     }
 
     // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
@@ -2237,9 +2305,12 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos == null || entryInfos.size() == 0) {
-            if (organization != null) {
+            if (organization != null && organization.getId() != 0) {
                 organizationSearcher.deleteById(organization.getId());
                 organizationProvider.deleteOrganization(organization);
+                if (customer != null) {
+                    customer.setOrganizationId(0L);
+                }
             }
         }
         //sync to es
@@ -2755,16 +2826,27 @@ public class CustomerServiceImpl implements CustomerService {
      */
     @Scheduled(cron = "1 20 2 * * ?")
     public void customerAutoSync() {
-        List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
-        if (communities != null) {
-            for (Community community : communities) {
-                SyncCustomersCommand command = new SyncCustomersCommand();
-                command.setNamespaceId(community.getNamespaceId());
-                command.setCommunityId(community.getId());
-                syncEnterpriseCustomers(command, false);
-                syncIndividualCustomers(command);
-            }
+        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode() + System.currentTimeMillis(), "");
+        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+        Map<String,String> runningMap  =new HashMap<>();
+        this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()).tryEnter(() -> {
+            String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
+            runningMap.put(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), runningFlag);
+            if(StringUtils.isBlank(runningFlag))
+            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), "executing", 5, TimeUnit.HOURS);
+        });
+        if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()))) {
+            List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
+            if (communities != null) {
+                for (Community community : communities) {
+                    SyncCustomersCommand command = new SyncCustomersCommand();
+                    command.setNamespaceId(community.getNamespaceId());
+                    command.setCommunityId(community.getId());
+                    syncEnterpriseCustomers(command, false);
+                    syncIndividualCustomers(command);
+                }
 
+            }
         }
     }
 
@@ -3576,11 +3658,11 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             cmd.setOrganizationId(customer.getOrganizationId());
             rolePrivilegeService.createOrganizationAdmin(cmd);
-            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken());
+            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken(),customer.getNamespaceId());
         } else if (customer != null) {
             //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
             // 旧版的模式为新建客户则关联企业客户中organizationId，现在为激活才增加organizationId
-            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken());
+            enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken(),customer.getNamespaceId());
         }
         if (customer != null) {
             customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
@@ -3598,15 +3680,15 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             //删除企业管理中的管理员权限
             rolePrivilegeService.deleteOrganizationAdministrators(cmd);
-            List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), null);
-            if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
-                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-            }else {
-                customer.setAdminFlag(TrueOrFalseFlag.FALSE.getCode());
-            }
-            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-            enterpriseCustomerSearcher.feedDoc(customer);
         }
+        List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), null);
+        if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
+            customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+        }else {
+            customer.setAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+        }
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
     }
 
     @Override
@@ -3632,7 +3714,9 @@ public class CustomerServiceImpl implements CustomerService {
             result = rolePrivilegeService.listOrganizationAdministrators(cmd);
             //复制organization管理员到企业客户管理中来
             if (result != null && result.size() > 0) {
-                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken()));
+                result.forEach((admin) -> enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), admin.getContactName(), admin.getTargetType(), admin.getContactToken(),customer.getNamespaceId()));
+                customer.setAdminFlag(AdminFlag.YES.getCode());
+                enterpriseCustomerSearcher.feedDoc(customer);
             }
         } else {
             result = customerAdminContacts;
@@ -3654,31 +3738,65 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void syncOrganizationToCustomer() {
-        List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations();
-        if (organizations != null && organizations.size() > 0) {
-            organizations.forEach((organization -> {
-                OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
-                List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
-//                OrganizationCommunityRequest request = organizationProvider.getOrganizationRequest(organization.getId());
-                OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
-                OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
-                List<OrganizationAttachment> banners = organizationProvider.listOrganizationAttachments(organization.getId());
-                List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
-                if (addresses != null && addresses.size() > 0) {
-                    addressDTOs = addresses.stream().map((address) -> ConvertHelper.convert(address, OrganizationAddressDTO.class)).collect(Collectors.toList());
-                }
-                String avatar = "";
-                if (organizationDetail == null) {
-                    organizationDetail = new OrganizationDetail();//坑
-                    avatar = organizationDetail.getAvatar();
-                }
-                Long communityId = 0L;
-                if (request != null) {
-                    communityId = request.getCommunityId();
-                }
-                createEnterpriseCustomer(organization, avatar, banners, org.getPostUri(), organizationDetail, communityId, addressDTOs);
-            }));
+    public void syncOrganizationToCustomer(SyncCustomerDataCommand cmd) {
+        //防止执行两次  之前出现过
+        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + System.currentTimeMillis(), "");
+        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+        String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
+        if(StringUtils.isEmpty(runningFlag)) {
+            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), "executing", 2, TimeUnit.HOURS);
+            List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations(cmd.getNamespaceId());
+            if (organizations != null && organizations.size() > 0) {
+                organizations.forEach((organization -> {
+                    try {
+                        OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+                        List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+                        //                OrganizationCommunityRequest request = organizationProvider.getOrganizationRequest(organization.getId());
+                        OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+                        //                OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+                        List<OrganizationAttachment> banners = organizationProvider.listOrganizationAttachments(organization.getId());
+                        List<OrganizationAddressDTO> addressDTOs = new ArrayList<>();
+                        if (addresses != null && addresses.size() > 0) {
+                            addressDTOs = addresses.stream().map((address) -> ConvertHelper.convert(address, OrganizationAddressDTO.class)).collect(Collectors.toList());
+                        }
+                        String avatar = "";
+                        String postUri = "";
+                        if (organizationDetail == null) {
+                            organizationDetail = new OrganizationDetail();
+                        } else {
+                            avatar = organizationDetail.getAvatar();
+                            postUri = organizationDetail.getPostUri();
+                        }
+                        Long communityId = 0L;
+                        if (request != null) {
+                            communityId = request.getCommunityId();
+                        }
+                        createEnterpriseCustomer(organization, avatar, banners, postUri, organizationDetail, communityId, addressDTOs);
+                    } catch (Exception e) {
+                        LOGGER.error("error organizationId ={}", organization.getId());
+                        LOGGER.error("sync organziation to customer error :{}", e);
+                    }
+                }));
+            }
+        }
+    }
+
+    private String getSyncTaskToken(RedisTemplate redisTemplate,String code) {
+        Map<String, String> map = makeSyncTaskToken(redisTemplate,code);
+        if(map == null) {
+            return null;
+        }
+        return  map.get(code);
+    }
+
+    private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate,String code) {
+        Object o = redisTemplate.opsForValue().get(code);
+        if(o != null) {
+            Map<String, String> keys = new HashMap<>();
+            keys.put(code, (String)o);
+            return keys;
+        } else {
+            return null;
         }
     }
 
@@ -3697,7 +3815,15 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpOpAddress(enterprise.getAddress());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount() == null ? null : enterprise.getMemberCount().intValue());
             customer.setPostUri(postUri);
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -3710,12 +3836,19 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setNamespaceId(organization.getNamespaceId());
             customer.setOrganizationId(organization.getId());
             customer.setName(organization.getName());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount() == null ? null : enterprise.getMemberCount().intValue());
             customer.setPostUri(postUri);
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -3759,5 +3892,218 @@ public class CustomerServiceImpl implements CustomerService {
             });
             enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), bannerList);
         }
+    }
+
+    @Override
+    public HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd,HttpServletResponse httpResponse) {
+
+//        ListCustomerAnnualStatisticsCommand annualStatisticsCommand = ConvertHelper.convert(cmd, ListCustomerAnnualStatisticsCommand.class);
+        //各园区企业企业分布
+        EnterpriseCustomerStatisticsDTO customerStatisticsDTO =  listEnterpriseCustomerStatistics(cmd);
+//        ListCustomerAnnualStatisticsResponse annualStatisticsResponse =  listCustomerAnnualStatistics(annualStatisticsCommand);
+        //企业行业分布
+        CustomerIndustryStatisticsResponse industryStatisticsResponse = listCustomerIndustryStatistics(cmd);
+        //企业人才分布
+        CustomerTalentStatisticsResponse talentStatisticsResponse = listCustomerTalentStatistics(cmd);
+        //知识产权分布
+        CustomerIntellectualPropertyStatisticsResponse statisticsResponse = listCustomerIntellectualPropertyStatistics(cmd);
+        //获批项目分布
+        CustomerProjectStatisticsResponse projectStatisticsResponse = listCustomerProjectStatistics(cmd);
+        //认知途径分布
+        CustomerSourceStatisticsResponse sourceStatisticsResponse = listCustomerSourceStatistics(cmd);
+
+        URL rootPath = CustomerServiceImpl.class.getResource("/");
+        String filePath = rootPath.getPath() + this.downloadDir;
+        File file = new File(filePath);
+        if (!file.exists()){
+            boolean mdkirResult =   file.mkdirs();
+            LOGGER.info("mkdir  excel file result :{}",mdkirResult);
+        }
+        filePath = filePath + "enterprise_customer_details" + System.currentTimeMillis() + ".xlsx";
+        //  new file
+        this.createEquipmentStandardsBook(filePath, customerStatisticsDTO, null,
+                industryStatisticsResponse.getDtos(), talentStatisticsResponse.getDtos(), statisticsResponse.getDtos(), projectStatisticsResponse.getDtos(), sourceStatisticsResponse.getDtos());
+
+        return download(filePath, httpResponse);
+    }
+
+    private void createEquipmentStandardsBook(String filePath, EnterpriseCustomerStatisticsDTO customerStatisticsDTO, List<CustomerAnnualStatisticDTO> statisticDTOs, List<CustomerIndustryStatisticsDTO> dtos, List<CustomerTalentStatisticsDTO> dtos1, List<CustomerIntellectualPropertyStatisticsDTO> dtos2, List<CustomerProjectStatisticsDTO> dtos3, List<CustomerSourceStatisticsDTO> dtos4) {
+        XSSFWorkbook wb = new XSSFWorkbook();
+        Sheet customerStatisticSheet = wb.createSheet("各园区企业分布");
+        Sheet industrySheet = wb.createSheet("企业行业分布");
+        Sheet talentSheet = wb.createSheet("企业人才分布");
+        Sheet intellectualPropertySheet = wb.createSheet("知识产权分布");
+        Sheet projectSheet = wb.createSheet("获批项目分布");
+        Sheet sourceSheet = wb.createSheet("认知途径分布");
+        customerStatisticSheet.setDefaultColumnWidth(20 * 256);
+        industrySheet.setDefaultColumnWidth(20 * 256);
+        talentSheet.setDefaultColumnWidth(20 * 256);
+        intellectualPropertySheet.setDefaultColumnWidth(20 * 256);
+        projectSheet.setDefaultColumnWidth(20 * 256);
+        sourceSheet.setDefaultColumnWidth(20 * 256);
+        // 设置sheet页面表头和cell数据
+        setNewCustomerStatisticSheetHeadAndBookRow(customerStatisticSheet, customerStatisticsDTO);
+        setNewIndustrySheetHeadAndBookRow(industrySheet, dtos);
+        setNewTalentSheetHeadAndBookRow(talentSheet, dtos1);
+        setNewIntellectualPropertySheetHeadAndBookRow(intellectualPropertySheet, dtos2);
+        setNewProjectSheetHeadAndBookRow(projectSheet, dtos3);
+        setNewSourceSheetHeadAndBookRow(sourceSheet, dtos4);
+
+        try {
+            FileOutputStream out = new FileOutputStream(filePath);
+            wb.write(out);
+            wb.close();
+            out.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+                    EquipmentServiceErrorCode.ERROR_CREATE_EXCEL,
+                    e.getLocalizedMessage());
+        }
+    }
+
+    private void setNewSourceSheetHeadAndBookRow(Sheet sourceSheet, List<CustomerSourceStatisticsDTO> dtos4) {
+        Row row = sourceSheet.createRow(sourceSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("认知途径");
+        row.createCell(++i).setCellValue("数量");
+        if (dtos4 != null && dtos4.size() > 0) {
+            dtos4.forEach((r) -> setNewSourceSheetBookRow(sourceSheet, r));
+        }
+    }
+
+    private void setNewSourceSheetBookRow(Sheet sourceSheet, CustomerSourceStatisticsDTO dto) {
+        Row row = sourceSheet.createRow(sourceSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getItemName() == null ? "未知" :dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getCustomerCount());
+    }
+
+    private void setNewProjectSheetHeadAndBookRow(Sheet projectSheet, List<CustomerProjectStatisticsDTO> dtos3) {
+        Row row = projectSheet.createRow(projectSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("获批项目");
+        row.createCell(++i).setCellValue("项目数量");
+        if(dtos3!=null && dtos3.size()>0){
+            dtos3.forEach((r) -> setNewProjectSheetBookRow(projectSheet, r));
+        }
+    }
+
+    private void setNewProjectSheetBookRow(Sheet projectSheet, CustomerProjectStatisticsDTO dto) {
+        Row row = projectSheet.createRow(projectSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getItemName() == null ? "未知" : dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getProjectCount());
+    }
+
+    private void setNewIntellectualPropertySheetHeadAndBookRow(Sheet intellectualPropertySheet, List<CustomerIntellectualPropertyStatisticsDTO> dtos2) {
+        Row row = intellectualPropertySheet.createRow(intellectualPropertySheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("知识产权");
+        row.createCell(++i).setCellValue("数量");
+        if (dtos2 != null && dtos2.size() > 0) {
+            dtos2.forEach((r) -> setNewIntellectualPropertySheetBookRow(intellectualPropertySheet, r));
+        }
+    }
+
+    private void setNewIntellectualPropertySheetBookRow(Sheet intellectualPropertySheet, CustomerIntellectualPropertyStatisticsDTO dto) {
+        Row row = intellectualPropertySheet.createRow(intellectualPropertySheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getPropertyType() == null ? "未知" : dto.getPropertyType());
+        row.createCell(++i).setCellValue(dto.getPropertyCount());
+    }
+
+    private void setNewTalentSheetHeadAndBookRow(Sheet talentSheet, List<CustomerTalentStatisticsDTO> dtos1) {
+        Row row = talentSheet.createRow(talentSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("人才类型");
+        row.createCell(++i).setCellValue("人才数");
+        if (dtos1 != null && dtos1.size() > 0) {
+            dtos1.forEach((r) -> setTalentSheetBookRow(talentSheet, r));
+        }
+    }
+
+    private void setTalentSheetBookRow(Sheet talentSheet, CustomerTalentStatisticsDTO dto) {
+        Row row = talentSheet.createRow(talentSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getCategoryName() == null ? "未知" : dto.getCategoryName());
+        row.createCell(++i).setCellValue(dto.getCustomerMemberCount() == null ? 0L : dto.getCustomerMemberCount());
+    }
+
+    private void setNewIndustrySheetHeadAndBookRow(Sheet industrySheet, List<CustomerIndustryStatisticsDTO> dtos) {
+        Row row = industrySheet.createRow(industrySheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("行业");
+        row.createCell(++i).setCellValue("企业数");
+        if (dtos != null && dtos.size() > 0) {
+            dtos.forEach((r) -> setIndustrySheetBookRow(industrySheet, r));
+        }
+    }
+
+    private void setIndustrySheetBookRow(Sheet industrySheet, CustomerIndustryStatisticsDTO dto) {
+        Row row = industrySheet.createRow(industrySheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getItemName() == null ? "未知" : dto.getItemName());
+        row.createCell(++i).setCellValue(dto.getCustomerCount() == null ? 0L : dto.getCustomerCount());
+    }
+
+    private void setNewCustomerStatisticSheetHeadAndBookRow(Sheet customerStatisticSheet, EnterpriseCustomerStatisticsDTO statisticDTO) {
+        Row row = customerStatisticSheet.createRow(customerStatisticSheet.getLastRowNum());
+        int i = -1;
+        row.createCell(++i).setCellValue("企业客户总数 单位：个");
+        row.createCell(++i).setCellValue("项目总企业人数 单位：人");
+        row.createCell(++i).setCellValue("截止到当前，项目总营业额  单位：万元");
+        row.createCell(++i).setCellValue("截止到当前，项目总纳税额  单位：万元");
+        setCustomerStatisticSheetBookRow(customerStatisticSheet, statisticDTO);
+    }
+
+    private void setCustomerStatisticSheetBookRow(Sheet customerStatisticSheet, EnterpriseCustomerStatisticsDTO dto) {
+        Row row = customerStatisticSheet.createRow(customerStatisticSheet.getLastRowNum() + 1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getCustomerCount() == null ? 0 : dto.getCustomerCount());
+        row.createCell(++i).setCellValue(dto.getCustomerMemberCount() == null ? 0 : dto.getCustomerMemberCount());
+        row.createCell(++i).setCellValue(dto.getTotalTurnover().toString());
+        row.createCell(++i).setCellValue(dto.getTotalTaxAmount().toString());
+    }
+
+    public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            if (!file.isFile()) {
+                LOGGER.info("filename:{} is not a file", path);
+            }
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {
+                boolean deleteResult = file.delete();
+                LOGGER.info("delete  excel file result :{}",deleteResult);
+            }
+
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE, QualityServiceErrorCode.ERROR_DOWNLOAD_EXCEL, ex.getLocalizedMessage());
+        }
+        return response;
     }
 }

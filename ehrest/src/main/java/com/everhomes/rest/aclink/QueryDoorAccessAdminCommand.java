@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>search: 搜索字符串</li>
  * <li>linkStatus: 连接状态{@link com.everhomes.rest.aclink.DoorAccessLinkStatus}</li>
  * <li>doorType: 门禁类型</li>
+ * <li>serverId: 关联服务器id</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每一页数量</li>
  * </ul>
@@ -31,6 +32,7 @@ public class QueryDoorAccessAdminCommand {
     private String search;
     private Byte linkStatus;
     private Byte doorType;
+    private Long serverId;
     private Long pageAnchor;
     
     private Integer pageSize;
@@ -65,7 +67,14 @@ public class QueryDoorAccessAdminCommand {
     public void setDoorType(Byte doorType) {
         this.doorType = doorType;
     }
-    public Long getPageAnchor() {
+    
+    public Long getServerId() {
+		return serverId;
+	}
+	public void setServerId(Long serverId) {
+		this.serverId = serverId;
+	}
+	public Long getPageAnchor() {
         return pageAnchor;
     }
     public void setPageAnchor(Long pageAnchor) {

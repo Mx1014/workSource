@@ -31,7 +31,7 @@ public interface DoorAuthProvider {
 
     List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count);
 
-    List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, int count);
+    List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, Byte rightRemote, int count);
 
     DoorAuth getLinglingDoorAuthByUuid(String uuid);
 
@@ -91,4 +91,13 @@ public interface DoorAuthProvider {
     DoorAuth queryValidDoorAuthByVisitorPhone(Long doorId, String phone);
 
 	List<DoorAuth> listValidDoorAuthByVisitorPhone(Long doorId, String phone);
+
+	List<User> listCommunityAclinkUsers(Byte isAuth, Byte isOpenAuth, Long doorId, Byte communityType, Long ownerId,
+			CrossShardListingLocator locator, int pageSize, Integer namespaceId);
+
+	Long countCommunityDoorAuthUser(Byte isAuth, Byte isOpenAuth, Long doorId, Long communityId, Byte communityType,
+			Integer namespaceId, Byte rightType);
+
+
+    List<DoorAuth> listValidDoorAuthByUser(long userId, String driver);
 }

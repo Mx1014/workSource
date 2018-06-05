@@ -24,7 +24,6 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -1496,7 +1495,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhCustomerTrackingsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKINGS);
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
+//        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
         query.addOrderBy(Tables.EH_CUSTOMER_TRACKINGS.CREATE_TIME.desc());
         List<CustomerTracking> result = new ArrayList<>();
         query.fetch().map((r) -> {
@@ -1688,13 +1687,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        }
 						}
                         if("trackingUid".equals(field.getFieldName())) {
-                            if (oldData == null || oldData.equals("")) {
+                            if (oldData == null || oldData.equals("")|| oldData.equals("空")) {
                                 oldData = "空";
                             } else {
                                 oldData = exist.getTrackingName();
                             }
 
-                            if (newData == null || newData.equals("")) {
+                            if (newData == null || newData.equals("")||newData.equals("空")) {
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();
@@ -1971,7 +1970,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken) {
+    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken,Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
         CustomerAdminRecord record = new CustomerAdminRecord();
@@ -1982,6 +1981,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         record.setId(id);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         record.setCreatorUid(UserContext.currentUserId());
+        record.setNamespaceId(namespaceId);
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
         dao.insert(record);
@@ -1996,11 +1996,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void updateEnterpriseCustomerAdminRecord(String contacToken) {
+    public void updateEnterpriseCustomerAdminRecord(String contacToken,Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         List<CustomerAdminRecord> records = context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contacToken))
-                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE.eq(OrganizationMemberTargetType.UNTRACK.getCode()))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
                 .fetchInto(CustomerAdminRecord.class);
         if (records != null && records.size() > 0) {
             for (CustomerAdminRecord record : records) {
@@ -2031,21 +2031,24 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public List<Organization> listNoSyncOrganizations() {
+    public List<Organization> listNoSyncOrganizations(Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> organizationIds = context.selectDistinct(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID)
-                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
-                .fetchInto(Long.class);
-        List<Long> namespaceId = context.selectDistinct(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID)
-                .from(Tables.EH_LAUNCH_PAD_ITEMS)
-                .where(Tables.EH_LAUNCH_PAD_ITEMS.ACTION_TYPE.eq(ActionType.PARKENTERPRISE.getCode()))
-                .fetchInto(Long.class);
+//        List<Long> organizationIds = context.selectDistinct(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID)
+//                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+//                .fetchInto(Long.class);
+//        List<Long> namespaceId = context.selectDistinct(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID)
+//                .from(Tables.EH_LAUNCH_PAD_ITEMS)
+//                .where(Tables.EH_LAUNCH_PAD_ITEMS.ACTION_TYPE.eq(ActionType.PARKENTERPRISE.getCode()))
+//                .fetchInto(Long.class);
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-        query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(organizationIds));
+//        query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(organizationIds));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
-        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.in(namespaceId));
+//        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.in(namespaceId));
         //大师说暂时可以用item来区分使用园区企业应用的namespaceId
+        if (namespaceId != null) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        }
         return query.fetchInto(Organization.class);
     }
 
@@ -2062,6 +2065,24 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public void deleteCustomerEntryInfoByCustomerIdAndAddressId(Long customerId, Long addressId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId))
+                .and(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.eq(addressId))
+                .execute();
+    }
+
+    @Override
+    public void deleteCustomerEntryInfoByCustomerIdAndAddressIds(Long customerId, List<Long> addressIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId))
+                .and(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.in(addressIds))
                 .execute();
     }
 }

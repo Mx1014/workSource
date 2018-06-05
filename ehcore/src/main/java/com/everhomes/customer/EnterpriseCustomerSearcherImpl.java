@@ -150,7 +150,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 List<String> addressIds = new ArrayList<>();
                 entryInfos.forEach((e) -> {
                     buildings.add(e.getBuildingId().toString());
-                    addressIds.add(e.getAddressId().toString());
+                    if (e.getAddressId() != null){
+                        addressIds.add(e.getAddressId().toString());
+                    }
                 });
                 builder.field("buildingId", StringUtils.join(buildings, "|"));
                 builder.field("addressId", StringUtils.join(addressIds, "|"));
@@ -410,22 +412,30 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
         if(categoryItem != null) {
             dto.setCategoryItemName(categoryItem.getItemDisplayName());
+        }else {
+            dto.setCategoryItemName(null);
         }
 //        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
         ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
         if(levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
+        }else {
+            dto.setLevelItemName(null);
         }
         if(null != dto.getCorpIndustryItemId()){
             ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getCorpIndustryItemId());
             if(null != corpIndustryItem){
                 dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
+            }else {
+                dto.setCorpIndustryItemName(null);
             }
         }
         if(null != dto.getContactGenderItemId()){
             ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getContactGenderItemId());
             if(null != contactGenderItem){
                 dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+            }else {
+                dto.setContactGenderItemName(null);
             }
         }
         if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
@@ -435,6 +445,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getPropertyType());
             if(null != propertyTypeItem){
                 dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+            }else {
+                dto.setPropertyTypeName(null);
             }
         }
 
@@ -442,6 +454,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRegistrationTypeId());
             if(null != registrationTypeItem){
                 dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
+            }else {
+                dto.setRegistrationTypeName(null);
             }
         }
 
@@ -449,6 +463,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTechnicalFieldId());
             if(null != technicalFieldItem){
                 dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
+            }else{
+                dto.setTechnicalFieldName(null);
             }
         }
 
@@ -456,6 +472,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTaxpayerTypeId());
             if(null != taxpayerTypeItem){
                 dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
+            }else{
+                dto.setTaxpayerTypeName(null);
             }
         }
 
@@ -463,6 +481,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRelationWillingId());
             if(null != relationWillingItem){
                 dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
+            }else{
+                dto.setRelationWillingName(null);
             }
         }
 
@@ -470,6 +490,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getHighAndNewTechId());
             if(null != highAndNewTechItem){
                 dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
+            }else{
+                dto.setHighAndNewTechName(null);
             }
         }
 
@@ -477,6 +499,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
             if(null != entrepreneurialCharacteristicsItem){
                 dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
+            }else{
+                dto.setEntrepreneurialCharacteristicsName(null);
             }
         }
 
@@ -484,6 +508,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getSerialEntrepreneurId());
             if(null != serialEntrepreneurItem){
                 dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
+            }else {
+                dto.setSerialEntrepreneurName(null);
             }
         }
 
@@ -495,10 +521,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if (members != null && members.size()>0) {
             dto.setTrackingPhone(members.get(0).getContactToken());
         }
-        if(customer.getLastTrackingTime()!=null){
-             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime())/604800000);
+        if (customer.getLastTrackingTime() != null && customer.getTrackingUid() != null && customer.getTrackingUid() != -1) {
+            result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
+            dto.setTrackingPeriod(result);
         }
-        dto.setTrackingPeriod(result);
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(customer.getOrganizationId());
         command.setCustomerId(customer.getId());
@@ -512,7 +538,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command1.setCustomerId(customer.getId());
         List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
         if (entryInfos != null && entryInfos.size() > 0) {
-            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
+//            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
+            entryInfos = entryInfos.stream().map((e) -> {
+                String addressName = e.getAddressName();
+                if (addressName != null) {
+                    e.setAddressName(addressName.replaceFirst("-", "/"));
+                }
+                return e;
+            }).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
         return dto;

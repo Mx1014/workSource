@@ -18,7 +18,10 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @Component
 public class MessagePersistWorker {
@@ -33,9 +36,9 @@ public class MessagePersistWorker {
     //    @Value("${border.app.secret}")
     // private String secretKey = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
 
-    private static volatile ConcurrentLinkedQueue<MessageRecordDto> queue = new ConcurrentLinkedQueue<>();
+    private static volatile BlockingQueue<MessageRecordDto> queue = new LinkedBlockingQueue<>();
 
-    public static ConcurrentLinkedQueue<MessageRecordDto> getQueue() {
+    public static BlockingQueue<MessageRecordDto> getQueue() {
         return queue;
     }
 //
@@ -239,7 +242,7 @@ public class MessagePersistWorker {
     }*/
 
 
-    public void setQueue(ConcurrentLinkedQueue<MessageRecordDto> queue) {
+    public void setQueue(BlockingQueue<MessageRecordDto> queue) {
         this.queue = queue;
     }
 
@@ -263,26 +266,24 @@ public class MessagePersistWorker {
         @Override
         public void run() {
             List<MessageRecordDto> dtos = new ArrayList<>();
-            for (; ; ) {
-                while (!queue.isEmpty() && !this.finished) {
-                    try {
-                        MessageRecordDto record = queue.poll();
-                        if (record != null)
-                            dtos.add(record);
-                        if (dtos.size() > threshold - 1 || System.currentTimeMillis() > tick + 10 * 1000) { //当取出的条数大于99或者距离上次持久化过去10S
-                            // dtos.add(record);
-                            tick = System.currentTimeMillis();
-                            handleMessagePersist(dtos);
-                            dtos.clear();
-                        } else if (this.finished) {
-                            handleMessagePersist(dtos);
-                            dtos.clear();
-                            Thread.sleep(60 * 1000L);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            while (!this.finished) {
+                try {
+                    MessageRecordDto record = queue.take();
+                    dtos.add(record);
+
+                    if (dtos.size() > threshold - 1 || System.currentTimeMillis() > tick + 10 * 1000) { //当取出的条数大于99或者距离上次持久化过去10S
+                        // dtos.add(record);
+                        tick = System.currentTimeMillis();
+                        handleMessagePersist(dtos);
                         dtos.clear();
+                    } else if (this.finished) {
+                        handleMessagePersist(dtos);
+                        dtos.clear();
+                        Thread.sleep(60 * 1000L);
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    dtos.clear();
                 }
             }
         }

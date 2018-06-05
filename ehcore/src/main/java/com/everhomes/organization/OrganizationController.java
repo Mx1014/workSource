@@ -237,6 +237,7 @@ public class OrganizationController extends ControllerBase {
     //checked
     @RequestMapping("queryOrgTopicsByCategory")
     @RestReturn(value = ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse queryOrgTopicsByCategory(QueryOrganizationTopicCommand cmd) {
 
 		/*是PM_ADMIN的场景下*/
@@ -514,6 +515,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("getOrgTopic")
     @RestReturn(value = PostDTO.class)
+    @RequireAuthentication(false)
     public RestResponse getOrgTopic(GetTopicCommand cmd) {
         PostDTO postDto = organizationService.getTopic(cmd);
 
@@ -957,6 +959,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("listOrganizationTopics")
     @RestReturn(value = ListPostCommandResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listOrgTopics(@Valid QueryOrganizationTopicCommand cmd) {
         RestResponse res = new RestResponse(organizationService.listOrgTopics(cmd));
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1579,6 +1582,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("listPMOrganizations")
     @RestReturn(value = ListPMOrganizationsResponse.class)
+    @RequireAuthentication(false)
     public RestResponse listPMOrganizations(@Valid ListPMOrganizationsCommand cmd) {
         RestResponse response = new RestResponse(organizationService.listPMOrganizations(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1592,7 +1596,6 @@ public class OrganizationController extends ControllerBase {
      * @param cmd
      * @return
      */
-    @RequestMapping(value = "/getAdminType")
     @RestReturn(value = GetAdminTypeResponse.class)
     public RestResponse getAdminType(GetAdminTypeCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");

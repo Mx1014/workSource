@@ -57,9 +57,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 
 
     @Autowired
-    private CommunityProvider communityProvider;
-    
-    @Autowired
     private OrganizationProvider organizationProvider;
 
     @Autowired
@@ -82,8 +79,10 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         if(null == serviceAllianceInstanceConfig.getType()){
             ServiceAllianceCategories serviceAllianceCategories = createServiceAlliance(namespaceId, serviceAllianceInstanceConfig.getDetailFlag(), itemLabel);
             serviceAllianceInstanceConfig.setType(serviceAllianceCategories.getId());
+            serviceAllianceInstanceConfig.setEnableComment((byte)0);
+            serviceAllianceInstanceConfig.setEnableProvider((byte)0);
         }else{
-            updateServiceAlliance(namespaceId, serviceAllianceInstanceConfig.getType(), serviceAllianceInstanceConfig.getDetailFlag(), itemLabel);
+            updateServiceAlliance(namespaceId, serviceAllianceInstanceConfig, itemLabel);
         }
         return StringHelper.toJsonString(serviceAllianceInstanceConfig);
     }
@@ -111,6 +110,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         serviceAllianceActionData.setType(serviceAllianceInstanceConfig.getType());
         serviceAllianceActionData.setParentId(serviceAllianceInstanceConfig.getType());
         serviceAllianceActionData.setDisplayType(serviceAllianceInstanceConfig.getDisplayType());
+        serviceAllianceActionData.setEnableComment(serviceAllianceInstanceConfig.getEnableComment());
         return StringHelper.toJsonString(serviceAllianceActionData);
     }
 
@@ -287,7 +287,21 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         return Integer.valueOf(value);
 	}
 
-	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, Long type, Byte detailFlag, String name){
+	/**
+	 * 更新服务联盟配置项，可以在发布时，
+	 * 将业务的配置，使用这个方法进行更新
+	 * @param namespaceId
+	 * @param config
+	 * @param name
+	 * @return
+	 */
+	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, ServiceAllianceInstanceConfig config, String name){
+		
+		Long type = config.getType();
+		Byte detailFlag = config.getDetailFlag();
+		Byte enableComment = config.getEnableComment(); //是否允许评论
+		Byte enableProvider = config.getEnableProvider(); //是否打开供应商开关
+		
         ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(type);
 //        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
         List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, "PM", null,null,new CrossShardListingLocator(), 10);
@@ -302,11 +316,16 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             }
             yellowPageProvider.updateServiceAllianceCategory(serviceAllianceCategories);
 
+           
             ServiceAlliances serviceAlliances = yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organization.getId(), type);
             if(null != serviceAlliances){
+            	//更新现有配置
                 serviceAlliances.setName(name);
                 serviceAlliances.setDisplayName(name);
+                serviceAlliances.setEnableComment(enableComment);
+                serviceAlliances.setEnableProvider(enableProvider);
                 yellowPageProvider.updateServiceAlliances(serviceAlliances);
+                
             }else{
                 LOGGER.error("serviceAlliances is null. pmId = {}, type = {}", organization.getId(), type);
             }

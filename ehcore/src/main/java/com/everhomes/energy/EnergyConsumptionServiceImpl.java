@@ -459,7 +459,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
         String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
-        LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+        LOGGER.info("================================================energyTaskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
         if (taskServer.equals(equipmentIp)) {
             if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
                 scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
@@ -527,9 +527,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeter meter = ConvertHelper.convert(cmd, EnergyMeter.class);
         meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
         meter.setNamespaceId(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-        if(cmd.getMeterNumber()!=null && cmd.getMeterNumber().startsWith("ZFH")){
-            meter.setAutoFlag(EnergyAutoReadingFlag.TURE.getCode());
-        }
+
         dbProvider.execute(r -> {
             meterProvider.createEnergyMeter(meter);
 
@@ -577,6 +575,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         task.setOwnerType(meter.getOwnerType());
         task.setTargetId(meter.getCommunityId());
         task.setPlanId(0L);
+        task.setTargetType("communityId");
         task.setMeterId(meter.getId());
         task.setLastTaskReading(meter.getStartReading() == null ? BigDecimal.ZERO :meter.getStartReading());
         LocalDateTime dateTime = meter.getCreateTime().toLocalDateTime();
@@ -2911,10 +2910,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //     * 每天早上5点10分刷自动读表
 //     */
 //    @Scheduled(cron = "0 10 5 L * ?")
-    private void readMeterRemote() {
+    private void readMeterRemote(Boolean createPlansFlag,Long communityId) {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             LOGGER.info("read energy meter reading ...");
-            List<EnergyMeter> meters = meterProvider.listAutoReadingMeters();
+            List<EnergyMeter> meters = new ArrayList<>();
+            if (communityId != null) {
+                meters = meterProvider.listAutoReadingMetersByCommunityId(communityId);
+            } else {
+                meters = meterProvider.listAutoReadingMeters();
+            }
             if (meters != null && meters.size() > 0) {
                 meters.forEach((meter) -> {
                     String serverUrl = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.server", "");
@@ -2934,7 +2938,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
                             EnergyMeterReadingLog log = new EnergyMeterReadingLog();
                             log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-                            log.setReading(new BigDecimal(Double.valueOf(result.get("this_read"))));
+                            log.setReading(new BigDecimal(result.get("this_read")));
                             if (task != null) {
                                 log.setTaskId(task.getId());
                                 task.setReading(log.getReading());
@@ -2947,7 +2951,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                             log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                             log.setOperatorId(UserContext.currentUserId());
                             if (meter.getLastReading() != null &&
-                                    Double.valueOf(result.get("this_read")).compareTo(meter.getLastReading().doubleValue()) < 0) {
+                                    new BigDecimal(result.get("this_read")).subtract(meter.getLastReading()).intValue() < 0) {
                                 log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
                             } else {
                                 log.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
@@ -2976,9 +2980,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             LOGGER.info("read energy meter reading  end...");
 
-            LOGGER.info("starting create  auto  meter plans ...");
-            createMonthAutoPlans(meters);
-            LOGGER.info("ending create  auto  meter plans ...");
+            if(createPlansFlag){
+                LOGGER.info("starting create  auto  meter plans ...");
+                createMonthAutoPlans(meters);
+                LOGGER.info("ending create  auto  meter plans ...");
+            }
         }
     }
 
@@ -2998,42 +3004,63 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             Map<Integer, List<EnergyMeter>> namespaceMeterMap = new HashMap<>();
             namespaceMeterMap = getprocessNamespaceMeterMap(meters);
             if(namespaceMeterMap!=null && namespaceMeterMap.size()>0){
-                namespaceMeterMap.forEach((k,v)->{
-                    if (v != null && v.size() > 0) {
-                        EnergyPlan plan = new EnergyPlan();
-                        plan.setRepeatSettingId(0L);
-                        plan.setName("autoPlans");
-                        plan.setNamespaceId(k);
-                        plan.setStatus(CommonStatus.AUTO.getCode());
-                        plan.setOwnerId(v.get(0).getOwnerId());
-                        plan.setOwnerType(v.get(0).getOwnerType());
-                        plan.setTargetId(v.get(0).getCommunityId());
-                        RepeatSettings repeatSetting = new RepeatSettings();
-                        //调用此的时候已经是每月月底
-                        LocalDate localDate = LocalDate.now();
-                        repeatSetting.setOwnerId(meters.get(0).getOwnerId());
-                        repeatSetting.setOwnerType(meters.get(0).getOwnerType());
-                        repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
-                        repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()).format(autoDateSF)));
-                        repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
-                        repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
-                        repeatSetting.setRepeatInterval(1);
-                        String expression = "{\"expression\":[{\"day\":%s}]}";
-                        expression = String.format(expression, String.valueOf(LocalDate.now().plusDays(1).getDayOfMonth()));
-                        repeatSetting.setExpression(expression);
-                        repeatService.createRepeatSettings(repeatSetting);
-                        plan.setRepeatSettingId(repeatSetting.getId());
-                        energyPlanProvider.createEnergyPlan(plan);
-                        meters.forEach((meter)->{
-                            EnergyPlanMeterMap meterMap = new EnergyPlanMeterMap();
-                            meterMap.setPlanId(plan.getId());
-                            meterMap.setMeterId(meter.getId());
-                            energyPlanProvider.createEnergyPlanMeterMap(meterMap);
-                        });
-                    }
-                });
+                for (Integer key : namespaceMeterMap.keySet()) {
+                    List<EnergyMeter> namespaceMeter = namespaceMeterMap.get(key);
+                    Map<Long, List<EnergyMeter>> communityMeters = getCommunityMapMeters(namespaceMeter);
+                    if (communityMeters != null && communityMeters.size() > 0) {
+                       communityMeters.forEach((k,v)->{
+                           EnergyPlan plan = new EnergyPlan();
+                           plan.setRepeatSettingId(0L);
+                           plan.setName("autoPlans");
+                           plan.setNamespaceId(key);
+                           plan.setTargetType("communityId");
+                           plan.setStatus(CommonStatus.AUTO.getCode());
+                           plan.setOwnerId(v.get(0).getOwnerId());
+                           plan.setOwnerType(v.get(0).getOwnerType());
+                           plan.setTargetId(k);
+                           RepeatSettings repeatSetting = new RepeatSettings();
+                           //调用此的时候已经是每月月底
+                           LocalDate localDate = LocalDate.now();
+                           repeatSetting.setOwnerId(v.get(0).getOwnerId());
+                           repeatSetting.setOwnerType(v.get(0).getOwnerType());
+                           repeatSetting.setStartDate(Date.valueOf(localDate.format(autoDateSF)));
+                           repeatSetting.setEndDate(Date.valueOf(localDate.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()).format(autoDateSF)));
+                           repeatSetting.setTimeRanges("{\"ranges\":[{\"startTime\":\"00:00:00\",\"duration\":\"1M\"}]}");
+                           repeatSetting.setRepeatType(StandardRepeatType.BY_MONTH.getCode());
+                           repeatSetting.setRepeatInterval(1);
+                           String expression = "{\"expression\":[{\"day\":%s}]}";
+                           expression = String.format(expression, String.valueOf(LocalDate.now().plusDays(1).getDayOfMonth()));
+                           repeatSetting.setExpression(expression);
+                           repeatService.createRepeatSettings(repeatSetting);
+                           plan.setRepeatSettingId(repeatSetting.getId());
+                           energyPlanProvider.createEnergyPlan(plan);
+                           if (v.size() > 0) {
+                               v.forEach((meter) -> {
+                                   EnergyPlanMeterMap meterMap = new EnergyPlanMeterMap();
+                                   meterMap.setPlanId(plan.getId());
+                                   meterMap.setMeterId(meter.getId());
+                                   energyPlanProvider.createEnergyPlanMeterMap(meterMap);
+                               });
+                           }
+                       });
+                   }
+                }
             }
         }
+    }
+
+    private Map<Long,List<EnergyMeter>> getCommunityMapMeters(List<EnergyMeter> v) {
+        Map<Long, List<EnergyMeter>> communityMeterMap = new HashMap<>();
+        if (v != null && v.size() > 0) {
+            v.forEach((r) -> {
+                if(communityMeterMap.get(r.getCommunityId())!=null){
+                    communityMeterMap.get(r.getCommunityId()).add(r);
+                }else {
+                    communityMeterMap.put(r.getCommunityId(), new ArrayList<>(Collections.singletonList(r)));
+                }
+            });
+        }
+        return  communityMeterMap;
     }
 
     private Map<Integer, List<EnergyMeter>> getprocessNamespaceMeterMap(List<EnergyMeter> meters) {
@@ -3878,42 +3905,38 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
         if(members == null || members.size() == 0) {
-            return new ArrayList<ExecuteGroupAndPosition>();
+            return new ArrayList<>();
         }
 
         List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
-        for(OrganizationMember member : members) {
+        for (OrganizationMember member : members) {
             Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
 
-            if(organization != null) {
-                if(LOGGER.isInfoEnabled()) {
+            if (organization != null) {
+                if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
                 }
-                if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+                if (OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+                    //部门岗位
+                    ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
+                    departmentGroup.setGroupId(organization.getParentId());
+                    departmentGroup.setPositionId(organization.getId());
+                    groupDtos.add(departmentGroup);
 
+                    //通用岗位
                     List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
-                    if(LOGGER.isInfoEnabled()) {
-                        LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" , organization.getId(), maps);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
                     }
 
-                    if(maps != null && maps.size() > 0) {
-                        for(OrganizationJobPositionMap map : maps) {
-                            ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-                            group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
-                            group.setPositionId(map.getJobPositionId());
-                            groupDtos.add(group);
-
-//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-//							if(groupOrg != null) {
-//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
+                    if (maps != null && maps.size() > 0) {
+                        for (OrganizationJobPositionMap map : maps) {
                             String[] path = organization.getPath().split("/");
                             Long organizationId = Long.valueOf(path[1]);
                             ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
                             topGroup.setGroupId(organizationId);
                             topGroup.setPositionId(map.getJobPositionId());
                             groupDtos.add(topGroup);
-//							}
-
                         }
 
                     }
@@ -3923,6 +3946,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     group.setPositionId(0L);
                     groupDtos.add(group);
                 }
+
             }
         }
 
@@ -4998,9 +5022,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 null, null, cmd.getCommunityId(), categoryUpdateTime);
         List<EnergyMeterCategoryMap> categoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
         if(categoryMaps != null && categoryMaps.size() > 0) {
-            List<Long> categoryIds = categoryMaps.stream().map(map -> {
-                return map.getCategoryId();
-            }).collect(Collectors.toList());
+            List<Long> categoryIds = categoryMaps.stream().map(EnergyMeterCategoryMap::getCategoryId).collect(Collectors.toList());
             List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());
             if(categories != null && categories.size() > 0) {
                 categoryList.addAll(categories);
@@ -5034,11 +5056,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
         List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
         if (maps != null && maps.size() > 0) {
-            List<Long> planIds = maps.stream().map(map -> {
-                return map.getPlanId();
-            }).collect(Collectors.toList());
+            List<Long> planIds = maps.stream().map(EnergyPlanGroupMap::getPlanId).collect(Collectors.toList());
+            EnergyPlan autoPlans = energyPlanProvider.listNewestAutoReadingPlans(cmd.getNamespaceId());
+            if (autoPlans != null) {
+                planIds.add(autoPlans.getId());
+            }
+            planIds.add(0L);
             List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(),
-                    cmd.getOwnerId(), 0L, Integer.MAX_VALUE-1, taskUpdateTime);
+                    cmd.getOwnerId(), 0L, Integer.MAX_VALUE - 1, taskUpdateTime);
 
             if(tasks != null && tasks.size() > 0) {
                 Set<Long> meterIds = new HashSet<>();
@@ -5062,6 +5087,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     dto.setStartReading(meter.getStartReading());
                     dto.setMeterStatus(meter.getStatus());
                     dto.setAutoFlag(meter.getAutoFlag());
+                    dto.setReading(task.getReading());
                     // 日读表差
                     dto.setDayPrompt(this.processDayPrompt(meter, meter.getNamespaceId()));
                     // 月读表差
@@ -5108,13 +5134,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
 
         }
+        LOGGER.info("auto reading auto meter ......");
+        try {
+            readMeterRemote(false ,cmd.getCommunityId());
+        }catch (Exception e){
+            LOGGER.error("auto reading error:{}", e);
+        }
         return response;
     }
 
     @Override
-    public void meterAutoReading() {
+    public void meterAutoReading(Boolean createPlansFlag) {
         LOGGER.debug("starting auto reading manual...");
-        readMeterRemote();
+        readMeterRemote(createPlansFlag,null);
         LOGGER.debug("ending auto reading manual...");
     }
 

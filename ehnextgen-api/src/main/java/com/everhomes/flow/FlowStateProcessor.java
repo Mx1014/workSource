@@ -15,6 +15,8 @@ public interface FlowStateProcessor {
 
     FlowCaseState prepareStepTimeout(FlowTimeout ft);
 
+    void createStepTimeout(FlowCaseState ctx, FlowNode currentRawNode);
+
     void normalStepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException;
 
     void normalStepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException;
@@ -28,4 +30,6 @@ public interface FlowStateProcessor {
     void rejectToNode(FlowCaseState ctx, Integer gotoLevel, FlowGraphNode currentNode);
 
     boolean allProcessorCompleteInCurrentNode(FlowCaseState ctx, FlowGraphNode currentNode, UserInfo firedUser);
+
+    void startStepEnter(FlowCaseState ctx, FlowGraphNode from);
 }

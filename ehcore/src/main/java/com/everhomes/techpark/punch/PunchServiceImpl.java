@@ -2741,6 +2741,11 @@ public class PunchServiceImpl implements PunchService {
             statistic.setUserName(member.getContactName());
             String depName = archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getDetailId()));
             statistic.setDeptName(depName);
+            //2018年5月17日 by wh 删除statistics提前到这里
+            List<Long> orgIds = new ArrayList<>();
+            orgIds.add(ownerId);
+            this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId());
+
             List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
                     dateSF.get().format(endCalendar.getTime()));
             List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -2786,25 +2791,25 @@ public class PunchServiceImpl implements PunchService {
             int abnormalRequestCount = approvalRequestProvider.countAbnormalUserRequest(member.getTargetId(), ownerId, new Date(startCalendar.getTime().getTime()),
                     new Date(endCalendar.getTime().getTime()));
             statistic.setExceptionRequestCounts(abnormalRequestCount);
-
-            //对于2017年9月的数据特殊处理 --- 兼容之前的
-            Calendar sepCalendar = Calendar.getInstance();
-            //设置为9月31日23点59分
-            sepCalendar.setTimeInMillis(1506873599000L);
-            if (startCalendar.before(sepCalendar)) {
-                statistic.setWorkDayCount((int) (statistic.getExceptionDayCount() + statistic.getWorkCount()));
-            }
-            List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/" + ownerId + "%", null);
-            List<Long> orgIds = new ArrayList();
-            if (null != organizations)
-                for (Organization org1 : organizations)
-                    orgIds.add(org1.getId());
-            this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getUserId());
-
+            //2018年5月17日 by wh 之前的特殊处理可以注释掉
+//            //对于2017年9月的数据特殊处理 --- 兼容之前的
+//            Calendar sepCalendar = Calendar.getInstance();
+//            //设置为9月31日23点59分
+//            sepCalendar.setTimeInMillis(1506873599000L);
+//            if (startCalendar.before(sepCalendar)) {
+//                statistic.setWorkDayCount((int) (statistic.getExceptionDayCount() + statistic.getWorkCount()));
+//            }
+//            List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/" + ownerId + "%", null);
+//            List<Long> orgIds = new ArrayList();
+//            if (null != organizations)
+//                for (Organization org1 : organizations)
+//                    orgIds.add(org1.getId());
+            
         } catch (Exception e) {
             LOGGER.error("#####refresh month log error!! userid:[" + member.getTargetId()
                     + "] organization id :[" + orgId + "] ", e);
         } finally {
+        	
             this.punchProvider.createPunchStatistic(statistic);
         }
 
@@ -2843,9 +2848,11 @@ public class PunchServiceImpl implements PunchService {
             	logs.add(offDutyLog);
             } 
            
-            
-            if (null != logs) {
+            //2018年5月17日 by wh ,因为这里logs 更改了,可能是个空数组要判断size
+            if (null != logs && logs.size() > 0) {
                 for (PunchLog log : logs) {
+                	if(null == log)
+                		continue;
                     if (log.getApprovalStatus() != null) {
                         processStatisticsTime(log, statistic, log.getApprovalStatus());
                     } else {
@@ -6733,10 +6740,8 @@ public class PunchServiceImpl implements PunchService {
     }
 
     @Override
-    public PunchSchedulingDTO importPunchScheduling(MultipartFile[] files) {
-        // TODO Auto-generated method stub
-
-        ArrayList resultList = new ArrayList();
+    public ArrayList processImportExcel2ArrayList(MultipartFile[] files){
+    	ArrayList resultList = new ArrayList();
         String rootPath = System.getProperty("user.dir");
         String filePath = rootPath + File.separator + UUID.randomUUID().toString() + ".xlsx";
         LOGGER.error("importOrganization-filePath=" + filePath);
@@ -6754,12 +6759,22 @@ public class PunchServiceImpl implements PunchService {
             resultList = PropMrgOwnerHandler.processorExcel(in);
         } catch (IOException e) {
             LOGGER.error("executeImportOrganization-parse file fail.message=" + e.getMessage());
-        } /*finally {
+        } finally{
+            File file = new File(filePath);
+            file.delete();
+        }
+        return resultList;
+    }
+    @Override
+    public PunchSchedulingDTO importPunchScheduling(MultipartFile[] files) {
+        // TODO Auto-generated method stub
+
+        /*finally {
             File file = new File(filePath);
 			if(file.exists())
 				file.delete();
 		}*/
-
+    	ArrayList resultList = processImportExcel2ArrayList(files);
         PunchSchedulingDTO result = convertToPunchSchedulings(resultList);
         addOperateLog(0L, "", result.toString(), 0L, "importPunchScheduling");
         return result;
@@ -8016,6 +8031,7 @@ public class PunchServiceImpl implements PunchService {
                     dto2 = convertPunchLog2DTO(pl);
                 }
                 intervalDTO.getPunchLogs().add(dto2);
+                LOGGER.debug("dto1 =" + dto1 + "dto 2 = " + dto2);
                 if (NormalFlag.fromCode(dto1.getSmartAlignment()) == NormalFlag.YES ||
                         NormalFlag.fromCode(dto2.getSmartAlignment()) == NormalFlag.YES) {
                     intervalDTO.setSmartAlignment(NormalFlag.YES.getCode());
@@ -8097,7 +8113,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
-//		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
+		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
         if (null == ptr) {
             return null;
         }
