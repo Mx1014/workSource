@@ -1358,8 +1358,6 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-        , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.STATUS)
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
         , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME)
                 .from(r)
