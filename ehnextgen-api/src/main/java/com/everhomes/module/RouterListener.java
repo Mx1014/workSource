@@ -41,7 +41,7 @@ public interface RouterListener {
 
 		Map<String, Object> parse = (Map)JSON.parse(queryJson);
 
-		if(parse.size() == 0){
+		if(parse == null || parse.size() == 0){
 			return null;
 		}
 		StringBuffer queryBuffer = new StringBuffer();
