@@ -7284,13 +7284,15 @@ public class ForumServiceImpl implements ForumService {
             }
             postDTO.setAttachments(attachmentDTOList);
         }
-        ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
-                ActivityPostCommand.class);
-        if (null != activityPostCommand) {
-            String url =  contentServerService.parserUri(activityPostCommand.getPosterUri(), EntityType.TOPIC.getCode(), 0L);
-            activityPostCommand.setPosterUrl(url);
+        if (!StringUtils.isEmpty(cmd.getEmbeddedJson())) {
+            ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                    ActivityPostCommand.class);
+            if (null != activityPostCommand) {
+                String url =  contentServerService.parserUri(activityPostCommand.getPosterUri(), EntityType.TOPIC.getCode(), 0L);
+                activityPostCommand.setPosterUrl(url);
+            }
+            postDTO.setEmbeddedJson(StringHelper.toJsonString(activityPostCommand));
         }
-        postDTO.setEmbeddedJson(StringHelper.toJsonString(activityPostCommand));
         return postDTO;
     }
 }
