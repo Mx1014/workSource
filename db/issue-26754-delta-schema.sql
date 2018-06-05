@@ -1,6 +1,6 @@
 CREATE TABLE `eh_sensitive_filter_record` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-  `namespaceId` BIGINT NOT NULL COMMENT '域空间ID',
+  `namespace_id` BIGINT NOT NULL COMMENT '域空间ID',
   `sensitive_words` VARCHAR(128) COMMENT '敏感词',
   `app_id` BIGINT COMMENT '应用ID',
   `creator_uid` BIGINT COMMENT '记录发布人userId' ,
