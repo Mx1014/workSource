@@ -98,7 +98,8 @@ public class RelocationController extends ControllerBase {
     @RequestMapping("admin/getRelocationConfig")
     @RestReturn(value=RelocationConfigDTO.class)
     public RestResponse getRelocationConfig(GetRelocationConfigCommand cmd) {
-        RestResponse response = new RestResponse(relocationConfigService.searchRelocationConfigById(cmd));
+        RelocationConfigDTO dto = relocationConfigService.searchRelocationConfigById(cmd);
+        RestResponse response = new RestResponse(dto == null ? new RelocationConfigDTO() : dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
