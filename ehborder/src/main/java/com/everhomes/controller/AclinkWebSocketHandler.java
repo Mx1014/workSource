@@ -222,7 +222,8 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         Map<String, String> params = new HashMap<String, String>();
         StringHelper.toStringMap(null, cmd, params);
         final AclinkWebSocketHandler handler = this;
-        
+        String uuid = uuidFromSession(session);
+        params.put("uuid", uuid);
         if(cmd.getPayload() != null) {
             LOGGER.info("Got reply = {}", cmd);    
         }

@@ -667,7 +667,7 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("excuteMessage")
     @RestReturn(value=String.class)
     public RestResponse excuteMessage(@Valid AclinkWebSocketMessage cmd) {
-        doorAccessService.excuteMessage(cmd.getPayload());
+        doorAccessService.excuteMessage(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

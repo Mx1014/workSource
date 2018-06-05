@@ -171,7 +171,11 @@ public interface AssetService {
     void reCalBill(ReCalBillCommand cmd);
 
     void modifySettledBill(ModifySettledBillCommand cmd);
-    
+
+    UploadCertificateInfoDTO uploadCertificate(UploadCertificateCommand cmd);
+
+	UploadCertificateInfoDTO listUploadCertificates(ListUploadCertificatesCommand cmd);
+
     JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
     
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);

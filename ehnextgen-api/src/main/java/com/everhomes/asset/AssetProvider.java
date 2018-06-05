@@ -166,7 +166,7 @@ public interface AssetProvider {
 
     PaymentAccount findPaymentAccount();
 
-    void changeBillStatusOnPaiedOff(List<Long> billIds);
+    //void changeBillStatusOnPaiedOff(List<Long> billIds);
 
 
     void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId,List<Long> communityIds);
@@ -313,6 +313,16 @@ public interface AssetProvider {
     boolean checkBillExistById(Long billId);
 
     String getAddressByBillId(Long id);
+
+    //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
+    
+	void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds, Integer paymentType);
+	
+	List<PaymentBillCertificate> listUploadCertificates(Long billId);
+	
+	String getCertificateNote(Long billId);
+	
+	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
     List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
 

@@ -50,7 +50,16 @@ public class ListBillDetailVO {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
+    private Byte billStatus;
     
+    public Byte getBillStatus() {
+		return billStatus;
+	}
+
+	public void setBillStatus(Byte billStatus) {
+		this.billStatus = billStatus;
+	}
+
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
     private BigDecimal amoutExemption;

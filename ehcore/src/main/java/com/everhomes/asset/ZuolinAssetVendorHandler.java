@@ -526,6 +526,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 dto.setIsPlus((byte)1);
             }
         }
+        //返回时增加缴费凭证留言和缴费凭证图片的信息（add by tangcen）
+        ListUploadCertificatesCommand listUploadCertificatesCommand = new ListUploadCertificatesCommand();
+        listUploadCertificatesCommand.setBillId(cmd.getBillId());
+        UploadCertificateInfoDTO uploadCertificateInfoDTO = assetService.listUploadCertificates(listUploadCertificatesCommand);
+        response.setCertificateNote(uploadCertificateInfoDTO.getCertificateNote());
+        response.setUploadCertificateDTOList(uploadCertificateInfoDTO.getUploadCertificateDTOList());
         return response;
     }
 
@@ -1169,8 +1175,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         if(claimedIdentifierByToken!=null){
                             cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
                         }
-                        cmd.setCustomerTel(data[j]);
                     }
+                    cmd.setCustomerTel(data[j]);
                 }
                 else if(headers[j].equals("*账单开始时间")){
                     cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));

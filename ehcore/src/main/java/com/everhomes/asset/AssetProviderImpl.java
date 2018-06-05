@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentAccounts;
+import com.everhomes.server.schema.tables.EhPaymentBillCertificate;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -126,7 +127,7 @@ public class AssetProviderImpl implements AssetProvider {
     public AssetBill findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
-
+        	
         query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
@@ -490,6 +491,8 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
+        Integer paymentType = cmd.getPaymentType();
+        Byte isUploadCertificate = cmd.getIsUploadCertificate();
         String buildingName = cmd.getBuildingName();//楼栋名称
         String apartmentName = cmd.getApartmentName();//门牌名称
         String customerTel = cmd.getCustomerTel();//客户手机号
@@ -540,6 +543,13 @@ public class AssetProviderImpl implements AssetProvider {
         }*/
         if(!org.springframework.util.StringUtils.isEmpty(customerTel)){
             query.addConditions(t.CUSTOMER_TEL.like("%"+customerTel+"%"));
+        }
+        if(paymentType!=null){
+            query.addConditions(t.PAYMENT_TYPE.eq(paymentType));
+        }
+        //只查询上传了缴费凭证的记录
+        if(isUploadCertificate!=null && isUploadCertificate == 1){
+        	query.addConditions(t.IS_UPLOAD_CERTIFICATE.eq(isUploadCertificate));
         }
         query.addOrderBy(t.DATE_STR.desc());
 //        query.addGroupBy(t.TARGET_NAME);
@@ -599,6 +609,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setContractId(String.valueOf(r.getContractId()));
             // 增加发票编号
             dto.setInvoiceNum(r.getInvoiceNumber());
+            //添加支付方式
+            dto.setPaymentType(r.getPaymentType());
             //增加账单时间
             dto.setDateStrBegin(r.getDateStrBegin());
             dto.setDateStrEnd(r.getDateStrEnd());
@@ -899,6 +911,17 @@ public class AssetProviderImpl implements AssetProvider {
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
                 });
+        //查询该账单id是否存在对应的缴费凭证记录
+        Result<Record> fetch = dslContext.select()
+        		.from(Tables.EH_PAYMENT_BILL_CERTIFICATE)
+        		.where(Tables.EH_PAYMENT_BILL_CERTIFICATE.BILL_ID.eq(billId))
+        		.fetch();
+        if(fetch.isNotEmpty()){
+        	response.setIsUploadCertificate((byte)1);
+        }else{
+        	response.setIsUploadCertificate((byte)0);
+        }
+        
         //后台设置了减免增收后，APP端需作为一个费项展现出来
         dslContext.select(exemption.AMOUNT,exemption.REMARKS)
 		    .from(exemption)
@@ -1336,7 +1359,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-        , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME)
+        , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.STATUS)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1357,6 +1380,7 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setBuildingName(f.getValue(r.BUILDING_NAME));
                     vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
                     vo.setContractNum(f.getValue(r.CONTRACT_NUM));
+                    vo.setBillStatus(f.getValue(r.STATUS));
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME)
@@ -1703,10 +1727,12 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         EhPaymentBillItems item = Tables.EH_PAYMENT_BILL_ITEMS.as("item");
         //BILL
+        //手动调整缴费状态时，需要将PAYMENT_TYPE置为0（线下支付）
         context.update(bill)
                 .set(bill.STATUS,(byte)1)
                 .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_OWED)
                 .set(bill.AMOUNT_OWED,new BigDecimal("0"))
+                .set(bill.PAYMENT_TYPE,0)
                 .where(bill.ID.eq(billId))
                 .execute();
         //bill item
@@ -2736,7 +2762,7 @@ public class AssetProviderImpl implements AssetProvider {
                 });
         return list.size() > 0 ? list.get(0) : null;
     }
-
+/*
     @Override
     public void changeBillStatusOnPaiedOff(List<Long> billIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -2761,6 +2787,37 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t1.AMOUNT_OWED,new BigDecimal("0"))
                 .where(t1.BILL_ID.in(billIds))
                 .execute();
+    }
+    */
+    
+    @Override
+    public void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds,Integer paymentType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+        //更新订单状态，记录订单的支付方式
+        context.update(t)
+                .set(t.STATUS,(byte)1)
+                .set(t.PAYMENT_TYPE,paymentType)
+                .where(t.ID.in(billIds))
+                .execute();
+        //更新各收费项的状态
+        context.update(t1)
+                .set(t1.STATUS,(byte)1)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+        //更改金钱
+        context.update(t)
+                .set(t.AMOUNT_OWED,new BigDecimal("0"))
+                .set(t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
+                .where(t.ID.in(billIds))
+                .execute();
+        context.update(t1)
+                .set(t1.AMOUNT_OWED,new BigDecimal("0"))
+                .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_OWED)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+
     }
 
     @Override
@@ -4480,8 +4537,66 @@ public class AssetProviderImpl implements AssetProvider {
         return map;
     }
 
+    //根据billId查询相应的凭证图片记录
+    @Override
+	public List<PaymentBillCertificate> listUploadCertificates(Long billId) {
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	SelectQuery<Record> selectQuery = dslContext.selectQuery();
+    	selectQuery.addFrom(Tables.EH_PAYMENT_BILL_CERTIFICATE);
+    	selectQuery.addConditions(Tables.EH_PAYMENT_BILL_CERTIFICATE.BILL_ID.eq(billId));
+    	List<PaymentBillCertificate> paymentBillCertificateList = selectQuery.fetch().map(r->{
+    		PaymentBillCertificate paymentBillCertificate = ConvertHelper.convert(r, PaymentBillCertificate.class);
+    		return paymentBillCertificate;
+    	});
+		return paymentBillCertificateList;
+	}
 
-
+    //根据billId查询对应的上传缴费凭证时的留言
+    @Override
+	public String getCertificateNote(Long billId) {
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	String certificateNote = dslContext.select(Tables.EH_PAYMENT_BILLS.CERTIFICATE_NOTE)
+    							.from(Tables.EH_PAYMENT_BILLS)
+    							.where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+    							.fetchOne(Tables.EH_PAYMENT_BILLS.CERTIFICATE_NOTE);
+		return certificateNote;
+	}
+    
+    //更新上传的缴费凭证的图片信息
+    @Override
+	public void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris) {
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhPaymentBillCertificateDao dao = new EhPaymentBillCertificateDao(dslContext.configuration());
+    	
+    	List<PaymentBillCertificate> list = new ArrayList<>();
+    	certificateUris.stream().forEach(r->{
+    		PaymentBillCertificate paymentBillCertificate = new PaymentBillCertificate();
+    		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillCertificate.class));
+    		paymentBillCertificate.setId(id);
+    		paymentBillCertificate.setBillId(billId);
+    		paymentBillCertificate.setCertificateUri(r);
+    		list.add(paymentBillCertificate);
+    	});
+    	
+    	this.dbProvider.execute((TransactionStatus status) -> {
+    		//更新上传凭证时附带的留言
+            dslContext.update(Tables.EH_PAYMENT_BILLS)
+                    .set(Tables.EH_PAYMENT_BILLS.CERTIFICATE_NOTE, certificateNote)
+                    .set(Tables.EH_PAYMENT_BILLS.IS_UPLOAD_CERTIFICATE, (byte)1)
+                    .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                    .execute();
+            //删除之前EH_PAYMENT_BILL_CERTIFICATE表中与该billId相关联的缴费凭证的记录
+            dslContext.delete(Tables.EH_PAYMENT_BILL_CERTIFICATE)
+            		.where(Tables.EH_PAYMENT_BILL_CERTIFICATE.BILL_ID.eq(billId))
+            		.execute();
+    		//重新添加缴费凭证图片信息
+            list.stream().forEach(r->{
+            	dao.insert(r);
+            });
+            return status;
+        });
+	}
+    
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
     }
@@ -4505,6 +4620,4 @@ public class AssetProviderImpl implements AssetProvider {
 	                .where(Tables.EH_CONTRACTS.ID.eq(contractId))
 	                .execute();
 	}
-
-
 }
