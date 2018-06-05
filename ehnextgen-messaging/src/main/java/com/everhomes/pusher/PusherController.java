@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,7 +156,14 @@ public class PusherController extends ControllerBase {
             device.setPusherServiceType(cmd.getPusherServiceType());
             
             this.deviceProvider.registDevice(device);
+        }else if(StringUtils.isBlank(device.getBundleId())||StringUtils.isBlank(device.getPusherServiceType())){
+        	//add by huanglm IOS推送升级需在注册设备时多传两个参数
+            device.setBundleId(cmd.getBundleId());
+            device.setPusherServiceType(cmd.getPusherServiceType());
+            
+            this.deviceProvider.updateDevice(device);
         }
+        
         return new RestResponse(ConvertHelper.convert(device, DeviceDTO.class));
     }
 
