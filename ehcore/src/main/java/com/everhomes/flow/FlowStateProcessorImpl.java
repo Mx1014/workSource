@@ -616,6 +616,31 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         currentNode.fireAction(ctx);
 
         //create step timeout
+        createStepTimeout(ctx, currentRawNode);
+
+        if (logStep && log == null) {
+            UserInfo firedUser = ctx.getOperator();
+            log = new FlowEventLog();
+            log.setId(flowEventLogProvider.getNextId());
+            log.setFlowMainId(flowGraph.getFlow().getFlowMainId());
+            log.setFlowVersion(flowGraph.getFlow().getFlowVersion());
+            log.setNamespaceId(flowGraph.getFlow().getNamespaceId());
+            log.setFlowNodeId(currentRawNode.getId());
+            log.setParentId(0L);
+            log.setFlowCaseId(ctx.getFlowCase().getId());
+            if (firedUser != null) {
+                log.setFlowUserId(firedUser.getId());
+                log.setFlowUserName(firedUser.getNickName());
+            }
+            log.setButtonFiredStep(fromStep.getCode());
+            log.setLogType(FlowLogType.STEP_TRACKER.getCode());
+            log.setStepCount(ctx.getFlowCase().getStepCount());
+            ctx.getLogs().add(log);    //added but not save to database now.
+        }
+    }
+
+    @Override
+    public void createStepTimeout(FlowCaseState ctx, FlowNode currentRawNode) {
         if (!currentRawNode.getAllowTimeoutAction().equals((byte) 0)) {
             FlowTimeout ft = new FlowTimeout();
             ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
@@ -637,26 +662,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + currentRawNode.getAutoStepMinute() * 60 * 1000L;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
             ctx.getTimeouts().add(ft);
-        }
-
-        if (logStep && log == null) {
-            UserInfo firedUser = ctx.getOperator();
-            log = new FlowEventLog();
-            log.setId(flowEventLogProvider.getNextId());
-            log.setFlowMainId(flowGraph.getFlow().getFlowMainId());
-            log.setFlowVersion(flowGraph.getFlow().getFlowVersion());
-            log.setNamespaceId(flowGraph.getFlow().getNamespaceId());
-            log.setFlowNodeId(currentRawNode.getId());
-            log.setParentId(0L);
-            log.setFlowCaseId(ctx.getFlowCase().getId());
-            if (firedUser != null) {
-                log.setFlowUserId(firedUser.getId());
-                log.setFlowUserName(firedUser.getNickName());
-            }
-            log.setButtonFiredStep(fromStep.getCode());
-            log.setLogType(FlowLogType.STEP_TRACKER.getCode());
-            log.setStepCount(ctx.getFlowCase().getStepCount());
-            ctx.getLogs().add(log);    //added but not save to database now.
         }
     }
 
