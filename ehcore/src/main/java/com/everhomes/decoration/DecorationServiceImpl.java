@@ -451,13 +451,14 @@ public class DecorationServiceImpl implements  DecorationService {
             dto.setStatus(r.getStatus());
             if (r.getApplyPhone().equals(cmd.getPhone())) {
                 dto.setProcessorType(ProcessorType.MASTER.getCode());
+            }
+            else if (r.getDecoratorPhone().equals(cmd.getPhone())) {
+                dto.setProcessorType(ProcessorType.CHIEF.getCode());
                 if (r.getDecoratorUid() == null){
                     r.setDecoratorUid(UserContext.currentUserId());
                     this.decorationProvider.updateDecorationRequest(r);
                 }
             }
-            else if (r.getDecoratorPhone().equals(cmd.getPhone()))
-                dto.setProcessorType(ProcessorType.CHIEF.getCode());
             else
                 dto.setProcessorType(ProcessorType.WORKER.getCode());
             dto.setCancelFlag(r.getCancelFlag());
