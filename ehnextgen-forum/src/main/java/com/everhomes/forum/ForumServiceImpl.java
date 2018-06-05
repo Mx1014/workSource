@@ -7295,6 +7295,36 @@ public class ForumServiceImpl implements ForumService {
             String embeddedJson = postDTO.getEmbeddedJson().replace("endTime","stopTime");
             postDTO.setEmbeddedJson(embeddedJson);
         }
+        User user =  UserContext.current().getUser();
+        if(user != null){
+            if (user.getCommunityId() != null && StringUtils.isEmpty(postDTO.getCreatorCommunityName())) {
+                Community community = communityProvider.findCommunityById(user.getCommunityId());
+                if(community != null){
+                    postDTO.setCreatorCommunityName(community.getName());
+                }
+            }
+            if (StringUtils.isEmpty(postDTO.getCreatorNickName())) {
+                postDTO.setCreatorNickName(user.getNickName());
+            }
+        }
+        if (postDTO.getCreateTime() == null) {
+            Timestamp timeStamp = new Timestamp(new Date().getTime());
+            postDTO.setCreateTime(timeStamp);
+        }
+        if(postDTO.getForumEntryId() == null){
+            postDTO.setForumEntryId(0L);
+        }
+        //没有forumId，则设置当前域空间默认的forumId
+        if(cmd.getForumId() == null) {
+            setNamespaceDefaultForumId(cmd);
+            postDTO.setForumId(cmd.getForumId());
+        }
+        if(postDTO.getInteractFlag() == null){
+            postDTO.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        }
+        if(postDTO.getLikeFlag() == null){
+            postDTO.setLikeFlag(UserLikeType.NONE.getCode());
+        }
         return postDTO;
     }
 }
