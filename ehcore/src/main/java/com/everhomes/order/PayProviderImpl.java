@@ -1,14 +1,24 @@
 //@formatter:off
 package com.everhomes.order;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.pay.order.PaymentDTO;
 import com.everhomes.pay.order.PaymentType;
-import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -19,6 +29,7 @@ import com.everhomes.server.schema.tables.daos.EhPaymentWithdrawOrdersDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
 import com.everhomes.server.schema.tables.pojos.EhPaymentWithdrawOrders;
+import com.everhomes.server.schema.tables.records.EhNamespacePayMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentOrderRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentTypesRecord;
@@ -27,13 +38,6 @@ import com.everhomes.server.schema.tables.records.EhPaymentWithdrawOrdersRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import org.jooq.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class PayProviderImpl implements PayProvider {
@@ -257,4 +261,13 @@ public class PayProviderImpl implements PayProvider {
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentWithdrawOrders.class, order.getId());
     }
+    
+    @Override
+    public EhNamespacePayMappingsRecord getNamespacePayMapping(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhNamespacePayMappingsRecord>  query = context.selectQuery(Tables.EH_NAMESPACE_PAY_MAPPINGS);
+        query.addConditions(Tables.EH_NAMESPACE_PAY_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
+        return query.fetchOneInto(EhNamespacePayMappingsRecord.class);
+    }
+
 }

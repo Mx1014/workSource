@@ -13,6 +13,9 @@ import com.everhomes.util.StringHelper;
  * <li>billingDay:出账单日</li>
  * <li>dueDay:最晚还款日</li>
  * <li>dueDayType:最晚还款日的单位，1：日；2：月</li>
+ * <li>bizPayeeAccount:收款方账户名称</li>
+ * <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
+ * <li>bizPayeeId:收款方账户id</li>
  *</ul>
  */
 public class ListBillGroupsDTO {
@@ -24,6 +27,10 @@ public class ListBillGroupsDTO {
     private Byte billDayType;
     private Integer dueDay;
     private Byte dueDayType;
+    
+    private String bizPayeeAccount;
+    private String bizPayeeType;
+    private String bizPayeeId;
 
     public Byte getBillDayType() {
         return billDayType;
@@ -97,4 +104,28 @@ public class ListBillGroupsDTO {
     public ListBillGroupsDTO() {
 
     }
+
+	public String getBizPayeeAccount() {
+		return bizPayeeAccount;
+	}
+
+	public void setBizPayeeAccount(String bizPayeeAccount) {
+		this.bizPayeeAccount = bizPayeeAccount;
+	}
+
+	public String getBizPayeeType() {
+		return bizPayeeType;
+	}
+
+	public void setBizPayeeType(String bizPayeeType) {
+		this.bizPayeeType = bizPayeeType;
+	}
+
+	public String getBizPayeeId() {
+		return bizPayeeId;
+	}
+
+	public void setBizPayeeId(String bizPayeeId) {
+		this.bizPayeeId = bizPayeeId;
+	}
 }
