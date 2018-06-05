@@ -18,6 +18,10 @@ public class ApprovalFlowIdsCommand {
     public ApprovalFlowIdsCommand() {
     }
 
+    public ApprovalFlowIdsCommand(List<Long> flowCaseIds) {
+        this.flowCaseIds = flowCaseIds;
+    }
+
     public List<Long> getFlowCaseIds() {
         return flowCaseIds;
     }

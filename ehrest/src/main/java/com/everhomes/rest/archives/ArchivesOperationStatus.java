@@ -11,20 +11,20 @@ public enum ArchivesOperationStatus {
         this.code = code;
     }
 
-    public Byte getCode() {
-        return code;
+    private ArchivesOperationStatus(byte code) {
+        this.code = code;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public byte getCode() {
+        return this.code;
     }
 
     public static ArchivesOperationStatus fromCode(Byte code) {
-        if (code != null) {
-            for (ArchivesOperationStatus a : ArchivesOperationStatus.values()) {
-                if (code.byteValue() == a.getCode().byteValue()) {
-                    return a;
+        if(code != null) {
+            ArchivesOperationStatus[] values = ArchivesOperationStatus.values();
+            for(ArchivesOperationStatus value : values) {
+                if(code.byteValue() == value.code) {
+                    return value;
                 }
             }
         }

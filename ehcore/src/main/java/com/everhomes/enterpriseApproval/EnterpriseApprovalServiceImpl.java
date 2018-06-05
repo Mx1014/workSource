@@ -813,30 +813,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return dto;
     }
 
-    /*@Override
-    public CheckArchivesApprovalResponse checkArchivesApproval(CheckArchivesApprovalCommand cmd) {
-        CheckArchivesApprovalResponse response = new CheckArchivesApprovalResponse();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        response.setFlag(TrueOrFalseFlag.FALSE.getCode());
-
-        SearchFlowCaseCommand command = new SearchFlowCaseCommand();
-        command.setOrganizationId(cmd.getOrganizationId());
-        command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
-        command.setNamespaceId(namespaceId);
-        command.setModuleId(EnterpriseApprovalController.MODULE_ID);
-        command.setUserId(cmd.getUserId());
-
-        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(new ListingLocator(), Integer.MAX_VALUE - 1, command, (locator1, query) -> {
-            query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(cmd.getApprovalId()));
-            query.addConditions(Tables.EH_FLOW_CASES.REFER_TYPE.eq("approval"));
-            query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
-            return query;
-        });
-        if (details != null && details.size() > 0)
-            response.setFlag(TrueOrFalseFlag.TRUE.getCode());
-        return response;
-    }*/
-
     private EnterpriseApprovalDTO processEnterpriseApproval(Integer namespaceId, GeneralApproval r) {
         EnterpriseApproval ea = ConvertHelper.convert(r, EnterpriseApproval.class);
         EnterpriseApprovalDTO dto = ConvertHelper.convert(ea, EnterpriseApprovalDTO.class);

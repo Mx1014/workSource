@@ -78,6 +78,8 @@ public interface ArchivesService {
 
     void deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd);
 
+    void cancelArchivesOperation(Integer namespaceId, Long detailId, Byte operationType);
+
     void executeArchivesConfiguration();
 
     void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd);
