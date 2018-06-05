@@ -627,6 +627,7 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractType.NEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		} else if(ContractType.RENEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
+			
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_RENEW, cmd.getOrgId(), cmd.getCommunityId());
 		} else if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))) {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CHANGE, cmd.getOrgId(), cmd.getCommunityId());
@@ -669,7 +670,9 @@ public class ContractServiceImpl implements ContractService {
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
-
+		//添加合同日志 by tangcen
+		saveContractEvent(ContractTrackingTemplateCode.ADD,contract ,null);
+		
 		//调用计算明细
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -1311,6 +1314,8 @@ public class ContractServiceImpl implements ContractService {
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		contractProvider.updateContract(contract);
+		//记录合同事件日志，by tangcen
+		saveContractEvent(ContractTrackingTemplateCode.UPDATE,contract ,exist);
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
@@ -1329,6 +1334,11 @@ public class ContractServiceImpl implements ContractService {
 		});
 
 		return ConvertHelper.convert(contract, ContractDetailDTO.class);
+	}
+	
+	@Override
+	public void saveContractEvent(int opearteType,Contract contract, Contract exist) {
+		contractProvider.saveContractEvent(opearteType,contract,exist);
 	}
 
 	@Override
@@ -1386,7 +1396,6 @@ public class ContractServiceImpl implements ContractService {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
 					//26058  已售的状态不变
 					if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
-						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
 					}
 

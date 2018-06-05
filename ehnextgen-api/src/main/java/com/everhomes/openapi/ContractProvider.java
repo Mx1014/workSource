@@ -81,4 +81,6 @@ public interface ContractProvider {
 	ContractCategory findContractCategoryById(Long categoryId);
 
 	void updateContractCategory(ContractCategory contractCategory);
+	//记录合同修改日志
+	void saveContractEvent(int i, Contract contract, Contract exist);
 }

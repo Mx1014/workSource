@@ -4,6 +4,7 @@ package com.everhomes.contract;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.asset.szwwyjf.SZWQuery;
 import com.everhomes.community.Community;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
@@ -208,6 +209,12 @@ public class SZWContractHandler implements ContractService{
 		String request = cmd.getContractNumber();
 		ContractDetailDTO response = szwQuery.findContractForApp(request);
 		return response;
+	}
+
+	@Override
+	public void saveContractEvent(int i, Contract contract, Contract exist) {
+		// TODO 记录合同修改日志
+		
 	}
 
 

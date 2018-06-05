@@ -1,20 +1,34 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.everhomes.contract.ContractCategory;
+import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.customer.CustomerEvent;
+import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
+import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhContractAttachments;
+import com.everhomes.server.schema.tables.EhContractEvents;
 import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
@@ -28,13 +42,21 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
 import com.everhomes.server.schema.tables.pojos.EhNewsCategories;
 import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.varField.FieldParams;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeFieldItem;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -60,8 +82,11 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEventsDao;
 import com.everhomes.server.schema.tables.daos.EhNewsCategoriesDao;
 import com.everhomes.util.ConvertHelper;
+
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 @Component
@@ -73,6 +98,16 @@ public class ContractProviderImpl implements ContractProvider {
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+	
+	@Autowired
+	private FieldService fieldService;
+	
+	@Autowired
+	private FieldProvider fieldProvider;
+	
 
 	@Override
 	public void createContract(Contract contract) {
@@ -686,7 +721,165 @@ public class ContractProviderImpl implements ContractProvider {
 		new EhContractCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).update(contractCategory);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, ContractCategory.class, null);
 	}
+	
+	//记录合同修改日志 by tangcen
+	@Override
+	public void saveContractEvent(int opearteType, Contract contract, Contract exist) {	
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY
+		String content = null;
+		switch(opearteType){
+		case 1 : 
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+			break;
+		case 2 :
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+			break;
+		case 3 :
+			content = compareContract(contract,exist);
+			break;
+		default :
+			break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			ContractEvents event = new ContractEvents(); 
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
+			event.setId(id);
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setContractId(contract.getId());	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOpearteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			event.setOpearteType((byte)opearteType);
+	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractEvents.class, id));
+	        LOGGER.info("saveContractEventWithInsert: " + event);
+	        //EhContractEventsDao dao = new EhContractEventsDao();
+	        //dao.insert(event);
+	        EhContractEvents t = Tables.EH_CONTRACT_EVENTS;
+	        context
+	        	.insertInto(t, t.ID, t.NAMESPACE_ID, t.CONTRACT_ID, t.OPERATOR_UID, t.OPEARTE_TIME, t.OPEARTE_TYPE, t.CONTENT)
+	        	.values(event.getId(),event.getNamespaceId(),
+	        			event.getContractId(),event.getOperatorUid(),
+	        			event.getOpearteTime(),event.getOpearteType(),
+	        			event.getContent())
+	        	.execute();
+	        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractEvents.class, null);
+		}
+	}
+	
+	//比较已存在的contract和待修改的contract的区别,by tangcen
+	private String compareContract(Contract contract, Contract exist) {
+		//查出模板配置的参数
+		ListFieldCommand command = new ListFieldCommand();
+		command.setNamespaceId(contract.getNamespaceId());
+		command.setModuleName(ContractTrackingTemplateCode.MODULE_NAME);
+		command.setGroupPath(ContractTrackingTemplateCode.GROUP_PATH);
+		command.setCommunityId(contract.getCommunityId());
+		List<FieldDTO> fields = fieldService.listFields(command);
+		String  getPrefix = "get";
+		StringBuffer buffer = new StringBuffer();
+		if(null != fields && fields.size() > 0){
+			for(FieldDTO field : fields){
+				String getter = getPrefix + StringUtils.capitalize(field.getFieldName());
+				Method methodNew = ReflectionUtils.findMethod(contract.getClass(), getter);
+				Method methodOld = ReflectionUtils.findMethod(exist.getClass(), getter);
+                String fieldType = field.getFieldType();
+				Object objNew = null;
+				Object objOld = null;
+				try {
+					if(null != methodNew && null != exist){
+						objNew = methodNew.invoke(contract, new Object[] {});
+						objOld = methodOld.invoke(exist, new Object[] {});
+					}
+				} catch (Exception e) {
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_TRACKING_NOT_EXIST,
+		                    "reflect exception");
+				}
+				
+				if(null != objNew || null != objOld){
+					//解决前端传过来的值和后端获取的值不等的问题（比如前端传1000，后端获取的是1000.00,如不处理则会判断为不相等）
+					if ("downpayment".equals(field.getFieldName()) && null != objNew && null != objOld) {
+						BigDecimal newDownpayment = (BigDecimal)objNew;
+						BigDecimal oldDownpayment = (BigDecimal)objOld;
+						if (newDownpayment.compareTo(oldDownpayment)==0) {
+							continue;
+						}
+					}
+					if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
+						String  content = "";
+						String  newData = objNew == null ? "空" : objNew.toString();
+						String  oldData = objOld == null ? "空" : objOld.toString();
+                        LOGGER.debug("compareContract FieldName: {}; newData: {}; oldData: {}",
+                                field.getFieldName(), newData, oldData);
+						if(field.getFieldName().lastIndexOf("ItemId") > -1){
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+					        if(levelItemNew != null) {
+					        	newData = levelItemNew.getItemDisplayName();
+					        }
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        if(levelItemOld != null) {
+					        	oldData = levelItemOld.getItemDisplayName();
+					        }
+						}
 
+                        FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
+                        if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
+                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+                            if(levelItemNew != null) {
+                                newData = levelItemNew.getItemDisplayName();
+                            }
+                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+                            if(levelItemOld != null) {
+                                oldData = levelItemOld.getItemDisplayName();
+                            }
+                        }
+                        if((params.getFieldParamType().equals("datetime"))){
+                            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                            if (objNew != null) {
+                            	newData = sdf.format((Timestamp)objNew); 
+							}
+                            if (objOld != null) {
+                            	oldData = sdf.format((Timestamp)objOld);
+							} 
+                        }
+//						if("propertyType".equals(field.getFieldName())){
+//							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+//					        if(levelItemNew != null) {
+//					        	newData = levelItemNew.getItemDisplayName();
+//					        }
+//					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+//					        if(levelItemOld != null) {
+//					        	oldData = levelItemOld.getItemDisplayName();
+//					        }
+//						}
+//                        if("trackingUid".equals(field.getFieldName())) {
+//                            if("-1".equals(oldData)) {
+//                                oldData = "空";
+//                            } else {
+//                                oldData = exist.getTrackingName();
+//                            }
+//
+//                            if("-1".equals(newData)) {
+//                                newData = "空";
+//                            } else {
+//                                newData = customer.getTrackingName();
+//                            }
+//
+//                        }
+						Map<String,Object> map = new HashMap<String,Object>();
+						map.put("display", field.getFieldDisplayName());
+						map.put("oldData", oldData);
+						map.put("newData", newData);
+						content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.UPDATE, UserContext.current().getUser().getLocale(), map, "");
+						buffer.append(content);
+						buffer.append(";");
+					}
+				}
+			}
+		}
+		//去除最后一个分号
+		return buffer.toString().length() > 0 ? buffer.toString().substring(0,buffer.toString().length() -1) : buffer.toString();
+	}
+	
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
@@ -710,4 +903,5 @@ public class ContractProviderImpl implements ContractProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
 }
