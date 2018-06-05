@@ -17,7 +17,6 @@ import javax.validation.constraints.NotNull;
  * <li>billDayType:出账单日类型，1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期第几日</li>
  * <li>dueDay:最晚还款日</li>
  * <li>dueDayType:最晚还款日的单位类型，1:日; 2:月</li>
- * <li>bizPayeeAccount:收款方账户名称</li>
  * <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
  * <li>bizPayeeId:收款方账户id</li>
  *</ul>
@@ -41,9 +40,8 @@ public class CreateBillGroupCommand {
     private Integer dueDay;
     @NotNull
     private Byte dueDayType;
-    private String bizPayeeAccount;
     private String bizPayeeType;
-    private String bizPayeeId;
+    private Long bizPayeeId;
 
     @Override
     public String toString() {
@@ -126,14 +124,6 @@ public class CreateBillGroupCommand {
 
     }
 
-	public String getBizPayeeAccount() {
-		return bizPayeeAccount;
-	}
-
-	public void setBizPayeeAccount(String bizPayeeAccount) {
-		this.bizPayeeAccount = bizPayeeAccount;
-	}
-
 	public String getBizPayeeType() {
 		return bizPayeeType;
 	}
@@ -142,11 +132,12 @@ public class CreateBillGroupCommand {
 		this.bizPayeeType = bizPayeeType;
 	}
 
-	public String getBizPayeeId() {
+	public Long getBizPayeeId() {
 		return bizPayeeId;
 	}
 
-	public void setBizPayeeId(String bizPayeeId) {
+	public void setBizPayeeId(Long bizPayeeId) {
 		this.bizPayeeId = bizPayeeId;
 	}
+
 }

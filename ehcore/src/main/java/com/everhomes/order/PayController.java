@@ -6,6 +6,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
+import com.everhomes.server.schema.tables.records.EhNamespacePayMappingsRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.util.RequireAuthentication;

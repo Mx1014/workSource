@@ -85,11 +85,11 @@ public class PayProviderImpl implements PayProvider {
     }
 
     @Override
-    public PaymentAccount findPaymentAccountBySystemId(Integer systemId) {
+    public PaymentAccount findPaymentAccountBySystemId(Long systemId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhPaymentAccountsRecord>  query = context.selectQuery(Tables.EH_PAYMENT_ACCOUNTS);
         if(systemId != null){
-            query.addConditions(Tables.EH_PAYMENT_ACCOUNTS.SYSTEM_ID.eq(systemId));
+            query.addConditions(Tables.EH_PAYMENT_ACCOUNTS.SYSTEM_ID.eq(systemId.intValue()));
         }
         return query.fetchOneInto(PaymentAccount.class);
     }

@@ -73,7 +73,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         QueryBuilder queryBuilder = payCmd.builder();
         queryBuilder.select(
                 PaymentAttributes.ID.spec(),
-                PaymentAttributes.ACCOUNT_ID.spec(),
+                //PaymentAttributes.ACCOUNT_ID.spec(),
+                PaymentAttributes.ACCOUNT_CODE.spec(),
                 PaymentAttributes.USER_ID.spec(),//支付系统用户id
                 PaymentAttributes.BIZ_SYSTEM_ID.spec(),//子系统id
                 PaymentAttributes.CLIENT_APP_ID.spec(),//客户端id
