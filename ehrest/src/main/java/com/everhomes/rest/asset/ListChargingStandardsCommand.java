@@ -28,9 +28,17 @@ public class ListChargingStandardsCommand {
 
     private Integer namespaceId;
     private Long categoryId;
+    private Long moduleId;
 
+    public Long getModuleId() {
+		return moduleId;
+	}
 
-    public Long getCategoryId() {
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public Long getCategoryId() {
         return categoryId;
     }
 
