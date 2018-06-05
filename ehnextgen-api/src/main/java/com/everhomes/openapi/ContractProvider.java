@@ -81,4 +81,6 @@ public interface ContractProvider {
 	ContractCategory findContractCategoryById(Long categoryId);
 
 	void updateContractCategory(ContractCategory contractCategory);
+
+    boolean isNormal(Long cid);
 }

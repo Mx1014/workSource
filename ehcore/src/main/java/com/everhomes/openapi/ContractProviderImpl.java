@@ -690,6 +690,24 @@ public class ContractProviderImpl implements ContractProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, ContractCategory.class, null);
 	}
 
+	@Override
+	public boolean isNormal(Long cid) {
+		List<Byte> cids = getReadOnlyContext().select(Tables.EH_CONTRACTS.STATUS)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.ID.eq(cid))
+				.fetch(Tables.EH_CONTRACTS.STATUS);
+		if(cids == null || cids.size() < 1){
+			return false;
+		}
+		if(cids.size() == 1){
+            Byte aByte = cids.get(0);
+            if(aByte != 7 && aByte != 8 && aByte != 9 && aByte != 10){
+                return true;
+            }
+        }
+		return false;
+	}
+
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
