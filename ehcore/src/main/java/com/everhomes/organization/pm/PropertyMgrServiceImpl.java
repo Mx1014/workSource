@@ -6670,16 +6670,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	private List<ImportFileResultLog<ImportOrganizationOwnerDTO>> importOrganizationOwnerData(long organizationId, Long communityId, Integer namespaceId, List<ImportOrganizationOwnerDTO> datas) {
 		List<ImportFileResultLog<ImportOrganizationOwnerDTO>> resultLogs = new ArrayList<>();
+		List<String> contactTokenList = new ArrayList<>();
 		if(datas==null || datas.size()==0){
 			return resultLogs ;
 		}
-		List<String> contactTokenList = new ArrayList<>();
 
 		for (ImportOrganizationOwnerDTO dto : datas) {
 			ImportFileResultLog<ImportOrganizationOwnerDTO> log = new ImportFileResultLog<>(PropertyServiceErrorCode.SCOPE);
+			CommunityPmOwner owner = ConvertHelper.convert(dto, CommunityPmOwner.class);
 			// 校验必填项目
 			Boolean mandatoryFlag = Stream.of(dto.getContactName(), dto.getContactType(), dto.getContactToken(), dto.getGender(), dto.getBuilding(), dto.getAddress(), dto.getLivingStatus()).anyMatch(StringUtils::isEmpty);
-			if(mandatoryFlag){
+			if (mandatoryFlag) {
 				LOGGER.error("organization owner mandatory column is empty, data = {}", dto);
 				log.setData(dto);
 				log.setErrorLog("eorganization owner mandatory column is empty");
@@ -6706,6 +6707,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				resultLogs.add(log);
 				continue;
 			}
+			//校验入驻状态
+			if (null == parseLivingStatus(dto.getLivingStatus())) {
+				LOGGER.error("living status is not illegal  , data = {}", dto);
+				log.setData(dto);
+				log.setErrorLog("living status is not illegal ");
+				log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_LIVING_STATUS_FORMAT_ERROR);
+				resultLogs.add(log);
+				continue;
+			}
 
 			// 检查手机号的唯一性
 			if (contactTokenList.contains(dto.getContactToken())) {
@@ -6713,14 +6723,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId, communityId, dto.getContactToken());
 				if (pmOwners != null && !pmOwners.isEmpty()) {
 					CommunityPmOwner pmOwner = pmOwners.get(0);
-					Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
-					createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, pmOwner.getId(), OrganizationOwnerAddressAuthType.INACTIVE);
-					if (StringUtils.hasLength(dto.getLivingTime())) {
-						long time = parseDate(dto.getLivingTime()).getTime();
-						createOrganizationOwnerBehavior(pmOwner.getId(), address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
-					}
+					owner.setId(pmOwner.getId());
 				}
-				continue;
 			}
 			contactTokenList.add(dto.getContactToken());
 			// 校验手机号
@@ -6729,8 +6733,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				LOGGER.error("organization owner contact phone is exists in this community  , data = {}", dto);
 				log.setData(dto);
 				log.setErrorLog("organization owner contact phone is exists in this community ");
-				log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_DATE_FORMAT_ERROR);
+				log.setCode(PropertyServiceErrorCode.ERROR_OWNER_EXIST);
 				resultLogs.add(log);
+			}
+			owner.setNamespaceId(namespaceId);
+			owner.setCreatorUid(UserContext.currentUserId());
+			owner.setOrganizationId(organizationId);
+			owner.setCommunityId(communityId == null ? null : communityId.toString());
+			owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
+			owner.setAddressId(address.getId());
+			Long ownerId = owner.getId();
+			if (ownerId == null) {
+				ownerId = propertyMgrProvider.createPropOwner(owner);
+				pmOwnerSearcher.feedDoc(owner);
+				Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
+				createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
+			}
+			if (StringUtils.hasLength(dto.getLivingTime())) {
+				long time = parseDate(dto.getLivingTime()).getTime();
+				createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
 			}
 		}
 		return resultLogs;
@@ -6856,8 +6877,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE, livingStatus, currentLocale());
 		if (localeString == null) {
 			LOGGER.error("The livingStatus {} is invalid.", livingStatus);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
-					"The livingStatus %s is invalid.", livingStatus);
+//			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
+//					"The livingStatus %s is invalid.", livingStatus);
+			return null;
 		}
 		return Byte.valueOf(localeString.getCode());
 	}
