@@ -53,6 +53,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import sun.rmi.runtime.Log;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -446,14 +448,31 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				appDTO.setClientHandlerType(serviceModule.getClientHandlerType());
 
 				if(ClientHandlerType.fromCode(serviceModule.getClientHandlerType()) == ClientHandlerType.NATIVE){
+
+					String query = "appId=" + app.getOriginId();
+					try {
+						// 加上默认的参数appId和title
+						query = query + "&title=" + URLEncoder.encode(app.getName(), "UTF-8");
+					} catch (UnsupportedEncodingException e) {
+						LOGGER.warn("query encode, query=", query);
+					}
+
 					RouterInfo routerInfo = routerService.getRouterInfo(app.getModuleId(), "/index", app.getInstanceConfig());
 					if(routerInfo != null){
 						appDTO.setRouterPath(routerInfo.getPath());
-						appDTO.setRouterQuery(routerInfo.getQuery());
+						if(routerInfo.getQuery() != null){
+							query = query  + "&" + routerInfo.getQuery();
+						}
+						appDTO.setRouterQuery(query);
+
 					}else {
 						//没有实现接口的模块默认的返回
 						appDTO.setRouterPath("/index");
-						appDTO.setRouterQuery(routerService.getQueryInDefaultWay(app.getInstanceConfig()));
+						String queryInDefaultWay = routerService.getQueryInDefaultWay(app.getInstanceConfig());
+						if(queryInDefaultWay != null){
+							query = query  + "&" + queryInDefaultWay;
+						}
+						appDTO.setRouterQuery(query);
 					}
 				}
 

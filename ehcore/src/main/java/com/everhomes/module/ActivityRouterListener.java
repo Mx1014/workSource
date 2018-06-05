@@ -4,8 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.everhomes.rest.common.ActivityActionData;
 import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +17,8 @@ import java.util.Map;
 
 @Component
 public class ActivityRouterListener implements RouterListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RouterInfoServiceImpl.class);
 
     @RouterPath(path = "/index")
     public RouterInfo getIndexRouterInfo(String queryJson){
@@ -49,16 +55,26 @@ public class ActivityRouterListener implements RouterListener {
         StringBuffer queryBuffer = new StringBuffer();
 
         for (Map.Entry entry: parse.entrySet()){
-            if(entry.getKey().equals("categoryDTOList")){
+            if(entry.getKey().equals("categoryDTOList") || entry.getKey().equals("title")){
                 continue;
             }
-            queryBuffer.append(entry.getKey());
-            queryBuffer.append("=");
-            queryBuffer.append(entry.getValue());
-            queryBuffer.append("&");
+            try {
+                queryBuffer.append(entry.getKey());
+                queryBuffer.append("=");
+                queryBuffer.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
+                queryBuffer.append("&");
+            } catch (UnsupportedEncodingException e) {
+                //给出错误提示信息
+                LOGGER.error("ActivityRouterListener getQueryString URLEncoder.encode fail, queryJson={} ", queryJson);
+            }
+
         }
 
-        return queryBuffer.substring(0, queryBuffer.length() - 1);
+        if(queryBuffer.length() > 0 ){
+            return queryBuffer.substring(0, queryBuffer.length() - 1);
+        }
+
+        return null;
     }
 
 }

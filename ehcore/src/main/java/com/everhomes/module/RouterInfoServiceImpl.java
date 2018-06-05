@@ -102,19 +102,22 @@ public class RouterInfoServiceImpl implements RouterService {
         StringBuffer queryBuffer = new StringBuffer();
 
         for (Map.Entry entry: parse.entrySet()){
-            queryBuffer.append(entry.getKey());
-            queryBuffer.append("=");
-            queryBuffer.append(entry.getValue());
-            queryBuffer.append("&");
+            try {
+                queryBuffer.append(entry.getKey());
+                queryBuffer.append("=");
+                queryBuffer.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
+                queryBuffer.append("&");
+            } catch (UnsupportedEncodingException e) {
+                //给出错误提示信息
+                logger.error("getQueryInDefaultWay URLEncoder.encode fail, queryJson={} ", queryJson);
+            }
+
         }
 
-        String query = queryBuffer.substring(0, queryBuffer.length() - 1);
-        try {
-            query = URLEncoder.encode(query,"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            //给出错误提示信息
-            logger.error("RouterQuery进行转码失败");
+        if(queryBuffer.length() > 0 ){
+            return queryBuffer.substring(0, queryBuffer.length() - 1);
         }
-        return query;
+
+        return null;
     }
 }

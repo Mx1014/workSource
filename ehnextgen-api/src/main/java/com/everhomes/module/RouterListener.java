@@ -11,6 +11,8 @@ import com.everhomes.util.GsonUtil;
 import com.everhomes.util.StringHelper;
 import org.jooq.tools.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -47,13 +49,21 @@ public interface RouterListener {
 		StringBuffer queryBuffer = new StringBuffer();
 
 		for (Map.Entry entry: parse.entrySet()){
-			queryBuffer.append(entry.getKey());
-			queryBuffer.append("=");
-			queryBuffer.append(entry.getValue());
-			queryBuffer.append("&");
+			try {
+				queryBuffer.append(entry.getKey());
+				queryBuffer.append("=");
+				queryBuffer.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
+				queryBuffer.append("&");
+			} catch (UnsupportedEncodingException e) {
+				//给出错误提示信息
+				e.printStackTrace();
+			}
 		}
 
-		return queryBuffer.substring(0, queryBuffer.length() - 1);
+		if(queryBuffer.length() > 0 ){
+			return queryBuffer.substring(0, queryBuffer.length() - 1);
+		}
+		return null;
 
 	}
 }
