@@ -49,6 +49,7 @@ import com.everhomes.apnshttp2.notifiction.NotificationResponseListener;
  * A wrapper around OkHttp's http client to send out notifications using Apple's HTTP/2 API.
  */
 public class AsyncOkHttpApnsClient extends SyncOkHttpApnsClient {
+	
 
     public AsyncOkHttpApnsClient(String apnsAuthKey, String teamID, String keyID,
                                  boolean production, String defaultTopic, ConnectionPool connectionPool) {
@@ -129,5 +130,10 @@ public class AsyncOkHttpApnsClient extends SyncOkHttpApnsClient {
             }
         });
 
+    }
+    
+    public void shutdown() {
+    	
+    	super.shutdown();
     }
 }

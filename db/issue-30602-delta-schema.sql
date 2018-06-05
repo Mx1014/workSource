@@ -16,5 +16,4 @@ CREATE TABLE `eh_developer_account_info` (
 -- 设备注册信息表新增3列（字段 ）
 ALTER  TABLE eh_devices  ADD  pusher_service_type  VARCHAR(40)   COMMENT '推送服务类型：develop或productiom';
 ALTER  TABLE eh_devices  ADD  bundle_id  VARCHAR(100)    COMMENT '关联应用';
-ALTER TABLE eh_devices DROP COLUMN namespace_id;
 -- 20180601-huangliangming

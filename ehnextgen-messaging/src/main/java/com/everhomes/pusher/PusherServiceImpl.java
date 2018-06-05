@@ -377,8 +377,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 		        ApnsClient client;
 		        client = getApnsClient(destLogin);
 			    if(client != null ){
-			    	//3.消息推送
-				    NotificationResponse result = client.push(notif);
+			    	//3.消息推送(回应消息暂无地方存放)
+				   // NotificationResponse result = 
+				    		client.addPush(notif);
 				    if(LOGGER.isDebugEnabled()) {
 		                LOGGER.debug("Pushing message(push ios), namespaceId=" + namespaceId + ", msgId=" + msgId + ", identify=" + identify
 		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
@@ -760,9 +761,17 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 } catch(Exception ex) {
                     LOGGER.warn("apns error deviceId not correct", ex);
                 }
-                                    
+                //将  client 转为PriorityQueuedApnsClient，让client推送PriorityQueuedApnsClient中队列的消息，也让添加到client的消息存在队列中
+                client = new PriorityQueuedApnsClient(client, Executors.defaultThreadFactory());
+                client.start();
+                
         	    ApnsClient tmp = this.http2ClientMaps.putIfAbsent(bundleId, client);
-                if(tmp != null) {                   
+                if(tmp != null) {  
+                	 try{
+                		 client.stop();
+                     } catch (Exception e) {
+                     LOGGER.warn("stop client server error");    
+                     }
                     client = tmp;
                 }
                       

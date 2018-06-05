@@ -49,4 +49,25 @@ public interface ApnsClient {
      * @return The underlying OkHttpClient instance
      */
     OkHttpClient getHttpClient();
+    
+    /**
+     * 关闭client
+     */
+     void shutdown() ;
+     
+     /**
+      * 启动线程从队列中取信息推送
+      */
+      void start();
+      
+      /**
+       * 将推送消息添加到队列
+       * @param msg
+       */     
+      void addPush(Notification msg);
+      
+      /**
+       * 停止推送客户端
+       */
+       void stop();
 }

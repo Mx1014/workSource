@@ -59,6 +59,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okio.BufferedSink;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.everhomes.apnshttp2.builder.ApnsClient;
 import com.everhomes.apnshttp2.builder.CertificateUtils;
 import com.everhomes.apnshttp2.internal.ApnsConstants;
@@ -73,6 +76,7 @@ import com.everhomes.apnshttp2.notifiction.NotificationResponseListener;
  */
 public class SyncOkHttpApnsClient implements ApnsClient {
 
+	private static final Logger logger = LoggerFactory.getLogger(SyncOkHttpApnsClient.class);
     private final String defaultTopic;
     private final String apnsAuthKey;
     private final String teamID;
@@ -360,4 +364,33 @@ public class SyncOkHttpApnsClient implements ApnsClient {
 
         return new NotificationResponse(error, statusCode, contentBody, null);
     }
+    
+    public void shutdown() {
+    	if(client !=null){
+    		client.dispatcher().executorService().shutdown();  //清除并关闭线程池
+    		client.connectionPool().evictAll();                 //清除并关闭连接池
+    		try {
+				client.cache().close();                        //清除cache
+			} catch (IOException e) {
+				
+				logger.warn("error while closing client ", e);
+			}                             
+    	}
+    }
+
+	@Override
+	public void start() {
+				
+	}
+	
+	@Override
+	public void addPush(Notification msg){
+		
+	}
+
+	@Override
+	public void stop() {
+		// TODO Auto-generated method stub
+		
+	}
 }
