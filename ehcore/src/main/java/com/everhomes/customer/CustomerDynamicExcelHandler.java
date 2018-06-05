@@ -300,6 +300,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 switch (sheet) {
                     case CUSTOMER:
                         failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns);
+                        resultLogs.add(importLogs);
                         break;
                     case CUSTOMER_TAX:
                         CustomerTax tax = new CustomerTax();
