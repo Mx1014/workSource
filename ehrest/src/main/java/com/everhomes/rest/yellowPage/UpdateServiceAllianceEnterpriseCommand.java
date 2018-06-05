@@ -43,6 +43,9 @@ import com.everhomes.util.StringHelper;
  *  <li>onlineServiceUname : 在线服务用户的名称</li>
  *  <li>appId : 校验权限时填写应用id</li>
  *  <li>currentPMId : 填写当前管理公司id用于校验权限</li>
+ *  <li>startDate : 用于policydeclare样式 开始日期</li>
+ *  <li>endDate : 用于policydeclare样式 结束日期</li>
+ *  <li>tagGroups: 筛选对象组（list） 服务联盟v3.4 {@link com.everhomes.rest.yellowPage.AllianceTagGroupDTO} </li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -84,6 +87,13 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private Long     appId;
 	
 	private Long     currentPMId;
+	
+	private String   startDate;
+	
+	private String   endDate;
+	
+ 	@ItemType(AllianceTagGroupDTO.class)
+	private List<AllianceTagGroupDTO> tagGroups;
 	
 	public Long getAppId() {
 		return appId;
@@ -401,4 +411,28 @@ public class UpdateServiceAllianceEnterpriseCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+
+	public List<AllianceTagGroupDTO> getTagGroups() {
+		return tagGroups;
+	}
+
+	public void setTagGroups(List<AllianceTagGroupDTO> tagGroups) {
+		this.tagGroups = tagGroups;
+	}
 }
