@@ -265,7 +265,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 VALUES ( 'asset.dingfenghui.appshowpay', '2', '2浠ｈ〃APP灞曠ず涓哄叏閮ㄧ即璐�', '999951');
 -- script by Steve Tang
 -- 添加 上传了缴费凭证的账单tab 功能,function_id为100
-INSERT INTO eh_service_module_functions (id,module_id,privilege_id,`explain`) VALUES (100,20400,0,"上传了缴费凭证的账单tab");
+INSERT INTO eh_service_module_functions (id,module_id,privilege_id,`explain`) VALUES (100,20400,0,'上传了缴费凭证的账单tab');
 
 -- 将 “修改缴费状态” 改成 “修改缴费状态与审核”
 UPDATE `eh_acl_privileges` SET `name`='修改缴费状态与审核', `description`='账单管理 修改缴费状态与审核' WHERE (`id`='204001004');
