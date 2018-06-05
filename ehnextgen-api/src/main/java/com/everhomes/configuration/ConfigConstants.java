@@ -171,5 +171,6 @@ public interface ConfigConstants {
 	public static final String ASSET_ZHUZONG_QUERYCOSTDETAILBYID_URL = "asset.zhuzong.QueryCostDetailByID.url";
 	public static final String ASSET_ZHUZONG_ACCOUNTCODE = "asset.zhuzong.AccountCode";
 	
+	public static final String ASSET_DINGFENGHUI_APPSHOWPAY = "asset.dingfenghui.appshowpay";
 	public static final String OPENAPI_LUFU_KEY = "openapi.lufu.key";
 }
