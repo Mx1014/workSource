@@ -215,6 +215,7 @@ import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
@@ -513,16 +514,16 @@ public class CustomerServiceImpl implements CustomerService {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
-            }else {
+            } else {
                 User user = userProvider.findUserById(customer.getTrackingUid());
-                if(user!=null)
-                customer.setTrackingName(user.getNickName());
+                if (user != null)
+                    customer.setTrackingName(user.getNickName());
             }
         }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
         //企业客户新增成功,保存客户事件
-        saveCustomerEvent(1, customer, null,cmd.getDeviceType());
+        saveCustomerEvent(1, customer, null, cmd.getDeviceType());
 
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
@@ -621,7 +622,7 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setThirdPartFlag(true);
         }
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
-        if (members != null && members.size()>0) {
+        if (members != null && members.size() > 0) {
             dto.setTrackingPhone(members.get(0).getContactToken());
         }
         return dto;
@@ -691,6 +692,13 @@ public class CustomerServiceImpl implements CustomerService {
         }
         checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
+        // 判定跟进人是否进行了改变，如果改变了，那么应当在update操作完成后，去通知新的跟进人 by wentian at 2018/6/5
+        Long originalTrackingUid = customer.getTrackingUid();
+        String originalTrackingName = customer.getTrackingName();
+        Long currentTrackingUid = updateCustomer.getTrackingUid();
+        String currentTrackingName = updateCustomer.getTrackingName();
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), customer.getNamespaceId());
+
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setCommunityId(customer.getCommunityId());
         updateCustomer.setOrganizationId(customer.getOrganizationId());
@@ -730,7 +738,7 @@ public class CustomerServiceImpl implements CustomerService {
         //保存之后重查一遍 因为数据类型导致 fix 22978
         updateCustomer = checkEnterpriseCustomer(cmd.getId());
         //保存客户事件
-        saveCustomerEvent(3, updateCustomer, customer,cmd.getDeviceType());
+        saveCustomerEvent(3, updateCustomer, customer, cmd.getDeviceType());
 
         if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
@@ -767,6 +775,54 @@ public class CustomerServiceImpl implements CustomerService {
         return convertToDTO(updateCustomer);
     }
 
+    private void routeMsgForTrackingChanged(Long originalTrackingUid, Long currentTrackingUid, String originalTrackingName, String currentTrackingName, String customerName, Integer namespaceId) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("customerName", customerName);
+        map.put("originalTrackingName", originalTrackingName);
+        map.put("currentTrackingName", currentTrackingName);
+        if (originalTrackingUid != null) {
+            if (currentTrackingUid != null && originalTrackingUid != currentTrackingUid) {
+                // two messges should be sent to two seperate users
+                // to new tracking people
+                routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_new_tracking
+                , map, namespaceId);
+                // to old tracking people
+                routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_old_tracking
+                , map, namespaceId);
+            } else if (currentTrackingUid == null) {
+                // only one message sent to original user
+                 routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_old_tracking_no_candidate
+                , map, namespaceId);
+            }
+        } else {
+            if (currentTrackingUid != null) {
+                // only one msg sent to new user
+                routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_new_tracking
+                , map, namespaceId);
+            }
+        }
+    }
+
+    private void routeAppMsg(Long uid, String scope, Integer code, Map<String, Object> map, Integer namespaceId) {
+        try {
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), String.valueOf(uid)));
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+           String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId, scope, code, UserContext.current().getUser().getLocale(), map, "");
+            messageDto.setBody(notifyTextForApplicant);
+            messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+            if (!notifyTextForApplicant.trim().equals("")) {
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        String.valueOf(uid), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            LOGGER.error("TRACKING CHANGED SENDING APP MESSAGE FAILED");
+        }
+    }
+
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth) {
         if (checkAuth) {
@@ -797,7 +853,7 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerSearcher.feedDoc(customer);
 
         //企业客户新增成功,保存客户事件
-        saveCustomerEvent(2, customer, null,cmd.getDeviceType());
+        saveCustomerEvent(2, customer, null, cmd.getDeviceType());
 
         if (customer.getOrganizationId() != null) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
@@ -2304,7 +2360,7 @@ public class CustomerServiceImpl implements CustomerService {
     public ListRentalBillsCommandResponse listCustomerRentalBills(ListCustomerRentalBillsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
-        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+        if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             ListRentalBillsByOrdIdCommand command = new ListRentalBillsByOrdIdCommand();
             command.setOrganizationId(customer.getOrganizationId());
             command.setPageSize(cmd.getPageSize());
@@ -2318,7 +2374,7 @@ public class CustomerServiceImpl implements CustomerService {
     public SearchRequestInfoResponse listCustomerSeviceAllianceAppRecords(ListCustomerSeviceAllianceAppRecordsCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
-        if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+        if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             return yellowPageService.listSeviceAllianceAppRecordsByEnterpriseId(customer.getOrganizationId(), cmd.getPageAnchor(), cmd.getPageSize());
         }
         return null;
@@ -3026,8 +3082,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType) {
-        enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist,deviceType);
+    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist, Byte deviceType) {
+        enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist, deviceType);
     }
 
     @Override
@@ -3058,9 +3114,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void createCustomerTalentFromOrgMember(Long orgId, OrganizationMember member) {
         EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(orgId);
-        if(customer != null) {
+        if (customer != null) {
             CustomerTalent talent = enterpriseCustomerProvider.findCustomerTalentByPhone(member.getContactToken(), customer.getId());
-            if(talent == null) {
+            if (talent == null) {
                 talent = new CustomerTalent();
                 talent.setNamespaceId(customer.getNamespaceId());
                 talent.setCustomerId(customer.getId());
@@ -3087,10 +3143,11 @@ public class CustomerServiceImpl implements CustomerService {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
+                // send two msgs
             }
         }
         //保存事件
-        saveCustomerEvent(3, customer, exist,cmd.getDeviceType());
+        saveCustomerEvent(3, customer, exist, cmd.getDeviceType());
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
     }
@@ -3334,8 +3391,8 @@ public class CustomerServiceImpl implements CustomerService {
             });
         }
         Map<Long, OrganizationMemberDTO> memberDTOMap = new HashMap<>();
-        if(members!=null && members.size()>0){
-            members.forEach((r)->{
+        if (members != null && members.size() > 0) {
+            members.forEach((r) -> {
                 memberDTOMap.putIfAbsent(r.getTargetId(), r);
             });
         }
@@ -3380,18 +3437,18 @@ public class CustomerServiceImpl implements CustomerService {
         administratorsCommand.setOwnerType(cmd.getOwnerType());
         ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse = rolePrivilegeService.listServiceModuleAppsAdministrators(administratorsCommand);
         List<OrganizationContactDTO> superAdmins = rolePrivilegeService.listOrganizationSuperAdministrators(administratorsCommand);
-        List<Long> adminUserId = getAdminUserIds(moduleAppsAdministratorResponse,superAdmins,cmd.getCommunityId());
-        if(adminUserId!=null && adminUserId.size()>0){
-            adminUserId.forEach((r)->{
+        List<Long> adminUserId = getAdminUserIds(moduleAppsAdministratorResponse, superAdmins, cmd.getCommunityId());
+        if (adminUserId != null && adminUserId.size() > 0) {
+            adminUserId.forEach((r) -> {
                 relatedMembers.add(ConvertHelper.convert(organizationProvider.listOrganizationMembersByUId(r), OrganizationMemberDTO.class));
             });
         }
         if (relatedMembers != null && relatedMembers.size() > 0) {
-            relatedMembers.forEach((r) ->{
-                Organization organization =  organizationProvider.findOrganizationById(r.getOrganizationId());
-                if(organization!=null){
+            relatedMembers.forEach((r) -> {
+                Organization organization = organizationProvider.findOrganizationById(r.getOrganizationId());
+                if (organization != null) {
                     r.setDepartmentName(organization.getName());
-                }else {
+                } else {
                     r.setDepartmentName("");
                 }
             });
