@@ -82,6 +82,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -772,7 +773,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
                 // 校验必填项
                 if (!column.getMandatoryFlag()) {
-                    Map<String, String> dataMap = new HashMap<>();
+                    Map<String, String> dataMap = new LinkedHashMap<>();
                     columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                     LOGGER.error("customer mandatory error : field ={}", column.getHeaderDisplay());
                     importLogs.setData(dataMap);
@@ -789,7 +790,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         case "Long":
                         case "BigDecimal":
                             if (!NumberUtils.isNumber(column.getValue())) {
-                                Map<String, String> dataMap = new HashMap<>();
+                                Map<String, String> dataMap = new LinkedHashMap<>();
                                 columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                                 LOGGER.error("customer import data number format error : field ={}", column.getHeaderDisplay());
                                 importLogs.setData(dataMap);
@@ -809,7 +810,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             Pattern pattern4 = Pattern.compile(regex4);
                             if (!(pattern1.matcher(column.getValue()).matches() || pattern2.matcher(column.getValue()).matches()
                                     || pattern3.matcher(column.getValue()).matches() || pattern4.matcher(column.getValue()).matches())) {
-                                Map<String, String> dataMap = new HashMap<>();
+                                Map<String, String> dataMap = new LinkedHashMap<>();
                                 columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                                 LOGGER.error("customer import data timestamp format error : field ={}", column.getHeaderDisplay());
                                 importLogs.setData(dataMap);
@@ -844,7 +845,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         }
                     }
                 } catch (Exception e) {
-                    Map<String, String> dataMap = new HashMap<>();
+                    Map<String, String> dataMap = new LinkedHashMap<>();
                     columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                     LOGGER.error("unknow exceptions : field ={}", column.getHeaderDisplay());
                     importLogs.setData(dataMap);
@@ -900,7 +901,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
                         Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
                         if (address == null || building == null) {
-                            Map<String, String> dataMap = new HashMap<>();
+                            Map<String, String> dataMap = new LinkedHashMap<>();
                             LOGGER.error("address and building not exist : field ={}", column.getHeaderDisplay());
                             importLogs.setData(dataMap);
                             importLogs.setErrorDescription("address and building not exist");
@@ -910,7 +911,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     }
                 }
             } catch (Exception e) {
-                Map<String, String> dataMap = new HashMap<>();
+                Map<String, String> dataMap = new LinkedHashMap<>();
                 columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                 LOGGER.error("wrong building and address format  : field ={}", column.getHeaderDisplay());
                 importLogs.setData(dataMap);
@@ -931,7 +932,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
             } catch (Exception e) {
                 //todo:校验格式
-                Map<String, String> dataMap = new HashMap<>();
+                Map<String, String> dataMap = new LinkedHashMap<>();
                 columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                 LOGGER.error("customer enterprise admins format error: field ={}", column.getHeaderDisplay());
                 importLogs.setData(dataMap);
@@ -957,7 +958,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             if(item != null) {
                 column.setValue(item.getItemId().toString());
             }else {
-                Map<String, String> dataMap = new HashMap<>();
+                Map<String, String> dataMap = new LinkedHashMap<>();
                 columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
                 LOGGER.error("can't find any scope items :item field ={}",column.getHeaderDisplay());
                 importLogs.setData(dataMap);
@@ -979,7 +980,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         contactPhone = column.getValue().substring(column.getValue().indexOf("(") + 1, column.getValue().indexOf(")"));
                     }
                 } catch (Exception e) {
-                    Map<String, String> dataMap = new HashMap<>();
+                    Map<String, String> dataMap = new LinkedHashMap<>();
                     columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
                     LOGGER.error("wrong trackingUid and contacPhone format  : field ={}",column.getHeaderDisplay());
                     importLogs.setData(dataMap);

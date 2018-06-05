@@ -264,7 +264,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
             Row row = sheet.getRow(j);
             DynamicRowDTO rowData = new DynamicRowDTO();
             List<DynamicColumnDTO> columns = new ArrayList<>();
-            for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
+            for (int k =0; k < headers.size(); k++) {
                 Cell cell = row.getCell(k);
                 String cellValue = ExcelUtils.getCellValue(cell, dynamicFields.get(k));
                 //少了一步,把cellvalue转成可存储的fieldvalue，例如 男-> 1; varfields , thread pool, jindu,
