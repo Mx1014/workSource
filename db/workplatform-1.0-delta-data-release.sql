@@ -53,3 +53,9 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 UPDATE eh_web_menus set parent_id = 53000000, path = '/40000010/53000000/48160000' where id = 48160000;
 
 
+
+
+
+update eh_portal_layout_templates set status = 0 where id in (3, 4, 5) and label like '%主页签门户%';
+
+UPDATE eh_portal_layout_templates set template_json = '{"groups":[{"label":"应用", "separatorFlag":"0", "separatorHeight":"0","widget":"Navigator","style":"Gallery","instanceConfig":{"margin":20,"padding":16,"backgroundColor":"#ffffff","titleFlag":0,"title":"标题","titleUri":""},"defaultOrder":3,"description":""}]}' WHERE id = 1 and label = '门户';
