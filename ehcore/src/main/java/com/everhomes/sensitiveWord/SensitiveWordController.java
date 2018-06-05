@@ -26,4 +26,14 @@ public class SensitiveWordController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    @RequestMapping("downloadSensitiveWords")
+    @RestReturn(String.class)
+    public RestResponse downloadSensitiveWords() {
+        this.sensitiveWordService.downloadSensitiveWords();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
