@@ -27,10 +27,11 @@ public class BaseOnHttp2ApnsTest {
 										  "7ayWDOp7";
 										 
 	//建立连接及推送所需的参数
-	static final String HostDevelopment_url = "https://api.development.push.apple.com";
-	static final String HostProduction_url = "https://api.push.apple.com";
+	//static final String HostDevelopment_url = "https://api.development.push.apple.com";
+	//static final String HostProduction_url = "https://api.push.apple.com";
 	//static final String deviceToken = "3c3e31318ee86003a371bea84a1f3fa7ea855d12d88a54aba8cda22e06548340";//设备
-	static final String deviceToken = "633a3f1c3777415071785884add2a9a30572d266faaa35aee5226bfb449e10ab";//设备
+	//static final String deviceToken = "633a3f1c3777415071785884add2a9a30572d266faaa35aee5226bfb449e10ab";//设备
+	static final String deviceToken = "1add69b3f502e607d27e5cec7a5b65f8e266937480d5dc620b113286d30008e2";//设备
 	
 	//开发者帐号信息
 	static final String authKey = AUTHKEY;//token证书
@@ -53,7 +54,7 @@ public class BaseOnHttp2ApnsTest {
 
 		    client = new ApnsClientBuilder()
 	        .inSynchronousMode()
-	        .withProductionGateway(false)
+	        .withProductionGateway(true)
 	        .withApnsAuthKey(AUTHKEY)
 	        .withTeamID(teamId)
 	        .withKeyID(authKeyId)

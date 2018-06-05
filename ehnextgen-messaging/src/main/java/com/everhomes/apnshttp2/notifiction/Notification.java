@@ -31,17 +31,19 @@
 package com.everhomes.apnshttp2.notifiction;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.UUID;
 
+import com.everhomes.apnshttp2.builder.impl.AsyncOkHttpApnsClient;
+import com.everhomes.util.StringHelper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * An entity containing the payload and the token.
  */
-public class Notification {
+public class Notification implements Comparable<Notification>{
     private final String payload;
     private final String token;
     private final String topic;
@@ -281,4 +283,15 @@ public class Notification {
             return new Notification(payload, token, topic, collapseId, expiration, priority, uuid);
         }
     }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+    
+    public int compareTo(Notification o) {
+        return Long.compare(this.getPriority()==null?0:this.getPriority().getCode(), o.getPriority()==null?0:this.getPriority().getCode());
+    }
+
+	
 }

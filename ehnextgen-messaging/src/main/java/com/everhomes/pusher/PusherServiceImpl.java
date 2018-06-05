@@ -377,9 +377,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 		        ApnsClient client;
 		        client = getApnsClient(destLogin);
 			    if(client != null ){
-			    	//3.消息推送(回应消息暂无地方存放)
-				   // NotificationResponse result = 
+			    	//3.消息推送(回应消息暂无地方存放)				   
 				    		client.addPush(notif);
+			    	//NotificationResponse result =	client.push(notif);
 				    if(LOGGER.isDebugEnabled()) {
 		                LOGGER.debug("Pushing message(push ios), namespaceId=" + namespaceId + ", msgId=" + msgId + ", identify=" + identify
 		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
@@ -746,15 +746,16 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 byte[] authkey = dlaInfo.getAuthkey();
                 String teamId = dlaInfo.getTeamId();
                 String authKeyId = dlaInfo.getAuthkeyId();
+                String authkeyStr = new String(authkey);
                
                 try {        		
         			    client = new ApnsClientBuilder()
         		        .inSynchronousMode()
         		        .withProductionGateway(isProductionGateway)
-        		        .withApnsAuthKey(authkey.toString())
-        		        .withTeamID(teamId)
-        		        .withKeyID(authKeyId)
-        		        .withDefaultTopic(bundleId)
+        		        .withApnsAuthKey(authkeyStr.trim())
+        		        .withTeamID(teamId.trim())
+        		        .withKeyID(authKeyId.trim())
+        		        .withDefaultTopic(bundleId.trim())
         		        .build();
                 } catch (NetworkIOException e) {
                     LOGGER.warn("apns error and stop it", e);
