@@ -829,4 +829,12 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	List<Long> findTargetIdListByOrgId(Long organizationId);
+
+	/**
+	 * 根据公司Id和targetId来查询超级管理员
+	 * @param organizationId
+	 * @param targetId
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberByOrgIdAndSoOn(Long organizationId,Long targetId);
 }

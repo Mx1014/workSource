@@ -13764,7 +13764,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(organizationAndDetailDTO.getAdminTargetId() != null){
             //说明超级管理员不为空，那么我们就将超级管理员查询出来，并且封装在对象OrganizationAndDetailDTO中
             //创建User对象
-            OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(organizationAndDetailDTO.getAdminTargetId());
+//            OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(organizationAndDetailDTO.getAdminTargetId());
+            //在这里就不能再使用以前判断超级管理员的逻辑了，应该改为现有的逻辑
+            //// TODO: 2018/6/5
+            OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndSoOn(organizationAndDetailDTO.getOrganizationId(),organizationAndDetailDTO.getAdminTargetId());
             if(organizationMember != null){
                 organizationAndDetailDTO.setContactor(organizationMember.getContactName());
                 organizationAndDetailDTO.setEntries(organizationMember.getContactToken());

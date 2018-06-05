@@ -6866,5 +6866,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return targetIdList;
     }
 
+    /**
+     * 根据公司Id和targetId来查询超级管理员
+     * @param organizationId
+     * @param targetId
+     * @return
+     */
+    @Override
+    public OrganizationMember findOrganizationMemberByOrgIdAndSoOn(Long organizationId,Long targetId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(2))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(OrganizationMemberGroupType.MANAGER.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
 
 }
