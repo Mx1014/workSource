@@ -764,9 +764,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         Boolean flag = true;
 
         if (columns != null && columns.size() > 0) {
+            List<DynamicColumnDTO> originColumns = columns;
             for (DynamicColumnDTO column : columns) {
                 LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName());
-                if (dealDynamicItemsAndTrackingUidField(customerInfo, importLogs, columns, enterpriseCustomer, column)) {
+                if (dealDynamicItemsAndTrackingUidField(customerInfo, importLogs, originColumns, enterpriseCustomer, column)) {
                     //如果发生异常 break 日志在校验函数中
                     flag = false;
                     break;
@@ -774,7 +775,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 // 校验必填项
                 if (!column.getMandatoryFlag()) {
                     Map<String, String> dataMap = new LinkedHashMap<>();
-                    columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                    originColumns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                     LOGGER.error("customer mandatory error : field ={}", column.getHeaderDisplay());
                     importLogs.setData(dataMap);
                     importLogs.setErrorDescription("customer mandatory error ");
@@ -789,9 +790,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         case "Integer":
                         case "Long":
                         case "BigDecimal":
-                            if (!NumberUtils.isNumber(column.getValue())) {
+                            if (column.getValue() != null && !NumberUtils.isNumber(column.getValue())) {
                                 Map<String, String> dataMap = new LinkedHashMap<>();
-                                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                                originColumns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                                 LOGGER.error("customer import data number format error : field ={}", column.getHeaderDisplay());
                                 importLogs.setData(dataMap);
                                 importLogs.setErrorDescription("customer import data format error ");
@@ -800,24 +801,26 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 break;
                             }
                         case "Timestamp":
-                            String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";
-                            String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";
-                            String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";
-                            String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";
-                            Pattern pattern1 = Pattern.compile(regex1);
-                            Pattern pattern2 = Pattern.compile(regex2);
-                            Pattern pattern3 = Pattern.compile(regex3);
-                            Pattern pattern4 = Pattern.compile(regex4);
-                            if (!(pattern1.matcher(column.getValue()).matches() || pattern2.matcher(column.getValue()).matches()
-                                    || pattern3.matcher(column.getValue()).matches() || pattern4.matcher(column.getValue()).matches())) {
-                                Map<String, String> dataMap = new LinkedHashMap<>();
-                                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
-                                LOGGER.error("customer import data timestamp format error : field ={}", column.getHeaderDisplay());
-                                importLogs.setData(dataMap);
-                                importLogs.setErrorDescription("customer import data timestamp format error ");
-                                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_DATE_FORMAT_ERROR);
-                                flag = false;
-                                break;
+                            if (StringUtils.isNotBlank(column.getValue())) {
+                                String regex2 = "^\\d{4}-\\d{2}-\\d{2}\\s?\\d{2}:\\d{2}$";
+                                String regex3 = "^\\d{4}-\\d{2}-\\d{2}\\s?$";
+                                String regex1 = "^\\d{4}/\\d{2}/\\d{2}\\s?\\d{2}:\\d{2}$";
+                                String regex4 = "^\\d{4}/\\d{2}/\\d{2}\\s?$";
+                                Pattern pattern1 = Pattern.compile(regex1);
+                                Pattern pattern2 = Pattern.compile(regex2);
+                                Pattern pattern3 = Pattern.compile(regex3);
+                                Pattern pattern4 = Pattern.compile(regex4);
+                                if (!(pattern1.matcher(column.getValue()).matches() || pattern2.matcher(column.getValue()).matches()
+                                        || pattern3.matcher(column.getValue()).matches() || pattern4.matcher(column.getValue()).matches())) {
+                                    Map<String, String> dataMap = new LinkedHashMap<>();
+                                    originColumns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                                    LOGGER.error("customer import data timestamp format error : field ={}", column.getHeaderDisplay());
+                                    importLogs.setData(dataMap);
+                                    importLogs.setErrorDescription("customer import data timestamp format error ");
+                                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_DATE_FORMAT_ERROR);
+                                    flag = false;
+                                    break;
+                                }
                             }
                     }
                 } catch (NoSuchFieldException e) {
@@ -838,7 +841,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             customerAddressString = column.getValue();
                         }
                         // 校验 admin address  异常日志在校验中
-                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, customerAdminString, importLogs, enterpriseCustomer, column, columns);
+                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, customerAdminString, importLogs, enterpriseCustomer, column, originColumns);
                         if (dealResult) {
                             flag = false;
                             break;
@@ -846,7 +849,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     }
                 } catch (Exception e) {
                     Map<String, String> dataMap = new LinkedHashMap<>();
-                    columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
+                    originColumns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                     LOGGER.error("unknow exceptions : field ={}", column.getHeaderDisplay());
                     importLogs.setData(dataMap);
                     importLogs.setErrorDescription("unknow exceptions");
@@ -1020,7 +1023,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             try {
                 compareCustomerFieldValues(exist, enterpriseCustomer);
             } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
-                LOGGER.error("Invoke compare erro :{}", e);
+                LOGGER.error("Invoke compare error :{}", e);
             }
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
