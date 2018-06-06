@@ -924,6 +924,11 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
+        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
+            // 转换
+             Long assetCategoryId = serviceModuleAppService.getOriginIdFromMappingApp(cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+             cmd.setCategoryId(assetCategoryId);
+         }
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId()
         , cmd.getCategoryId());
     }
