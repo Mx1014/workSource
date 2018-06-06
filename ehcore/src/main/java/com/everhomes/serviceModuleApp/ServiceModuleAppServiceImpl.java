@@ -447,34 +447,17 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
 				appDTO.setClientHandlerType(serviceModule.getClientHandlerType());
 
-				if(ClientHandlerType.fromCode(serviceModule.getClientHandlerType()) == ClientHandlerType.NATIVE){
+                appDTO.setActionData(app.getInstanceConfig());
+                PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
+                if(handler != null){
+                    String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig());
+                    if(itemActionData != null){
+                        appDTO.setActionData(itemActionData);
+                    }
+                }
 
-					String query = "appId=" + app.getOriginId();
-					try {
-						// 加上默认的参数appId和title
-						query = query + "&title=" + URLEncoder.encode(app.getName(), "UTF-8");
-					} catch (UnsupportedEncodingException e) {
-						LOGGER.warn("query encode, query=", query);
-					}
-
-					RouterInfo routerInfo = routerService.getRouterInfo(app.getModuleId(), "/index", app.getInstanceConfig());
-					if(routerInfo != null){
-						appDTO.setRouterPath(routerInfo.getPath());
-						if(routerInfo.getQuery() != null){
-							query = query  + "&" + routerInfo.getQuery();
-						}
-						appDTO.setRouterQuery(query);
-
-					}else {
-						//没有实现接口的模块默认的返回
-						appDTO.setRouterPath("/index");
-						String queryInDefaultWay = routerService.getQueryInDefaultWay(app.getInstanceConfig());
-						if(queryInDefaultWay != null){
-							query = query  + "&" + queryInDefaultWay;
-						}
-						appDTO.setRouterQuery(query);
-					}
-				}
+                //填充路由信息
+				populateRouter(appDTO);
 
 				ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
 				if(profile != null && profile.getIconUri() != null){
@@ -482,14 +465,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 					appDTO.setIconUrl(url);
 				}
 
-				appDTO.setActionData(app.getInstanceConfig());
-				PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
-				if(handler != null){
-					String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig());
-					if(itemActionData != null){
-						appDTO.setActionData(itemActionData);
-					}
-				}
+
 
 				appDtos.add(appDTO);
 			}
@@ -498,6 +474,34 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		ListLaunchPadAppsResponse response = new ListLaunchPadAppsResponse();
 		response.setApps(appDtos);
 		return response;
+	}
+
+	private void populateRouter(AppDTO appDTO){
+		String query = "appId=" + appDTO.getAppId();
+		try {
+			// 加上默认的参数appId和title
+			query = query + "&title=" + URLEncoder.encode(appDTO.getName(), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn("query encode, query=", query);
+		}
+
+		RouterInfo routerInfo = routerService.getRouterInfo(appDTO.getModuleId(), "/index", appDTO.getActionData());
+		if(routerInfo != null){
+			appDTO.setRouterPath(routerInfo.getPath());
+			if(routerInfo.getQuery() != null){
+				query = query  + "&" + routerInfo.getQuery();
+			}
+			appDTO.setRouterQuery(query);
+
+		}else {
+			//没有实现接口的模块默认的返回
+			appDTO.setRouterPath("/index");
+			String queryInDefaultWay = routerService.getQueryInDefaultWay(appDTO.getActionData());
+			if(queryInDefaultWay != null){
+				query = query  + "&" + queryInDefaultWay;
+			}
+			appDTO.setRouterQuery(query);
+		}
 	}
 
 	@Override
