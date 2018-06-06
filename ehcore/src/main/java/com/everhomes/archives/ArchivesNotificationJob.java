@@ -41,8 +41,9 @@ public class ArchivesNotificationJob extends QuartzJobBean {
             if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
                 LocalDateTime nowDateTime = LocalDateTime.now();
                 coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_NOTIFICATION.getCode()).tryEnter(() -> {
+                    LOGGER.info("ArchivesNotificationJob has been started at " + nowDateTime);
                     archivesService.executeArchivesNotification(nowDateTime.getDayOfWeek().getValue(), nowDateTime.getHour(), nowDateTime);
-                    LOGGER.info("ArchivesNotificationJob has been executed at " + nowDateTime);
+                    LOGGER.info("ArchivesNotificationJob has been ended at " + nowDateTime);
                 });
             }
         } catch (Exception e) {

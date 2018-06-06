@@ -2601,17 +2601,15 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime dateTime) {
         Organization company = organizationProvider.findOrganizationById(notification.getOrganizationId());
         if (company == null) {
-            throw RuntimeErrorException.errorWith(ArchivesServiceCode.SCOPE, ArchivesServiceCode.ERROR_DEPARTMENT_NOT_FOUND,
-                    "Company not found: notification=" + notification);
-
+            LOGGER.info("Company not found: notification=" + notification);
+            return;
         }
 
         //  1.resolve targets
         List<ArchivesNotificationTarget> targets = JSON.parseArray(notification.getNotifyTarget(), ArchivesNotificationTarget.class);
         if (targets == null || targets.size() == 0) {
-            throw RuntimeErrorException.errorWith(ArchivesServiceCode.SCOPE, ArchivesServiceCode.ERROR_NO_TARGETS,
-                    "No targets: notification=" + notification);
-
+            LOGGER.info("No targets: notification=" + notification);
+            return;
         }
 
         //  2.get employee's names
