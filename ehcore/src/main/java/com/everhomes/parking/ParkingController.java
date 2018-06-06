@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhome.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -274,10 +275,10 @@ public class ParkingController extends ControllerBase {
      * <p>获取收款方账号</p>
      */
     @RequestMapping("listPayeeAccount")
-    @RestReturn(value=PayeeAccountDTO.class,collection = true)
+    @RestReturn(value=ListBizPayeeAccountDTO.class,collection = true)
     public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
 
-        parkingService.listPayeeAccount(cmd);
+//        parkingService.listPayeeAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -292,7 +293,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 
-        parkingService.createOrUpdateBusinessPayeeAccount(cmd);
+//        parkingService.createOrUpdateBusinessPayeeAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -307,7 +308,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=PayUserDTO.class,collection = true)
     public RestResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
 
-        parkingService.listBusinessPayeeAccount(cmd);
+//        parkingService.listBusinessPayeeAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
