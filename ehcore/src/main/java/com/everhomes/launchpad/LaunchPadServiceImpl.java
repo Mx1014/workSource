@@ -1250,7 +1250,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			return null;
 		}
         if(jsonObject.get("handler") != null) {
-            LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
+            LaunchPadItemActionDataHandler handler = PlatformContextNoWarnning.getComponent(
                     LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));
             if (handler != null) {
                 actionData = handler.refreshActionData(actionData);
@@ -2835,6 +2835,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public ListOPPushCardsResponse listOPPushCards(ListOPPushCardsCommand cmd) {
+		UserContext.current().setAppContext(cmd.getContext());
+
 		ListOPPushCardsResponse response = new ListOPPushCardsResponse();
 
 		OPPush oppush = (OPPush)StringHelper.fromJsonString(cmd.getInstanceConfig(), OPPush.class);

@@ -46,8 +46,9 @@ public class OPPushActivityHandler implements OPPushHandler {
         }
         listCmd.setCategoryId(categoryId);
 
-        String scenetoken = launchPadService.getSceneTokenByCommunityId(context.getCommunityId());
-        listCmd.setSceneToken(scenetoken);
+        //String scenetoken = launchPadService.getSceneTokenByCommunityId(context.getCommunityId());
+        //listCmd.setSceneToken(scenetoken);
+
         listCmd.setPageSize(config.getEntityCount());
         // 只要查询预告中与进行中的活动
         listCmd.setActivityStatusList(Arrays.asList(NOTSTART.getCode(), UNDERWAY.getCode()));

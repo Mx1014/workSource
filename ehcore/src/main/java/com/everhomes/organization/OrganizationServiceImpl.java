@@ -93,6 +93,7 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
@@ -11428,13 +11429,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public CheckOfficalPrivilegeResponse checkOfficalPrivilegeByScene(CheckOfficalPrivilegeBySceneCommand cmd) {
-        Long userId = UserContext.current().getUser().getId();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        if (UserCurrentEntityType.fromCode(sceneToken.getEntityType()) != UserCurrentEntityType.ORGANIZATION) {
+        //Long userId = UserContext.current().getUser().getId();
+        //SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        AppContext appContext = UserContext.current().getAppContext();
+        if (appContext == null || appContext.getOrganizationId() == null) {
             return checkOfficalPrivilege(-1L);
         }
 
-        return checkOfficalPrivilege(sceneToken.getEntityId());
+        return checkOfficalPrivilege(appContext.getOrganizationId());
     }
 
     @Override
