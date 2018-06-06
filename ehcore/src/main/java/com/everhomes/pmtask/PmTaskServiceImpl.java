@@ -2532,6 +2532,24 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return ret;
 	}
 
+	@Override
+	public List<SearchTasksByOrgDTO> searchOrgTasks(SearchOrgTasksCommand cmd) {
+		List<SearchTasksByOrgDTO> ret = new ArrayList<>();
+		List<PmTask> list = pmTaskProvider.findTasksByOrg(cmd.getCommunityId(),cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getTaskCategoryId());
+		list.stream().forEach(r -> {
+			SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
+			dto.setStatus(r.getStatus());
+			dto.setRequestorPhone(r.getRequestorPhone());
+			dto.setRequestorName(r.getRequestorName());
+			dto.setOrganizationUid(r.getOrganizationUid());
+			dto.setCreateTime(r.getCreateTime());
+			dto.setBuildingName(r.getBuildingName());
+			dto.setTaskCategoryName(categoryProvider.findCategoryById(r.getCategoryId()).getName());
+			ret.add(dto);
+		});
+		return ret;
+	}
+
 	public static String computeSignature(Map<String, String> params, String secretKey) {
 		assert (params != null);
 		assert (secretKey != null);

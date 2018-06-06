@@ -63,4 +63,6 @@ public interface PmTaskProvider {
 	List<PmTask> listTaskByStat(Integer namespaceId, List<Long> ownerIds, Timestamp dateStart, Timestamp dateEnd, List<Long> taskcategoryIds);
 
     List<PmTask> listPmTasksByOrgId(Integer namespaceId, Long communityId, Long organizationId);
+
+    List<PmTask> findTasksByOrg(Long communityId, Integer namespaceId, Long organizationId, Long taskCategoryId);
 }

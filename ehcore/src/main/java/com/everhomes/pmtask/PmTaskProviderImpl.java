@@ -503,4 +503,14 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 				.and(Tables.EH_PM_TASKS.ORGANIZATION_ID.eq(organizationId))
 				.fetchInto(PmTask.class);
 	}
+
+    @Override
+    public List<PmTask> findTasksByOrg(Long communityId, Integer namespaceId, Long organizationId, Long taskCategoryId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_PM_TASKS)
+                .where(Tables.EH_PM_TASKS.OWNER_ID.eq(communityId))
+                .and(Tables.EH_PM_TASKS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PM_TASKS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.eq(taskCategoryId))
+                .fetchInto(PmTask.class);
+    }
 }
