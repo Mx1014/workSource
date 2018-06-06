@@ -1785,7 +1785,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//否则就没有加入
 			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByContactTokenAndOrgId(cmd.getOrganizationId(),cmd.getContactToken());
 			//判断
-			if(organizationMember != null){
+			if(organizationMember != null && organizationMember.getStatus() != null && organizationMember.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
 				//说明之前已经加入了公司
 				response.setIsJoined(TrueOrFalseFlag.TRUE.getCode());
 			}else{
@@ -2663,6 +2663,29 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		return new OrganizationContactDTO();
 	}
+	
+	   private Long getOrUpdateTopAdministratorByOrganizationId(Long orgId, List<OrganizationMember> members){
+	        Organization org = checkOrganization(orgId);
+	        if(org != null) {
+	            if (org.getAdminTargetId() != null && !org.getAdminTargetId().equals(0l)) {
+	                return org.getAdminTargetId();
+	            } else {
+	                //设置默认超级管理员
+	                if(members != null && members.size() > 0) {
+	                    for(OrganizationMember mb : members) {
+	                        if(mb.getTargetId() != null) {
+	                            org.setAdminTargetId(mb.getTargetId());
+	                            organizationProvider.updateOrganization(org);
+	                            break;
+	                        }
+	                            
+	                    }
+	                    
+	                }
+	            }
+	        }
+	        return null;
+	    }
 
 	@Override
     public GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd) {
@@ -2689,8 +2712,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 		//modify by lei yuan
-		Long organizationId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		if(organizationId != null && organizationId.equals(cmd.getUserId())){
+		Long topId = getOrUpdateTopAdministratorByOrganizationId(cmd.getOrganizationId(), members);
+		if(topId != null && topId.equals(cmd.getUserId())){
 			response.setIsTopAdminFlag(AllFlagType.YES.getCode());
 
 			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());

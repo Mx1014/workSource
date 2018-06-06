@@ -714,7 +714,7 @@ public class GroupServiceImpl implements GroupService {
          }
 
          cmdResponse.setGroups(groups.stream().map((r)-> {
-             Long userId = user != null ? user.getId() : -1;
+             Long userId = user != null && user.getId() != 0 ? user.getId() : -1;
              return toGroupDTO(userId, r);
          }).collect(Collectors.toList()));
          
