@@ -3246,7 +3246,7 @@ public class PunchServiceImpl implements PunchService {
         if (null != dto) {
             row.createCell(++i).setCellValue(dto.getUserName());
             row.createCell(++i).setCellValue(dto.getDeptName());
-            row.createCell(++i).setCellValue(dto.getDeptName());
+            row.createCell(++i).setCellValue(dto.getPunchOrgName());
         } else {
             row.createCell(++i).setCellValue(log.getUserId());
             row.createCell(++i).setCellValue("");
