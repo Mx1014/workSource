@@ -496,7 +496,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                     }
 
                 // modify start
-                if(checkCommunityId != null){
+                if(checkCommunityId != null && checkCommunityId != 0L && checkCommunityId != -1L){
                     if(!serviceModuleAppAuthorizationService.checkCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), currentOrgId, checkCommunityId))
                         return false;
                 }
