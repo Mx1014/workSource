@@ -2014,7 +2014,7 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public ImportPayslipResponse importPayslip(MultipartFile[] files, ImportPayslipCommand cmd) {
         ArrayList resultList = punchService.processImportExcel2ArrayList(files);
-        if(resultList.size() <=1)
+        if(resultList == null || resultList.size() <=1)
         	throw RuntimeErrorException.errorWith(SalaryConstants.SCOPE, SalaryConstants.ERROR_EXCEL_BLANK,
                     "导入的数据为空");
         List<PayslipDetailDTO> details = convertArrayList2PayslipDetailDTOList(resultList, cmd.getOwnerId());
