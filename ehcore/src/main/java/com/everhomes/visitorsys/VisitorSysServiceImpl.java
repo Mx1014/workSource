@@ -1098,10 +1098,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorSysVisitor relatedVisitor = getRelatedVisitor(visitor);
         GetConfigurationResponse relatedConfiguration = getConfiguration(ConvertHelper.convert(relatedVisitor, GetConfigurationCommand.class));
         VisitorsysOwnerType ownerType = checkOwner(visitor.getOwnerType(), visitor.getOwnerId());
+        GetInvitationLetterForWebResponse response = null;
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
-            return setInvitationLetter(configuration,relatedConfiguration,visitor,relatedVisitor);
+            response = setInvitationLetter(configuration, relatedConfiguration, visitor, relatedVisitor);
+        }else {
+            response = setInvitationLetter(relatedConfiguration, configuration, relatedVisitor, visitor);
         }
-        return setInvitationLetter(relatedConfiguration,configuration,relatedVisitor,visitor);
+        response.getBaseConfig().setAllowPassportQrcodeFlag(configuration.getBaseConfig().getAllowPassportQrcodeFlag());
+        return response;
     }
 
     private GetInvitationLetterForWebResponse setInvitationLetter(GetConfigurationResponse communityConfig, GetConfigurationResponse enterpriseConfig,
