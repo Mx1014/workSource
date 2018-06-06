@@ -381,7 +381,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				    	//	client.addPush(notif);
 			    	NotificationResponse result =	client.push(notif);
 				    if(LOGGER.isDebugEnabled()) {
-				    	LOGGER.warn("NotificationResponse:"+result);
+				    	//LOGGER.warn("NotificationResponse:"+result);
 		                LOGGER.debug("Pushing message(push ios), namespaceId=" + namespaceId + ", msgId=" + msgId + ", identify=" + identify
 		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
 		                    }
@@ -758,13 +758,18 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         		        .withKeyID(authKeyId.trim())
         		        .withDefaultTopic(bundleId.trim())
         		        .build();
+        			    if(LOGGER.isDebugEnabled()) {
+    				    	//LOGGER.warn("NotificationResponse:"+result);
+    		                LOGGER.debug("Pushing message(build client), bundleId=" + bundleId + ", isProductionGateway=" + isProductionGateway + ", authkeyStr=" + authkeyStr
+    		                    + ", teamId=" + teamId + ", authKeyId=" + authKeyId);
+    		                    }
                 } catch (NetworkIOException e) {
                     LOGGER.warn("apns error and stop it", e);
                 } catch(Exception ex) {
                     LOGGER.warn("apns error deviceId not correct", ex);
                 }
                 //将  client 转为PriorityQueuedApnsClient，让client推送PriorityQueuedApnsClient中队列的消息，也让添加到client的消息存在队列中
-               // client = new PriorityQueuedApnsClient(client, Executors.defaultThreadFactory());
+                //client = new PriorityQueuedApnsClient(client, Executors.defaultThreadFactory());
                 //client.start();
                 
         	    ApnsClient tmp = this.http2ClientMaps.putIfAbsent(bundleId, client);
