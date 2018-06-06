@@ -2090,4 +2090,20 @@ public class NewsServiceImpl implements NewsService {
 		//文字较长，截取默认长度
 		news.setContentAbstract(contentAbstract.substring(0, NEWS_CONTENT_ABSTRACT_DEFAULT_LEN));
 	}
+
+	@Override
+	public String getNewsQR(UpdateNewsCommand cmd) {
+		String url = this.configProvider.getValue("home.url","") + "/html/news_text_review.html?newsToken=";
+		String token;
+		if(null == cmd.getId()){
+			CreateNewsResponse result = this.createNews(ConvertHelper.convert(cmd,CreateNewsCommand.class));
+			token = result.getNewsToken();
+		} else {
+			this.updateNews(cmd);
+			token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
+		}
+		url += token;
+
+		return url;
+	}
 }
