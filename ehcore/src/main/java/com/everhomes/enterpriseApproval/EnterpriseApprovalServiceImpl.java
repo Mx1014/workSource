@@ -391,7 +391,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public void stopApprovalFlows(ApprovalFlowIdsCommand cmd) {
+    public ApprovalFlowOperateResponse stopApprovalFlows(ApprovalFlowIdsCommand cmd) {
         if (cmd.getFlowCaseIds() == null || cmd.getFlowCaseIds().size() == 0)
             return;
         Long userId = UserContext.currentUserId();
@@ -446,7 +446,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public void deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
+    public ApprovalFlowOperateResponse deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
         if(cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
             return;
         List<FlowEntitySel> transferOut = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());

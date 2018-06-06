@@ -23,13 +23,13 @@ public interface EnterpriseApprovalService {
 
     ListApprovalFlowRecordsResponse listActiveApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd);
 
-    void stopApprovalFlows(ApprovalFlowIdsCommand cmd);
+    ApprovalFlowOperateResponse stopApprovalFlows(ApprovalFlowIdsCommand cmd);
 
     List<OrganizationMemberDTO> listApprovalProcessors(ApprovalFlowIdCommand cmd);
 
     void deliverApprovalFlow(DeliverApprovalFlowCommand cmd);
 
-    void deliverApprovalFlows(DeliverApprovalFlowsCommand cmd);
+    ApprovalFlowOperateResponse deliverApprovalFlows(DeliverApprovalFlowsCommand cmd);
 
     List<EnterpriseApprovalGroupDTO> listEnterpriseApprovalGroups();
 
