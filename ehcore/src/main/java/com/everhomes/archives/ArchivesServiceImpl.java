@@ -1027,7 +1027,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
                 break;
             default:
-                map.put("firstDate", format.format(employee.getCheckInTime()));
+                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
                 map.put("nextDate", employee.getContractEndTime() != null ? format.format(employee.getContractEndTime()) : "   无");
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
                 break;
@@ -2592,8 +2592,10 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime) {
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotifications(day, time);
-        if (results == null)
+        if (results == null) {
+            LOGGER.info("No notifications");
             return;
+        }
         for (ArchivesNotifications result : results)
             sendArchivesNotification(result, nowDateTime);
     }
@@ -2601,15 +2603,17 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime dateTime) {
         Organization company = organizationProvider.findOrganizationById(notification.getOrganizationId());
         if (company == null) {
-            LOGGER.info("Company not found: notification=" + notification);
-            return;
+            throw RuntimeErrorException.errorWith(ArchivesServiceCode.SCOPE, ArchivesServiceCode.ERROR_DEPARTMENT_NOT_FOUND,
+                    "Company not found: notification=" + notification);
+
         }
 
         //  1.resolve targets
         List<ArchivesNotificationTarget> targets = JSON.parseArray(notification.getNotifyTarget(), ArchivesNotificationTarget.class);
         if (targets == null || targets.size() == 0) {
-            LOGGER.info("No targets: notification=" + notification);
-            return;
+            throw RuntimeErrorException.errorWith(ArchivesServiceCode.SCOPE, ArchivesServiceCode.ERROR_NO_TARGETS,
+                    "No targets: notification=" + notification);
+
         }
 
         //  2.get employee's names
