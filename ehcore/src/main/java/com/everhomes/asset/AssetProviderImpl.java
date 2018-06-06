@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhome.paySDK.pojo.PayUserDTO;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -171,6 +172,9 @@ public class AssetProviderImpl implements AssetProvider {
     
     @Autowired 
     private PayService payService;
+    
+    @Autowired
+    private com.everhome.paySDK.api.PayService payServiceV2;
 
     @Override
     public void creatAssetBill(AssetBill bill) {
@@ -1046,21 +1050,29 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDueDay(r.getValue(t.DUE_DAY));
                     dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
                     dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
-                    userIds.add(r.getValue(t.BIZ_PAYEE_ID));
                     dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
+                    dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
+                    userIds.add(r.getValue(t.BIZ_PAYEE_ID));
                     list.add(dto);
                     return null;
                 });
         //由于收款方账户名称可能存在修改的情况，故重新请求电商
-        cmd.setUserIds(userIds);
-        List<UserAccountInfo> result = payService.listBusinessUserByIds(cmd);
-        for(int i = 0;i < result.size();i++) {
-        	for(int j = 0;j < list.size();j++) {
-        		if(result.get(i).getUserId() != null && list.get(j).getBizPayeeId() != null &&
-        			result.get(i).getUserId().equals(list.get(j).getBizPayeeId())){
-        			list.get(j).setBizPayeeAccount(result.get(i).getRemark());
-        		}
-        	}
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBillGroups(request), cmd={}", userIds);
+        }
+        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
+        }
+        if(payUserDTOs != null && payUserDTOs.size() != 0) {
+        	for(int i = 0;i < payUserDTOs.size();i++) {
+            	for(int j = 0;j < list.size();j++) {
+            		if(payUserDTOs.get(i).getId() != null && list.get(j).getBizPayeeId() != null &&
+            			payUserDTOs.get(i).getId().equals(list.get(j).getBizPayeeId())){
+            			list.get(j).setBizPayeeAccount(payUserDTOs.get(i).getRemark());
+            		}
+            	}
+            }
         }
         return list;
     }

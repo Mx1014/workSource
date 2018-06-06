@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import com.everhome.paySDK.pojo.PayUserDTO;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
@@ -17,6 +18,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityType;
@@ -25,12 +28,15 @@ import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.pay.controller.ListBusinessUsersRestResponse;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.EhPaymentBills;
@@ -100,6 +106,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Autowired
     private PayService payService;
+    
+    @Autowired 
+    private com.everhome.paySDK.api.PayService payServiceV2;
 
     @Autowired
     private ImportFileService importFileService;
@@ -1679,10 +1688,54 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
     	//调接口从电商获取收款方账户
     	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
-    		return payService.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
+    		return listBizPayeeAccounts(cmd.getOrganizationId(), "0");
     	}else {
-    		return payService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
+    		return listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
     	}
     }
+    
+    private List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags){
+        ListBusinessUsersCommand cmd = new ListBusinessUsersCommand();
+        // 给支付系统的bizUserId的形式：EhBizBusinesses1037001
+        String userPrefix = "EhBizBusinesses";
+        cmd.setBizUserId(userPrefix + orgnizationId);
+        if(tags != null && tags.length > 0) {
+            cmd.setTag1s(Arrays.asList(tags));
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List biz payee accounts(request), orgnizationId={}, tags={}, cmd={}", orgnizationId, tags, cmd);
+        }
+        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(cmd.getBizUserId(), cmd.getTag1s());
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("List biz payee accounts(response), orgnizationId={}, tags={}, response={}", orgnizationId, tags, GsonUtil.toJson(payUserDTOs));
+        }
+        List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();        
+        if(payUserDTOs != null){
+            for(PayUserDTO payUserDTO : payUserDTOs) {
+                ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+                // 支付系统中的用户ID
+                dto.setAccountId(payUserDTO.getId());
+                // 用户向支付系统注册帐号时填写的帐号名称
+                dto.setAccountName(payUserDTO.getRemark());
+                // 帐号类型，1-个人帐号、2-企业帐号
+                Integer userType = payUserDTO.getUserType();
+                if(userType != null && userType.equals(2)) {
+                    dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+                } else {
+                    dto.setAccountType(OwnerType.USER.getCode());
+                }
+                // 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                Integer registerStatus = payUserDTO.getRegisterStatus();
+                if(registerStatus != null && registerStatus.intValue() == 1) {
+                    dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                } else {
+                    dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                }
+                result.add(dto);
+            }
+        }
+        return result;
+    }
+    
 }
 
