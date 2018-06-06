@@ -5335,6 +5335,10 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
 
+        if (cmd.getOldId() != null) {
+            NewTopicCommand newTopicCommand = ConvertHelper.convert(cmd, NewTopicCommand.class);
+            return this.updateTopic(newTopicCommand);
+        }
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
