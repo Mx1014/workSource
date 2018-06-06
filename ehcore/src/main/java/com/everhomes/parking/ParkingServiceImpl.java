@@ -137,6 +137,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private CoordinationProvider coordinationProvider;
 	@Autowired
 	public CommunityProvider communityProvider;
+	@Autowired
+	public com.everhome.paySDK.api.PayService sdkPayService;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 

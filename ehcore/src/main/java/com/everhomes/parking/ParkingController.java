@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhome.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,7 +267,53 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+
+    /**
+     * <b>URL: /parking/listPayeeAccount </b>
+     * <p>获取收款方账号</p>
+     */
+    @RequestMapping("listPayeeAccount")
+    @RestReturn(value=PayeeAccountDTO.class,collection = true)
+    public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
+
+        parkingService.listPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/createOrUpdateBusinessPayeeAccount </b>
+     * <p>关联收款方账号到具体业务</p>
+     */
+    @RequestMapping("createOrUpdateBusinessPayeeAccount")
+    @RestReturn(value=String.class)
+    public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+        parkingService.createOrUpdateBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/listBusinessPayeeAccount </b>
+     * <p>获取已关联收款账号的业务列表</p>
+     */
+    @RequestMapping("listBusinessPayeeAccount")
+    @RestReturn(value=PayUserDTO.class,collection = true)
+    public RestResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+
+        parkingService.listBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /parking/listParkingCardRequests</b>
      * <p>查询指定园区/小区、停车场、车牌对应的月卡申请列表</p>
