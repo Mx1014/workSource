@@ -6890,8 +6890,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (address == null) {
             String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);
             LOGGER.error("The address {} is not exist.", addressText);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_ADDRESS_ERROR,
-					"The address %s is not exist.", addressText);
+//			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_ADDRESS_ERROR,
+//					"The address %s is not exist.", addressText);
 		}
 		return address;
 	}
