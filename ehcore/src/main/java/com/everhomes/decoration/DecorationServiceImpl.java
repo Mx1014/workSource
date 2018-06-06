@@ -788,20 +788,27 @@ public class DecorationServiceImpl implements  DecorationService {
         try{
             //注册公司
             if (request.getDecoratorCompanyId() == null){
-                CreateEnterpriseCommand cmd = new CreateEnterpriseCommand();
-                cmd.setName(request.getDecoratorCompany());
-                cmd.setAddress("待补充");
-                cmd.setCommunityId(request.getCommunityId());
-                cmd.setLatitude("0.00");
-                cmd.setLongitude("0.00");
-                OrganizationDTO org = this.organizationService.createEnterprise(cmd);
-                //新建装修公司
-                DecorationCompany company = new DecorationCompany();
-                company.setName(request.getDecoratorCompany());
-                company.setNamespaceId(UserContext.getCurrentNamespaceId());
-                company.setOrganizationId(org.getId());
-                this.decorationProvider.createDecorationCompany(company);
-                request.setDecoratorCompanyId(company.getId());
+                Organization org = organizationProvider.findOrganizationByName(request.getDecoratorCompany(), request.getNamespaceId());
+                if (org == null) {//再次检测
+                    CreateEnterpriseCommand cmd = new CreateEnterpriseCommand();
+                    cmd.setName(request.getDecoratorCompany());
+                    cmd.setAddress("待补充");
+                    cmd.setCommunityId(request.getCommunityId());
+                    cmd.setLatitude("0.00");
+                    cmd.setLongitude("0.00");
+                    OrganizationDTO organizationDTO = this.organizationService.createEnterprise(cmd);
+                    //新建装修公司
+                    DecorationCompany company = new DecorationCompany();
+                    company.setName(request.getDecoratorCompany());
+                    company.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    company.setOrganizationId(org.getId());
+                    this.decorationProvider.createDecorationCompany(company);
+                    request.setDecoratorCompanyId(company.getId());
+                }else{
+                    List<DecorationCompany> companies = this.decorationProvider.listDecorationCompanies(request.getNamespaceId(),request.getDecoratorCompany());
+                    if (companies!=null && companies.size()>0)
+                        request.setDecoratorCompanyId(companies.get(0).getId());
+                }
             }
             // 注册装修公司负责人
             DecorationCompany decorationCompany = this.decorationProvider.getDecorationCompanyById(request.getDecoratorCompanyId());
