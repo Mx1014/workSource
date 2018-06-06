@@ -24,20 +24,19 @@ public enum ArchivesDismissReason {
         this.code = code;
     }
 
-    public Byte getCode() {
+    public byte getCode() {
         return this.code;
     }
 
     public static ArchivesDismissReason fromCode(Byte code) {
-        if (code != null) {
+        if(code != null) {
             ArchivesDismissReason[] values = ArchivesDismissReason.values();
-            for (ArchivesDismissReason value : values) {
-                if (code.equals(value.code)) {
+            for(ArchivesDismissReason value : values) {
+                if(code.byteValue() == value.code) {
                     return value;
                 }
             }
         }
-
         return null;
     }
 }

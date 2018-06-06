@@ -15,6 +15,7 @@ public interface EnterpriseApprovalHandler {
 
     void onFlowCaseAbsorted(FlowCaseState flowCase);
 
+    //  add by wuhan.
     default PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase){return null;}
 
     default GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd){

@@ -1485,7 +1485,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //  由于事务嵌套的缺陷，暂时不添加事务
         //  判断日期决定是否立即执行
-        if (cmd.getEmploymentTime().equals(ArchivesUtil.currentDate().toString()))
+        if (ArchivesUtil.parseDate(cmd.getEmploymentTime()).before(ArchivesUtil.currentDate()))
             employArchivesEmployees(cmd);
         else {
             for (Long detailId : cmd.getDetailIds()) {
@@ -1550,7 +1550,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if (cmd.getDismissTime().equals(ArchivesUtil.currentDate().toString()))
+        if (ArchivesUtil.parseDate(cmd.getDismissTime()).before(ArchivesUtil.currentDate()))
             dismissArchivesEmployees(cmd);
         else {
             for (Long detailId : cmd.getDetailIds()) {

@@ -135,7 +135,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
             Long flowCaseId = flowService.getNextFlowCaseId();
 
-            // 6.save approval vals
+            // 6.save approval value
             for (PostApprovalFormItem val : cmd.getValues()) {
                 GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
                 obj.setApprovalId(ga.getId());

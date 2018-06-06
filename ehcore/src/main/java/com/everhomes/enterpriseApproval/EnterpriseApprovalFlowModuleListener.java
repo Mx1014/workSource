@@ -345,17 +345,14 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
         // 审批通过 ( 如果 stepType 不是驳回 就是正常结束,进入处理 )
-        if (!(ctx.getStepType() == FlowStepType.ABSORT_STEP)) {
-            FlowCase flowCase = ctx.getRootState().getFlowCase();
-            LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:" + ctx.getStepType());
-            EnterpriseApprovalHandler handler;
-            //  兼容以前的版本，老版本未使用上 refer_id 故其值为0
-            if (flowCase.getReferId() == 0L)
-                handler = getEnterpriseApprovalHandler(flowCase.getOwnerId());
-            else
-                handler = getEnterpriseApprovalHandler(flowCase.getReferId());
-            handler.onFlowCaseEnd(flowCase);
-        }
+        FlowCase flowCase = ctx.getRootState().getFlowCase();
+        EnterpriseApprovalHandler handler;
+        //  兼容以前的版本，老版本未使用上 refer_id 故其值为0
+        if (flowCase.getReferId() == 0L)
+            handler = getEnterpriseApprovalHandler(flowCase.getOwnerId());
+        else
+            handler = getEnterpriseApprovalHandler(flowCase.getReferId());
+        handler.onFlowCaseEnd(flowCase);
     }
 
     @Override
@@ -414,8 +411,8 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         return entities;
     }
 
-    private void processEntities(
-            List<FlowCaseEntity> entities, List<GeneralApprovalVal> vals, List<GeneralFormFieldDTO> fieldDTOs) {
+    private void processEntities(List<FlowCaseEntity> entities, List<GeneralApprovalVal> vals,
+                                 List<GeneralFormFieldDTO> fieldDTOs) {
 
         for (GeneralApprovalVal val : vals) {
             try {
