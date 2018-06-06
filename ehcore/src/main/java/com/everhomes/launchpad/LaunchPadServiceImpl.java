@@ -1241,7 +1241,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
     public String refreshActionData(String actionData) {
+		if(actionData == null){
+			return null;
+		}
         JSONObject jsonObject = (JSONObject) JSONValue.parse(actionData);
+
+		if(jsonObject == null){
+			return null;
+		}
         if(jsonObject.get("handler") != null) {
             LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
                     LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));

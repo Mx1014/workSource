@@ -30,7 +30,7 @@ update eh_service_modules set client_handler_type = 3 WHERE id in (49100, 20800,
 -- 默认为园区模块
 UPDATE eh_service_modules set app_type = 1;
 -- 设置oa模块
-UPDATE eh_service_modules set app_type = 0 WHERE id in (50100,  50300, 50500, 50400, 52000, 50600, 54000, 51300, 51400, 55000, 57000, 60100, 60200, 60210, 13000, 20650, 20830, 41020, 50700);
+UPDATE eh_service_modules set app_type = 0 WHERE id in (41000, 50100,  50300, 50500, 50400, 52000, 50600, 54000, 51300, 51400, 55000, 57000, 60100, 60200, 60210, 13000, 20650, 20830, 41020, 50700);
 -- 更新应用信息
 UPDATE eh_service_module_apps a set a.app_type = IFNULL((SELECT b.app_type from eh_service_modules b where b.id = a.module_id), 1);
 
