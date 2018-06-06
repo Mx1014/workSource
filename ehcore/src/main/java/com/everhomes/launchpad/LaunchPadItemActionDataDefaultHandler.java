@@ -8,6 +8,7 @@ import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.StringTemplateUtil;
 import freemarker.template.Configuration;
@@ -34,11 +35,8 @@ public class LaunchPadItemActionDataDefaultHandler implements LaunchPadItemActio
     private ConfigurationProvider configProvider;
 
 
-    @Autowired
-    private UserService userService;
-
     @Override
-    public String refreshActionData(String actionData, SceneTokenDTO sceneToken) {
+    public String refreshActionData(String actionData) {
         if(actionData == null || "".equals(actionData)){
             return actionData;
         }
@@ -47,12 +45,9 @@ public class LaunchPadItemActionDataDefaultHandler implements LaunchPadItemActio
         if(jsonObject == null){
             return actionData;
         }
-        if(sceneToken == null){
-            return actionData;
-        }
 
         //替换url中的{key}
-        refeshActionDataKey(jsonObject, sceneToken.getNamespaceId());
+        refeshActionDataKey(jsonObject, UserContext.getCurrentNamespaceId());
 
         return jsonObject.toJSONString();
     }

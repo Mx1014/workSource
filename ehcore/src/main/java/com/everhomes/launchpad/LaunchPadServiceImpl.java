@@ -550,7 +550,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            break;
        }
 
-	   refreshActionData(cmdResponse.getLaunchPadItems(), sceneToken);
+	   refreshActionData(cmdResponse.getLaunchPadItems());
        return cmdResponse;
    }
    
@@ -621,7 +621,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            break;
        }
 
-	   refreshActionData(cmdResponse.getLaunchPadItems(), sceneToken);
+	   refreshActionData(cmdResponse.getLaunchPadItems());
        
        return cmdResponse;
    }
@@ -699,7 +699,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			categryItemDTOs.forEach(r ->
 				dtos.addAll(r.getLaunchPadItems())
 			);
-			refreshActionData(dtos, sceneToken);
+			refreshActionData(dtos);
 		}
 
 
@@ -1227,12 +1227,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         return result;
 	}
 
-	private void refreshActionData(List<LaunchPadItemDTO> dtos, SceneTokenDTO sceneToken){
+	private void refreshActionData(List<LaunchPadItemDTO> dtos){
 		if(dtos != null && dtos.size() > 0){
 			dtos.forEach(r -> {
 				if(r.getActionData() != null && !"".equals(r.getActionData().trim())){
 					//调用各个业务的handler处理action
-                    String newActionData = refreshActionData(sceneToken, r.getActionData());
+                    String newActionData = refreshActionData(r.getActionData());
                     r.setActionData(newActionData);
                 }
 			});
@@ -1240,20 +1240,20 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	}
 
 	@Override
-    public String refreshActionData(SceneTokenDTO sceneToken, String actionData) {
+    public String refreshActionData(String actionData) {
         JSONObject jsonObject = (JSONObject) JSONValue.parse(actionData);
         if(jsonObject.get("handler") != null) {
             LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
                     LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));
             if (handler != null) {
-                actionData = handler.refreshActionData(actionData, sceneToken);
+                actionData = handler.refreshActionData(actionData);
             }
         }
 
         //调用默认的default_host handler处理url，将{key}等转换成实际的host
         LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(
                 LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
-        return handler.refreshActionData(actionData, sceneToken);
+        return handler.refreshActionData(actionData);
     }
 
     private List<BusinessDTO> getBusinessesInfo(List<String> businessIds){

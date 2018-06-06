@@ -7,6 +7,7 @@ import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -110,6 +111,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Autowired
 	private RouterService routerService;
+
+	@Autowired
+	private LaunchPadService launchPadService;
 
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
@@ -455,6 +459,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                         appDTO.setActionData(itemActionData);
                     }
                 }
+
+				appDTO.setActionData(launchPadService.refreshActionData(appDTO.getActionData()));
 
                 //填充路由信息
 				populateRouter(appDTO);
