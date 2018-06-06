@@ -748,7 +748,7 @@ public class ContractProviderImpl implements ContractProvider {
 			event.setNamespaceId(UserContext.getCurrentNamespaceId());
 			event.setContractId(contract.getId());	
 			event.setOperatorUid(UserContext.currentUserId());
-			event.setOpearteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			event.setOpearteTime(contract.getUpdateTime());
 			event.setOpearteType((byte)opearteType);
 	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractEvents.class, id));
 	        LOGGER.info("saveContractEventWithInsert: " + event);
@@ -841,30 +841,6 @@ public class ContractProviderImpl implements ContractProvider {
                             	oldData = sdf.format((Timestamp)objOld);
 							} 
                         }
-//						if("propertyType".equals(field.getFieldName())){
-//							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
-//					        if(levelItemNew != null) {
-//					        	newData = levelItemNew.getItemDisplayName();
-//					        }
-//					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
-//					        if(levelItemOld != null) {
-//					        	oldData = levelItemOld.getItemDisplayName();
-//					        }
-//						}
-//                        if("trackingUid".equals(field.getFieldName())) {
-//                            if("-1".equals(oldData)) {
-//                                oldData = "空";
-//                            } else {
-//                                oldData = exist.getTrackingName();
-//                            }
-//
-//                            if("-1".equals(newData)) {
-//                                newData = "空";
-//                            } else {
-//                                newData = customer.getTrackingName();
-//                            }
-//
-//                        }
 						Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);

@@ -987,6 +987,8 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
+		//没有id的，增加
+	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
@@ -1009,7 +1011,6 @@ public class ContractServiceImpl implements ContractService {
 					}
 				}
 
-
 			}
 		}
 		Double totalSize = 0.0;
@@ -1018,6 +1019,7 @@ public class ContractServiceImpl implements ContractService {
 				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				totalSize = totalSize + size;
 				if(buildingApartment.getId() == null) {
+					//新增的资产
 					ContractBuildingMapping mapping = ConvertHelper.convert(buildingApartment, ContractBuildingMapping.class);
 					mapping.setNamespaceId(contract.getNamespaceId());
 //					mapping.setOrganizationName(contract.getCustomerName());
@@ -1039,10 +1041,12 @@ public class ContractServiceImpl implements ContractService {
 
 					}
 				} else {
+					//保留的资产
 					map.remove(buildingApartment.getId());
 				}
 			}
 		}
+		//删除的资产
 		if(map.size() > 0) {
 			List<Long> finalParents = parentAddressIds;
 			map.forEach((id, apartment) -> {
@@ -1064,6 +1068,8 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private void dealContractChargingItems(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+		//没有id的，增加
+	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractChargingItem> existChargingItems = contractChargingItemProvider.listByContractId(contract.getId());
 		Map<Long, ContractChargingItem> map = new HashMap<>();
 		if(existChargingItems != null && existChargingItems.size() > 0) {
@@ -1103,8 +1109,10 @@ public class ContractServiceImpl implements ContractService {
 			});
 		}
 	}
-
+	
 	private void dealContractChargingItemAddresses(ContractChargingItem item, List<BuildingApartmentDTO> addresses) {
+		//没有id的，增加
+	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractChargingItemAddress> existItemAddresses = contractChargingItemAddressProvider.findByItemId(item.getId());
 		Map<Long, ContractChargingItemAddress> map = new HashMap<>();
 		if(existItemAddresses != null && existItemAddresses.size() > 0) {
@@ -1304,6 +1312,8 @@ public class ContractServiceImpl implements ContractService {
 			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
 		Double rentSize = dealContractApartments(contract, cmd.getApartments());
 		if(cmd.getRentSize() == null) {
 			contract.setRentSize(rentSize);
@@ -1311,8 +1321,7 @@ public class ContractServiceImpl implements ContractService {
 		if(cmd.getCategoryId() != null) {
 			contract.setCategoryId(cmd.getCategoryId());
 		}
-		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+		
 		contractProvider.updateContract(contract);
 		//记录合同事件日志，by tangcen
 		saveContractEvent(ContractTrackingTemplateCode.UPDATE,contract ,exist);
@@ -1715,7 +1724,8 @@ public class ContractServiceImpl implements ContractService {
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
-
+		//添加合同日志 by tangcen
+		saveContractEvent(ContractTrackingTemplateCode.DELETE,contract ,null);
 
 		//释放资源状态
 		if(flag) {
