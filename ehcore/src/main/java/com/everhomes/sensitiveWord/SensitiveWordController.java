@@ -17,6 +17,10 @@ public class SensitiveWordController extends ControllerBase {
     @Autowired
     private SensitiveWordService sensitiveWordService;
 
+    /**
+     *<b>URL: /sensitive/initSensitiveWords</b>
+     *<p>初始化敏感词字典</p>
+     */
     @RequestMapping("initSensitiveWords")
     @RestReturn(String.class)
     public RestResponse initSensitiveWords(InitSensitiveWordTrieCommand cmd) {
@@ -27,6 +31,10 @@ public class SensitiveWordController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /sensitive/downloadSensitiveWords</b>
+     * <p>下载敏感词库txt文本</p>
+     */
     @RequestMapping("downloadSensitiveWords")
     @RestReturn(String.class)
     public RestResponse downloadSensitiveWords() {

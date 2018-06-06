@@ -3,6 +3,11 @@ package com.everhomes.rest.sensitiveWord;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>url: 上传敏感词库的url</li>
+ * </ul>
+ */
 public class InitSensitiveWordTrieCommand {
 
     private String url;
