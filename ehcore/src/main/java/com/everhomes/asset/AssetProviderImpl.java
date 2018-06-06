@@ -3239,6 +3239,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(t4.OWNER_ID.eq(group.getOwnerId()))
                     .and(t4.OWNER_TYPE.eq(group.getOwnerType()))
                     .and(t4.NAMESPACE_ID.eq(group.getNamespaceId()))
+                    .and(t4.CATEGORY_ID.eq(group.getCategoryId()))
                     .fetchOne(t4.PROJECT_LEVEL_NAME);
             if(StringUtils.isBlank(ItemName)){
                 ItemName = context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
