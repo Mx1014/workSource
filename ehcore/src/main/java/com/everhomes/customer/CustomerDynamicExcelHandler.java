@@ -792,8 +792,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
                 //校验数字格式及日期格式
                 try {
-                    String type = clz.getDeclaredField(column.getFieldName()).getType().getSimpleName();
                     if(!"enterpriseAdmins".equals(column.getFieldName()) && !"entryInfos".equals(column.getFieldName())){
+                        String type = clz.getDeclaredField(column.getFieldName()).getType().getSimpleName();
                         switch (type) {
                             case "Integer":
                             case "Long":
