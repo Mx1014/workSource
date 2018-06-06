@@ -207,6 +207,12 @@ public interface ActivityService {
 	 */
 	void syncActivitySignupAttendeeCount();
 
+    GetActivityPayeeDTO getActivityPayee(GetActivityPayeeCommand cmd);
+
+	ListActivityPayeeResponse listActivityPayee(ListActivityPayeeCommand cmd);
+
+	void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd);
+
 //	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
 

@@ -514,6 +514,37 @@ public class ActivityController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /activity/setActivityPayee</b>
+     * <p>设置活动收款方</p>
+     */
+    @RequestMapping("setActivityPayee")
+    @RestReturn(value=String .class)
+    public RestResponse setActivityPayee(CreateOrUpdateActivityPayeeCommand cmd){
+        activityService.createOrUpdateActivityPayee(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /activity/getActivityPayee</b>
+     * <p>获取已设置的活动收款方</p>
+     */
+    @RequestMapping("getActivityPayee")
+    @RestReturn(value=GetActivityPayeeDTO.class)
+    public RestResponse getActivityPayee(GetActivityPayeeCommand cmd){
+        return new RestResponse(activityService.getActivityPayee(cmd));
+    }
+
+    /**
+     * <b>URL: /activity/listActivityPayee</b>
+     * <p>获取活动收款方列表</p>
+     */
+    @RequestMapping("listActivityPayee")
+    @RestReturn(value=ListActivityPayeeResponse.class)
+    public RestResponse listActivityPayee(ListActivityPayeeCommand cmd){
+        return new RestResponse(activityService.listActivityPayee(cmd));
+    }
+
+    /**
      * <b>URL: /activity/setActivityWarning</b>
      * <p>设置活动提醒</p>
      */
