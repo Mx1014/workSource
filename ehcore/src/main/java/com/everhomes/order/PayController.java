@@ -6,7 +6,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
-import com.everhomes.server.schema.tables.records.EhNamespacePayMappingsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.*;
@@ -175,18 +174,4 @@ public class PayController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /pay/getPayAppKey</b>
-     * <p>查询当前用户所在的域对应的支付appKey</p>
-     */
-    @RequestMapping("getPayAppKey")
-    public RestResponse getPayAppKey() {
-        EhNamespacePayMappingsRecord payMapping = payProvider.getNamespacePayMapping(UserContext.getCurrentNamespaceId());
-
-        String appKey = payMapping.getAppKey();
-        RestResponse response = new RestResponse(appKey);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
 }

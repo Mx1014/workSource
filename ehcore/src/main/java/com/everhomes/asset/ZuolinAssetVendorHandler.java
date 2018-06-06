@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import com.everhome.paySDK.pojo.PayUserDTO;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
@@ -17,6 +18,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityType;
@@ -25,12 +28,15 @@ import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.pay.controller.ListBusinessUsersRestResponse;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.EhPaymentBills;
@@ -100,7 +106,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Autowired
     private PayService payService;
-
+    
     @Autowired
     private ImportFileService importFileService;
 
@@ -109,6 +115,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Autowired
     private ContractProvider contractProvider;
+    
+    @Autowired
+    private AssetPayService assetPayService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -746,16 +755,10 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
         PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
         if(paymentBillGroup != null) {
-        	try {
-        		if(paymentBillGroup.getBizPayeeId() != null) {
-        			cmd2pay.setBizPayeeId(Long.valueOf(paymentBillGroup.getBizPayeeId()));
-        		}
-        	}catch (Exception e) {
-        		cmd2pay.setBizPayeeId(null);
-			}
+        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
         	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
         }
-        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
+        PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
 //        response.setExpiredIntervalTime(15l*60l);
 //        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
@@ -1679,10 +1682,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
     	//调接口从电商获取收款方账户
     	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
-    		return payService.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
+    		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
     	}else {
-    		return payService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
+    		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
     	}
     }
+    
 }
 
