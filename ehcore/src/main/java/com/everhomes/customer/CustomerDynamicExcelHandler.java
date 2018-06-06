@@ -917,6 +917,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
                         if (address == null || building == null) {
                             Map<String, String> dataMap = new LinkedHashMap<>();
+                            columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                             LOGGER.error("address and building not exist : field ={}", column.getHeaderDisplay());
                             importLogs.setData(dataMap);
                             importLogs.setErrorDescription("address and building not exist");
