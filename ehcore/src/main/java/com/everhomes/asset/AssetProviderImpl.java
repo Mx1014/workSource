@@ -2789,7 +2789,7 @@ public class AssetProviderImpl implements AssetProvider {
 //                只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
                 Boolean coupled = true;
                 if(cid.longValue() != namespaceId.longValue()){
-                    coupled = checkCoupling(cid,ownerType);
+                    coupled = checkCoupling(cid,ownerType, categoryId);
                 }
                 if(coupled){
                     de_coupling = 0;
@@ -2802,12 +2802,13 @@ public class AssetProviderImpl implements AssetProvider {
         }
     }
 
-    private Boolean checkCoupling(Long communityId, String ownerType) {
+    private Boolean checkCoupling(Long communityId, String ownerType, Long categoryId) {
         DSLContext context = getReadOnlyContext();
         List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
                 .from(itemScope)
                 .where(itemScope.OWNER_TYPE.eq(ownerType))
                 .and(itemScope.OWNER_ID.eq(communityId))
+                .and(itemScope.CATEGORY_ID.eq(categoryId))
                 .fetch(itemScope.DECOUPLING_FLAG);
         for(int i = 0; i < flags.size(); i ++){
             if(flags.get(i).byteValue() == (byte)1){
@@ -2850,6 +2851,7 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(t)
                     .where(t.OWNER_TYPE.eq(ownerType))
                     .and(t.OWNER_ID.eq(communityId))
+                    .and(t.CATEGORY_ID.eq(categoryId))
                     .execute();
             if(list.size()>0){
                 dao.insert(list);
