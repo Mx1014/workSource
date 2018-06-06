@@ -1046,8 +1046,11 @@ public class ParkingProviderImpl implements ParkingProvider {
 	public ParkingSpace findParkingSpaceByLockId(String lockId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
-
-		return ConvertHelper.convert(dao.fetchOne(Tables.EH_PARKING_SPACES.LOCK_ID, lockId), ParkingSpace.class);
+		List<EhParkingSpaces> fetch = dao.fetch(Tables.EH_PARKING_SPACES.LOCK_ID, lockId);
+		if (fetch!=null && fetch.size()>0)
+			return ConvertHelper.convert(fetch.get(0), ParkingSpace.class);
+		else
+			return null;
 
 	}
 

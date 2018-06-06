@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.aclink.admin;
 
 import com.everhomes.aclink.*;
@@ -5,10 +6,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RequireAuthentication;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 @RestDoc(value="Aclink Admin controller", site="core")
 @RestController
@@ -185,8 +190,8 @@ public class AclinkAdminController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /admin/aclink/syncDoorMessages</b>
-     * <p>删除授权</p>
+     * <b>URL: /admin/aclink/createAclinkFirmware</b>
+     * <p>新增版本包</p>
      * @return
      */
     @RequestMapping("createAclinkFirmware")
@@ -258,8 +263,8 @@ public class AclinkAdminController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /admin/aclink/createLingingVistor</b>
-     * <p>给令令访客授权</p>
+     * <b>URL: /admin/aclink/listDoorAccessGroup</b>
+     * <p>列出所有门禁列表</p>
      * @return OK 成功
      */
     @RequestMapping("listDoorAccessGroup")
@@ -333,7 +338,7 @@ public class AclinkAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/aclink/searchVisitorDoorAuth</b>
-     * <p>获取门禁列表</p>
+     * <p>获取门禁授权列表</p>
      * @return 门禁列表
      */
     @RequestMapping("searchVisitorDoorAuth")
@@ -441,12 +446,19 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("authVisitorStatistic")
     @RestReturn(value=AuthVisitorStasticResponse.class)
     public RestResponse authVisitorStatistic(@Valid AuthVisitorStatisticCommand cmd) {
-        if(cmd.getStart() == null) {
+    	//---by liuyilin 20180417  查不到当天的数据,前端传过来的时分秒默认是当前时间,startTime改为0时0分,endTime改为第二天0点. by liuyilin 20180417
+    	if(cmd.getStart() == null) {
             cmd.setStart(DateHelper.parseDataString(cmd.getStartStr(), "yyyy-MM-dd").getTime());
+        }else{
+        	
+        	cmd.setStart(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getStart()),"yyyy-MM-dd").getTime());
         }
         if(cmd.getEnd() == null) {
-            cmd.setEnd(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime());
+            cmd.setEnd(DateHelper.parseDataString(cmd.getEndStr(), "yyyy-MM-dd").getTime() + 24*60*60*1000);
+        }else{
+        	cmd.setEnd(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEnd()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
         }
+        //---
         AuthVisitorStasticResponse obj = doorAuthProvider.authVistorStatistic(cmd);
         RestResponse response = new RestResponse(obj);
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -158,7 +158,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Cacheable(value="Community", key="#id" , unless="#result == null")
     @Override
-    public Community findCommunityById(long id) {
+    public Community findCommunityById(Long id) {
         final Community[] result = new Community[1];
 
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result,

@@ -1,11 +1,16 @@
 package com.everhomes.pushmessage;
 
+import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -148,6 +153,30 @@ public class PushMessageTest extends LoginAuthTestCase {
         members = groupService.listMessageGroupMembers(locator, 20);
         LOGGER.info("members=" + members);
         
+    }
+    
+    @Test
+    public void testScriptMap() {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("js");
+        engine.put("a", 4);
+        engine.put("b", 6);
+        Object maxNum;
+        try {
+            maxNum = engine.eval("function max_num(a,b){return (a>b)?a:b;}max_num(a,b);");
+            System.out.println("max_num:" + maxNum + ", (class = " + maxNum.getClass() + ")");
+            
+            Map m = new HashMap();
+            m.put("c", 10);
+            engine.put("m", m);
+
+            engine.eval("var x= max_num(a,m.get('c'));");
+            System.out.println("max_num:" + engine.get("x"));
+            
+        } catch (ScriptException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     @Test

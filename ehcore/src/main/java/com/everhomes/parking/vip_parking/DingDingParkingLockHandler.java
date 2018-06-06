@@ -43,6 +43,11 @@ public class DingDingParkingLockHandler {
 
             return true;
         }
+        json = Utils.get(String.format(url + RAISE_LOCK, hubMac, lockId), null);
+        entity = JSONObject.parseObject(json, DingDingResponseEntity.class);
+        if (null != entity && entity.getBLEComm().equalsIgnoreCase("success")) {
+            return true;
+        }
         return false;
     }
 
@@ -72,7 +77,7 @@ public class DingDingParkingLockHandler {
 
         DingDingResponseEntity entity = JSONObject.parseObject(json, DingDingResponseEntity.class);
 
-        if (null != entity && entity.getBLEComm().equalsIgnoreCase("success")) {
+        if (null != entity && "success".equalsIgnoreCase(entity.getBLEComm())) {
             ParkingSpaceDTO lockInfo = ConvertHelper.convert(space, ParkingSpaceDTO.class);
             if (entity.getLockStatus().equals("01")) {
                 lockInfo.setLockStatus(ParkingSpaceLockStatus.DOWN.getCode());

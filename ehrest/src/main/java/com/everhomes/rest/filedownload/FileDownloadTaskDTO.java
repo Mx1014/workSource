@@ -28,6 +28,9 @@ import java.sql.Timestamp;
  *     <li>validTime: 有效期</li>
  *     <li>finishTime: 完成时间</li>
  *     <li>updateTime: 最后更新时间</li>
+ *     <li>executeStartTime: 任务开始执行时间</li>
+ *     <li>uploadFileStartTime: 开始上传文件时间</li>
+ *     <li>uploadFileFinishTime: 上传文件结束时间</li>
  * </ul>
  */
 public class FileDownloadTaskDTO {
@@ -52,6 +55,9 @@ public class FileDownloadTaskDTO {
     Timestamp validTime;
     Timestamp finishTime;
     Timestamp updateTime;
+    Timestamp executeStartTime;
+    Timestamp uploadFileStartTime;
+    Timestamp uploadFileFinishTime;
 
     public Long getId() {
         return id;
@@ -219,6 +225,30 @@ public class FileDownloadTaskDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Timestamp getExecuteStartTime() {
+        return executeStartTime;
+    }
+
+    public void setExecuteStartTime(Timestamp executeStartTime) {
+        this.executeStartTime = executeStartTime;
+    }
+
+    public Timestamp getUploadFileStartTime() {
+        return uploadFileStartTime;
+    }
+
+    public void setUploadFileStartTime(Timestamp uploadFileStartTime) {
+        this.uploadFileStartTime = uploadFileStartTime;
+    }
+
+    public Timestamp getUploadFileFinishTime() {
+        return uploadFileFinishTime;
+    }
+
+    public void setUploadFileFinishTime(Timestamp uploadFileFinishTime) {
+        this.uploadFileFinishTime = uploadFileFinishTime;
     }
 
     @Override

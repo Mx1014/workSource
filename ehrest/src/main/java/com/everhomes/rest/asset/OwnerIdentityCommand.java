@@ -20,6 +20,24 @@ public class OwnerIdentityCommand {
     private String ownerType;
     @NotNull
     private Integer namespaceId;
+    private Long categoryId;
+    private Long moduleId;
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     @Override
     public String toString() {

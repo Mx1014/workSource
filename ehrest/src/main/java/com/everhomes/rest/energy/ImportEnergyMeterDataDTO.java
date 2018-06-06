@@ -1,5 +1,7 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * Created by ying.xiong on 2017/11/10.
  */
@@ -11,26 +13,19 @@ public class ImportEnergyMeterDataDTO {
     private String serviceCategory = "";
     private String buildingName = "";
     private String apartmentName = "";
+    private String  burdenRate = "";
     private String maxReading = "";
     private String startReading = "";
     private String Rate = "";
-    private String amountFormula = "";
+   // private String amountFormula = "";
 
-    public String getAmountFormula() {
-        return amountFormula;
-    }
+    //public String getAmountFormula() {
+   //     return amountFormula;
+   // }
 
-    public void setAmountFormula(String amountFormula) {
-        this.amountFormula = amountFormula;
-    }
-
-    public String getApartmentName() {
-        return apartmentName;
-    }
-
-    public void setApartmentName(String apartmentName) {
-        this.apartmentName = apartmentName;
-    }
+   // public void setAmountFormula(String amountFormula) {
+    //    this.amountFormula = amountFormula;
+   // }
 
     public String getBillCategory() {
         return billCategory;
@@ -46,6 +41,23 @@ public class ImportEnergyMeterDataDTO {
 
     public void setBuildingName(String buildingName) {
         this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
+    }
+
+
+    public String getBurdenRate() {
+        return burdenRate;
+    }
+
+    public void setBurdenRate(String burdenRate) {
+        this.burdenRate = burdenRate;
     }
 
     public String getMaxReading() {
@@ -102,5 +114,10 @@ public class ImportEnergyMeterDataDTO {
 
     public void setStartReading(String startReading) {
         this.startReading = startReading;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

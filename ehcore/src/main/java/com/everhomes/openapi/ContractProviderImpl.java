@@ -355,8 +355,12 @@ public class ContractProviderImpl implements ContractProvider {
 				ContractStatus.ACTIVE.getCode(), ContractStatus.EXPIRING.getCode(), ContractStatus.APPROVE_QUALITIED.getCode()));
 
 		Map<Long, List<Contract>> result = new HashMap<>();
-		query.fetch().map((r) -> {
-			List<Contract> contracts = result.get(r.getCommunityId());
+		query.fetch().forEach((r) -> {
+            Long communityId = r.getCommunityId();
+            if(communityId == null){
+                return;
+            }
+            List<Contract> contracts = result.get(communityId);
 			if(contracts == null) {
 				contracts = new ArrayList<>();
 				contracts.add(ConvertHelper.convert(r, Contract.class));
@@ -365,7 +369,6 @@ public class ContractProviderImpl implements ContractProvider {
 				contracts.add(ConvertHelper.convert(r, Contract.class));
 				result.put(r.getCommunityId(), contracts);
 			}
-			return null;
 		});
 
 		return result;
@@ -685,6 +688,24 @@ public class ContractProviderImpl implements ContractProvider {
 	public void updateContractCategory(ContractCategory contractCategory) {
 		new EhContractCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).update(contractCategory);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, ContractCategory.class, null);
+	}
+
+	@Override
+	public boolean isNormal(Long cid) {
+		List<Byte> cids = getReadOnlyContext().select(Tables.EH_CONTRACTS.STATUS)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.ID.eq(cid))
+				.fetch(Tables.EH_CONTRACTS.STATUS);
+		if(cids == null || cids.size() < 1){
+			return false;
+		}
+		if(cids.size() == 1){
+            Byte aByte = cids.get(0);
+            if(aByte != 7 && aByte != 8 && aByte != 9 && aByte != 10){
+                return true;
+            }
+        }
+		return false;
 	}
 
 	private EhContractsDao getReadWriteDao() {

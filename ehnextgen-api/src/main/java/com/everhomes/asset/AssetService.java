@@ -156,8 +156,6 @@ public interface AssetService {
 
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
-	void activeAutoBillNotice();
-
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
 
 	List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
@@ -181,4 +179,16 @@ public interface AssetService {
 	ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd);
 
     void reCalBill(ReCalBillCommand cmd);
+
+    void modifySettledBill(ModifySettledBillCommand cmd);
+    
+    JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
+    
+    void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
+
+    void noticeTrigger(Integer namespaceId);
+
+    long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
+
+	void saveInstanceConfig(long categoryId, String ret);
 }

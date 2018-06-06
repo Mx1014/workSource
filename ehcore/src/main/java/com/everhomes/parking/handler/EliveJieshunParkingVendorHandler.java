@@ -689,6 +689,9 @@ public class EliveJieshunParkingVendorHandler extends DefaultParkingVendorHandle
 			return false;
 		}
 		JSONArray dateItems = JSONObject.parseArray(String.valueOf(inRecordResponse.getDataItems()));
+		if(dateItems==null||dateItems.size()==0){
+			return false;
+		}
 		JSONObject attr = JSONObject.parseObject(String.valueOf(dateItems.get(0)));
 		Integer isout = attr.getJSONObject("attributes").getInteger("isOut");
 		if(isout==null){

@@ -6,7 +6,6 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -21,7 +20,11 @@ import com.everhomes.server.schema.tables.records.EhEnergyPlanMeterMapRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +96,7 @@ public class EnergyPlanProviderImpl implements EnergyPlanProvider {
     public List<EnergyPlan> listActivePlan() {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_PLANS)
-                .where(Tables.EH_ENERGY_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .where(Tables.EH_ENERGY_PLANS.STATUS.in(CommonStatus.ACTIVE.getCode(), CommonStatus.AUTO.getCode()))
                 .fetchInto(EnergyPlan.class);
     }
 

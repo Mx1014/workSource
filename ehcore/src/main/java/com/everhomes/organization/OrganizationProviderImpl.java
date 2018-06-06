@@ -20,6 +20,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.organization.*;
@@ -54,6 +55,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.Access;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -2536,6 +2538,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         EhOrganizationCommunityRequestsDao dao = new EhOrganizationCommunityRequestsDao(context.configuration());
         organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(organizationCommunityRequest);
+    }
+
+    @Override
+    public OrganizationCommunityRequest getOrganizationRequest(Long organizationid) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationid));
+        return ConvertHelper.convert(query.fetchAny(), OrganizationCommunityRequest.class);
     }
 
     @Override
@@ -5714,8 +5725,42 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
+    public List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long orgId, String ...targetTypes) {
+        List<NoticeMemberIdAndContact> ret = new ArrayList<>();
+       this.dbProvider.getDslContext(AccessSpec.readOnly())
+            .select(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID, Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN)
+                .from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.in(targetTypes))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .fetch().forEach(r ->{
+                    NoticeMemberIdAndContact c = new NoticeMemberIdAndContact();
+                    c.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
+                    c.setTargetId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+                    ret.add(c);
+                });
+       return ret;
+    }
+
+    @Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId) {
 		 return countUserOrganization(namespaceId, communityId, null, null, null);
 	}
 
+
+    @Override
+    public void deleteAllOrganizationAddressById(Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_ADDRESSES)
+                .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+    }
+    @Override
+    public Integer getUserOrgAmount(Long targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMembers.class));
+        SelectConditionStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"));
+        return step.fetchOneInto(Integer.class);
+    }
 }

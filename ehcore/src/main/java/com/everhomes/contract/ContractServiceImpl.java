@@ -1,57 +1,60 @@
 // @formatter:off
 package com.everhomes.contract;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-
-
+import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
-
-
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.appurl.AppUrlService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.customer.*;
+import com.everhomes.customer.CustomerService;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.customer.IndividualCustomerProvider;
+import com.everhomes.customer.SyncDataTask;
+import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.openapi.*;
-import com.everhomes.organization.*;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
-import com.everhomes.rest.address.AddressLivingStatus;
-import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.asset.*;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.asset.ContractProperty;
+import com.everhomes.rest.asset.FeeRules;
+import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.PaymentVariable;
+import com.everhomes.rest.asset.RentAdjust;
+import com.everhomes.rest.asset.RentFree;
+import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.*;
@@ -62,22 +65,30 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
-
 import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-
+import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
-
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
-
-
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.OSType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.*;
@@ -93,25 +104,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMappingProvider;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.rest.appurl.AppUrlDTO;
-import com.everhomes.rest.appurl.GetAppInfoCommand;
-import com.everhomes.rest.organization.OrganizationServiceUser;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
 import org.springframework.transaction.TransactionStatus;
 
+import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService {
@@ -231,6 +231,12 @@ public class ContractServiceImpl implements ContractService {
 	//多入口相关
 	@Autowired
 	ServiceModuleAppService serviceModuleAppService;
+
+	@Autowired
+	private CustomerService customerService;
+
+	@Autowired
+	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 //		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
@@ -696,7 +702,30 @@ public class ContractServiceImpl implements ContractService {
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
 		ContractDetailDTO contractDetailDTO = findContract(command);
+		// 签合同的customer 同步到organization
+		syncCustomerToOrganization(cmd.getCustomerId());
 		return contractDetailDTO;
+	}
+
+	private void syncCustomerToOrganization(Long customerId) {
+		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(customerId);
+		if (customer != null) {
+			Organization organization = null;
+			if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
+				organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+				if (null == organization){
+					com.everhomes.rest.organization.OrganizationDTO organizationDTO = customerService.createOrganization(customer);
+					customer.setOrganizationId(organizationDTO.getId());
+					enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+					enterpriseCustomerSearcher.feedDoc(customer);
+				}
+			}else {
+				com.everhomes.rest.organization.OrganizationDTO organizationDTO = customerService.createOrganization(customer);
+				customer.setOrganizationId(organizationDTO.getId());
+				enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+				enterpriseCustomerSearcher.feedDoc(customer);
+			}
+		}
 	}
 
 	@Override

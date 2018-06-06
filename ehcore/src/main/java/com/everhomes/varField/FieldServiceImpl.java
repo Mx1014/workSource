@@ -1,30 +1,46 @@
 package com.everhomes.varField;
 
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.customer.CustomerService;
+import com.everhomes.dynamicExcel.DynamicExcelService;
+import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.*;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.rentalv2.RentalBillDTO;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.varField.*;
+import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
+import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.ExcelUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -37,92 +53,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.community.Building;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.customer.CustomerService;
-import com.everhomes.dynamicExcel.DynamicExcelService;
-import com.everhomes.dynamicExcel.DynamicExcelStrings;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.portal.PortalService;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.asset.ImportFieldsExcelResponse;
-import com.everhomes.rest.customer.CustomerAccountDTO;
-import com.everhomes.rest.customer.CustomerApplyProjectDTO;
-import com.everhomes.rest.customer.CustomerCertificateDTO;
-import com.everhomes.rest.customer.CustomerCommercialDTO;
-import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
-import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
-import com.everhomes.rest.customer.CustomerEntryInfoDTO;
-import com.everhomes.rest.customer.CustomerInvestmentDTO;
-import com.everhomes.rest.customer.CustomerPatentDTO;
-import com.everhomes.rest.customer.CustomerTalentDTO;
-import com.everhomes.rest.customer.CustomerTaxDTO;
-import com.everhomes.rest.customer.CustomerTrackingDTO;
-import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
-import com.everhomes.rest.customer.CustomerTrademarkDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ListCustomerAccountsCommand;
-import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
-import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
-import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
-import com.everhomes.rest.customer.ListCustomerDepartureInfosCommand;
-import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
-import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
-import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
-import com.everhomes.rest.customer.ListCustomerPatentsCommand;
-import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
-import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
-import com.everhomes.rest.customer.ListCustomerTalentsCommand;
-import com.everhomes.rest.customer.ListCustomerTaxesCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
-import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
-import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.rentalv2.RentalBillDTO;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.varField.ListFieldItemCommand;
-import com.everhomes.rest.varField.ListScopeFieldItemCommand;
-import com.everhomes.rest.varField.ListSystemFieldCommand;
-import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
-import com.everhomes.rest.varField.ListSystemFieldItemCommand;
-import com.everhomes.rest.varField.ModuleName;
-import com.everhomes.rest.varField.ScopeFieldGroupInfo;
-import com.everhomes.rest.varField.ScopeFieldInfo;
-import com.everhomes.rest.varField.ScopeFieldItemInfo;
-import com.everhomes.rest.varField.SystemFieldDTO;
-import com.everhomes.rest.varField.SystemFieldGroupDTO;
-import com.everhomes.rest.varField.SystemFieldItemDTO;
-import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
-import com.everhomes.rest.varField.UpdateFieldItemsCommand;
-import com.everhomes.rest.varField.UpdateFieldsCommand;
-import com.everhomes.rest.varField.VarFieldStatus;
-import com.everhomes.rest.yellowPage.RequestInfoDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
-import com.everhomes.search.EnterpriseCustomerSearcher;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.excel.ExcelUtils;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -168,6 +114,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -229,11 +178,11 @@ public class FieldServiceImpl implements FieldService {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
         List<FieldGroupDTO> results = getAllGroups(command,true,false);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
             String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
-                sheetNames.removeIf((s) -> !s.equals(cmd.getEquipmentCategoryName()));
+                sheetNames.removeIf((s) -> !(Long.parseLong(s)==10000L));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }
@@ -285,11 +234,13 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public void exportDynamicExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+        //管理员权限校验
+        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
+            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         List<FieldGroupDTO> results = getAllGroups(cmd,true,true);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(result -> {
-                return result.getGroupDisplayName();
-            }).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
 
@@ -303,10 +254,7 @@ public class FieldServiceImpl implements FieldService {
      */
     @Override
     public List<FieldGroupDTO> getAllGroups(ExportFieldsExcelCommand cmd,@Deprecated boolean onlyLeaf, boolean filter) {
-        //管理员权限校验
-        if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
-            customerService.checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
-        }
+
         //将command转换为listFieldGroup的参数command
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         //获得客户所拥有的sheet
@@ -379,8 +327,17 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         // try to call dynamicExcelService.importMultiSheet
-
+        if (1 == cmd.getPrivilegeCode()) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
+        if (2 == cmd.getPrivilegeCode()) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        }
         return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
+    }
+
+    private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
     }
 
     @Override
@@ -748,12 +705,19 @@ public class FieldServiceImpl implements FieldService {
             case "员工情况":
                 if(customerType == null) {
                     SearchEnterpriseCustomerCommand cmd0 = ConvertHelper.convert(params, SearchEnterpriseCustomerCommand.class);
+                    ExportEnterpriseCustomerCommand exportcmd = ConvertHelper.convert(params, ExportEnterpriseCustomerCommand.class);
                     cmd0.setCommunityId(communityId);
                     cmd0.setNamespaceId(namespaceId);
                     cmd0.setOrgId(orgId);
-                    cmd0.setPageSize(Integer.MAX_VALUE-1);
-                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0);
-                    if(response.getDtos() != null && response.getDtos().size() > 0) {
+                    cmd0.setPageSize(Integer.MAX_VALUE - 1);
+                    //request by get method
+                    if(StringUtils.isNotEmpty(exportcmd.getTrackingUids())){
+                        Long[] trackingUids = (Long[]) StringHelper.fromJsonString(exportcmd.getTrackingUids(), Long[].class);
+                        cmd0.setTrackingUids(Arrays.asList(trackingUids));
+                    }
+                    Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
+                    SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
+                    if (response.getDtos() != null && response.getDtos().size() > 0) {
                         List<EnterpriseCustomerDTO> enterpriseCustomerDTOs = response.getDtos();
                         for(int j = 0; j < enterpriseCustomerDTOs.size(); j ++){
                             EnterpriseCustomerDTO dto = enterpriseCustomerDTOs.get(j);
@@ -1020,6 +984,22 @@ public class FieldServiceImpl implements FieldService {
         return data;
     }
 
+    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+        checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        checkModuleManageCommand.setOrganizationId(ownerId);
+        checkModuleManageCommand.setOwnerType(ownerType);
+        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+        }
+        return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
+    }
+
     private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto,Long communityId,Integer namespaceId,String moduleName,String sheetName) {
         List<String> rowDatas = new ArrayList<>();
         for(int i = 0; i <  fields.size(); i++) {
@@ -1090,6 +1070,29 @@ public class FieldServiceImpl implements FieldService {
         }
         if(invoke==null){
             return "";
+        }
+        //增加管理员和楼栋门牌特殊情况
+        if ("enterpriseAdmins".equals(fieldName)) {
+            if(invoke instanceof  ArrayList){
+                List<OrganizationContactDTO> contacts =  (ArrayList<OrganizationContactDTO>) invoke;
+                if(contacts.size()>0){
+                    List<String> admin = new ArrayList<>();
+                    contacts.forEach((c)->admin.add(c.getContactName()+"("+c.getContactToken()+")"));
+                    return String.join(",", admin);
+                }else {
+                    return "";
+                }
+            }
+        }
+        if("entryInfos".equals(fieldName)){
+            List<CustomerEntryInfoDTO> entryInfos = (ArrayList<CustomerEntryInfoDTO>) invoke;
+            if(entryInfos.size()>0){
+                List<String> entryInfo = new ArrayList<>();
+                entryInfos.forEach((c)->entryInfo.add(c.getBuilding()+"/"+c.getApartment()));
+                return String.join(",", entryInfo);
+            }else {
+                return "";
+            }
         }
         try {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
@@ -1172,11 +1175,15 @@ public class FieldServiceImpl implements FieldService {
                 invoke = String.valueOf(detail.getContactName());
             }else{
                 if(uid > 0) {
-                    UserInfo userInfo = userService.getUserInfo(uid);
-                    if(userInfo != null){
-                        invoke = String.valueOf(userInfo.getNickName());
-                    } else {
-                        LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                    try {
+                        UserInfo userInfo = userService.getUserInfo(uid);
+                        if(userInfo != null){
+                            invoke = String.valueOf(userInfo.getNickName());
+                        } else {
+                            LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("cannot find user any information.uid={}",uid);
                     }
                 } else {
                     invoke = "";
@@ -1614,7 +1621,8 @@ public class FieldServiceImpl implements FieldService {
             boolean isRealSheet = true;
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
-            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0 && !group.getGroupDisplayName().equals("客户信息")){
+//            if (group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0 && !CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(group.getName()))) {
+            if (group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0 && !(group.getGroupId() == 1L)) {
                 getAllGroups(group.getChildrenGroup(), allGroups);
                 //父节点的标识改为false
                 isRealSheet = false;

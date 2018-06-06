@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
  * <li>ownerType: 所属者type</li>
  * <li>addressId: 楼栋门牌id</li>
  * <li>pageSize: 显示数量</li>
- * <li>pageAnchor: 下页锚点</li>
  * <li>dateStrBegin: 账期开始</li>
  * <li>dateStrEnd: 账期结束</li>
  * <li>targetName: 客户名称</li>
@@ -26,7 +25,10 @@ import javax.validation.constraints.NotNull;
  * <li>apartmentName:门牌名称</li>
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
  * <li>targetType:客户属性；eh_user个人；eh_organization：企业</li>
- * <li>contractNum:合同编号</li>
+ * <li>category_id: 应用标识id</li>
+ * <li>contractNum: 合同编号</li>
+ * <li>organizationId: 企业id</li>
+ * <li>customerTel: 客户手机号</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -46,12 +48,27 @@ public class ListBillsCommand {
     private String billGroupName;
 
     private Long billGroupId;
+    
     private String buildingName;
     private String apartmentName;
     private Byte status;
     private String targetType;
     private String contractNum;
     private Long organizationId;
+
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    
+    private String customerTel;
+
 
     public Long getOrganizationId() {
         return organizationId;
@@ -215,4 +232,12 @@ public class ListBillsCommand {
     public ListBillsCommand() {
 
     }
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
+	}
 }

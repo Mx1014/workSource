@@ -1,7 +1,6 @@
 package com.everhomes.general_approval;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -615,9 +614,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
 
-        if (dtos == null || dtos.size() == 0)
-            return;
-
+        if (dtos != null || dtos.size() > 0)
         for (GeneralApprovalScopeMapDTO dto : dtos) {
             GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(namespaceId, approvalId,
                     dto.getSourceId(), dto.getSourceType());
@@ -646,11 +643,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         //  4.delete the scope which is not in the array
         if (detailIds.size() == 0)
             detailIds.add(0L);
-        generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
-
+        generalApprovalProvider.deleteOddGeneralApprovalScope(namespaceId, approvalId, UniongroupTargetType.MEMBERDETAIL.getCode(), detailIds);
         if (organizationIds.size() == 0)
             organizationIds.add(0L);
-        generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+        generalApprovalProvider.deleteOddGeneralApprovalScope(namespaceId, approvalId, UniongroupTargetType.ORGANIZATION.getCode(), organizationIds);
     }
 
     private String getUserRealName(Long userId, Long ownerId) {
@@ -1209,7 +1205,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  5. the current operator
-        FlowCaseProcessorsProcessor processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
+        FlowCaseProcessorsResolver processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
         if (processorRes.getProcessorsInfoList() != null && processorRes.getProcessorsInfoList().size() > 0) {
             String processors = "";
             for (int i = 0; i < processorRes.getProcessorsInfoList().size(); i++) {

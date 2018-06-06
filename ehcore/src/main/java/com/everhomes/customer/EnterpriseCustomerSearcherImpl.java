@@ -3,17 +3,20 @@ package com.everhomes.customer;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
-import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -27,7 +30,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -36,8 +38,10 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.ExistsFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
@@ -49,12 +53,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/17.
@@ -83,6 +86,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private CustomerService customerService;
 
     @Override
     public String getIndexType() {
@@ -124,7 +130,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("communityId", customer.getCommunityId());
             builder.field("namespaceId", customer.getNamespaceId());
             builder.field("name", customer.getName());
-            builder.field("contactMobile", customer.getContactMobile());
+            builder.field("contactPhone", customer.getContactPhone());
             builder.field("contactName", customer.getContactName());
             builder.field("contactAddress", customer.getContactAddress());
             builder.field("categoryItemId", customer.getCategoryItemId());
@@ -137,7 +143,22 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("propertyType" , customer.getPropertyType());
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
-           
+            builder.field("adminFlag" , customer.getAdminFlag());
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            if (entryInfos != null && entryInfos.size() > 0) {
+                List<String> buildings = new ArrayList<>();
+                List<String> addressIds = new ArrayList<>();
+                entryInfos.forEach((e) -> {
+                    buildings.add(e.getBuildingId().toString());
+                    if (e.getAddressId() != null){
+                        addressIds.add(e.getAddressId().toString());
+                    }
+                });
+                builder.field("buildingId", StringUtils.join(buildings, "|"));
+                builder.field("addressId", StringUtils.join(addressIds, "|"));
+//                builder.array("buildings", buildings);
+//                builder.array("addressId", addressIds);
+            }
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -186,17 +207,25 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     }
 
     @Override
-    public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd) {
+    public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd,Boolean isAdmin) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
-            qb = QueryBuilders.matchAllQuery();
+            //app端要只根据跟进人名称搜索
+            if(StringUtils.isNotEmpty(cmd.getTrackingName())){
+                qb = QueryBuilders.multiMatchQuery(cmd.getTrackingName())
+                        .field("trackingName", 5.5f)
+                        .field("trackingName.pinyin_prefix", 2.0f)
+                        .field("trackingName.pinyin_gram", 1.0f);
+            }else {
+                qb = QueryBuilders.matchAllQuery();
+            }
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("name", 1.5f)
                     .field("contactName", 1.2f)
                     .field("contactAddress", 1.2f)
-                    .field("contactMobile", 1.0f)
+                    .field("contactPhone", 1.0f)
                     .field("trackingName" , 1.0f);
 
             builder.setHighlighterFragmentSize(60);
@@ -210,9 +239,22 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        if (cmd.getAddressId() != null) {
+            MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+            qb = QueryBuilders.boolQuery().must(qb).must(addressId);
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+        }
+        if (cmd.getBuildingId() != null) {
+            MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+            qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+        }
 
         if(cmd.getCustomerCategoryId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryItemId", cmd.getCustomerCategoryId()));
+
+        if(cmd.getAdminFlag() != null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("adminFlag", cmd.getAdminFlag()));
 
         if(cmd.getCorpIndustryItemId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("corpIndustryItemId", cmd.getCorpIndustryItemId()));
@@ -220,13 +262,30 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
         
-        //查询全部客户、我的客户、公共客户
+        /*//查询全部客户、我的客户、公共客户
         if(null != cmd.getType()){
         	if(2 == cmd.getType()){
         		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
         	}else if(3 == cmd.getType()){
         		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", -1l));
         	}
+        }*/
+        //增加如果不是admin只能看自己为跟进人
+        if (!isAdmin) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
+        }
+        //有无跟进人
+        if(null != cmd.getType()){
+            if(2 == cmd.getType()){
+                fb = FilterBuilders.andFilter(fb ,FilterBuilders.existsFilter("trackingUid"));
+            }else if(3 == cmd.getType()){
+                ExistsFilterBuilder notFilter = FilterBuilders.existsFilter("trackingUid");
+                fb = FilterBuilders.andFilter(fb ,FilterBuilders.notFilter(notFilter));
+            }
+        }
+
+        if(cmd.getTrackingUids()!=null && cmd.getTrackingUids().size()>0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackingUid", cmd.getTrackingUids()));
         }
         //跟进时间、资产类型、资产面积、资产单价增加筛选
         if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
@@ -267,7 +326,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long anchor = 0l;
+        Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
@@ -348,6 +407,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        Integer result = 0;
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
         if(categoryItem != null) {
@@ -432,6 +492,37 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
+        }
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
+        if (members != null && members.size()>0) {
+            dto.setTrackingPhone(members.get(0).getContactToken());
+        }
+        if(customer.getLastTrackingTime()!=null){
+             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime())/604800000);
+        }
+        dto.setTrackingPeriod(result);
+        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+        command.setOrganizationId(customer.getOrganizationId());
+        command.setCustomerId(customer.getId());
+        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        command.setCommunityId(customer.getCommunityId());
+        List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
+        dto.setEnterpriseAdmins(admins);
+        //楼栋门牌
+        ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
+        command1.setCommunityId(customer.getCommunityId());
+        command1.setCustomerId(customer.getId());
+        List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
+        if (entryInfos != null && entryInfos.size() > 0) {
+//            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
+            entryInfos = entryInfos.stream().map((e) -> {
+                String addressName = e.getAddressName();
+                if (addressName != null) {
+                    e.setAddressName(addressName.replaceFirst("-", "/"));
+                }
+                return e;
+            }).collect(Collectors.toList());
+            dto.setEntryInfos(entryInfos);
         }
         return dto;
     }

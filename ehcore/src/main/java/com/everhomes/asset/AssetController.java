@@ -368,11 +368,6 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
-    //左邻管理员可以进入，点击收费项目，传递所在园区，点击保存，其园区可以看到此收费项目          ---   4
-    // 查看时，全部情况是查看域空间为namespaceid的，(接口为listAllChargingItems
-    // )
-    // 修改时(此修改支持删除,增加)，只使用此接口，全部：储存到namespaceid，同步到下面的communityid； 单个：修改单个的并且修改decoupleFlag
-    //
     /**
      * <p>园区收费项权限配置</p>
      * <b>URL: /asset/configChargingItems</b>
@@ -660,15 +655,27 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 修改后保存一个未出账单          4?
     /**
-     * <p>保存一个未出账单的修改,若账单状态更改为已出，则不能修改</p>
+     * <p>保存一个未出账单的修改</p>
      * <b>URL: /asset/modifyNotSettledBill</b>
      */
     @RequestMapping("modifyNotSettledBill")
     @RestReturn(value = String.class)
     public RestResponse modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
         assetService.modifyNotSettledBill(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    /**
+     * <p>保存一个已出账单的修改</p>
+     * <b>URL: /asset/modifySettledBill</b>
+     */
+    @RequestMapping("modifySettledBill")
+    @RestReturn(value = String.class)
+    public RestResponse modifySettledBill(ModifySettledBillCommand cmd) {
+        assetService.modifySettledBill(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -747,7 +754,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 保存一个新增账单         4
+
     /**
      * <p>保存一个新增账单</p>
      * <b>URL: /asset/createBill</b>
@@ -761,22 +768,6 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
-
-    // this is for 批量导入账单           2
-    /**
-     * <p>批量导入账单</p>
-     * <b>URL: /asset/importBills</b>
-     */
-    @RequestMapping("importBills")
-    @RestReturn(value = String.class)
-    public RestResponse importBills(HttpServletResponse response) {
-        // unfinished, under plan
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorDescription("OK");
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        return restResponse;
-    }
-
 
 
     // this is for 按照账单组展示已出账单          4
@@ -1102,29 +1093,25 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-
     /**
-     * <p>测试清单产生</p>
-     * <b>URL: /asset/doctor</b>
-     *
-     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
+     * <b>URL: /asset/listPaymentBillDetail</b>
+     * <p>交易明细查看账单明细接口</p>
      */
-    @RequireAuthentication(false)//不用登陆就可以用
-    @RequestMapping("doctor")
-    @RestReturn(String.class)
-    public String hi(@RequestBody PaymentExpectanciesCommand cmd){
-//        List<FeeRules> feesRules = cmd.getFeesRules();
-//        for(int i = 0; i < feesRules.size(); i++) {
-//            List<VariableIdAndValue> list = feesRules.get(i).getVariableIdAndValueList();
-//            for(int j = 0; j < list.size(); j++){
-//                Integer variableValue = (Integer)list.get(j).getVariableValue();
-//                BigDecimal c = new BigDecimal(variableValue);
-//                list.get(j).setVariableValue(c);
-//            }
-//        }
-        assetService.paymentExpectancies_re_struct(cmd);
-        return "ROU ARE WA GA DEKI ROU KU ROU!";
+    @RequestMapping(value = "listPaymentBillDetail")
+    @RestReturn(PaymentOrderBillDTO.class)
+    public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+        ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
+        PaymentOrderBillDTO result = new PaymentOrderBillDTO();
+        if (listPaymentBillResp != null && listPaymentBillResp.getList() != null
+                && listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
+                && listPaymentBillResp.getList().get(0).getChildren() != null) {
+            result = listPaymentBillResp.getList().get(0).getChildren().get(0);
+        }
+        RestResponse response = new RestResponse(result);
+        return response;
     }
+
+
     /**
      * <b>URL: /asset/autoNoticeConfig</b>
      * <p>自动缴费配置</p>
@@ -1167,18 +1154,6 @@ public class AssetController extends ControllerBase {
         return restResponse;
     }
     /**
-     * <b>URL: /asset/activeLateFine</b>
-     * <p>主动调用定期催缴的功能</p>
-     */
-//    @RequestMapping("activeLateFine")
-//    @RestReturn(String.class)
-//    public RestResponse activeLateFine(){
-//        assetService.activeLateFine();
-//        RestResponse restResponse = new RestResponse();
-//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-//        restResponse.setErrorDescription("OK");
-//        return restResponse;
-//    }
 
     /**
      * <b>URL: /asset/functionDisableList</b>
@@ -1257,7 +1232,44 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
-
-
+    
+    /**
+     * <b>URL: /asset/noticeTrigger</b>
+     * <p>启动自动催缴的定时任务</p>
+     */
+    @RequestMapping("noticeTrigger")
+    public RestResponse noticeTrigger(NoticeTriggerCommand cmd){
+        assetService.noticeTrigger(cmd.getNamespaceId());
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+     * <b>URL: /asset/judgeAppShowPay</b>
+     * <p>取出配置项，用于判断APP多账单组的缴费方式：全部缴费/部分缴费/单个缴费</p>
+     */
+    @RequestMapping("judgeAppShowPay")
+    public RestResponse judgeAppShowPay(JudgeAppShowPayCommand cmd){
+    	JudgeAppShowPayResponse judgeAppShowPayResponse = assetService.judgeAppShowPay(cmd);
+        RestResponse restResponse = new RestResponse(judgeAppShowPayResponse);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+     * <p>导出筛选过的所有交易明细</p>
+     * <b>URL: /asset/exportOrders</b>
+     */
+    @RequestMapping("exportOrders")
+    public HttpServletResponse exportOrders(ListPaymentBillCmd cmd,HttpServletResponse response) {
+        assetService.exportOrders(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
 }
 
