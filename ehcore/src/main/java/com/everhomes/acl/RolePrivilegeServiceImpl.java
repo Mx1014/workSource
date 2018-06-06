@@ -1785,7 +1785,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//否则就没有加入
 			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByContactTokenAndOrgId(cmd.getOrganizationId(),cmd.getContactToken());
 			//判断
-			if(organizationMember != null){
+			if(organizationMember != null && organizationMember.getStatus() != null && organizationMember.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
 				//说明之前已经加入了公司
 				response.setIsJoined(TrueOrFalseFlag.TRUE.getCode());
 			}else{
