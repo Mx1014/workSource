@@ -324,7 +324,7 @@ public class SyncOkHttpApnsClient implements ApnsClient {
 
             rb.header("authorization", "bearer " + cachedJWTToken);
         }
-
+        
         return rb.build();
     }
 
@@ -332,6 +332,7 @@ public class SyncOkHttpApnsClient implements ApnsClient {
     @Override
     public NotificationResponse push(Notification notification) {
         final Request request = buildRequest(notification);
+        logger.info("http2 headers :["+request.headers()+" ];bodys:["+request.body()+"]");
         Response response = null;
 
         try {
