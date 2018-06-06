@@ -107,9 +107,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     @Autowired
     private PayService payService;
     
-    @Autowired 
-    private com.everhome.paySDK.api.PayService payServiceV2;
-
     @Autowired
     private ImportFileService importFileService;
 
@@ -118,6 +115,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Autowired
     private ContractProvider contractProvider;
+    
+    @Autowired
+    private AssetPayService assetPayService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -755,16 +755,10 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
         PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
         if(paymentBillGroup != null) {
-        	try {
-        		if(paymentBillGroup.getBizPayeeId() != null) {
-        			cmd2pay.setBizPayeeId(Long.valueOf(paymentBillGroup.getBizPayeeId()));
-        		}
-        	}catch (Exception e) {
-        		cmd2pay.setBizPayeeId(null);
-			}
+        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
         	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
         }
-        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
+        PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
 //        response.setExpiredIntervalTime(15l*60l);
 //        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
@@ -1688,53 +1682,10 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
     	//调接口从电商获取收款方账户
     	if(cmd.getCommunityId() == null || cmd.getCommunityId().equals(-1L)){
-    		return listBizPayeeAccounts(cmd.getOrganizationId(), "0");
+    		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0");
     	}else {
-    		return listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
+    		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
     	}
-    }
-    
-    private List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags){
-        ListBusinessUsersCommand cmd = new ListBusinessUsersCommand();
-        // 给支付系统的bizUserId的形式：EhBizBusinesses1037001
-        String userPrefix = "EhBizBusinesses";
-        cmd.setBizUserId(userPrefix + orgnizationId);
-        if(tags != null && tags.length > 0) {
-            cmd.setTag1s(Arrays.asList(tags));
-        }
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("List biz payee accounts(request), orgnizationId={}, tags={}, cmd={}", orgnizationId, tags, cmd);
-        }
-        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(cmd.getBizUserId(), cmd.getTag1s());
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("List biz payee accounts(response), orgnizationId={}, tags={}, response={}", orgnizationId, tags, GsonUtil.toJson(payUserDTOs));
-        }
-        List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();        
-        if(payUserDTOs != null){
-            for(PayUserDTO payUserDTO : payUserDTOs) {
-                ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
-                // 支付系统中的用户ID
-                dto.setAccountId(payUserDTO.getId());
-                // 用户向支付系统注册帐号时填写的帐号名称
-                dto.setAccountName(payUserDTO.getRemark());
-                // 帐号类型，1-个人帐号、2-企业帐号
-                Integer userType = payUserDTO.getUserType();
-                if(userType != null && userType.equals(2)) {
-                    dto.setAccountType(OwnerType.ORGANIZATION.getCode());
-                } else {
-                    dto.setAccountType(OwnerType.USER.getCode());
-                }
-                // 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-                Integer registerStatus = payUserDTO.getRegisterStatus();
-                if(registerStatus != null && registerStatus.intValue() == 1) {
-                    dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-                } else {
-                    dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-                }
-                result.add(dto);
-            }
-        }
-        return result;
     }
     
 }

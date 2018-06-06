@@ -31,7 +31,6 @@ import com.everhomes.rest.order.PayOrderCommandResponse;
 import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
 import com.everhomes.rest.order.QueryOrderPaymentStatusCommandResponse;
 import com.everhomes.rest.pay.controller.*;
-import com.everhomes.server.schema.tables.records.EhNamespacePayMappingsRecord;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -60,7 +59,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 @Service
-public class PayServiceImpl implements PayService, ApplicationListener<ContextRefreshedEvent> {
+public class PayServiceImpl222 implements PayService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
 
@@ -91,17 +90,6 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     
     @Autowired
     private ConfigurationProvider configProvider;
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        String payHomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
-        EhNamespacePayMappingsRecord payMapping = payProvider.getNamespacePayMapping(UserContext.getCurrentNamespaceId());
-        if(payMapping == null){
-            LOGGER.error("pay account mapping not found for namespaceId={}", UserContext.getCurrentNamespaceId());
-            return;
-        }
-        restClient = new RestClient(payHomeUrl, payMapping.getAppKey(), payMapping.getSecretKey());
-    }
 
     /**
      *
@@ -1364,6 +1352,12 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 		}*/
 		return result;
     }
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 
