@@ -29,7 +29,6 @@ import com.everhomes.server.schema.tables.daos.EhPaymentWithdrawOrdersDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
 import com.everhomes.server.schema.tables.pojos.EhPaymentWithdrawOrders;
-import com.everhomes.server.schema.tables.records.EhNamespacePayMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentOrderRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentTypesRecord;
@@ -260,14 +259,6 @@ public class PayProviderImpl implements PayProvider {
         dao.update(order);
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentWithdrawOrders.class, order.getId());
-    }
-    
-    @Override
-    public EhNamespacePayMappingsRecord getNamespacePayMapping(Integer namespaceId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhNamespacePayMappingsRecord>  query = context.selectQuery(Tables.EH_NAMESPACE_PAY_MAPPINGS);
-        query.addConditions(Tables.EH_NAMESPACE_PAY_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
-        return query.fetchOneInto(EhNamespacePayMappingsRecord.class);
     }
 
 }
