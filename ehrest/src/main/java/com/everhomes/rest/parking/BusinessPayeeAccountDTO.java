@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>返回码: 200成功，14000重复添加了账号</li>
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
@@ -17,7 +16,7 @@ import java.sql.Timestamp;
  * <li>payeeUserType: 收款方账号类型 帐号类型，1-个人帐号、2-企业帐号</li>
  * </ul>
  */
-public class CreateOrUpdateBusinessPayeeAccountCommand {
+public class BusinessPayeeAccountDTO {
     private Long id;
     private Integer namespaceId;
     private String ownerType;

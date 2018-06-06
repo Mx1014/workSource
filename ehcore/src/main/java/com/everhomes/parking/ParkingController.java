@@ -305,8 +305,23 @@ public class ParkingController extends ControllerBase {
      * <p>获取已关联收款账号的业务列表</p>
      */
     @RequestMapping("listBusinessPayeeAccount")
-    @RestReturn(value=PayUserDTO.class,collection = true)
+    @RestReturn(value=BusinessPayeeAccountDTO.class,collection = true)
     public RestResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+
+//        parkingService.listBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/delBusinessPayeeAccount </b>
+     * <p>删除已关联收款账号的业务</p>
+     */
+    @RequestMapping("delBusinessPayeeAccount")
+    @RestReturn(value=String.class)
+    public RestResponse delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 
 //        parkingService.listBusinessPayeeAccount(cmd);
         RestResponse response = new RestResponse();
