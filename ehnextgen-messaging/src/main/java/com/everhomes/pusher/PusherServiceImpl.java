@@ -381,7 +381,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				    	//	client.addPush(notif);
 			    	NotificationResponse result =	client.push(notif);
 				    if(LOGGER.isDebugEnabled()) {
-				    	//LOGGER.warn("NotificationResponse:"+result);
+				    	LOGGER.warn("NotificationResponse:"+result);
 		                LOGGER.debug("Pushing message(push ios), namespaceId=" + namespaceId + ", msgId=" + msgId + ", identify=" + identify
 		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
 		                    }
