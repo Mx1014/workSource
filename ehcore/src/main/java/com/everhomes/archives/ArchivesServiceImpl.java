@@ -2594,11 +2594,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotifications(day, time);
         if (results == null)
             return;
-        coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_NOTIFICATION.getCode()).tryEnter(() -> {
-            for (ArchivesNotifications result : results) {
-                sendArchivesNotification(result, nowDateTime);
-            }
-        });
+        for (ArchivesNotifications result : results)
+            sendArchivesNotification(result, nowDateTime);
     }
 
     private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime dateTime) {
@@ -2636,7 +2633,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             return query;
         });
         if (employees == null) {
-            LOGGER.error("Nothing needs to be sent.");
+            LOGGER.info("Nothing needs to be sent.");
             return;
         }
 
