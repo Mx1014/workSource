@@ -5,7 +5,9 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sensitiveWord.InitSensitiveWordTrieCommand;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
+import com.everhomes.user.UserService;
 import com.everhomes.util.WebTokenGenerator;
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -28,6 +31,10 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
     private static final String fileName = "C:/Users/Administrator/Desktop/sensitive.txt";
     @Autowired
     private ContentServerService contentServerService;
+    @Autowired
+    private SensitiveFilterRecordProvider sensitiveFilterRecordProvider;
+    @Autowired
+    private UserService userService;
 
     @Override
     public void initSensitiveWords(InitSensitiveWordTrieCommand cmd) {
@@ -64,6 +71,9 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
         for (AhoCorasickDoubleArrayTrie.Hit<String> hit : hits) {
             wordList.add(hit.value);
         }
+        if (wordList.size() > 0) {
+            createSentiveRecord(cmd, wordList);
+        }
     }
 
     @Override
@@ -93,6 +103,24 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
         return file;
     }
 
+    private void createSentiveRecord(FilterWordsCommand cmd, List<String> wordList) {
+        SensitiveFilterRecord sensitiveFilterRecord = new SensitiveFilterRecord();
+        sensitiveFilterRecord.setNamespaceId(cmd.getNamespaceId());
+        sensitiveFilterRecord.setSensitiveWords(wordList.toString().substring(1,wordList.toString().length() - 1));
+        sensitiveFilterRecord.setAppId(cmd.getAppId());
+        UserInfo user = this.userService.getUserInfo(cmd.getCreatorUid());
+        if (user != null) {
+            sensitiveFilterRecord.setCreatorUid(cmd.getCreatorUid());
+            sensitiveFilterRecord.setCreatorName(user.getNickName());
+            if (user.getPhones() != null && user.getPhones().size() > 0) {
+                String phones = user.getPhones().toString();
+                sensitiveFilterRecord.setPhone(phones.substring(1,phones.length()-1));
+            }
+        }
+        sensitiveFilterRecord.setPublishTime(Timestamp.valueOf(cmd.getPublishTime()));
+        sensitiveFilterRecord.setText(cmd.getText());
+        this.sensitiveFilterRecordProvider.createSensitiveFilterRecord(sensitiveFilterRecord);
+    }
 
     private void uploadFileToContentServer() {
         String token = WebTokenGenerator.getInstance().toWebToken(User.SYSTEM_USER_LOGIN);
