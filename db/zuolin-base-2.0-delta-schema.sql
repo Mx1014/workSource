@@ -139,6 +139,13 @@ CREATE TABLE `eh_service_module_entries` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 应用二级分类
+CREATE TABLE `eh_second_app_types` (
+  `id` bigint(22) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `app_type` tinyint(4) DEFAULT NULL COMMENT '一级分类，0-oa，1-community，2-service。参考ServiceModuleAppType',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`module_id`);
 
