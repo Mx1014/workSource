@@ -2,7 +2,11 @@
 package com.everhomes.sensitiveWord;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSensitiveFilterRecordDao;
 import com.everhomes.server.schema.tables.pojos.EhSensitiveFilterRecord;
@@ -20,6 +24,21 @@ public class SensitiveFilterRecordProviderImpl implements SensitiveFilterRecordP
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
+    @Override
+    public void createSensitiveFilterRecord(SensitiveFilterRecord sensitiveFilterRecord) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhSensitiveFilterRecord.class));
+        sensitiveFilterRecord.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhSensitiveFilterRecordDao dao = new EhSensitiveFilterRecordDao(context.configuration());
+        dao.insert(sensitiveFilterRecord);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhSensitiveFilterRecord.class, null);
+    }
 
     @Override
     public List<SensitiveFilterRecord> listSensitiveFilterRecord(Long namespaceId, Long pageAnchor, Integer pageSize) {

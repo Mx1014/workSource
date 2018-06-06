@@ -5,6 +5,8 @@ import java.util.List;
 
 public interface SensitiveFilterRecordProvider {
 
+    void createSensitiveFilterRecord(SensitiveFilterRecord sensitiveFilterRecord);
+
     List<SensitiveFilterRecord> listSensitiveFilterRecord(Long namespaceId, Long pageAnchor, Integer pageSize);
 
     SensitiveFilterRecord getSensitiveFilterRecord(Long id);
