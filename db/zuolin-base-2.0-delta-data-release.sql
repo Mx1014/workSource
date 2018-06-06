@@ -21,7 +21,7 @@ INSERT INTO EH_LOCALE_TEMPLATES(scope,code,locale,description,`text`,namespace_i
 -- 默认所有是navtive应用
 update eh_service_modules set client_handler_type = 0;
 -- 内部链接
-update eh_service_modules set client_handler_type = 2 WHERE id in (50700, 41400, 20400, 21200, 32500);
+update eh_service_modules set client_handler_type = 2 WHERE id in (41400, 20400, 21200, 32500);
 -- 离线包
 update eh_service_modules set client_handler_type = 3 WHERE id in (49100, 20800, 20600);
 
