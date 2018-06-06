@@ -5,7 +5,7 @@ ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_id` BIGINT COMMENT '�
 
 
 -- st.zheng
-CREATE TABLE `eh_rentalv2_order_record` (
+CREATE TABLE `eh_rentalv2_order_records` (
 `id`  bigint(20) NOT NULL ,
 `namespace_id`  int NULL ,
 `order_id`  bigint(20) NULL COMMENT '资源预订订单id' ,
@@ -17,6 +17,20 @@ CREATE TABLE `eh_rentalv2_order_record` (
 `update_time`  datetime  ,
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_rentalv2_pay_accounts` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int NULL ,
+`community_id`  bigint(20) NULL ,
+`resource_type`  varchar(20) NULL，
+`source_type`  varchar(20) NULL COMMENT 'default_rule:默认规则 resource_rule:资源规则' ,
+`source_id`  bigint(20) NULL ,
+`account_id`  bigint(20) NULL ,
+`create_time`  datetime  ,
+PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
 
 
 

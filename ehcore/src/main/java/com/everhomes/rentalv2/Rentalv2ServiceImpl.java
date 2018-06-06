@@ -3,6 +3,7 @@ package com.everhomes.rentalv2;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhome.paySDK.pojo.PayUserDTO;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
@@ -40,6 +41,7 @@ import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.portal.PortalService;
@@ -55,17 +57,13 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PreOrderCommand;
-import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
@@ -227,7 +225,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private DingDingParkingLockHandler dingDingParkingLockHandler;
 	@Autowired
 	private OrganizationService organizationService;
-	
+	@Autowired
+	private com.everhome.paySDK.api.PayService payServiceV2;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
@@ -8750,5 +8749,41 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					cmd.getEndDate(),null,r.getEnterpriseId()));
 			r.setUsedTime(r.getUsedTime()==null?0L:r.getUsedTime());
 		});
+	}
+
+	@Override
+	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
+		String userPrefix = "EhBizBusinesses";
+		List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(userPrefix+cmd.getOrganizationId(), cmd.getCommunityId().toString());
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("List rental payee accounts(response), orgnizationId={}, tags={}, response={}", cmd.getOrganizationId(), cmd.getCommunityId(), GsonUtil.toJson(payUserDTOs));
+		}
+
+		List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();
+		if(payUserDTOs != null){
+			for(PayUserDTO payUserDTO : payUserDTOs) {
+				ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+				// 支付系统中的用户ID
+				dto.setAccountId(payUserDTO.getId());
+				// 用户向支付系统注册帐号时填写的帐号名称
+				dto.setAccountName(payUserDTO.getRemark());
+				// 帐号类型，1-个人帐号、2-企业帐号
+				Integer userType = payUserDTO.getUserType();
+				if(userType != null && userType.equals(2)) {
+					dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+				} else {
+					dto.setAccountType(OwnerType.USER.getCode());
+				}
+				// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+				Integer registerStatus = payUserDTO.getRegisterStatus();
+				if(registerStatus != null && registerStatus.intValue() == 1) {
+					dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+				} else {
+					dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+				}
+				result.add(dto);
+			}
+		}
+		return result;
 	}
 }

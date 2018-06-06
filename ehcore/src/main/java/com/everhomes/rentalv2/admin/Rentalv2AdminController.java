@@ -3,6 +3,8 @@ package com.everhomes.rentalv2.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
@@ -946,6 +948,22 @@ public class Rentalv2AdminController extends ControllerBase {
 	public RestResponse queryOrgRentalStatistics( QueryRentalStatisticsCommand cmd) {
 		QueryOrgRentalStatisticsResponse statisticsResponse = rentalService.queryOrgRentalStatistics(cmd);
 		RestResponse response = new RestResponse(statisticsResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/ListPayeeAccountsCommand</b>
+	 * <p>
+	 * 查询企业账户信息
+	 * </p>
+	 */
+	@RequestMapping("ListPayeeAccountsCommand")
+	@RestReturn(value = ListBizPayeeAccountDTO.class,collection = true)
+	public RestResponse ListPayeeAccountsCommand( ListPayeeAccountsCommand cmd) {
+
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
