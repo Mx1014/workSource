@@ -30,6 +30,14 @@ CREATE TABLE `eh_rentalv2_pay_accounts` (
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+-- yanlong.liang 发起活动的企业与收款方账户映射表
+CREATE TABLE `eh_activity_biz_payee` (
+`id`  bigint(20) NOT NULL ,
+`biz_payee_id` bigint(20) NOT NULL COMMENT '收款方账户ID',
+`organization_id` bigint(20) NOT NULL COMMENT '企业ID',
+PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 
 
 
