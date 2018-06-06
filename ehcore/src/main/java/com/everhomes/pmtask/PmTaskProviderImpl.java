@@ -494,4 +494,13 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		condition = condition.and(Tables.EH_PM_TASKS.FLOW_CASE_ID.ne(0L));
 		return query.where(condition).fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASKS.recordType(), PmTask.class));
 	}
+
+	@Override
+	public List<PmTask> listPmTasksByOrgId(Integer namespaceId, Long communityId, Long organizationId) {
+		return this.dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_PM_TASKS)
+				.where(Tables.EH_PM_TASKS.OWNER_ID.eq(communityId))
+				.and(Tables.EH_PM_TASKS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_PM_TASKS.ORGANIZATION_ID.eq(organizationId))
+				.fetchInto(PmTask.class);
+	}
 }

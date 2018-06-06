@@ -13,6 +13,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.PmTaskService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -56,6 +57,7 @@ import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
@@ -176,6 +178,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private PmTaskService pmTaskService;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -1008,6 +1013,18 @@ public class FieldServiceImpl implements FieldService {
                     setMutilRowDatas(fields,data,requestInfoDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
+            case "物业报修":
+                SearchTasksByOrgCommand cmd17 = new SearchTasksByOrgCommand();
+                cmd17.setCommunityId(communityId);
+                cmd17.setNamespaceId(namespaceId);
+                cmd17.setOrganizationId(orgId);
+                List<SearchTasksByOrgDTO> list = pmTaskService.listTasksByOrg(cmd17);
+                if(list == null) list = new ArrayList<>();
+                for(int j = 0; j < list.size(); j++){
+                    LOGGER.info("物业报修"+j+":"+list.get(j));
+                    setMutilRowDatas(fields,data,list.get(j),communityId,namespaceId,moduleName,sheetName);
+                }
+                break;
         }
         return data;
     }
@@ -1093,6 +1110,12 @@ public class FieldServiceImpl implements FieldService {
         if(sheetName.equalsIgnoreCase("企业服务")){
             if(fieldName.equalsIgnoreCase("workflowStatus")){
                 invoke = ServiceAllianceWorkFlowStatus.fromType((byte)invoke).getDescription();
+                return String.valueOf(invoke);
+            }
+        }
+        if(sheetName.equalsIgnoreCase("物业报修")){
+            if(fieldName.equalsIgnoreCase("status")){
+                invoke = PmTaskFlowStatus.fromCode((byte)invoke).getDescription();
                 return String.valueOf(invoke);
             }
         }

@@ -697,7 +697,7 @@ public class CustomerServiceImpl implements CustomerService {
         String originalTrackingName = customer.getTrackingName();
         Long currentTrackingUid = updateCustomer.getTrackingUid();
         String currentTrackingName = updateCustomer.getTrackingName();
-        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), customer.getNamespaceId());
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), customer.getNamespaceId(), false);
 
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setCommunityId(customer.getCommunityId());
@@ -775,29 +775,29 @@ public class CustomerServiceImpl implements CustomerService {
         return convertToDTO(updateCustomer);
     }
 
-    private void routeMsgForTrackingChanged(Long originalTrackingUid, Long currentTrackingUid, String originalTrackingName, String currentTrackingName, String customerName, Integer namespaceId) {
+    private void routeMsgForTrackingChanged(Long originalTrackingUid, Long currentTrackingUid, String originalTrackingName, String currentTrackingName, String customerName, Integer namespaceId, boolean deleteCustomer) {
         Map<String,Object> map = new HashMap<>();
         map.put("customerName", customerName);
         map.put("originalTrackingName", originalTrackingName);
         map.put("currentTrackingName", currentTrackingName);
-        if (originalTrackingUid != null) {
-            if (currentTrackingUid != null && originalTrackingUid != currentTrackingUid) {
-                // two messges should be sent to two seperate users
-                // to new tracking people
+        if(deleteCustomer){
+             routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_tracking_on_customer_delete, map, namespaceId);
+             return;
+        }
+        if(currentTrackingUid != null && currentTrackingUid != originalTrackingUid){
+                 // to new tracking people
                 routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_new_tracking
                 , map, namespaceId);
-                // to old tracking people
+        }
+        if (originalTrackingUid != null) {
+            if (currentTrackingUid != null && currentTrackingUid != originalTrackingUid) {
+                // two messges should be sent to two seperate users
+               // to old tracking people
                 routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_old_tracking
                 , map, namespaceId);
             } else if (currentTrackingUid == null) {
                 // only one message sent to original user
-                 routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_old_tracking_no_candidate
-                , map, namespaceId);
-            }
-        } else {
-            if (currentTrackingUid != null) {
-                // only one msg sent to new user
-                routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_new_tracking
+                 routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_admin_no_candidate
                 , map, namespaceId);
             }
         }
@@ -860,6 +860,8 @@ public class CustomerServiceImpl implements CustomerService {
             command.setId(customer.getOrganizationId());
             organizationService.deleteEnterpriseById(command, false);
         }
+        routeMsgForTrackingChanged(null, null, null, null
+        , customer.getName(), customer.getNamespaceId(), true);
 
     }
 
@@ -3132,29 +3134,38 @@ public class CustomerServiceImpl implements CustomerService {
 
         }
     }
-
     @Override
     public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
         //checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         EnterpriseCustomer exist = enterpriseCustomerProvider.findById(cmd.getId());
+        Long originalTrackingUid = exist.getTrackingUid();
+        String orignalTrackingName = exist.getTrackingName();
+        Long currentTrackingUid = cmd.getTrackingUid();
+        String currentTrackingName = null;
         customer.setTrackingUid(cmd.getTrackingUid());
         if (cmd.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
+            currentTrackingName = detail.getContactName();
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
-                // send two msgs
             }
         }
         //保存事件
         saveCustomerEvent(3, customer, exist, cmd.getDeviceType());
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, orignalTrackingName, currentTrackingName,
+                customer.getName(), customer.getNamespaceId(), false);
     }
 
     @Override
     public void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        Long originalTrackingUid = customer.getTrackingUid();
+        String orignalTrackingName = customer.getTrackingName();
+        Long currentTrackingUid = null;
+        String currentTrackingName = null;
         //查看当前用户是否和跟进人一致
         if (null == customer.getTrackingUid() || !(customer.getTrackingUid().toString()).equals(UserContext.currentUserId() == null ? "" : UserContext.currentUserId().toString())) {
             LOGGER.error("enterprise customer do not contains trackingUid or not the same uid. id: {}, customer: {} ,current:{}", cmd.getId(), customer, UserContext.currentUserId());
@@ -3165,6 +3176,8 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setTrackingName(null);
         enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, orignalTrackingName, currentTrackingName,
+        customer.getName(), customer.getNamespaceId(), false);
     }
 
     @Override

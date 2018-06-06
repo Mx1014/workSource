@@ -61,4 +61,6 @@ public interface PmTaskProvider {
 	List<PmTask> findTaskByOrderId(String orderId);
 
 	List<PmTask> listTaskByStat(Integer namespaceId, List<Long> ownerIds, Timestamp dateStart, Timestamp dateEnd, List<Long> taskcategoryIds);
+
+    List<PmTask> listPmTasksByOrgId(Integer namespaceId, Long communityId, Long organizationId);
 }

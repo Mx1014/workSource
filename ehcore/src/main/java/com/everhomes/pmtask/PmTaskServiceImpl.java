@@ -2513,6 +2513,24 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		return handler.getThirdTaskDetail(req);
 	}
+	// 查找报修公司的报修记录, 对接不查
+	@Override
+	public List<SearchTasksByOrgDTO> listTasksByOrg(SearchTasksByOrgCommand cmd17) {
+		List<SearchTasksByOrgDTO> ret = new ArrayList<>();
+		List<PmTask> list = pmTaskProvider.listPmTasksByOrgId(cmd17.getNamespaceId(), cmd17.getCommunityId(), cmd17.getOrganizationId());
+		for(PmTask task : list){
+			SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
+			dto.setBuildingName(task.getBuildingName());
+			dto.setCreateTime(task.getCreateTime());
+			dto.setOrganizationUid(task.getOrganizationUid());
+			dto.setRequestorName(task.getRequestorName());
+			dto.setRequestorPhone(task.getRequestorPhone());
+			dto.setStatus(task.getStatus());
+			dto.setTaskCategoryName(categoryProvider.findCategoryById(task.getTaskCategoryId()).getName());
+			ret.add(dto);
+		}
+		return ret;
+	}
 
 	public static String computeSignature(Map<String, String> params, String secretKey) {
 		assert (params != null);
