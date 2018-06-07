@@ -13,6 +13,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import com.everhomes.bootstrap.PlatformContext;
 
@@ -23,7 +25,7 @@ import net.greghaines.jesque.Job;
 import net.greghaines.jesque.worker.MapBasedJobFactory;
 import net.greghaines.jesque.worker.WorkerImpl;
 
-public class SpringWorker extends WorkerImpl implements ApplicationContextAware {
+public class SpringWorker extends WorkerImpl implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
     private Logger logger = LoggerFactory.getLogger(SpringWorker.class);
 
@@ -90,12 +92,21 @@ public class SpringWorker extends WorkerImpl implements ApplicationContextAware 
         this.applicationContext = applicationContext;
     }
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         logger.info("Start a new thread for SpringWorker");
         new Thread(this).start();
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
+    }
+    
     @PreDestroy
     public void destroy() {
         logger.info("End the SpringWorker thread");

@@ -95,7 +95,7 @@ public class RestCallTemplate {
             messageConverters.add(new MappingJackson2HttpMessageConverter());
         }
         else if (jacksonPresent) {
-            messageConverters.add(new org.springframework.http.converter.json.MappingJacksonHttpMessageConverter());
+            messageConverters.add(new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter());
         }
 
         template.setMessageConverters(messageConverters);

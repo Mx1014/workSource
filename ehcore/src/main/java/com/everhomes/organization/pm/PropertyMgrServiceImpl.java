@@ -106,6 +106,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -138,7 +140,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
  */
 @Component 
-public class PropertyMgrServiceImpl implements PropertyMgrService {
+public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrServiceImpl.class);
 	private static final String ASSIGN_TASK_AUTO_COMMENT = "assign.task.auto.comment";
 	private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
@@ -267,12 +269,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     private String queueName = "property-mgr-push";
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-	
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
 	@Override
 	public void applyPropertyMember(applyPropertyMemberCommand cmd) {
 		User user  = UserContext.current().getUser();
