@@ -993,7 +993,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * 更新通用支付账户设定
 	 * </p>
 	 */
-	@RequestMapping("getGeneralAccountSetting")
+	@RequestMapping("updateGeneralAccountSetting")
 	@RestReturn(value = String.class)
 	public RestResponse updateGeneralAccountSetting( UpdateGeneralAccountSettingCommand cmd) {
 		rentalService.updateGeneralAccountSetting(cmd);
@@ -1009,13 +1009,45 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * 获取资源支付账户设定
 	 * </p>
 	 */
-	@RequestMapping("getGeneralAccountSetting")
+	@RequestMapping("getResourceAccountSetting")
 	@RestReturn(value = GetResourceAccountSettingResponse.class)
 	public RestResponse getResourceAccountSetting( GetResourceAccountSettingCommand cmd) {
-
-		RestResponse response = new RestResponse();
+        GetResourceAccountSettingResponse res = rentalService.getResourceAccountSetting(cmd);
+		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /rental/admin/deleteResourceAccountSetting</b>
+     * <p>
+     * 删除资源支付账户
+     * </p>
+     */
+    @RequestMapping("deleteResourceAccountSetting")
+    @RestReturn(value = String.class)
+    public RestResponse deleteResourceAccountSetting( Long id) {
+        rentalService.deleteResourceAccountSetting(id);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /rental/admin/updateResourceAccountSetting</b>
+     * <p>
+     * 新增/更新资源支付账户
+     * </p>
+     */
+    @RequestMapping("updateResourceAccountSetting")
+    @RestReturn(value = String.class)
+    public RestResponse updateResourceAccountSetting( UpdateResourceAccountSettingCommand cmd) {
+		rentalService.updateResourceAccountSetting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
