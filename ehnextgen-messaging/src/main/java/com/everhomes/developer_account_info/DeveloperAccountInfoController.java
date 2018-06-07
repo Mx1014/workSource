@@ -89,7 +89,7 @@ public class DeveloperAccountInfoController extends ControllerBase {
      * @return
      * @throws IOException 
      */
-    public  StringBuffer removeAnnotations(MultipartFile file) throws IOException{
+    private  StringBuffer removeAnnotations(MultipartFile file) throws IOException{
     	
     	StringBuffer sb = new StringBuffer();			
 	    	InputStreamReader reader;
