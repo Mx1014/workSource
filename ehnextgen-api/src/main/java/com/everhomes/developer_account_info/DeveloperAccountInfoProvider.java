@@ -13,5 +13,17 @@ public interface DeveloperAccountInfoProvider {
 	 * @return
 	 */
 	DeveloperAccountInfo getDeveloperAccountInfoByBundleId(String  bundleId);
+	
+	/**
+	 * 删除DeveloperAccountInfo信息
+	 * @param bo
+	 */	
+	void deleteDeveloperAccountInfo(DeveloperAccountInfo  bo);
+	
+	/**
+	 * 新增DeveloperAccountInfo信息
+	 * @param bo
+	 */
+	 void createDeveloperAccountInfo(DeveloperAccountInfo  bo);
 
 }

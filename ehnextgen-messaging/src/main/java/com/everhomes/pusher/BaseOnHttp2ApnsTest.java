@@ -21,10 +21,10 @@ public class BaseOnHttp2ApnsTest {
 	
 	
 	private static final  String AUTHKEY =
-										  "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgexxG8QrtsI2+Xuwf"+
-										  "75baYuZBQYBDzSBfEPijhC2GOmagCgYIKoZIzj0DAQehRANCAAT4qnM82JvBxnJ/"+
-										  "R3ESPFgylVgU4st8QlQdf1QEYQtU3lVNStrg8W6DcLvYyL/7I/Tc0HFXm+8YQijz"+
-										  "7ayWDOp7";
+										  "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgexxG8QrtsI2+Xuwf           "+
+										  "75baYuZBQYBDzSBfEPijhC2GOmagCgYIKoZIzj0DAQehRANCAAT4qnM82JvBxnJ/        "+
+										  "R3ESPFgylVgU4st8QlQdf1QEYQtU3lVNStrg8W6DcLvYyL/7I/Tc0HFXm+8YQijz        "+
+										  "7ayWDOp7  ";
 										 
 	//建立连接及推送所需的参数
 	//static final String HostDevelopment_url = "https://api.development.push.apple.com";

@@ -63,7 +63,8 @@ public class PriorityQueuedApnsClient implements ApnsClient {
 	                       	 if(result == null || result.getHttpStatusCode() != 200){
 	                       		 queue.add(msg);
 	                       	 }
-	                           logger.info("Pushing message,response= "+result+"  priority=" + msg.getPriority());
+	                           logger.info("Pushing message,NotificationResponse= "+result+"  priority=" + msg.getPriority());
+	                           logger.info("NotificationResponse:"+result);
                     	}
                     	 
                     } catch (InterruptedException e) {
