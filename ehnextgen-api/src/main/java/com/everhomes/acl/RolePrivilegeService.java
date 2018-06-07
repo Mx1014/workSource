@@ -443,4 +443,6 @@ public interface RolePrivilegeService {
 	GetPersonelInfoByTokenResponse getPersonelInfoByToken(GetPersonelInfoByTokenCommand cmd);
 
 	void updateTopAdminstrator(CreateOrganizationAdminCommand cmd);
+
+	String findTopAdminByOrgId(FindTopAdminByOrgIdCommand cmd);
 }
