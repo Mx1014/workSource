@@ -2029,7 +2029,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             LOGGER.info(String.valueOf(data.getApartmentName().getBytes().length));
             //校验楼栋名称的长度不能大于20个汉字
-            if(data.getApartmentName().length()> 60){
+            if(data.getApartmentName().length()> 20){
                 log.setCode(AddressServiceErrorCode.ERROR_APPARTMENT_NAME_OVER_FLOW);
                 log.setData(data);
                 log.setErrorLog("address name cannot over than 20");
