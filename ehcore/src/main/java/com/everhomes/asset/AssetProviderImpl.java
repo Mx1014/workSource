@@ -936,6 +936,7 @@ public class AssetProviderImpl implements AssetProvider {
 		        return null;
         });
         response.setAmountReceivable(amountReceivable[0]);
+        amountOwed[0] = DecimalUtils.negativeValueFilte(amountOwed[0]);
         response.setAmountOwed(amountOwed[0]);
         response.setDatestr(dateStrBegin[0] + "~" + dateStrEnd[0]);
         response.setShowBillDetailForClientDTOList(dtos);
