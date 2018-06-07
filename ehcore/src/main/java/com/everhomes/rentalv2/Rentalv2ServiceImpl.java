@@ -6747,6 +6747,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		siteItem.setName(cmd.getItemName());
 		siteItem.setPrice(cmd.getItemPrice());
 		siteItem.setDescription(cmd.getDescription());
+		siteItem.setCounts(cmd.getCounts());
 		rentalv2Provider.updateRentalSiteItem(siteItem);
 	}
 
