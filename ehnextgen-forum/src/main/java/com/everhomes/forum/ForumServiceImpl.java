@@ -68,6 +68,7 @@ import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.hotTag.*;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -5120,99 +5121,100 @@ public class ForumServiceImpl implements ForumService {
 
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        //SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         
         NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
         
         PostEntityTag creatorTag = PostEntityTag.USER;
         VisibleRegionType visibleRegionType = null;
         Long visibleRegionId = null;
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        AppContext appContext = UserContext.current().getAppContext();
+//        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
         Long currentOrgId = null;
-        switch(sceneType) {
-        case DEFAULT:
-        case PARK_TOURIST:
+//        switch(sceneType) {
+//        case DEFAULT:
+//        case PARK_TOURIST:
             visibleRegionType = VisibleRegionType.COMMUNITY;
-            visibleRegionId = sceneToken.getEntityId();
-            
+            visibleRegionId = appContext.getCommunityId();
+
             // 在园区场景下，客户端可能使用错误的社区论坛（甚至不传），
             if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
                 setCurrentForumId(topicCmd, visibleRegionId);
             }
-            break;
-        case FAMILY:
-            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-            if(family != null) {
-                visibleRegionType = VisibleRegionType.COMMUNITY;
-                visibleRegionId = family.getCommunityId();
-                
-                if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
-                    setCurrentForumId(topicCmd, visibleRegionId);
-                }
-            } else {
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
-                }
-            }
-            break;
-        case PM_ADMIN:// 无小区ID
-        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
-        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
-            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
-            currentOrgId = org.getId();
-            if(org != null) {
-                String orgType = org.getOrganizationType();
-                
-                // 以前由于只有物业管理员场景故需要进行管理员判断，后来加上普通企业之后，就不需要进行这个判断；
-                // 客户端会从发送范围里把visible_region_type/id传过来，如果不传则说明是偏老一点的版本，此时使用REGION类型 by lqs 20160601
-//                if(OrganizationType.isGovAgencyOrganization(orgType)) {
-//                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
-//                    	creatorTag = PostEntityTag.fromCode(orgType);
-//                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
-//                    		creatorTag = PostEntityTag.USER;
-//                    	}
-//                        visibleRegionType = VisibleRegionType.COMMUNITY;
-//                        visibleRegionId = cmd.getVisibleRegionId();
-//                    }else{
-//                        creatorTag = PostEntityTag.fromCode(orgType);
-//                        visibleRegionType = VisibleRegionType.REGION;
-//                        visibleRegionId = sceneToken.getEntityId();
-//                    }
-//                    
+//            break;
+//        case FAMILY:
+//            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//            if(family != null) {
+//                visibleRegionType = VisibleRegionType.COMMUNITY;
+//                visibleRegionId = family.getCommunityId();
+//
+//                if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
+//                    setCurrentForumId(topicCmd, visibleRegionId);
 //                }
-                visibleRegionType = VisibleRegionType.fromCode(cmd.getVisibleRegionType());
-                visibleRegionType = (visibleRegionType == null) ? VisibleRegionType.REGION : visibleRegionType;
-                visibleRegionId = cmd.getVisibleRegionId();
-
-                if(cmd.getVisibleRegionIds() == null || cmd.getVisibleRegionIds().size() == 0){
-                    visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
-                }
-
-                if(OrganizationType.isGovAgencyOrganization(orgType)) {
-//                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
-//                    	creatorTag = PostEntityTag.fromCode(orgType);
-//                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
-//                    		creatorTag = PostEntityTag.USER;
-//                    	}
-//                        visibleRegionType = VisibleRegionType.COMMUNITY;
-//                        visibleRegionId = cmd.getVisibleRegionId();
-//                    }else{
-//                        creatorTag = PostEntityTag.fromCode(orgType);
-//                        visibleRegionType = VisibleRegionType.REGION;
-//                        visibleRegionId = sceneToken.getEntityId();
-//                    }
-                    
-                    creatorTag = PostEntityTag.fromCode(orgType);
-                }
-            } else {
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
-                }
-            }
-            break;
-        default:
-            break;
-        }
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//            break;
+//        case PM_ADMIN:// 无小区ID
+//        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+//            currentOrgId = org.getId();
+//            if(org != null) {
+//                String orgType = org.getOrganizationType();
+//
+//                // 以前由于只有物业管理员场景故需要进行管理员判断，后来加上普通企业之后，就不需要进行这个判断；
+//                // 客户端会从发送范围里把visible_region_type/id传过来，如果不传则说明是偏老一点的版本，此时使用REGION类型 by lqs 20160601
+////                if(OrganizationType.isGovAgencyOrganization(orgType)) {
+////                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+////                    	creatorTag = PostEntityTag.fromCode(orgType);
+////                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
+////                    		creatorTag = PostEntityTag.USER;
+////                    	}
+////                        visibleRegionType = VisibleRegionType.COMMUNITY;
+////                        visibleRegionId = cmd.getVisibleRegionId();
+////                    }else{
+////                        creatorTag = PostEntityTag.fromCode(orgType);
+////                        visibleRegionType = VisibleRegionType.REGION;
+////                        visibleRegionId = sceneToken.getEntityId();
+////                    }
+////
+////                }
+//                visibleRegionType = VisibleRegionType.fromCode(cmd.getVisibleRegionType());
+//                visibleRegionType = (visibleRegionType == null) ? VisibleRegionType.REGION : visibleRegionType;
+//                visibleRegionId = cmd.getVisibleRegionId();
+//
+//                if(cmd.getVisibleRegionIds() == null || cmd.getVisibleRegionIds().size() == 0){
+//                    visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
+//                }
+//
+//                if(OrganizationType.isGovAgencyOrganization(orgType)) {
+////                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+////                    	creatorTag = PostEntityTag.fromCode(orgType);
+////                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
+////                    		creatorTag = PostEntityTag.USER;
+////                    	}
+////                        visibleRegionType = VisibleRegionType.COMMUNITY;
+////                        visibleRegionId = cmd.getVisibleRegionId();
+////                    }else{
+////                        creatorTag = PostEntityTag.fromCode(orgType);
+////                        visibleRegionType = VisibleRegionType.REGION;
+////                        visibleRegionId = sceneToken.getEntityId();
+////                    }
+//
+//                    creatorTag = PostEntityTag.fromCode(orgType);
+//                }
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//            break;
+//        default:
+//            break;
+//        }
         if(visibleRegionType == VisibleRegionType.COMMUNITY){
             topicCmd.setOwnerType(EntityType.COMMUNITY.getCode());
             topicCmd.setOwnerId(visibleRegionId);
@@ -5849,8 +5851,9 @@ public class ForumServiceImpl implements ForumService {
     public List<TopicScopeDTO> getTopicSentScopes(GetTopicSentScopeCommand cmd) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        
+        //SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        AppContext appContext = UserContext.current().getAppContext();
+
         // 增加园区场景，由于很多代码是重复复制的，故把它们转移到Handler里进行构造，方便以后增加新场景只需要增加相应的handler即可 by lqs 20160510
 //        List<TopicScopeDTO> sentScopeList = null;
 //        PostSentScopeType sentScopeType = PostSentScopeType.fromCode(cmd.getScopeType());
@@ -5872,16 +5875,16 @@ public class ForumServiceImpl implements ForumService {
         List<TopicScopeDTO> sentScopeList = null;
         PostFilterType filterType = PostFilterType.fromCode(cmd.getScopeType());
         if(filterType == null) {
-            LOGGER.error("Unsupported post sent scope type, cmd={}, sceneToken={}", cmd, sceneToken);
+            LOGGER.error("Unsupported post sent scope type, cmd={}, appContext={}", cmd, appContext);
             return sentScopeList;
         }
         
-        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + sceneToken.getScene();
+        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + "park_tourist";
         PostSceneHandler handler = PlatformContext.getComponent(handlerName);
         if(handler != null) {
-            sentScopeList = handler.getTopicSentScopes(user, sceneToken);
+            sentScopeList = handler.getTopicSentScopes(user, null);
         } else {
-            LOGGER.error("No handler found for post sent scope, cmd={}, sceneToken={}, handlerName={}", cmd, sceneToken, handlerName);
+            LOGGER.error("No handler found for post sent scope, cmd={}, appContext={}, handlerName={}", cmd, appContext, handlerName);
         }
         
         

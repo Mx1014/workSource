@@ -26,9 +26,9 @@ public class RouterInfoServiceImpl implements RouterService {
     @Override
     public RouterInfo getRouterInfo(Long moduleId, String path, String jsonStr) {
 
-        RouterInfo routerInfo = null;
+        //RouterInfo routerInfo = null;
         if (routerListeners == null) {
-            return routerInfo;
+            return null;
         }
 
         String[] splits = path.split("/");
@@ -47,9 +47,7 @@ public class RouterInfoServiceImpl implements RouterService {
                         if (checkRouterPathMethod(method, tempPath)) {
                             method.setAccessible(true);
                             try {
-                                routerInfo = (RouterInfo) method.invoke(listener, jsonStr);
-                                routerInfo.setQuery(URLEncoder.encode(routerInfo.getQuery(),"UTF-8"));
-                                return routerInfo;
+                                return  (RouterInfo) method.invoke(listener, jsonStr);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
