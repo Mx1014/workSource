@@ -3,7 +3,7 @@ package com.everhomes.rentalv2;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhome.paySDK.pojo.PayUserDTO;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
@@ -226,7 +226,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Autowired
 	private OrganizationService organizationService;
 	@Autowired
-	private com.everhome.paySDK.api.PayService payServiceV2;
+	private com.everhomes.paySDK.api.PayService payServiceV2;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired

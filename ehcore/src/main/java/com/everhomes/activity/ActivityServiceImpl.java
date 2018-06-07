@@ -2,7 +2,7 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
-import com.everhome.paySDK.pojo.PayUserDTO;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalEventBus;
@@ -252,7 +252,7 @@ public class ActivityServiceImpl implements ActivityService {
 	private PayService payService;
 
 	@Autowired
-    private com.everhome.paySDK.api.PayService payServiceV2;
+    private com.everhomes.paySDK.api.PayService payServiceV2;
 	
     @PostConstruct
     public void setup() {
