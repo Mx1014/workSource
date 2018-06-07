@@ -33,6 +33,8 @@ public interface ActivityService {
 
     PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd);
 
+    PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd);
+
     CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
 
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
@@ -212,6 +214,8 @@ public interface ActivityService {
 	ListActivityPayeeResponse listActivityPayee(ListActivityPayeeCommand cmd);
 
 	void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd);
+
+	CheckPayeeIsUsefulResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd);
 
 //	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
