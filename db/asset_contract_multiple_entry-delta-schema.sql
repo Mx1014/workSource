@@ -56,25 +56,43 @@ ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `category_id` bigint(20) NULL 
 ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
 
 
+-- CREATE TABLE `eh_contract_categories` (
+--   `id` bigint(20) NOT NULL,
+--   `owner_type` varchar(32) DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+--   `owner_id` bigint(20) DEFAULT '0',
+--   `parent_id` bigint(20) DEFAULT '0',
+--   `name` varchar(64) DEFAULT NULL,
+--   `path` varchar(128) DEFAULT NULL,
+--   `default_order` int(11) DEFAULT NULL,
+--   `status` tinyint(4) DEFAULT '0' COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+--   `creator_uid` bigint(20) DEFAULT '0' COMMENT 'record creator user id',
+--   `create_time` datetime DEFAULT NULL,
+--   `delete_uid` bigint(20) DEFAULT '0' COMMENT 'record deleter user id',
+--   `delete_time` datetime DEFAULT NULL,
+--   `namespace_id` int(11) DEFAULT '0',
+--   `logo_uri` varchar(1024) DEFAULT NULL COMMENT 'default cover uri',
+--   `entry_id` int(11) DEFAULT NULL,
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE `eh_contract_categories` (
   `id` bigint(20) NOT NULL,
-  `owner_type` varchar(32) DEFAULT '' COMMENT 'the type of who own the category, community, etc',
-  `owner_id` bigint(20) DEFAULT '0',
-  `parent_id` bigint(20) DEFAULT '0',
-  `name` varchar(64) DEFAULT NULL,
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `parent_id` bigint(20) NOT NULL DEFAULT '0',
+  `name` varchar(64) NOT NULL,
   `path` varchar(128) DEFAULT NULL,
   `default_order` int(11) DEFAULT NULL,
-  `status` tinyint(4) DEFAULT '0' COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
-  `creator_uid` bigint(20) DEFAULT '0' COMMENT 'record creator user id',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record creator user id',
   `create_time` datetime DEFAULT NULL,
   `delete_uid` bigint(20) DEFAULT '0' COMMENT 'record deleter user id',
   `delete_time` datetime DEFAULT NULL,
-  `namespace_id` int(11) DEFAULT '0',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
   `logo_uri` varchar(1024) DEFAULT NULL COMMENT 'default cover uri',
   `entry_id` int(11) DEFAULT NULL,
+  `contract_application_scene` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0 租赁合同场景 1 物业合同场景 3 综合合同场景',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 -- from 5.5.1 todo delete
 -- 1: 同步客户
