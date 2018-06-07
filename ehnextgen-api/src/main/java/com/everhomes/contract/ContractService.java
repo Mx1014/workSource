@@ -52,6 +52,7 @@ public interface ContractService {
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
 
     ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
-    //记录合同修改日志
-	void saveContractEvent(int i, Contract contract, Contract exist);
+    //add by tangcen
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+   
 }

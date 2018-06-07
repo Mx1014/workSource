@@ -212,11 +212,9 @@ public class SZWContractHandler implements ContractService{
 	}
 
 	@Override
-	public void saveContractEvent(int i, Contract contract, Contract exist) {
-		// TODO 记录合同修改日志
-		
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
-
-
     
 }

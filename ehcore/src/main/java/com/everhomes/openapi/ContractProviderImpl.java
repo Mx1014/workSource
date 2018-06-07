@@ -9,7 +9,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
+import com.everhomes.contract.ContractChargingChange;
+import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
@@ -108,7 +112,9 @@ public class ContractProviderImpl implements ContractProvider {
 	@Autowired
 	private FieldProvider fieldProvider;
 	
-
+	@Autowired
+	private AssetProvider assetProvider;
+	
 	@Override
 	public void createContract(Contract contract) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContracts.class));
@@ -722,23 +728,40 @@ public class ContractProviderImpl implements ContractProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, ContractCategory.class, null);
 	}
 	
+	//显示合同日志
+	@Override
+	public List<ContractEvents> listContractEvents(Long contractId) {
+		List<ContractEvents> result = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractEvents.class));
+        context.select()
+        	   .from(Tables.EH_CONTRACT_EVENTS)
+        	   .where(Tables.EH_CONTRACT_EVENTS.CONTRACT_ID.eq(contractId))
+        	   .fetch()
+        	   .map(r->{
+        		   ContractEvents contractEvents = ConvertHelper.convert(r, ContractEvents.class);
+        		   result.add(contractEvents);
+        		   return null;
+        	   });
+		return result;
+	}
+	
 	//记录合同修改日志 by tangcen
 	@Override
 	public void saveContractEvent(int opearteType, Contract contract, Contract exist) {	
 		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY
 		String content = null;
 		switch(opearteType){
-		case 1 : 
-			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
-			break;
-		case 2 :
-			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
-			break;
-		case 3 :
-			content = compareContract(contract,exist);
-			break;
-		default :
-			break;
+			case 1 : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case 2 :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case 3 :
+				content = compareContract(contract,exist);
+				break;
+			default :
+				break;
 		}
 		if(!StringUtils.isEmpty(content)){
 			ContractEvents event = new ContractEvents(); 
@@ -750,23 +773,149 @@ public class ContractProviderImpl implements ContractProvider {
 			event.setOperatorUid(UserContext.currentUserId());
 			event.setOpearteTime(contract.getUpdateTime());
 			event.setOpearteType((byte)opearteType);
-	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractEvents.class, id));
 	        LOGGER.info("saveContractEventWithInsert: " + event);
-	        //EhContractEventsDao dao = new EhContractEventsDao();
-	        //dao.insert(event);
-	        EhContractEvents t = Tables.EH_CONTRACT_EVENTS;
-	        context
-	        	.insertInto(t, t.ID, t.NAMESPACE_ID, t.CONTRACT_ID, t.OPERATOR_UID, t.OPEARTE_TIME, t.OPEARTE_TYPE, t.CONTENT)
-	        	.values(event.getId(),event.getNamespaceId(),
-	        			event.getContractId(),event.getOperatorUid(),
-	        			event.getOpearteTime(),event.getOpearteType(),
-	        			event.getContent())
-	        	.execute();
-	        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractEvents.class, null);
+	        insertContractEvents(event);
 		}
 	}
 	
-	//比较已存在的contract和待修改的contract的区别,by tangcen
+	@Override
+	public void saveContractEventAboutApartments(int opearteType, Contract contract, ContractBuildingMapping mapping) {
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		String content = null;
+		HashMap<String, String> dataMap = new HashMap<>();
+		switch(opearteType){
+			case ContractTrackingTemplateCode.APARTMENT_ADD : 
+				dataMap.put("apartmentName", mapping.getApartmentName());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.APARTMENT_DELETE :
+				dataMap.put("apartmentName", mapping.getApartmentName());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			ContractEvents event = new ContractEvents(); 
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
+			event.setId(id);
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setContractId(contract.getId());	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOpearteTime(contract.getUpdateTime());
+			//因为关联资产的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			event.setOpearteType((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE);
+	        LOGGER.info("saveContractEventWithInsert: " + event);
+	        insertContractEvents(event);
+		}
+	}
+	
+	@Override
+	public void saveContractEventAboutChargingItem(int opearteType, Contract contract,ContractChargingItem contractChargingItem) {
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		HashMap<String, String> dataMap = new HashMap<>();
+		String chargingItemName = assetProvider.findChargingItemNameById(contractChargingItem.getId());
+		dataMap.put("chargingItemName", chargingItemName);
+		String content = null;
+		switch(opearteType){
+			case ContractTrackingTemplateCode.CHARGING_ITEM_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CHARGING_ITEM_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.CHARGING_ITEM_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CHARGING_ITEM_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			//保存合同日志,因为计价条款的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			saveGeneralContractEvent((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE,content,contract);
+		}
+	}
+	
+	@Override
+	public void saveContractEventAboutAttachment(int opearteType, Contract contract, ContractAttachment contractAttachment){
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		HashMap<String, String> dataMap = new HashMap<>();
+		String attachmentName = contractAttachment.getName();
+		dataMap.put("attachmentName", attachmentName);
+		String content = null;
+		switch(opearteType){
+			case ContractTrackingTemplateCode.ATTACHMENT_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ATTACHMENT_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.ATTACHMENT_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ATTACHMENT_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			//保存合同日志,因为合同附件的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			saveGeneralContractEvent((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE,content,contract);
+		}
+	}
+	
+	@Override
+	public void saveContractEventAboutChargingChange(int opearteType, Contract contract,ContractChargingChange contractChargingChange){
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		HashMap<String, String> dataMap = new HashMap<>();
+		String chargingChangeName = assetProvider.findChargingItemNameById(contractChargingChange.getChargingItemId());
+		dataMap.put("chargingChangeName", chargingChangeName);
+		String content = null;
+		switch(opearteType){
+			case ContractTrackingTemplateCode.ADJUST_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADJUST_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.ADJUST_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADJUST_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.FREE_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.FREE_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.FREE_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.FREE_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			//保存合同日志,因为合同附件的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			saveGeneralContractEvent((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE,content,contract);
+		}
+	}
+	
+	@Override
+	public void insertContractEvents(ContractEvents event){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractEvents.class, event.getId()));
+		EhContractEvents t = Tables.EH_CONTRACT_EVENTS;
+        context
+        	.insertInto(t, t.ID, t.NAMESPACE_ID, t.CONTRACT_ID, t.OPERATOR_UID, t.OPEARTE_TIME, t.OPEARTE_TYPE, t.CONTENT)
+        	.values(event.getId(),event.getNamespaceId(),
+        			event.getContractId(),event.getOperatorUid(),
+        			event.getOpearteTime(),event.getOpearteType(),
+        			event.getContent())
+        	.execute();
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractEvents.class, null);
+	}
+	
+	//保存合同日志 by tangcen
+	private void saveGeneralContractEvent(Byte opearteType,String content,Contract contract){
+		ContractEvents event = new ContractEvents(); 
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
+		event.setId(id);
+		event.setContent(content);
+		event.setNamespaceId(UserContext.getCurrentNamespaceId());
+		event.setContractId(contract.getId());	
+		event.setOperatorUid(UserContext.currentUserId());
+		event.setOpearteTime(contract.getUpdateTime());
+		event.setOpearteType(opearteType);
+        LOGGER.info("saveContractEventWithInsert: " + event);
+        insertContractEvents(event);
+	}
+	
+	//比较已存在的contract和待修改的contract的区别 by tangcen
 	private String compareContract(Contract contract, Contract exist) {
 		//查出模板配置的参数
 		ListFieldCommand command = new ListFieldCommand();
@@ -845,7 +994,7 @@ public class ContractProviderImpl implements ContractProvider {
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);
 						map.put("newData", newData);
-						content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.UPDATE, UserContext.current().getUser().getLocale(), map, "");
+						content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_UPDATE, UserContext.current().getUser().getLocale(), map, "");
 						buffer.append(content);
 						buffer.append(";");
 					}
