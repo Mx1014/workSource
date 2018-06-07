@@ -278,8 +278,8 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ListBizPayeeAccountDTO.class,collection = true)
     public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
 
-//        parkingService.listPayeeAccount(cmd);
-        RestResponse response = new RestResponse();
+        List<ListBizPayeeAccountDTO> list = parkingService.listPayeeAccount(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -293,7 +293,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 
-//        parkingService.createOrUpdateBusinessPayeeAccount(cmd);
+        parkingService.createOrUpdateBusinessPayeeAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -308,8 +308,8 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=BusinessPayeeAccountDTO.class,collection = true)
     public RestResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
 
-//        parkingService.listBusinessPayeeAccount(cmd);
-        RestResponse response = new RestResponse();
+        List<BusinessPayeeAccountDTO> list = parkingService.listBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -323,7 +323,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 
-//        parkingService.listBusinessPayeeAccount(cmd);
+        parkingService.delBusinessPayeeAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

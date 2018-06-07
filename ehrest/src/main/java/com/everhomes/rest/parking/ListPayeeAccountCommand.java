@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
+ * <li>organizationId: 公司id</li>
  * </ul>
  */
 public class ListPayeeAccountCommand {
@@ -17,6 +18,7 @@ public class ListPayeeAccountCommand {
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
+    private Long organizationId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -48,6 +50,14 @@ public class ListPayeeAccountCommand {
 
     public void setParkingLotId(Long parkingLotId) {
         this.parkingLotId = parkingLotId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     @Override
