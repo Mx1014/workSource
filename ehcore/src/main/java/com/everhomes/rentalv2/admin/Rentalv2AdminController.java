@@ -1011,9 +1011,9 @@ public class Rentalv2AdminController extends ControllerBase {
 	 */
 	@RequestMapping("getGeneralAccountSetting")
 	@RestReturn(value = ListBizPayeeAccountDTO.class)
-	public RestResponse getResourceAccountSetting( GetGeneralAccountSettingCommand cmd) {
-		ListBizPayeeAccountDTO dto = rentalService.getGeneralAccountSetting(cmd);
-		RestResponse response = new RestResponse(dto);
+	public RestResponse getResourceAccountSetting( GetResourceAccountSettingCommand cmd) {
+
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
