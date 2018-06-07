@@ -184,4 +184,6 @@ public interface EnterpriseCustomerProvider {
 
     void deleteCustomerEntryInfoByCustomerIdAndAddressIds(Long id, List<Long> addressIds);
 
+    void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId,Integer namespaceId);
+
 }

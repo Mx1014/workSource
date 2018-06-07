@@ -5055,13 +5055,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
         List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
+        EnergyPlan autoPlans = energyPlanProvider.listNewestAutoReadingPlans(cmd.getNamespaceId(),cmd.getCommunityId());
+        List<Long> planIds = new ArrayList<>();
+        planIds.add(0L);
+        if (autoPlans != null) {
+            planIds.add(autoPlans.getId());
+        }
         if (maps != null && maps.size() > 0) {
-            List<Long> planIds = maps.stream().map(EnergyPlanGroupMap::getPlanId).collect(Collectors.toList());
-            EnergyPlan autoPlans = energyPlanProvider.listNewestAutoReadingPlans(cmd.getNamespaceId());
-            if (autoPlans != null) {
-                planIds.add(autoPlans.getId());
-            }
-            planIds.add(0L);
+            List<Long> plans = maps.stream().map(EnergyPlanGroupMap::getPlanId).collect(Collectors.toList());
+            if (plans != null && plans.size() > 0)
+                planIds.addAll(plans);
+        }
+        if(planIds.size()>0){
             List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(),
                     cmd.getOwnerId(), 0L, Integer.MAX_VALUE - 1, taskUpdateTime);
 
