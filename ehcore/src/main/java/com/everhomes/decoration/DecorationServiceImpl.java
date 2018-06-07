@@ -144,6 +144,7 @@ public class DecorationServiceImpl implements  DecorationService {
         GetDecorationFeeResponse response = new GetDecorationFeeResponse();
         GetIlluStrationCommand cmd2 = new GetIlluStrationCommand();
         cmd2.setOwnerType(IllustrationType.FEE.getCode());
+        cmd2.setCommunityId(request.getCommunityId());
         DecorationIllustrationDTO dto = this.getIllustration(cmd2);
         response.setAddress(dto.getAddress());
         response.setLatitude(dto.getLatitude());
