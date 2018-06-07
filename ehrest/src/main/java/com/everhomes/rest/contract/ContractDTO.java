@@ -54,7 +54,6 @@ public class ContractDTO {
 	private String customerName;
 	
 	private Long categoryId;
-	
 	private Long configId;
 	
 	

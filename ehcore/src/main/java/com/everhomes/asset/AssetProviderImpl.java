@@ -3659,7 +3659,6 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setChargingItemId(scope.getChargingItemId());
             list.add(dto);
         }
-
         return list;
     }
 

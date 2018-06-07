@@ -1933,14 +1933,12 @@ public class ContractServiceImpl implements ContractService {
 			return contracts.stream().map(contract -> {
 				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
 				dto.setOrganizationName(contract.getCustomerName());
-				
 				if(categoryConfigMap.containsKey(contract.getCategoryId())){
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}else{
 					categoryConfigMap.put(contract.getCategoryId(), getConfigId(namespaceId, contract.getCategoryId()));
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}
-			
 				return dto;
 			}).collect(Collectors.toList());
 
@@ -1950,10 +1948,8 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private Long getConfigId(Integer namespaceId, Long categoryId) {
-		// TODO Auto-generated method stub
 		List<ServiceModuleApp> serviceModuleApp = serviceModuleAppService.listReleaseServiceModuleApp(namespaceId, 21200L, null, categoryId.toString(), null);
 		if (serviceModuleApp != null && serviceModuleApp.size()>0){
-			// sort by id, return the biggest one todo
 			return serviceModuleApp.get(0).getId();
 		}
 		return 0L;
@@ -1984,7 +1980,6 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public List<ContractDTO> listApartmentContracts(ListApartmentContractsCommand cmd) {
 		List<Contract> contracts = contractProvider.listContractsByAddressId(cmd.getAddressId());
-		
 		Map<Long, Long> categoryConfigMap = new HashMap<Long, Long>();
 		
 		if(contracts != null && contracts.size() > 0) {
@@ -1997,7 +1992,6 @@ public class ContractServiceImpl implements ContractService {
 					categoryConfigMap.put(contract.getCategoryId(), getConfigId(cmd.getNamespaceId(), contract.getCategoryId()));
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}
-				
 				return dto;
 			}).collect(Collectors.toList());
 		}
