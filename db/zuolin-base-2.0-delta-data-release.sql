@@ -30,7 +30,7 @@ update eh_service_modules set client_handler_type = 3 WHERE id in (49100, 20800,
 -- 默认为园区模块
 UPDATE eh_service_modules set app_type = 1;
 -- 设置oa模块
-UPDATE eh_service_modules set app_type = 0 WHERE id in (41000, 50100,  50300, 50500, 50400, 52000, 50600, 54000, 51300, 51400, 55000, 57000, 60100, 60200, 60210, 13000, 20650, 20830, 41020, 50700);
+UPDATE eh_service_modules set app_type = 0 WHERE id in (50100,  50300, 50500, 50400, 52000, 50600, 54000, 51300, 51400, 55000, 57000, 60100, 60200, 60210, 13000, 20650, 20830, 41020, 50700);
 -- 更新应用信息
 UPDATE eh_service_module_apps a set a.app_type = IFNULL((SELECT b.app_type from eh_service_modules b where b.id = a.module_id), 1);
 
@@ -204,4 +204,4 @@ INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entr
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('303', '0', '企业访客', '企业访客', '2', '4', '1', '3', '9');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('306', '50700', '视频会议', '视频会议', '1', '1', '2', '1', '11');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('311', '0', '企业账户', '企业账户', '2', '4', '1', '3', '12');
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('312', '41000', '门禁（临时）', '门禁（临时）', '1', '1', '2', '2', '10');
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('312', '41000', '门禁（临时）', '门禁（临时）', '1', '2', '2', '12', '10');
