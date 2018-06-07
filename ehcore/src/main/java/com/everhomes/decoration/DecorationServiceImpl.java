@@ -807,7 +807,7 @@ public class DecorationServiceImpl implements  DecorationService {
                     DecorationCompany company = new DecorationCompany();
                     company.setName(request.getDecoratorCompany());
                     company.setNamespaceId(UserContext.getCurrentNamespaceId());
-                    company.setOrganizationId(org.getId());
+                    company.setOrganizationId(organizationDTO.getId());
                     this.decorationProvider.createDecorationCompany(company);
                     request.setDecoratorCompanyId(company.getId());
                 }else{
