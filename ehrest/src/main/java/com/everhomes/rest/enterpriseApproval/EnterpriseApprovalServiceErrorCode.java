@@ -14,6 +14,8 @@ public interface EnterpriseApprovalServiceErrorCode {
 
     int ERROR_DISABLE_APPROVAL_FLOW = 10004;    //  工作流未启用
 
+    int ERROR_NO_OUTERS = 10005;    //  没有转移密保
+
 
     int ERROR_ILLEGAL_APPROVAL = 20001;     //  审批状态异常
 

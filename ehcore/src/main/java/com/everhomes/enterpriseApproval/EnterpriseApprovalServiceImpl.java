@@ -69,9 +69,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     private GeneralFormService generalFormService;
 
     @Autowired
-    private GeneralFormProvider generalFormProvider;
-
-    @Autowired
     private GeneralApprovalService generalApprovalService;
 
     @Autowired
@@ -144,7 +141,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             if (cmd.getCreatorDepartmentId() != null)
                 query.addConditions(EnterpriseApprovalFlowCaseCustomField.CREATOR_DEPARTMENT_ID.getField().eq(cmd.getCreatorDepartmentId()));
             //  activeFlag
-            if(TrueOrFalseFlag.TRUE.getCode().equals(cmd.getActiveFlag()))
+            if (TrueOrFalseFlag.TRUE.getCode().equals(cmd.getActiveFlag()))
                 query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
             return query;
         });
@@ -392,13 +389,18 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Override
     public ApprovalFlowOperateResponse stopApprovalFlows(ApprovalFlowIdsCommand cmd) {
+        ApprovalFlowOperateResponse res = new ApprovalFlowOperateResponse();
+        Integer failedCounts = 0;
+        Integer successfulCounts = 0;
         if (cmd.getFlowCaseIds() == null || cmd.getFlowCaseIds().size() == 0)
-            return;
+            return res;
         Long userId = UserContext.currentUserId();
         for (Long flowCaseId : cmd.getFlowCaseIds()) {
             FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
-            if (flowCase == null)
+            if (flowCase == null) {
+                failedCounts++;
                 continue;
+            }
             FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
             stepDTO.setFlowCaseId(flowCase.getId());
             stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
@@ -406,8 +408,16 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
             stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
             stepDTO.setOperatorId(userId);
-            flowService.processAutoStep(stepDTO);
+            try {
+                flowService.processAutoStep(stepDTO);
+                successfulCounts++;
+            } catch (Exception e) {
+                failedCounts++;
+            }
         }
+        res.setFailedCounts(failedCounts);
+        res.setSuccessfulCounts(successfulCounts);
+        return res;
     }
 
     @Override
@@ -427,7 +437,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Override
     public void deliverApprovalFlow(DeliverApprovalFlowCommand cmd) {
-        if(cmd.getInnerIds() == null || cmd.getInnerIds().size() == 0 || cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
+        if (cmd.getInnerIds() == null || cmd.getInnerIds().size() == 0 || cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
             return;
         FlowCase flowCase = flowService.getFlowCaseById(cmd.getFlowCaseId());
         if (flowCase == null)
@@ -447,13 +457,19 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Override
     public ApprovalFlowOperateResponse deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
-        if(cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
-            return;
+        ApprovalFlowOperateResponse res = new ApprovalFlowOperateResponse();
+        Integer failedCounts = 0;
+        Integer successfulCounts = 0;
+        if (cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
+                    EnterpriseApprovalServiceErrorCode.ERROR_NO_OUTERS, "no outers.");
         List<FlowEntitySel> transferOut = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
-        for(Long flowCaseId : cmd.getFlowCaseIds()){
+        for (Long flowCaseId : cmd.getFlowCaseIds()) {
             FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
-            if (flowCase == null)
-                return;
+            if (flowCase == null) {
+                failedCounts++;
+                continue;
+            }
             FlowAutoStepTransferDTO stepDTO = new FlowAutoStepTransferDTO();
             stepDTO.setFlowCaseId(flowCase.getId());
             stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
@@ -461,12 +477,22 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             stepDTO.setAutoStepType(FlowStepType.TRANSFER_STEP.getCode());
             stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
             List<OrganizationMemberDTO> processors = listApprovalProcessors(new ApprovalFlowIdCommand(flowCaseId));
-            if(processors == null || processors.size() == 0)
+            if (processors == null || processors.size() == 0) {
+                failedCounts++;
                 continue;
+            }
             stepDTO.setTransferIn(processors.stream().map(r -> new FlowEntitySel(r.getTargetId(), FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList()));
             stepDTO.setTransferOut(transferOut);
-            flowService.processAutoStep(stepDTO);
+            try {
+                flowService.processAutoStep(stepDTO);
+                successfulCounts++;
+            } catch (Exception e) {
+                failedCounts++;
+            }
         }
+        res.setSuccessfulCounts(successfulCounts);
+        res.setFailedCounts(failedCounts);
+        return res;
     }
 
     //  Whether the approval template has already been existed, check it.
@@ -576,11 +602,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         Long userId = UserContext.currentUserId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         EnterpriseApprovalGroup group = enterpriseApprovalProvider.findEnterpriseApprovalGroup(cmd.getApprovalGroupId());
-        if(group == null)
+        if (group == null)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_GROUP_NOT_EXIST,
                     "The approval group not exist.");
         GeneralApproval oldApproval = enterpriseApprovalProvider.findEnterpriseApprovalByName(namespaceId, cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getApprovalName(), cmd.getApprovalGroupId());
-        if(oldApproval != null)
+        if (oldApproval != null)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_DUPLICATE_NAME,
                     "Duplicate approval name.");
 
