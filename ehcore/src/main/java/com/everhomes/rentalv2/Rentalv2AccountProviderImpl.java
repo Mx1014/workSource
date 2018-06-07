@@ -8,6 +8,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhRentalv2PayAccountsDao;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2PayAccounts;
 import com.everhomes.server.schema.tables.records.EhRentalv2PayAccountsRecord;
 import com.everhomes.util.ConvertHelper;
@@ -29,7 +30,7 @@ public class Rentalv2AccountProviderImpl implements  Rentalv2AccountProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public List<Rentalv2PayAccount> listPayAccounts(Integer namespaceId, Long communityId, String resourceType, String sourceType, Long sourceId,
+    public List<Rentalv2PayAccount> listPayAccounts(Integer namespaceId, Long communityId, String resourceType, Long resourceTypeId,String sourceType, Long sourceId,
                                                     ListingLocator locator, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_PAY_ACCOUNTS);
@@ -38,6 +39,8 @@ public class Rentalv2AccountProviderImpl implements  Rentalv2AccountProvider {
             condition = condition.and(Tables.EH_RENTALV2_PAY_ACCOUNTS.NAMESPACE_ID.eq(namespaceId));
         if (!StringUtils.isBlank(resourceType))
             condition = condition.and(Tables.EH_RENTALV2_PAY_ACCOUNTS.RESOURCE_TYPE.eq(resourceType));
+        if (null != resourceTypeId)
+            condition = condition.and(Tables.EH_RENTALV2_PAY_ACCOUNTS.RESOURCE_TYPE_ID.eq(resourceTypeId));
         if(!StringUtils.isBlank(sourceType))
             condition = condition.and(Tables.EH_RENTALV2_PAY_ACCOUNTS.SOURCE_TYPE.eq(sourceType));
         if (null != sourceId)
@@ -80,5 +83,24 @@ public class Rentalv2AccountProviderImpl implements  Rentalv2AccountProvider {
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2PayAccounts.class,
                 null);
+    }
+
+    @Override
+    public Rentalv2PayAccount getAccountById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Record record = context.select().from(Tables.EH_RENTALV2_PAY_ACCOUNTS).where(Tables.EH_RENTALV2_PAY_ACCOUNTS.ID.eq(id)).fetchOne();
+        if (record == null)
+            return null;
+        return ConvertHelper.convert(record,Rentalv2PayAccount.class);
+    }
+
+    @Override
+    public void updatePayAccount(Rentalv2PayAccount account) {
+        assert (account.getId() == null);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhRentalv2PayAccountsDao dao = new EhRentalv2PayAccountsDao(context.configuration());
+        dao.update(account);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2PayAccounts.class,
+                account.getId());
     }
 }

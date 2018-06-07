@@ -8788,7 +8788,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public ListBizPayeeAccountDTO getGeneralAccountSetting(GetGeneralAccountSettingCommand cmd) {
 		List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-				RuleSourceType.DEFAULT.getCode(), cmd.getResourceTypeId(), null, null);
+				null,RuleSourceType.DEFAULT.getCode(), cmd.getResourceTypeId(), null, null);
 		if (accounts == null || accounts.size() == 0)
 			return null;
 		List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(accounts.stream().map(r -> r.getAccountId()).collect(Collectors.toList()));
@@ -8823,12 +8823,78 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			locator.setAnchor(cmd.getPageAnchor());
 		}
 		List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(),
-				cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-				RuleSourceType.RESOURCE.getCode(), cmd.getResourceTypeId(), locator, cmd.getPageSize());
-		return null;
+				cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),cmd.getResourceTypeId(),
+				RuleSourceType.RESOURCE.getCode(), null, locator, cmd.getPageSize()+1);
+		if (accounts == null || accounts.size()==0)
+			return null;
+		GetResourceAccountSettingResponse response = new GetResourceAccountSettingResponse();
+		if (accounts.size()>cmd.getPageSize()){
+			accounts.remove(accounts.size()-1);
+			response.setNextPageAnchor(accounts.get(accounts.size()-1).getId());
+		}
+		List<PayUserDTO> payUserDTOS = payServiceV2.listPayUsersByIds(accounts.stream().map(r -> r.getAccountId()).collect(Collectors.toList()));
+		response.setResourceAccounts(new ArrayList<>());
+		accounts.forEach(r->{
+			ResourceAccountDTO dto = new ResourceAccountDTO();
+			dto.setId(r.getId());
+			dto.setResourceName(r.getResourceName());
+			dto.setResourceId(r.getSourceId());
+			PayUserDTO payUserDTO = payUserDTOS.stream().filter(t -> t.getId().equals(r.getAccountId())).findFirst().get();
+			dto.setAccount(convertAccount(payUserDTO));
+		});
+		return response;
+	}
+
+	@Override
+	public void deleteResourceAccountSetting(Long id) {
+		this.rentalv2AccountProvider.deletePayAccount(id,null,null,null);
+	}
+
+	@Override
+	public void updateResourceAccountSetting(UpdateResourceAccountSettingCommand cmd) {
+		List<Rentalv2PayAccount> accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+				null, RuleSourceType.DEFAULT.getCode(), cmd.getResourceTypeId(), null, null);
+		if (accounts !=null && accounts.size()>0){//检测通用账户
+			List<Rentalv2PayAccount> collect = accounts.stream().filter(r -> r.getAccountId().equals(cmd.getAccountId())).collect(Collectors.toList());
+			if (collect!=null && collect.size()>0)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"此收款账户为通用收款账户，请重新选择");
+		}
+		if (cmd.getId() != null){//更新
+			Rentalv2PayAccount account = rentalv2AccountProvider.getAccountById(cmd.getId());
+			if (!account.getAccountId().equals(cmd.getAccountId())){
+				accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+						null, RuleSourceType.RESOURCE.getCode(), cmd.getResourceId(), null, null);
+				if (accounts!=null && accounts.size()>0)
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							cmd.getResourceName()+"已设置非通用收款账户，不可重复添加");
+			}
+			account.setAccountId(cmd.getAccountId());
+			account.setSourceId(cmd.getResourceId());
+			account.setResourceName(cmd.getResourceName());
+			rentalv2AccountProvider.updatePayAccount(account);
+		}else {//新建
+			accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+					null, RuleSourceType.RESOURCE.getCode(), cmd.getResourceId(), null, null);
+			if (accounts!=null && accounts.size()>0)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						cmd.getResourceName()+"已设置非通用收款账户，不可重复添加");
+			Rentalv2PayAccount account = new Rentalv2PayAccount();
+			account.setNamespaceId(UserContext.getCurrentNamespaceId());
+			account.setCommunityId(cmd.getCommunityId());
+			account.setResourceName(cmd.getResourceName());
+			account.setResourceTypeId(cmd.getResourceTypeId());
+			account.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+			account.setSourceType(RuleSourceType.RESOURCE.getCode());
+			account.setSourceId(cmd.getResourceId());
+			account.setAccountId(cmd.getAccountId());
+			rentalv2AccountProvider.createPayAccount(account);
+		}
 	}
 
 	private ListBizPayeeAccountDTO convertAccount(PayUserDTO payUserDTO){
+		if (payUserDTO == null)
+			return null;
 		ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
 		// 支付系统中的用户ID
 		dto.setAccountId(payUserDTO.getId());

@@ -6,6 +6,7 @@ public class ResourceAccountDTO {
 
     private Long id;
     private String resourceName;
+    private Long resourceId;
     private ListBizPayeeAccountDTO account;
 
     public Long getId() {
@@ -30,5 +31,13 @@ public class ResourceAccountDTO {
 
     public void setAccount(ListBizPayeeAccountDTO account) {
         this.account = account;
+    }
+
+    public Long getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
     }
 }

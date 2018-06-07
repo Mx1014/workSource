@@ -304,6 +304,10 @@ public interface Rentalv2Service {
 
 	GetResourceAccountSettingResponse getResourceAccountSetting(GetResourceAccountSettingCommand cmd);
 
+	void deleteResourceAccountSetting(Long id);
+
+	void updateResourceAccountSetting(UpdateResourceAccountSettingCommand cmd);
+
 	void test();
 
 }
