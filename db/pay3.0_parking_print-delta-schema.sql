@@ -33,6 +33,9 @@ CREATE TABLE `eh_siyin_print_business_payee_accounts` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '云打印收款账户表';
 
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_order_no`  VARCHAR(64) COMMENT '支付系统单号';
+
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_order_no`  VARCHAR(64)  COMMENT '支付系统单号';
 
 -- 1: 同步客户
 -- /customer/syncEnterpriseCustomerIndex

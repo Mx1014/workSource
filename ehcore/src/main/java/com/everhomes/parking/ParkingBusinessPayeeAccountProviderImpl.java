@@ -93,12 +93,13 @@ public class ParkingBusinessPayeeAccountProviderImpl implements ParkingBusinessP
 	public List<ParkingBusinessPayeeAccount> findRepeatParkingBusinessPayeeAccounts(Long id, Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, String bussiness) {
 		Condition condition = Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.NAMESPACE_ID.eq(namespaceId)
 				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_TYPE.eq(ownerType))
-				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId));
+				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.STATUS.eq((byte)2));
 		if(parkingLotId!=null){
 			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.PARKING_LOT_ID.eq(parkingLotId));
 		}
 		if(bussiness!=null){
-			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.BUSSINESS.eq(bussiness));
+			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.BUSINESSTYPE.eq(bussiness));
 		}
 		if(id!=null){
 			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.ID.notEqual(id));
@@ -113,7 +114,8 @@ public class ParkingBusinessPayeeAccountProviderImpl implements ParkingBusinessP
 	public List<ParkingBusinessPayeeAccount> listParkingBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId) {
 		Condition condition = Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.NAMESPACE_ID.eq(namespaceId)
 				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_TYPE.eq(ownerType))
-				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId));
+				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.STATUS.eq((byte)2));
 		if(parkingLotId!=null){
 			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.PARKING_LOT_ID.eq(parkingLotId));
 		}
@@ -126,7 +128,8 @@ public class ParkingBusinessPayeeAccountProviderImpl implements ParkingBusinessP
 	@Override
 	public void deleteParkingBusinessPayeeAccount(Long id) {
 		getReadWriteContext()
-				.delete(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS)
+				.update(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS)
+				.set(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.STATUS,(byte)0)
 				.where(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.ID.eq(id)).execute();
 	}
 }

@@ -8,17 +8,17 @@ package com.everhomes.rest.parking;
  * <li>MONTH_RECHARGE("monthRecharge"),: 月卡缴费</li>
  * </ul>
  */
-public enum ParkingBussinessType {
+public enum ParkingBusinessType {
     TEMPFEE("tempfee"),
     VIP_PARKING("vipParking"),
     MONTH_RECHARGE("monthRecharge");
     private String code;
 
-    ParkingBussinessType(String code){
+    ParkingBusinessType(String code){
         this.code = code;
     }
-    public static ParkingBussinessType fromCode(String code) {
-        for (ParkingBussinessType bussinessType : ParkingBussinessType.values()) {
+    public static ParkingBusinessType fromCode(String code) {
+        for (ParkingBusinessType bussinessType : ParkingBusinessType.values()) {
             if (bussinessType.code.equals(code) ) {
                 return bussinessType;
             }

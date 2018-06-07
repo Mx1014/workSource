@@ -3,8 +3,6 @@ package com.everhomes.rest.parking;
 
 import com.everhomes.util.StringHelper;
 
-import java.sql.Timestamp;
-
 /**
  * <ul>
  * <li>返回码: 200成功，14000重复添加了账号</li>
@@ -12,7 +10,8 @@ import java.sql.Timestamp;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
- * <li>bussiness: 业务标识，{@link com.everhomes.rest.parking.ParkingBussinessType}</li>
+ * <li>parkingLotName: 停车场名称</li>
+ * <li>businessType: 业务标识，{@link com.everhomes.rest.parking.ParkingBusinessType}</li>
  * <li>payeeId: 收款方账号id</li>
  * <li>payeeUserType: 收款方账号类型 帐号类型，{@link com.everhomes.rest.order.OwnerType}</li>
  * </ul>
@@ -23,7 +22,8 @@ public class CreateOrUpdateBusinessPayeeAccountCommand {
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
-    private String bussiness;
+    private Long parkingLotName;
+    private String businessType;
     private Long payeeId;
     private String payeeUserType;
 
@@ -67,12 +67,20 @@ public class CreateOrUpdateBusinessPayeeAccountCommand {
         this.parkingLotId = parkingLotId;
     }
 
-    public String getBussiness() {
-        return bussiness;
+    public Long getParkingLotName() {
+        return parkingLotName;
     }
 
-    public void setBussiness(String bussiness) {
-        this.bussiness = bussiness;
+    public void setParkingLotName(Long parkingLotName) {
+        this.parkingLotName = parkingLotName;
+    }
+
+    public String getBusinessType() {
+        return businessType;
+    }
+
+    public void setBusinessType(String businessType) {
+        this.businessType = businessType;
     }
 
     public Long getPayeeId() {
