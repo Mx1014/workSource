@@ -1,7 +1,7 @@
 
 package com.everhomes.asset;
 
-import com.everhome.paySDK.pojo.PayUserDTO;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
@@ -753,6 +753,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //        cmd2pay.setPaymentParams(paymentParamsDTO);
         
         //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+        cmd.setBillGroupId(427L);
         PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
         if(paymentBillGroup != null) {
         	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());

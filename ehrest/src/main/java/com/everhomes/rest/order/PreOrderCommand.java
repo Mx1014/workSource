@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
  *     <li>clientAppName: 客户端realm值</li>
  *     <li>orderType: orderType {@link com.everhomes.rest.order.OrderType}</li>
  *     <li>orderId: 订单Id</li>
- *     <li>payerId: 卖家用户ID</li>
+ *     <li>payerId: 付款方ID</li>
  *     <li>amount: 支付金额，BigDecimal转换本类提供了方法changePayAmount</li>
  *     <li>resourceType: 订单资源类型</li>
  *     <li>resourceId: 订单资源类型ID</li>

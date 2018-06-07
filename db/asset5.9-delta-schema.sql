@@ -40,6 +40,12 @@ CREATE TABLE `eh_activity_biz_payee` (
 `organization_id` bigint(20) NOT NULL COMMENT '企业ID',
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+-- 活动表增加企业ID，用于查询收款方.
+ALTER TABLE `eh_activities` ADD COLUMN `organization_id` BIGINT COMMENT '企业ID';
+-- 活动报名表增加支付系统订单ID，关联支付订单.
+ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_order_id` BIGINT COMMENT '支付系统订单ID';
+-- yanlong.liang END
+
 
 
 

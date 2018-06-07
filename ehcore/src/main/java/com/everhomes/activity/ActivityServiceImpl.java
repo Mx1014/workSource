@@ -2,7 +2,7 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
-import com.everhome.paySDK.pojo.PayUserDTO;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalEventBus;
@@ -35,6 +35,8 @@ import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
 import com.everhomes.organization.*;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -253,7 +255,7 @@ public class ActivityServiceImpl implements ActivityService {
 	private PayService payService;
 
 	@Autowired
-    private com.everhome.paySDK.api.PayService payServiceV2;
+    private com.everhomes.paySDK.api.PayService payServiceV2;
 	
     @PostConstruct
     public void setup() {
@@ -272,7 +274,7 @@ public class ActivityServiceImpl implements ActivityService {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         activity.setNamespaceId(namespaceId);
         activity.setGuest(cmd.getGuest());
-        
+
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
         
@@ -333,7 +335,10 @@ public class ActivityServiceImpl implements ActivityService {
         //add by xiongying, 添加类型id， 20161117
         activity.setCategoryId(cmd.getCategoryId());
         activity.setContentCategoryId(cmd.getContentCategoryId());
-        
+
+        //add by liangyanlong, 增加企业ID，用户付款时，查询付款方.
+        activity.setOrganizationId(cmd.getOrganizationId());
+
         activityProvider.createActity(activity);
         createScheduleForActivity(activity);
         
@@ -810,44 +815,66 @@ public class ActivityServiceImpl implements ActivityService {
                     "no activity.");
         }
 
-        PreOrderCommand preOrderCommand = new PreOrderCommand();
+        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
 
-        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
-        preOrderCommand.setOrderId(roster.getOrderNo());
+        createOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getCode());
+        createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
+
         BigDecimal amout = activity.getChargePrice();
         if(amout == null){
-            preOrderCommand.setAmount(0L);
+            createOrderCommand.setAmount(0L);
         }
-        preOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
+        createOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
 
-        preOrderCommand.setPayerId(roster.getUid());
-        preOrderCommand.setNamespaceId(activity.getNamespaceId());
+        //后续修改为新的获取付款方账号接口
+        createOrderCommand.setPayerUserId(roster.getUid());
 
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getOrganizationId());
+        if (activityBizPayee == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no payee.");
+        }
+        //收款方账号
+        createOrderCommand.setPayeeUserId(activityBizPayee.getBizPayeeId());
         GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
         timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
         Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
 
 
-        preOrderCommand.setExpiration(expiredTime);
+        createOrderCommand.setExpirationMillis(expiredTime);
 
 
-        preOrderCommand.setClientAppName(cmd.getClientAppName());
+        createOrderCommand.setClientAppName(cmd.getClientAppName());
 
         //微信公众号支付，重新设置ClientName，设置支付方式和参数
         if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
 
-            if(preOrderCommand.getClientAppName() == null){
+            if(createOrderCommand.getClientAppName() == null){
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
-                preOrderCommand.setClientAppName("wechat_" + namespaceId);
+                createOrderCommand.setClientAppName("wechat_" + namespaceId);
             }
-            preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+            createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
         }
 
 
-        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+        PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
 
         return callBack;
+    }
+
+    private PreOrderDTO createPreOrder(CreateOrderCommand cmd) {
+        CreateOrderRestResponse createOrderRestResponse = this.payServiceV2.createPurchaseOrder(cmd);
+        PreOrderDTO callback = new PreOrderDTO();
+        if (createOrderRestResponse.getErrorCode() != 200) {
+            LOGGER.error("create order fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "create order fail");
+        }
+        OrderCommandResponse response = createOrderRestResponse.getResponse();
+        callback = ConvertHelper.convert(response, PreOrderDTO.class);
+        //缺设置付款方式
+        return callback;
     }
 
     @Override

@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhome.paySDK.pojo.PayUserDTO;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -47,6 +46,7 @@ import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.pay.user.UserAccountInfo;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
 import com.everhomes.rest.asset.AssetBillStatus;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
@@ -174,7 +174,7 @@ public class AssetProviderImpl implements AssetProvider {
     private PayService payService;
     
     @Autowired
-    private com.everhome.paySDK.api.PayService payServiceV2;
+    private com.everhomes.paySDK.api.PayService payServiceV2;
 
     @Override
     public void creatAssetBill(AssetBill bill) {

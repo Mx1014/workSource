@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.everhome.paySDK.pojo.PayUserDTO;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -39,6 +38,8 @@ import com.everhomes.pay.user.BindPhoneCommand;
 import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderType;
@@ -66,13 +67,10 @@ public class AssetPayServiceImpl implements AssetPayService{
 	private RestClient restClient = null;
 	
 	@Autowired 
-    private com.everhome.paySDK.api.PayService payServiceV2;
+    private PayService payServiceV2;
 	
 	@Autowired
     private PayProvider payProvider;
-	
-	@Autowired
-    private ContentServerService contentServerService;
 	
 	@Autowired
     private ConfigurationProvider configurationProvider;
@@ -85,8 +83,7 @@ public class AssetPayServiceImpl implements AssetPayService{
 	 */
 	public List<ListBizPayeeAccountDTO> listBizPayeeAccounts(Long orgnizationId, String... tags) {
 		ListBusinessUsersCommand cmd = new ListBusinessUsersCommand();
-        // 给支付系统的bizUserId的形式：EhBizBusinesses1037001
-        //String userPrefix = "EhBizBusinesses";
+        // 给支付系统的bizUserId的形式：EhOrganizations1037001
 		String userPrefix = "EhOrganizations";
         cmd.setBizUserId(userPrefix + orgnizationId);
         if(tags != null && tags.length > 0) {
@@ -131,160 +128,40 @@ public class AssetPayServiceImpl implements AssetPayService{
         PreOrderDTO preOrderDTO = null;
         //1、检查买方（付款方）是否有会员，无则创建
         PayUserDTO payUserDTO = checkAndCreatePaymentUser(cmd.getPayerId(), cmd.getNamespaceId());
+        if(payUserDTO != null) {
+        	cmd.setPayerId(payUserDTO.getId());
+        }else {
+        	LOGGER.error("payerUserId no find, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+                    "payerUserId no find");
+        }
 
-       /* //2、收款方是否有会员，无则报错
-        Long payeeUserId = checkPaymentService(cmd.getNamespaceId(), cmd.getOrderType(), cmd.getResourceType(), cmd.getResourceId());
+        //2、收款方是否有会员，无则报错
+        Long payeeUserId = cmd.getBizPayeeId();
+        if(payeeUserId == null) {
+        	LOGGER.error("payeeUserId no find, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+                    "payeeUserId no find");
+        }
         
-
         //3、组装报文，发起下单请求
-        OrderCommandResponse orderCommandResponse = createOrder(cmd, paymentUser, serviceConfig, paymentAccount);
+        OrderCommandResponse orderCommandResponse = createOrder(cmd);
 
-        //4、组装支付方式
-        preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd, serviceConfig);
+        //4、保存订单信息
+        saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
 
-        //5、保存订单信息
-        saveOrderRecord(orderCommandResponse, cmd.getOrderId(), serviceConfig.getOrderType(),  serviceConfig.getId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
-*/
-        //6、返回
+        //5、返回
         return preOrderDTO;
     }
     
-    private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd, PaymentServiceConfig service){
-        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
-        dto.setAmount(cmd.getAmount());
-        List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
-        dto.setPayMethod(payMethods);
-        Long expiredIntervalTime = getExpiredIntervalTime(cmd.getExpiration());
-        dto.setExpiredIntervalTime(expiredIntervalTime);
-        dto.setOrderId(cmd.getOrderId());
-        return dto;
-    }
-    
-    private void saveOrderRecord(OrderCommandResponse orderCommandResponse, Long orderId, String orderType, Long serviceConfigId, Integer paymentOrderType){
-
+    private void saveOrderRecord(OrderCommandResponse orderCommandResponse, Long orderId, Integer paymentOrderType){
         PaymentOrderRecord record = ConvertHelper.convert(orderCommandResponse, PaymentOrderRecord.class);
-
         record.setOrderNum(orderCommandResponse.getBizOrderNum());
-
         record.setOrderId(orderId);
         //PaymentOrderId为支付系统传来的orderId
         record.setPaymentOrderId(orderCommandResponse.getOrderId());
-        record.setServiceConfigId(serviceConfigId);
-        record.setOrderType(orderType);
         record.setPaymentOrderType(paymentOrderType);
         payProvider.createPaymentOrderRecord(record);
-    }
-    
-    private PreOrderDTO recordToDto(PaymentOrderRecord record, PreOrderCommand cmd){
-        PreOrderDTO dto = ConvertHelper.convert(record, PreOrderDTO.class);
-
-        PaymentServiceConfig service = checkPaymentService(cmd.getNamespaceId(), cmd.getOrderType(), cmd.getResourceType(), cmd.getResourceId());
-        dto.setAmount(cmd.getAmount());
-        dto.setExtendInfo(cmd.getExtendInfo());
-
-        List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
-        dto.setPayMethod(payMethods);
-        Long expiredIntervalTime = getExpiredIntervalTime(cmd.getExpiration());
-        dto.setExpiredIntervalTime(expiredIntervalTime);
-        return dto;
-    }
-    
-    /**
-     * 检查卖方信息，无则报错
-     */
-    private PaymentServiceConfig checkPaymentService(Integer namespaceId, String orderType, String resourceType, Long resourceId){
-
-        PaymentServiceConfigHandler handler = getServiceConfigHandler(orderType);
-
-        PaymentServiceConfig paymentServiceConfig = handler.findPaymentServiceConfig(namespaceId, orderType, resourceType, resourceId);
-
-        if(paymentServiceConfig == null){
-            LOGGER.error("payment service config no find, namespaceId={}, orderType={}, resourceType={}, resourceId={}"
-                    , namespaceId, orderType, resourceType, resourceId);
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
-                    "payment service config no find");
-        }
-
-        return paymentServiceConfig;
-    }
-    
-    private List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, PaymentParamsDTO paramsDTO, PaymentServiceConfig service){
-
-        List<PayMethodDTO> payMethods = payProvider.listPayMethods(namespaceId, paymentType, service.getOrderType(),
-                service.getOwnerType(), service.getOwnerId(), service.getResourceType(), service.getResourceId());
-
-        if(payMethods != null && payMethods.size() > 0){
-            for(PayMethodDTO r : payMethods) {
-//                PaymentExtendInfo extendInfo = new PaymentExtendInfo();
-//                extendInfo.setGetOrderInfoUrl(getPayMethodExtendInfo());
-                r.setExtendInfo(getPayMethodExtendInfo());
-
-                if(r.getPaymentParams() == null){
-                    r.setPaymentParams(new PaymentParamsDTO());
-                }
-                //微信公众号支付时，acct原样返回
-                if(PaymentType.fromCode(paymentType) == PaymentType.WECHAT_JS_PAY &&
-                        PaymentType.fromCode(r.getPaymentType()) == PaymentType.WECHAT_JS_PAY &&
-                        paramsDTO != null){
-                    r.getPaymentParams().setAcct(paramsDTO.getAcct());
-                }
-                //转化为可以访问的url
-                String url = contentServerService.parserUri(r.getPaymentLogo());
-                r.setPaymentLogo(url);
-            }
-        }
-
-        return payMethods;
-    }
-    
-    private Long getExpiredIntervalTime(Long expiration){
-        Long expiredIntervalTime = null;
-        if(expiration != null){
-            expiredIntervalTime = expiration - System.currentTimeMillis();
-            //转换成秒
-            expiredIntervalTime = expiredIntervalTime/1000;
-            if(expiredIntervalTime < 0){
-               expiredIntervalTime = 0L;
-            }
-        }
-        return expiredIntervalTime;
-    }
-    
-    private PaymentServiceConfigHandler getServiceConfigHandler(String orderType) {
-        PaymentServiceConfigHandler handler = null;
-        String handlerName = PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX +this.getOrderTypeCode(orderType);
-        
-        // 收款方不一定实现handler，此时会找不到handler而抛异常，为了减少日志这些不必要的堆栈打印，故只打一行warning by lqs 20170930
-        try {
-            handler = PlatformContext.getComponent(handlerName);
-        } catch (NoSuchBeanDefinitionException e) {
-            LOGGER.warn("Failed to find handler, orderType={}, handlerName={}", orderType, handlerName);
-        }
-
-        if(handler == null){
-            handler = PlatformContext.getComponent(PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX +"DEFAULT");
-        }
-
-        return handler;
-    }
-
-    private String getOrderTypeCode(String orderType) {
-        Integer code = OrderType.OrderTypeEnum.getCodeByPyCode(orderType);
-        if(code==null){
-            LOGGER.error("Invalid parameter,orderType not found in OrderType.orderType="+orderType);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid parameter,orderType not found in OrderType");
-        }
-        LOGGER.debug("orderTypeCode="+code);
-        return String.valueOf(code);
-    }
-    
-    private String getPayMethodExtendInfo(){
-        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
-        String getOrderInfoUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.orderPaymentStatusQueryUri", "");
-
-        String format = "{\"getOrderInfoUrl\":\"%s\"}";
-        return String.format(format, payV2HomeUrl+getOrderInfoUri);
     }
     
     //检查买方（付款方）会员，无则创建
@@ -301,6 +178,8 @@ public class AssetPayServiceImpl implements AssetPayService{
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
         	payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), namespaceId.toString());
+        }else {
+        	payUserDTO = payUserDTOs.get(0);
         }
         return payUserDTO;
     }
@@ -382,97 +261,57 @@ public class AssetPayServiceImpl implements AssetPayService{
 
     }
     
-    //获取
-    private PaymentAccount findPaymentAccount(Long systemId){
-        return payProvider.findPaymentAccountBySystemId(systemId);
-    }
-    
-    private OrderCommandResponse createOrder(PreOrderCommand preOrderCommand, PaymentUser paymentUser, PaymentServiceConfig serviceConfig, PaymentAccount paymentAccount){
+    private OrderCommandResponse createOrder(PreOrderCommand preOrderCommand){
         //组装参数
-        CreateOrderCommand createOrderCommand = newCreateOrderCommandForPay(preOrderCommand, paymentUser, serviceConfig, paymentAccount);
-
+        CreateOrderCommand createOrderCommand = newCreateOrderCommandForPay(preOrderCommand);
+        //向支付预下单
         CreateOrderRestResponse createOrderResp = createOrderPayV2(createOrderCommand);
-
         if(!createOrderResp.getErrorCode().equals(200)) {
             LOGGER.error("create order fail");
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "create order fail");
         }
-
         OrderCommandResponse  response = createOrderResp.getResponse();
-
         return response;
     }
     
-    private CreateOrderCommand newCreateOrderCommandForPay(PreOrderCommand cmd, PaymentUser paymentUser, PaymentServiceConfig serviceConfig, PaymentAccount paymentAccount){
-
+    private CreateOrderCommand newCreateOrderCommandForPay(PreOrderCommand cmd){
         //PaymentParamsDTO转为Map
         Map<String, String> flattenMap = new HashMap<>();
         StringHelper.toStringMap(null, cmd.getPaymentParams(), flattenMap);
 
         CreateOrderCommand createOrderCmd = new CreateOrderCommand();
-        createOrderCmd.setOrderType(com.everhomes.pay.order.OrderType.PURCHACE.getCode());
-        createOrderCmd.setAmount(cmd.getAmount());//需要将元转化为分，使用此类: AmountUtil.unitToCent()
-        if(paymentAccount.getSystemId() != null) {
-        	createOrderCmd.setBizSystemId(paymentAccount.getSystemId().longValue());
-        }
-        createOrderCmd.setClientAppName(cmd.getClientAppName());
-        createOrderCmd.setPaymentType(cmd.getPaymentType());
-        createOrderCmd.setValidationType(ValidationType.NO_VERIFY.getCode());
-        createOrderCmd.setPaymentParams(flattenMap);
-        
-        // 在eh_payment_users中加上结算类型，结算类型以收款方为准，收款方没有配置时则使用默认值 by lqs 20171124
-        //createOrderCmd.setSettlementType(null);
-        PaymentUser payeetUser = payProvider.findPaymentUserByOwner(serviceConfig.getOwnerType(), serviceConfig.getOwnerId());
-        SettlementType settlementType = null;
-        if(payeetUser != null) {
-            settlementType = SettlementType.fromCode(payeetUser.getSettlementType());
-        }
-        if(settlementType == null) {
-            settlementType = SettlementType.WEEKLY;
-        }
-        createOrderCmd.setSettlementType(settlementType.getCode());
-        
-        createOrderCmd.setSplitRuleId(serviceConfig.getPaymentSplitRuleId());
-        if(cmd.getExpiration() != null) {
-            createOrderCmd.setExpirationMillis(cmd.getExpiration());
-        }
-        createOrderCmd.setPayeeUserId(serviceConfig.getPaymentUserId());
-        createOrderCmd.setPayerUserId(paymentUser.getPaymentUserId());
-        createOrderCmd.setFrontUrl(null);
-
-        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url", "");
-        String backUrl = homeUrl + contextPath + backUri;
-
-        createOrderCmd.setBackUrl(backUrl);
-        createOrderCmd.setExtendInfo(cmd.getExtendInfo());
-        createOrderCmd.setGoodsName(serviceConfig.getName());
-        createOrderCmd.setGoodsDescription(null);
-        createOrderCmd.setIndustryCode(null);
-        createOrderCmd.setIndustryName(null);
-        createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
-
-//        //BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
-//        Long orderRecordId = payProvider.getNewPaymentOrderRecordId();
-
-
+        //业务系统中的订单号，请在整个业务系统中约定好唯一规则；
         String BizOrderNum  = getOrderNum(cmd.getOrderId(),cmd.getOrderType());
         LOGGER.info("BizOrderNum is = {} "+BizOrderNum);
         createOrderCmd.setBizOrderNum(BizOrderNum);
-
-        createOrderCmd.setOrderRemark1(String.valueOf(cmd.getOrderType()));
-//        createOrderCmd.setOrderRemark1(String.valueOf(serviceConfig.getId()));
-        createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
-        createOrderCmd.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
-        createOrderCmd.setOrderRemark4(null);
-        createOrderCmd.setOrderRemark5(null);
-        createOrderCmd.setCommitFlag(0);
-        if(cmd.getCommitFlag() != null){
-            createOrderCmd.setCommitFlag(cmd.getCommitFlag());
+        createOrderCmd.setClientAppName(cmd.getClientAppName());
+        createOrderCmd.setPayerUserId(cmd.getPayerId());//付款方ID
+        createOrderCmd.setPayeeUserId(cmd.getBizPayeeId());//收款方ID
+        createOrderCmd.setAmount(cmd.getAmount());//需要将元转化为分，使用此类: AmountUtil.unitToCent()
+        createOrderCmd.setPaymentParams(flattenMap);
+        createOrderCmd.setPaymentType(cmd.getPaymentType());
+        if(cmd.getExpiration() != null) {
+            createOrderCmd.setExpirationMillis(cmd.getExpiration());
         }
-        //为微信公众号新增commitFlag
-
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"asset.pay.v2.callback.url", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        createOrderCmd.setBackUrl(backUrl);
+        createOrderCmd.setExtendInfo(cmd.getExtendInfo());
+        createOrderCmd.setGoodsName("物业缴费");
+        createOrderCmd.setGoodsDescription(null);
+        createOrderCmd.setIndustryName(null);
+        createOrderCmd.setIndustryCode(null);
+        createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
+        createOrderCmd.setOrderRemark1(String.valueOf(cmd.getOrderType()));
+	    createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+	    createOrderCmd.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
+	    createOrderCmd.setOrderRemark4(null);
+	    createOrderCmd.setOrderRemark5(null);
+	    if(UserContext.getCurrentNamespaceId() != null) {
+	    	createOrderCmd.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+	    }
         return createOrderCmd;
     }
     
@@ -488,11 +327,7 @@ public class AssetPayServiceImpl implements AssetPayService{
 
     private CreateOrderRestResponse createOrderPayV2(CreateOrderCommand cmd){
         if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-command=" + GsonUtil.toJson(cmd));}
-        CreateOrderRestResponse response = restClient.restCall(
-                "POST",
-                ApiConstants.ORDER_CREATEORDER_URL,
-                cmd,
-                CreateOrderRestResponse.class);
+        CreateOrderRestResponse response = payServiceV2.createPurchaseOrder(cmd);
         if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-response=" + GsonUtil.toJson(response));}
         return response;
     }
