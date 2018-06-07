@@ -874,7 +874,7 @@ public class ContractServiceImpl implements ContractService {
 
 		command.setIsEffectiveImmediately((byte)0);
 		command.setCategoryId(contract.getCategoryId());
-		assetService.paymentExpectancies_re_struct(command);
+		assetService.paymentExpectancies(command);
 	}
 
 
