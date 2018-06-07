@@ -4,6 +4,7 @@ package com.everhomes.parking;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -86,5 +87,46 @@ public class ParkingBusinessPayeeAccountProviderImpl implements ParkingBusinessP
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<ParkingBusinessPayeeAccount> findRepeatParkingBusinessPayeeAccounts(Long id, Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, String bussiness) {
+		Condition condition = Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.NAMESPACE_ID.eq(namespaceId)
+				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId));
+		if(parkingLotId!=null){
+			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.PARKING_LOT_ID.eq(parkingLotId));
+		}
+		if(bussiness!=null){
+			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.BUSSINESS.eq(bussiness));
+		}
+		if(id!=null){
+			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.ID.notEqual(id));
+		}
+		return getReadOnlyContext().select().from(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS)
+				.where(condition)
+				.orderBy(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ParkingBusinessPayeeAccount.class));
+	}
+
+	@Override
+	public List<ParkingBusinessPayeeAccount> listParkingBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId) {
+		Condition condition = Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.NAMESPACE_ID.eq(namespaceId)
+				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId));
+		if(parkingLotId!=null){
+			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.PARKING_LOT_ID.eq(parkingLotId));
+		}
+		return getReadOnlyContext().select().from(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS)
+				.where(condition)
+				.orderBy(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ParkingBusinessPayeeAccount.class));
+	}
+
+	@Override
+	public void deleteParkingBusinessPayeeAccount(Long id) {
+		getReadWriteContext()
+				.delete(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS)
+				.where(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.ID.eq(id)).execute();
 	}
 }

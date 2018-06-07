@@ -13,7 +13,7 @@ import java.sql.Timestamp;
  * <li>parkingLotId: 停车场ID</li>
  * <li>bussiness: 业务标识，{@link com.everhomes.rest.parking.ParkingBussinessType}</li>
  * <li>payeeId: 收款方账号id</li>
- * <li>payeeUserType: 收款方账号类型 帐号类型，1-个人帐号、2-企业帐号</li>
+ * <li>payeeUserType: 收款方账号类型 帐号类型，{@link com.everhomes.rest.order.OwnerType}</li>
  * </ul>
  */
 public class BusinessPayeeAccountDTO {

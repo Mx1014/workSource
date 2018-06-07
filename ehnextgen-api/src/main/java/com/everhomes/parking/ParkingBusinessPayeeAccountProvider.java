@@ -13,4 +13,9 @@ public interface ParkingBusinessPayeeAccountProvider {
 
 	List<ParkingBusinessPayeeAccount> listParkingBusinessPayeeAccount();
 
+	List<ParkingBusinessPayeeAccount> findRepeatParkingBusinessPayeeAccounts(Long id, Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, String bussiness);
+
+	List<ParkingBusinessPayeeAccount> listParkingBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId);
+
+    void deleteParkingBusinessPayeeAccount(Long id);
 }

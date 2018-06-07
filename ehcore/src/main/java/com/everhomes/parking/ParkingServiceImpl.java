@@ -28,6 +28,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
@@ -139,6 +140,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public CommunityProvider communityProvider;
 	@Autowired
 	public com.everhomes.paySDK.api.PayService sdkPayService;
+	@Autowired
+	public ParkingBusinessPayeeAccountProvider parkingBusinessPayeeAccountProvider;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -2805,22 +2808,95 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
-//		sdkPayService.
-		return null;
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId(),
+				new ArrayList(Arrays.asList("0",cmd.getOwnerId()+"")));
+		if(payUserList==null || payUserList.size() == 0){
+			return null;
+		}
+		return payUserList.stream().map(r->{
+			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+			dto.setAccountId(r.getId());
+			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+			dto.setAccountName(r.getUserName());
+			dto.setAccountAliasName(r.getUserAliasName());
+			dto.setAccountStatus(Byte.valueOf(r.getRegisterStatus()+""));
+			return dto;
+		}).collect(Collectors.toList());
 	}
 
 	@Override
 	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		if(cmd.getId()==null){
+			List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts
+					(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId(),cmd.getBussiness());
+			if(accounts!=null && accounts.size()>0){
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEATE_ACCOUNT,
+						"repeat account");
+			}
 
+			ParkingBusinessPayeeAccount oldPayeeAccount = parkingBusinessPayeeAccountProvider.findParkingBusinessPayeeAccountById(cmd.getId());
+			if(oldPayeeAccount == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"unknown payaccountid = "+cmd.getId());
+			}
+			ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);
+			newPayeeAccount.setCreateTime(oldPayeeAccount.getCreateTime());
+			newPayeeAccount.setCreatorUid(oldPayeeAccount.getCreatorUid());
+			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
+			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
+			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+			parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(newPayeeAccount);
+		}else{
+			ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);
+			newPayeeAccount.setStatus((byte)2);
+			parkingBusinessPayeeAccountProvider.createParkingBusinessPayeeAccount(newPayeeAccount);
+		}
 	}
 
 	@Override
 	public List<BusinessPayeeAccountDTO> listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
-		return null;
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider
+				.listParkingBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId());
+		if(accounts==null || accounts.size()==0){
+			return null;
+		}
+		return accounts.stream().map(r->ConvertHelper.convert(r,BusinessPayeeAccountDTO.class)).collect(Collectors.toList());
 	}
 
 	@Override
 	public void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+		parkingBusinessPayeeAccountProvider.deleteParkingBusinessPayeeAccount(cmd.getId());
+	}
 
+	private ParkingOwnerType checkOwner(String ownerType, Long ownerId) {
+		ParkingOwnerType enumOwnerType = checkOwnerType(ownerType);
+		switch (enumOwnerType){
+			case COMMUNITY:
+				Community community = communityProvider.findCommunityById(ownerId);
+				if(community==null){
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"unknown ownerId "+ownerId);
+				}
+				break;
+		}
+		return enumOwnerType;
+
+	}
+
+	/**
+	 * 检查所属枚举
+	 * @param ownerType
+	 * @return
+	 */
+	private ParkingOwnerType checkOwnerType(String ownerType) {
+		ParkingOwnerType enumOwnerType = ParkingOwnerType.fromCode(ownerType);
+		if(enumOwnerType==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"unknown ownerType "+ownerType);
+		}
+		return enumOwnerType;
 	}
 }

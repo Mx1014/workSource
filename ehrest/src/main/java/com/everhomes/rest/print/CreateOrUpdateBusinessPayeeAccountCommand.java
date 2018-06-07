@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.print.PrintOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>payeeId: 收款方账号id</li>
- * <li>payeeUserType: 收款方账号类型 帐号类型，1-个人帐号、2-企业帐号</li>
+ * <li>payeeUserType: 收款方账号类型 帐号类型，{@link com.everhomes.rest.order.OwnerType}</li>
  * </ul>
  */
 public class CreateOrUpdateBusinessPayeeAccountCommand {

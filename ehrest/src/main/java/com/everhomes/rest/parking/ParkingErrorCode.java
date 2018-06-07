@@ -49,6 +49,7 @@ public interface ParkingErrorCode {
     int ERROR_GET_RESULT = 11010; //  返回参数失败
     int ERROR_INVITE_FAILD = 12000; //  发起访邀失败
     int ERROR_GENERATE_ORDER_NO= 13000; //  生成订单编号失败
+    int ERROR_REPEATE_ACCOUNT= 14000; //  重复账号
 
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";
