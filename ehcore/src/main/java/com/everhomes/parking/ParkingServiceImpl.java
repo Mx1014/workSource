@@ -138,7 +138,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Autowired
 	public CommunityProvider communityProvider;
 	@Autowired
-	public com.everhome.paySDK.api.PayService sdkPayService;
+	public com.everhomes.paySDK.api.PayService sdkPayService;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -2801,5 +2801,26 @@ public class ParkingServiceImpl implements ParkingService {
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 			handler.refreshToken();
 		}
+	}
+
+	@Override
+	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
+//		sdkPayService.
+		return null;
+	}
+
+	@Override
+	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+	}
+
+	@Override
+	public List<BusinessPayeeAccountDTO> listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
 	}
 }
