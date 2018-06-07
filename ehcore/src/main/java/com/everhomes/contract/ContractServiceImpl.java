@@ -90,6 +90,7 @@ import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
@@ -99,12 +100,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
+import org.hibernate.cache.internal.CollectionCacheInvalidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
@@ -231,6 +234,9 @@ public class ContractServiceImpl implements ContractService {
 	//多入口相关
 	@Autowired
 	ServiceModuleAppService serviceModuleAppService;
+	
+	@Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;
 
 	@Autowired
 	private CustomerService customerService;
@@ -987,8 +993,19 @@ public class ContractServiceImpl implements ContractService {
 	private void addToFlowCase(Contract contract, String flowcaseOwnerType) {
 //		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
 //				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
-		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
-				FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), flowcaseOwnerType);
+		Flow flow = null;
+		
+		if ("CONTRACT".equals(flowcaseOwnerType)) {
+			flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+					FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+		}else if ("PAYMENT_CONTRACT".equals(flowcaseOwnerType)) {
+			flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+					FlowConstants.PAYMENT_CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), flowcaseOwnerType);
+		}else {
+			flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+					FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), flowcaseOwnerType);
+		}
+		
 		if(null == flow) {
 			LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.CONTRACT_MODULE);
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ENABLE_FLOW,
@@ -1921,15 +1938,32 @@ public class ContractServiceImpl implements ContractService {
 //		}
 
 		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode(), cmd.getStatus());
+		Map<Long, Long> categoryConfigMap = new HashMap<>();
+	
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> {
 				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
 				dto.setOrganizationName(contract.getCustomerName());
+				if(categoryConfigMap.containsKey(contract.getCategoryId())){
+					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
+				}else{
+					categoryConfigMap.put(contract.getCategoryId(), getConfigId(namespaceId, contract.getCategoryId()));
+					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
+				}
 				return dto;
 			}).collect(Collectors.toList());
 
 		}
+		
 		return null;
+	}
+
+	private Long getConfigId(Integer namespaceId, Long categoryId) {
+		List<ServiceModuleApp> serviceModuleApp = serviceModuleAppService.listReleaseServiceModuleApp(namespaceId, 21200L, null, categoryId.toString(), null);
+		if (serviceModuleApp != null && serviceModuleApp.size()>0){
+			return serviceModuleApp.get(0).getId();
+		}
+		return 0L;
 	}
 
 	@Override
@@ -1957,8 +1991,20 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public List<ContractDTO> listApartmentContracts(ListApartmentContractsCommand cmd) {
 		List<Contract> contracts = contractProvider.listContractsByAddressId(cmd.getAddressId());
+		Map<Long, Long> categoryConfigMap = new HashMap<Long, Long>();
+		
 		if(contracts != null && contracts.size() > 0) {
-			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+			return contracts.stream().map(contract -> {
+				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+				
+				if(categoryConfigMap.containsKey(contract.getCategoryId())){
+					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
+				}else{
+					categoryConfigMap.put(contract.getCategoryId(), getConfigId(cmd.getNamespaceId(), contract.getCategoryId()));
+					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
+				}
+				return dto;
+			}).collect(Collectors.toList());
 		}
 		return null;
 	}
