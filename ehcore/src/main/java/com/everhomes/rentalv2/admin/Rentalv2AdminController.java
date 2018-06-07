@@ -986,4 +986,20 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/admin/updateGeneralAccountSetting</b>
+	 * <p>
+	 * 更新通用支付账户设定
+	 * </p>
+	 */
+	@RequestMapping("getGeneralAccountSetting")
+	@RestReturn(value = String.class)
+	public RestResponse updateGeneralAccountSetting( UpdateGeneralAccountSettingCommand cmd) {
+		rentalService.updateGeneralAccountSetting(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

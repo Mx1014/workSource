@@ -300,6 +300,8 @@ public interface Rentalv2Service {
 
 	ListBizPayeeAccountDTO getGeneralAccountSetting(GetGeneralAccountSettingCommand cmd);
 
+	void updateGeneralAccountSetting(UpdateGeneralAccountSettingCommand cmd);
+
 	void test();
 
 }
