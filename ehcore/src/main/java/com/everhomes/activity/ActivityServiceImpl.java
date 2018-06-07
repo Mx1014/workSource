@@ -4324,24 +4324,24 @@ public class ActivityServiceImpl implements ActivityService {
 		Long userId = UserContext.current().getUser().getId();
 		QueryOrganizationTopicCommand cmd = new QueryOrganizationTopicCommand();
 		//SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
-//		processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
+		//processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
 
         AppContext appContext = UserContext.current().getAppContext();
 
         if(appContext.getCommunityId() != null && appContext.getOrganizationId() != null){
             cmd.setCommunityId(appContext.getCommunityId());
             cmd.setOrganizationId(appContext.getOrganizationId());
-        }else if(appContext.getOrganizationId() != null){
-            cmd.setOrganizationId(appContext.getOrganizationId());
-            OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
-            if(org != null){
-                cmd.setCommunityId(org.getCommunityId());
-            }
-        }else if(appContext.getCommunityId() != null) {
+        }else if(appContext.getCommunityId() != null){
             cmd.setCommunityId(appContext.getCommunityId());
             List<OrganizationCommunityDTO> list = organizationProvider.findOrganizationCommunityByCommunityId(appContext.getCommunityId());
             if (list != null && list.size() > 0) {
-                cmd.setCommunityId(list.get(0).getCommunityId());
+                cmd.setOrganizationId(list.get(0).getOrganizationId());
+            }
+        }else if(appContext.getOrganizationId() != null) {
+            cmd.setOrganizationId(appContext.getOrganizationId());
+            OrganizationDTO org = organizationService.getOrganizationById(appContext.getOrganizationId());
+            if (org != null && org.getCommunityId() != null) {
+                cmd.setCommunityId(org.getCommunityId());
             }
 
         }

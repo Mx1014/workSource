@@ -19,7 +19,7 @@ public class AppContextGenerator {
      * @param object
      * @return
      */
-    public String toBase64WebToken(AppContext object) {
+    public static String toBase64WebToken(AppContext object) {
         return base64SafeUrlEncode(object.toString());
     }
 
