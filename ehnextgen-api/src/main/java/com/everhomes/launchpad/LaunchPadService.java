@@ -19,7 +19,7 @@ public interface LaunchPadService {
     //void createLaunchPadItem(CreateLaunchPatItemCommand cmd);
     void userDefinedLaunchPad(UserDefinedLaunchPadCommand cmd);
 
-    String refreshActionData(SceneTokenDTO sceneToken, String actionData);
+    String refreshActionData(String actionData);
 
     void createLaunchPadItem(CreateLaunchPadItemAdminCommand cmd);
     void deleteLaunchPadItem(DeleteLaunchPadItemAdminCommand cmd);

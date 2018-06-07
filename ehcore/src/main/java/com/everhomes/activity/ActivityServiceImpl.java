@@ -54,6 +54,7 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.*;
@@ -3937,52 +3938,63 @@ public class ActivityServiceImpl implements ActivityService {
 	    User user = UserContext.current().getUser();
 	    Long userId = user.getId();
 	    Integer namespaceId = UserContext.getCurrentNamespaceId();
-	    SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, cmd.getSceneToken());
-	    
-	    int geoCharCount = 6; // 默认使用6位GEO字符
+	    //SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, cmd.getSceneToken());
+
+        AppContext appContext = UserContext.current().getAppContext();
+
+        int geoCharCount = 6; // 默认使用6位GEO字符
 	    ActivityLocationScope scope = ActivityLocationScope.fromCode(cmd.getScope());
 	    if(scope == ActivityLocationScope.SAME_CITY) {
 	        geoCharCount = 4;
 	    }
 	    
 	    ListActivitiesReponse resp = null;
-	    SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
+	    //SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
         //检查游客是否能继续访问此场景 by sfyan 20161009
-        userService.checkUserScene(sceneType);
-	    switch(sceneType) {
-	    case DEFAULT:
-	    case PARK_TOURIST:
-	        resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, sceneTokenDto.getEntityId(), scope);
-	        break;
-	    case FAMILY:
-	        FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
-	        if(family != null) {
-	            resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, family.getCommunityId(), scope);
-	        } else {
-	            if(LOGGER.isWarnEnabled()) {
-	                LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
-	            }
-	        }
-	        break;
-        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
-        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
-	        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
-            if(organization != null) {
-                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
-                resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, communityId, scope);
-            }
-            break;
-	    case PM_ADMIN:
-			ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
-			execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
-			//resp = listOrgNearbyActivities(execOrgCmd);
-			execOrgCmd.setSceneToken(cmd.getSceneToken());
-			resp = listOrgActivitiesByScope(execOrgCmd);
-	        break;
-	    default:
-	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
-	        break;
-	    }
+//        userService.checkUserScene(sceneType);
+//	    switch(sceneType) {
+//	    case DEFAULT:
+//	    case PARK_TOURIST:
+//	        resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, sceneTokenDto.getEntityId(), scope);
+//	        break;
+//	    case FAMILY:
+//	        FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+//	        if(family != null) {
+//	            resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, family.getCommunityId(), scope);
+//	        } else {
+//	            if(LOGGER.isWarnEnabled()) {
+//	                LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
+//	            }
+//	        }
+//	        break;
+//        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//	        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
+//            if(organization != null) {
+//                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+//                resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, communityId, scope);
+//            }
+//            break;
+//	    case PM_ADMIN:
+//			ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+//			execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+//			//resp = listOrgNearbyActivities(execOrgCmd);
+//			execOrgCmd.setSceneToken(cmd.getSceneToken());
+//			resp = listOrgActivitiesByScope(execOrgCmd);
+//	        break;
+//	    default:
+//	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
+//	        break;
+//	    }
+
+        if(appContext.getCommunityId() != null){
+            resp = listActivitiesByScope(null, cmd, geoCharCount, appContext.getCommunityId(), scope);
+        }else if(appContext.getOrganizationId() != null){
+            ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+			execOrgCmd.setOrganizationId(appContext.getOrganizationId());
+            resp = listOrgActivitiesByScope(execOrgCmd);
+        }
+
 	    
 	    if(LOGGER.isDebugEnabled()) {
 	        long endTime = System.currentTimeMillis();
@@ -3996,21 +4008,25 @@ public class ActivityServiceImpl implements ActivityService {
 	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
 	private ListActivitiesReponse listActivitiesByScope(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd,
 														int geoCharCount, Long communityId, ActivityLocationScope scope){
-		if(scope != null && scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
-			return listOfficialActivitiesByScene(cmd);
-		}else{
-			return listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
-		}
+		//if(scope != null && scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
+
+        //现在应该都是园区的
+        return listOfficialActivitiesByScene(cmd);
+//		}else{
+//			return listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
+//		}
 	}
 
 	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
 	private  ListActivitiesReponse listOrgActivitiesByScope(ListOrgNearbyActivitiesCommand execOrgCmd){
-		if(execOrgCmd.getScope() != null && execOrgCmd.getScope() == ActivityLocationScope.COMMUNITY.getCode()){
-			ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(execOrgCmd, ListNearbyActivitiesBySceneCommand.class);
+		//if(execOrgCmd.getScope() != null && execOrgCmd.getScope() == ActivityLocationScope.COMMUNITY.getCode()){
+
+        //现在应该都是园区的
+        ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(execOrgCmd, ListNearbyActivitiesBySceneCommand.class);
 			return listOfficialActivitiesByScene(command);
-		}else{
-			return listOrgNearbyActivities(execOrgCmd);
-		}
+//		}else{
+//			return listOrgNearbyActivities(execOrgCmd);
+//		}
 	}
 	
 	//根据小区获取活动
@@ -4307,9 +4323,31 @@ public class ActivityServiceImpl implements ActivityService {
 	public ListActivitiesReponse listOfficialActivitiesByScene(ListNearbyActivitiesBySceneCommand command) {
 		Long userId = UserContext.current().getUser().getId();
 		QueryOrganizationTopicCommand cmd = new QueryOrganizationTopicCommand();
-		SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
-		processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
-		cmd.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+		//SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
+//		processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
+
+        AppContext appContext = UserContext.current().getAppContext();
+
+        if(appContext.getCommunityId() != null && appContext.getOrganizationId() != null){
+            cmd.setCommunityId(appContext.getCommunityId());
+            cmd.setOrganizationId(appContext.getOrganizationId());
+        }else if(appContext.getOrganizationId() != null){
+            cmd.setOrganizationId(appContext.getOrganizationId());
+            OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+            if(org != null){
+                cmd.setCommunityId(org.getCommunityId());
+            }
+        }else if(appContext.getCommunityId() != null) {
+            cmd.setCommunityId(appContext.getCommunityId());
+            List<OrganizationCommunityDTO> list = organizationProvider.findOrganizationCommunityByCommunityId(appContext.getCommunityId());
+            if (list != null && list.size() > 0) {
+                cmd.setCommunityId(list.get(0).getCommunityId());
+            }
+
+        }
+
+
+        cmd.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
 		cmd.setEmbeddedAppId(AppConstants.APPID_ACTIVITY);
 		cmd.setOfficialFlag(OfficialFlag.YES.getCode());
 		cmd.setPageAnchor(command.getPageAnchor());

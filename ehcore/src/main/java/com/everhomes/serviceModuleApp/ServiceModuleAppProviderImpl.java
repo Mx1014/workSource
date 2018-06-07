@@ -416,7 +416,8 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(orgId));
 
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
-		query.addOrderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc());
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER.asc());
+
 		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
 		return apps;
 	}

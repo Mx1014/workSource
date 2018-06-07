@@ -465,7 +465,7 @@ public class BannerServiceImpl implements BannerService {
 
                 if (dto.getActionData() != null) {
                     try {
-                        dto.setActionData(launchPadService.refreshActionData(sceneToken, dto.getActionData()));
+                        dto.setActionData(launchPadService.refreshActionData(dto.getActionData()));
                     } catch (Exception e) {
                         LOGGER.error("Refresh actionData error, bannerDTO = " + dto, e);
                     }

@@ -129,9 +129,21 @@ ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  varchar(255) NULL;
 CREATE TABLE `eh_service_module_entries` (
   `id` bigint(20) NOT NULL,
   `module_id` bigint(20) NOT NULL,
+  `module_name` varchar(256) DEFAULT NULL,
+  `entry_name` varchar(256) DEFAULT NULL,
   `terminal_type` tinyint(4) NOT NULL COMMENT '终端列表，1-mobile,2-pc',
   `location_type` tinyint(4) NOT NULL COMMENT '位置，参考枚举ServiceModuleLocationType',
   `scene_type` tinyint(4) NOT NULL COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType',
+  `second_app_type` int(11) NOT NULL DEFAULT '0',
+  `default_order` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 应用二级分类
+CREATE TABLE `eh_second_app_types` (
+  `id` bigint(22) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `app_type` tinyint(4) DEFAULT NULL COMMENT '一级分类，0-oa，1-community，2-service。参考ServiceModuleAppType',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
