@@ -415,6 +415,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<WebMenuDTO> webMenuDtos  = new ArrayList<>();
 		for (WebMenu webMenu : webMenus) {
 			WebMenuDTO dto = ConvertHelper.convert(webMenu, WebMenuDTO.class);
+			ServiceModuleAppDTO appDTO = ConvertHelper.convert(webMenu.getAppConfig(), ServiceModuleAppDTO.class);
+			dto.setAppConfig(appDTO);
 			webMenuDtos.add(dto);
 		}
 
