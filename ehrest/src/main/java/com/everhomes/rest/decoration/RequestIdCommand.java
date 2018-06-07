@@ -10,6 +10,7 @@ public class RequestIdCommand {
 
     private Long requestId;
     private Long organizationId;
+    private String reason;
 
     public Long getRequestId() {
         return requestId;
@@ -27,4 +28,11 @@ public class RequestIdCommand {
         this.organizationId = organizationId;
     }
 
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
 }
