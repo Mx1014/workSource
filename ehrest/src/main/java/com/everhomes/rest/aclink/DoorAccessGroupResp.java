@@ -4,7 +4,7 @@ import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
 
-public class DoorAccessGroupResp extends RestResponseBase {
+public class DoorAccessGroupResp {
 
     private Long userId;
     List<DoorAccessGroupDTO> groups;
