@@ -30,6 +30,7 @@ public class AclinkCameraDTO {
 	private Timestamp createTime;
 	private Byte status;
 	private String keyCode;
+	private String account;
 	
 	public String getKeyCode() {
 		return keyCode;
@@ -117,6 +118,14 @@ public class AclinkCameraDTO {
 
 	public void setDoorAccessId(Long doorAccessId) {
 		this.doorAccessId = doorAccessId;
+	}
+
+	public String getAccount() {
+		return account;
+	}
+
+	public void setAccount(String account) {
+		this.account = account;
 	}
 
 	@Override
