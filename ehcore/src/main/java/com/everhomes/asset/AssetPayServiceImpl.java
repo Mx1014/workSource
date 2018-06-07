@@ -160,19 +160,14 @@ public class AssetPayServiceImpl implements AssetPayService{
         return preOrderDTO;
     }
     
-    public void payNotify(OrderPaymentNotificationCommand cmd) {
-    	/*if(LOGGER.isDebugEnabled()) {
+    public void payNotify(OrderPaymentNotificationCommand cmd, PaymentCallBackHandler handler) {
+    	if(LOGGER.isDebugEnabled()) {
     		LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
     	}
-    	if(cmd.getPaymentErrorCode())
-        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
-        cmd.setOrderId(orderRecord.getOrderId());
-        //调用具体业务
-        LOGGER.info("Handler found# handler name = {}",String.valueOf(orderRecord.getOrderType()));
-        PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
-        LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
-        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
-        srvCmd.setOrderType(orderRecord.getOrderType());
+    	if(cmd == null || cmd.getPaymentErrorCode() != "200") {
+    		LOGGER.error("payNotify fail, cmd={}", cmd);
+    	}
+    	SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
         com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
         if(orderType != null) {
             switch (orderType) {
@@ -201,7 +196,7 @@ public class AssetPayServiceImpl implements AssetPayService{
             }
         }else {
             LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
-        }*/
+        }
     }
     
     private void saveOrderRecord(OrderCommandResponse orderCommandResponse, Long orderId, Integer paymentOrderType){

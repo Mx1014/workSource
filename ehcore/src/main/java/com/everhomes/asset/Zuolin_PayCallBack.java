@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by Wentian Wang on 2017/9/28.
  */
-@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.WUYE_CODE)
+//@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.WUYE_CODE)
 public class Zuolin_PayCallBack implements PaymentCallBackHandler{
     private static final Logger LOGGER = LoggerFactory.getLogger(Zuolin_PayCallBack.class);
 
