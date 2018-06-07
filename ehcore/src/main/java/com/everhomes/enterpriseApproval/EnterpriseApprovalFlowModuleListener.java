@@ -19,6 +19,7 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -557,4 +558,12 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         dto.setFormOriginId(formOriginId);
         return dto;
     }
+
+    @Override
+    public void onFlowStateChanging(Flow flow) {
+        if(flow.getFormOriginId() == 0)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FORM,
+                    "Form is empty.");
+    }
+
 }

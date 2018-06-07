@@ -1565,6 +1565,8 @@ public class FlowServiceImpl implements FlowService {
 
         checkFlowValidationStatus(flow);
 
+        flowListenerManager.onFlowStateChanging(flow);
+
         // 避免同时启用工作流的问题
         String lockKey = MD5Utils.getMD5(String.format("%s:%s:%s:%s:%s:%s:%s:%s",
                 CoordinationLocks.FLOW.getCode(), flow.getNamespaceId(), flow.getProjectType(), flow.getProjectId(),

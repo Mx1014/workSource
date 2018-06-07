@@ -77,10 +77,10 @@ public class EnterpriseApprovalController extends ControllerBase{
      * <p>终止流程</p>
      */
     @RequestMapping("stopApprovalFlows")
-    @RestReturn(value = ApprovalFlowOperateResponse.class)
+    @RestReturn(value = String.class)
     public RestResponse stopApprovalFlows(@Valid ApprovalFlowIdsCommand cmd){
-        ApprovalFlowOperateResponse res = enterpriseApprovalService.stopApprovalFlows(cmd);
-        RestResponse response = new RestResponse(res);
+        enterpriseApprovalService.stopApprovalFlows(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -119,10 +119,10 @@ public class EnterpriseApprovalController extends ControllerBase{
      * <p>批量移交流程</p>
      */
     @RequestMapping("deliverApprovalFlows")
-    @RestReturn(value = ApprovalFlowOperateResponse.class)
+    @RestReturn(value = String.class)
     public RestResponse deliverApprovalFlows(@Valid DeliverApprovalFlowsCommand cmd){
-        ApprovalFlowOperateResponse res = enterpriseApprovalService.deliverApprovalFlows(cmd);
-        RestResponse response = new RestResponse(res);
+        enterpriseApprovalService.deliverApprovalFlows(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -8,7 +8,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.*;
 import com.everhomes.general_approval.*;
-import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -388,19 +387,14 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public ApprovalFlowOperateResponse stopApprovalFlows(ApprovalFlowIdsCommand cmd) {
-        ApprovalFlowOperateResponse res = new ApprovalFlowOperateResponse();
-        Integer failedCounts = 0;
-        Integer successfulCounts = 0;
+    public void stopApprovalFlows(ApprovalFlowIdsCommand cmd) {
         if (cmd.getFlowCaseIds() == null || cmd.getFlowCaseIds().size() == 0)
-            return res;
+            return;
         Long userId = UserContext.currentUserId();
         for (Long flowCaseId : cmd.getFlowCaseIds()) {
             FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
-            if (flowCase == null) {
-                failedCounts++;
+            if (flowCase == null)
                 continue;
-            }
             FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
             stepDTO.setFlowCaseId(flowCase.getId());
             stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
@@ -408,16 +402,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
             stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
             stepDTO.setOperatorId(userId);
-            try {
-                flowService.processAutoStep(stepDTO);
-                successfulCounts++;
-            } catch (Exception e) {
-                failedCounts++;
-            }
+            flowService.processAutoStep(stepDTO);
         }
-        res.setFailedCounts(failedCounts);
-        res.setSuccessfulCounts(successfulCounts);
-        return res;
     }
 
     @Override
@@ -456,20 +442,15 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public ApprovalFlowOperateResponse deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
-        ApprovalFlowOperateResponse res = new ApprovalFlowOperateResponse();
-        Integer failedCounts = 0;
-        Integer successfulCounts = 0;
+    public void deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
         if (cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
                     EnterpriseApprovalServiceErrorCode.ERROR_NO_OUTERS, "no outers.");
         List<FlowEntitySel> transferOut = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
         for (Long flowCaseId : cmd.getFlowCaseIds()) {
             FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
-            if (flowCase == null) {
-                failedCounts++;
+            if (flowCase == null)
                 continue;
-            }
             FlowAutoStepTransferDTO stepDTO = new FlowAutoStepTransferDTO();
             stepDTO.setFlowCaseId(flowCase.getId());
             stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
@@ -477,22 +458,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             stepDTO.setAutoStepType(FlowStepType.TRANSFER_STEP.getCode());
             stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
             List<OrganizationMemberDTO> processors = listApprovalProcessors(new ApprovalFlowIdCommand(flowCaseId));
-            if (processors == null || processors.size() == 0) {
-                failedCounts++;
+            if (processors == null || processors.size() == 0)
                 continue;
-            }
             stepDTO.setTransferIn(processors.stream().map(r -> new FlowEntitySel(r.getTargetId(), FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList()));
             stepDTO.setTransferOut(transferOut);
-            try {
-                flowService.processAutoStep(stepDTO);
-                successfulCounts++;
-            } catch (Exception e) {
-                failedCounts++;
-            }
+            flowService.processAutoStep(stepDTO);
         }
-        res.setSuccessfulCounts(successfulCounts);
-        res.setFailedCounts(failedCounts);
-        return res;
     }
 
     //  Whether the approval template has already been existed, check it.
