@@ -2715,18 +2715,21 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Long topId = getOrUpdateTopAdministratorByOrganizationId(cmd.getOrganizationId(), members);
 		if(topId != null && topId.equals(cmd.getUserId())){
 			response.setIsTopAdminFlag(AllFlagType.YES.getCode());
-
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
-			if(identifier != null){
-				response.setTopAdminToken(identifier.getIdentifierToken());
-			}
-			User user = userProvider.findUserById(cmd.getUserId());
-			if(user != null){
-				response.setTopAdminName(user.getNickName());
-			}
 		}else{
 			response.setIsTopAdminFlag(AllFlagType.NO.getCode());
 		}
+		
+		if(topId != null) {
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
+			if(identifier != null){
+				response.setTopAdminToken(identifier.getIdentifierToken());
+			}
+			User user = userProvider.findUserById(topId);
+			if(user != null){
+				response.setTopAdminName(user.getNickName());
+			}			
+		}
+
 
 		return response;
     }
