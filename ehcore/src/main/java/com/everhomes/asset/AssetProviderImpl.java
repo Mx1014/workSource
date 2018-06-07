@@ -3640,8 +3640,10 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
         List<PaymentChargingItemScope> scopes = context.select(t1.fields())
-                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1, Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(t1.CHARGING_ITEM_ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
                 .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
