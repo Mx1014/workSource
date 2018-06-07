@@ -8786,4 +8786,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		return result;
 	}
+
+    @Override
+    public ListBizPayeeAccountDTO getGeneralAccountSetting(GetGeneralAccountSettingCommand cmd) {
+
+        return null;
+    }
 }

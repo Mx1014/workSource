@@ -298,6 +298,8 @@ public interface Rentalv2Service {
 
 	List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
 
+	ListBizPayeeAccountDTO getGeneralAccountSetting(GetGeneralAccountSettingCommand cmd);
+
 	void test();
 
 }

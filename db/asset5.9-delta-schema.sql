@@ -11,8 +11,9 @@ CREATE TABLE `eh_rentalv2_order_records` (
 `order_id`  bigint(20) NULL COMMENT '资源预订订单id' ,
 `order_no`  bigint(20) NULL COMMENT '资源预订订单号' ,
 `pay_order_id`  bigint(20) NULL COMMENT '支付系统订单号' ,
-`payment_order_type`  tinyint(8) NULL COMMENT '订单类型 3支付订单 4退款订单' ,
+`payment_order_type`  tinyint(8) NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单' ,
 `status`  tinyint(8) NULL COMMENT '订单状态0未支付 1已支付' ,
+`amount` decimal(16) NULL COMMENT '订单金额' ,
 `create_time`  datetime  ,
 `update_time`  datetime  ,
 PRIMARY KEY (`id`)
