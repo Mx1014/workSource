@@ -2715,7 +2715,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Long topId = getOrUpdateTopAdministratorByOrganizationId(cmd.getOrganizationId(), members);
 		if(topId != null && topId.equals(cmd.getUserId())){
 			response.setIsTopAdminFlag(AllFlagType.YES.getCode());
-
+		}else{
+			response.setIsTopAdminFlag(AllFlagType.NO.getCode());
+		}
+		
+		if(topId != null) {
 			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
 			if(identifier != null){
 				response.setTopAdminToken(identifier.getIdentifierToken());
@@ -2723,10 +2727,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			User user = userProvider.findUserById(cmd.getUserId());
 			if(user != null){
 				response.setTopAdminName(user.getNickName());
-			}
-		}else{
-			response.setIsTopAdminFlag(AllFlagType.NO.getCode());
+			}			
 		}
+
 
 		return response;
     }
