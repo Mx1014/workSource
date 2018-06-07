@@ -545,6 +545,16 @@ public class ActivityController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /activity/checkPayeeIsUseful</b>
+     * <p>校验收款方是否可用</p>
+     */
+    @RequestMapping("checkPayeeIsUseful")
+    @RestReturn(value=CheckPayeeIsUsefulResponse.class)
+    public RestResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd){
+        return new RestResponse(activityService.checkPayeeIsUseful(cmd));
+    }
+
+    /**
      * <b>URL: /activity/setActivityWarning</b>
      * <p>设置活动提醒</p>
      */
