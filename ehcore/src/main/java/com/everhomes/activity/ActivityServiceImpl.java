@@ -2,6 +2,7 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.everhome.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalEventBus;
@@ -249,7 +250,9 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Autowired
 	private PayService payService;
-	
+
+	@Autowired
+    private com.everhome.paySDK.api.PayService payServiceV2;
 	
     @PostConstruct
     public void setup() {
@@ -6018,6 +6021,84 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		
 	}
+
+    @Override
+    public GetActivityPayeeDTO getActivityPayee(GetActivityPayeeCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
+        if (activityBizPayee != null) {
+            activityPayeeDTO.setAccountId(activityBizPayee.getId());
+        }
+        return activityPayeeDTO;
+    }
+
+    @Override
+    public ListActivityPayeeResponse listActivityPayee(ListActivityPayeeCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+	    List<ActivityPayeeDTO> dtoList = new ArrayList<>();
+	    String prefix = "EhOrganizations";
+	    List<PayUserDTO> list = this.payServiceV2.getPayUserList(prefix + cmd.getOrganizationId().toString(), String.valueOf(0));
+	    if (list != null && list.size() > 0) {
+            for (PayUserDTO r : list) {
+                ActivityPayeeDTO activityPayeeDTO = new ActivityPayeeDTO();
+                activityPayeeDTO.setAccountId(r.getId());
+                activityPayeeDTO.setAccountName(r.getUserName());
+                Integer userType = r.getUserType();
+                if(userType != null && userType.equals(2)) {
+                    activityPayeeDTO.setAccountType(OwnerType.ORGANIZATION.getCode());
+                } else {
+                    activityPayeeDTO.setAccountType(OwnerType.USER.getCode());
+                }
+                activityPayeeDTO.setAccountAliasName(r.getUserAliasName());
+                // 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                Integer registerStatus = r.getRegisterStatus();
+                if(registerStatus != null && registerStatus.intValue() == 1) {
+                    activityPayeeDTO.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                } else {
+                    activityPayeeDTO.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                }
+                dtoList.add(activityPayeeDTO);
+            }
+        }
+        ListActivityPayeeResponse response = new ListActivityPayeeResponse();
+        response.setDtos(dtoList);
+        return response;
+    }
+
+    @Override
+    public void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+        if (cmd.getPayeeId() == null) {
+            LOGGER.error("payeeId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "payeeId cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        if (activityBizPayee == null) {
+            ActivityBizPayee persist = new ActivityBizPayee();
+            persist.setOrganizationId(cmd.getOrganizationId());
+            persist.setBizPayeeId(cmd.getPayeeId());
+            this.activityProvider.CreateActivityPayee(persist);
+        }else {
+            if (activityBizPayee.getBizPayeeId() != cmd.getPayeeId()) {
+                activityBizPayee.setBizPayeeId(cmd.getPayeeId());
+                this.activityProvider.updateActivityPayee(activityBizPayee);
+            }
+        }
+    }
 
 //	@Override
 //	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {

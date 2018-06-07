@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import com.everhomes.rest.forum.NeedTemporaryType;
 import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -42,16 +44,6 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhActivityAttachments;
-import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
-import com.everhomes.server.schema.tables.pojos.EhActivityGoods;
-import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
-import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
-import com.everhomes.server.schema.tables.records.EhActivityAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhActivityCategoriesRecord;
-import com.everhomes.server.schema.tables.records.EhActivityGoodsRecord;
-import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
@@ -755,6 +747,42 @@ public class ActivityProviderImpl implements ActivityProivider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
         dao.deleteById(id);
+    }
+
+    @Override
+    public ActivityBizPayee getActivityPayee(Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityBizPayee.class));
+        SelectQuery<EhActivityBizPayeeRecord> query = context.selectQuery(Tables.EH_ACTIVITY_BIZ_PAYEE);
+        if (organizationId != null) {
+            query.addConditions(Tables.EH_ACTIVITY_BIZ_PAYEE.ORGANIZATION_ID.eq(organizationId));
+        }
+        EhActivityBizPayeeRecord activityBizPayee = query.fetchOne();
+        if (activityBizPayee == null) {
+            return null;
+        }
+        return ConvertHelper.convert(activityBizPayee, ActivityBizPayee.class);
+    }
+
+    @Override
+    public void CreateActivityPayee(ActivityBizPayee activityBizPayee) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhActivityBizPayee.class));
+        activityBizPayee.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityBizPayeeDao dao = new EhActivityBizPayeeDao(context.configuration());
+        dao.insert(activityBizPayee);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, ActivityBizPayee.class, null);
+
+    }
+
+    @Override
+    public void updateActivityPayee(ActivityBizPayee activityBizPayee) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityBizPayeeDao dao = new EhActivityBizPayeeDao(context.configuration());
+        dao.update(activityBizPayee);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, ActivityBizPayee.class, null);
     }
 
     @Override

@@ -165,6 +165,13 @@ public interface ActivityProivider {
 	 * @param id
 	 */
 	void deleteActivityCategories(Long id);
+
+
+	ActivityBizPayee getActivityPayee(Long organizationId);
+
+	void CreateActivityPayee(ActivityBizPayee activityBizPayee);
+
+	void updateActivityPayee(ActivityBizPayee activityBizPayee);
 	
 //	void createActivityRosterError(ActivityRosterError rosterError);
 //
