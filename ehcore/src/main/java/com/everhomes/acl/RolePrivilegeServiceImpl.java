@@ -2720,11 +2720,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		
 		if(topId != null) {
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
 			if(identifier != null){
 				response.setTopAdminToken(identifier.getIdentifierToken());
 			}
-			User user = userProvider.findUserById(cmd.getUserId());
+			User user = userProvider.findUserById(topId);
 			if(user != null){
 				response.setTopAdminName(user.getNickName());
 			}			
