@@ -3815,10 +3815,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
                 tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
                 //物业或业委增加小区Id和小区name信息
-                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
-                    this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+                if(org.getOrganizationType() != null){
+                    if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                        this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+                    }
+                    orgs.add(tempSimpleOrgDTO);
                 }
-                orgs.add(tempSimpleOrgDTO);
             }
         }
         return orgs;
