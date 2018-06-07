@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
  * <li>bundleIds: 关联应用(必填)</li>
  * <li>teamId: 关联开发者帐号(必填)</li>
  * <li>authkeyId: authkey_id(必填)</li>
- * <li>authkey: authkey(从文件中取)</li>
  * </ul>
  * @author huanglm 20180606
  *
@@ -29,10 +28,6 @@ public class DeveloperAccountInfoCommand {
      */
 	@NotNull
     private String authkeyId;
-    /**
-     * authkey
-     */
-    private String authkey;
     
 	public String getBundleIds() {
 		return bundleIds;
@@ -52,13 +47,6 @@ public class DeveloperAccountInfoCommand {
 	public void setAuthkeyId(String authkeyId) {
 		this.authkeyId = authkeyId;
 	}
-	public String getAuthkey() {
-		return authkey;
-	}
-	public void setAuthkey(String authkey) {
-		this.authkey = authkey;
-	}
-    
-    
+  
 }
 

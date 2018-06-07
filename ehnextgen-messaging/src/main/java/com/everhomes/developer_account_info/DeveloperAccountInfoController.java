@@ -1,15 +1,13 @@
 package com.everhomes.developer_account_info;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.elasticsearch.common.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,7 +31,7 @@ import com.everhomes.rest.developer_account_info.DeveloperAccountInfoCommand;
 @RestController
 @RequestMapping("/developer")
 public class DeveloperAccountInfoController extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeveloperAccountInfoController.class);
+  //  private static final Logger LOGGER = LoggerFactory.getLogger(DeveloperAccountInfoController.class);
     
     @Autowired
     DeveloperAccountInfoService developerAccountInfoService;
@@ -63,12 +61,18 @@ public class DeveloperAccountInfoController extends ControllerBase {
         bo.setAuthkeyId(cmd.getAuthkeyId());
         bo.setTeamId(cmd.getTeamId());
         try {
-        	
-            bo.setAuthkey(files[0].getBytes());
-            developerAccountInfoService.createDeveloperAccountInfo(bo);
+        	StringBuffer sb = removeAnnotations(files[0]);
+        	if(sb == null ||  StringUtils.isBlank(sb.toString())){
+        		response.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
+                response.setErrorDescription("Cannot read file");
+        	}else{
+        		bo.setAuthkey(sb.toString().getBytes());
+                developerAccountInfoService.createDeveloperAccountInfo(bo);
+                
+                response.setErrorCode(ErrorCodes.SUCCESS);
+                response.setErrorDescription("OK");
+        	}
             
-            response.setErrorCode(ErrorCodes.SUCCESS);
-            response.setErrorDescription("OK");
         } catch (IOException e) {
             response.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
             response.setErrorDescription("Cannot read file");
@@ -78,16 +82,29 @@ public class DeveloperAccountInfoController extends ControllerBase {
     }
     
     /**
-     *  
+     *  对Authkey 文本中的注释进行过滤（存在注释将会使得http2连接APNs的时候不成功）
+     *  默认为注释单独一行，是按行来过滤的，以"---"开头的行认为是注释行（目前得到的文件是这个样子的）
+     *  如存在其他形式的注释，得修改此方法增加过滤条件
      * @param code
      * @return
+     * @throws IOException 
      */
-    public  StringBuffer removeAnnotations(MultipartFile file){
-    	StringBuffer sb = new StringBuffer();
-    	if(file == null ){
-    		return sb ;
-    	}
-    	return sb;
-    } 
+    public  StringBuffer removeAnnotations(MultipartFile file) throws IOException{
+    	
+    	StringBuffer sb = new StringBuffer();			
+	    	InputStreamReader reader;
+			reader = new InputStreamReader(file.getInputStream(), Charset.forName("utf-8"));
+			BufferedReader br = new BufferedReader(reader);
+			
+				String line = null; 
+				 while((line = br.readLine()) != null){ 
+					 //排除注释行
+					 if(line.startsWith("---")){
+						 continue;
+					 }
+	                 sb.append(line);  
+	             } 
+				 return sb;			
+    	} 
 	
 }
