@@ -813,7 +813,7 @@ public class ContractProviderImpl implements ContractProvider {
 	
 	@Override
 	public void saveContractEventAboutChargingItem(int opearteType, Contract contract,ContractChargingItem contractChargingItem) {
-		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:UPDATE
 		HashMap<String, String> dataMap = new HashMap<>();
 		String chargingItemName = assetProvider.findChargingItemNameById(contractChargingItem.getId());
 		dataMap.put("chargingItemName", chargingItemName);
@@ -824,6 +824,9 @@ public class ContractProviderImpl implements ContractProvider {
 				break;
 			case ContractTrackingTemplateCode.CHARGING_ITEM_DELETE :
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CHARGING_ITEM_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.CHARGING_ITEM_UPDATE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CHARGING_ITEM_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
 				break;
 			default :
 				break;
@@ -871,11 +874,17 @@ public class ContractProviderImpl implements ContractProvider {
 			case ContractTrackingTemplateCode.ADJUST_DELETE :
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADJUST_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
 				break;
+			case ContractTrackingTemplateCode.ADJUST_UPDATE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.ADJUST_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;	
 			case ContractTrackingTemplateCode.FREE_ADD : 
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.FREE_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
 				break;
 			case ContractTrackingTemplateCode.FREE_DELETE :
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.FREE_DELETE , UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case ContractTrackingTemplateCode.FREE_UPDATE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.FREE_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
 				break;
 			default :
 				break;

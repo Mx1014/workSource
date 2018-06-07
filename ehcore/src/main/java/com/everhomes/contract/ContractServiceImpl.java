@@ -56,6 +56,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.customer.CustomerEventDTO;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -1109,6 +1110,10 @@ public class ContractServiceImpl implements ContractService {
 					contractChargingItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractChargingItemProvider.updateContractChargingItem(contractChargingItem);
 					map.remove(item.getId());
+					//add by tangcen
+					if (!compareContractChargingItem(contractChargingItem,exist)) {
+						contractProvider.saveContractEventAboutChargingItem(ContractTrackingTemplateCode.CHARGING_ITEM_UPDATE,contract,contractChargingItem);
+					}
 				}
 			});
 		}
@@ -1121,7 +1126,16 @@ public class ContractServiceImpl implements ContractService {
 			});
 		}
 	}
-	
+	//对比ContractChargingItem by tangcen
+	private boolean compareContractChargingItem(ContractChargingItem contractChargingItem, ContractChargingItem exist) {
+		if (contractChargingItem==null || exist==null) {
+			return false;
+		}
+		ContractChargingItemEventDTO updateDto = ConvertHelper.convert(contractChargingItem, ContractChargingItemEventDTO.class);
+		ContractChargingItemEventDTO existDto = ConvertHelper.convert(exist, ContractChargingItemEventDTO.class);
+		return updateDto.equals(existDto);
+	}
+
 	private void dealContractChargingItemAddresses(ContractChargingItem item, List<BuildingApartmentDTO> addresses) {
 		//没有id的，增加
 	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
@@ -1215,9 +1229,28 @@ public class ContractServiceImpl implements ContractService {
 				contractChargingChange.setCreateTime(exist.getCreateTime());
 				contractChargingChangeProvider.updateContractChargingChange(contractChargingChange);
 				map.remove(change.getId());
+				//记录合同日志 by tangcen
+				if (changeType.equals(ChangeType.ADJUST)) {
+					if (compareContractChargingChange(contractChargingChange, exist)) {
+						contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.ADJUST_UPDATE,contract,contractChargingChange);
+					}	
+				}else if (changeType.equals(ChangeType.FREE)) {
+					if (compareContractChargingChange(contractChargingChange, exist)) {
+						contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.ADJUST_UPDATE,contract,contractChargingChange);
+					}
+				}
 			}
 		});
 		return map;
+	}
+	//对比ContractChargingChange by tangcen
+	private boolean compareContractChargingChange(ContractChargingChange contractChargingChange,ContractChargingChange exist) {
+		if (contractChargingChange == null || exist ==null) {
+			return false;
+		}
+		ContractChargingChangeEventDTO updateDto = ConvertHelper.convert(contractChargingChange, ContractChargingChangeEventDTO.class);
+		ContractChargingChangeEventDTO existDto = ConvertHelper.convert(exist, ContractChargingChangeEventDTO.class);
+		return updateDto.equals(existDto);
 	}
 
 	private void dealContractChargingChangeAddresses(ContractChargingChange contractChargingChange, List<BuildingApartmentDTO> apartments ) {
@@ -2311,6 +2344,13 @@ public class ContractServiceImpl implements ContractService {
 				contractEventDTO.setContent(content);
 			}else {
 				ContractEventDTO dto = ConvertHelper.convert(contractEvents, ContractEventDTO.class);
+		        if(dto.getOperatorUid() != null) {
+		            //用户可能不在组织架构中 所以用nickname
+		            User user = userProvider.findUserById(dto.getOperatorUid());
+		            if(user != null) {
+		                dto.setOperatorName(user.getNickName());
+		            }
+		        }
 				map.put(dto.getOpearteTime(), dto);
 			}
 		}

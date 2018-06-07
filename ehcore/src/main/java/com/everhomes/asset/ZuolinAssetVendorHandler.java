@@ -617,8 +617,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         //先查看任务
         Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId(),cmd.getContractNum());
         if(inWork){
-//            return response;
-            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
+        	//change by tangcen
+        	response.setGenerated((byte)0);
+            return response;
+            //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId());
         if(dtos.size() <= cmd.getPageSize()){
@@ -631,6 +633,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId());
         response.setList(dtos);
         response.setTotalAmount(totalAmount.toString());
+        //add by tangcen
+        response.setGenerated((byte)1);
         return response;
     }
 
