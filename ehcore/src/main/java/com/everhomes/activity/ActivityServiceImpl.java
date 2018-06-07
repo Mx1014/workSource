@@ -274,7 +274,7 @@ public class ActivityServiceImpl implements ActivityService {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         activity.setNamespaceId(namespaceId);
         activity.setGuest(cmd.getGuest());
-        
+
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
         
@@ -335,7 +335,10 @@ public class ActivityServiceImpl implements ActivityService {
         //add by xiongying, 添加类型id， 20161117
         activity.setCategoryId(cmd.getCategoryId());
         activity.setContentCategoryId(cmd.getContentCategoryId());
-        
+
+        //add by liangyanlong, 增加企业ID，用户付款时，查询付款方.
+        activity.setOrganizationId(cmd.getOrganizationId());
+
         activityProvider.createActity(activity);
         createScheduleForActivity(activity);
         
@@ -825,8 +828,14 @@ public class ActivityServiceImpl implements ActivityService {
 
         //后续修改为新的获取付款方账号接口
         createOrderCommand.setPayerUserId(roster.getUid());
+
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getOrganizationId());
+        if (activityBizPayee == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no payee.");
+        }
         //收款方账号
-        createOrderCommand.setPayeeUserId(0L);
+        createOrderCommand.setPayeeUserId(activityBizPayee.getBizPayeeId());
         GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
         timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
