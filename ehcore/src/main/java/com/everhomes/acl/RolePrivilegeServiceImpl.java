@@ -3062,8 +3062,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		if(cmd.getPageAnchor() != null){
 			locator.setAnchor(cmd.getPageAnchor());
-		}else{
-			locator.setAnchor(99999L);
 		}
 		Integer pageSize = 20;//默认20条
 		if(cmd.getPageSize() != null){
