@@ -1,17 +1,23 @@
 package com.everhomes.rentalv2;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2PayAccounts;
 import com.everhomes.server.schema.tables.records.EhRentalv2PayAccountsRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Component
@@ -57,5 +63,22 @@ public class Rentalv2AccountProviderImpl implements  Rentalv2AccountProvider {
                     .and(Tables.EH_RENTALV2_PAY_ACCOUNTS.SOURCE_ID.eq(sourceId));
         }
         step.where(condition).execute();
+    }
+
+    @Override
+    public void createPayAccount(Rentalv2PayAccount account) {
+        long id = sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhRentalv2PayAccounts.class));
+        account.setId(id);
+        account.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhRentalv2PayAccountsRecord record = ConvertHelper.convert(account,
+                EhRentalv2PayAccountsRecord.class);
+        InsertQuery<EhRentalv2PayAccountsRecord> query = context
+                .insertQuery(Tables.EH_RENTALV2_PAY_ACCOUNTS);
+        query.setRecord(record);
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2PayAccounts.class,
+                null);
     }
 }

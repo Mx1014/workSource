@@ -1002,4 +1002,20 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/admin/getResourceAccountSetting</b>
+	 * <p>
+	 * 获取资源支付账户设定
+	 * </p>
+	 */
+	@RequestMapping("getGeneralAccountSetting")
+	@RestReturn(value = ListBizPayeeAccountDTO.class)
+	public RestResponse getResourceAccountSetting( GetGeneralAccountSettingCommand cmd) {
+		ListBizPayeeAccountDTO dto = rentalService.getGeneralAccountSetting(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

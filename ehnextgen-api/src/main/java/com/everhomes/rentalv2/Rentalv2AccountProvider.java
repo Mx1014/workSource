@@ -12,5 +12,7 @@ public interface Rentalv2AccountProvider {
 
     void deletePayAccount(Long id,Long communityId,String sourceType,Long sourceId);
 
+    void createPayAccount(Rentalv2PayAccount account);
+
 
 }

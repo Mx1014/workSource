@@ -8811,6 +8811,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		account.setNamespaceId(UserContext.getCurrentNamespaceId());
 		account.setSourceType(RuleSourceType.DEFAULT.getCode());
 		account.setSourceId(cmd.getResourceTypeId());
+		rentalv2AccountProvider.createPayAccount(account);
 	}
 
 	private ListBizPayeeAccountDTO convertAccount(PayUserDTO payUserDTO){
