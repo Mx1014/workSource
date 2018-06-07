@@ -90,7 +90,7 @@ CREATE TABLE `eh_contract_categories` (
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `logo_uri` varchar(1024) DEFAULT NULL COMMENT 'default cover uri',
   `entry_id` int(11) DEFAULT NULL,
-  `contract_application_scene` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0 租赁合同场景 1 物业合同场景 3 综合合同场景',
+  `contract_application_scene` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0 租赁合同场景 1 物业合同场景 2 综合合同场景',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
