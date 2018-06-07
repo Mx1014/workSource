@@ -1,11 +1,34 @@
 // @formatter:off
 package com.everhomes.pusher;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+
+import org.jooq.tools.StringUtils;
+import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+
 import com.everhomes.apnshttp2.builder.ApnsClient;
 import com.everhomes.apnshttp2.builder.impl.ApnsClientBuilder;
 import com.everhomes.apnshttp2.notifiction.Notification;
 import com.everhomes.apnshttp2.notifiction.Notification.Builder;
-import com.everhomes.apnshttp2.notifiction.NotificationResponse;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -21,7 +44,11 @@ import com.everhomes.developer_account_info.DeveloperAccountInfo;
 import com.everhomes.developer_account_info.DeveloperAccountInfoProvider;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
-import com.everhomes.messaging.*;
+import com.everhomes.messaging.ApnsServiceFactory;
+import com.everhomes.messaging.PushMessageResolver;
+import com.everhomes.messaging.PusherService;
+import com.everhomes.messaging.PusherVenderType;
+import com.everhomes.messaging.PusherVendorService;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
@@ -43,34 +70,14 @@ import com.everhomes.user.UserLogin;
 import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-import com.notnoop.apns.*;
+import com.notnoop.apns.APNS;
+import com.notnoop.apns.ApnsService;
+import com.notnoop.apns.ApnsServiceBuilder;
+import com.notnoop.apns.EnhancedApnsNotification;
+import com.notnoop.apns.PayloadBuilder;
 import com.notnoop.exceptions.NetworkIOException;
 import com.xiaomi.xmpush.server.Result;
 import com.xiaomi.xmpush.server.Sender;
-
-import org.jooq.tools.StringUtils;
-import org.json.simple.parser.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
@@ -785,5 +792,17 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 }
                       
         return client;
+    }
+    
+    /**
+     * 停止bundleId对应的连接端，add by huanglm
+     */
+    public void stophttp2Client(String bundleId) {
+    	ApnsClient client = null;
+    	client = this.http2ClientMaps.remove(bundleId);
+    	if(client != null){
+    		client.shutdown();
+    	}
+    	
     }
 }

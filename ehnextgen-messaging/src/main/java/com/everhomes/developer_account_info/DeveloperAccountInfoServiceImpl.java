@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.messaging.PusherService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
 
@@ -13,7 +14,10 @@ import com.everhomes.util.DateUtils;
 public class DeveloperAccountInfoServiceImpl implements DeveloperAccountInfoService {
 
 	@Autowired
-    DeveloperAccountInfoProvider developerAccountInfoProvider;
+   private DeveloperAccountInfoProvider developerAccountInfoProvider;
+	
+	@Autowired
+	private PusherService pusherService;
 	
 	@Override
 	public void createDeveloperAccountInfo(DeveloperAccountInfo bo) {
@@ -29,4 +33,9 @@ public class DeveloperAccountInfoServiceImpl implements DeveloperAccountInfoServ
 		Long uid = UserContext.currentUserId();
 		bo.setCreateName("userId :"+uid);
 		developerAccountInfoProvider.createDeveloperAccountInfo(bo);
+		//如果原来有，可能已经建了连接，那么就要停掉
+		if(resultBo != null){
+			pusherService.stophttp2Client(bo.getBundleIds());
+		}
+		
 	}}
