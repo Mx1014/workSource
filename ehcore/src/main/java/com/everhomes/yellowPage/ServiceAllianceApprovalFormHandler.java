@@ -175,7 +175,7 @@ public class ServiceAllianceApprovalFormHandler implements GeneralApprovalFormHa
     }
 
     @Override
-    public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+    public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         return new GeneralFormReminderDTO(TrueOrFalseFlag.FALSE.getCode());
     }
 }

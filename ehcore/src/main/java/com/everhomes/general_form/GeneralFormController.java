@@ -72,7 +72,7 @@ public class GeneralFormController extends ControllerBase {
      */
     @RequestMapping("getGeneralFormReminder")
     @RestReturn(value=GeneralFormReminderDTO.class)
-    public RestResponse getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+    public RestResponse getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         GeneralFormReminderDTO dto = generalFormService.getGeneralFormReminder(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);

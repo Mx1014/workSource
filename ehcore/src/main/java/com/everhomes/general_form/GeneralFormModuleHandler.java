@@ -16,7 +16,7 @@ public interface GeneralFormModuleHandler {
 
     PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
 
-    default GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd){
+    default GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd){
         return new GeneralFormReminderDTO(TrueOrFalseFlag.FALSE.getCode());
     }
 }

@@ -47,7 +47,7 @@ public class GeneralApprovalFormModuleHandler implements GeneralFormModuleHandle
     }
 
     @Override
-    public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd){
+    public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd){
         GeneralApprovalFormHandler handler = getApprovalPostItemHandler(cmd.getSourceId());
         return handler.getGeneralFormReminder(cmd);
     }

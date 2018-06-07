@@ -59,5 +59,5 @@ public interface GeneralFormService {
 
 	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
 
-	GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd);
+	GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd);
 }

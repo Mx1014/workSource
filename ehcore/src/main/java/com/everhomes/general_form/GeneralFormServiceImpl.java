@@ -654,7 +654,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+    public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
         return handler.getGeneralFormReminder(cmd);
     }

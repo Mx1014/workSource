@@ -13,6 +13,7 @@ import com.everhomes.rest.archives.EmployArchivesEmployeesCommand;
 import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
 import com.everhomes.rest.enterpriseApproval.ComponentEmployApplicationValue;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
 import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
@@ -83,9 +84,9 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
     }
 
     @Override
-    public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+    public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         Long userId = UserContext.currentUserId();
-        return enterpriseApprovalService.checkArchivesApproval(userId, cmd.getOwnerId(), cmd.getSourceId(),
+        return enterpriseApprovalService.checkArchivesApproval(userId, cmd.getCurrentOrganizationId(), cmd.getSourceId(),
                 ArchivesOperationType.EMPLOY.getCode());
     }
 }

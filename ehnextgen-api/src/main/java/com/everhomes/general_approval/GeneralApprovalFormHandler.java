@@ -10,5 +10,5 @@ public interface GeneralApprovalFormHandler {
 
     GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd);
 
-    GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd);
+    GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd);
 }

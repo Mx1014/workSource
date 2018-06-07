@@ -251,7 +251,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
     }
 
     @Override
-    public GeneralFormReminderDTO getGeneralFormReminder(GetTemplateBySourceIdCommand cmd) {
+    public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(cmd.getSourceId());
         return handler.getGeneralFormReminder(cmd);
     }
