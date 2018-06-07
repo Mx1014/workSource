@@ -127,50 +127,25 @@ public class AssetPayServiceImpl implements AssetPayService{
         return result;
 	}
 	
-	/**
-     * 1、检查是否已经下单
-     * 2、检查买方是否有会员，无则创建
-     * 3、收款方是否有会员，无则报错
-     * 4、获取在支付系统中的账号，用户与支付系统交互
-     * 5、组装报文，发起下单请求
-     * 6、组装支付方式
-     * 7、保存订单信息
-     * 8、返回结果
-     */
     public PreOrderDTO createPreOrder(PreOrderCommand cmd) {
         PreOrderDTO preOrderDTO = null;
-        //1、查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
-        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrder(cmd.getOrderType(), cmd.getOrderId());
-        if (orderRecord != null) {
-            preOrderDTO = recordToDto(orderRecord, cmd);
-            return preOrderDTO;
-        }
+        //1、检查买方（付款方）是否有会员，无则创建
+        PayUserDTO payUserDTO = checkAndCreatePaymentUser(cmd.getPayerId(), cmd.getNamespaceId());
 
-        //2、检查买方（付款方）是否有会员，无则创建
-        PaymentUser paymentUser = checkAndCreatePaymentUser(cmd.getPayerId());
+       /* //2、收款方是否有会员，无则报错
+        Long payeeUserId = checkPaymentService(cmd.getNamespaceId(), cmd.getOrderType(), cmd.getResourceType(), cmd.getResourceId());
+        
 
-        //3、收款方是否有会员，无则报错
-        PaymentServiceConfig serviceConfig = checkPaymentService(cmd.getNamespaceId(), cmd.getOrderType(), cmd.getResourceType(), cmd.getResourceId());
-
-        //4、获取在支付系统中的账号，用户与支付系统交互,
-        PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
-        if (paymentAccount == null) {
-            LOGGER.error("payment account no find system_id={}", SYSTEMID);
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
-                    "payment account no find");
-        }
-
-        //5、组装报文，发起下单请求
+        //3、组装报文，发起下单请求
         OrderCommandResponse orderCommandResponse = createOrder(cmd, paymentUser, serviceConfig, paymentAccount);
 
-        //6、组装支付方式
+        //4、组装支付方式
         preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd, serviceConfig);
 
-        //7、保存订单信息
+        //5、保存订单信息
         saveOrderRecord(orderCommandResponse, cmd.getOrderId(), serviceConfig.getOrderType(),  serviceConfig.getId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
-
-
-        //8、返回
+*/
+        //6、返回
         return preOrderDTO;
     }
     
@@ -313,14 +288,21 @@ public class AssetPayServiceImpl implements AssetPayService{
     }
     
     //检查买方（付款方）会员，无则创建
-    private PaymentUser checkAndCreatePaymentUser(Long payerId){
-        PaymentUser paymentUser = new PaymentUser();
+    private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
+    	PayUserDTO payUserDTO = new PayUserDTO();
         //根据支付帐号ID列表查询帐号信息
-        //List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(arg0)
-        if(paymentUser == null){
-            //创建
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("checkAndCreatePaymentUser request={}", payerId);
         }
-        return paymentUser;
+        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Arrays.asList(payerId));
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("checkAndCreatePaymentUser response={}", payUserDTOs);
+        }
+        if(payUserDTOs == null || payUserDTOs.size() == 0){
+            //创建个人账号
+        	payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), namespaceId.toString());
+        }
+        return payUserDTO;
     }
     
     public PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId){
