@@ -15,6 +15,24 @@ public class SearchTasksByOrgDTO {
     private String requestorPhone;
     private Timestamp createTime;
     private Byte status;
+    private String content;
+    private Long flowCaseId;
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 
     public String getTaskCategoryName() {
         return taskCategoryName;

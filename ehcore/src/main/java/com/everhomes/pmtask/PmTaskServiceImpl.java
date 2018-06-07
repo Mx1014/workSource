@@ -2527,6 +2527,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			dto.setRequestorPhone(task.getRequestorPhone());
 			dto.setStatus(task.getStatus());
 			dto.setTaskCategoryName(categoryProvider.findCategoryById(task.getTaskCategoryId()).getName());
+			dto.setContent(task.getContent());
 			ret.add(dto);
 		}
 		return ret;
@@ -2545,6 +2546,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 			dto.setCreateTime(r.getCreateTime());
 			dto.setBuildingName(r.getBuildingName());
 			dto.setTaskCategoryName(categoryProvider.findCategoryById(r.getCategoryId()).getName());
+			dto.setContent(r.getContent());
+			dto.setFlowCaseId(r.getFlowCaseId());
 			ret.add(dto);
 		});
 		return ret;
