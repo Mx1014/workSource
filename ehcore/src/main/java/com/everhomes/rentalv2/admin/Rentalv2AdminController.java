@@ -1027,8 +1027,8 @@ public class Rentalv2AdminController extends ControllerBase {
      */
     @RequestMapping("deleteResourceAccountSetting")
     @RestReturn(value = String.class)
-    public RestResponse deleteResourceAccountSetting( Long id) {
-        rentalService.deleteResourceAccountSetting(id);
+    public RestResponse deleteResourceAccountSetting( UpdateResourceAccountSettingCommand cmd) {
+        rentalService.deleteResourceAccountSetting(cmd.getId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
