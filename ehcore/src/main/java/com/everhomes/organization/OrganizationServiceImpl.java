@@ -9043,6 +9043,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     }else{
                         //说明在该域空间下面不存在该项目，所以我们需要向前端给出提示错误
                         LOGGER.error("community is not exists, data = {}", importEnterpriseDataDTO);
+                        log.setData(importEnterpriseDataDTO);
                         log.setErrorLog("community is not exists");
                         log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST);
                         errorDataLogs.add(log);
