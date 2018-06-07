@@ -19,6 +19,7 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -1687,6 +1688,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	}else {
     		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
     	}
+    }
+    
+    public void payNotify(OrderPaymentNotificationCommand cmd) {
+    	//支付模块回调接口，通知支付结果
+    	assetPayService.payNotify(cmd);
     }
     
 }

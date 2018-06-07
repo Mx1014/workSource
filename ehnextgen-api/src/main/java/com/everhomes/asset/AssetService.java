@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -184,4 +185,10 @@ public interface AssetService {
     void noticeTrigger(Integer namespaceId);
     
     List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
+    
+    /**
+     * 用于接受支付系统的回调信息
+     * @param cmd
+     */
+    void payNotify(OrderPaymentNotificationCommand cmd);
 }

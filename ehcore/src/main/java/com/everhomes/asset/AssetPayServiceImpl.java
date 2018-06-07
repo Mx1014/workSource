@@ -21,6 +21,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.order.PayProvider;
 import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentServiceConfigHandler;
@@ -29,6 +30,7 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.SettlementType;
 import com.everhomes.pay.order.SourceType;
@@ -38,10 +40,12 @@ import com.everhomes.pay.user.BindPhoneCommand;
 import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
+import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -50,11 +54,13 @@ import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 
 @Service
@@ -154,6 +160,50 @@ public class AssetPayServiceImpl implements AssetPayService{
         return preOrderDTO;
     }
     
+    public void payNotify(OrderPaymentNotificationCommand cmd) {
+    	/*if(LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
+    	}
+    	if(cmd.getPaymentErrorCode())
+        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
+        cmd.setOrderId(orderRecord.getOrderId());
+        //调用具体业务
+        LOGGER.info("Handler found# handler name = {}",String.valueOf(orderRecord.getOrderType()));
+        PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
+        LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
+        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
+        srvCmd.setOrderType(orderRecord.getOrderType());
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+        if(orderType != null) {
+            switch (orderType) {
+                case PURCHACE:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //支付成功
+                        handler.paySuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //支付失败
+                        handler.payFail(srvCmd);
+                    }
+                    break;
+                case REFUND:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //退款成功
+                        handler.refundSuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //退款失败
+                        handler.refundFail(srvCmd);
+                    }
+                    break;
+                default:
+                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+            }
+        }else {
+            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+        }*/
+    }
+    
     private void saveOrderRecord(OrderCommandResponse orderCommandResponse, Long orderId, Integer paymentOrderType){
         PaymentOrderRecord record = ConvertHelper.convert(orderCommandResponse, PaymentOrderRecord.class);
         record.setOrderNum(orderCommandResponse.getBizOrderNum());
@@ -182,83 +232,6 @@ public class AssetPayServiceImpl implements AssetPayService{
         	payUserDTO = payUserDTOs.get(0);
         }
         return payUserDTO;
-    }
-    
-    public PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId){
-
-        Long id = payProvider.getNewPaymentUserId();
-
-        RegisterBusinessUserRestResponse restResponse = registerPayV2User(businessUserType,  ownerType+String.valueOf(ownerId));
-
-        if(restResponse == null || restResponse.getErrorCode() == null || restResponse.getErrorCode() != 200 ){
-            LOGGER.error("register user fail, businessUserType={}, ownerType={}, ownerId={}", businessUserType, ownerType, ownerId);
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_REGISTER_USER_FAIL,
-                    "register user fail");
-        }
-
-        Long paymentUserId = restResponse.getResponse().getId();
-        String defaultPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"default.bind.phone", "");
-        StringRestResponse bindResponse = bindPhonePayV2(paymentUserId, defaultPhone);
-        String errorDescription = bindResponse.getErrorDescription();
-        if(errorDescription!=null && errorDescription.indexOf("30024")==-1){
-            if(bindResponse == null || bindResponse.getErrorCode() == null || bindResponse.getErrorCode() != 200 ){
-                LOGGER.error("bind phone fail, businessUserType={}, ownerType={}, ownerId={}, phone={}", businessUserType, ownerType, ownerId, defaultPhone);
-                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_BIND_PHONE_FAIL,
-                        "bind phone fail");
-            }
-        }
-
-        PaymentUser paymentUser = new PaymentUser();
-        paymentUser.setId(id);
-        paymentUser.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        paymentUser.setOwnerType(ownerType);
-        paymentUser.setOwnerId(ownerId);
-        paymentUser.setPaymentUserType(businessUserType);
-        paymentUser.setPaymentUserId(paymentUserId);
-        // 买方会员默认就是正常状态，不需要审核 by lqs 20171124
-        paymentUser.setStatus(PaymentUserStatus.ACTIVE.getCode());
-        payProvider.createPaymentUser(paymentUser);
-        return paymentUser;
-    }
-    
-    /**
-     * 去支付系统创建用户
-     */
-    private RegisterBusinessUserRestResponse registerPayV2User(Integer businessUserType, String bizUserId){
-
-        RegisterBusinessUserCommand cmd = new RegisterBusinessUserCommand();
-        cmd.setBizSystemId(SYSTEMID);
-        cmd.setUserType(businessUserType);
-        cmd.setBizUserId(bizUserId);
-
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("registerPayV2User-command=" + GsonUtil.toJson(cmd));}
-        RegisterBusinessUserRestResponse response = restClient.restCall(
-                "POST",
-                ApiConstants.MEMBER_REGISTERBUSINESSUSER_URL,
-                cmd,
-                RegisterBusinessUserRestResponse.class);
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-response=" + GsonUtil.toJson(response));}
-        return response;
-    }
-    
-    /**
-     * 去支付系统创建用户
-     */
-    private StringRestResponse bindPhonePayV2(Long paymentUserId, String phone){
-        BindPhoneCommand cmd = new BindPhoneCommand();
-        cmd.setPhone(phone);
-        cmd.setUserId(paymentUserId);
-
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("bindPhonePayV2-command=" + GsonUtil.toJson(cmd));}
-        StringRestResponse response = restClient.restCall(
-                "POST",
-                ApiConstants.MEMBER_BINDPHONE_URL,
-                cmd,
-                StringRestResponse.class);
-        if(LOGGER.isDebugEnabled()) {LOGGER.debug("bindPhonePayV2-response=" + GsonUtil.toJson(response));}
-
-        return response;
-
     }
     
     private OrderCommandResponse createOrder(PreOrderCommand preOrderCommand){

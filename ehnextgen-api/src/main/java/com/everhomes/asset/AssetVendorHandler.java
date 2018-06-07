@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
 import com.everhomes.rest.asset.BatchImportBillsCommand;
@@ -235,6 +236,11 @@ public abstract class AssetVendorHandler {
     }
     List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
     	LOGGER.error("Insufficient privilege, handler listPayeeAccounts");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+    void payNotify(OrderPaymentNotificationCommand cmd) {
+    	LOGGER.error("Insufficient privilege, handler payNotify");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
