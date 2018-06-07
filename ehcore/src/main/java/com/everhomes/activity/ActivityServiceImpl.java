@@ -113,6 +113,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -796,7 +797,60 @@ public class ActivityServiceImpl implements ActivityService {
 		return callBack;
 	}
 
-	@Override
+    @Override
+    public PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd) {
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
+
+        PreOrderCommand preOrderCommand = new PreOrderCommand();
+
+        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+        preOrderCommand.setOrderId(roster.getOrderNo());
+        BigDecimal amout = activity.getChargePrice();
+        if(amout == null){
+            preOrderCommand.setAmount(0L);
+        }
+        preOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
+
+        preOrderCommand.setPayerId(roster.getUid());
+        preOrderCommand.setNamespaceId(activity.getNamespaceId());
+
+        GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+        timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+        Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+
+
+        preOrderCommand.setExpiration(expiredTime);
+
+
+        preOrderCommand.setClientAppName(cmd.getClientAppName());
+
+        //微信公众号支付，重新设置ClientName，设置支付方式和参数
+        if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
+
+            if(preOrderCommand.getClientAppName() == null){
+                Integer namespaceId = UserContext.getCurrentNamespaceId();
+                preOrderCommand.setClientAppName("wechat_" + namespaceId);
+            }
+            preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+        }
+
+
+        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+
+        return callBack;
+    }
+
+    @Override
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
 //		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
 
@@ -6098,6 +6152,34 @@ public class ActivityServiceImpl implements ActivityService {
                 this.activityProvider.updateActivityPayee(activityBizPayee);
             }
         }
+    }
+
+    @Override
+    public CheckPayeeIsUsefulResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+        CheckPayeeIsUsefulResponse checkPayeeIsUsefulResponse = new CheckPayeeIsUsefulResponse();
+        checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.NULL.getCode());
+
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        List<Long> idList = new ArrayList<>();
+        idList.add(activityBizPayee.getId());
+        List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);
+        if (list != null && list.size() > 0) {
+            PayUserDTO payUserDTO = (PayUserDTO)list.get(0);
+            if (payUserDTO.getRegisterStatus() == 0) {
+                checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.UNDER_REVIEW.getCode());
+                return checkPayeeIsUsefulResponse;
+            }
+            if (payUserDTO.getRegisterStatus() == 1) {
+                checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.IN_USE.getCode());
+                return checkPayeeIsUsefulResponse;
+            }
+        }
+        return checkPayeeIsUsefulResponse;
     }
 
 //	@Override

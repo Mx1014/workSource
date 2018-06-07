@@ -19,6 +19,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.RestResponse;
 
+import java.util.List;
+
 /**
  * <ul>
  * 预约后台系统：
@@ -954,14 +956,62 @@ public class Rentalv2AdminController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /rental/admin/ListPayeeAccountsCommand</b>
+	 * <b>URL: /rental/admin/listPayeeAccounts</b>
 	 * <p>
 	 * 查询企业账户信息
 	 * </p>
 	 */
-	@RequestMapping("ListPayeeAccountsCommand")
+	@RequestMapping("listPayeeAccounts")
 	@RestReturn(value = ListBizPayeeAccountDTO.class,collection = true)
-	public RestResponse ListPayeeAccountsCommand( ListPayeeAccountsCommand cmd) {
+	public RestResponse listPayeeAccounts( ListPayeeAccountsCommand cmd) {
+		List<ListBizPayeeAccountDTO> list =  rentalService.listPayeeAccounts(cmd);
+		RestResponse response = new RestResponse(list);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/getGeneralAccountSetting</b>
+	 * <p>
+	 * 获取通用支付账户设定
+	 * </p>
+	 */
+	@RequestMapping("getGeneralAccountSetting")
+	@RestReturn(value = ListBizPayeeAccountDTO.class)
+	public RestResponse getGeneralAccountSetting( GetGeneralAccountSettingCommand cmd) {
+		ListBizPayeeAccountDTO dto = rentalService.getGeneralAccountSetting(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateGeneralAccountSetting</b>
+	 * <p>
+	 * 更新通用支付账户设定
+	 * </p>
+	 */
+	@RequestMapping("getGeneralAccountSetting")
+	@RestReturn(value = String.class)
+	public RestResponse updateGeneralAccountSetting( UpdateGeneralAccountSettingCommand cmd) {
+		rentalService.updateGeneralAccountSetting(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/getResourceAccountSetting</b>
+	 * <p>
+	 * 获取资源支付账户设定
+	 * </p>
+	 */
+	@RequestMapping("getGeneralAccountSetting")
+	@RestReturn(value = GetResourceAccountSettingResponse.class)
+	public RestResponse getResourceAccountSetting( GetResourceAccountSettingCommand cmd) {
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
