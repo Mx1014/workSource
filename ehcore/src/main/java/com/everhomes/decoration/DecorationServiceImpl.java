@@ -132,7 +132,9 @@ public class DecorationServiceImpl implements  DecorationService {
         cmd2.setCommunityId(request.getCommunityId());
         cmd2.setOwnerType(IllustrationType.REFOUND.getCode());
         DecorationIllustrationDTO dto = this.getIllustration(cmd2);
-        dto.setRefundAmount(request.getRefoundAmount());
+        if (dto != null) {
+            dto.setRefundAmount(request.getRefoundAmount());
+        }
         return dto;
     }
 
@@ -146,9 +148,11 @@ public class DecorationServiceImpl implements  DecorationService {
         cmd2.setOwnerType(IllustrationType.FEE.getCode());
         cmd2.setCommunityId(request.getCommunityId());
         DecorationIllustrationDTO dto = this.getIllustration(cmd2);
-        response.setAddress(dto.getAddress());
-        response.setLatitude(dto.getLatitude());
-        response.setLongitude(dto.getLongitude());
+        if(dto != null) {
+            response.setAddress(dto.getAddress());
+            response.setLatitude(dto.getLatitude());
+            response.setLongitude(dto.getLongitude());
+        }
 
         List<DecorationFee> list = this.decorationProvider.listDecorationFeeByRequestId(request.getId());
         if(list == null || list.size()==0)
