@@ -1307,7 +1307,7 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setErrorLog("building name cannot be empty");
 			return log;
 		}
-		LOGGER.info(String.valueOf(data.getName().getBytes().length));
+		LOGGER.info(String.valueOf(data.getName().length()));
 		//校验楼栋名称的长度不能大于20个汉字
 		if(data.getName().getBytes().length > 60){
 			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_OVER_FLOW);
