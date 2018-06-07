@@ -8814,6 +8814,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rentalv2AccountProvider.createPayAccount(account);
 	}
 
+	@Override
+	public GetResourceAccountSettingResponse getResourceAccountSetting(GetResourceAccountSettingCommand cmd) {
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
+		CrossShardListingLocator locator = null ;
+		if (cmd.getPageAnchor() != null){
+			locator = new CrossShardListingLocator();
+			locator.setAnchor(cmd.getPageAnchor());
+		}
+		List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(),
+				cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+				RuleSourceType.RESOURCE.getCode(), cmd.getResourceTypeId(), locator, cmd.getPageSize());
+		return null;
+	}
+
 	private ListBizPayeeAccountDTO convertAccount(PayUserDTO payUserDTO){
 		ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
 		// 支付系统中的用户ID

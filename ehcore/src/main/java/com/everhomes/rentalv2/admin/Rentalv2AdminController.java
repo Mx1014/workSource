@@ -1010,7 +1010,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getGeneralAccountSetting")
-	@RestReturn(value = ListBizPayeeAccountDTO.class)
+	@RestReturn(value = GetResourceAccountSettingResponse.class)
 	public RestResponse getResourceAccountSetting( GetResourceAccountSettingCommand cmd) {
 
 		RestResponse response = new RestResponse();

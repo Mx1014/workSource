@@ -24,6 +24,7 @@ CREATE TABLE `eh_rentalv2_pay_accounts` (
 `namespace_id`  int NULL ,
 `community_id`  bigint(20) NULL ,
 `resource_type`  varchar(20) NULL,
+`resource_type_id`  bigint(20) NULL ,
 `source_type`  varchar(20) NULL COMMENT 'default_rule:默认规则 resource_rule:资源规则' ,
 `source_id`  bigint(20) NULL ,
 `resource_name`  varchar(20) NULL,

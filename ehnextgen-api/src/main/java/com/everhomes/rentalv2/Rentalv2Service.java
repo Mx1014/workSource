@@ -302,6 +302,8 @@ public interface Rentalv2Service {
 
 	void updateGeneralAccountSetting(UpdateGeneralAccountSettingCommand cmd);
 
+	GetResourceAccountSettingResponse getResourceAccountSetting(GetResourceAccountSettingCommand cmd);
+
 	void test();
 
 }
