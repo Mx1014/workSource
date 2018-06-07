@@ -212,17 +212,17 @@ public class AssetPayServiceImpl implements AssetPayService{
     //检查买方（付款方）会员，无则创建
     private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
     	PayUserDTO payUserDTO = new PayUserDTO();
-        //根据支付帐号ID列表查询帐号信息
+        //根据tag查询支付帐号
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("checkAndCreatePaymentUser request={}", payerId);
         }
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Arrays.asList(payerId));
+        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList("EhUsers" + payerId.toString());
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("checkAndCreatePaymentUser response={}", payUserDTOs);
         }
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
-        	payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), namespaceId.toString());
+        	payUserDTO = payServiceV2.createPersonalPayUserIfAbsent("EhUsers" + payerId.toString(), namespaceId.toString());
         }else {
         	payUserDTO = payUserDTOs.get(0);
         }
