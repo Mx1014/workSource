@@ -2881,7 +2881,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public List<BusinessPayeeAccountDTO> listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+	public ListBusinessPayeeAccountResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 		List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider
 				.listParkingBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId());
@@ -2890,7 +2890,8 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		List<PayUserDTO> payUserDTOS = sdkPayService.listPayUsersByIds(accounts.stream().map(r -> r.getPayeeId()).collect(Collectors.toList()));
 		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
-		return accounts.stream().map(r->{
+		ListBusinessPayeeAccountResponse response = new ListBusinessPayeeAccountResponse();
+		response.setAccountList(accounts.stream().map(r->{
 			BusinessPayeeAccountDTO convert = ConvertHelper.convert(r, BusinessPayeeAccountDTO.class);
 			PayUserDTO payUserDTO = map.get(convert.getPayeeId());
 			if(payUserDTO!=null){
@@ -2901,7 +2902,8 @@ public class ParkingServiceImpl implements ParkingService {
 				convert.setPayeeRemark(payUserDTO.getRemark());
 			}
 			return convert;
-		}).collect(Collectors.toList());
+		}).collect(Collectors.toList()));
+		return response;
 	}
 
 	@Override

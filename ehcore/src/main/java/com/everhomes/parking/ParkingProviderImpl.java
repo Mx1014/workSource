@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -20,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -43,7 +46,9 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Autowired
     private DbProvider dbProvider;
-    
+
+	@Autowired
+	public com.everhomes.paySDK.api.PayService sdkPayService;
     @Override
     public ParkingVendor findParkingVendorByName(String name) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingVendors.class));
@@ -1224,7 +1229,18 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
+	@Cacheable(value = "createPersonalPayUserIfAbsent", key="{#userId, #accountCode}", unless="#result == null")
 	public ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String userId, String accountCode, String tag1, String tag2, String tag3) {
-		return null;
+		PayUserDTO payUserList = sdkPayService.createPersonalPayUserIfAbsent(userId, accountCode);
+		if(payUserList==null){
+			return null;
+		}
+		ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+		dto.setAccountId(payUserList.getId());
+		dto.setAccountType(payUserList.getUserType()==2? OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+		dto.setAccountName(payUserList.getUserName());
+		dto.setAccountAliasName(payUserList.getUserAliasName());
+		dto.setAccountStatus(Byte.valueOf(payUserList.getRegisterStatus()+""));
+		return dto;
 	}
 }

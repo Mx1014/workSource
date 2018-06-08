@@ -305,11 +305,10 @@ public class ParkingController extends ControllerBase {
      * <p>获取已关联收款账号的业务列表</p>
      */
     @RequestMapping("listBusinessPayeeAccount")
-    @RestReturn(value=BusinessPayeeAccountDTO.class,collection = true)
+    @RestReturn(value=ListBusinessPayeeAccountResponse.class)
     public RestResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
 
-        List<BusinessPayeeAccountDTO> list = parkingService.listBusinessPayeeAccount(cmd);
-        RestResponse response = new RestResponse(list);
+        RestResponse response = new RestResponse(parkingService.listBusinessPayeeAccount(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

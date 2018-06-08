@@ -142,7 +142,7 @@ public interface ParkingService {
 
     void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd);
 
-    List<BusinessPayeeAccountDTO> listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd);
+    ListBusinessPayeeAccountResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd);
 
     void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd);
 
