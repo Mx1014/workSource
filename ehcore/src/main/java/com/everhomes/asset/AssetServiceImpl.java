@@ -4523,4 +4523,35 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         handler.payNotify(cmd);
 	}
+	
+	public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd){
+		//权限校验
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrganizationId(), PrivilegeConstants.ASSET_DEAL_VIEW, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, cmd.getCommunityId());
+        ListPaymentBillResp response = new ListPaymentBillResp();
+        if(cmd.getNamespaceId() == null){
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+        //修改传递参数为一个对象，卸货
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize;
+        //卸货完毕
+        if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        if(cmd.getPageSize() == null){
+            pageSize = 20;
+        }else {
+        	pageSize = cmd.getPageSize().intValue();
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        
+        List<ListBillsDTO> list = assetProvider.listBillsForOrder(cmd.getNamespaceId(), pageOffSet, pageSize, cmd);
+        if(list.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            list.remove(list.size()-1);
+        }
+        return response;
+	}
 }

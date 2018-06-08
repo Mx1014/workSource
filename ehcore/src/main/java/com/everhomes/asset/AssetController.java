@@ -1113,8 +1113,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping(value = "listPaymentBill")
 	@RestReturn(ListPaymentBillResp.class)
 	public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-	//        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
-	    ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
+	    ListPaymentBillResp result = assetService.listPaymentBill(cmd);
 	    RestResponse response = new RestResponse(result);
 	    return response;
 	}
