@@ -22,7 +22,7 @@ public class CreateOrUpdateBusinessPayeeAccountCommand {
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
-    private Long parkingLotName;
+    private String parkingLotName;
     private String businessType;
     private Long payeeId;
     private String payeeUserType;
@@ -67,11 +67,11 @@ public class CreateOrUpdateBusinessPayeeAccountCommand {
         this.parkingLotId = parkingLotId;
     }
 
-    public Long getParkingLotName() {
+    public String getParkingLotName() {
         return parkingLotName;
     }
 
-    public void setParkingLotName(Long parkingLotName) {
+    public void setParkingLotName(String parkingLotName) {
         this.parkingLotName = parkingLotName;
     }
 

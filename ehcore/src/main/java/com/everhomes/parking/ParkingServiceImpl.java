@@ -2832,8 +2832,10 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId(),
-				new ArrayList(Arrays.asList("0",cmd.getOwnerId()+"")));
+		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getOwnerId() + ""));
+		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
+		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
+		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
 		if(payUserList==null || payUserList.size() == 0){
 			return null;
 		}
@@ -2851,7 +2853,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		if(cmd.getId()==null){
+		if(cmd.getId()!=null){
 			List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts
 					(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId(),cmd.getBusinessType());
 			if(accounts!=null && accounts.size()>0){
