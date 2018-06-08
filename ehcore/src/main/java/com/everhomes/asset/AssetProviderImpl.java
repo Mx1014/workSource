@@ -3412,7 +3412,8 @@ public class AssetProviderImpl implements AssetProvider {
                     .fetchOne(contract.IN_WORK);
         }
         if ( aByte == null) {
-            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
+        	return false;
+            //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
         }
         if( aByte == (byte)0){
             return false;
