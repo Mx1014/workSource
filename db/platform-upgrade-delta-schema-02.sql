@@ -460,7 +460,3 @@ CREATE TABLE `eh_payment_bill_certificate` (
   `certificate_uri` varchar(255) DEFAULT NULL COMMENT '上传凭证图片的uri',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- issue-31047 摄像头增加账号 by liuyilin
-ALTER TABLE `eh_aclink_cameras` ADD COLUMN `account` VARCHAR(128) NOT NULL DEFAULT 'admin' COMMENT '摄像头账号';
--- END issue-31047

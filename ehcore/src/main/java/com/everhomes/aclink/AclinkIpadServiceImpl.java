@@ -57,6 +57,8 @@ public class AclinkIpadServiceImpl implements AclinkIpadService {
 				for(AclinkServer server: servers){
 					serverIds.add(server.getId());
 				}
+			}else{
+				return resp;
 			}
 		}
 		

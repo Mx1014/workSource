@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -28,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class LocaleStringProviderImpl implements LocaleStringProvider {
+public class LocaleStringProviderImpl implements LocaleStringProvider, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocaleStringProviderImpl.class);
     
     @Autowired
@@ -37,11 +39,20 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
     @Autowired
     private CacheProvider cacheProvice;
     
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516   
+    //@PostConstruct
     public void setup() {
         CacheAccessor accessor = this.cacheProvice.getCacheAccessor("LocaleStringFind");
         accessor.clear();
     }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    } 
     
     @Cacheable(value="LocaleStringFind", key="{#scope, #code, #locale}")
     @Override

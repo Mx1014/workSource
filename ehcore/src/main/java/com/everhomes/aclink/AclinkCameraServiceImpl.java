@@ -62,6 +62,7 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 		camera.setOperatorUid(user.getId());
 		camera.setLinkStatus((byte) 2);//TODO delete
 		camera.setKeyCode(cmd.getKeyCode());
+		camera.setAccount(cmd.getAccount());
 		aclinkCameraProvider.createLocalCamera(camera);
 		//内网服务器下属设备有变动,更新服务器的上次操作时间
 		AclinkServer server = aclinkServerProvider.findServerById(camera.getServerId());
@@ -84,6 +85,7 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 		camera.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		camera.setOperatorUid(user.getId());
 		camera.setKeyCode(cmd.getKeyCode());
+		camera.setAccount(cmd.getAccount());
 		aclinkCameraProvider.updateLocalCamera(camera);
 		//内网服务器下属设备有变动,更新服务器的上次操作时间
 		AclinkServer server = aclinkServerProvider.findServerById(camera.getServerId());
@@ -124,6 +126,8 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 				for(AclinkServer server: servers){
 					serverIds.add(server.getId());
 				}
+			}else{
+				return resp;
 			}
 		}
 		
