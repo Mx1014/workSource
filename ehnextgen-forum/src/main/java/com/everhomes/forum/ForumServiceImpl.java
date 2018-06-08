@@ -423,6 +423,9 @@ public class ForumServiceImpl implements ForumService {
         if (!StringUtils.isEmpty(newCmd.getContent()) && !newCmd.getContent().equals(oldCmd.getContent())) {
             oldCmd.setContent(newCmd.getContent());
         }
+        if (!StringUtils.isEmpty(newCmd.getDescription()) && !newCmd.getDescription().equals(oldCmd.getDescription())) {
+            oldCmd.setDescription(newCmd.getDescription());
+        }
         post.setEmbeddedJson(StringHelper.toJsonString(oldCmd));
         this.activityProvider.updateActivity(activity);
         return activity;
