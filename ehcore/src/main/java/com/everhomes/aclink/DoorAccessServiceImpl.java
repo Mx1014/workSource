@@ -1698,7 +1698,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         //避免现网客户端反复取数据,锚点传0就取全部,不返回下一页锚点,待下一版客户端修复后删掉即可  byliuyilin 20180608
-        if(cmd.getPageAnchor() == 0){
+        if(cmd.getPageAnchor() != null && cmd.getPageAnchor() == 0){
         	cmd.setPageSize(0);
         }
         //end 20180608
