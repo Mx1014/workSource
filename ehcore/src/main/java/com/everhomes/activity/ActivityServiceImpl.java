@@ -818,7 +818,6 @@ public class ActivityServiceImpl implements ActivityService {
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
 
         createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
-        createOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getCode());
         createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
 
         BigDecimal amout = activity.getChargePrice();
@@ -844,9 +843,9 @@ public class ActivityServiceImpl implements ActivityService {
         ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
         Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
 
-
+        createOrderCommand.setOrderType(com.everhomes.pay.order.OrderType.PURCHACE.getCode());
         createOrderCommand.setExpirationMillis(expiredTime);
-
+        createOrderCommand.setGoodsName("活动报名");
 
         createOrderCommand.setClientAppName(cmd.getClientAppName());
 
@@ -6239,7 +6238,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
         List<Long> idList = new ArrayList<>();
-        idList.add(activityBizPayee.getId());
+        idList.add(activityBizPayee.getBizPayeeId());
         List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);
         if (list != null && list.size() > 0) {
             PayUserDTO payUserDTO = (PayUserDTO)list.get(0);
