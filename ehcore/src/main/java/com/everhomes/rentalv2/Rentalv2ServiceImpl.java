@@ -2603,16 +2603,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void test() {
-		Map<String, Object> messageMap = new HashMap<>();
-		messageMap.put("orderId", 6236L);
-		messageMap.put("methodName", "endReminderSendMessage");
-		scheduleProvider.scheduleSimpleJob(
-				queueName,
-				queueName,
-				new java.util.Date(),
-				RentalMessageQuartzJob.class,
-				messageMap
-		);
+		RentalOrder order = new RentalOrder();
+		order.setId(5697l);
+		createOrderOverTimeTask(order);
 	}
 
 	@Override
