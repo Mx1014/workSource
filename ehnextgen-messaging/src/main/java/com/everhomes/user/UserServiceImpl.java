@@ -6182,6 +6182,7 @@ public class UserServiceImpl implements UserService {
 									addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
 									addressSiteDTO.setCommunityName(community.getName());
 									addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
+									addressSiteDTO.setCommunityId(community.getId());
 									addressSiteDtos.add(addressSiteDTO);
 								}
 

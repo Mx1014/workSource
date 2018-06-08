@@ -38,6 +38,7 @@ public class AddressSiteDTO {
     private Double latitude;
     private String wholeAddressName;
     private String communityName;
+    private Long communityId;
 
     public Long getId() {
         return id;
@@ -141,6 +142,14 @@ public class AddressSiteDTO {
 
     public void setCommunityName(String communityName) {
         this.communityName = communityName;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override
