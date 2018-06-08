@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 公司id</li>
  * <li>subject:  主题名称</li>
  * <li>content: 祝福语</li>
+ * <li>senderName:发放者姓名</li>
  * <li>senderUid:发放者userId</li>
  * <li>senderDetailId: 发放者detailId</li>
  * <li>senderName: 发放者姓名</li>
@@ -36,6 +37,7 @@ public class WelfaresDTO {
     private Long ownerId;
     private String subject;
     private String content;
+    private String senderName;
     private Long senderUid;
     private Long senderDetailId;
     private String attachmentImgUri;
@@ -206,6 +208,14 @@ public class WelfaresDTO {
 
 	public void setItems(List<WelfareItemDTO> items) {
 		this.items = items;
+	}
+
+	public String getSenderName() {
+		return senderName;
+	}
+
+	public void setSenderName(String senderName) {
+		this.senderName = senderName;
 	}
 	
 }
