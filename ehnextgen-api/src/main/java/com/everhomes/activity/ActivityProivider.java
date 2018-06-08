@@ -35,6 +35,8 @@ public interface ActivityProivider {
     
     ActivityRoster findRosterByOrderNo(Long orderNo);
 
+    ActivityRoster findRosterByPayOrderId(Long payOrderId);
+
     List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId, boolean onlyConfirm);
 
     List<ActivityRoster> listRosters(Long activityId, ActivityRosterStatus status);

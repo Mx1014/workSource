@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
@@ -104,7 +105,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("createSignupOrderV2")
     @RestReturn(value=PreOrderDTO.class)
     public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
-        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
+        PreOrderDTO dto = activityService.createSignupOrderV3(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -876,6 +877,21 @@ public class ActivityController extends ControllerBase {
     public RestResponse listActivitiesByCategoryId(ListActivitiesByCategoryIdCommand cmd){
         ListActivitiesByCategoryIdResponse result = activityService.listActivitiesByCategoryId(cmd);
         RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/payNotify</b>
+     * <p>支付模块回调接口，通知支付结果</p>
+     */
+    @RequestMapping("payNotify")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
+        activityService.payNotify(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

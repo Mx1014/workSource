@@ -331,7 +331,24 @@ public class ActivityProviderImpl implements ActivityProivider {
                 });
         return rosters[0];
     }
-    
+
+    @Override
+    public ActivityRoster findRosterByPayOrderId(Long payOrderId) {
+        ActivityRoster[] rosters = new ActivityRoster[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),null,
+                (context, obj) -> {
+                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
+                            .where(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()))
+                            .and(Tables.EH_ACTIVITY_ROSTER.PAY_ORDER_ID.eq(payOrderId)).fetch().forEach(item -> {
+                        rosters[0] = ConvertHelper.convert(item, ActivityRoster.class);
+                    });
+                    if (rosters[0] != null)
+                        return false;
+                    return true;
+                });
+        return rosters[0];
+    }
+
 
     @Override
     public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId, boolean onlyConfirm) {

@@ -2,6 +2,8 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -99,6 +101,7 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -256,7 +259,9 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Autowired
     private com.everhomes.paySDK.api.PayService payServiceV2;
-	
+
+    @Value("${server.contextPath:}")
+    private String contextPath;
     @PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
@@ -859,7 +864,10 @@ public class ActivityServiceImpl implements ActivityService {
             createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
         }
 
-
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        createOrderCommand.setBackUrl(backUrl);
         PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
 
         return callBack;
@@ -2036,9 +2044,14 @@ public class ActivityServiceImpl implements ActivityService {
 		//支付时是不同的版本，此处也要按不同的版本做处理，当前有版本1、2，默认是老版本1 edit by yanjun 20170919
 		if(ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V1){
 			refundV1(activity, roster, userId, refoundOrderNo);
-		}else{
+		}else if (ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V2){
 			refundV2(activity, roster, userId, refoundOrderNo);
-		}
+		}else {
+		    Long orderId = refundV3(activity, roster, userId);
+		    if (orderId != null) {
+		        roster.setPayOrderId(orderId);
+            }
+        }
 
 		roster.setPayFlag(ActivityRosterPayFlag.REFUND.getCode());
 		roster.setRefundOrderNo(refoundOrderNo);
@@ -2109,7 +2122,7 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 
 	}
-    private void refundV3(Activity activity, ActivityRoster roster, Long userId){
+    private Long refundV3(Activity activity, ActivityRoster roster, Long userId){
         CreateOrderCommand createOrderCommand = new CreateOrderCommand();
         BigDecimal amount = activity.getChargePrice();
         if(amount == null){
@@ -2119,6 +2132,10 @@ public class ActivityServiceImpl implements ActivityService {
         createOrderCommand.setRefundOrderId(roster.getPayOrderId());
         createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
         createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        createOrderCommand.setBackUrl(backUrl);
         CreateOrderRestResponse refundResponse = payServiceV2.createRefundOrder(createOrderCommand);
 
         if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
@@ -2131,7 +2148,10 @@ public class ActivityServiceImpl implements ActivityService {
                     RentalServiceErrorCode.ERROR_REFUND_ERROR,
                     "bill  refound error");
         }
-
+        if (refundResponse.getResponse() != null) {
+            return refundResponse.getResponse().getOrderId();
+        }
+        return null;
     }
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
@@ -6252,6 +6272,47 @@ public class ActivityServiceImpl implements ActivityService {
             }
         }
         return checkPayeeIsUsefulResponse;
+    }
+
+    @Override
+    public void payNotify(OrderPaymentNotificationCommand cmd) {
+        ActivitySignupOrderV2CallBackHandler handler = new ActivitySignupOrderV2CallBackHandler();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
+        }
+        if(cmd == null || cmd.getPaymentErrorCode() != "200") {
+            LOGGER.error("payNotify fail, cmd={}", cmd);
+        }
+        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+        if(orderType != null) {
+            switch (orderType) {
+                case PURCHACE:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //支付成功
+                        handler.paySuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //支付失败
+                        handler.payFail(srvCmd);
+                    }
+                    break;
+                case REFUND:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //退款成功
+                        handler.refundSuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //退款失败
+                        handler.refundFail(srvCmd);
+                    }
+                    break;
+                default:
+                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+            }
+        }else {
+            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+        }
     }
 
 //	@Override
