@@ -1339,17 +1339,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     	cmd.setTargetName(data[j]);
                     }
                 }else if(headers[j].contains("客户手机号")){
-                	if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
-                        log.setErrorLog("客户手机号码格式不正确");
-                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }
-                	UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
-                    if(claimedIdentifierByToken!=null){
-                        cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
-                    }
-                	cmd.setCustomerTel(data[j]);
+                	if(data[j] != null && data[j] != "") {
+                		if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
+                            log.setErrorLog("客户手机号码格式不正确");
+                            log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
+                            datas.add(log);
+                            continue bill;
+                        }
+                    	UserIdentifier claimedIdentifierByToken = userProvider.findClaimedIdentifierByToken(namespaceId, data[j]);
+                        if(claimedIdentifierByToken!=null){
+                            cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
+                        }
+                    	cmd.setCustomerTel(data[j]);
+                	}
                 }else if(headers[j].contains("合同编号")){
                     cmd.setContractNum(data[j]);
                     List<Long> list = contractProvider.SimpleFindContractByNumber(data[j]);
@@ -1359,12 +1361,14 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         cmd.setContractId(list.get(0));
                     }
                 }else if(headers[j].contains("催缴手机号")){
-                    if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
-                        log.setErrorLog("催缴手机号码格式不正确");
-                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
-                        datas.add(log);
-                        continue bill;
-                    }
+                	if(data[j] != null && data[j] != "") {
+	                    if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
+	                        log.setErrorLog("催缴手机号码格式不正确");
+	                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
+	                        datas.add(log);
+	                        continue bill;
+	                    }
+                	}
                     cmd.setNoticeTel(data[j]);
                 }else if(j >= itemStartIndex && j <= itemEndIndex){// 收费项目
                     PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
