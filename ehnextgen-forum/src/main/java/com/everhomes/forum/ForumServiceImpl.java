@@ -411,6 +411,13 @@ public class ForumServiceImpl implements ForumService {
             activity.setEndTimeMs(endTime.getTime());
             changeList.add("time");
         }
+        if (newCmd.getAllDayFlag() != null && newCmd.getAllDayFlag() != oldCmd.getAllDayFlag()) {
+            oldCmd.setAllDayFlag(newCmd.getAllDayFlag());
+            activity.setAllDayFlag(newCmd.getAllDayFlag());
+            if (!changeList.contains("time")) {
+                changeList.add("time");
+            }
+        }
         if (!StringUtils.isEmpty(newCmd.getLocation()) && !newCmd.getLocation().equals(oldCmd.getLocation())) {
             oldCmd.setLatitude(newCmd.getLatitude());
             oldCmd.setLongitude(newCmd.getLongitude());
