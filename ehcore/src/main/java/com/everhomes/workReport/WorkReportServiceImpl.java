@@ -382,6 +382,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         if(member == null)
             return false;
         List<WorkReportScopeMapDTO> scopes = listWorkReportScopes(reportId);
+        if (scopes == null || scopes.size() == 0)
+            return false;
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
                 .map(p2 -> p2.getSourceId()).collect(Collectors.toList());

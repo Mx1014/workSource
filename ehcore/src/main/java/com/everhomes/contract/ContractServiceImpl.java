@@ -8,6 +8,8 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -137,6 +139,10 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -145,6 +151,9 @@ import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -153,10 +162,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
-public class ContractServiceImpl implements ContractService {
+public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContractServiceImpl.class);
 
@@ -276,6 +286,11 @@ public class ContractServiceImpl implements ContractService {
 	@Autowired
 	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
+	@Autowired
+	private BigCollectionProvider bigCollectionProvider;
+
+	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 //		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
 //		cmd.setNamespaceId(namespaceId);
@@ -292,8 +307,10 @@ public class ContractServiceImpl implements ContractService {
 //		}
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null,communityId);
 	}
-
-	@PostConstruct
+	
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+	//@PostConstruct
 	public void setup(){
 		String triggerName = ContractScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
 		String jobName = triggerName;
@@ -302,6 +319,12 @@ public class ContractServiceImpl implements ContractService {
 		scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ContractScheduleJob.class, null);
 	}
 
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -845,7 +868,7 @@ public class ContractServiceImpl implements ContractService {
 //		assetService.paymentExpectancies(command);
 
 		command.setIsEffectiveImmediately((byte)0);
-		assetService.paymentExpectancies_re_struct(command);
+		assetService.paymentExpectanciesCalculate(command);
 	}
 
 
@@ -1277,25 +1300,25 @@ public class ContractServiceImpl implements ContractService {
 					"contractNumber is already exist");
 		}
 		if(cmd.getContractStartDate() != null) {
-			contract.setContractStartDate(new Timestamp(cmd.getContractStartDate()));
+			contract.setContractStartDate(setToBegin(cmd.getContractStartDate()));
 		}
 		if(cmd.getContractEndDate() != null) {
-			contract.setContractEndDate(new Timestamp(cmd.getContractEndDate()));
+			contract.setContractEndDate(setToEnd(cmd.getContractEndDate()));
 		}
 		if(cmd.getDecorateBeginDate() != null) {
-			contract.setDecorateBeginDate(new Timestamp(cmd.getDecorateBeginDate()));
+			contract.setDecorateBeginDate(setToBegin(cmd.getDecorateBeginDate()));
 		}
 		if(cmd.getDecorateEndDate() != null) {
-			contract.setDecorateEndDate(new Timestamp(cmd.getDecorateEndDate()));
+			contract.setDecorateEndDate(setToEnd(cmd.getDecorateEndDate()));
 		}
 		if(cmd.getSignedTime() != null) {
 			contract.setSignedTime(new Timestamp(cmd.getSignedTime()));
 		}
 		if(cmd.getDepositTime() != null) {
-			contract.setDepositTime(new Timestamp(cmd.getDepositTime()));
+			contract.setDepositTime(setToEnd(cmd.getDepositTime()));
 		}
 		if(cmd.getDownpaymentTime() != null) {
-			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
+			contract.setDownpaymentTime(setToEnd(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
 		Double rentSize = dealContractApartments(contract, cmd.getApartments());
@@ -1314,6 +1337,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 		contract.setPaymentFlag(exist.getPaymentFlag());
 		contractSearcher.feedDoc(contract);
+		
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
@@ -1322,6 +1346,27 @@ public class ContractServiceImpl implements ContractService {
 		});
 
 		return ConvertHelper.convert(contract, ContractDetailDTO.class);
+	}
+
+	private Timestamp setToEnd(Long date) {
+		try{
+			Timestamp stp = new Timestamp(date);
+			LocalDateTime time = stp.toLocalDateTime();
+			return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MAX).format(dateTimeFormat));
+		}catch (Exception e){
+			return new Timestamp(date);
+		}
+	}
+
+	private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private Timestamp setToBegin(Long date) {
+		try{
+			Timestamp stp = new Timestamp(date);
+			LocalDateTime time = stp.toLocalDateTime();
+			return Timestamp.valueOf(LocalDateTime.of(time.toLocalDate(), LocalTime.MIN).format(dateTimeFormat));
+		}catch (Exception e){
+			return new Timestamp(date);
+		}
 	}
 
 	@Override
@@ -2077,21 +2122,51 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	/**
-	 * 每天早上2点50,自动同步合同信息
+	 * 每天早上4点50,自动同步合同信息
 	 * */
-	@Scheduled(cron = "1 50 2 * * ?")
+	@Scheduled(cron = "1 50 4 * * ?")
 	public void contractAutoSync() {
-		List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
-		if(communities != null) {
-			for(Community community : communities) {
-				SyncContractsFromThirdPartCommand command = new SyncContractsFromThirdPartCommand();
-				command.setNamespaceId(community.getNamespaceId());
-				command.setCommunityId(community.getId());
-				syncContractsFromThirdPart(command, false);
+		Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode() + System.currentTimeMillis(), "");
+		RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+		Map<String,String> runningMap  =new HashMap<>();
+		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()).tryEnter(() -> {
+			String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
+			runningMap.put(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), runningFlag);
+			if(StringUtils.isBlank(runningFlag))
+			redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), "executing", 5, TimeUnit.HOURS);
+		});
+		if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()))) {
+			List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
+			if (communities != null) {
+				for (Community community : communities) {
+					SyncContractsFromThirdPartCommand command = new SyncContractsFromThirdPartCommand();
+					command.setNamespaceId(community.getNamespaceId());
+					command.setCommunityId(community.getId());
+					syncContractsFromThirdPart(command, false);
+				}
 			}
-
 		}
 	}
+
+	private String getSyncTaskToken(RedisTemplate redisTemplate,String code) {
+		Map<String, String> map = makeSyncTaskToken(redisTemplate,code);
+		if(map == null) {
+			return null;
+		}
+		return  map.get(code);
+	}
+
+	private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate,String code) {
+		Object o = redisTemplate.opsForValue().get(code);
+		if(o != null) {
+			Map<String, String> keys = new HashMap<>();
+			keys.put(code, (String)o);
+			return keys;
+		} else {
+			return null;
+		}
+	}
+
 
 	@Override
 	public String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd, Boolean authFlag) {

@@ -46,13 +46,15 @@ public class FlowGraphBranchNormal extends FlowGraphBranch {
     @Override
     public FlowCaseState processSubFlowCaseStart(FlowCaseState ctx, FlowGraphNode nextNode) {
         Long parentId = ctx.getFlowCase().getId();
-        Long startLinkId = nextNode.getLinksIn().get(0).getFlowLink().getId();
+        Long startLinkId = nextNode.getLinksIn().iterator().next().getFlowLink().getId();
 
         // 查原来是否已经创建了flowCase
-        FlowCase subFlowCase = flowCaseProvider.findFlowCaseByStartLinkId(parentId, flowBranch.getOriginalNodeId(), flowBranch.getConvergenceNodeId(), startLinkId);
+        FlowCase subFlowCase = flowCaseProvider.findFlowCaseByStartLinkId(
+                parentId, flowBranch.getOriginalNodeId(), flowBranch.getConvergenceNodeId(), startLinkId);
         if (subFlowCase == null) {
             subFlowCase = ConvertHelper.convert(ctx.getFlowCase(), FlowCase.class);
-            subFlowCase.setId(null);
+            subFlowCase.setId(flowCaseProvider.getNextId());
+            subFlowCase.addPath(subFlowCase.getId());
             subFlowCase.setParentId(parentId);
             subFlowCase.setStartNodeId(flowBranch.getOriginalNodeId());
             subFlowCase.setEndNodeId(flowBranch.getConvergenceNodeId());
@@ -63,7 +65,7 @@ public class FlowGraphBranchNormal extends FlowGraphBranch {
 
             subFlowCase.setStepCount(0L);
             subFlowCase.setStatus(FlowCaseStatus.PROCESS.getCode());
-            flowCaseProvider.createFlowCase(subFlowCase);
+            flowCaseProvider.createFlowCaseHasId(subFlowCase);
         }
         subFlowCase.setStepCount(subFlowCase.getStepCount() + 1);
         return flowStateProcessor.prepareSubFlowCaseStart(ctx.getOperator(), subFlowCase);
@@ -87,6 +89,6 @@ public class FlowGraphBranchNormal extends FlowGraphBranch {
             return flowLink.getFlowLink();
         }
         List<FlowGraphLink> linksOut = toNode.getLinksOut();
-        return getEndFlowLink(ctx, toNode, linksOut.get(0).getFlowLink().getId());
+        return getEndFlowLink(ctx, toNode, linksOut.iterator().next().getFlowLink().getId());
     }
 }

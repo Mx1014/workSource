@@ -25,7 +25,17 @@ public class NoticeInfo implements Serializable{
     private Long appTemplateId;
     private Long msgTemplateId;
     private Boolean useTemplate;
-//    private List<NoticeObj> noticeObjs;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    //    private List<NoticeObj> noticeObjs;
     public Boolean isUseTemplate() {
         return useTemplate;
     }

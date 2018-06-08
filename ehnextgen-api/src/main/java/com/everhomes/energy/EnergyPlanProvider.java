@@ -27,4 +27,6 @@ public interface EnergyPlanProvider {
     List<EnergyPlanMeterMap> listMetersByEnergyPlan(Long planId);
     List<PlanMeter> listByEnergyMeter(Long meterId);
     Map<Long, EnergyPlanMeterMap> listMeterMapsByEnergyPlan(Long planId);
+
+    EnergyPlan listNewestAutoReadingPlans(Integer namespaceId,Long communityId);
 }

@@ -30,7 +30,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(clientHandler(), "/client");
         registry.addHandler(pusherHandler(), "/pusher");
-        registry.addHandler(interServerHandler(), "/interserver");;
+        registry.addHandler(interServerHandler(), "/interserver");
         registry.addHandler(aclinkHandler(), "/aclink/**").addInterceptors(aclinkInterceptors());
     }
 

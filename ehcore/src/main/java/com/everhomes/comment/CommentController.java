@@ -72,5 +72,20 @@ public class CommentController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /comment/getComment</b>
+     * <p>获取指定评论</p>
+     * @return 
+     */
+    @RequestMapping("getComment")
+    @RestReturn(value=GetCommentsResponse.class)
+    public RestResponse getComment(GetCommentCommand cmd) {
+    	GetCommentsResponse rsp = CommentService.getComment(cmd);
+        RestResponse response = new RestResponse(rsp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }
