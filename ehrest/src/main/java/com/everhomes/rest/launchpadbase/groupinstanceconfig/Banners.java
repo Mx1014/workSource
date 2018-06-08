@@ -8,25 +8,19 @@ import java.util.List;
 /**
  * <ul>
  *     <li>itemGroup: itemGroup</li>
- *     <li>wideRatio: 宽高比（宽）</li>
+ *     <li>widthRatio: widthRatio</li>
  *     <li>hightRatio: 宽高比（高）</li>
  *     <li>shadowFlag: shadowFlag</li>
- *     <li>paddingTop: paddingTop</li>
- *     <li>paddingLeft: paddingLeft</li>
- *     <li>paddingBottom: paddingBottom</li>
- *     <li>paddingRight: paddingRight</li>
+ *     <li>paddingFlag: paddingFlag</li>
  * </ul>
  */
 public class Banners {
 
     private String itemGroup;
-    private Long wideRatio;
+    private Long widthRatio;
     private Long hightRatio;
     private Byte shadowFlag;
-    private Integer paddingTop;
-    private Integer paddingLeft;
-    private Integer paddingBottom;
-    private Integer paddingRight;
+    private Integer paddingFlag;
 
     public String getItemGroup() {
         return itemGroup;
@@ -36,12 +30,12 @@ public class Banners {
         this.itemGroup = itemGroup;
     }
 
-    public Long getWideRatio() {
-        return wideRatio;
+    public Long getWidthRatio() {
+        return widthRatio;
     }
 
-    public void setWideRatio(Long wideRatio) {
-        this.wideRatio = wideRatio;
+    public void setWidthRatio(Long widthRatio) {
+        this.widthRatio = widthRatio;
     }
 
     public Long getHightRatio() {
@@ -60,36 +54,12 @@ public class Banners {
         this.shadowFlag = shadowFlag;
     }
 
-    public Integer getPaddingTop() {
-        return paddingTop;
+    public Integer getPaddingFlag() {
+        return paddingFlag;
     }
 
-    public void setPaddingTop(Integer paddingTop) {
-        this.paddingTop = paddingTop;
-    }
-
-    public Integer getPaddingLeft() {
-        return paddingLeft;
-    }
-
-    public void setPaddingLeft(Integer paddingLeft) {
-        this.paddingLeft = paddingLeft;
-    }
-
-    public Integer getPaddingBottom() {
-        return paddingBottom;
-    }
-
-    public void setPaddingBottom(Integer paddingBottom) {
-        this.paddingBottom = paddingBottom;
-    }
-
-    public Integer getPaddingRight() {
-        return paddingRight;
-    }
-
-    public void setPaddingRight(Integer paddingRight) {
-        this.paddingRight = paddingRight;
+    public void setPaddingFlag(Integer paddingFlag) {
+        this.paddingFlag = paddingFlag;
     }
 
     @Override
