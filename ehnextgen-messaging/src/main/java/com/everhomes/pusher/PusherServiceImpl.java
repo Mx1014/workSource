@@ -36,6 +36,8 @@ import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
+import com.everhomes.bundleid_mapper.BundleidMapper;
+import com.everhomes.bundleid_mapper.BundleidMapperProvider;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
@@ -124,6 +126,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
      */
     @Autowired
     DeveloperAccountInfoProvider developerAccountInfoProvider;
+    
+    /**
+     * add by huanglm for IOS pusher update
+     */
+    @Autowired
+    BundleidMapperProvider bundleidMapperProvider;
     
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -731,12 +739,23 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         	if(TYPE_PRODUCTION.equals(pusherServiceType)){
         		isProductionGateway = true ;
         	}
-        
+        //bundleId 为空的情况一般是旧应用的推送，为了兼容需要从映射表中取得bundleId（新应用bundleId不能为空）
         if(StringUtils.isBlank(bundleId)){
+        	String pidentyfy = destLogin.getPusherIdentify();
+        	if(StringUtils.isBlank(pidentyfy)){
+        		 LOGGER.error("bundleId is null  and pusherIdentify is null , Unable to establish a connection");
+                 return null;
+        	}
         	//获取域空间ID，该值无论如何都得有值
             Integer namespaceId = destLogin.getNamespaceId() ;
             namespaceId = UserContext.getCurrentNamespaceId(namespaceId); 
-        	bundleId=namespaceId +"";
+            BundleidMapper bmapper = bundleidMapperProvider.findBundleidMapperByParams(namespaceId, pidentyfy);
+            if(bmapper == null || StringUtils.isBlank(bmapper.getBundleId())){
+            	LOGGER.error("namespaceId = "+namespaceId+";identify = "+pidentyfy+"; can not find data or bundleId from mapper table ");
+                return null;
+            }else{
+            	bundleId = bmapper.getBundleId();
+            }       	
         }
         
     	//优先从http2ClientMaps 中   取，如没有再创建新的连接
