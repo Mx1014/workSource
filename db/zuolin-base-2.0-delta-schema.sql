@@ -100,6 +100,8 @@ CREATE TABLE `eh_launch_pad_indexs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+alter table eh_launch_pad_indexs add index namespace_id_index(`namespace_id`);
+
 -- 一卡通实现
 CREATE TABLE `eh_smart_card_keys` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
