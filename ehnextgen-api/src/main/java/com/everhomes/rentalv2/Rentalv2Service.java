@@ -296,17 +296,6 @@ public interface Rentalv2Service {
 
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
-	List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
-
-	ListBizPayeeAccountDTO getGeneralAccountSetting(GetGeneralAccountSettingCommand cmd);
-
-	void updateGeneralAccountSetting(UpdateGeneralAccountSettingCommand cmd);
-
-	GetResourceAccountSettingResponse getResourceAccountSetting(GetResourceAccountSettingCommand cmd);
-
-	void deleteResourceAccountSetting(Long id);
-
-	void updateResourceAccountSetting(UpdateResourceAccountSettingCommand cmd);
 
 	void test();
 
