@@ -3,6 +3,7 @@ package com.everhomes.sensitiveWord;
 
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
+import com.everhomes.rest.forum.ForumModuleType;
 import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sensitiveWord.InitSensitiveWordTrieCommand;
 import com.everhomes.rest.user.UserInfo;
@@ -107,7 +108,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
         SensitiveFilterRecord sensitiveFilterRecord = new SensitiveFilterRecord();
         sensitiveFilterRecord.setNamespaceId(cmd.getNamespaceId());
         sensitiveFilterRecord.setSensitiveWords(wordList.toString().substring(1,wordList.toString().length() - 1));
-        sensitiveFilterRecord.setAppId(cmd.getAppId());
+        sensitiveFilterRecord.setModuleId(ForumModuleType.fromCode(cmd.getModuleType()).getModuleId());
         UserInfo user = this.userService.getUserInfo(cmd.getCreatorUid());
         if (user != null) {
             sensitiveFilterRecord.setCreatorUid(cmd.getCreatorUid());

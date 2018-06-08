@@ -3,6 +3,9 @@ package com.everhomes.sensitiveWord;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.sensitiveWord.admin.GetSensitiveFilterRecordAdminCommand;
 import com.everhomes.rest.sensitiveWord.admin.ListSensitiveFilterRecordAdminCommand;
 import com.everhomes.rest.sensitiveWord.admin.ListSensitiveFilterRecordAdminResponse;
@@ -28,7 +31,7 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
     private SensitiveFilterRecordProvider sensitiveFilterRecordProvider;
 
     @Autowired
-    private ServiceModuleAppService serviceModuleAppService;
+    private ServiceModuleProvider serviceModuleProvider;
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -69,9 +72,9 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
         }
         SensitiveFilterRecord sensitiveFilterRecord = this.sensitiveFilterRecordProvider.getSensitiveFilterRecord(cmd.getId());
         SensitiveFilterRecordAdminDTO sensitiveFilterRecordAdminDTO = ConvertHelper.convert(sensitiveFilterRecord,SensitiveFilterRecordAdminDTO.class);
-        ServiceModuleApp serviceModuleApp = this.serviceModuleAppService.findReleaseServiceModuleAppByOriginId(sensitiveFilterRecord.getAppId());
-        if (serviceModuleApp != null) {
-            sensitiveFilterRecordAdminDTO.setAppName(serviceModuleApp.getName());
+        ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(sensitiveFilterRecord.getModuleId());
+        if (serviceModule != null) {
+            sensitiveFilterRecordAdminDTO.setModuleName(serviceModule.getName());
         }
         return sensitiveFilterRecordAdminDTO;
     }

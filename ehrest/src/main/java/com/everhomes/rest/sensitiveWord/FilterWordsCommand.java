@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: 域空间ID</li>
- *     <li>appId: 应用originID</li>
+ *     <li>moduleType: 模块类型/li>
  *     <li>creatorUid: 发布人的userId</li>
  *     <li>publishTime: 发布时间</li>
  *     <li>text: 需要检测的文本内容</li>
@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
 public class FilterWordsCommand {
 
     private Long namespaceId;
-    private Long appId;
+    private Byte moduleType;
     private Long creatorUid;
     private String publishTime;
     private String text;
@@ -28,12 +28,12 @@ public class FilterWordsCommand {
         this.namespaceId = namespaceId;
     }
 
-    public Long getAppId() {
-        return appId;
+    public Byte getModuleType() {
+        return moduleType;
     }
 
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setModuleType(Byte moduleType) {
+        this.moduleType = moduleType;
     }
 
     public Long getCreatorUid() {
