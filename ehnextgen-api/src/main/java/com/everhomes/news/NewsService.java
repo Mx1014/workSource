@@ -42,6 +42,8 @@ public interface NewsService {
 	AddNewsCommentResponse addNewsComment(AddNewsCommentCommand cmd);
 
 	ListNewsCommentResponse listNewsComment(ListNewsCommentCommand cmd);
+	
+	GetNewsCommentResponse getNewsComment(GetNewsCommentCommand cmd);
 
 	void deleteNewsComment(DeleteNewsCommentCommand cmd);
 

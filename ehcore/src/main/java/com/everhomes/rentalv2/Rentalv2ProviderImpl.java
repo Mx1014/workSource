@@ -276,7 +276,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.APPROVING.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.PAYINGFINAL.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
-		
+		if (!StringUtils.isBlank(rentalCell.getResourceNumber())){
+			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_NUMBER.eq(rentalCell.getResourceNumber()));
+		}
 		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HOUR) {
 			// 如果这个资源可以使用半天预约，要判断当前时间段在上午还是下午或者晚上
 			if (rentalTypes.contains(RentalType.HALFDAY.getCode()) || rentalTypes.contains(RentalType.THREETIMEADAY.getCode())) {

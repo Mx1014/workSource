@@ -1,13 +1,19 @@
 package com.everhomes.controller;
 
 import com.everhomes.rest.message.MessageRecordDto;
-import com.everhomes.rest.message.MessageRecordStatus;
 import com.everhomes.rest.message.PersistMessageRecordCommand;
 import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -26,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
-public class WebSocketSessionProxy {
+public class WebSocketSessionProxy implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WebSocketSessionProxy.class);
 
@@ -45,7 +51,15 @@ public class WebSocketSessionProxy {
         return queue;
     }
 
-    @PostConstruct
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180525
+    //@PostConstruct
     public void setup() {
         // 每次满一百条就持久化一次
         // Worker worker = new Worker(100);

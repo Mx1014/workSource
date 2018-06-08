@@ -25,4 +25,5 @@ public interface FlowEvaluateItemProvider {
 
 	void createFlowEvaluateItem(List<FlowEvaluateItem> objs);
 
+    List<FlowEvaluateItem> findFlowEvaluateItemsByFlowCase(Long flowCaseId);
 }

@@ -30,6 +30,8 @@ import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.TaskScheduler;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -49,7 +52,7 @@ import java.util.stream.Collectors;
  *
  */
 @Component
-public class MessagingServiceImpl implements MessagingService {
+public class MessagingServiceImpl implements MessagingService, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagingServiceImpl.class);
 
 //    private static BlockingEventStored blockingEventStored = new BlockingEventStored();
@@ -101,7 +104,9 @@ public class MessagingServiceImpl implements MessagingService {
 
     private final static String MESSAGE_INDEX_ID = "indexId";
 
-    @PostConstruct
+    //升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         if(handlers != null) {
             handlers.forEach((handler) -> {
@@ -120,6 +125,13 @@ public class MessagingServiceImpl implements MessagingService {
             Map<String, Object> map = new HashMap<>();
             map.put("stored",stored);
             taskScheduler.scheduleWithFixedDelay(()-> { setExpireKey(stored); }, 60*1000);
+        }
+    }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
         }
     }
     
@@ -167,6 +179,7 @@ public class MessagingServiceImpl implements MessagingService {
                 record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
                 record.setIndexId(r.getMeta().get(MESSAGE_INDEX_ID) != null ? Long.valueOf(r.getMeta().get(MESSAGE_INDEX_ID)) : 0);
                 record.setMeta(r.getMeta());
+                record.setCreateTime(new Timestamp(System.currentTimeMillis()));
                 MessagePersistWorker.getQueue().offer(record);
             }
         }
