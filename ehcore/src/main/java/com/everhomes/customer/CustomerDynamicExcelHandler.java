@@ -877,18 +877,18 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
 
         if (flag) {
+            if (null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()) {
+                String geohash = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
+                enterpriseCustomer.setGeohash(geohash);
+            }
             if (StringUtils.isNotBlank(enterpriseCustomer.getName())) {
                 List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
                 if (customers != null && customers.size() > 0) {
                     for (EnterpriseCustomer customer : customers) {
                         updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
                     }
+                 return failedNumber ;
                 }
-            }
-
-            if (null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()) {
-                String geohash = GeoHashUtils.encode(enterpriseCustomer.getLatitude(), enterpriseCustomer.getLongitude());
-                enterpriseCustomer.setGeohash(geohash);
             }
             customerProvider.createEnterpriseCustomer(enterpriseCustomer);
 
@@ -1046,14 +1046,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
                 LOGGER.error("invoke compare error :{}", e);
             }
-            if ((exist.getOrganizationId() == null || exist.getOrganizationId() == 0) && StringUtils.isNotBlank(customerAddressString)) {
+            if (exist.getOrganizationId() == null || exist.getOrganizationId() == 0) {
+                if(StringUtils.isNotBlank(customerAddressString)){
                 //此种场景有企业管理员 需要自动加入organizationMembers 表 用于后面用户注册激活
                 syncCustomerInfoIntoOrganization(enterpriseCustomer);
-            } else if (exist.getOrganizationId() != null && exist.getOrganizationId() == 0) {
-                //单纯的保持数据一致
-                OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
-                exist.setOrganizationId(organizationDTO.getId());
-                syncCustomerBasicInfoToOrganziation(exist);
+                }else {
+                    //单纯的保持数据一致
+                    OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                    exist.setOrganizationId(organizationDTO.getId());
+                    syncCustomerBasicInfoToOrganziation(exist);
+                }
             }
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
