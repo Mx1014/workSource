@@ -111,6 +111,8 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
@@ -139,7 +141,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
-public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber {
+public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
     
     @Autowired
@@ -301,11 +303,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private final static String URL_GETAPPINFOS = "http://sdk.api.jia-r.com/projectManage/getAppInfos";
     private final static String URL_GETKEYU = "http://sdk.api.jia-r.com/projectManage/getKeyU";
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         Security.addProvider(new BouncyCastleProvider());
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUserIdentifiers.class, null);
         localBus.subscribe(subcribeKey, this);
+    }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
     
     private AlipayClient getAlipayClient() {
@@ -4753,7 +4764,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
 	@Override
-	public void excuteMessage(String msg) {
+	public void excuteMessage(AclinkWebSocketMessage cmd) {
+		String msg = cmd.getPayload();
+		String uuid = cmd.getUuid();
+		DoorAccess door = doorAccessProvider.queryDoorAccessByUuid(uuid);
+		if(door == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND,
+                    "sender not found ");
+		}
 		byte[] msgArr = Base64.decodeBase64(msg);
 		byte cmdNumber = msgArr[0];
 		if(cmdNumber == 0x10){
@@ -4765,6 +4783,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(authId);
 				if (doorAuth != null && doorAuth.getStatus().equals(DoorAuthStatus.VALID.getCode())
 						&& doorAuth.getValidAuthAmount() > 0 && doorAuth.getValidEndMs() > System.currentTimeMillis()) {
+					if(doorAuth.getDoorId().longValue() != door.getId().longValue() && doorAuth.getDoorId().longValue() != door.getGroupid().longValue()){
+						throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR,
+		                        "sender and msg not pair ");
+					}
 					doorAuth.setValidAuthAmount(doorAuth.getValidAuthAmount() - 1);
 					doorAuthProvider.updateDoorAuth(doorAuth);
 					validResult = "true";

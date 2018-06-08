@@ -10,8 +10,10 @@ import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerService;
@@ -26,9 +28,11 @@ import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
@@ -178,7 +182,16 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private LocaleTemplateProvider localeTemplateProvider;
 
+    @Autowired
+    private ImportFileService importFileService;
 
+    @Autowired
+    private PortalService portalService;
+    
+    @Autowired
+    private ContentServerService contentServerService;
+    @Autowired
+    private PaymentService paymentService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -220,7 +233,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
-        //校验查看的权限
+       //校验查看的权限
         checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
         ListBillsResponse response = new ListBillsResponse();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
@@ -294,6 +307,10 @@ public class AssetServiceImpl implements AssetService {
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
                 Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                //携带了namespaceId
+                if(noticeInfo.getNamespaceId() != null){
+                    nameSpaceId = noticeInfo.getNamespaceId();
+                }
                 injectSmsVars(noticeInfo, variables,nameSpaceId);
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
@@ -387,7 +404,8 @@ public class AssetServiceImpl implements AssetService {
                 }
                 String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
-                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+//                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                Integer nameSpaceId = noticeInfo.getNamespaceId();
                 injectSmsVars(noticeInfo, variables,nameSpaceId);
                 String templateLocale = UserContext.current().getUser().getLocale();
                 int templateId = SmsTemplateCode.PAYMENT_NOTICE_CODE;
@@ -659,6 +677,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
                     info.setDateStr(dto.getDateStr());
+                    info.setNamespaceId(999971);
                     Long tid = 0l;
                     String targeType=null;
                     Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
@@ -776,18 +795,102 @@ public class AssetServiceImpl implements AssetService {
 //            }
             detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
             detail.setTargetName(dto.getTargetName());
-            detail.setDateStr(dto.getDateStr());
+            detail.setDateStr(dto.getDateStr()); 
             // 增加发票单号 by wentian 2018/4/27
             detail.setInvoiceNum(dto.getInvoiceNum());
+            // 增加账单开始时间、账单结束时间、楼栋名称、门牌名称、客户手机号
+            detail.setDateStrBegin(dto.getDateStrBegin());
+            detail.setDateStrEnd(dto.getDateStrEnd());
+            //detail.setBuildingName(dto.getBuildingName());
+            //detail.setApartmentName(dto.getApartmentName());
+            detail.setAddresses(dto.getAddresses());
+            detail.setCustomerTel(dto.getCustomerTel());
             dataList.add(detail);
         }
 
-        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","status", "invoiceNum"};
-        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态"
-                , "发票单号"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20};
+        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","addresses","amountReceivable","amountReceived","amountOwed","status","invoiceNum"};
+        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋门牌","应收(元)","已收(元)","欠收(元)","缴费状态", "发票单号"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+    }
+    
+    public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(Long.parseLong("5000"));
+        }
+        ListPaymentBillResp result;
+		try {
+			result = paymentService.listPaymentBill(cmd);
+			List<PaymentBillResp> dtos = result.getList();
+	        Calendar c = newClearedCalendar();
+	        int year = c.get(Calendar.YEAR);
+	        int month = c.get(Calendar.MONTH);
+	        int date = c.get(Calendar.DATE);
+	        int hour = c.get(Calendar.HOUR_OF_DAY);
+	        int minute = c.get(Calendar.MINUTE);
+	        int second = c.get(Calendar.SECOND);
+	        String fileName = "payment"+year+month+date+hour+minute+ second;
+
+	        List<exportPaymentOrdersDetail> dataList = new ArrayList<>();
+	        //组装datalist来确定propertyNames的值
+	        for(int i = 0; i < dtos.size(); i++) {
+	        	List<PaymentOrderBillDTO> paymentOrderBillDTOs = dtos.get(i).getChildren();
+	        	if(paymentOrderBillDTOs != null) {
+	        		for(int j = 0;j < paymentOrderBillDTOs.size();j++) {
+		        		PaymentOrderBillDTO dto = paymentOrderBillDTOs.get(j);
+			        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
+			            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+			            detail.setBillGroupName(dto.getBillGroupName());
+			            //组装所有的收费项信息
+			            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
+			            String billItemListMsg = "";
+			            if(billItemDTOList != null) {
+			            	for(int k = 0; k < billItemDTOList.size();k++) {
+			            		BillItemDTO billItemDTO = billItemDTOList.get(k);
+			            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
+			            	}
+			            }
+			            detail.setBillItemListMsg(billItemListMsg);
+			            detail.setTargetName(dto.getTargetName());
+			            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
+			            detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
+			            switch (dto.getPaymentType()) {
+							case 0:
+								detail.setPaymentType("微信");
+								break;
+							case 1:
+								detail.setPaymentType("支付宝");
+								break;
+							case 2:
+								detail.setPaymentType("对公转账");
+								break;
+							default:
+								break;
+						}
+			            detail.setAmountReceived(dto.getAmountReceived());
+			            detail.setAmountReceivable(dto.getAmountReceivable());
+			            detail.setAmoutExemption(dto.getAmountExemption());
+			            detail.setAmountSupplement(dto.getAmountSupplement());
+			            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
+			            detail.setPayTime(dto.getPayTime());
+			            detail.setPayerTel(dto.getPayerTel());
+			            detail.setPayerName(dto.getPayerName());
+			            detail.setAddresses(dto.getAddresses());
+			            dataList.add(detail);
+		        	}
+	        	}
+	        }
+	        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
+	        		"amountReceived","amountReceivable","amoutExemption","amountSupplement","paymentOrderNum","payTime","payerTel","payerName","addresses"};
+	        String[] titleName ={"账单时间","账单组","收费项信息","客户名称","客户类型","订单状态","支付方式",
+	        		"实收金额","应收金额","减免","增收","订单编号","缴费时间","缴费人电话","缴费人","楼栋门牌"};
+	        int[] titleSize = {40,20,20,20,20,20,20,20,20,20,20,30,20,20,20,40};
+	        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+	        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+		} catch (Exception e) {
+			LOGGER.error("exportOrders cmd={}, Exception={}", cmd, e);
+		}
     }
 
     @Override
@@ -808,7 +911,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
-        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTO(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName(), cmd.getInvoiceNum());
+        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTO(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName(), cmd.getInvoiceNum(), cmd.getNoticeTel());
     }
 
     @Override
@@ -2673,6 +2776,8 @@ public class AssetServiceImpl implements AssetService {
                     info.setPhoneNums(b.getNoticetel());
                     info.setTargetType(b.getTargetType());
                     info.setTargetId(b.getTargetId());
+                    // 增加域空间信息
+                    info.setNamespaceId(b.getNamespaceId());
                     noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
                     List<NoticeMemberIdAndContact> userIds = new ArrayList<>();
@@ -2800,6 +2905,9 @@ public class AssetServiceImpl implements AssetService {
         Integer namespaceId = cmd.getNamespaceId();
         Byte hasContractView = 1;
         Byte hasPay = 1;
+        //是否显示上传凭证按钮（add by tangcen）
+        Byte hasUploadCertificate = 0;
+
         Boolean[] remarkCheckList = new Boolean[3];
         remarkCheckList[0] = false;
         remarkCheckList[1] = false;
@@ -2827,6 +2935,8 @@ public class AssetServiceImpl implements AssetService {
                 hasContractView = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.PAY.getCode())){
                 hasPay = view.getHasView();
+            }else if(view.getViewItem().equals(PaymentViewItems.CERTIFICATE.getCode())){
+                hasUploadCertificate = view.getHasView();
             }
         }
         //用数据库配置的方式替代了
@@ -2857,6 +2967,7 @@ public class AssetServiceImpl implements AssetService {
 //        }
         dto.setHasPay(hasPay);
         dto.setHasContractView(hasContractView);
+        dto.setHasUploadCertificate(hasUploadCertificate);
         return dto;
     }
 
@@ -2959,7 +3070,7 @@ public class AssetServiceImpl implements AssetService {
     }
     @Override
     public void modifySettledBill(ModifySettledBillCommand cmd) {
-        assetProvider.modifySettledBill(cmd.getBillId(), cmd.getInvoiceNum());
+        assetProvider.modifySettledBill(cmd.getBillId(), cmd.getInvoiceNum(), cmd.getNoticeTel());
     }
 
     @Override
@@ -3051,6 +3162,8 @@ public class AssetServiceImpl implements AssetService {
                     info.setPhoneNums(b.getNoticetel());
                     info.setTargetType(b.getTargetType());
                     info.setTargetId(b.getTargetId());
+                    // 增加域空间信息
+                    info.setNamespaceId(b.getNamespaceId());
                     noticeInfoList.add(info);
                     //待发送人员如如果是定义好的，之类就转成个人，再来一个info
                     List<NoticeMemberIdAndContact> userIds = new ArrayList<>();
@@ -4166,7 +4279,6 @@ public class AssetServiceImpl implements AssetService {
                                     sendMessageToUser(contact.getTargetId(), content);
                                 }
                             }
-
                         }
                     }
                 }
@@ -4323,4 +4435,76 @@ public class AssetServiceImpl implements AssetService {
         }
         return fieldMap;
     }
+
+	//线下缴费场景，显示付费凭证图片
+	@Override
+	public UploadCertificateInfoDTO listUploadCertificates(ListUploadCertificatesCommand cmd) {
+		UploadCertificateInfoDTO uploadCertificateInfoDTO = new UploadCertificateInfoDTO();
+		//获取账单对应的各凭证图片信息
+		List<PaymentBillCertificate> paymentBillCertificateList = assetProvider.listUploadCertificates(cmd.getBillId());
+		List<UploadCertificateDTO> uploadCertificateDTOList = paymentBillCertificateList.stream().map(r->{
+			UploadCertificateDTO dto = new UploadCertificateDTO();
+			dto.setUri(r.getCertificateUri());
+			//根据uri来获取url
+			String url = contentServerService.parserUri(dto.getUri(),EntityType.DOMAIN.getCode(),cmd.getBillId());
+			dto.setUrl(url);
+			return dto;
+		}).collect(Collectors.toList());
+		uploadCertificateInfoDTO.setUploadCertificateDTOList(uploadCertificateDTOList);
+		//获取账单对应的上传凭证时的留言
+		String certificateNote = assetProvider.getCertificateNote(cmd.getBillId());
+		uploadCertificateInfoDTO.setCertificateNote(certificateNote);
+		
+		return uploadCertificateInfoDTO;
+	}
+	
+	//线下缴费场景，上传缴费凭证
+	@Override
+	public UploadCertificateInfoDTO uploadCertificate(UploadCertificateCommand cmd) {
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("upload certificate for bill: billId = {}", cmd.getBillId());
+        }
+		//除去前端传过来的空uri字符串
+		if (cmd.getCertificateUris()!=null) {
+			List<String> uris = cmd.getCertificateUris();
+			Iterator<String> it = uris.iterator();
+			while (it.hasNext()) {
+				String uri = (String) it.next();
+				if (org.springframework.util.StringUtils.isEmpty(uri)) {
+					it.remove();
+				}
+			}
+		}
+		//一次最多上传6张缴费凭证图片(范围为1-6张)
+		if(cmd.getCertificateUris().size()==0 || cmd.getCertificateUris().size()>6){
+			throw RuntimeErrorException.errorWith(AssetServiceErrorCode.SCOPE, 
+					AssetServiceErrorCode.UPLOAD_CERTIFICATES_NUM_ERROR, "upload certificates num is out of range");
+		}
+		//判断该账单（paymentBill）已存在，若账单不存在则不做操作
+		PaymentBills paymentBill = assetProvider.findPaymentBillById(cmd.getBillId());
+		if (paymentBill==null) {
+			throw RuntimeErrorException.errorWith(AssetServiceErrorCode.SCOPE, 
+					AssetServiceErrorCode.ASSET_BILL_NOT_EXIST, "the bill does not exist");
+		}
+		//更新数据库中缴费凭证的相关信息
+		assetProvider.updatePaymentBillCertificates(cmd.getBillId(),cmd.getCertificateNote(),cmd.getCertificateUris());
+		//重新查询更新后的缴费凭证图片的uri和url传给前端
+		ListUploadCertificatesCommand listUploadCertificatesCommand = new ListUploadCertificatesCommand();
+		listUploadCertificatesCommand.setBillId(cmd.getBillId());
+		UploadCertificateInfoDTO uploadCertificateInfoDTO = listUploadCertificates(listUploadCertificatesCommand);		
+		
+		return uploadCertificateInfoDTO;	
+	}
+	
+	public JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd) {
+		JudgeAppShowPayResponse judgeAppShowPayResponse = new JudgeAppShowPayResponse();
+		String appShowPay = configurationProvider.getValue(cmd.getNamespaceId(), ConfigConstants.ASSET_DINGFENGHUI_APPSHOWPAY,""); 
+		//如果根据域空间找不到，那么默认为2：全部缴
+		if(appShowPay.isEmpty()) {
+			judgeAppShowPayResponse.setAppShowPay(new Byte("2"));
+		}else {
+			judgeAppShowPayResponse.setAppShowPay(new Byte(appShowPay));
+		}
+		return judgeAppShowPayResponse;
+	}
 }

@@ -17,6 +17,13 @@ public class exportPaymentBillsDetail {
 
     private String contractNum;
     private String invoiceNum;
+    
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private String buildingName;
+    private String apartmentName;
+    private String customerTel;
+    private String addresses;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -98,5 +105,54 @@ public class exportPaymentBillsDetail {
         this.status = status;
     }
 
+
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
+	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
+	}
 
 }

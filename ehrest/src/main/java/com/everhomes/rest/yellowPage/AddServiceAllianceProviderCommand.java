@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
 * <li>mail: 企业邮箱</li>
 * <li>contactNumber: 号码</li>
 * <li>contactName: 姓名</li>
+* <li>currentPMId: 校验权限时填管理公司id</li>
 * </ul>
 *  @author
 *  huangmingbo 2018年5月17日
@@ -52,6 +53,9 @@ public class AddServiceAllianceProviderCommand {
 	
 	@NotNull
 	private String contactName;
+	
+	@NotNull
+	private Long currentPMId;
 	
 
 	@Override
@@ -137,6 +141,14 @@ public class AddServiceAllianceProviderCommand {
 
 	public void setType(Long type) {
 		this.type = type;
+	}
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
 	}
 
 }

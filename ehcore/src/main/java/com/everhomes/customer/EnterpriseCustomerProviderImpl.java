@@ -2085,4 +2085,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .and(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.in(addressIds))
                 .execute();
     }
+
+    @Override
+    public void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .set(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE, OrganizationMemberTargetType.USER.getCode())
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
+                .execute();
+    }
 }

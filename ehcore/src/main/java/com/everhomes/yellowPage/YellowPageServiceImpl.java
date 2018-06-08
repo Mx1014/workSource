@@ -14,6 +14,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.FlowAutoStepDTO;
@@ -33,8 +34,10 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.news.Comment;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.handler.Utils;
@@ -46,6 +49,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.comment.ListCommentsResponse;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.common.TrueOrFalseFlag;
@@ -66,6 +70,9 @@ import com.everhomes.rest.general_approval.GeneralFormRenderType;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
 import com.everhomes.rest.general_approval.GeneralFormValidatorType;
+import com.everhomes.rest.news.GetNewsCommentCommand;
+import com.everhomes.rest.news.GetNewsCommentResponse;
+import com.everhomes.rest.news.NewsCommentDTO;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
@@ -142,6 +149,9 @@ import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhNewsComment;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceComments;
+import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -175,6 +185,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -755,9 +767,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040510L, cmd.getAppId(), null,0L);//样式设置权限
-		}
+
 		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(null,null,cmd.getType());
 		if (null == sa){
 			LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = " + cmd.getType()); 
@@ -796,8 +806,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceListResponse getServiceAllianceEnterpriseList(
 			GetServiceAllianceEnterpriseListCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040520L, cmd.getAppId(), null,0L);//服务管理权限
+		if(cmd.getAppId()!=null ){
+			checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 		}
 		if(null != cmd.getCommunityId()) {
 			cmd.setOwnerId(cmd.getCommunityId());
@@ -819,45 +829,28 @@ public class YellowPageServiceImpl implements YellowPageService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getNextPageAnchor());
-//        List<YellowPage> yellowPages = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
-//        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
         
-        //add by dengs .20170428 如果是客户端来，将community所在organaization 的服务联盟也查询出来。
         List<ServiceAlliances> sas = null;
         final ServiceAllianceSourceRequestType sourceRequestType = ServiceAllianceSourceRequestType.fromCode(cmd.getSourceRequestType());
         //如果为CLIENT，或者空值，认为是客户端
-        if(ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null){
-        	 List<Organization> organizationList= this.organizationProvider.findOrganizationByCommunityId(cmd.getOwnerId());
-        	 if(organizationList!=null &&organizationList.size()>0){
-        		 //目前只考虑一个物业管理公司的情况。
-        		 Organization pm = organizationList.get(0);
-        		 sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
-        	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(),pm.getId(),ServiceAllianceBelongType.ORGANAIZATION.getCode());
-        		 for (ServiceAlliances serviceAlliance : sas) {
-        			ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(serviceAlliance.getOwnerType());
-					if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
-						//传给客户端的ownertype,ownerid 都改成小区，兼容老版本
-						serviceAlliance.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-						serviceAlliance.setOwnerId(cmd.getOwnerId());
-					}
-				}
-        	 }
-        	
-        }else{
-        	if(cmd.getParentId()==null){
-        		return null;
-			}
-        	Condition condition =  DSL.trueCondition();
-			if (ServiceAllianceBelongType.ORGANAIZATION.getCode().equals(cmd.getOwnerType())) {
-				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-				for (OrganizationCommunity orgcommunity : communityList) {
-					condition = condition.or(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+orgcommunity.getCommunityId()+"%"));
-				}
-				condition = condition.or(Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all"));
-			}
-        	sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
- 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(), cmd.getDisplayFlag(),condition );
+		if (ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null) {
 
+			sas = this.yellowPageProvider.queryServiceAllianceByScene(locator, pageSize + 1, cmd.getOwnerType(),
+					cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+			
+			for (ServiceAlliances serviceAlliance : sas) {
+				ServiceAllianceBelongType belongType = ServiceAllianceBelongType
+						.fromCode(serviceAlliance.getOwnerType());
+				if (belongType == ServiceAllianceBelongType.ORGANAIZATION) {
+					// 传给客户端的ownertype,ownerid 都改成小区，兼容老版本
+					serviceAlliance.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+					serviceAlliance.setOwnerId(cmd.getOwnerId());
+				}
+			}
+
+		}else{
+        	sas = this.yellowPageProvider.queryServiceAllianceAdmin(locator, pageSize + 1,cmd.getOwnerType(), 
+ 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(), cmd.getDisplayFlag());
         }
 
         if(null == sas || sas.size() == 0)
@@ -1143,6 +1136,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public void updateServiceAllianceEnterprise(
 			UpdateServiceAllianceEnterpriseCommand cmd) {
 		
+		//校验权限
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
+		
 		ServiceAlliances serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliances.class);
 
 		if(null != serviceAlliance.getCategoryId()) {
@@ -1324,6 +1320,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public void addTarget(AddNotifyTargetCommand cmd) {
 		
+		//校验权限
+		checkPrivilege(PrivilegeType.INFO_NOTIFY, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
+		
 		ServiceAllianceNotifyTargets isExist = this.yellowPageProvider.findNotifyTarget(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getCategoryId(), cmd.getContactType() , cmd.getContactToken());
 		if(isExist != null) {
@@ -1349,6 +1348,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void deleteNotifyTarget(DeleteNotifyTargetCommand cmd) {
+		
+		//权限限制
+		checkPrivilege(PrivilegeType.INFO_NOTIFY, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 
 //		ServiceAllianceNotifyTargets target = verifyNotifyTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getId());
 		this.yellowPageProvider.deleteNotifyTarget(cmd.getId());
@@ -1376,8 +1378,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public ListNotifyTargetsResponse listNotifyTargets(
 			ListNotifyTargetsCommand cmd) {
 		
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040530L, cmd.getAppId(), null,0L);//消息通知权限
+		if(cmd.getAppId()!=null ){
+			checkPrivilege(PrivilegeType.INFO_NOTIFY, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 		}
 		ListNotifyTargetsResponse response = new ListNotifyTargetsResponse();
 		
@@ -2503,6 +2505,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	 * */
 	public ListServiceAllianceProvidersResponse listServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd) {
 
+		if (null != cmd.getAppId()) {
+			checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
+		}
+		
 		if (cmd.getNamespaceId() == null) {
 			cmd.setNamespaceId(UserContext.current().getNamespaceId());
 		}
@@ -2521,6 +2527,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Override
 	public void exportServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd, HttpServletResponse response) {
+		
+		//校验权限
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 
 		// 获取记录
 		List<ServiceAllianceProvid> providerList = allianceProvidProvider.listServiceAllianceProviders(
@@ -2638,8 +2647,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public void addServiceAllianceProvider(AddServiceAllianceProviderCommand cmd) {
 
 		// 校验权限
-
-		// 检查合法性
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 
 		// 获取参数
 		ServiceAllianceProvid provider = ConvertHelper.convert(cmd, ServiceAllianceProvid.class);
@@ -2660,13 +2668,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 		
 		// 校验权限
-		
-
-		// 检查合法性
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), provider.getOwnerId());
 		
 		//删除
 		allianceProvidProvider.deleteServiceAllianceProvid(provider);
-		
 		
 		return;
 		
@@ -2683,6 +2688,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 
 		// 校验权限
+		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), provider.getOwnerId());
 
 		// 检查合法性
 
@@ -3193,18 +3199,119 @@ public class YellowPageServiceImpl implements YellowPageService {
 	/**
 	 * 校验当前请求是否符合权限
 	 * @param privilegeType
-	 * @param currentOrgId
+	 * @param currentPMId
 	 * @param appId
 	 * @param checkOrgId
 	 * @param checkCommunityId
 	 */
-	private void checkPrivilege(PrivilegeType privilegeType, Long currentOrgId, Long appId,
+	public void checkPrivilege(PrivilegeType privilegeType, Long currentPMId, Long appId,
 			Long checkCommunityId) {
 		if (configProvider.getBooleanValue("privilege.community.checkflag", true)) {
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), currentOrgId,
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), currentPMId,
 					privilegeType.getCode(), appId, null, checkCommunityId);
 		}
 	}
+	
+	
+	/**   
+	* @Function: YellowPageServiceImpl.java
+	* @Description: 将服务联盟的数据更新为community
+	* 主要涉及到service_alliance表
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月1日 下午2:19:10 
+	*
+	*/
+	@Override
+	public String transferServiceToCommunity() {
+		
+		StringBuilder failed = new StringBuilder();
+		StringBuilder returnString = new StringBuilder();
+		
+		
+		// 进行数据迁移
+		dbProvider.execute(r-> {
+			
+			int total = 0;
+			int ignoreCnt = 0;
+			int rangeNotAll = 0;
+			int rangeIsAll = 0;
+			
+			String fixedOwnerType = ServiceAllianceBelongType.COMMUNITY.getCode();
+			// 读取每一条service_alliance status为2的记录。
+			List<ServiceAlliances> saList = queryAllServiceAlliances();
+			if (CollectionUtils.isEmpty(saList)) {
+				return null;
+			}
+			
+			for (ServiceAlliances sa : saList) {
+				if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(sa.getOwnerType())
+						|| null == sa.getParentId() 
+						|| 0 == sa.getParentId()) {
+					// 如果已经是community，或者parentId为0，不做修改
+					ignoreCnt++;
+					continue;
+				}
+				
+				String range = sa.getRange();
+				Long ownerId = null;
+				if (!StringUtils.isEmpty(range) && !StringUtils.isEmpty(range = range.trim()) && !"all".equals(range)) {
+					//查看range，如果有范围，取第一个communityId
+					String[] idStrArray =  range.split(",");
+					ownerId = Long.parseLong(idStrArray[0]);
+					rangeNotAll++;
+				} else {
+					//如果range为all或者为空（异常情况），则根据公司id去获取community
+					OrganizationCommunityRequest rq = organizationProvider.getOrganizationCommunityRequestByOrganizationId(sa.getOwnerId());
+					if (null == rq) {
+						failed.append(sa.getId()+",");
+						continue;
+					}
+					
+					ownerId = rq.getCommunityId();
+					rangeIsAll++;
+				}
+				
+				//更新该记录
+				sa.setOwnerType(fixedOwnerType);
+				sa.setOwnerId(ownerId);
+				yellowPageProvider.updateServiceAlliances(sa);
+			}
+
+			// 获取一些重要信息
+			returnString.append("|ignore:"+ignoreCnt);
+			returnString.append("|notAll:"+rangeNotAll);
+			returnString.append("|All:"+rangeIsAll);
+			returnString.append("|total:"+saList.size());
+			
+			return null;
+			
+		});
+		
+		if (failed.length() > 0) {
+			int getLen = failed.length() > 1000 ? failed.length() : failed.length();
+			returnString.append("|failed:"+failed.toString().substring(0, getLen));
+		}
+		
+		return returnString.toString();
+	}
+	
+	/**   
+	* @Function: YellowPageServiceImpl.java
+	* @Description: 迁移数据用，获取所有的Alliance数据
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月1日 下午5:16:44 
+	*
+	*/
+	private List<ServiceAlliances> queryAllServiceAlliances() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+		return query.fetchInto(ServiceAlliances.class);
+	}
+	
 	
 
 }

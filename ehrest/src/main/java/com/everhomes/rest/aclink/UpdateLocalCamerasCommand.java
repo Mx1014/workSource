@@ -22,6 +22,7 @@ public class UpdateLocalCamerasCommand {
 	private Long doorAccessId;
 	private Byte enterStatus;
 	private String keyCode;
+	private String account;
 
 	public String getKeyCode() {
 		return keyCode;
@@ -77,6 +78,14 @@ public class UpdateLocalCamerasCommand {
 
 	public void setEnterStatus(Byte enterStatus) {
 		this.enterStatus = enterStatus;
+	}
+
+	public String getAccount() {
+		return account;
+	}
+
+	public void setAccount(String account) {
+		this.account = account;
 	}
 
 	@Override

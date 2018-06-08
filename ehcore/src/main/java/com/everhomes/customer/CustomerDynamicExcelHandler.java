@@ -5,6 +5,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.dynamicExcel.DynamicColumnDTO;
 import com.everhomes.dynamicExcel.DynamicExcelHandler;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
@@ -68,6 +69,7 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -151,6 +153,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private ImportFileService importFileService;
+
+    @Autowired
+    private DbProvider dbProvider;
 
 
     @Override
@@ -1027,16 +1032,22 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
-            enterpriseCustomer.setId(exist.getId());
-            if (exist.getOrganizationId() == null || exist.getOrganizationId() == 0) {
-                syncCustomerInfoIntoOrganization(exist);
+            try {
+                createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
+            } catch (Exception e) {
+                //todo:接口过时 没有批量删除
+                LOGGER.error("create enterprise admin error :{}", e);
             }
+            enterpriseCustomer.setId(exist.getId());
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             //对比
             try {
                 compareCustomerFieldValues(exist, enterpriseCustomer);
             } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
                 LOGGER.error("Invoke compare error :{}", e);
+            }
+            if ((exist.getOrganizationId() == null || exist.getOrganizationId() == 0) && StringUtils.isNotBlank(customerAddressString)) {
+                syncCustomerInfoIntoOrganization(exist);
             }
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
@@ -1102,6 +1113,22 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         //这里增加入驻信息后自动同步到企业管理
         OrganizationDTO organizationDTO = customerService.createOrganization(exist);
         exist.setOrganizationId(organizationDTO.getId());
+        dbProvider.execute((TransactionStatus status) -> {
+            List<CustomerAdminRecord> untrackAdmins = customerProvider.listEnterpriseCustomerAdminRecords(exist.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
+            if (untrackAdmins != null && untrackAdmins.size() > 0) {
+                untrackAdmins.forEach((r)->{
+                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                    cmd.setContactName(r.getContactName());
+                    cmd.setContactToken(r.getContactToken());
+                    cmd.setOrganizationId(exist.getOrganizationId());
+                    rolePrivilegeService.createOrganizationAdmin(cmd);
+                });
+                customerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(exist.getId(), exist.getNamespaceId());
+                exist.setAdminFlag(com.everhomes.rest.approval.TrueOrFalseFlag.TRUE.getCode());
+            }
+            return null;
+        });
+
         List<EnterpriseAttachment> attachments = customerProvider.listEnterpriseCustomerPostUri(exist.getId());
         if (attachments != null && attachments.size() > 0) {
             List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
