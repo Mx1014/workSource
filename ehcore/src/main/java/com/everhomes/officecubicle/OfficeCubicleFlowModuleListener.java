@@ -179,12 +179,6 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
-    	LOGGER.debug("listFlowPredefinedParam");
-    	return null;
-    }
-
-    @Override
     public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) {
     	LOGGER.debug("onFlowConditionVariableRender");
     	return null;

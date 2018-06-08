@@ -401,6 +401,7 @@ public class NewsController extends ControllerBase {
 	 */
 	@RequestMapping("getCategoryIdByEntryId")
 	@RestReturn(GetCategoryIdByEntryIdResponse.class)	
+	@RequireAuthentication(false)
 	public RestResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd){
 		RestResponse response = new RestResponse(newsService.getCategoryIdByEntryId(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);

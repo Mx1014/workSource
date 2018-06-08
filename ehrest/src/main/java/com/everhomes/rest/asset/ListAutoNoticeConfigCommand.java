@@ -10,6 +10,7 @@ package com.everhomes.rest.asset;
  * <li>ownerType:所属者类型</li>
  * <li>ownerId:所属者id</li>
  * <li>namespaceId:域空间</li>
+ * <li>organizationId:公司id，和原来的接口的参数保持一致即可</li>
  *</ul>
  */
 public class ListAutoNoticeConfigCommand {

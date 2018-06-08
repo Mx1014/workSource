@@ -6,6 +6,8 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.general_form.*;
@@ -53,6 +55,8 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -79,7 +83,7 @@ import java.util.stream.Collectors;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
-public class ArchivesServiceImpl implements ArchivesService {
+public class ArchivesServiceImpl implements ArchivesService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchivesServiceImpl.class);
 
@@ -137,8 +141,19 @@ public class ArchivesServiceImpl implements ArchivesService {
     private ScheduleProvider scheduleProvider;
 
     @Autowired
-    private TaskService taskService;
+    private CoordinationProvider coordinationProvider;
 
+    @Autowired
+    private TaskService taskService;
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            // 合并5.5.1版本时，此方法被注释掉了，在此也注释掉 by lqs 20180526
+            //initArchivesNotification();
+        }
+    }
+    
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
@@ -237,6 +252,17 @@ public class ArchivesServiceImpl implements ArchivesService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
+                //  1.置顶表删除
+                archivesProvider.deleteArchivesStickyContactsByDetailIds(namespaceId, cmd.getDetailIds());
+                //  2.人事删除
+                DeleteArchivesEmployeesCommand command = ConvertHelper.convert(cmd, DeleteArchivesEmployeesCommand.class);
+                deleteArchivesEmployees(command);
+            }
+            return null;
+        });
+        /*Integer namespaceId = UserContext.getCurrentNamespaceId();
+        dbProvider.execute((TransactionStatus status) -> {
+            if (cmd.getDetailIds() != null) {
                 for (Long detailId : cmd.getDetailIds()) {
                     //  1.组织架构删除
                     OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
@@ -262,7 +288,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dismissArchivesEmployeesLogs(dismissCommand);
             }
             return null;
-        });
+        });*/
     }
 
     //  通讯录成员置顶接口
@@ -1611,10 +1637,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 nextPageOffset = cmd.getPageAnchor() + 1;
             }
             response.setNextPageAnchor(nextPageOffset);
-            response.setDismissEmployees(results.stream().map(r -> {
-                ArchivesDismissEmployeeDTO dto = ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+            response.setDismissEmployees(results.stream().map(r -> ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class)).collect(Collectors.toList()));
             return response;
         }
 
@@ -1666,18 +1689,20 @@ public class ArchivesServiceImpl implements ArchivesService {
             return;
         List<ArchivesConfigurations> configurations = archivesProvider.listArchivesConfigurations(ArchivesUtil.currentDate());
         if (configurations != null && configurations.size() > 0) {
-            for (ArchivesConfigurations configuration : configurations) {
-                if (configuration.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())) {
-                    EmployArchivesEmployeesCommand cmd = (EmployArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), EmployArchivesEmployeesCommand.class);
-                    employArchivesEmployees(cmd);
-                } else if (configuration.getOperationType().equals(ArchivesOperationType.TRANSFER.getCode())) {
-                    TransferArchivesEmployeesCommand cmd = (TransferArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), TransferArchivesEmployeesCommand.class);
-                    transferArchivesEmployees(cmd);
-                } else if (configuration.getOperationType().equals(ArchivesOperationType.DISMISS.getCode())) {
-                    DismissArchivesEmployeesCommand cmd = (DismissArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), DismissArchivesEmployeesCommand.class);
-                    dismissArchivesEmployees(cmd);
+            coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_CONFIGURATION.getCode()).tryEnter(() -> {
+                for (ArchivesConfigurations configuration : configurations) {
+                    if (configuration.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())) {
+                        EmployArchivesEmployeesCommand cmd = (EmployArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), EmployArchivesEmployeesCommand.class);
+                        employArchivesEmployees(cmd);
+                    } else if (configuration.getOperationType().equals(ArchivesOperationType.TRANSFER.getCode())) {
+                        TransferArchivesEmployeesCommand cmd = (TransferArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), TransferArchivesEmployeesCommand.class);
+                        transferArchivesEmployees(cmd);
+                    } else if (configuration.getOperationType().equals(ArchivesOperationType.DISMISS.getCode())) {
+                        DismissArchivesEmployeesCommand cmd = (DismissArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getOperationInformation(), DismissArchivesEmployeesCommand.class);
+                        dismissArchivesEmployees(cmd);
+                    }
                 }
-            }
+            });
         }
     }
 
@@ -1792,7 +1817,6 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //  添加事务
         dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
                 //  1.将员工添加到离职人员表
@@ -2056,8 +2080,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         for (int i = 0; i < fields.size(); i++) {
             if (!fields.get(i).getFieldDisplayName().equals(title.getValues().get(i)))
                 return ImportFileErrorType.TITLE_ERROE.getCode();
-            else
-                continue;
         }
         return null;
     }
@@ -2337,7 +2359,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
         String fileName = localeStringService.getLocalizedString(ArchivesServiceCode.SCOPE, ArchivesServiceCode.EMPLOYEE_IMPORT_MODULE, "zh_CN", "EmployeeImportModule");
         ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
-        List<String> titleNames = form.getFormFields().stream().map(r -> r.getFieldDisplayName()).collect(Collectors.toList());
+        List<String> titleNames = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
         List<String> propertyNames = new ArrayList<>();
         List<Integer> titleSizes = new ArrayList<>();
         for (int i = 0; i < form.getFormFields().size(); i++) {
@@ -2647,7 +2669,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         return results;
     }
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
+    /*@PostConstruct
     @Override
     public void initArchivesNotification() {
         if(scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
@@ -2666,19 +2691,21 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesNotificationJob.class,
                 new HashMap<>());
         LOGGER.info("======================================== The first ArchivesNotificationJob has been prepared at " + date);
-    }
+    }*/
 
     @Override
     public void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime) {
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotifications(day, time);
         if (results == null)
             return;
-        for(ArchivesNotifications result : results){
-            sendArchivesNotification(result, nowDateTime);
-        }
+        coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_NOTIFICATION.getCode()).tryEnter(() -> {
+            for(ArchivesNotifications result : results){
+                sendArchivesNotification(result, nowDateTime);
+            }
+        });
     }
 
-    private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime nowDateTime){
+    private void sendArchivesNotification(ArchivesNotifications notification, LocalDateTime dateTime){
         Organization company = organizationProvider.findOrganizationById(notification.getOrganizationId());
         if(company == null) {
             LOGGER.error("Company not found!");
@@ -2693,7 +2720,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
 
         //  2.get employee's names
-        Date firstOfWeek = Date.valueOf(nowDateTime.toLocalDate());
+        Date firstOfWeek = Date.valueOf(dateTime.toLocalDate());
         Date lastOfWeek = ArchivesUtil.plusDate(firstOfWeek, 6);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
         List<String> weekScopes = new ArrayList<>();
@@ -2721,19 +2748,23 @@ public class ArchivesServiceImpl implements ArchivesService {
             map.put("contactName", target.getContactName());
             map.put("companyName", company.getName());
             //  3-1.get the notification body.
-            String body = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BEGINNING, "zh_CN", map, "");
+            StringBuilder body = new StringBuilder(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BEGINNING, "zh_CN", map, ""));
             for (int n = 0; n < 7; n++)
-                body += processNotificationBody(employees, company.getName(), ArchivesUtil.plusDate(firstOfWeek, n));
+                body.append(processNotificationBody(employees, company.getName(), ArchivesUtil.plusDate(firstOfWeek, n)));
             //  3-2.send it
             if(notification.getMailFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode())
-                sendArchivesEmails(target.getWorkEmail(), body);
+                sendArchivesEmails(target.getWorkEmail(), body.toString());
             if(notification.getMessageFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode())
-                sendArchivesMessages(target.getUserId(), body);
+                sendArchivesMessages(target.getUserId(), body.toString());
         }
     }
 
     private String processNotificationBody(List<OrganizationMemberDetails> employees, String organizationName, Date date) {
-        String body = "", employment = "", anniversary = "", birthday = "", contract = "", idExpiry = "";
+        String body = "";
+        StringBuilder employment = new StringBuilder();
+        StringBuilder anniversary = new StringBuilder();
+        StringBuilder birthday = new StringBuilder();
+        StringBuilder contract = new StringBuilder();StringBuilder idExpiry = new StringBuilder();
 //        DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String dateString = date.toLocalDate() + "   " + date.toLocalDate().getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, Locale.SIMPLIFIED_CHINESE) + "\n";
         body += dateString;
@@ -2741,47 +2772,47 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         for (OrganizationMemberDetails employee : employees) {
             if (date.equals(employee.getEmploymentTime()))
-                employment += (employee.getContactName() + "，");
+                employment.append(employee.getContactName()).append("，");
             if (date.equals(employee.getContractEndTime()))
-                contract += (employee.getContactName() + "，");
+                contract.append(employee.getContactName()).append("，");
             if (date.equals(employee.getIdExpiryDate()))
-                idExpiry += (employee.getContactName() + "，");
+                idExpiry.append(employee.getContactName()).append("，");
             if (getMonthAndDay(date).equals(employee.getCheckInTimeIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("companyName", organizationName);
                 map.put("year", date.toLocalDate().getYear() - employee.getCheckInTime().toLocalDate().getYear());
-                anniversary += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, "");
+                anniversary.append(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ANNIVERSARY, "zh_CN", map, ""));
             }
             if (getMonthAndDay(date).equals(employee.getBirthdayIndex())) {
                 map = new LinkedHashMap<>();
                 map.put("contactName", employee.getContactName());
                 map.put("year", date.toLocalDate().getYear() - employee.getBirthday().toLocalDate().getYear());
-                birthday += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BIRTH, "zh_CN", map, "");
+                birthday.append(localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_BIRTH, "zh_CN", map, ""));
             }
         }
-        if (!employment.equals("")) {
-            employment = employment.substring(0, employment.length() - 1);
+        if (!employment.toString().equals("")) {
+            employment = new StringBuilder(employment.substring(0, employment.length() - 1));
             map = new LinkedHashMap<>();
-            map.put("contactNames", employment);
+            map.put("contactNames", employment.toString());
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_EMPLOYMENT, "zh_CN", map, "");
         }
-        if (!contract.equals("")) {
-            contract = contract.substring(0, contract.length() - 1);
+        if (!contract.toString().equals("")) {
+            contract = new StringBuilder(contract.substring(0, contract.length() - 1));
             map = new LinkedHashMap<>();
-            map.put("contactNames", contract);
+            map.put("contactNames", contract.toString());
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_CONTRACT, "zh_CN", map, "");
         }
-        if (!idExpiry.equals("")) {
-            idExpiry = idExpiry.substring(0, idExpiry.length() - 1);
+        if (!idExpiry.toString().equals("")) {
+            idExpiry = new StringBuilder(idExpiry.substring(0, idExpiry.length() - 1));
             map = new LinkedHashMap<>();
-            map.put("contactNames", idExpiry);
+            map.put("contactNames", idExpiry.toString());
             body += localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_REMIND_ID, "zh_CN", map, "");
         }
-        if (!anniversary.equals("")) {
+        if (!anniversary.toString().equals("")) {
             body += anniversary;
         }
-        if (!birthday.equals("")) {
+        if (!birthday.toString().equals("")) {
             body += birthday;
         }
         body += "\n";

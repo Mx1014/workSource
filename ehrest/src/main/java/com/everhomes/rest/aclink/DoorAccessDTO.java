@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import com.everhomes.util.StringHelper;
@@ -9,13 +10,32 @@ import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
+ * <li>id:门禁id</li>
+ * <li>status: 门禁状态， 0 激活中，1 已激活，2 无效</li>
+ * <li>activeUserId: 激活者id</li>
+ * <li>description: 门禁描述</li>
+ * <li>creatorUserId: 创建者id</li>
+ * <li>ownerType: 门禁所属组织类型 {@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
+ * <li>longitude: 经度</li>
+ * <li>latitude: 纬度</li>
+ * <li>createTime: 创建时间</li>
+ * <li>doorType: 门禁类型{@link com.everhomes.rest.aclink.DoorAccessType}</li>
+ * <li>address: 门禁地址</li>
+ * <li>ownerId:门禁所属组织的Id</li>
+ * <li>role:default 0</li>
+ * <li>id:门禁id</li>
  * <li>name: 门禁名字</li>
  * <li>displayName: 用户端显示的门禁名字</li>
- * <li>hardwareId: 门禁硬件地址</li>
- * <li>status: 门禁状态， 0 激活中，1 已激活，2 无效</li>
- * <li>description: 门禁描述</li>
- * <li>address: 门禁地址</li>
- * <li>creator: 激活人员名字</li>
+ * <li>hardwareId: 门禁硬件mac地址</li>
+ * <li>creatorName: 创建者名字</li>
+ * <li>creatorPhone: 创建者手机号</li>
+ * <li>linkStatus: 链接状态0已连接1未连接{@link com.everhomes.rest.aclink.DoorAccessLinkStatus}</li>
+ * <li>version:版本</li>
+ * <li>groupId:分组id</li>
+ * <li>groupNmae:分组名称</li>
+ * <li>enableAmount:门禁是否允许授权按次开门，1是0否{@link com.everhomes.rest.aclink.DoorAuthEnableAmount}</li>
+ * <li>server：门禁关联服务器{@link com.everhomes.rest.aclink.AclinkServerDTO}</li>
+ * <li>hasQr:门禁是否支持二维码0否1是</li>
  * </ul>
  * @author janson
  *
@@ -45,9 +65,26 @@ public class DoorAccessDTO {
     private String  version;
     private String groupName;
     private Long groupId;
-    
+    private Byte enableAmount;
+    private AclinkServerDTO server;
+    private String localUUid;
+    private String localAesKey;
+    private Long localServerId;
+    private Byte hasQr;
 
-    public Byte getStatus() {
+    public String getLocalAesKey() {
+		return localAesKey;
+	}
+
+
+
+	public void setLocalAesKey(String localAesKey) {
+		this.localAesKey = localAesKey;
+	}
+
+
+
+	public Byte getStatus() {
         return status;
     }
 
@@ -326,7 +363,67 @@ public class DoorAccessDTO {
 
 
 
-    @Override
+	public Byte getEnableAmount() {
+		return enableAmount;
+	}
+
+
+
+	public void setEnableAmount(Byte enableAmount) {
+		this.enableAmount = enableAmount;
+	}
+
+
+
+	public AclinkServerDTO getServer() {
+		return server;
+	}
+
+
+
+	public void setServer(AclinkServerDTO server) {
+		this.server = server;
+	}
+
+
+
+	public String getLocalUUid() {
+		return localUUid;
+	}
+
+
+
+	public void setLocalUUid(String localUUid) {
+		this.localUUid = localUUid;
+	}
+
+
+
+	public Long getLocalServerId() {
+		return localServerId;
+	}
+
+
+
+	public void setLocalServerId(Long localServerId) {
+		this.localServerId = localServerId;
+	}
+
+
+
+	public Byte getHasQr() {
+		return hasQr;
+	}
+
+
+
+	public void setHasQr(Byte hasQr) {
+		this.hasQr = hasQr;
+	}
+
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
