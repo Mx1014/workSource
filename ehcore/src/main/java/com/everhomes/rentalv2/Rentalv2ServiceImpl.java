@@ -2603,8 +2603,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void test() {
-		RentalOrder order = new RentalOrder();
-		order.setId(5697l);
+		RentalOrder order = this.rentalv2Provider.findRentalBillById(5697l);
 		createOrderOverTimeTask(order);
 	}
 
