@@ -1664,6 +1664,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_CONFIGURATION.getCode()).tryEnter(() -> {
             for (ArchivesOperationalConfiguration configuration : configurations)
                 resolveArchivesConfiguration(configuration);
+
         });
     }
 

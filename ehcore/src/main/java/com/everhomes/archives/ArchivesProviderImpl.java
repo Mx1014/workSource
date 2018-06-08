@@ -255,7 +255,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.DETAIL_ID.eq(detailId));
-        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_TYPE.eq(type));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATION_TYPE.eq(type));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
         return query.fetchAnyInto(ArchivesOperationalConfiguration.class);
 
@@ -267,8 +267,8 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.DETAIL_ID.eq(detailId));
-        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_TYPE.eq(operationType));
-        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.gt(ArchivesUtil.currentDate()));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATION_TYPE.eq(operationType));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATION_DATE.gt(ArchivesUtil.currentDate()));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
         return query.fetchAnyInto(ArchivesOperationalConfiguration.class);
     }
@@ -279,8 +279,8 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.DETAIL_ID.in(detailIds));
-        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_TYPE.eq(operationType));
-        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.gt(ArchivesUtil.currentDate()));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATION_TYPE.eq(operationType));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATION_DATE.gt(ArchivesUtil.currentDate()));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
         List<ArchivesOperationalConfiguration> results = new ArrayList<>();
         query.fetch().map(r -> {
@@ -295,7 +295,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         List<ArchivesOperationalConfiguration> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesOperationalConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
-        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATE_DATE.eq(date));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATION_DATE.eq(date));
         query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, ArchivesOperationalConfiguration.class));
