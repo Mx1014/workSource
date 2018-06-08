@@ -1,5 +1,6 @@
 package com.everhomes.decoration;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.archives.ArchivesService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -35,6 +36,8 @@ import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.tables.pojos.EhDecorationApprovalVals;
@@ -262,7 +265,7 @@ public class DecorationServiceImpl implements  DecorationService {
                 worker.setUid(member.getTargetId());
             }
             decorationProvider.createDecorationWorker(worker);
-            worker.setQrid(createQrCode(worker.getId(),ProcessorType.WORKER.getCode()));
+            worker.setQrid(createQrCode(request.getId(),worker.getId(),worker.getPhone(),ProcessorType.WORKER.getCode()));
             decorationProvider.updateDecorationWorker(worker);
             dto =  ConvertHelper.convert(worker,DecorationWorkerDTO.class);
             if (!StringUtils.isBlank(dto.getImageUri()))
@@ -274,8 +277,30 @@ public class DecorationServiceImpl implements  DecorationService {
         return dto;
     }
 
-    private String createQrCode(Long workerId,Byte processorType){
-        return null;
+    private String createQrCode(Long requestId,Long workerId,String phone,Byte processorType){
+        NewQRCodeCommand cmd = new NewQRCodeCommand();
+        cmd.setActionType((byte)13);
+        String url = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+        if(!url.endsWith("/")) {
+            url += "/";
+        }
+        url += "handle-management/build/index.html#/license-detail?requestId=";
+        if (requestId != null)
+            url += requestId;
+        url += "&workerId=";
+        if (workerId != null)
+            url += workerId;
+        url += "&phone=";
+        if (phone != null)
+            url += phone;
+        url += "&processorType=";
+        if (processorType != null)
+            url += processorType;
+        JSONObject json = new JSONObject();
+        json.put("url",url);
+        cmd.setActionData(json.toJSONString());
+        QRCodeDTO qrCode = this.qRCodeService.createQRCode(cmd);
+        return qrCode.getQrid();
     }
 
     @Override
@@ -871,6 +896,7 @@ public class DecorationServiceImpl implements  DecorationService {
             flowService.createFlowCase(cmd2);
 
             request.setStatus(DecorationRequestStatus.FILE_APPROVAL.getCode());
+            request.setDecoratorQrid(createQrCode(requestId,null,request.getDecoratorPhone(),ProcessorType.CHIEF.getCode()));
             this.decorationProvider.updateDecorationRequest(request);
 
             //短信通知
