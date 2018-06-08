@@ -14,11 +14,11 @@ public class CompliedScriptHolder {
 
     private ScriptEngine scriptEngine;
 
-    private Map<String, CompiledScript> compiledScriptMap;
+    // private Map<String, CompiledScript> compiledScriptMap;
     private Map<String, ScriptObjectMirror> scriptObjectMirrorMap;
 
     public CompliedScriptHolder() {
-        compiledScriptMap = new LRUMap<>(1000);
+        // compiledScriptMap = new LRUMap<>(1000);
         scriptObjectMirrorMap = new LRUMap<>(1000);
     }
 
@@ -26,12 +26,12 @@ public class CompliedScriptHolder {
         return scriptEngine;
     }
 
-    public void compile(FlowScript flowScript) {
+    public void compile(Long scriptMainId, Integer scriptVersion, String script) {
         try {
-            String key = String.format("%s:%s", flowScript.getScriptMainId(), flowScript.getScriptVersion());
+            String key = String.format("%s:%s", scriptMainId, scriptVersion);
 
-            CompiledScript compiledScript = getCompilable().compile(flowScript.getScript());
-            compiledScriptMap.put(key, compiledScript);
+            CompiledScript compiledScript = getCompilable().compile(script);
+            // compiledScriptMap.put(key, compiledScript);
 
             Object eval = compiledScript.eval();
             ScriptObjectMirror mirror = (ScriptObjectMirror) eval;

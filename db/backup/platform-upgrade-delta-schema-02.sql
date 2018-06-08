@@ -242,3 +242,221 @@ CREATE TABLE `eh_policy_agent_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- 政务服务 1.0 end
+
+-- 企业管理员列表 by jiarui
+ALTER TABLE `eh_enterprise_customer_admins` ADD COLUMN `namespace_id`  int NOT NULL DEFAULT 0 AFTER `create_time`;
+
+
+
+-- ------------------------------
+-- 服务联盟V3.3（新增需求提单功能）     
+-- 产品功能 #26469 add by huangmingbo  2018/05/29
+-- ------------------------------
+-- DROP TABLE IF EXISTS `eh_flow_script_configs`;
+CREATE TABLE `eh_service_alliance_providers` (
+	`id` BIGINT(20) NOT NULL,
+	`namespace_id` INT(11) NOT NULL DEFAULT '0',
+	`owner_type` VARCHAR(32) NOT NULL DEFAULT '\'\'',
+	`owner_id` BIGINT(20) NOT NULL DEFAULT '0',
+	`app_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'module_app id, new type of alliance, represent one kine fo alliance',
+	`type` BIGINT(20) NOT NULL COMMENT 'old type of Alliance，represent one kind of alliance',
+	`name` VARCHAR(50) NOT NULL COMMENT 'provider name',
+	`category_id` BIGINT(20) NOT NULL COMMENT '见 categories表',
+	`mail` VARCHAR(50) NOT NULL COMMENT 'enterprise mail',
+	`contact_number` VARCHAR(50) NOT NULL COMMENT 'mobile or contact phone',
+	`contact_name` VARCHAR(50) NOT NULL COMMENT 'contact name',
+	`total_score` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'total score',
+	`score_times` INT(11) NOT NULL DEFAULT '0' COMMENT 'the num of times make the score',
+	`score_flow_case_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'the final flow case id that make score',
+	`status` TINYINT(4) NOT NULL DEFAULT '1' COMMENT '0-deleted 1-active',
+	`create_time` DATETIME NOT NULL,
+	`create_uid` BIGINT(20) NOT NULL COMMENT 'create user id',
+	PRIMARY KEY (`id`)
+)
+COMMENT='服务商信息'
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+
+CREATE TABLE `eh_alliance_extra_events` (
+	`id` BIGINT(20) NOT NULL,
+	`flow_case_id` BIGINT(20) NOT NULL,
+	`topic` VARCHAR(200) NOT NULL COMMENT 'topic of current event',
+	`time` DATETIME NOT NULL COMMENT 'the time that event happen',
+	`address` VARCHAR(200) NULL DEFAULT NULL,
+	`provider_id` BIGINT(20) NULL DEFAULT NULL COMMENT 'id of alliance_providers',
+	`provider_name` VARCHAR(50) NULL DEFAULT NULL COMMENT 'name of alliance_provider',
+	`members` VARCHAR(500) NOT NULL COMMENT 'those who participate in',
+	`content` MEDIUMTEXT NOT NULL COMMENT 'main body',
+	`enable_read` TINYINT(3) NOT NULL DEFAULT '0' COMMENT '0-hide for applier  1-show for applier',
+	`enable_notify_by_email` TINYINT(3) NOT NULL DEFAULT '0' COMMENT '0-not send email  1-send email to provider',
+	`create_time` DATETIME NOT NULL,
+	`create_uid` BIGINT(20) NOT NULL,
+	PRIMARY KEY (`id`)
+)
+COMMENT='工作流中，新建事件表'
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+
+CREATE TABLE `eh_alliance_extra_event_attachment` (
+	`id` BIGINT(20) NOT NULL,
+	`owner_id` BIGINT(20) NOT NULL COMMENT 'the id of eh_alliance_extra_events',
+	`file_type` VARCHAR(32) NULL DEFAULT NULL COMMENT 'like image,jpg. in lower case',
+	`file_uri` VARCHAR(1024) NOT NULL COMMENT 'like cs://1/...',
+	`file_name` VARCHAR(200) NULL DEFAULT NULL,
+	`file_size` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'file size (Byte)',
+	`create_uid` BIGINT(20) NOT NULL,
+	`create_time` DATETIME NOT NULL COMMENT 'create time',
+	PRIMARY KEY (`id`)
+)
+COMMENT='用于服务联盟工作流中新建事件时保存附件使用'
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+
+ALTER TABLE `eh_service_alliance_jump_module`
+	ADD COLUMN `module_id` BIGINT NOT NULL DEFAULT '0' AFTER `module_name`;
+	
+	
+ALTER TABLE `eh_service_alliance_jump_module`
+	ADD COLUMN `instance_config` TEXT NULL DEFAULT NULL AFTER `module_url`;
+
+-- 超级管理员 Added by janson
+ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
+-- 能耗抄表精度  by jiarui
+ALTER TABLE `eh_energy_meter_reading_logs`
+	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `meter_id`;
+ALTER TABLE `eh_energy_meter_tasks`
+	MODIFY COLUMN `last_task_reading`  decimal(10,2) NULL DEFAULT NULL AFTER `executive_expire_time`;
+ALTER TABLE `eh_energy_meter_tasks`
+	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `last_task_reading`;
+
+-- added a new column for eh_payment_bill_groups by wentian
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `bills_day_type` TINYINT NOT NULL DEFAULT 4 COMMENT '1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期首月第几日';
+
+-- ISSUE#26184 门禁人脸识别 by liuyilin 201180524
+-- 内网服务器表创建
+CREATE TABLE `eh_aclink_servers` (
+    `id` BIGINT(20) NOT NULL,
+    `name` VARCHAR(32) DEFAULT NULL,
+	`namespace_id` INT(11) NOT NULL DEFAULT '0',
+	`uuid` VARCHAR(6) NOT NULL COMMENT '配对码',
+    `ip_address` VARCHAR(128) DEFAULT NULL COMMENT 'IP地址',
+	`link_status` TINYINT NOT NULL DEFAULT '0' COMMENT '联网状态',
+	`active_time` DATETIME DEFAULT NULL COMMENT '激活时间',
+	`sync_time`  DATETIME DEFAULT NULL COMMENT '上次同步时间',
+	`version` VARCHAR(8) DEFAULT NULL COMMENT '版本号',
+	`owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '组织id',
+	`owner_type` TINYINT NOT NULL DEFAULT '0' COMMENT '组织类型',
+	`aes_server_key` VARCHAR(64) COMMENT 'AES公钥',
+	`status` TINYINT NOT NULL DEFAULT '0' COMMENT '激活状态0未激活1已激活2已删除',
+	`creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId' ,
+	`create_time` DATETIME NOT NULL COMMENT '记录创建时间' ,
+	`operator_uid` BIGINT NULL COMMENT '记录更新人userId' ,
+	`operate_time` DATETIME NULL COMMENT '记录更新时间' ,
+	PRIMARY KEY (`id`),
+	UNIQUE `u_eh_aclink_servers_uuid`(`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '内网服务器表';
+
+-- 内网ipad表创建
+CREATE TABLE `eh_aclink_ipads` (
+	`id` BIGINT(20) NOT NULL,
+	`name` VARCHAR(32) DEFAULT NULL,
+	`door_access_id` BIGINT(20) NOT NULL COMMENT '关联门禁id',
+	`enter_status` TINYINT DEFAULT '0' COMMENT '进出标识 1进0出',
+	`uuid` VARCHAR(6) NOT NULL COMMENT '配对码',
+	`link_status` TINYINT NOT NULL DEFAULT '0' COMMENT '联网状态',
+	`server_id` BIGINT(20) COMMENT '服务器id',
+	`active_time` DATETIME DEFAULT NULL COMMENT '激活时间',
+	`status` TINYINT NOT NULL DEFAULT '0' COMMENT '激活状态0未激活1已激活2已删除',
+	`creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId' ,
+	`create_time` DATETIME NOT NULL COMMENT '记录创建时间' ,
+	`operator_uid` BIGINT NULL COMMENT '记录更新人userId' ,
+	`operate_time` DATETIME NULL COMMENT '记录更新时间' ,
+	PRIMARY KEY (`id`),
+	UNIQUE `u_eh_aclink_ipads_uuid`(`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '内网ipad表';
+
+-- 内网摄像头表创建
+CREATE TABLE `eh_aclink_cameras` (
+	`id` BIGINT(20) NOT NULL,
+	`name` VARCHAR(32) DEFAULT NULL,
+	`door_access_id` BIGINT NOT NULL COMMENT '关联门禁id',
+	`enter_status` TINYINT DEFAULT '0' COMMENT '进出标识 1进0出',
+	`link_status` TINYINT NOT NULL DEFAULT '0' COMMENT '联网状态',
+	`ip_address` VARCHAR(128) DEFAULT NULL COMMENT 'IP地址',
+	`server_id` BIGINT(20) COMMENT '服务器id',
+	`status` TINYINT NOT NULL DEFAULT '1' COMMENT '状态1正常2已删除',
+	`creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId' ,
+	`create_time` DATETIME NOT NULL COMMENT '记录创建时间' ,
+	`operator_uid` BIGINT NULL COMMENT '记录更新人userId' ,
+	`operate_time` DATETIME NULL COMMENT '记录更新时间' ,
+	`key_code` VARCHAR(128) NOT NULL COMMENT '摄像头密钥' ,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4  COMMENT = '内网摄像头表';
+
+-- 门禁与服务器多对一关联
+ALTER TABLE `eh_door_access`
+ADD `local_server_id` BIGINT(20) COMMENT '服务器id';
+
+-- 人脸识别照片表创建
+CREATE TABLE `eh_face_recognition_photos` (
+	`id` BIGINT(20) NOT NULL,
+    `user_id` BIGINT(20) COMMENT '用户id(正式用户)',
+	`auth_id` BIGINT(20) COMMENT '授权id(访客)',
+	`user_type` TINYINT NOT NULL DEFAULT '0' COMMENT '照片关联的用户类型,0正式用户,1访客',
+	`img_uri` VARCHAR(2048) COMMENT '照片uri',
+	`img_url` VARCHAR(2048) NOT NULL COMMENT '照片url',
+	`sync_time` DATETIME COMMENT '上次同步时间时间' ,
+	`status` TINYINT NOT NULL DEFAULT '1' COMMENT '状态1正常2已删除',
+	`creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId' ,
+	`create_time` DATETIME NOT NULL COMMENT '记录创建时间' ,
+	`operator_uid` BIGINT NULL COMMENT '记录更新人userId' ,
+	`operate_time` DATETIME NULL COMMENT '记录更新时间' ,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4  COMMENT = '人脸识别照片表';
+
+-- 门禁版本包url长度限制修改
+ALTER TABLE eh_aclink_firmware MODIFY COLUMN `download_url` VARCHAR(1024);
+ALTER TABLE eh_aclink_firmware MODIFY COLUMN `info_url` VARCHAR(1024);
+
+-- issue28839允许修改门禁开门方式,增加字段表示是否支持二维码
+ALTER TABLE `eh_door_access` ADD COLUMN `has_qr` TINYINT NOT NULL DEFAULT '1' COMMENT '门禁二维码能力0无1有';
+
+-- End by: yilin Liu
+
+
+-- 大沙河梯控
+-- by shiheng.ma
+-- 新增字段 第三方KeyU字段
+ALTER TABLE `eh_door_auth`
+ADD COLUMN `key_u` VARCHAR(16) NULL DEFAULT NULL COMMENT '第三方用户秘钥' AFTER `right_remote`;
+
+-- 新增字段 授权楼层
+ALTER TABLE `eh_door_access`
+ADD COLUMN `floor_id` VARCHAR(2000) NULL DEFAULT NULL COMMENT '授权楼层' AFTER `groupId`;
+-- 大沙河梯控 end
+
+-- 唐岑
+ALTER TABLE `eh_contract_param_group_map` ADD COLUMN `user_id` BIGINT DEFAULT 0 COMMENT '用户id';
+
+-- 给eh_payment_bills表添加支付方式、留言、账单是否有缴费凭证的标志字段  by Steve Tang
+ALTER TABLE `eh_payment_bills` ADD COLUMN `payment_type` int DEFAULT null COMMENT '账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）';
+
+ALTER TABLE `eh_payment_bills` ADD COLUMN `certificate_note` varchar(255) DEFAULT NULL COMMENT '上传凭证图片时附加的留言';
+
+ALTER TABLE `eh_payment_bills` ADD COLUMN `is_upload_certificate` tinyint(4) DEFAULT null COMMENT '该账单是否上传了缴费凭证（0:否，1：是）';
+
+-- 创建缴费凭证表
+DROP TABLE IF EXISTS `eh_payment_bill_certificate`;
+
+CREATE TABLE `eh_payment_bill_certificate` (
+  `id` bigint(20) NOT NULL,
+  `bill_id` bigint(20) NOT NULL COMMENT '该凭证记录对应的账单id',
+  `certificate_uri` varchar(255) DEFAULT NULL COMMENT '上传凭证图片的uri',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -12,6 +12,8 @@ import java.util.List;
  * <li>type: 服务联盟分类id</li>
  * <li>detailFlag: 是否直接展示详情</li>
  * <li>displayType: 样式</li>
+ * <li>enableComment: 是否允许评论 0-不允许 1-允许</li>
+ * <li>enableProvider: 是否开启服务商的功能 0-不开启 1-开启</li>
  * </ul>
  */
 public class ServiceAllianceInstanceConfig {
@@ -23,6 +25,10 @@ public class ServiceAllianceInstanceConfig {
 	private String displayType;
 
 	private Byte detailFlag;
+	
+	private Byte enableComment;
+	
+	private Byte enableProvider;
 
 	@ItemType(ServiceAllianceJump.class)
 	private List<ServiceAllianceJump> jumps;
@@ -70,6 +76,22 @@ public class ServiceAllianceInstanceConfig {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Byte getEnableProvider() {
+		return enableProvider;
+	}
+
+	public void setEnableProvider(Byte enableProvider) {
+		this.enableProvider = enableProvider;
+	}
+
+	public Byte getEnableComment() {
+		return enableComment;
+	}
+
+	public void setEnableComment(Byte enableComment) {
+		this.enableComment = enableComment;
 	}
 
 }

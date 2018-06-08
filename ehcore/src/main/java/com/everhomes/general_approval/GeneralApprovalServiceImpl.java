@@ -748,9 +748,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             conditionOR = conditionOR.or(condition);
             query.addConditions(conditionOR);
         }
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd.getModuleId()));
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd.getModuleType()));
 
         if (null != cmd.getProjectId())
             query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));

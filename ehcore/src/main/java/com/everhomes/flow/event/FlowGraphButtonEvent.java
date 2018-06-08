@@ -356,6 +356,10 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                 for (FlowCase aCase : ctx.getAllFlowCases()) {
                     aCase.setStatus(FlowCaseStatus.PROCESS.getCode());
                 }
+                // 重启定时消息及短信
+                currentNode.getTickMessageAction().fireAction(ctx, this);
+                currentNode.getTickSMSAction().fireAction(ctx, this);
+                flowStateProcessor.createStepTimeout(ctx, next.getFlowNode());
                 break;
             default:
                 break;

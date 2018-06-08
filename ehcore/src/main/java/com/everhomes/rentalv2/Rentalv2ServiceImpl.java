@@ -111,6 +111,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -135,7 +137,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Component
-public class Rentalv2ServiceImpl implements Rentalv2Service {
+public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener<ContextRefreshedEvent> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2ServiceImpl.class);
 
@@ -254,11 +256,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		return null;
 	}
-
-	@PostConstruct
+	
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+	//@PostConstruct
 	public void setup() {
 		workerPoolFactory.getWorkerPool().addQueue(queueName);
 	}
+	
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
 
 	private String processFlowURL(Long flowCaseId, String flowUserType, Long moduleId) { 
 		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+flowUserType+"&moduleId="+moduleId;
@@ -1203,7 +1214,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (ids.length>0) {
 				String aclinkName = "";
 				for (String id:ids)
-					aclinkName += doorAccessProvider.getDoorAccessById(Long.parseLong(id)).getName()+",";
+					aclinkName += doorAccessProvider.getDoorAccessById(Long.parseLong(id)).getDisplayName()+",";
 				rSiteDTO.setAclinkName(aclinkName.substring(0,aclinkName.length()-1));
 			}
 		}
@@ -1748,6 +1759,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalBillDTO billDTO = ConvertHelper.convert(rentalBill, RentalBillDTO.class);
 		mappingRentalBillDTO(billDTO, rentalBill, rs);
+		billDTO.setConfirmationPrompt(rs.getConfirmationPrompt());
 		return billDTO;
 	}
 
@@ -6746,6 +6758,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		siteItem.setName(cmd.getItemName());
 		siteItem.setPrice(cmd.getItemPrice());
 		siteItem.setDescription(cmd.getDescription());
+		siteItem.setCounts(cmd.getCounts());
 		rentalv2Provider.updateRentalSiteItem(siteItem);
 	}
 
@@ -6844,6 +6857,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			cmd.setCounts(1.0);
 //		}
 		if (cmd.getSitePackages()!=null && !cmd.getSitePackages().isEmpty()) {
+			if (RentalUserPriceType.UNIFICATION.getCode() == cmd.getUserPriceType())
+				cmd.getSitePackages().forEach(r->{
+					r.setOrgMemberPrice(r.getPrice());
+					r.setOrgMemberInitiatePrice(r.getInitiatePrice());
+					r.setOrgMemberOriginalPrice(r.getOriginalPrice());
+					r.setApprovingUserPrice(r.getPrice());
+					r.setApprovingUserInitiatePrice(r.getInitiatePrice());
+					r.setApprovingUserOriginalPrice(r.getOriginalPrice());
+				});
 			Long sitePackageId = createCellPricePackage(cmd.getSitePackages(), rs.getResourceType());
 			cmd.setSitePackageId(sitePackageId);
 		}

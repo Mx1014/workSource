@@ -3,12 +3,12 @@ package com.everhomes.flow;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.action.FlowGraphScriptAction;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.flow.nashornfunc.NashornScriptMain;
+import com.everhomes.flow.nashornfunc.NashornScriptMappingCall;
 import com.everhomes.rest.flow.*;
-import com.everhomes.sequence.SequenceService;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.records.EhFlowScriptsRecord;
-import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
@@ -23,10 +23,12 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.request.async.DeferredResult;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class FlowScriptTest extends LoginAuthTestCase {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowScriptTest.class);
@@ -49,31 +51,10 @@ public class FlowScriptTest extends LoginAuthTestCase {
     private FlowService flowService;
 
     @Autowired
-    private FlowNodeProvider flowNodeProvider;
-
-    @Autowired
-    private FlowButtonProvider flowButtonProvider;
-
-    @Autowired
-    private OrganizationService organizationService;
-
-    @Autowired
-    private FlowListenerManager flowListenerManager;
-
-    @Autowired
-    private FlowScriptProvider flowScriptProvider;
-
-    @Autowired
-    private FlowTimeoutService flowTimeoutService;
-
-    @Autowired
-    private UserService userService;
+    private NashornEngineService nashornEngineService;
 
     @Autowired
     private DbProvider dbProvider;
-
-    @Autowired
-    private SequenceService sequenceService;
 
     private final static String SCRIPT = "var configService = require(\"configService\");\n" +
             "var apiService = require(\"apiService\");\n" +
@@ -401,5 +382,44 @@ public class FlowScriptTest extends LoginAuthTestCase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testScriptMain() {
+        FlowAction flowAction = new FlowAction();
+        FlowCaseState state = new FlowCaseState();
+        state.setFlowCase(new FlowCase());
+        FlowGraph flowGraph = new FlowGraph();
+        flowGraph.setFlow(new Flow());
+        state.setFlowGraph(flowGraph);
+        state.setOperator(new UserInfo());
+
+        FlowScript script = new FlowScript();
+        script.setScriptMainId(1L);
+        script.setScriptVersion(0);
+
+        String js = new Scanner(this.getClass().getResourceAsStream("/flow/demo.js")).useDelimiter("\\A").next();
+        script.setScript(js);
+
+        NashornScriptMain main = new NashornScriptMain(state, script, flowAction);
+
+        main.process(nashornEngineService);
+    }
+
+    @Test
+    public void testScriptMapping() {
+        FlowScript script = new FlowScript();
+        script.setScriptMainId(1L);
+        script.setScriptVersion(0);
+
+        String js = new Scanner(this.getClass().getResourceAsStream("/flow/demo.js")).useDelimiter("\\A").next();
+        script.setScript(js);
+
+        Map<String, String[]> paramMap = new HashMap<>();
+        paramMap.put("a", new String[]{"b"});
+
+
+        Object result = new NashornScriptMappingCall(script, "https", paramMap, "body1", new DeferredResult<>()).process(nashornEngineService);
+        LOGGER.info("script mapping: {}", result);
     }
 }

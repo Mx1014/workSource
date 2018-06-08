@@ -26,6 +26,9 @@ import javax.validation.constraints.NotNull;
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
  * <li>targetType:客户属性；eh_user个人；eh_organization：企业</li>
  * <li>category_id: 应用标识id</li>
+ * <li>contractNum:合同编号</li>
+ * <li>paymentType:账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）</li>
+ * <li>isUploadCertificate:账单是否附带缴费凭证（0：否，1：是）</li>
  * <li>contractNum: 合同编号</li>
  * <li>organizationId: 企业id</li>
  * <li>customerTel: 客户手机号</li>
@@ -67,10 +70,29 @@ public class ListBillsCommand {
     }
 
     
+    private Integer paymentType;
+    private Byte isUploadCertificate;
     private String customerTel;
 
 
-    public Long getOrganizationId() {
+
+	public Byte getIsUploadCertificate() {
+		return isUploadCertificate;
+	}
+
+	public void setIsUploadCertificate(Byte isUploadCertificate) {
+		this.isUploadCertificate = isUploadCertificate;
+	}
+
+	public Integer getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(Integer paymentType) {
+		this.paymentType = paymentType;
+	}
+
+	public Long getOrganizationId() {
         return organizationId;
     }
 

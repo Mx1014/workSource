@@ -2,14 +2,15 @@
 package com.everhomes.news;
 import com.everhomes.comment.CommentHandler;
 import com.everhomes.rest.comment.*;
-import com.everhomes.rest.comment.AttachmentDTO;
-import com.everhomes.rest.comment.DeleteCommonCommentCommand;
 import com.everhomes.rest.news.*;
 import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneResponse;
 import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
+import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.util.ConvertHelper;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,4 +114,28 @@ public class NewsCommentHandler implements CommentHandler {
 		}
 		return commentDto;
 	}
+	
+	@Override
+	public GetCommentsResponse getComment(GetCommentCommand cmd) {
+
+		GetNewsCommentCommand newsCmd =  ConvertHelper.convert(cmd, GetNewsCommentCommand.class);
+		
+		// 使用news业务获取评论
+		GetNewsCommentResponse newsResp = newsService.getNewsComment(newsCmd);
+		if (newsResp.getComment() == null) {
+			return new GetCommentsResponse();
+		}
+		
+		// 转化成通用评论dto
+		CommentDTO commentDto = toCommentDTO(newsResp.getComment());
+		commentDto.setOwnerToken(cmd.getOwnerToken());
+		
+		// 组装返回数据
+		GetCommentsResponse resp = new GetCommentsResponse();
+		resp.setComment(commentDto);
+		return resp;
+
+	}
+	
+	
 }

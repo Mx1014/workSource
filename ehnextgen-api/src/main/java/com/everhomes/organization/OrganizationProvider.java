@@ -444,7 +444,9 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 
-	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId);
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId, int pageSize, ListingLocator locator);
+
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Integer pageSize, ListingLocator locator);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId);
 
@@ -504,4 +506,9 @@ public interface OrganizationProvider {
 	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
 
 	Integer getUserOrgAmount(Long targetId);
+
+    OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
+            Long targetId, Long organizationId);
+    OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
+            Long organizationId, String contactToken);
 }

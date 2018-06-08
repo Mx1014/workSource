@@ -1,3 +1,0 @@
--- ehcore.yml 新增如下配置项
--- # 允许在 nashorn 中通过 Java.type 访问的类
--- nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService

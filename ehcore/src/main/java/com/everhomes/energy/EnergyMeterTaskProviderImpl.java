@@ -5,7 +5,6 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.energy.EnergyTaskStatus;
 import com.everhomes.rest.energy.TaskGeneratePaymentFlag;
 import com.everhomes.sequence.SequenceProvider;
@@ -16,6 +15,7 @@ import com.everhomes.server.schema.tables.records.EhEnergyMeterTasksRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -123,18 +123,19 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhEnergyMeterTasksRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_TASKS);
-        query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor));
-        query.addConditions(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds));
-        query.addConditions(Tables.EH_ENERGY_METER_TASKS.STATUS.in(EnergyTaskStatus.READ.getCode(), EnergyTaskStatus.NON_READ.getCode()));
-        query.addConditions(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId));
-        query.addConditions(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
-
-        if(lastUpdateTime != null) {
-            query.addConditions(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.gt(lastUpdateTime)
+        Condition condition = Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds);
+        condition = condition.and(Tables.EH_ENERGY_METER_TASKS.STATUS.in(EnergyTaskStatus.READ.getCode(), EnergyTaskStatus.NON_READ.getCode()));
+        condition = condition.and(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId)).and(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+        if (lastUpdateTime != null) {
+            condition.and(Tables.EH_ENERGY_METER_TASKS.CREATE_TIME.gt(lastUpdateTime)
                     .or(Tables.EH_ENERGY_METER_TASKS.UPDATE_TIME.gt(lastUpdateTime)));
         }
+//        // add for auto reading meters
+//        condition = condition.or(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.eq(0L));
 
+        query.addConditions(condition);
         query.addOrderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER);
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor));
         query.addLimit(pageSize);
 
         if(LOGGER.isDebugEnabled()) {

@@ -1,6 +1,6 @@
 package com.everhomes.flow.nashornfunc;
 
-import com.everhomes.flow.FlowNashornEngineService;
+import com.everhomes.flow.NashornEngineService;
 import com.everhomes.flow.FlowScript;
 import com.everhomes.flow.NashornScript;
 import com.everhomes.rest.flow.FlowScriptConfigInfo;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 
-public class NashornScriptConfigExtractor implements NashornScript<FlowNashornEngineService, List<FlowScriptConfigInfo>> {
+public class NashornScriptConfigExtractor implements NashornScript<List<FlowScriptConfigInfo>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NashornScriptConfigExtractor.class);
 
@@ -33,12 +33,12 @@ public class NashornScriptConfigExtractor implements NashornScript<FlowNashornEn
     }
 
     @Override
-    public FlowScript getScript() {
+    public String getScript() {
         return scriptConfig.getScript();
     }
 
     @Override
-    public List<FlowScriptConfigInfo> process(FlowNashornEngineService input) {
+    public List<FlowScriptConfigInfo> process(NashornEngineService input) {
         ScriptObjectMirror configMirror = scriptConfig.process(input);
 
         List<FlowScriptConfigInfo> configInfos = new ArrayList<>();

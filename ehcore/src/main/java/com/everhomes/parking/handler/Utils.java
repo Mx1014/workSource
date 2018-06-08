@@ -60,6 +60,7 @@ public class Utils {
         public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
         public static final String DATE = "yyyy-MM-dd";
         public static final String DATE_TIME_STR = "yyyyMMddHHmmss";
+        public static final String DATE_HOUR_MINUTE = "yyyy-MM-dd HH:mm";
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
@@ -227,8 +228,9 @@ public class Utils {
      */
     static Timestamp getTimestampByAddThisMonth(long source, int month) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(source);
+        calendar.setTimeInMillis(source+1000);
         calendar.add(Calendar.MONTH,month);
+        calendar.add(Calendar.DAY_OF_MONTH,-1);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);

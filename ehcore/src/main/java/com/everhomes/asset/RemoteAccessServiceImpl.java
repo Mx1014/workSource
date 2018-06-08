@@ -17,6 +17,7 @@ import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.RestErrorCode;
 import com.everhomes.rest.asset.*;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.AmountUtil;
@@ -130,7 +131,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     processAmount(paymentBillDTO, cmd);
                     //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
                     List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
-                    putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
+                    putOrderInfo(paymentBillDTO, paymentOrderBillDTO, listBillDetailVOs, cmd);//组装订单信息
                     List<PaymentOrderBillDTO> children = new ArrayList<PaymentOrderBillDTO>();
                     BigDecimal amountReceivable = BigDecimal.ZERO;//amountReceivable:应收(元)：该订单下所有账单应收金额的总和
                     BigDecimal amountReceived = BigDecimal.ZERO;//amountReceived:实收(元)：该订单下所有账单实收金额的总和
@@ -175,7 +176,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     paymentBillDTO.setAmountReceived(amountReceived);
                     paymentBillDTO.setTargetName(targetName);
                     paymentBillDTO.setTargetType(targetType);
-                    paymentBillDTO.setChildren(children);
+                    if(children.size() != 0) {
+                    	paymentBillDTO.setChildren(children);
+                    }
                     result.getList().add(paymentBillDTO);
                 }
             }
@@ -197,7 +200,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         return result;
     }
     
-    private void putOrderInfo(PaymentBillResp dto, List<ListBillDetailVO> listBillDetailVOs, ListPaymentBillCmd cmd) {
+    private void putOrderInfo(PaymentBillResp dto, PaymentOrderBillDTO paymentOrderBillDTO, List<ListBillDetailVO> listBillDetailVOs, ListPaymentBillCmd cmd) {
         String orderRemark2 = dto.getOrderRemark2();
         Long orderId = null;
         try{
@@ -224,10 +227,18 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         dto.setOrderSource(sb.toString());
+        paymentOrderBillDTO.setOrderSource(sb.toString());
         //获得付款人员
         User userById = userProvider.findUserById(order.getUid());
-        dto.setPayerName(userById.getNickName());
-        dto.setPayerTel(userById.getAccountName());
+        if(userById != null) {
+        	dto.setPayerName(userById.getNickName());
+        	paymentOrderBillDTO.setPayerName(userById.getNickName());
+            UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
+            if(userIdentifier != null) {
+            	dto.setPayerTel(userIdentifier.getIdentifierToken());
+            	paymentOrderBillDTO.setPayerTel(userIdentifier.getIdentifierToken());
+            }
+        }
         //获取账单信息：若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
         for( int i = 0; i < orderBills.size(); i ++){
             AssetPaymentOrderBills orderBill = orderBills.get(i);
@@ -302,7 +313,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentBill.setUserId(LongUtil.convert(map.get("userId")));
         paymentBill.setPaymentOrderNum(map.get("supportingOrderNum"));
         paymentBill.setPaymentStatus(IntegerUtil.convert(map.get("paymentStatus")));
-        paymentBill.setPaymentType(IntegerUtil.convert(map.get("paymentType")));
+        Integer paymentType = IntegerUtil.convert(map.get("paymentType"));
+        paymentBill.setPaymentType(convertPaymentType(paymentType));
         paymentBill.setSettlementStatus(IntegerUtil.convert(map.get("settlementStatus")));
         paymentBill.setTransactionType(IntegerUtil.convert(map.get("transactionType")));
         paymentBill.setOrderRemark1(map.get("orderRemark1"));
@@ -334,7 +346,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
     	paymentOrderBillDTO.setUserId(LongUtil.convert(map.get("userId")));
     	paymentOrderBillDTO.setPaymentOrderNum(map.get("supportingOrderNum"));
     	paymentOrderBillDTO.setPaymentStatus(IntegerUtil.convert(map.get("paymentStatus")));
-    	paymentOrderBillDTO.setPaymentType(IntegerUtil.convert(map.get("paymentType")));
+    	Integer paymentType = IntegerUtil.convert(map.get("paymentType"));
+    	paymentOrderBillDTO.setPaymentType(convertPaymentType(paymentType));
     	paymentOrderBillDTO.setSettlementStatus(IntegerUtil.convert(map.get("settlementStatus")));
     	paymentOrderBillDTO.setTransactionType(IntegerUtil.convert(map.get("transactionType")));
     	paymentOrderBillDTO.setOrderRemark1(map.get("orderRemark1"));
@@ -356,6 +369,20 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             paymentOrderBillDTO.setPayTime(format);
         }
         return paymentOrderBillDTO;
+    }
+    
+    private Integer convertPaymentType(Integer paymentType) {
+    	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
+        //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+        //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
+        if(paymentType.equals(1) || paymentType.equals(7) || paymentType.equals(9) || paymentType.equals(12) || paymentType.equals(21)) {
+        	paymentType = 0;//微信
+        }else if(paymentType.equals(8) || paymentType.equals(10) || paymentType.equals(13)) {
+        	paymentType = 1;//支付宝
+        }else {
+        	paymentType = 2;//对公转账
+        }
+        return paymentType;
     }
 
     private List<SortSpec> getListOrderPaymentSorts(List<ReSortCmd> sorts) {
@@ -450,7 +477,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         //缴费时间字段精确到时分，筛选缴费时间到天即可
-        if(cmd.getStartPayTime() != null) {
+        if(cmd.getStartPayTime() != null && cmd.getStartPayTime() != "") {
         	//SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
         	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
             Date start = sdf.parse(cmd.getStartPayTime());
@@ -461,7 +488,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 condition = condition.and(tempCondition);
             }
         }
-        if(cmd.getEndPayTime() != null) {
+        if(cmd.getEndPayTime() != null && cmd.getStartPayTime() != "") {
         	//SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
         	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
             Date end = sdf.parse(cmd.getEndPayTime());
@@ -617,9 +644,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         paymentOrderBillDTO.setSettlementStatus(1);//结算状态：已结算/待结算
         paymentOrderBillDTO.setTransactionType(3);//交易类型，如：手续费/充值/提现/退款等
         paymentOrderBillDTO.setUserId(Long.parseLong("1210"));
-      //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
+        //若支付时一次性支付了多条账单，一个支付订单多条账单的情况，交易明细处仍为账单维度，故多条明细的订单编号可相同！！！
         List<ListBillDetailVO> listBillDetailVOs = new ArrayList<ListBillDetailVO>();
-        putOrderInfo(paymentBillDTO, listBillDetailVOs, cmd);//组装订单信息
+        putOrderInfo(paymentBillDTO,paymentOrderBillDTO, listBillDetailVOs, cmd);//组装订单信息
         List<PaymentOrderBillDTO> children = new ArrayList<PaymentOrderBillDTO>();
         BigDecimal amountReceivable = BigDecimal.ZERO;//amountReceivable:应收(元)：该订单下所有账单应收金额的总和
         BigDecimal amountReceived = BigDecimal.ZERO;//amountReceived:实收(元)：该订单下所有账单实收金额的总和

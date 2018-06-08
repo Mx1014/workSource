@@ -98,6 +98,8 @@ public enum CoordinationLocks {
 
     BILL_STATUS_UPDATE("bill.status.update"),
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
+    SYNC_THIRD_CONTRACT("sync.third.contract"),
+    SYNC_THIRD_CUSTOMER("sync.third.customer"),
 
     TRACKING_PLAN_WARNING_SCHEDULE("tracking.plan.warning.schedule"),
 
