@@ -648,7 +648,7 @@ public RestResponse listNotSettledBill(ListBillsCommand cmd) {
  */
 @RequestMapping("listNotSettledBillDetail")
 @RestReturn(value = ListBillDetailResponse.class)
-public RestResponse listNotSettledBillDetail(ListBillDetailCommand cmd) {
+public RestResponse listNotSettledBillDetail(ListBillDetailCommandStr cmd) {
     ListBillDetailResponse res = assetService.listBillDetail(cmd);
     RestResponse response = new RestResponse(res);
     response.setErrorDescription("OK");
