@@ -1648,8 +1648,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         LOGGER.info("timeout for cmdId=", cmdId);
     }
     
-    List<AesUserKey> listAesUserKeyByUser(User user, ListingLocator locator, Integer count) {
         //TODO cache AesUserKey
+    List<AesUserKey> listAesUserKeyByUser(User user, ListingLocator locator, Integer count) {
         if(locator == null || locator.getAnchor() == null || locator.getAnchor() == 0){
         	locator = new ListingLocator();
         }
@@ -1657,7 +1657,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	count = 60;
         }
 
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), count));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, DoorAccessDriverType.ZUOLIN.getCode(), count));
         
         //TODO when the key is invalid, MUST invalid it and generate a command.
         
@@ -1697,7 +1697,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<AesUserKey> aesUserKeys = this.listAesUserKeyByUser(user, locator, cmd.getPageSize());
+        //避免现网客户端反复取数据,锚点传0就取全部,不返回下一页锚点,待下一版客户端修复后删掉即可  byliuyilin 20180608
+        if(cmd.getPageAnchor() != null && cmd.getPageAnchor() == 0){
+        	cmd.setPageSize(0);
+        }
+        //end 20180608
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, DoorAccessDriverType.ZUOLIN.getCode(), cmd.getPageSize() != null && cmd.getPageSize() >0 ?cmd.getPageSize() + 1 : 0));
+        //TODO when the key is invalid, MUST invalid it and generate a command.
+        List<AesUserKey> aesUserKeys = new ArrayList<AesUserKey>();
+        for(DoorAuth auth : auths) {
+            AesUserKey aesUserKey = generateAesUserKey(user, auth);
+            if(aesUserKey != null) {
+                aesUserKeys.add(aesUserKey);    
+                }
+            }
+        
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(AesUserKey key : aesUserKeys) {
             AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
@@ -1713,9 +1727,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 dtos.add(dto);    
             }
         }
-        
+        Collections.sort(dtos);
         if(cmd.getPageSize() != null && cmd.getPageSize() > 0 && dtos.size() > cmd.getPageSize()){
-        	locator.setAnchor(dtos.get(dtos.size() - 1).getAuthId());
+        	for(DoorAuth auth : auths) {
+        		if(dtos.get(dtos.size() - 1).getAuthId().equals(auth.getId())){
+        			locator.setAnchor(auth.getCreateTime().getTime());
+        		}
+                }
         	dtos.remove(dtos.size() - 1);
         }
         resp.setNextPageAnchor(locator.getAnchor());
@@ -1756,7 +1774,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), cmd.getRightRemote(), cmd.getPageSize());
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), cmd.getRightRemote(), null, cmd.getPageSize());
 
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
@@ -4990,7 +5008,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		User user = UserContext.current().getUser();
 		ListingLocator locator = new ListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, cmd.getPageSize() == null? 0 : cmd.getPageSize());
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, null, cmd.getPageSize() == null? 0 : cmd.getPageSize());
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
             AesUserKeyDTO dto = new AesUserKeyDTO();
