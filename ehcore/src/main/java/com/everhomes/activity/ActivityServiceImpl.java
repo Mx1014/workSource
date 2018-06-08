@@ -817,6 +817,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
 
+        createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getCode());
         createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
 
@@ -826,8 +827,10 @@ public class ActivityServiceImpl implements ActivityService {
         }
         createOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
 
-        //后续修改为新的获取付款方账号接口
-        createOrderCommand.setPayerUserId(roster.getUid());
+        //付款方账号
+        Long payerId = UserContext.currentUserId();
+        PayUserDTO payUserDTO = checkAndCreatePaymentUser(payerId,UserContext.getCurrentNamespaceId());
+        createOrderCommand.setPayerUserId(payUserDTO.getId());
 
         ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getOrganizationId());
         if (activityBizPayee == null) {
@@ -861,6 +864,25 @@ public class ActivityServiceImpl implements ActivityService {
         PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
 
         return callBack;
+    }
+
+    private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
+        PayUserDTO payUserDTO = new PayUserDTO();
+        //根据支付帐号ID列表查询帐号信息
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("checkAndCreatePaymentUser request={}", payerId);
+        }
+        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Arrays.asList(payerId));
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("checkAndCreatePaymentUser response={}", payUserDTOs);
+        }
+        if(payUserDTOs == null || payUserDTOs.size() == 0){
+            //创建个人账号
+            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), namespaceId.toString());
+        }else {
+            payUserDTO = payUserDTOs.get(0);
+        }
+        return payUserDTO;
     }
 
     private PreOrderDTO createPreOrder(CreateOrderCommand cmd) {
@@ -2088,6 +2110,30 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 
 	}
+    private void refundV3(Activity activity, ActivityRoster roster, Long userId){
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+        BigDecimal amount = activity.getChargePrice();
+        if(amount == null){
+            createOrderCommand.setAmount(0L);
+        }
+        createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
+        createOrderCommand.setRefundOrderId(roster.getPayOrderId());
+        createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
+        createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+        CreateOrderRestResponse refundResponse = payServiceV2.createRefundOrder(createOrderCommand);
+
+        if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+            LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+        } else{
+            LOGGER.error("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill  refound error");
+        }
+
+    }
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
 		App app = appProvider.findAppByKey(cmd.getAppKey());
@@ -6113,7 +6159,7 @@ public class ActivityServiceImpl implements ActivityService {
 	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
         GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
         if (activityBizPayee != null) {
-            activityPayeeDTO.setAccountId(activityBizPayee.getId());
+            activityPayeeDTO.setAccountId(activityBizPayee.getBizPayeeId());
         }
         return activityPayeeDTO;
     }
