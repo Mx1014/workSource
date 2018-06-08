@@ -722,11 +722,18 @@ public class CustomerServiceImpl implements CustomerService {
         Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if (org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo   postUri  hotline bannerUri
+            org.setStringTag1(customer.getCorpEmail());
             org.setWebsite(customer.getCorpWebsite());
             org.setUnifiedSocialCreditCode(customer.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(org);
             OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
             if (detail != null) {
+                detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
+                detail.setStringTag1(customer.getCorpEmail());
+                detail.setDescription(customer.getCorpDescription());
+                detail.setCheckinDate(customer.getCorpEntryDate());
+                detail.setPostUri(customer.getPostUri());
+                detail.setDisplayName(customer.getNickName());
                 detail.setAvatar(customer.getCorpLogoUri());
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
@@ -736,12 +743,18 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
-                detail.setOrganizationId(org.getId());
+                detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
+                detail.setStringTag1(customer.getCorpEmail());
+                detail.setDescription(customer.getCorpDescription());
+                detail.setCheckinDate(customer.getCorpEntryDate());
+                detail.setPostUri(customer.getPostUri());
+                detail.setDisplayName(customer.getNickName());
+                detail.setAvatar(customer.getCorpLogoUri());
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
                 detail.setLongitude(customer.getLongitude());
-                detail.setAvatar(customer.getCorpLogoUri());
-                detail.setCreateTime(org.getCreateTime());
+                detail.setPostUri(customer.getPostUri());
+                detail.setContact(customer.getHotline());
                 organizationProvider.createOrganizationDetail(detail);
             }
             addAttachments(org.getId(),customer.getBanner(),UserContext.currentUserId());

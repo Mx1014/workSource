@@ -1035,55 +1035,49 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             try {
                 createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             } catch (Exception e) {
-                //todo:接口过时 没有批量删除
+                //todo:接口过时 没有批量删除 需要基线提供
                 LOGGER.error("create enterprise admin error :{}", e);
             }
             enterpriseCustomer.setId(exist.getId());
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
-            //对比
+            //对比 如果被更新有数据则补上exist
             try {
                 compareCustomerFieldValues(exist, enterpriseCustomer);
             } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
-                LOGGER.error("Invoke compare error :{}", e);
+                LOGGER.error("invoke compare error :{}", e);
             }
             if ((exist.getOrganizationId() == null || exist.getOrganizationId() == 0) && StringUtils.isNotBlank(customerAddressString)) {
-                syncCustomerInfoIntoOrganization(exist);
+                //此种场景有企业管理员 需要自动加入organizationMembers 表 用于后面用户注册激活
+                syncCustomerInfoIntoOrganization(enterpriseCustomer);
+            } else if (exist.getOrganizationId() != null && exist.getOrganizationId() == 0) {
+                //单纯的保持数据一致
+                OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                exist.setOrganizationId(organizationDTO.getId());
+                syncCustomerBasicInfoToOrganziation(exist);
             }
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
-            //修改了客户名称则要同步修改合同里面的客户名称
-            if (!exist.getName().equals(enterpriseCustomer.getName())) {
-                List<Contract> contracts = contractProvider.listContractByCustomerId(exist.getCommunityId(), exist.getId(), CustomerType.ENTERPRISE.getCode());
-                if (contracts != null && contracts.size() > 0) {
-                    for (Contract contract : contracts) {
-                        contract.setCustomerName(enterpriseCustomer.getName());
-                        contractProvider.updateContract(contract);
-                        contractSearcher.feedDoc(contract);
-                    }
-                }
-            }
+            //修改了客户名称则要同步修改合同里面的客户名称 但合同用的customerId 好像没啥用
+            syncCustomerNameToContract(exist, enterpriseCustomer);
             customerService.saveCustomerEvent(3, enterpriseCustomer, exist, (byte) 0);
-            try {
-                if(StringUtils.isNotBlank(customerAdminString))
-                createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
-            } catch (Exception e) {
-                //todo:接口过时 没有批量删除
-                LOGGER.error("create enterprise admin error :{}", e);
-            }
+
             if (StringUtils.isNotBlank(customerAddressString)) {
                 customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
                 createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
             }
-            /*if (StringUtils.isEmpty(customerAddressString)) {
-                organizationProvider.deleteOrganizationById(exist.getOrganizationId());
-                Organization organization = organizationProvider.findOrganizationById(exist.getOrganizationId());
-                if (organization != null){
-                    organizationSearcher.feedDoc(organization);
+        }
+    }
+
+    private void syncCustomerNameToContract(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer) {
+        if (!exist.getName().equals(enterpriseCustomer.getName())) {
+            List<Contract> contracts = contractProvider.listContractByCustomerId(exist.getCommunityId(), exist.getId(), CustomerType.ENTERPRISE.getCode());
+            if (contracts != null && contracts.size() > 0) {
+                for (Contract contract : contracts) {
+                    contract.setCustomerName(enterpriseCustomer.getName());
+                    contractProvider.updateContract(contract);
+                    contractSearcher.feedDoc(contract);
                 }
-                enterpriseCustomer.setOrganizationId(0L);
-                //there is no need to feedDoc
-                customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-            }*/
+            }
         }
     }
 
@@ -1106,41 +1100,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     }
                 }
             }
-        }
-    }
-
-    private void syncCustomerInfoIntoOrganization(EnterpriseCustomer exist) {
-        //这里增加入驻信息后自动同步到企业管理
-        OrganizationDTO organizationDTO = customerService.createOrganization(exist);
-        exist.setOrganizationId(organizationDTO.getId());
-        dbProvider.execute((TransactionStatus status) -> {
-            List<CustomerAdminRecord> untrackAdmins = customerProvider.listEnterpriseCustomerAdminRecords(exist.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
-            if (untrackAdmins != null && untrackAdmins.size() > 0) {
-                untrackAdmins.forEach((r)->{
-                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
-                    cmd.setContactName(r.getContactName());
-                    cmd.setContactToken(r.getContactToken());
-                    cmd.setOrganizationId(exist.getOrganizationId());
-                    rolePrivilegeService.createOrganizationAdmin(cmd);
-                });
-                customerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(exist.getId(), exist.getNamespaceId());
-                exist.setAdminFlag(com.everhomes.rest.approval.TrueOrFalseFlag.TRUE.getCode());
-            }
-            return null;
-        });
-
-        List<EnterpriseAttachment> attachments = customerProvider.listEnterpriseCustomerPostUri(exist.getId());
-        if (attachments != null && attachments.size() > 0) {
-            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
-            attachments.forEach((a) -> {
-                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
-                bannerUrl.setContentType(a.getContentType());
-                bannerUrl.setContentUri(a.getContentUri());
-                bannerUrls.add(bannerUrl);
-            });
-            addAttachments(exist.getOrganizationId(), bannerUrls, UserContext.currentUserId());
-            Organization createOrganization = organizationProvider.findOrganizationById(exist.getOrganizationId());
-            organizationSearcher.feedDoc(createOrganization);
         }
     }
 
@@ -1260,6 +1219,45 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                    LOGGER.error("create organization admin erro :{}", e);
                }
             });
+        }
+    }
+
+    private void syncCustomerInfoIntoOrganization(EnterpriseCustomer exist) {
+        //这里增加入驻信息后自动同步到企业管理
+        syncCustomerBasicInfoToOrganziation(exist);
+        dbProvider.execute((TransactionStatus status) -> {
+            List<CustomerAdminRecord> untrackAdmins = customerProvider.listEnterpriseCustomerAdminRecords(exist.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
+            if (untrackAdmins != null && untrackAdmins.size() > 0) {
+                untrackAdmins.forEach((r)->{
+                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                    cmd.setContactName(r.getContactName());
+                    cmd.setContactToken(r.getContactToken());
+                    cmd.setOrganizationId(exist.getOrganizationId());
+                    rolePrivilegeService.createOrganizationAdmin(cmd);
+                });
+                customerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(exist.getId(), exist.getNamespaceId());
+                exist.setAdminFlag(com.everhomes.rest.approval.TrueOrFalseFlag.TRUE.getCode());
+            }
+            return null;
+        });
+
+    }
+
+    private void syncCustomerBasicInfoToOrganziation(EnterpriseCustomer exist) {
+        OrganizationDTO organizationDTO = customerService.createOrganization(exist);
+        exist.setOrganizationId(organizationDTO.getId());
+        List<EnterpriseAttachment> attachments = customerProvider.listEnterpriseCustomerPostUri(exist.getId());
+        if (attachments != null && attachments.size() > 0) {
+            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
+            attachments.forEach((a) -> {
+                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
+                bannerUrl.setContentType(a.getContentType());
+                bannerUrl.setContentUri(a.getContentUri());
+                bannerUrls.add(bannerUrl);
+            });
+            addAttachments(exist.getOrganizationId(), bannerUrls, UserContext.currentUserId());
+            Organization createOrganization = organizationProvider.findOrganizationById(exist.getOrganizationId());
+            organizationSearcher.feedDoc(createOrganization);
         }
     }
 
