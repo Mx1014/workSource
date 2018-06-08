@@ -416,12 +416,12 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /archives/ArchivesNotification</b>
+     * <b>URL: /archives/setArchivesNotification</b>
      * <p>12.人事档案提醒设置</p>
      */
-    @RequestMapping("ArchivesNotification")
+    @RequestMapping("setArchivesNotification")
     @RestReturn(value = String.class)
-    public RestResponse ArchivesNotification(ArchivesNotificationCommand cmd){
+    public RestResponse setArchivesNotification(ArchivesNotificationCommand cmd){
         archivesService.setArchivesNotification(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
