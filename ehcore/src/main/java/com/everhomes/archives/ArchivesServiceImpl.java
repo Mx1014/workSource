@@ -212,8 +212,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         });
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
-                //  TODO:使用新调动接口
-                /*TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
+                TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
                 transferCommand.setOrganizationId(cmd.getOrganizationId());
                 transferCommand.setDetailIds(cmd.getDetailIds());
                 transferCommand.setDepartmentIds(cmd.getDepartmentIds());
@@ -221,12 +220,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 transferCommand.setJobLevelIds(cmd.getJobLevelIds());
                 //  调整部门、岗位、职级并同步到detail表
                 organizationService.transferOrganizationPersonels(transferCommand);
-
-                //  添加档案记录
-                TransferArchivesEmployeesCommand logCommand = ConvertHelper.convert(cmd, TransferArchivesEmployeesCommand.class);
-                logCommand.setEffectiveTime(String.valueOf(ArchivesUtil.currentDate()));
-                logCommand.setTransferType(ArchivesTransferType.OTHER.getCode());
-                addTransferLogs(logCommand);*/
             }
             return null;
         });
@@ -1662,8 +1655,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (configurations.size() == 0)
             return;
         coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_CONFIGURATION.getCode()).tryEnter(() -> {
-            for (ArchivesOperationalConfiguration configuration : configurations)
+            for (ArchivesOperationalConfiguration configuration : configurations){
+                //  1.execute it
                 resolveArchivesConfiguration(configuration);
+                //  2.update it's status
+                configuration.setStatus(ArchivesOperationStatus.COMPLETE.getCode());
+                archivesProvider.updateOperationalConfiguration(configuration);
+            }
 
         });
     }
