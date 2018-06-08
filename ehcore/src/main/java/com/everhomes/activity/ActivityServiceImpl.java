@@ -2,6 +2,7 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalEventBus;
@@ -34,6 +35,8 @@ import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
 import com.everhomes.organization.*;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -112,6 +115,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -249,7 +253,9 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Autowired
 	private PayService payService;
-	
+
+	@Autowired
+    private com.everhomes.paySDK.api.PayService payServiceV2;
 	
     @PostConstruct
     public void setup() {
@@ -268,7 +274,7 @@ public class ActivityServiceImpl implements ActivityService {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         activity.setNamespaceId(namespaceId);
         activity.setGuest(cmd.getGuest());
-        
+
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
         
@@ -329,7 +335,10 @@ public class ActivityServiceImpl implements ActivityService {
         //add by xiongying, 添加类型id， 20161117
         activity.setCategoryId(cmd.getCategoryId());
         activity.setContentCategoryId(cmd.getContentCategoryId());
-        
+
+        //add by liangyanlong, 增加企业ID，用户付款时，查询付款方.
+        activity.setOrganizationId(cmd.getOrganizationId());
+
         activityProvider.createActity(activity);
         createScheduleForActivity(activity);
         
@@ -793,7 +802,103 @@ public class ActivityServiceImpl implements ActivityService {
 		return callBack;
 	}
 
-	@Override
+    @Override
+    public PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd) {
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
+
+        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+
+        createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+        createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
+
+        BigDecimal amout = activity.getChargePrice();
+        if(amout == null){
+            createOrderCommand.setAmount(0L);
+        }
+        createOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
+
+        //付款方账号
+        Long payerId = UserContext.currentUserId();
+        PayUserDTO payUserDTO = checkAndCreatePaymentUser(payerId,UserContext.getCurrentNamespaceId());
+        createOrderCommand.setPayerUserId(payUserDTO.getId());
+
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getOrganizationId());
+        if (activityBizPayee == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no payee.");
+        }
+        //收款方账号
+        createOrderCommand.setPayeeUserId(activityBizPayee.getBizPayeeId());
+        GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+        timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+        Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+
+        createOrderCommand.setOrderType(com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+        createOrderCommand.setExpirationMillis(expiredTime);
+        createOrderCommand.setGoodsName("活动报名");
+
+        createOrderCommand.setClientAppName(cmd.getClientAppName());
+
+        //微信公众号支付，重新设置ClientName，设置支付方式和参数
+        if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
+
+            if(createOrderCommand.getClientAppName() == null){
+                Integer namespaceId = UserContext.getCurrentNamespaceId();
+                createOrderCommand.setClientAppName("wechat_" + namespaceId);
+            }
+            createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+        }
+
+
+        PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
+
+        return callBack;
+    }
+
+    private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
+        PayUserDTO payUserDTO = new PayUserDTO();
+        //根据支付帐号ID列表查询帐号信息
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("checkAndCreatePaymentUser request={}", payerId);
+        }
+        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Arrays.asList(payerId));
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("checkAndCreatePaymentUser response={}", payUserDTOs);
+        }
+        if(payUserDTOs == null || payUserDTOs.size() == 0){
+            //创建个人账号
+            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), namespaceId.toString());
+        }else {
+            payUserDTO = payUserDTOs.get(0);
+        }
+        return payUserDTO;
+    }
+
+    private PreOrderDTO createPreOrder(CreateOrderCommand cmd) {
+        CreateOrderRestResponse createOrderRestResponse = this.payServiceV2.createPurchaseOrder(cmd);
+        PreOrderDTO callback = new PreOrderDTO();
+        if (createOrderRestResponse.getErrorCode() != 200) {
+            LOGGER.error("create order fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "create order fail");
+        }
+        OrderCommandResponse response = createOrderRestResponse.getResponse();
+        callback = ConvertHelper.convert(response, PreOrderDTO.class);
+        //缺设置付款方式
+        return callback;
+    }
+
+    @Override
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
 //		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
 
@@ -2004,6 +2109,30 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 
 	}
+    private void refundV3(Activity activity, ActivityRoster roster, Long userId){
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+        BigDecimal amount = activity.getChargePrice();
+        if(amount == null){
+            createOrderCommand.setAmount(0L);
+        }
+        createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
+        createOrderCommand.setRefundOrderId(roster.getPayOrderId());
+        createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
+        createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+        CreateOrderRestResponse refundResponse = payServiceV2.createRefundOrder(createOrderCommand);
+
+        if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+            LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+        } else{
+            LOGGER.error("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill  refound error");
+        }
+
+    }
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
 		App app = appProvider.findAppByKey(cmd.getAppKey());
@@ -6018,6 +6147,112 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		
 	}
+
+    @Override
+    public GetActivityPayeeDTO getActivityPayee(GetActivityPayeeCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
+        if (activityBizPayee != null) {
+            activityPayeeDTO.setAccountId(activityBizPayee.getBizPayeeId());
+        }
+        return activityPayeeDTO;
+    }
+
+    @Override
+    public ListActivityPayeeResponse listActivityPayee(ListActivityPayeeCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+	    List<ActivityPayeeDTO> dtoList = new ArrayList<>();
+	    String prefix = "EhOrganizations";
+	    List<PayUserDTO> list = this.payServiceV2.getPayUserList(prefix + cmd.getOrganizationId().toString(), String.valueOf(0));
+	    if (list != null && list.size() > 0) {
+            for (PayUserDTO r : list) {
+                ActivityPayeeDTO activityPayeeDTO = new ActivityPayeeDTO();
+                activityPayeeDTO.setAccountId(r.getId());
+                activityPayeeDTO.setAccountName(r.getUserName());
+                Integer userType = r.getUserType();
+                if(userType != null && userType.equals(2)) {
+                    activityPayeeDTO.setAccountType(OwnerType.ORGANIZATION.getCode());
+                } else {
+                    activityPayeeDTO.setAccountType(OwnerType.USER.getCode());
+                }
+                activityPayeeDTO.setAccountAliasName(r.getUserAliasName());
+                // 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                Integer registerStatus = r.getRegisterStatus();
+                if(registerStatus != null && registerStatus.intValue() == 1) {
+                    activityPayeeDTO.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                } else {
+                    activityPayeeDTO.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                }
+                dtoList.add(activityPayeeDTO);
+            }
+        }
+        ListActivityPayeeResponse response = new ListActivityPayeeResponse();
+        response.setDtos(dtoList);
+        return response;
+    }
+
+    @Override
+    public void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+        if (cmd.getPayeeId() == null) {
+            LOGGER.error("payeeId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "payeeId cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        if (activityBizPayee == null) {
+            ActivityBizPayee persist = new ActivityBizPayee();
+            persist.setOrganizationId(cmd.getOrganizationId());
+            persist.setBizPayeeId(cmd.getPayeeId());
+            this.activityProvider.CreateActivityPayee(persist);
+        }else {
+            if (activityBizPayee.getBizPayeeId() != cmd.getPayeeId()) {
+                activityBizPayee.setBizPayeeId(cmd.getPayeeId());
+                this.activityProvider.updateActivityPayee(activityBizPayee);
+            }
+        }
+    }
+
+    @Override
+    public CheckPayeeIsUsefulResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+        CheckPayeeIsUsefulResponse checkPayeeIsUsefulResponse = new CheckPayeeIsUsefulResponse();
+        checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.NULL.getCode());
+
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        List<Long> idList = new ArrayList<>();
+        idList.add(activityBizPayee.getBizPayeeId());
+        List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);
+        if (list != null && list.size() > 0) {
+            PayUserDTO payUserDTO = (PayUserDTO)list.get(0);
+            if (payUserDTO.getRegisterStatus() == 0) {
+                checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.UNDER_REVIEW.getCode());
+                return checkPayeeIsUsefulResponse;
+            }
+            if (payUserDTO.getRegisterStatus() == 1) {
+                checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.IN_USE.getCode());
+                return checkPayeeIsUsefulResponse;
+            }
+        }
+        return checkPayeeIsUsefulResponse;
+    }
 
 //	@Override
 //	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {

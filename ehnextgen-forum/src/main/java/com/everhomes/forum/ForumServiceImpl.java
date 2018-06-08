@@ -4491,6 +4491,11 @@ public class ForumServiceImpl implements ForumService {
                     namespaceId = UserContext.getCurrentNamespaceId();
                 }
 
+                ActivityPostCommand activityPostCommand = (ActivityPostCommand)StringHelper.fromJsonString(post.getEmbeddedJson(), ActivityPostCommand.class);
+                Long organizationId = 0L;
+                if (activityPostCommand != null) {
+                    organizationId = activityPostCommand.getOrganizationId();
+                }
 
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
                     LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl 
@@ -4513,13 +4518,13 @@ public class ForumServiceImpl implements ForumService {
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
                         }
-                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
+                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup + "&organizationID=" + organizationId);
                 	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
                         //投票帖子用自己的分享链接 modified by yanjun 220171227
                         relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
-                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&organizationID=" + organizationId);
                     }else {
-                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&organizationID=" + organizationId);
                 	}
                 }
             } catch(Exception e) {

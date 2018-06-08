@@ -22,7 +22,7 @@ import com.everhomes.atomikos.AtomikosHelper;
  * @author Kelven Yang
  *
  */
-@ComponentScan(value={"com.everhomes","com.everhome"})
+@ComponentScan(value={"com.everhomes"})
 @EnableAutoConfiguration(exclude={
 //    XADataSourceAutoConfiguration.class,
     DataSourceAutoConfiguration.class, 

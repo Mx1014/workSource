@@ -1,7 +1,7 @@
 
 package com.everhomes.asset;
 
-import com.everhome.paySDK.pojo.PayUserDTO;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
@@ -17,8 +17,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -753,6 +755,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //        cmd2pay.setPaymentParams(paymentParamsDTO);
         
         //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+        cmd.setBillGroupId(427L);
         PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
         if(paymentBillGroup != null) {
         	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
@@ -1686,6 +1689,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	}else {
     		return assetPayService.listBizPayeeAccounts(cmd.getOrganizationId(), "0", String.valueOf(cmd.getCommunityId()));
     	}
+    }
+    
+    public void payNotify(OrderPaymentNotificationCommand cmd) {
+    	PaymentCallBackHandler handler = new Zuolin_PayCallBack();
+    	//支付模块回调接口，通知支付结果
+    	assetPayService.payNotify(cmd, handler);
     }
     
 }

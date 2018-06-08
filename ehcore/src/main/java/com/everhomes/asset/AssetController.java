@@ -21,6 +21,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
@@ -30,6 +31,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -1355,6 +1357,21 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
+    
+    /**
+	 * <b>URL: /asset/payNotify</b>
+	 * <p>支付模块回调接口，通知支付结果</p>
+	 */
+	@RequestMapping("payNotify")
+	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
+	public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
+		assetService.payNotify(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
 }
 
