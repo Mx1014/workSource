@@ -36,7 +36,7 @@ public class ContractChargingChangeEventDTO {
     private Long changeStartTime;
     private Long changeExpiredTime;
     @ItemType(BuildingApartmentDTO.class)
-    private List<BuildingApartmentEventDTO> apartments;
+    private List<BuildingApartmentDTO> apartments;
     private String remark;
     // 增加免租天数
     private Integer changeDurationDays;
@@ -100,10 +100,11 @@ public class ContractChargingChangeEventDTO {
 	public void setChangeExpiredTime(Long changeExpiredTime) {
 		this.changeExpiredTime = changeExpiredTime;
 	}
-	public List<BuildingApartmentEventDTO> getApartments() {
+	
+	public List<BuildingApartmentDTO> getApartments() {
 		return apartments;
 	}
-	public void setApartments(List<BuildingApartmentEventDTO> apartments) {
+	public void setApartments(List<BuildingApartmentDTO> apartments) {
 		this.apartments = apartments;
 	}
 	public String getRemark() {
@@ -174,7 +175,7 @@ public class ContractChargingChangeEventDTO {
 		if (changeRange == null) {
 			if (other.changeRange != null)
 				return false;
-		} else if (!changeRange.equals(other.changeRange))
+		} else if (!((changeRange.compareTo(other.changeRange))==0))
 			return false;
 		if (changeStartTime == null) {
 			if (other.changeStartTime != null)
@@ -212,6 +213,10 @@ public class ContractChargingChangeEventDTO {
 		} else if (!remark.equals(other.remark))
 			return false;
 		return true;
+	}
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
     
     

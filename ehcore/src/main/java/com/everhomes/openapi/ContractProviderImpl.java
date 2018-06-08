@@ -57,6 +57,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.varField.FieldItem;
 import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
@@ -815,7 +816,7 @@ public class ContractProviderImpl implements ContractProvider {
 	public void saveContractEventAboutChargingItem(int opearteType, Contract contract,ContractChargingItem contractChargingItem) {
 		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:UPDATE
 		HashMap<String, String> dataMap = new HashMap<>();
-		String chargingItemName = assetProvider.findChargingItemNameById(contractChargingItem.getId());
+		String chargingItemName = assetProvider.findChargingItemNameById(contractChargingItem.getChargingItemId());
 		dataMap.put("chargingItemName", chargingItemName);
 		String content = null;
 		switch(opearteType){
@@ -953,22 +954,27 @@ public class ContractProviderImpl implements ContractProvider {
 		                    "reflect exception");
 				}
 				
+				//处理 首付总额、押金 字段
 				if(null != objNew || null != objOld){
-					//解决前端传过来的值和后端获取的值不等的问题（比如前端传1000，后端获取的是1000.00,如不处理则会判断为不相等）
-					if ("downpayment".equals(field.getFieldName()) && null != objNew && null != objOld) {
-						BigDecimal newDownpayment = (BigDecimal)objNew;
-						BigDecimal oldDownpayment = (BigDecimal)objOld;
-						if (newDownpayment.compareTo(oldDownpayment)==0) {
-							continue;
+					//解决前端传过来的数值和后端获取的数值不等的问题（比如前端传1000，后端获取的是1000.00,如不处理则会判断为不相等）
+					if(null != objNew && null != objOld){
+						if ("downpayment".equals(field.getFieldName()) || "deposit".equals(field.getFieldName())) {
+							BigDecimal newDigit = (BigDecimal)objNew;
+							BigDecimal oldDigit = (BigDecimal)objOld;
+							if (newDigit.compareTo(oldDigit)==0) {
+								continue;
+							}
 						}
 					}
+					
 					if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
 						String  content = "";
 						String  newData = objNew == null ? "空" : objNew.toString();
 						String  oldData = objOld == null ? "空" : objOld.toString();
                         LOGGER.debug("compareContract FieldName: {}; newData: {}; oldData: {}",
                                 field.getFieldName(), newData, oldData);
-						if(field.getFieldName().lastIndexOf("ItemId") > -1){
+						
+                        if(field.getFieldName().lastIndexOf("ItemId") > -1){
 							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
 					        	newData = levelItemNew.getItemDisplayName();
@@ -978,7 +984,18 @@ public class ContractProviderImpl implements ContractProvider {
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
 						}
-
+						//处理 合同状态 字段
+						if("status".equals(field.getFieldName())){
+							FieldItem fieldItemsNew = fieldProvider.findFieldItemByBusinessValue(field.getFieldId(),(Byte)objNew);
+							if(fieldItemsNew != null) {
+					        	newData = fieldItemsNew.getDisplayName();
+					        }
+							FieldItem fieldItemsOld = fieldProvider.findFieldItemByBusinessValue(field.getFieldId(),(Byte)objOld);
+							if(fieldItemsOld != null) {
+					        	oldData = fieldItemsOld.getDisplayName();
+					        }
+						}
+						
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
                         if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
                             ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));

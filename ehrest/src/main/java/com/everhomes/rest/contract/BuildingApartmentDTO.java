@@ -61,5 +61,4 @@ public class BuildingApartmentDTO {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
 }

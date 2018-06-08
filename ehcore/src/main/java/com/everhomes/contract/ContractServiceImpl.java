@@ -1231,12 +1231,12 @@ public class ContractServiceImpl implements ContractService {
 				map.remove(change.getId());
 				//记录合同日志 by tangcen
 				if (changeType.equals(ChangeType.ADJUST)) {
-					if (compareContractChargingChange(contractChargingChange, exist)) {
+					if (!compareContractChargingChange(contractChargingChange, exist)) {
 						contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.ADJUST_UPDATE,contract,contractChargingChange);
 					}	
 				}else if (changeType.equals(ChangeType.FREE)) {
-					if (compareContractChargingChange(contractChargingChange, exist)) {
-						contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.ADJUST_UPDATE,contract,contractChargingChange);
+					if (!compareContractChargingChange(contractChargingChange, exist)) {
+						contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.FREE_UPDATE,contract,contractChargingChange);
 					}
 				}
 			}
@@ -1455,11 +1455,14 @@ public class ContractServiceImpl implements ContractService {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DENUNCIATION, cmd.getOrgId(), cmd.getCommunityId());
 		}
 		Contract contract = checkContract(cmd.getId());
+		Contract exist = checkContract(cmd.getId());
 		contract.setStatus(ContractStatus.DENUNCIATION.getCode());
 		contract.setDenunciationReason(cmd.getDenunciationReason());
 		contract.setDenunciationUid(cmd.getDenunciationUid());
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
 		contractProvider.updateContract(contract);
+		//记录合同事件日志，by tangcen
+		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		contractSearcher.feedDoc(contract);
 //		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
 //		assetService.deleteUnsettledBillsOnContractId(contract.getId());
@@ -1490,7 +1493,10 @@ public class ContractServiceImpl implements ContractService {
 			contract.setInvalidTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			contract.setInvalidUid(UserContext.currentUserId());
 			contract.setStatus(cmd.getResult());
+			Contract exist = checkContract(cmd.getId());
 			contractProvider.updateContract(contract);
+			//记录合同事件日志，by tangcen
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 			contractSearcher.feedDoc(contract);
 //			//todo 将此合同关联的关联的未出账单删除，但账单记录着不用
 //			assetService.deleteUnsettledBillsOnContractId(contract.getId());
@@ -1569,7 +1575,10 @@ public class ContractServiceImpl implements ContractService {
 				}
 
 				contract.setStatus(cmd.getResult());
+				Contract exist = checkContract(cmd.getId());
 				contractProvider.updateContract(contract);
+				//记录合同事件日志，by tangcen
+				contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 				contractSearcher.feedDoc(contract);
 				if(cmd.getPaymentFlag() == 1) {
 					addToFlowCase(contract, flowcasePaymentContractOwnerType);
@@ -1595,7 +1604,10 @@ public class ContractServiceImpl implements ContractService {
 		}
 		contract.setStatus(ContractStatus.ACTIVE.getCode());
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		Contract exist = checkContract(cmd.getId());
 		contractProvider.updateContract(contract);
+		//记录合同事件日志，by tangcen
+		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		contractSearcher.feedDoc(contract);
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		List<Long> contractAddressIds = new ArrayList<>();
