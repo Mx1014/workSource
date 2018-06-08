@@ -99,7 +99,7 @@ public class ParkingBusinessPayeeAccountProviderImpl implements ParkingBusinessP
 			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.PARKING_LOT_ID.eq(parkingLotId));
 		}
 		if(bussiness!=null){
-			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.BUSINESSTYPE.eq(bussiness));
+			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.BUSINESS_TYPE.eq(bussiness));
 		}
 		if(id!=null){
 			condition=condition.and(Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.ID.notEqual(id));
