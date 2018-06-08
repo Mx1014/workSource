@@ -3860,7 +3860,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(org.getGroupType())) {
                         OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                         //物业或业委增加小区Id和小区name信息
-                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                        if (org.getOrganizationType() != null && (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode()))) {
                             this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                         }
                         tempSimpleOrgDTO.setContactName(member.getContactName());
