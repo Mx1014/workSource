@@ -295,6 +295,31 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
+    public Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        Map<Long, ScopeFieldGroup> groups = new HashMap<>();
+        SelectQuery<EhVarFieldGroupScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_GROUP_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.MODULE_NAME.eq(moduleName));
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
+        if(communityId != null) {
+            query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.eq(communityId));
+        }
+
+        if(communityId == null) {
+            query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.isNull());
+        }
+        query.fetch().map((r) -> {
+            groups.put(r.getId(), ConvertHelper.convert(r, ScopeFieldGroup.class));
+            return null;
+        });
+
+        return groups;
+    }
+
+    @Override
     public List<FieldGroup> listFieldGroups(List<Long> ids) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
