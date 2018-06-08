@@ -16,11 +16,14 @@ import com.everhomes.util.StringHelper;
 	* <li>pageSize: 获取的数据条数，如需所有传空</li>
 	* <li>anchor: 锚点</li>
 	* <li>isByFlow: 是否根据工作流获取，用于客户端 1-根据工作流获取 0-不根据工作流获取</li>
+	* <li>appId: 后台校验权限时需要添加应用id</li>
+	* <li>currentPMId: 后台校验权限时需要添加管理公司id</li>
 	* </ul>
 	*  @author
 	*  huangmingbo 2018年5月17日
 **/
 public class ListServiceAllianceProvidersCommand {
+	
 	@NotNull
 	private Integer namespaceId;
     @NotNull
@@ -42,6 +45,9 @@ public class ListServiceAllianceProvidersCommand {
     
     private Byte isByFlow;
     
+	private Long appId;	
+	
+	private Long currentPMId;
 
 	@Override
     public String toString() {
@@ -126,6 +132,22 @@ public class ListServiceAllianceProvidersCommand {
 
 	public void setIsByFlow(Byte isByFlow) {
 		this.isByFlow = isByFlow;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
 	}
 
 }

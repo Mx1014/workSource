@@ -71,6 +71,8 @@ import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -95,7 +97,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
-public class RemindServiceImpl implements RemindService {
+public class RemindServiceImpl implements RemindService, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemindServiceImpl.class);
     private static final String DEFAULT_CATEGORY_NAME = "默认分类";
     private static final int FETCH_SIZE = 2000;
@@ -123,7 +125,9 @@ public class RemindServiceImpl implements RemindService {
     @Autowired
     private ScheduleProvider scheduleProvider;
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         // 现网是集群部署，这个判断是为了防止定时任务在多台机器执行
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
@@ -135,6 +139,13 @@ public class RemindServiceImpl implements RemindService {
         }
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
     @Override
     public GetRemindCategoryColorsResponse getRemindCategoryColors() {
         String colours = configurationProvider.getValue(ConfigConstants.REMIND_COLOUR_LIST, "");

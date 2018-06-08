@@ -40,7 +40,9 @@ public class PushMessageResultProviderImpl implements PushMessageResultProvider 
      */
     @Override
     public void createPushMessageResult(PushMessageResult pushMessageResult) {
-        long id = this.shardingProvider.allocShardableContentId(EhPushMessageResults.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhPushMessageResults.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhPushMessageResults.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPushMessageResults.class, id));
         pushMessageResult.setId(id);
         pushMessageResult.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
