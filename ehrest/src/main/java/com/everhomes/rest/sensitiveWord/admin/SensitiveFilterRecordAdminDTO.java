@@ -8,8 +8,8 @@ import com.everhomes.util.StringHelper;
  *     <li>id: id</li>
  *     <li>namespaceId: 域空间ID</li>
  *     <li>sensitiveWords: 敏感词</li>
- *     <li>appId: 应用ID</li>
- *     <li>appName: 应用名称</li>
+ *     <li>moduleId: 应用ID</li>
+ *     <li>moduleName: 应用名称</li>
  *     <li>creatorUid: 发布人ID</li>
  *     <li>creatorName：发布人名称</li>
  *     <li>phone: 发布人手机号码</li>
@@ -22,8 +22,8 @@ public class SensitiveFilterRecordAdminDTO {
     private Long id;
     private Long namespaceId;
     private String sensitiveWords;
-    private Long appId;
-    private String appName;
+    private Long moduleId;
+    private String moduleName;
     private Long creatorUid;
     private String creatorName;
     private String phone;
@@ -54,20 +54,20 @@ public class SensitiveFilterRecordAdminDTO {
         this.sensitiveWords = sensitiveWords;
     }
 
-    public Long getAppId() {
-        return appId;
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
-    public String getAppName() {
-        return appName;
+    public String getModuleName() {
+        return moduleName;
     }
 
-    public void setAppName(String appName) {
-        this.appName = appName;
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 
     public Long getCreatorUid() {
