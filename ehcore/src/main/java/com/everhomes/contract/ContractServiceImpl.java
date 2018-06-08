@@ -1794,6 +1794,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				|| ContractStatus.EXPIRING.equals(ContractStatus.fromStatus(contract.getStatus()))  || ContractStatus.DRAFT.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			flag = true;
 		}
+		if (ContractApplicationScene.PROPERTY.equals(cmd.getContractApplicationScene())) {
+			flag = false;
+		}
 		contract.setStatus(ContractStatus.INACTIVE.getCode());
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
