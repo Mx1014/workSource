@@ -77,7 +77,9 @@ public class AddressProviderImpl implements AddressProvider {
     
     @Override
     public void createAddress(Address address) {
-        long id = shardingProvider.allocShardableContentId(EhAddresses.class).second(); 
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhAddresses.class);
+        //long id = shardingProvider.allocShardableContentId(EhAddresses.class).second(); 
 
         address.setId(id); 
         address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
@@ -94,7 +96,9 @@ public class AddressProviderImpl implements AddressProvider {
     @Override
     public void createAddress2(Address address) {
     	long startTime = System.currentTimeMillis();
-        long id = shardingProvider.allocShardableContentId(EhAddresses.class).second(); 
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+    	long id = this.dbProvider.allocPojoRecordId(EhAddresses.class);
+        //long id = shardingProvider.allocShardableContentId(EhAddresses.class).second(); 
 
         address.setId(id); 
         address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 

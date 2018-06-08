@@ -1785,7 +1785,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//否则就没有加入
 			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByContactTokenAndOrgId(cmd.getOrganizationId(),cmd.getContactToken());
 			//判断
-			if(organizationMember != null){
+			if(organizationMember != null && organizationMember.getStatus() != null && organizationMember.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
 				//说明之前已经加入了公司
 				response.setIsJoined(TrueOrFalseFlag.TRUE.getCode());
 			}else{
@@ -2663,6 +2663,29 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		return new OrganizationContactDTO();
 	}
+	
+	   private Long getOrUpdateTopAdministratorByOrganizationId(Long orgId, List<OrganizationMember> members){
+	        Organization org = checkOrganization(orgId);
+	        if(org != null) {
+	            if (org.getAdminTargetId() != null && !org.getAdminTargetId().equals(0l)) {
+	                return org.getAdminTargetId();
+	            } else {
+	                //设置默认超级管理员
+	                if(members != null && members.size() > 0) {
+	                    for(OrganizationMember mb : members) {
+	                        if(mb.getTargetId() != null) {
+	                            org.setAdminTargetId(mb.getTargetId());
+	                            organizationProvider.updateOrganization(org);
+	                            break;
+	                        }
+	                            
+	                    }
+	                    
+	                }
+	            }
+	        }
+	        return null;
+	    }
 
 	@Override
     public GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd) {
@@ -2689,21 +2712,24 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 		//modify by lei yuan
-		Long organizationId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		if(organizationId != null && organizationId.equals(cmd.getUserId())){
+		Long topId = getOrUpdateTopAdministratorByOrganizationId(cmd.getOrganizationId(), members);
+		if(topId != null && topId.equals(cmd.getUserId())){
 			response.setIsTopAdminFlag(AllFlagType.YES.getCode());
-
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
-			if(identifier != null){
-				response.setTopAdminToken(identifier.getIdentifierToken());
-			}
-			User user = userProvider.findUserById(cmd.getUserId());
-			if(user != null){
-				response.setTopAdminName(user.getNickName());
-			}
 		}else{
 			response.setIsTopAdminFlag(AllFlagType.NO.getCode());
 		}
+		
+		if(topId != null) {
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
+			if(identifier != null){
+				response.setTopAdminToken(identifier.getIdentifierToken());
+			}
+			User user = userProvider.findUserById(topId);
+			if(user != null){
+				response.setTopAdminName(user.getNickName());
+			}			
+		}
+
 
 		return response;
     }
@@ -4140,5 +4166,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 //		for (int i = 1; i < 13; i++ ) {
 //			System.out.println("INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, '伊湾尊府" + i + "号楼', '" + i + "号楼', 0, '0755-82738680', '浑南区朗日街19-" + i + "号楼', NULL, 41.843665, 123.455102, 'wxry133m02s0', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999993);");
 //		}
+	}
+
+
+
+	@Override
+	public String findTopAdminByOrgId(FindTopAdminByOrgIdCommand cmd) {
+		List<OrganizationMember> members =
+				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+						cmd.getOrgId(), OrganizationMemberGroupType.MANAGER.getCode(),
+						OrganizationMemberTargetType.USER.getCode(), 1000, new ListingLocator());
+		
+		Long topId = this.getOrUpdateTopAdministratorByOrganizationId(cmd.getOrgId(), members);
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
+		return identifier.getIdentifierToken();
 	}
 }

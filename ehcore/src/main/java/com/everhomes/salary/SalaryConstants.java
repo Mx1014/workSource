@@ -30,5 +30,6 @@ public class SalaryConstants {
 	public static int ERROR_FILE_IS_EMPTY = 10005;
 	public static Integer ERROR_CHECK_CONTACT = 10006;
 
-	public static int ERROR_EXCEL_TITILE = 10007;
+	public static int ERROR_EXCEL_TITILE = 10008;
+	public static int ERROR_EXCEL_BLANK = 10009;
 }

@@ -818,7 +818,7 @@ public class AclinkController extends ControllerBase {
      * @return
      */
     @RequestMapping("listDoorAccessByUser")
-//    @RestReturn(value=RestResponse.class)
+    @RestReturn(value=DoorAccessGroupResp.class)
     public RestResponse listDoorAccessByUser(ListDoorAccessByUserCommand cmd) {
         RestResponse response = new RestResponse();
 

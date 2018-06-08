@@ -936,6 +936,7 @@ public class AssetProviderImpl implements AssetProvider {
 		        return null;
         });
         response.setAmountReceivable(amountReceivable[0]);
+        amountOwed[0] = DecimalUtils.negativeValueFilte(amountOwed[0]);
         response.setAmountOwed(amountOwed[0]);
         response.setDatestr(dateStrBegin[0] + "~" + dateStrEnd[0]);
         response.setShowBillDetailForClientDTOList(dtos);
@@ -2808,13 +2809,13 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
         //更改金钱
         context.update(t)
-                .set(t.AMOUNT_OWED,new BigDecimal("0"))
                 .set(t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
+                .set(t.AMOUNT_OWED,BigDecimal.ZERO)
                 .where(t.ID.in(billIds))
                 .execute();
         context.update(t1)
-                .set(t1.AMOUNT_OWED,new BigDecimal("0"))
                 .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_OWED)
+                .set(t1.AMOUNT_OWED,BigDecimal.ZERO)
                 .where(t1.BILL_ID.in(billIds))
                 .execute();
 

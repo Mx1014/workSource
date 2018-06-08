@@ -132,7 +132,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
         workerPoolFactory.getWorkerPool().addQueue(queueNoDelay);
     }
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         //重启时内存中启的job都会消失 所以把没发消息的job加上
         List<PmNotifyRecord> records = pmNotifyProvider.listUnsendRecords();
@@ -176,7 +178,11 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {setup();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+            init();
+        }
     }
 
     @Override
