@@ -85,6 +85,7 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
             DismissArchivesEmployeesCommand cmd = new DismissArchivesEmployeesCommand();
             cmd.setDetailIds(Collections.singletonList(member.getDetailId()));
             cmd.setOrganizationId(flowCase.getApplierOrganizationId());
+            cmd.setOperationType(ArchivesOperationType.SELF_DISMISS.getCode());
             cmd.setDismissType(ArchivesDismissType.QUIT.getCode());
             cmd.setDismissReason(ArchivesUtil.convertToArchivesEnum(val.getDismissReason(), ArchivesParameter.DISMISS_REASON));
             cmd.setDismissRemark(val.getDismissRemark());

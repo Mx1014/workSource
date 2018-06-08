@@ -1,6 +1,6 @@
 package com.everhomes.rest.archives;
 
-public interface ArchivesServiceCode {
+public interface ArchivesLocaleStringCode {
 
     String SCOPE = "archives";
 

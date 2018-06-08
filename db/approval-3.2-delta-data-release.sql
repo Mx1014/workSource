@@ -81,6 +81,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '30002', 'zh_CN', '还有审批中的人事申请');
 
 SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '101', 'zh_CN', '操作提示试用期', '${month}个月', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '102', 'zh_CN', '操作提示部门变动', '从 ${oldOrgNames} 调动至 ${newOrgNames}', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'enterpriseApproval', '1', 'zh_CN', '转正审批提醒正文', '您原定于${operationTime}${operationType}\r\n现在发起申请将使该${operationType}计划作废\r\n确定仍要提交吗？', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'enterpriseApproval', '2', 'zh_CN', '离职审批提醒正文', '您的${approvalName}正在审批中\r\n现在发起申请将使该申请作废\r\n确定仍要提交吗？', '0');
 

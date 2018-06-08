@@ -1,6 +1,6 @@
 package com.everhomes.rest.archives;
 
-public interface ArchivesTemplateCode {
+public interface ArchivesLocaleTemplateCode {
 	String SCOPE = "archives.notification";
 
 	int ARCHIVES_PROBATION_CASE = 1;		//	试用或实习员工
@@ -24,6 +24,4 @@ public interface ArchivesTemplateCode {
 
 	int OPERATION_PROBATION_PERIOD = 101;     //  操作提示试用期
 	int OPERATION_ORG_CHANGE = 102;    //  操作提示部门、岗位、职级变动
-	int OPERATION_JOB_POSITION_CHANGE = 103;  //  操作提示岗位变动
-	int OPERATION_JOB_LEVEL_CHANGE = 104;     //  操作提示职级变动
 }

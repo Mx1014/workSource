@@ -8,14 +8,17 @@ import com.everhomes.util.StringHelper;
  * <li>EMPLOY((byte) 1): 转正</li>
  * <li>TRANSFER((byte) 2): 调动</li>
  * <li>DISMISS((byte)3): 离职</li>
+ * <li>SELF_EMPLOY((byte)4): 申请转正</li>
+ * <li>SELF_DISMISS((byte)6): 申请离职</li>
  * </ul>
  */
 public enum ArchivesOperationType {
 
-    CHECK_IN((byte) 0), EMPLOY((byte) 1), TRANSFER((byte) 2), DISMISS((byte) 3);
+    CHECK_IN((byte) 0), EMPLOY((byte) 1), TRANSFER((byte) 2), DISMISS((byte) 3),
+    SELF_EMPLOY((byte) 4), SELF_DISMISS((byte) 6);
     private Byte code;
 
-    private ArchivesOperationType(byte code) {
+    ArchivesOperationType(byte code) {
         this.code = code;
     }
 

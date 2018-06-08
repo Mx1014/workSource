@@ -54,6 +54,8 @@ public interface ArchivesParameter {
 
     String EMPLOYMENT_REMARK = "employmentRemark";
 
+    String EMPLOYMENT_REASON = "employmentReason";
+
     String EN_NAME = "enName";
 
     String ENTRY_FORM = "entryForm";

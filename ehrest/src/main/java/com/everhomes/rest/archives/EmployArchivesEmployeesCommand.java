@@ -25,6 +25,9 @@ public class EmployArchivesEmployeesCommand {
 
     private String employmentEvaluation;
 
+    //  同样的操作流程，只是操作类型名称不同时传递次参数 add by ryan.
+    private Byte operationType;
+
     public EmployArchivesEmployeesCommand() {
     }
 
@@ -58,6 +61,14 @@ public class EmployArchivesEmployeesCommand {
 
     public void setEmploymentEvaluation(String employmentEvaluation) {
         this.employmentEvaluation = employmentEvaluation;
+    }
+
+    public Byte getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(Byte operationType) {
+        this.operationType = operationType;
     }
 
     @Override

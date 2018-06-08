@@ -33,6 +33,9 @@ public class DismissArchivesEmployeesCommand {
 
     private String dismissRemark;
 
+    //  同样的操作流程，只是操作类型名称不同时传递次参数 add by ryan.
+    private Byte operationType;
+
     public DismissArchivesEmployeesCommand() {
     }
 
@@ -82,6 +85,14 @@ public class DismissArchivesEmployeesCommand {
 
     public void setDismissRemark(String dismissRemark) {
         this.dismissRemark = dismissRemark;
+    }
+
+    public Byte getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(Byte operationType) {
+        this.operationType = operationType;
     }
 
     @Override

@@ -78,6 +78,8 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
             cmd.setDetailIds(Collections.singletonList(member.getDetailId()));
             cmd.setOrganizationId(flowCase.getApplierOrganizationId());
             cmd.setEmploymentTime(val.getEmploymentTime());
+            cmd.setEmploymentEvaluation(val.getEmploymentReason());
+            cmd.setOperationType(ArchivesOperationType.SELF_EMPLOY.getCode());
             archivesService.employArchivesEmployeesConfig(cmd);
         }
         return null;
