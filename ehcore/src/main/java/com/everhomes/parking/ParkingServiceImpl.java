@@ -30,6 +30,7 @@ import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rentalv2.utils.RentalUtils;
@@ -2904,6 +2905,11 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		parkingBusinessPayeeAccountProvider.deleteParkingBusinessPayeeAccount(cmd.getId());
+	}
+
+	@Override
+	public void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+
 	}
 
 	private ParkingOwnerType checkOwner(String ownerType, Long ownerId) {

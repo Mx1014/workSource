@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.parking.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -1220,5 +1221,10 @@ public class ParkingProviderImpl implements ParkingProvider {
 			query.addLimit(pageSize);
 		}
 		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingSpaceLog.class));
+	}
+
+	@Override
+	public ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String userId, String accountCode, String tag1, String tag2, String tag3) {
+		return null;
 	}
 }

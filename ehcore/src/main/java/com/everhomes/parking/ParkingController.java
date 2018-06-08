@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhome.paySDK.pojo.PayUserDTO;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
@@ -519,6 +520,21 @@ public class ParkingController extends ControllerBase {
     public RestResponse notifyParkingRechargeOrderPayment(PayCallbackCommand cmd) {
         
     	parkingService.notifyParkingRechargeOrderPayment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/notifyParkingRechargeOrderPaymentV2</b>
+     * <p>支付后,支付系统回调</p>
+     */
+    @RequestMapping("notifyParkingRechargeOrderPaymentV2")
+    @RestReturn(value = String.class)
+    public RestResponse notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+
+        parkingService.notifyParkingRechargeOrderPaymentV2(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

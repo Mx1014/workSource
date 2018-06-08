@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
@@ -144,4 +145,6 @@ public interface ParkingService {
     List<BusinessPayeeAccountDTO> listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd);
 
     void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd);
+
+    void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd);
 }
