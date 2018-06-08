@@ -9,3 +9,7 @@ update `eh_rentalv2_order_record` t1 right join `eh_rentalv2_orders` t2 on t1.`o
 -- by cx.yang 支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 VALUES ('asset.pay.v2.callback.url', '/asset/payNotify', '物业缴费新支付回调接口', '0');
+
+-- by yanlong.liang 支付回调
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+VALUES ('activity.pay.v2.callback.url', '/activity/payNotify', '活动报名新支付回调接口', '0');

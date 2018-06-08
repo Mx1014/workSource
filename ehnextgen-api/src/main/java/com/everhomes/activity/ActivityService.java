@@ -2,6 +2,7 @@ package com.everhomes.activity;
 
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
@@ -216,6 +217,8 @@ public interface ActivityService {
 	void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd);
 
 	CheckPayeeIsUsefulResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd);
+
+	void payNotify(OrderPaymentNotificationCommand cmd);
 
 //	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
