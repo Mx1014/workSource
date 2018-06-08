@@ -13,4 +13,7 @@ public interface SiyinPrintBusinessPayeeAccountProvider {
 
 	List<SiyinPrintBusinessPayeeAccount> listSiyinPrintBusinessPayeeAccount();
 
+    List<SiyinPrintBusinessPayeeAccount> findRepeatBusinessPayeeAccounts(Long id, Integer namespaceId, String ownerType, Long ownerId);
+
+	SiyinPrintBusinessPayeeAccount getSiyinPrintBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId);
 }

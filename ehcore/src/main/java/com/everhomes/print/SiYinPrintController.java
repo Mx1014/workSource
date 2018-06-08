@@ -405,8 +405,7 @@ public class SiYinPrintController extends ControllerBase {
 	@RestReturn(value=ListBizPayeeAccountDTO.class,collection = true)
 	public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
 
-//        parkingService.listPayeeAccount(cmd);
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(siyinPrintService.listPayeeAccount(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -420,7 +419,7 @@ public class SiYinPrintController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 
-//        parkingService.createOrUpdateBusinessPayeeAccount(cmd);
+        siyinPrintService.createOrUpdateBusinessPayeeAccount(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -433,13 +432,22 @@ public class SiYinPrintController extends ControllerBase {
 	 */
 	@RequestMapping("getBusinessPayeeAccount")
 	@RestReturn(value=BusinessPayeeAccountDTO.class)
-	public RestResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+	public RestResponse getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
 
-//        parkingService.listBusinessPayeeAccount(cmd);
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(siyinPrintService.getBusinessPayeeAccount(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 
+	/**
+	 *
+	 * <b>URL: /siyinprint/mfpLogNotificationV2</b>
+	 * <p>21.司印方调用，任务日志处理</p>
+	 */
+	@RequestMapping("mfpLogNotificationV2")
+	@RequireAuthentication(false)
+	public void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response){
+		siyinPrintService.mfpLogNotificationV2(cmd,response);
+	}
 }

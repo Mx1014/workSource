@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.order.*;
+import com.everhomes.rest.print.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,62 +60,8 @@ import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.print.DeleteQueueJobsCommand;
-import com.everhomes.rest.print.GetPrintLogonUrlCommand;
-import com.everhomes.rest.print.GetPrintLogonUrlResponse;
-import com.everhomes.rest.print.GetPrintQrcodeCommand;
-import com.everhomes.rest.print.GetPrintSettingCommand;
-import com.everhomes.rest.print.GetPrintSettingResponse;
-import com.everhomes.rest.print.GetPrintStatCommand;
-import com.everhomes.rest.print.GetPrintStatResponse;
-import com.everhomes.rest.print.GetPrintUnpaidOrderCommand;
-import com.everhomes.rest.print.GetPrintUnpaidOrderResponse;
-import com.everhomes.rest.print.GetPrintUserEmailCommand;
-import com.everhomes.rest.print.GetPrintUserEmailResponse;
-import com.everhomes.rest.print.InformPrintCommand;
-import com.everhomes.rest.print.InformPrintResponse;
-import com.everhomes.rest.print.ListPrintJobTypesCommand;
-import com.everhomes.rest.print.ListPrintJobTypesResponse;
-import com.everhomes.rest.print.ListPrintOrderStatusCommand;
-import com.everhomes.rest.print.ListPrintOrderStatusResponse;
-import com.everhomes.rest.print.ListPrintOrdersCommand;
-import com.everhomes.rest.print.ListPrintOrdersResponse;
-import com.everhomes.rest.print.ListPrintRecordsCommand;
-import com.everhomes.rest.print.ListPrintRecordsResponse;
-import com.everhomes.rest.print.ListPrintUserOrganizationsCommand;
-import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
-import com.everhomes.rest.print.ListPrintingJobsCommand;
-import com.everhomes.rest.print.ListPrintingJobsResponse;
-import com.everhomes.rest.print.ListQueueJobsCommand;
-import com.everhomes.rest.print.ListQueueJobsDTO;
-import com.everhomes.rest.print.ListQueueJobsResponse;
-import com.everhomes.rest.print.PayPrintOrderCommand;
-import com.everhomes.rest.print.PayPrintOrderCommandV2;
-import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.print.PrintJobTypeType;
-import com.everhomes.rest.print.PrintLogonStatusType;
-import com.everhomes.rest.print.PrintOrderDTO;
-import com.everhomes.rest.print.PrintOrderLockType;
-import com.everhomes.rest.print.PrintOrderStatusType;
-import com.everhomes.rest.print.PrintOwnerType;
-import com.everhomes.rest.print.PrintPaperSizeType;
-import com.everhomes.rest.print.PrintRecordDTO;
-import com.everhomes.rest.print.PrintScanTarget;
-import com.everhomes.rest.print.PrintSettingColorTypeDTO;
-import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
-import com.everhomes.rest.print.PrintSettingType;
-import com.everhomes.rest.print.PrintStatDTO;
-import com.everhomes.rest.print.ReleaseQueueJobsCommand;
-import com.everhomes.rest.print.UnlockPrinterCommand;
-import com.everhomes.rest.print.UnlockPrinterResponse;
-import com.everhomes.rest.print.UpdatePrintSettingCommand;
-import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
@@ -204,6 +153,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private QRCodeService qrcodeService;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	public com.everhomes.paySDK.api.PayService sdkPayService;
+	@Autowired
+	public SiyinPrintBusinessPayeeAccountProvider siyinBusinessPayeeAccountProvider;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
@@ -1495,5 +1448,83 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getOwnerId() + ""));
+		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
+		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
+		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
+		if(payUserList==null || payUserList.size() == 0){
+			return null;
+		}
+		return payUserList.stream().map(r->{
+			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+			dto.setAccountId(r.getId());
+			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+			dto.setAccountName(r.getUserName());
+			dto.setAccountAliasName(r.getUserAliasName());
+			dto.setAccountStatus(Byte.valueOf(r.getRegisterStatus()+""));
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		List<SiyinPrintBusinessPayeeAccount> accounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts
+				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		if(accounts!=null && accounts.size()>0){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"repeat account");
+		}
+		if(cmd.getId()!=null){
+			SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider.findSiyinPrintBusinessPayeeAccountById(cmd.getId());
+			if(oldPayeeAccount == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"unknown payaccountid = "+cmd.getId());
+			}
+			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
+			newPayeeAccount.setCreateTime(oldPayeeAccount.getCreateTime());
+			newPayeeAccount.setCreatorUid(oldPayeeAccount.getCreatorUid());
+			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
+			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
+			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+			siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(newPayeeAccount);
+		}else{
+			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
+			newPayeeAccount.setStatus((byte)2);
+			siyinBusinessPayeeAccountProvider.createSiyinPrintBusinessPayeeAccount(newPayeeAccount);
+		}
+	}
+
+	@Override
+	public BusinessPayeeAccountDTO getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		SiyinPrintBusinessPayeeAccount account = siyinBusinessPayeeAccountProvider
+				.getSiyinPrintBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		if(account==null){
+			return null;
+		}
+		List<PayUserDTO> payUserDTOS = sdkPayService.listPayUsersByIds(new ArrayList<>(Arrays.asList(account.getPayeeId())));
+		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
+		BusinessPayeeAccountDTO convert = ConvertHelper.convert(account, BusinessPayeeAccountDTO.class);
+		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
+		if(payUserDTO!=null){
+			convert.setPayeeUserName(payUserDTO.getUserName());
+			convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
+			convert.setPayeeAccountCode(payUserDTO.getAccountCode());
+			convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus());
+			convert.setPayeeRemark(payUserDTO.getRemark());
+		}
+		return convert;
+
+	}
+
+	@Override
+	public void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response) {
+
 	}
 }

@@ -36,6 +36,7 @@ import com.everhomes.rentalv2.*;
 import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
@@ -723,8 +724,12 @@ public class ParkingServiceImpl implements ParkingService {
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
 		}
-		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(UserContext.current().getUser().getId() + "",
-				UserContext.getCurrentNamespaceId() + "", null, null, null);
+		//todo
+		User user = UserContext.current().getUser();
+		String sNamespaceId = "999951";
+		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
+		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
+				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
 		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
 				parkingLot.getOwnerType(), parkingLot.getOwnerId(), parkingLot.getId(),bussinessType.getCode());
 		if(payeeAccounts==null || payeeAccounts.size()==0){
@@ -732,6 +737,7 @@ public class ParkingServiceImpl implements ParkingService {
 					"未设置收款方账号");
 		}
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+		createOrderCommand.setAccountCode(sNamespaceId);
 		createOrderCommand.setBizOrderNum(parkingRechargeOrder.getId()+"");
 		createOrderCommand.setClientAppName(clientAppName);
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
@@ -742,11 +748,12 @@ public class ParkingServiceImpl implements ParkingService {
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		createOrderCommand.setBackUrl(callbackurl);
+		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
 		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
 		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
 			LOGGER.info("purchaseOrder "+purchaseOrder);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"preorder failed "+purchaseOrder);
+					"preorder failed "+StringHelper.toJsonString(purchaseOrder));
 		}
 		OrderCommandResponse response = purchaseOrder.getResponse();
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
@@ -2853,14 +2860,13 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts
+				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId(),cmd.getBusinessType());
+		if(accounts!=null && accounts.size()>0){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEATE_ACCOUNT,
+					"repeat account");
+		}
 		if(cmd.getId()!=null){
-			List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts
-					(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId(),cmd.getBusinessType());
-			if(accounts!=null && accounts.size()>0){
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEATE_ACCOUNT,
-						"repeat account");
-			}
-
 			ParkingBusinessPayeeAccount oldPayeeAccount = parkingBusinessPayeeAccountProvider.findParkingBusinessPayeeAccountById(cmd.getId());
 			if(oldPayeeAccount == null){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

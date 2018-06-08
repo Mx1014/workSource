@@ -4,6 +4,7 @@ package com.everhomes.print;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -87,4 +88,37 @@ public class SiyinPrintBusinessPayeeAccountProviderImpl implements SiyinPrintBus
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public List<SiyinPrintBusinessPayeeAccount> findRepeatBusinessPayeeAccounts(Long id, Integer namespaceId, String ownerType, Long ownerId) {
+		Condition condition = Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.NAMESPACE_ID.eq(namespaceId)
+				.and(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.STATUS.eq((byte)2));
+		if(id!=null){
+			condition=condition.and(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.ID.notEqual(id));
+		}
+		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS)
+				.where(condition)
+				.orderBy(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintBusinessPayeeAccount.class));
+	}
+
+	@Override
+	public SiyinPrintBusinessPayeeAccount getSiyinPrintBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+		Condition condition = Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.NAMESPACE_ID.eq(namespaceId)
+				.and(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.STATUS.eq((byte)2));
+		List<SiyinPrintBusinessPayeeAccount> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS)
+				.where(condition)
+				.orderBy(Tables.EH_SIYIN_PRINT_BUSINESS_PAYEE_ACCOUNTS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintBusinessPayeeAccount.class));
+		if(list == null || list.size()==0){
+			return null;
+		}
+		return list.get(0);
+	}
+
+
 }

@@ -2,6 +2,8 @@ package com.everhomes.rest.order;
 
 import com.everhomes.util.StringHelper;
 
+import java.io.Serializable;
+
 /**
  * <ul>
  *     <li>accountType: 帐号类型，{@link com.everhomes.rest.order.OwnerType}</li>
@@ -12,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *     对应于支付系统中的com.everhomes.pay.user.BusinessUserDTO的businessCheckResult字段</li>
  * </ul>
  */
-public class ListBizPayeeAccountDTO {
+public class ListBizPayeeAccountDTO implements Serializable{
     private String accountType;
     
     private Long accountId;
