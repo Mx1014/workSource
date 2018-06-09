@@ -14,12 +14,6 @@ CREATE TABLE `eh_rentalv2_order_records` (
 `payment_order_type`  tinyint(8) NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单' ,
 `status`  tinyint(8) NULL COMMENT '订单状态0未支付 1已支付' ,
 `amount` decimal(16) NULL COMMENT '订单金额' ,
-`account_id`  bigint(20) NULL COMMENT '收款方账号' ,
-`order_commit_url` varchar(1024) NULL,
-`order_commit_token` varchar(1024) NULL,
-`order_commit_nonce` varchar(128) NULL,
-`order_commit_timestamp`  bigint(20) NULL  ,
-`pay_info` text NULL,
 `create_time`  datetime  ,
 `update_time`  datetime  ,
 PRIMARY KEY (`id`)
@@ -54,6 +48,44 @@ ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_order_id` BIGINT COMMENT '支�
 
 
 
+-- DROP TABLE IF EXISTS `eh_parking_business_payee_accounts`;
+CREATE TABLE `eh_parking_business_payee_accounts` (
+  `id` bigint NOT NULL,
+  `namespace_id` int NOT NULL,
+  `owner_type` varchar(32) NOT NULL COMMENT 'community 园区或者其他类型',
+  `owner_id` bigint NOT NULL COMMENT '园区id或者其他id',
+  `parking_lot_id` bigint NOT NULL COMMENT '停车场id',
+  `parking_lot_name` varchar(512) NOT NULL COMMENT '停车场名称',
+  `business_type` varchar(32) NOT NULL COMMENT '业务 tempfee:临时车缴费 vipParking:vip车位预约 monthRecharge:月卡充值',
+  `payee_id` bigint NOT NULL COMMENT '支付帐号id',
+  `payee_user_type` varchar(128) NOT NULL COMMENT '帐号类型，1-个人帐号、2-企业帐号',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0: inactive, 2: active',
+  `creator_uid` bigint DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint DEFAULT NULL,
+  `operate_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '停车充值收款账户表';
+
+-- DROP TABLE IF EXISTS `eh_siyin_print_business_payee_accounts`;
+CREATE TABLE `eh_siyin_print_business_payee_accounts` (
+  `id` bigint NOT NULL,
+  `namespace_id` int NOT NULL,
+  `owner_type` varchar(32) NOT NULL COMMENT 'community 园区',
+  `owner_id` bigint NOT NULL COMMENT '园区id',
+  `payee_id` bigint NOT NULL COMMENT '支付帐号id',
+  `payee_user_type` varchar(128) NOT NULL COMMENT '帐号类型，1-个人帐号、2-企业帐号',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0: inactive, 2: active',
+  `creator_uid` bigint DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint DEFAULT NULL,
+  `operate_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '云打印收款账户表';
+
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_order_no`  VARCHAR(64) COMMENT '支付系统单号';
+
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_order_no`  VARCHAR(64)  COMMENT '支付系统单号';
 
 
 
