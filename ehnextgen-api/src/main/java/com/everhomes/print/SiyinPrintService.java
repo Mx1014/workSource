@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.print;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.*;
@@ -71,4 +72,6 @@ public interface SiyinPrintService {
 	BusinessPayeeAccountDTO getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd);
 
 	void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response);
+
+    void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd);
 }

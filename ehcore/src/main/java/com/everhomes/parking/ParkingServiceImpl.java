@@ -97,6 +97,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Component
 public class ParkingServiceImpl implements ParkingService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
+	public static final String BIZ_ORDER_NUM_SPILT = "_";
+
 	@Autowired
 	private List<ParkingVendorHandler> allListeners;
 	@Autowired
@@ -713,7 +715,7 @@ public class ParkingServiceImpl implements ParkingService {
 				extendInfo ="项目："+community.getName()+"；停车场："+parkingLot.getName();
 			}
 		}
-		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
+//		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 //		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
 //				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount,null, null, null,extendInfo);
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType());
@@ -724,7 +726,7 @@ public class ParkingServiceImpl implements ParkingService {
 			bussinessType = ParkingBusinessType.TEMPFEE;
 		}
 		User user = UserContext.current().getUser();
-		String sNamespaceId = "999951";		//todo
+		String sNamespaceId = UserContext.getCurrentNamespaceId()+"";		//todo
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
 				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
@@ -736,7 +738,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		createOrderCommand.setAccountCode(sNamespaceId);
-		createOrderCommand.setBizOrderNum(parkingRechargeOrder.getId()+"");
+		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
 		createOrderCommand.setClientAppName(clientAppName);
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
@@ -1993,9 +1995,9 @@ public class ParkingServiceImpl implements ParkingService {
 			refundParkingOrderV2(cmd, order);
 		}
 
-		order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
-		order.setRefundTime(new Timestamp(System.currentTimeMillis()));
-		parkingProvider.updateParkingRechargeOrder(order);
+//		order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
+//		order.setRefundTime(new Timestamp(System.currentTimeMillis()));
+//		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
 	private void refundParkingOrderV2 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
@@ -2008,30 +2010,30 @@ public class ParkingServiceImpl implements ParkingService {
 		if(order.getPayOrderNo()==null){
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
-					"支付订单号不存在");
+					"支付系统订单号不存在");
 		}
 		CreateOrderCommand refundOrder = new CreateOrderCommand();
-		refundOrder.setRefundOrderId(order.getOrderNo());
-		refundOrder.setBizOrderNum(createOrderNo(parkingLot)+"");
+		refundOrder.setRefundOrderId(Long.valueOf(order.getPayOrderNo()));
+		refundOrder.setBizOrderNum(generateBizOrderNum(UserContext.getCurrentNamespaceId()+"",OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
 		refundOrder.setAmount(amount);
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		refundOrder.setBackUrl(callbackurl);
-		String sNamespaceId = "999951";		//todo
+		String sNamespaceId = UserContext.getCurrentNamespaceId()+"";		//todo
 		refundOrder.setAccountCode(sNamespaceId);
 		LOGGER.info("refund order params = "+refundOrder);
 		CreateOrderRestResponse refundResponse = sdkPayService.createRefundOrder(refundOrder);
 //		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
-		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-
-		} else{
+		if(refundResponse == null || refundResponse.getErrorCode() == null || !refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 			LOGGER.error("Refund failed from vendor, cmd={}, response={}",
 					cmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"bill refund error");
 		}
+		order.setStatus(ParkingRechargeOrderStatus.REFUNDING.getCode());
+		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
 	private void refundParkingOrderV1 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
@@ -2988,4 +2990,9 @@ public class ParkingServiceImpl implements ParkingService {
 		payMethods.add(wxpay);
 		return payMethods;
 	}
+
+	private String generateBizOrderNum(String sNamespaceId, String pyCode, Long orderNo) {
+		return sNamespaceId+BIZ_ORDER_NUM_SPILT+pyCode+BIZ_ORDER_NUM_SPILT+orderNo;
+	}
+
 }

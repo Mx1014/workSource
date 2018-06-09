@@ -5,13 +5,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -21,9 +16,18 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.print.*;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,13 +71,6 @@ import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
 import com.google.gson.JsonObject;
 /**
@@ -85,6 +82,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintServiceImpl.class);
 	private static final Pattern emailregex = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");    
 	private static final String REDIS_PRINT_IDENTIFIER_TOKEN = "print-uid";
+	private static final String BIZ_ORDER_NUM_SPILT = "_";
 	//redis记录用户打印任务的数量
 	public static final String REDIS_PRINTING_TASK_COUNT = "print-task-count";
 	//redis中存储的验证打印记录的时间点，
@@ -146,7 +144,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private DbProvider dbProvider;
-	
+	@Autowired
+	private ConfigurationProvider configProvider;
+	@Autowired
+	private ContentServerService contentServerService;
 	@Autowired
 	private QRCodeController qrController;
 	@Autowired
@@ -157,6 +158,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public com.everhomes.paySDK.api.PayService sdkPayService;
 	@Autowired
 	public SiyinPrintBusinessPayeeAccountProvider siyinBusinessPayeeAccountProvider;
+	@Autowired
+	private UserProvider userProvider;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
@@ -530,14 +533,91 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return null;
 		}
 
-		Long paysummay = payService.changePayAmount(order.getOrderTotalFee());
+		Long amount = order.getOrderTotalFee().multiply(new BigDecimal(100)).longValue();
 		Integer namespaceId = cmd.getNamespaceId();
 		if(namespaceId == null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		PreOrderDTO dto = payService.createAppPreOrder(namespaceId,cmd.getClientAppName(),
-				OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo(),UserContext.current().getUser().getId(),paysummay);
-		return dto;
+//		PreOrderDTO dto = payService.createAppPreOrder(namespaceId,cmd.getClientAppName(),
+//				OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo(),UserContext.current().getUser().getId(),paysummay);
+//		return dto;
+
+		User user = UserContext.current().getUser();
+		String sNamespaceId = "999951";		//todo
+		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
+		ListBizPayeeAccountDTO payerDto = siyinPrintOrderProvider.createPersonalPayUserIfAbsent(user.getId() + "",
+				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
+		List<SiyinPrintBusinessPayeeAccount> payeeAccounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts(null,namespaceId,
+				order.getOwnerType(), order.getOwnerId());
+		if(payeeAccounts==null || payeeAccounts.size()==0){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"未设置收款方账号");
+		}
+		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+		createOrderCommand.setAccountCode(sNamespaceId);
+		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
+		createOrderCommand.setClientAppName(cmd.getClientAppName());
+		createOrderCommand.setPayerUserId(payerDto.getAccountId());
+		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
+		createOrderCommand.setAmount(amount);
+		createOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.PRINT_ORDER.getMsg());
+		createOrderCommand.setGoodsName(OrderType.OrderTypeEnum.PRINT_ORDER.getMsg());
+		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
+		String homeurl = configProvider.getValue("home.url", "");
+		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/siyinprint/notifySiyinprintOrderPaymentV2"), homeurl);
+		createOrderCommand.setBackUrl(callbackurl);
+		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
+		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
+			LOGGER.info("purchaseOrder "+purchaseOrder);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"preorder failed "+ StringHelper.toJsonString(purchaseOrder));
+		}
+		OrderCommandResponse response = purchaseOrder.getResponse();
+		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
+		preDto.setExpiredIntervalTime(response.getExpirationMillis());
+		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
+		return preDto;
+	}
+
+	private String generateBizOrderNum(String sNamespaceId, String pyCode, Long orderNo) {
+		return sNamespaceId+BIZ_ORDER_NUM_SPILT+pyCode+BIZ_ORDER_NUM_SPILT+orderNo;
+	}
+
+	private String transferOrderNo(String bizOrderNum) {
+		String[] split = bizOrderNum.split(BIZ_ORDER_NUM_SPILT);
+		if(split.length==3){
+			return split[2];
+		}
+		return bizOrderNum;
+	}
+
+	public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+		List<PayMethodDTO> payMethods = new ArrayList<>();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		PayMethodDTO alipay = new PayMethodDTO();
+		alipay.setPaymentName("支付宝支付");
+		PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
+		alipayParamsDTO.setPayType("A01");
+		alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+		String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
+		alipay.setPaymentLogo(url);
+		alipay.setPaymentParams(alipayParamsDTO);
+		alipay.setPaymentType(8);
+		payMethods.add(alipay);
+
+		PayMethodDTO wxpay = new PayMethodDTO();
+		wxpay.setPaymentName("微信支付");
+		wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+		url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
+		wxpay.setPaymentLogo(url);
+		PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
+		wxParamsDTO.setPayType("no_credit");
+		wxpay.setPaymentParams(wxParamsDTO);
+		wxpay.setPaymentType(1);
+
+		payMethods.add(wxpay);
+		return payMethods;
 	}
 
 	@Override
@@ -1525,6 +1605,83 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response) {
+		if(cmd.getJob_id()==null){
+			cmd.setJob_id(UUID.randomUUID().toString());
+		}
+		if(cmd.getJob_name()==null){
+			cmd.setJob_name("jobname.txt");
+		}
+		if(cmd.getPrint_time()==null){
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			cmd.setPrint_time(format.format(new Date()));
+		}
+		if(cmd.getLocation()==null){
+			cmd.setLocation("");
+		}
+		if(cmd.getUser_name()==null){
+			UserIdentifier uIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getPhone() + "");
+			if(uIdentifier!=null){
+				cmd.setUser_name(uIdentifier.getOwnerUid()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
+				cmd.setUser_id(uIdentifier.getOwnerUid()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
+			}
+		}
+		mfpLogNotification(StringHelper.toJsonString(cmd),response);
+	}
 
+
+	@Override
+	public void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+			//检查签名
+			if(!PayUtil.verifyCallbackSignature(cmd)){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"sign verify faild");
+			}
+
+			// * RAW(0)：
+			// * SUCCESS(1)：支付成功
+			// * PENDING(2)：挂起
+			// * ERROR(3)：错误
+			if(cmd.getPaymentStatus()== null || 1!=cmd.getPaymentStatus()){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"invaild paymentstatus,"+cmd.getPaymentStatus());
+			}//检查状态
+
+			//检查orderType
+			//RECHARGE(1), WITHDRAW(2), PURCHACE(3), REFUND(4);
+			//充值，体现，支付，退款
+			if(cmd.getOrderType()==null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"invaild ordertype,"+cmd.getOrderType());
+			}
+			if(cmd.getOrderType() == 3) {
+				Long orderNo = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));
+				SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(orderNo);
+
+				if(order == null){
+					LOGGER.error("the order {} not found.",orderNo);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"the order not found.");
+				}
+				BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
+
+				//加一个开关，方便在beta环境测试
+				boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
+				if (!flag) {
+					if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
+						LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+								"Order amount is not equal to payAmount.");
+					}
+				}
+				Long payTime = System.currentTimeMillis();
+				Timestamp payTimeStamp = new Timestamp(payTime);
+				if(order.getOrderStatus().byteValue() == PrintOrderStatusType.UNPAID.getCode()) {
+					order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+					order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+					order.setPaidTime(payTimeStamp);
+					siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+				}
+
+			}
 	}
 }

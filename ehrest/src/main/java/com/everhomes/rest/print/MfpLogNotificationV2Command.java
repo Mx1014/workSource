@@ -15,7 +15,7 @@ public class MfpLogNotificationV2Command {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private Long phone;
+    private String phone;
 
     private String color_surface = "0";
     private String duplex = "1";
@@ -27,7 +27,8 @@ public class MfpLogNotificationV2Command {
     private String paper_size="A4";
     private String print_time;
     private String serial_number="TC101154727022";
-    private String user_id;
+    private String user_id="12323";
+    private String user_name;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -53,11 +54,11 @@ public class MfpLogNotificationV2Command {
         this.ownerId = ownerId;
     }
 
-    public Long getPhone() {
+    public String getPhone() {
         return phone;
     }
 
-    public void setPhone(Long phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 
@@ -147,6 +148,14 @@ public class MfpLogNotificationV2Command {
 
     public void setUser_id(String user_id) {
         this.user_id = user_id;
+    }
+
+    public String getUser_name() {
+        return user_name;
+    }
+
+    public void setUser_name(String user_name) {
+        this.user_name = user_name;
     }
 
     @Override

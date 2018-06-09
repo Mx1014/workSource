@@ -51,12 +51,20 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	@Autowired
 	private BusBridgeProvider busBridgeProvider;
 
+	private String transferOrderNo(String bizOrderNum) {
+		String[] split = bizOrderNum.split(ParkingServiceImpl.BIZ_ORDER_NUM_SPILT);
+		if(split.length==3){
+			return split[2];
+		}
+		return bizOrderNum;
+	}
+
 	private void paySuccess(OrderPaymentNotificationCommand cmd) {
 		this.checkOrderNoIsNull(cmd.getBizOrderNum());//检查停车业务订单号
 		this.checkPayAmountIsNull(cmd.getAmount());//
 
 
-		Long orderId = Long.parseLong(cmd.getBizOrderNum());//获取下单时候的支付id
+		Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
 		BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
 
 		//支付宝回调时，可能会同时回调多次，
@@ -254,10 +262,15 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 
 	private void refundSuccess(OrderPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
-		Long orderId = Long.parseLong(cmd.getBizOrderNum());//获取下单时候的支付id
+		Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
 
-		ParkingRechargeOrder order = checkOrder(orderId);
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByOrderNo(orderId);
 
+		if(order == null){
+			LOGGER.error("the order {} not found.",orderId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the order not found.");
+		}
 		order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
 		order.setRefundTime(new Timestamp(System.currentTimeMillis()));
 		parkingProvider.updateParkingRechargeOrder(order);

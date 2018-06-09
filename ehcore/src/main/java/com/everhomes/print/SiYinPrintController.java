@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.*;
@@ -281,6 +282,21 @@ public class SiYinPrintController extends ControllerBase {
 	public RestResponse payPrintOrderV2(PayPrintOrderCommandV2 cmd) {
 
 		RestResponse response = new RestResponse(siyinPrintService.payPrintOrderV2(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /siyinprint/notifySiyinprintOrderPaymentV2</b>
+	 * <p>17.1.支付回调订单</p>
+	 */
+	@RequestMapping("notifySiyinprintOrderPaymentV2")
+	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
+	public RestResponse notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+		siyinPrintService.notifySiyinprintOrderPaymentV2(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
