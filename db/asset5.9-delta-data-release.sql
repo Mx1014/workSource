@@ -17,3 +17,5 @@ VALUES ('activity.pay.v2.callback.url', '/activity/payNotify', '活动报名新�
 -- by st.zheng
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 VALUES ('rental.pay.v2.callback.url', '/rental/payNotify', '资源预订新支付回调接口', '0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+VALUES ('rental.refund.v2.callback.url', '/rental/refundNotify', '资源预订新退款回调接口', '0');

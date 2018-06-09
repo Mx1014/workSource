@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderCommand;
@@ -28,4 +29,9 @@ public interface Rentalv2PayService {
 
     PreOrderDTO createPreOrder(PreOrderCommand cmd,RentalOrder order);
 
+    void refundOrder (RentalOrder order,Long amount);
+
+    void payNotify(OrderPaymentNotificationCommand cmd);
+
+    void refundNotify(OrderPaymentNotificationCommand cmd);
 }

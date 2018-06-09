@@ -2,31 +2,48 @@ package com.everhomes.rentalv2;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +55,8 @@ import java.util.stream.Stream;
 @Component
 public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2PayServiceImpl.class);
-
+    private static final String REFER_TYPE= FlowReferType.RENTAL.getCode();
+    public static final Long moduleId = 40400L;
     @Autowired
     private com.everhomes.paySDK.api.PayService payServiceV2;
     @Autowired
@@ -47,6 +65,22 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private Rentalv2Provider rentalv2Provider;
+    @Autowired
+    private Rentalv2Provider rentalProvider;
+    @Autowired
+    private Rentalv2Service rentalService;
+    @Autowired
+    private FlowService flowService;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private SmsProvider smsProvider;
+    @Autowired
+    private RentalCommonServiceImpl rentalCommonService;
+    @Autowired
+    private UserProvider userProvider;
+    @Autowired
+    private DbProvider dbProvider;
     @Value("${server.contextPath:}")
     private String contextPath;
 
@@ -230,6 +264,9 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
             payUserDTO = payServiceV2.createPersonalPayUserIfAbsent("EhUsers" + payerId.toString(), namespaceId.toString());
+            String defaultPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"default.bind.phone", "");
+            payServiceV2.bandPhone(payUserDTO.getId(), defaultPhone);
+
         }else {
             payUserDTO = payUserDTOs.get(0);
         }
@@ -275,6 +312,39 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
 
         return preOrderDTO;
+    }
+
+    private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
+        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+        dto.setAmount(cmd.getAmount());
+        //List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
+        //dto.setPayMethod(payMethods);
+        dto.setOrderId(cmd.getOrderId());
+        return dto;
+    }
+
+    @Override
+    public void refundOrder(RentalOrder order,Long amount) {
+        CreateOrderCommand cmd = new CreateOrderCommand();
+        Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
+        cmd.setRefundOrderId(record.getPayOrderId());
+        cmd.setBizOrderNum(record.getOrderNo().toString());
+        cmd.setAmount(amount);
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"rental.refund.v2.callback.url", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        cmd.setBackUrl(backUrl);
+        CreateOrderRestResponse refundOrder = payServiceV2.createRefundOrder(cmd);
+        if(refundOrder != null || refundOrder.getErrorCode() != null
+                && refundOrder.getErrorCode().equals(HttpStatus.OK.value())){
+
+        } else{
+            LOGGER.error("Refund failed from vendor, refundOrderNo={}, order={}, response={}", order.getOrderNo(), order,
+                    refundOrder);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill refund error");
+        }
     }
 
     private void saveOrderRecord(Long orderNo, OrderCommandResponse orderCommandResponse, Long bizPayeeId) {
@@ -328,7 +398,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             createOrderCmd.setExpirationMillis(cmd.getExpiration());
         }
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"asset.pay.v2.callback.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"rental.pay.v2.callback.url", "");
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCmd.setBackUrl(backUrl);
         createOrderCmd.setExtendInfo(cmd.getExtendInfo());
@@ -371,5 +441,131 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         //TODO 支付方式组装
         //dto.setPayMethod(payMethods);
         return dto;
+    }
+
+    @Override
+    public void payNotify(OrderPaymentNotificationCommand cmd) {
+        if(cmd.getPaymentStatus() == null) {
+            LOGGER.info(" ----------------- - - - PAY FAIL command is "+cmd.toString());
+        }
+
+        //success
+        if(cmd.getPaymentStatus() != null) {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                RentalOrder order = rentalProvider.findRentalBillByOrderNo(cmd.getBizOrderNum());
+                order.setPaidMoney(order.getPaidMoney().add(new java.math.BigDecimal(cmd.getAmount()/100.0)));
+                switch (cmd.getPaymentType()){
+                    case 1:
+                    case 7:
+                    case 9:
+                    case 21: order.setVendorType(VendorType.WEI_XIN.getCode());break;
+                    default: order.setVendorType(VendorType.ZHI_FU_BAO.getCode());break;
+                }
+
+                order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+
+                if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+                    //判断支付金额与订单金额是否相同
+                    if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+                        onOrderRecordSuccess(order);
+                        onOrderSuccess(order);
+                    } else {
+                        LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
+                    }
+                } else if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
+                    LOGGER.error("待付款订单:id [" + order.getId() + "] 状态已经是成功预约");
+                } else if (order.getStatus().equals(SiteBillStatus.IN_USING.getCode()) || (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))) {//vip停车的欠费和续费
+                    if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+                        if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode())) {
+                            order.setStatus(SiteBillStatus.COMPLETE.getCode());
+                        }
+                        else
+                            rentalService.renewOrderSuccess(order,order.getRentalCount());
+                        rentalProvider.updateRentalBill(order);
+                        onOrderRecordSuccess(order);
+                    }else{
+                        LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
+                    }
+                } else
+                    LOGGER.error("待付款订单:id [" + order.getId() + "]状态有问题： 订单状态是：" + order.getStatus());
+                return null;
+            });
+        }
+    }
+
+    private void onOrderRecordSuccess(RentalOrder order){
+        Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
+        if (record != null){
+            record.setStatus((byte)1);
+            this.rentalv2AccountProvider.updateOrderRecord(record);
+        }
+    }
+
+    public void onOrderSuccess(RentalOrder order){
+        if (order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) {
+            //支付成功之后创建工作流
+            order.setStatus(SiteBillStatus.SUCCESS.getCode());
+            rentalProvider.updateRentalBill(order);
+            rentalService.onOrderSuccess(order);
+            //发短信
+            RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+
+            handler.sendRentalSuccessSms(order);
+
+        } else {
+
+//		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
+            rentalProvider.updateRentalBill(order);
+            FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
+
+            FlowAutoStepDTO dto = new FlowAutoStepDTO();
+            dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+            dto.setFlowCaseId(flowCase.getId());
+            dto.setFlowMainId(flowCase.getFlowMainId());
+            dto.setFlowNodeId(flowCase.getCurrentNodeId());
+            dto.setFlowVersion(flowCase.getFlowVersion());
+            dto.setStepCount(flowCase.getStepCount());
+            flowService.processAutoStep(dto);
+
+            //发消息和短信
+            //发给发起人
+            Map<String, String> map = new HashMap<>();
+            map.put("useTime", order.getUseDetail());
+            map.put("resourceName", order.getResourceName());
+            rentalCommonService.sendMessageCode(order.getRentalUid(), map,
+                    RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+
+            String templateScope = SmsTemplateCode.SCOPE;
+            String templateLocale = RentalNotificationTemplateCode.locale;
+            int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
+
+            List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
+            smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+
+            UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
+                    IdentifierType.MOBILE.getCode());
+            if (null == userIdentifier) {
+                LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
+            } else {
+                smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+                        templateId, templateLocale, variables);
+            }
+        }
+    }
+
+    @Override
+    public void refundNotify(OrderPaymentNotificationCommand cmd) {
+        this.dbProvider.execute((TransactionStatus status) -> {
+            RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByOrderNo(cmd.getBizOrderNum());
+            RentalOrder bill = this.rentalProvider.findRentalBillById(rentalRefundOrder.getOrderId());
+            rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+            bill.setStatus(SiteBillStatus.REFUNDED.getCode());
+            rentalProvider.updateRentalBill(bill);
+            rentalProvider.updateRentalRefundOrder(rentalRefundOrder);
+//			rentalService.cancelOrderSendMessage(bill);
+            return null;
+        });
     }
 }

@@ -72,6 +72,8 @@ public class RentalCommonServiceImpl {
     private UserProvider userProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private Rentalv2PayService  rentalv2PayService;
 
     public RentalResourceHandler getRentalResourceHandler(String handlerName) {
         RentalResourceHandler handler = null;
@@ -246,19 +248,7 @@ public class RentalCommonServiceImpl {
         if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) {
             //新支付退款
             Long amount = payService.changePayAmount(orderAmount);
-            CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(),
-                    Long.valueOf(order.getOrderNo()), refundOrderNo, amount);
-
-            if(refundResponse != null || refundResponse.getErrorCode() != null
-                    && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-
-            } else{
-                LOGGER.error("Refund failed from vendor, refundOrderNo={}, order={}, response={}", refundOrderNo, order,
-                        refundResponse);
-                throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-                        RentalServiceErrorCode.ERROR_REFUND_ERROR,
-                        "bill refund error");
-            }
+            rentalv2PayService.refundOrder(order,amount);
         } else {
             refundParkingOrderV1(order, timestamp, refundOrderNo, orderAmount);
         }
