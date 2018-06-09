@@ -2,6 +2,7 @@ package com.everhomes.rentalv2;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.flow.FlowCase;
@@ -81,6 +82,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private UserProvider userProvider;
     @Autowired
     private DbProvider dbProvider;
+    @Autowired
+    private ContentServerService contentServerService;
     @Value("${server.contextPath:}")
     private String contextPath;
 
@@ -321,6 +324,34 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         //dto.setPayMethod(payMethods);
         dto.setOrderId(cmd.getOrderId());
         return dto;
+    }
+
+    public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+        List<PayMethodDTO> payMethods = new ArrayList<>();
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        PayMethodDTO alipay = new PayMethodDTO();
+        alipay.setPaymentName("支付宝支付");
+        PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
+        alipayParamsDTO.setPayType("A01");
+        alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+        String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
+        alipay.setPaymentLogo(url);
+        alipay.setPaymentParams(alipayParamsDTO);
+        alipay.setPaymentType(8);
+        payMethods.add(alipay);
+
+        PayMethodDTO wxpay = new PayMethodDTO();
+        wxpay.setPaymentName("微信支付");
+        wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+        url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
+        wxpay.setPaymentLogo(url);
+        PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
+        wxParamsDTO.setPayType("no_credit");
+        wxpay.setPaymentParams(wxParamsDTO);
+        wxpay.setPaymentType(1);
+
+        payMethods.add(wxpay);
+        return payMethods;
     }
 
     @Override
