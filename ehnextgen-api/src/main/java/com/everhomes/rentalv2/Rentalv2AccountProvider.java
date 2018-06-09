@@ -18,5 +18,13 @@ public interface Rentalv2AccountProvider {
 
     void updatePayAccount(Rentalv2PayAccount account);
 
+    void createOrderRecord(Rentalv2OrderRecord record);
+
+    void updateOrderRecord(Rentalv2OrderRecord record);
+
+    Rentalv2OrderRecord getOrderRecordByOrderNo(Long orderNo);
+
+    Rentalv2OrderRecord getOrderRecordByBizOrderNo(String bizOrderNo);
+
 
 }

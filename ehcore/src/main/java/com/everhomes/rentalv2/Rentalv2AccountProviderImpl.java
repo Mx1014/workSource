@@ -8,8 +8,11 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhRentalv2OrderRecordsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalv2PayAccountsDao;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2OrderRecords;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2PayAccounts;
+import com.everhomes.server.schema.tables.records.EhRentalv2OrderRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2PayAccountsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -102,5 +105,50 @@ public class Rentalv2AccountProviderImpl implements  Rentalv2AccountProvider {
         dao.update(account);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2PayAccounts.class,
                 account.getId());
+    }
+
+    @Override
+    public void createOrderRecord(Rentalv2OrderRecord record) {
+        long id = sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhRentalv2OrderRecords.class));
+        record.setId(id);
+        record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhRentalv2OrderRecordsRecord record1 = ConvertHelper.convert(record,
+                EhRentalv2OrderRecordsRecord.class);
+        InsertQuery<EhRentalv2OrderRecordsRecord> query = context
+                .insertQuery(Tables.EH_RENTALV2_ORDER_RECORDS);
+        query.setRecord(record1);
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2OrderRecords.class,
+                null);
+    }
+
+    @Override
+    public void updateOrderRecord(Rentalv2OrderRecord record) {
+        assert (record.getId() == null);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhRentalv2OrderRecordsDao dao = new EhRentalv2OrderRecordsDao(context.configuration());
+        dao.update(record);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2OrderRecords.class,
+                record.getId());
+    }
+
+    @Override
+    public Rentalv2OrderRecord getOrderRecordByOrderNo(Long orderNo) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Record record = context.select().from(Tables.EH_RENTALV2_ORDER_RECORDS).where(Tables.EH_RENTALV2_ORDER_RECORDS.ORDER_NO.eq(orderNo)).fetchOne();
+        if (record == null)
+            return null;
+        return ConvertHelper.convert(record,Rentalv2OrderRecord.class);
+    }
+
+    @Override
+    public Rentalv2OrderRecord getOrderRecordByBizOrderNo(String bizOrderNo) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Record record = context.select().from(Tables.EH_RENTALV2_ORDER_RECORDS).where(Tables.EH_RENTALV2_ORDER_RECORDS.BIZ_ORDER_NUM.eq(bizOrderNo)).fetchOne();
+        if (record == null)
+            return null;
+        return ConvertHelper.convert(record,Rentalv2OrderRecord.class);
     }
 }

@@ -232,11 +232,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Autowired
 	private OrganizationService organizationService;
 	@Autowired
-	private com.everhomes.paySDK.api.PayService payServiceV2;
-	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private PortalService portalService;
+	@Autowired
+	private Rentalv2PayService  rentalv2PayService;
 	@Autowired
 	private Rentalv2AccountProvider rentalv2AccountProvider;
 
@@ -2279,7 +2279,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		preOrderCommand.setClientAppName(clientAppName);
 
-		return payService.createPreOrder(preOrderCommand);
+		return rentalv2PayService.createPreOrder(preOrderCommand,order);
 	}
 
 	public PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd) {
@@ -2295,8 +2295,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED, "Order has been canceled");
 		}
-
-		return buildPreOrderDTO(order, cmd.getClientAppName(), cmd.getPaymentType());
+		PreOrderDTO preOrderDTO = buildPreOrderDTO(order, cmd.getClientAppName(), cmd.getPaymentType());
+		//保存支付订单信息
+		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
+		if (record != null && order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode())){ //欠费订单保存
+			record.setOrderId(order.getId());
+			record.setStatus((byte)0);//未支付
+			record.setNamespaceId(UserContext.getCurrentNamespaceId());
+			record.setPaymentOrderType(OrderRecordType.OWNINGFEE.getCode());//欠费订单
+			this.rentalv2AccountProvider.updateOrderRecord(record);
+		}
+		return preOrderDTO;
 	}
 
 	@Override
@@ -3933,6 +3942,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return (AddRentalBillItemV2Response) actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V2);
 	}
 
+
 	private AddRentalBillItemV2Response convertOrderDTOForV2(RentalOrder order, String clientAppName, Integer paymentType,
 															 String flowCaseUrl) {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
@@ -3945,17 +3955,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		preOrderCommand.setPayerId(order.getRentalUid());
 		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-//        preOrderCommand.setExpiration(expiredTime);
 
 		preOrderCommand.setClientAppName(clientAppName);
 
 		//微信公众号支付，重新设置ClientName，设置支付方式和参数
 		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
 
-//			if(preOrderCommand.getClientAppName() == null){
-//				Integer namespaceId = UserContext.getCurrentNamespaceId();
-//				preOrderCommand.setClientAppName("wechat_" + namespaceId);
-//			}
+
 			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
 			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
 			paymentParamsDTO.setPayType("no_credit");
@@ -3966,12 +3972,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			paymentParamsDTO.setVspCusid(vspCusid);
 			preOrderCommand.setPaymentParams(paymentParamsDTO);
 			preOrderCommand.setCommitFlag(1);
-
-
 		}
+
 		PreOrderDTO callBack = null;
 		if (amount > 0)
-			callBack = payService.createPreOrder(preOrderCommand);
+			callBack = rentalv2PayService.createPreOrder(preOrderCommand,order);
 
 		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
 		response.setPreOrderDTO(callBack);
@@ -4111,7 +4116,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return response;
 		} else {
 			Object obj = convertOrderDTOForV2(bill, cmd.getClientAppName(), cmd.getPaymentType(), response.getFlowCaseUrl());
-
+			//保存支付订单信息
+			Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
+			if (record != null){
+				record.setOrderId(bill.getId());
+				record.setStatus((byte)0);//未支付
+				record.setNamespaceId(UserContext.getCurrentNamespaceId());
+				record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
+				this.rentalv2AccountProvider.updateOrderRecord(record);
+			}
 			//当订单创建成功之后，在来创建定时任务
 			if (orderCancelFlag[0]) {
 				createOrderOverTimeTask(bill);
@@ -8309,8 +8322,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public PreOrderDTO renewRentalOrderV2(RenewRentalOrderCommand cmd) {
 		RentalOrder bill = actualRenewRentalOrder(cmd);
-
-		return buildPreOrderDTO(bill, cmd.getClientAppName(), null);
+		PreOrderDTO dto = buildPreOrderDTO(bill, cmd.getClientAppName(), null);
+		//保存支付订单信息
+		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
+		if (record != null){
+			record.setOrderId(bill.getId());
+			record.setStatus((byte)0);//未支付
+			record.setNamespaceId(UserContext.getCurrentNamespaceId());
+			record.setPaymentOrderType(OrderRecordType.RENEW.getCode());//续费订单
+			this.rentalv2AccountProvider.updateOrderRecord(record);
+		}
+		return dto;
 	}
 
 	private RentalOrder actualRenewRentalOrder(RenewRentalOrderCommand cmd) {
@@ -8767,154 +8789,5 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 	}
 
-	@Override
-	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
-		String userPrefix = "EhBizBusinesses";
-		List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(userPrefix + cmd.getOrganizationId(), cmd.getCommunityId().toString());
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("List rental payee accounts(response), orgnizationId={}, tags={}, response={}", cmd.getOrganizationId(), cmd.getCommunityId(), GsonUtil.toJson(payUserDTOs));
-		}
-
-		List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();
-		if (payUserDTOs != null) {
-			for (PayUserDTO payUserDTO : payUserDTOs) {
-				ListBizPayeeAccountDTO dto = convertAccount(payUserDTO);
-				result.add(dto);
-			}
-		}
-		return result;
-	}
-
-	@Override
-	public ListBizPayeeAccountDTO getGeneralAccountSetting(GetGeneralAccountSettingCommand cmd) {
-		List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-				null,RuleSourceType.DEFAULT.getCode(), cmd.getResourceTypeId(), null, null);
-		if (accounts == null || accounts.size() == 0)
-			return null;
-		List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(accounts.stream().map(r -> r.getAccountId()).collect(Collectors.toList()));
-		if (payUserDTOs == null || payUserDTOs.size() == 0)
-			return null;
-		ListBizPayeeAccountDTO dto = convertAccount(payUserDTOs.get(0));
-
-		return dto;
-	}
-
-	@Override
-	public void updateGeneralAccountSetting(UpdateGeneralAccountSettingCommand cmd) {
-		//删除
-		rentalv2AccountProvider.deletePayAccount(null,cmd.getCommunityId(),RuleSourceType.DEFAULT.getCode(),cmd.getResourceTypeId());
-		//添加
-		Rentalv2PayAccount account = new Rentalv2PayAccount();
-		account.setAccountId(cmd.getAccountId());
-		account.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
-		account.setCommunityId(cmd.getCommunityId());
-		account.setNamespaceId(UserContext.getCurrentNamespaceId());
-		account.setSourceType(RuleSourceType.DEFAULT.getCode());
-		account.setSourceId(cmd.getResourceTypeId());
-		rentalv2AccountProvider.createPayAccount(account);
-	}
-
-	@Override
-	public GetResourceAccountSettingResponse getResourceAccountSetting(GetResourceAccountSettingCommand cmd) {
-		cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
-		CrossShardListingLocator locator = null ;
-		if (cmd.getPageAnchor() != null){
-			locator = new CrossShardListingLocator();
-			locator.setAnchor(cmd.getPageAnchor());
-		}
-		List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(),
-				cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),cmd.getResourceTypeId(),
-				RuleSourceType.RESOURCE.getCode(), null, locator, cmd.getPageSize()+1);
-		if (accounts == null || accounts.size()==0)
-			return null;
-		GetResourceAccountSettingResponse response = new GetResourceAccountSettingResponse();
-		if (accounts.size()>cmd.getPageSize()){
-			accounts.remove(accounts.size()-1);
-			response.setNextPageAnchor(accounts.get(accounts.size()-1).getId());
-		}
-		List<PayUserDTO> payUserDTOS = payServiceV2.listPayUsersByIds(accounts.stream().map(r -> r.getAccountId()).collect(Collectors.toList()));
-		response.setResourceAccounts(new ArrayList<>());
-		accounts.forEach(r->{
-			ResourceAccountDTO dto = new ResourceAccountDTO();
-			dto.setId(r.getId());
-			dto.setResourceName(r.getResourceName());
-			dto.setResourceId(r.getSourceId());
-			PayUserDTO payUserDTO = payUserDTOS.stream().filter(t -> t.getId().equals(r.getAccountId())).findFirst().get();
-			dto.setAccount(convertAccount(payUserDTO));
-		});
-		return response;
-	}
-
-	@Override
-	public void deleteResourceAccountSetting(Long id) {
-		this.rentalv2AccountProvider.deletePayAccount(id,null,null,null);
-	}
-
-	@Override
-	public void updateResourceAccountSetting(UpdateResourceAccountSettingCommand cmd) {
-		List<Rentalv2PayAccount> accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-				null, RuleSourceType.DEFAULT.getCode(), cmd.getResourceTypeId(), null, null);
-		if (accounts !=null && accounts.size()>0){//检测通用账户
-			List<Rentalv2PayAccount> collect = accounts.stream().filter(r -> r.getAccountId().equals(cmd.getAccountId())).collect(Collectors.toList());
-			if (collect!=null && collect.size()>0)
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"此收款账户为通用收款账户，请重新选择");
-		}
-		if (cmd.getId() != null){//更新
-			Rentalv2PayAccount account = rentalv2AccountProvider.getAccountById(cmd.getId());
-			if (!account.getAccountId().equals(cmd.getAccountId())){
-				accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-						null, RuleSourceType.RESOURCE.getCode(), cmd.getResourceId(), null, null);
-				if (accounts!=null && accounts.size()>0)
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							cmd.getResourceName()+"已设置非通用收款账户，不可重复添加");
-			}
-			account.setAccountId(cmd.getAccountId());
-			account.setSourceId(cmd.getResourceId());
-			account.setResourceName(cmd.getResourceName());
-			rentalv2AccountProvider.updatePayAccount(account);
-		}else {//新建
-			accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-					null, RuleSourceType.RESOURCE.getCode(), cmd.getResourceId(), null, null);
-			if (accounts!=null && accounts.size()>0)
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						cmd.getResourceName()+"已设置非通用收款账户，不可重复添加");
-			Rentalv2PayAccount account = new Rentalv2PayAccount();
-			account.setNamespaceId(UserContext.getCurrentNamespaceId());
-			account.setCommunityId(cmd.getCommunityId());
-			account.setResourceName(cmd.getResourceName());
-			account.setResourceTypeId(cmd.getResourceTypeId());
-			account.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
-			account.setSourceType(RuleSourceType.RESOURCE.getCode());
-			account.setSourceId(cmd.getResourceId());
-			account.setAccountId(cmd.getAccountId());
-			rentalv2AccountProvider.createPayAccount(account);
-		}
-	}
-
-	private ListBizPayeeAccountDTO convertAccount(PayUserDTO payUserDTO){
-		if (payUserDTO == null)
-			return null;
-		ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
-		// 支付系统中的用户ID
-		dto.setAccountId(payUserDTO.getId());
-		// 用户向支付系统注册帐号时填写的帐号名称
-		dto.setAccountName(payUserDTO.getRemark());
-		// 帐号类型，1-个人帐号、2-企业帐号
-		Integer userType = payUserDTO.getUserType();
-		if (userType != null && userType.equals(2)) {
-			dto.setAccountType(OwnerType.ORGANIZATION.getCode());
-		} else {
-			dto.setAccountType(OwnerType.USER.getCode());
-		}
-		// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-		Integer registerStatus = payUserDTO.getRegisterStatus();
-		if (registerStatus != null && registerStatus.intValue() == 1) {
-			dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-		} else {
-			dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-		}
-		return  dto;
-	}
 
 }

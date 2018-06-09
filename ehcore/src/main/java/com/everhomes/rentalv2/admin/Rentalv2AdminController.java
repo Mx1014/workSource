@@ -3,6 +3,7 @@ package com.everhomes.rentalv2.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rentalv2.Rentalv2PayService;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.rentalv2.*;
@@ -36,6 +37,8 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	@Autowired
 	private Rentalv2Service rentalService;
+	@Autowired
+	private Rentalv2PayService  rentalv2PayService;
 
 	/**
 	 * 
@@ -955,6 +958,8 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+	//====================================================企业账户设置================================================
+
 	/**
 	 * <b>URL: /rental/admin/listPayeeAccounts</b>
 	 * <p>
@@ -964,7 +969,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("listPayeeAccounts")
 	@RestReturn(value = ListBizPayeeAccountDTO.class,collection = true)
 	public RestResponse listPayeeAccounts( ListPayeeAccountsCommand cmd) {
-		List<ListBizPayeeAccountDTO> list =  rentalService.listPayeeAccounts(cmd);
+		List<ListBizPayeeAccountDTO> list =  rentalv2PayService.listPayeeAccounts(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -980,7 +985,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getGeneralAccountSetting")
 	@RestReturn(value = ListBizPayeeAccountDTO.class)
 	public RestResponse getGeneralAccountSetting( GetGeneralAccountSettingCommand cmd) {
-		ListBizPayeeAccountDTO dto = rentalService.getGeneralAccountSetting(cmd);
+		ListBizPayeeAccountDTO dto = rentalv2PayService.getGeneralAccountSetting(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -996,7 +1001,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateGeneralAccountSetting")
 	@RestReturn(value = String.class)
 	public RestResponse updateGeneralAccountSetting( UpdateGeneralAccountSettingCommand cmd) {
-		rentalService.updateGeneralAccountSetting(cmd);
+		rentalv2PayService.updateGeneralAccountSetting(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1012,7 +1017,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceAccountSetting")
 	@RestReturn(value = GetResourceAccountSettingResponse.class)
 	public RestResponse getResourceAccountSetting( GetResourceAccountSettingCommand cmd) {
-        GetResourceAccountSettingResponse res = rentalService.getResourceAccountSetting(cmd);
+        GetResourceAccountSettingResponse res = rentalv2PayService.getResourceAccountSetting(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1028,7 +1033,7 @@ public class Rentalv2AdminController extends ControllerBase {
     @RequestMapping("deleteResourceAccountSetting")
     @RestReturn(value = String.class)
     public RestResponse deleteResourceAccountSetting( UpdateResourceAccountSettingCommand cmd) {
-        rentalService.deleteResourceAccountSetting(cmd.getId());
+		rentalv2PayService.deleteResourceAccountSetting(cmd.getId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1044,7 +1049,7 @@ public class Rentalv2AdminController extends ControllerBase {
     @RequestMapping("updateResourceAccountSetting")
     @RestReturn(value = String.class)
     public RestResponse updateResourceAccountSetting( UpdateResourceAccountSettingCommand cmd) {
-		rentalService.updateResourceAccountSetting(cmd);
+		rentalv2PayService.updateResourceAccountSetting(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

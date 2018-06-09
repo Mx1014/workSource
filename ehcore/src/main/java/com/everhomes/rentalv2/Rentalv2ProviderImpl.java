@@ -1974,7 +1974,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	@Override
 	public Long createRentalRefundOrder(RentalRefundOrder rentalRefundOrder) {
 		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhRentalv2ResourceRanges.class));
+				.getSequenceDomainFromTablePojo(EhRentalv2RefundOrders.class));
 		rentalRefundOrder.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2RefundOrdersRecord record = ConvertHelper.convert(rentalRefundOrder,
@@ -2069,7 +2069,21 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		
 	}
 
-	@Override
+    @Override
+    public RentalRefundOrder getRentalRefundOrderByOrderNo(String orderNo) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_RENTALV2_REFUND_ORDERS);
+        Condition condition = Tables.EH_RENTALV2_REFUND_ORDERS.ORDER_NO.eq(Long.valueOf(orderNo));
+        step.where(condition);
+        RentalRefundOrder result = step
+                .orderBy(Tables.EH_RENTALV2_REFUND_ORDERS.ID.desc()).fetchOne().map((r) -> {
+                    return ConvertHelper.convert(r, RentalRefundOrder.class);
+                });
+        return result;
+    }
+
+    @Override
 	public RentalResourceType getRentalResourceTypeById(Long rentalResourceTypeId) {
 		 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
