@@ -331,5 +331,5 @@ public interface AssetProvider {
     
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
     
-    List<ListBillsDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
+    List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
 }

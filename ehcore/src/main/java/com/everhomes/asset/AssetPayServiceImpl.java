@@ -223,6 +223,9 @@ public class AssetPayServiceImpl implements AssetPayService{
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
         	payUserDTO = payServiceV2.createPersonalPayUserIfAbsent("EhUsers" + payerId.toString(), namespaceId.toString());
+        	if(payUserDTO != null) {
+        		payServiceV2.bandPhone(payUserDTO.getId(), "手机号????");
+        	}
         }else {
         	payUserDTO = payUserDTOs.get(0);
         }

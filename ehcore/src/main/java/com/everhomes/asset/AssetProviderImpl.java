@@ -19,7 +19,9 @@ import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.Result;
+import org.jooq.Select;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
 import org.jooq.UpdateQuery;
@@ -83,7 +85,9 @@ import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
 import com.everhomes.rest.asset.ModifyBillGroupCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentBillResp;
 import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
@@ -138,6 +142,7 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetPaymentOrderBillsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentBillsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentChargingStandardsRecord;
@@ -2782,7 +2787,7 @@ public class AssetProviderImpl implements AssetProvider {
         long nextSequence = nextBlockSequence - bills.size()+1;
         List<EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
         for(int i = 0; i < bills.size(); i ++){
-            EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
+        	EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
             BillIdAndAmount billIdAndAmount = bills.get(i);
             orderBill.setId(nextSequence++);
             orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
@@ -4733,20 +4738,20 @@ public class AssetProviderImpl implements AssetProvider {
 	                .execute();
 	}
 	
-	public List<ListBillsDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd) {
+	public List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd) {
         //卸货
-        Long ownerId = cmd.getUserId();
-        String ownerType = cmd.getUserType();
+        Long ownerId = cmd.getCommunityId();
         String dateStrBegin = cmd.getDateStrBegin();
         String dateStrEnd = cmd.getDateStrEnd();
         String targetName = cmd.getTargetName();
         //卸货结束
-        List<ListBillsDTO> list = new ArrayList<>();
+        List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
         SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
         query.addConditions(t.OWNER_ID.eq(ownerId));
-        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         Byte status = new Byte("1");
         query.addConditions(t.SWITCH.eq(status));
@@ -4756,38 +4761,42 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
             query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
         }
+        if(!org.springframework.util.StringUtils.isEmpty(targetName)){
+        	query.addConditions(t.TARGET_NAME.like(targetName));
+        }
         query.addOrderBy(t.DATE_STR.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
-            ListBillsDTO dto = new ListBillsDTO();
-            dto.setBuildingName(r.getBuildingName());
-            dto.setApartmentName(r.getApartmentName());
-            dto.setAmountOwed(r.getAmountOwed());
+        	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
             dto.setAmountReceivable(r.getAmountReceivable());
             dto.setAmountReceived(r.getAmountReceived());
-            dto.setBillId(String.valueOf(r.getValue(t.ID)));
-            dto.setBillStatus(r.getValue(t.STATUS));
-            dto.setNoticeTel(r.getValue(t.NOTICETEL));
-            dto.setNoticeTimes(r.getNoticeTimes());
-            dto.setDateStr(r.getDateStr());
-            dto.setTargetName(r.getTargetName());
-            dto.setTargetId(String.valueOf(r.getTargetId()));
-            dto.setTargetType(r.getTargetType());
-            dto.setOwnerId(String.valueOf(r.getOwnerId()));
-            dto.setOwnerType(r.getOwnerType());
-            dto.setContractNum(r.getContractNum());
-            dto.setContractId(String.valueOf(r.getContractId()));
-            // 增加发票编号
-            dto.setInvoiceNum(r.getInvoiceNumber());
-            //添加支付方式
-            dto.setPaymentType(r.getPaymentType());
-            //增加账单时间
-            dto.setDateStrBegin(r.getDateStrBegin());
-            dto.setDateStrEnd(r.getDateStrEnd());
-            //增加客户手机号
-            dto.setCustomerTel(r.getCustomerTel());
+            dto.setBillId(r.getValue(t.ID));
+//            dto.setBillStatus(r.getValue(t.STATUS));
+//            dto.setNoticeTel(r.getValue(t.NOTICETEL));
+//            dto.setDateStr(r.getDateStr());
+//            dto.setTargetName(r.getTargetName());
+//            dto.setTargetId(String.valueOf(r.getTargetId()));
+//            dto.setTargetType(r.getTargetType());
+//            dto.setOwnerId(String.valueOf(r.getOwnerId()));
+//            dto.setOwnerType(r.getOwnerType());
+//            dto.setContractNum(r.getContractNum());
+//            dto.setContractId(String.valueOf(r.getContractId()));
+//            dto.setInvoiceNum(r.getInvoiceNumber());// 发票编号
+//            dto.setPaymentType(r.getPaymentType());//支付方式
+//            dto.setDateStrBegin(r.getDateStrBegin());//账单开始时间
+//            dto.setDateStrEnd(r.getDateStrEnd());//账单结束时间
+//            dto.setCustomerTel(r.getCustomerTel());//客户手机号
+            SelectQuery<EhAssetPaymentOrderBillsRecord> query2 = context.selectQuery(t2);
+       		query2.addConditions(t2.BILL_ID.eq(String.valueOf(dto.getBillId())));
+            query2.addConditions(t2.STATUS.eq(1));//1代表支付成功
+            query2.fetch().map(r2 -> {
+            	dto.setPaymentOrderNum(r2.getValue(t2.ORDER_ID).toString());
+            	return null;
+            });
             list.add(dto);
-            return null;});
+            return null;
+        });
+        //调用支付提供的接口查询订单信息
         return list;
     }
 }

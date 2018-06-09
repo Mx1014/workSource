@@ -4545,13 +4545,14 @@ public class AssetServiceImpl implements AssetService {
         }
         Integer pageOffSet = pageAnchor.intValue();
         
-        List<ListBillsDTO> list = assetProvider.listBillsForOrder(cmd.getNamespaceId(), pageOffSet, pageSize, cmd);
+        List<PaymentOrderBillDTO> list = assetProvider.listBillsForOrder(cmd.getNamespaceId(), pageOffSet, pageSize, cmd);
         if(list.size() <= pageSize){
             response.setNextPageAnchor(null);
         }else {
             response.setNextPageAnchor(pageAnchor+pageSize.longValue());
             list.remove(list.size()-1);
         }
+        response.setPaymentOrderBillDTOs(list);
         return response;
 	}
 }
