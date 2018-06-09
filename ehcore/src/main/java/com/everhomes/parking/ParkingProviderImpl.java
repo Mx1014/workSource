@@ -1240,6 +1240,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 					"创建个人付款账户失败");
 		}
 		String s = sdkPayService.bandPhone(payUserList.getId(), userIdenify);
+		//todo
 //		if(s==null || !"OK".equalsIgnoreCase(s)){
 //			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
 //					"绑定个人手机号码失败");

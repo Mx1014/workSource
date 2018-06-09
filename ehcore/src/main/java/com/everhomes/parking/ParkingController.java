@@ -526,10 +526,11 @@ public class ParkingController extends ControllerBase {
 
     /**
      * <b>URL: /parking/notifyParkingRechargeOrderPaymentV2</b>
-     * <p>支付后,支付系统回调</p>
+     * <p>支付/退款后,支付系统回调</p>
      */
     @RequestMapping("notifyParkingRechargeOrderPaymentV2")
     @RestReturn(value = String.class)
+    @RequireAuthentication(false)
     public RestResponse notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
 
         parkingService.notifyParkingRechargeOrderPaymentV2(cmd);

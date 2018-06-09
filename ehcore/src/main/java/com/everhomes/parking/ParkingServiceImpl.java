@@ -145,6 +145,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public com.everhomes.paySDK.api.PayService sdkPayService;
 	@Autowired
 	public ParkingBusinessPayeeAccountProvider parkingBusinessPayeeAccountProvider;
+	@Autowired
+	public ParkingOrderEmbeddedV2Handler parkingOrderEmbeddedV2Handler;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -698,7 +700,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName,ParkingLot parkingLot ) {
-		Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
+		Long amount = parkingRechargeOrder.getPrice().multiply(new BigDecimal(100)).longValue();
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
 			amount = 1L;
@@ -714,9 +716,6 @@ public class ParkingServiceImpl implements ParkingService {
 		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 //		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
 //				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount,null, null, null,extendInfo);
-//
-//
-//		return callBack;
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType());
 		ParkingBusinessType bussinessType = null;
 		if(rechargeType == ParkingRechargeType.MONTHLY){
@@ -724,9 +723,8 @@ public class ParkingServiceImpl implements ParkingService {
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
 		}
-		//todo
 		User user = UserContext.current().getUser();
-		String sNamespaceId = "999951";
+		String sNamespaceId = "999951";		//todo
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
 				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
@@ -745,6 +743,7 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setAmount(amount);
 		createOrderCommand.setExtendInfo(extendInfo);
 		createOrderCommand.setGoodsName(extendInfo);
+		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		createOrderCommand.setBackUrl(callbackurl);
@@ -758,6 +757,7 @@ public class ParkingServiceImpl implements ParkingService {
 		OrderCommandResponse response = purchaseOrder.getResponse();
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
+		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
 		return preDto;
 	}
 
@@ -2000,18 +2000,28 @@ public class ParkingServiceImpl implements ParkingService {
 
 	private void refundParkingOrderV2 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-
-		Long refoundOrderNo = createOrderNo(parkingLot);
-
-		BigDecimal price = order.getPrice();
-
-		Long amount = payService.changePayAmount(price);
+		Long amount = order.getPrice().multiply(new BigDecimal(100)).longValue();
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
 			amount = 1L;
 		}
-
-		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
+		if(order.getPayOrderNo()==null){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
+					"支付订单号不存在");
+		}
+		CreateOrderCommand refundOrder = new CreateOrderCommand();
+		refundOrder.setRefundOrderId(order.getOrderNo());
+		refundOrder.setBizOrderNum(createOrderNo(parkingLot)+"");
+		refundOrder.setAmount(amount);
+		String homeurl = configProvider.getValue("home.url", "");
+		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
+		refundOrder.setBackUrl(callbackurl);
+		String sNamespaceId = "999951";		//todo
+		refundOrder.setAccountCode(sNamespaceId);
+		LOGGER.info("refund order params = "+refundOrder);
+		CreateOrderRestResponse refundResponse = sdkPayService.createRefundOrder(refundOrder);
+//		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
 		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 
@@ -2919,7 +2929,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
-
+		parkingOrderEmbeddedV2Handler.payCallBack(cmd);
 	}
 
 	private ParkingOwnerType checkOwner(String ownerType, Long ownerId) {
@@ -2949,5 +2959,33 @@ public class ParkingServiceImpl implements ParkingService {
 					"unknown ownerType "+ownerType);
 		}
 		return enumOwnerType;
+	}
+
+	public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+		List<PayMethodDTO> payMethods = new ArrayList<>();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		PayMethodDTO alipay = new PayMethodDTO();
+		alipay.setPaymentName("支付宝支付");
+		PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
+		alipayParamsDTO.setPayType("A01");
+		alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+		String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
+		alipay.setPaymentLogo(url);
+		alipay.setPaymentParams(alipayParamsDTO);
+		alipay.setPaymentType(8);
+		payMethods.add(alipay);
+
+		PayMethodDTO wxpay = new PayMethodDTO();
+		wxpay.setPaymentName("微信支付");
+		wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+		url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
+		wxpay.setPaymentLogo(url);
+		PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
+		wxParamsDTO.setPayType("no_credit");
+		wxpay.setPaymentParams(wxParamsDTO);
+		wxpay.setPaymentType(1);
+
+		payMethods.add(wxpay);
+		return payMethods;
 	}
 }

@@ -11,6 +11,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.PayUtil;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
@@ -51,13 +52,12 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	private BusBridgeProvider busBridgeProvider;
 
 	private void paySuccess(OrderPaymentNotificationCommand cmd) {
-		LOGGER.info("Parking pay info, cmd={}", cmd);
+		this.checkOrderNoIsNull(cmd.getBizOrderNum());//检查停车业务订单号
+		this.checkPayAmountIsNull(cmd.getAmount());//
 
-		this.checkOrderNoIsNull(cmd.getBizOrderNum());
-		this.checkPayAmountIsNull(cmd.getAmount());
 
 		Long orderId = Long.parseLong(cmd.getBizOrderNum());//获取下单时候的支付id
-		BigDecimal payAmount = new BigDecimal(cmd.getAmount());
+		BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
 
 		//支付宝回调时，可能会同时回调多次，
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + orderId).enter(()-> {
@@ -222,6 +222,44 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 
 	@Override
 	public void payCallBack(OrderPaymentNotificationCommand cmd) {
-		paySuccess(cmd);
+		//检查签名
+		if(!PayUtil.verifyCallbackSignature(cmd)){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"sign verify faild");
+		}
+
+		// * RAW(0)：
+		// * SUCCESS(1)：支付成功
+		// * PENDING(2)：挂起
+		// * ERROR(3)：错误
+		if(cmd.getPaymentStatus()== null || 1!=cmd.getPaymentStatus()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"invaild paymentstatus,"+cmd.getPaymentStatus());
+		}//检查状态
+
+		//检查orderType
+		//RECHARGE(1), WITHDRAW(2), PURCHACE(3), REFUND(4);
+		//充值，体现，支付，退款
+		if(cmd.getOrderType()==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"invaild ordertype,"+cmd.getOrderType());
+		}
+		if(cmd.getOrderType() == 3) {
+			paySuccess(cmd);
+		}
+		else if(cmd.getOrderType() == 4){
+			refundSuccess(cmd);
+		}
+	}
+
+	private void refundSuccess(OrderPaymentNotificationCommand cmd) {
+		//when you refund, i can do nothing.
+		Long orderId = Long.parseLong(cmd.getBizOrderNum());//获取下单时候的支付id
+
+		ParkingRechargeOrder order = checkOrder(orderId);
+
+		order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
+		order.setRefundTime(new Timestamp(System.currentTimeMillis()));
+		parkingProvider.updateParkingRechargeOrder(order);
 	}
 }
