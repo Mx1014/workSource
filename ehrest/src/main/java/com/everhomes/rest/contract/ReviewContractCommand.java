@@ -7,6 +7,7 @@ package com.everhomes.rest.contract;
  *     <li>invalidReason: 作废时传作废原因</li>
  *     <li>result: 结果 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  *     <li>categoryId: 合同类型categoryId，用于多入口</li>
+ *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -28,6 +29,17 @@ public class ReviewContractCommand {
 
     private String invalidReason;
     
+    private Byte contractApplicationScene = 0;
+    
+    
+	public Byte getContractApplicationScene() {
+		return contractApplicationScene;
+	}
+
+	public void setContractApplicationScene(Byte contractApplicationScene) {
+		this.contractApplicationScene = contractApplicationScene;
+	}
+
 	public String getInvalidReason() {
         return invalidReason;
     }
