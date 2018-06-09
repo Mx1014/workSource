@@ -15,6 +15,7 @@ import com.everhomes.query.QueryCondition;
 import com.everhomes.query.SortSpec;
 import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.RestErrorCode;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
@@ -411,13 +412,14 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
 //        String payHomeUrl = "http://paytest.zuolin.com:8080/pay";
         String payHomeUrl = configurationProvider.getValue(0, ConfigConstants.PAY_V2_HOME_URL, "");
-        PaymentAccountResp account = paymentService.findPaymentAccount();
-        RestClient restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
-        com.everhomes.rest.RestResponseBase response = (com.everhomes.rest.RestResponseBase) restClient.restCall(
+        //PaymentAccountResp account = paymentService.findPaymentAccount();
+        //RestClient restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
+        /*com.everhomes.rest.RestResponseBase response = (com.everhomes.rest.RestResponseBase) restClient.restCall(
                 method,
                 uri,
                 cmd,
-                classType);
+                classType);*/
+        com.everhomes.rest.RestResponseBase response = new RestResponseBase();
         if(LOGGER.isDebugEnabled()) {LOGGER.debug("callPaymentMethod.response=" + GsonUtil.toJson(response));}
 
         checkPaymentResponse(response);

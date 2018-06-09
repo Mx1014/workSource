@@ -14,6 +14,12 @@ CREATE TABLE `eh_rentalv2_order_records` (
 `payment_order_type`  tinyint(8) NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单' ,
 `status`  tinyint(8) NULL COMMENT '订单状态0未支付 1已支付' ,
 `amount` decimal(16) NULL COMMENT '订单金额' ,
+`account_id`  bigint(20) NULL COMMENT '收款方账号' ,
+`order_commit_url` varchar(1024) NULL,
+`order_commit_token` varchar(1024) NULL,
+`order_commit_nonce` varchar(128) NULL,
+`order_commit_timestamp`  bigint(20) NULL  ,
+`pay_info` text NULL,
 `create_time`  datetime  ,
 `update_time`  datetime  ,
 PRIMARY KEY (`id`)

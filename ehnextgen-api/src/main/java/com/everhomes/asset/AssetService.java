@@ -191,4 +191,6 @@ public interface AssetService {
      * @param cmd
      */
     void payNotify(OrderPaymentNotificationCommand cmd);
+    	
+    ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd);
 }

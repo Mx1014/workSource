@@ -330,4 +330,6 @@ public interface AssetProvider {
 	void setRent(Long contractId, BigDecimal rent);
     
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+    
+    List<ListBillsDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
 }

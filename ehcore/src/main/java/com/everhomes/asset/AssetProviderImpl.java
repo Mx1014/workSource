@@ -4732,4 +4732,62 @@ public class AssetProviderImpl implements AssetProvider {
 	                .where(Tables.EH_CONTRACTS.ID.eq(contractId))
 	                .execute();
 	}
+	
+	public List<ListBillsDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd) {
+        //卸货
+        Long ownerId = cmd.getUserId();
+        String ownerType = cmd.getUserType();
+        String dateStrBegin = cmd.getDateStrBegin();
+        String dateStrEnd = cmd.getDateStrEnd();
+        String targetName = cmd.getTargetName();
+        //卸货结束
+        List<ListBillsDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
+        Byte status = new Byte("1");
+        query.addConditions(t.SWITCH.eq(status));
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
+            query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
+            query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
+        }
+        query.addOrderBy(t.DATE_STR.desc());
+        query.addLimit(pageOffSet,pageSize+1);
+        query.fetch().map(r -> {
+            ListBillsDTO dto = new ListBillsDTO();
+            dto.setBuildingName(r.getBuildingName());
+            dto.setApartmentName(r.getApartmentName());
+            dto.setAmountOwed(r.getAmountOwed());
+            dto.setAmountReceivable(r.getAmountReceivable());
+            dto.setAmountReceived(r.getAmountReceived());
+            dto.setBillId(String.valueOf(r.getValue(t.ID)));
+            dto.setBillStatus(r.getValue(t.STATUS));
+            dto.setNoticeTel(r.getValue(t.NOTICETEL));
+            dto.setNoticeTimes(r.getNoticeTimes());
+            dto.setDateStr(r.getDateStr());
+            dto.setTargetName(r.getTargetName());
+            dto.setTargetId(String.valueOf(r.getTargetId()));
+            dto.setTargetType(r.getTargetType());
+            dto.setOwnerId(String.valueOf(r.getOwnerId()));
+            dto.setOwnerType(r.getOwnerType());
+            dto.setContractNum(r.getContractNum());
+            dto.setContractId(String.valueOf(r.getContractId()));
+            // 增加发票编号
+            dto.setInvoiceNum(r.getInvoiceNumber());
+            //添加支付方式
+            dto.setPaymentType(r.getPaymentType());
+            //增加账单时间
+            dto.setDateStrBegin(r.getDateStrBegin());
+            dto.setDateStrEnd(r.getDateStrEnd());
+            //增加客户手机号
+            dto.setCustomerTel(r.getCustomerTel());
+            list.add(dto);
+            return null;});
+        return list;
+    }
 }
