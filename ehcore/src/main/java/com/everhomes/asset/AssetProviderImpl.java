@@ -46,6 +46,8 @@ import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.OrderDTO;
 import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.pay.user.UserAccountInfo;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -180,7 +182,7 @@ public class AssetProviderImpl implements AssetProvider {
     
     @Autowired
     private com.everhomes.paySDK.api.PayService payServiceV2;
-
+    
     @Override
     public void creatAssetBill(AssetBill bill) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetBills.class));
@@ -4797,6 +4799,25 @@ public class AssetProviderImpl implements AssetProvider {
             return null;
         });
         //调用支付提供的接口查询订单信息
+        List<Long> payOrderIds = new ArrayList<>();
+        payOrderIds.add(1000198L);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listPayOrderByIds(request), cmd={}", payOrderIds);
+        }
+        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(payOrderIds);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listPayOrderByIds(response), response={}", GsonUtil.toJson(payOrderDTOs));
+        }
+        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
+        	for(int i = 0;i < payOrderDTOs.size();i++) {
+            	for(int j = 0;j < list.size();j++) {
+            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
+            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
+            			list.get(j).setPaymentType(payOrderDTOs.get(i).getPaymentType());
+            		}
+            	}
+            }
+        }
         return list;
     }
 }

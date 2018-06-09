@@ -16,6 +16,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
@@ -1692,7 +1693,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     }
     
     public void payNotify(OrderPaymentNotificationCommand cmd) {
-    	PaymentCallBackHandler handler = new Zuolin_PayCallBack();
+    	PaymentCallBackHandler handler = PlatformContext.getComponent(
+    			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.WUYE_CODE);
     	//支付模块回调接口，通知支付结果
     	assetPayService.payNotify(cmd, handler);
     }
