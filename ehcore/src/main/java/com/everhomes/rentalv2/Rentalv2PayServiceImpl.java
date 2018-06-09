@@ -381,6 +381,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private void saveOrderRecord(Long orderNo, OrderCommandResponse orderCommandResponse, Long bizPayeeId) {
         Rentalv2OrderRecord record = new Rentalv2OrderRecord();
         record.setOrderNo(orderNo);
+        record.setBizOrderNum(orderCommandResponse.getBizOrderNum());
         record.setAccountId(bizPayeeId);
         record.setOrderCommitNonce(orderCommandResponse.getOrderCommitNonce());
         record.setOrderCommitTimestamp(orderCommandResponse.getOrderCommitTimestamp());
@@ -483,7 +484,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         //success
         if(cmd.getPaymentStatus() != null) {
             this.dbProvider.execute((TransactionStatus status) -> {
-                RentalOrder order = rentalProvider.findRentalBillByOrderNo(cmd.getBizOrderNum());
+                Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
+                RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
                 order.setPaidMoney(order.getPaidMoney().add(new java.math.BigDecimal(cmd.getAmount()/100.0)));
                 switch (cmd.getPaymentType()){
                     case 1:
@@ -589,7 +591,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     @Override
     public void refundNotify(OrderPaymentNotificationCommand cmd) {
         this.dbProvider.execute((TransactionStatus status) -> {
-            RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByOrderNo(cmd.getBizOrderNum());
+            Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
+            RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByOrderNo(record.getOrderNo().toString());
             RentalOrder bill = this.rentalProvider.findRentalBillById(rentalRefundOrder.getOrderId());
             rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
             bill.setStatus(SiteBillStatus.REFUNDED.getCode());

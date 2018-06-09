@@ -142,4 +142,13 @@ public class Rentalv2AccountProviderImpl implements  Rentalv2AccountProvider {
             return null;
         return ConvertHelper.convert(record,Rentalv2OrderRecord.class);
     }
+
+    @Override
+    public Rentalv2OrderRecord getOrderRecordByBizOrderNo(String bizOrderNo) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Record record = context.select().from(Tables.EH_RENTALV2_ORDER_RECORDS).where(Tables.EH_RENTALV2_ORDER_RECORDS.BIZ_ORDER_NUM.eq(bizOrderNo)).fetchOne();
+        if (record == null)
+            return null;
+        return ConvertHelper.convert(record,Rentalv2OrderRecord.class);
+    }
 }
