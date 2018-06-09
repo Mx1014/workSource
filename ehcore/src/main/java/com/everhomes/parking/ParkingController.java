@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,7 +268,67 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+
+    /**
+     * <b>URL: /parking/listPayeeAccount </b>
+     * <p>获取收款方账号</p>
+     */
+    @RequestMapping("listPayeeAccount")
+    @RestReturn(value=ListBizPayeeAccountDTO.class,collection = true)
+    public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
+
+        List<ListBizPayeeAccountDTO> list = parkingService.listPayeeAccount(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/createOrUpdateBusinessPayeeAccount </b>
+     * <p>关联收款方账号到具体业务</p>
+     */
+    @RequestMapping("createOrUpdateBusinessPayeeAccount")
+    @RestReturn(value=String.class)
+    public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+        parkingService.createOrUpdateBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/listBusinessPayeeAccount </b>
+     * <p>获取已关联收款账号的业务列表</p>
+     */
+    @RequestMapping("listBusinessPayeeAccount")
+    @RestReturn(value=ListBusinessPayeeAccountResponse.class)
+    public RestResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.listBusinessPayeeAccount(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/delBusinessPayeeAccount </b>
+     * <p>删除已关联收款账号的业务</p>
+     */
+    @RequestMapping("delBusinessPayeeAccount")
+    @RestReturn(value=String.class)
+    public RestResponse delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+        parkingService.delBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /parking/listParkingCardRequests</b>
      * <p>查询指定园区/小区、停车场、车牌对应的月卡申请列表</p>
@@ -456,6 +518,22 @@ public class ParkingController extends ControllerBase {
     public RestResponse notifyParkingRechargeOrderPayment(PayCallbackCommand cmd) {
         
     	parkingService.notifyParkingRechargeOrderPayment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/notifyParkingRechargeOrderPaymentV2</b>
+     * <p>支付/退款后,支付系统回调</p>
+     */
+    @RequestMapping("notifyParkingRechargeOrderPaymentV2")
+    @RestReturn(value = String.class)
+    @RequireAuthentication(false)
+    public RestResponse notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+
+        parkingService.notifyParkingRechargeOrderPaymentV2(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

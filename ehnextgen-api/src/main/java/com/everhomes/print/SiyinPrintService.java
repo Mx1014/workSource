@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.print;
 
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.*;
 
@@ -11,6 +12,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
+
+import java.util.List;
 
 public interface SiyinPrintService {
 	GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd);
@@ -60,4 +63,12 @@ public interface SiyinPrintService {
 	void mfpLogNotification(String jobData, HttpServletResponse response);
 
 	void getPrintQrcode(HttpServletRequest req, HttpServletResponse rps);
+
+    List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd);
+
+	void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd);
+
+	BusinessPayeeAccountDTO getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd);
+
+	void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response);
 }

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.*;
 import org.slf4j.Logger;
@@ -395,4 +396,58 @@ public class SiYinPrintController extends ControllerBase {
 	     response.setErrorDescription("OK");
 	     return response;
 	 }
+
+	/**
+	 * <b>URL: /siyinprint/listPayeeAccount </b>
+	 * <p>获取收款方账号</p>
+	 */
+	@RequestMapping("listPayeeAccount")
+	@RestReturn(value=ListBizPayeeAccountDTO.class,collection = true)
+	public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
+
+		RestResponse response = new RestResponse(siyinPrintService.listPayeeAccount(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /siyinprint/createOrUpdateBusinessPayeeAccount </b>
+	 * <p>关联收款方账号到具体业务</p>
+	 */
+	@RequestMapping("createOrUpdateBusinessPayeeAccount")
+	@RestReturn(value=String.class)
+	public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+        siyinPrintService.createOrUpdateBusinessPayeeAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /siyinprint/getBusinessPayeeAccount </b>
+	 * <p>获取已关联收款账号的业务</p>
+	 */
+	@RequestMapping("getBusinessPayeeAccount")
+	@RestReturn(value=BusinessPayeeAccountDTO.class)
+	public RestResponse getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+
+		RestResponse response = new RestResponse(siyinPrintService.getBusinessPayeeAccount(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /siyinprint/mfpLogNotificationV2</b>
+	 * <p>21.司印方调用，任务日志处理</p>
+	 */
+	@RequestMapping("mfpLogNotificationV2")
+	@RequireAuthentication(false)
+	public void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response){
+		siyinPrintService.mfpLogNotificationV2(cmd,response);
+	}
 }

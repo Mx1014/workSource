@@ -28,10 +28,15 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
@@ -42,7 +47,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -137,6 +141,12 @@ public class ParkingServiceImpl implements ParkingService {
 	private CoordinationProvider coordinationProvider;
 	@Autowired
 	public CommunityProvider communityProvider;
+	@Autowired
+	public com.everhomes.paySDK.api.PayService sdkPayService;
+	@Autowired
+	public ParkingBusinessPayeeAccountProvider parkingBusinessPayeeAccountProvider;
+	@Autowired
+	public ParkingOrderEmbeddedV2Handler parkingOrderEmbeddedV2Handler;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -690,26 +700,11 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName,ParkingLot parkingLot ) {
-//        PreOrderCommand preOrderCommand = new PreOrderCommand();
-//
-//        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-//        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
-
-		Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
+		Long amount = parkingRechargeOrder.getPrice().multiply(new BigDecimal(100)).longValue();
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
 			amount = 1L;
 		}
-//        preOrderCommand.setAmount(amount);
-//
-//        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
-//        preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-//
-////        preOrderCommand.setExpiration(expiredTime);
-//
-//        preOrderCommand.setClientAppName(clientAppName);
-//
-//        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 		String extendInfo = null;
 		if(parkingLot!=null){
 			Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
@@ -719,11 +714,51 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
-		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
-				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount,null, null, null,extendInfo);
-
-
-		return callBack;
+//		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
+//				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount,null, null, null,extendInfo);
+		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType());
+		ParkingBusinessType bussinessType = null;
+		if(rechargeType == ParkingRechargeType.MONTHLY){
+			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
+		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
+			bussinessType = ParkingBusinessType.TEMPFEE;
+		}
+		User user = UserContext.current().getUser();
+		String sNamespaceId = "999951";		//todo
+		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
+		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
+				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
+		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
+				parkingLot.getOwnerType(), parkingLot.getOwnerId(), parkingLot.getId(),bussinessType.getCode());
+		if(payeeAccounts==null || payeeAccounts.size()==0){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_NO_PAYEE_ACCOUNT,
+					"未设置收款方账号");
+		}
+		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+		createOrderCommand.setAccountCode(sNamespaceId);
+		createOrderCommand.setBizOrderNum(parkingRechargeOrder.getId()+"");
+		createOrderCommand.setClientAppName(clientAppName);
+		createOrderCommand.setPayerUserId(payerDto.getAccountId());
+		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
+		createOrderCommand.setAmount(amount);
+		createOrderCommand.setExtendInfo(extendInfo);
+		createOrderCommand.setGoodsName(extendInfo);
+		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
+		String homeurl = configProvider.getValue("home.url", "");
+		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
+		createOrderCommand.setBackUrl(callbackurl);
+		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
+		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
+			LOGGER.info("purchaseOrder "+purchaseOrder);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"preorder failed "+StringHelper.toJsonString(purchaseOrder));
+		}
+		OrderCommandResponse response = purchaseOrder.getResponse();
+		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
+		preDto.setExpiredIntervalTime(response.getExpirationMillis());
+		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
+		return preDto;
 	}
 
 	private CommonOrderDTO convertOrderDTOForV1(ParkingRechargeOrder parkingRechargeOrder, Byte rechargeType) {
@@ -1965,18 +2000,28 @@ public class ParkingServiceImpl implements ParkingService {
 
 	private void refundParkingOrderV2 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-
-		Long refoundOrderNo = createOrderNo(parkingLot);
-
-		BigDecimal price = order.getPrice();
-
-		Long amount = payService.changePayAmount(price);
+		Long amount = order.getPrice().multiply(new BigDecimal(100)).longValue();
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
 			amount = 1L;
 		}
-
-		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
+		if(order.getPayOrderNo()==null){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
+					"支付订单号不存在");
+		}
+		CreateOrderCommand refundOrder = new CreateOrderCommand();
+		refundOrder.setRefundOrderId(order.getOrderNo());
+		refundOrder.setBizOrderNum(createOrderNo(parkingLot)+"");
+		refundOrder.setAmount(amount);
+		String homeurl = configProvider.getValue("home.url", "");
+		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
+		refundOrder.setBackUrl(callbackurl);
+		String sNamespaceId = "999951";		//todo
+		refundOrder.setAccountCode(sNamespaceId);
+		LOGGER.info("refund order params = "+refundOrder);
+		CreateOrderRestResponse refundResponse = sdkPayService.createRefundOrder(refundOrder);
+//		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
 		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 
@@ -2799,5 +2844,148 @@ public class ParkingServiceImpl implements ParkingService {
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 			handler.refreshToken();
 		}
+	}
+
+	@Override
+	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getOwnerId() + ""));
+		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
+		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
+		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
+		if(payUserList==null || payUserList.size() == 0){
+			return null;
+		}
+		return payUserList.stream().map(r->{
+			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+			dto.setAccountId(r.getId());
+			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+			dto.setAccountName(r.getUserName());
+			dto.setAccountAliasName(r.getUserAliasName());
+			dto.setAccountStatus(Byte.valueOf(r.getRegisterStatus()+""));
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts
+				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId(),cmd.getBusinessType());
+		if(accounts!=null && accounts.size()>0){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEATE_ACCOUNT,
+					"repeat account");
+		}
+		if(cmd.getId()!=null){
+			ParkingBusinessPayeeAccount oldPayeeAccount = parkingBusinessPayeeAccountProvider.findParkingBusinessPayeeAccountById(cmd.getId());
+			if(oldPayeeAccount == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"unknown payaccountid = "+cmd.getId());
+			}
+			ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);
+			newPayeeAccount.setCreateTime(oldPayeeAccount.getCreateTime());
+			newPayeeAccount.setCreatorUid(oldPayeeAccount.getCreatorUid());
+			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
+			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
+			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+			parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(newPayeeAccount);
+		}else{
+			ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);
+			newPayeeAccount.setStatus((byte)2);
+			parkingBusinessPayeeAccountProvider.createParkingBusinessPayeeAccount(newPayeeAccount);
+		}
+	}
+
+	@Override
+	public ListBusinessPayeeAccountResponse listBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider
+				.listParkingBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId());
+		if(accounts==null || accounts.size()==0){
+			return null;
+		}
+		List<PayUserDTO> payUserDTOS = sdkPayService.listPayUsersByIds(accounts.stream().map(r -> r.getPayeeId()).collect(Collectors.toList()));
+		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
+		ListBusinessPayeeAccountResponse response = new ListBusinessPayeeAccountResponse();
+		response.setAccountList(accounts.stream().map(r->{
+			BusinessPayeeAccountDTO convert = ConvertHelper.convert(r, BusinessPayeeAccountDTO.class);
+			PayUserDTO payUserDTO = map.get(convert.getPayeeId());
+			if(payUserDTO!=null){
+				convert.setPayeeUserName(payUserDTO.getUserName());
+				convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
+				convert.setPayeeAccountCode(payUserDTO.getAccountCode());
+				convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus());
+				convert.setPayeeRemark(payUserDTO.getRemark());
+			}
+			return convert;
+		}).collect(Collectors.toList()));
+		return response;
+	}
+
+	@Override
+	public void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+		parkingBusinessPayeeAccountProvider.deleteParkingBusinessPayeeAccount(cmd.getId());
+	}
+
+	@Override
+	public void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+		parkingOrderEmbeddedV2Handler.payCallBack(cmd);
+	}
+
+	private ParkingOwnerType checkOwner(String ownerType, Long ownerId) {
+		ParkingOwnerType enumOwnerType = checkOwnerType(ownerType);
+		switch (enumOwnerType){
+			case COMMUNITY:
+				Community community = communityProvider.findCommunityById(ownerId);
+				if(community==null){
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"unknown ownerId "+ownerId);
+				}
+				break;
+		}
+		return enumOwnerType;
+
+	}
+
+	/**
+	 * 检查所属枚举
+	 * @param ownerType
+	 * @return
+	 */
+	private ParkingOwnerType checkOwnerType(String ownerType) {
+		ParkingOwnerType enumOwnerType = ParkingOwnerType.fromCode(ownerType);
+		if(enumOwnerType==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"unknown ownerType "+ownerType);
+		}
+		return enumOwnerType;
+	}
+
+	public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+		List<PayMethodDTO> payMethods = new ArrayList<>();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		PayMethodDTO alipay = new PayMethodDTO();
+		alipay.setPaymentName("支付宝支付");
+		PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
+		alipayParamsDTO.setPayType("A01");
+		alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+		String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
+		alipay.setPaymentLogo(url);
+		alipay.setPaymentParams(alipayParamsDTO);
+		alipay.setPaymentType(8);
+		payMethods.add(alipay);
+
+		PayMethodDTO wxpay = new PayMethodDTO();
+		wxpay.setPaymentName("微信支付");
+		wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+		url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
+		wxpay.setPaymentLogo(url);
+		PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
+		wxParamsDTO.setPayType("no_credit");
+		wxpay.setPaymentParams(wxParamsDTO);
+		wxpay.setPaymentType(1);
+
+		payMethods.add(wxpay);
+		return payMethods;
 	}
 }
