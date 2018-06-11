@@ -793,6 +793,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setData(dataMap);
                     importLogs.setErrorDescription("customer mandatory error ");
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_MANDATORY_ERROR);
+                    importLogs.setFieldName(column.getHeaderDisplay());
                     flag = false;
                     break;
                 }
@@ -811,6 +812,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     importLogs.setData(dataMap);
                                     importLogs.setErrorDescription("customer import data format error ");
                                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_NUM_FORMAT_ERROR);
+                                    importLogs.setFieldName(column.getHeaderDisplay());
                                     flag = false;
                                     break columnLoop;
                                 }
@@ -833,6 +835,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                         importLogs.setData(dataMap);
                                         importLogs.setErrorDescription("customer import data timestamp format error ");
                                         importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_DATE_FORMAT_ERROR);
+                                        importLogs.setFieldName(column.getHeaderDisplay());
                                         flag = false;
                                         break columnLoop;
                                     }
@@ -871,6 +874,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setData(dataMap);
                     importLogs.setErrorDescription("unknow exceptions");
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_UNKNOW_ERROR);
+                    importLogs.setFieldName(column.getHeaderDisplay());
                     break;
                 }
             }
@@ -927,6 +931,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             importLogs.setData(dataMap);
                             importLogs.setErrorDescription("address and building not exist");
                             importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST_ERROR);
+                            importLogs.setFieldName(column.getHeaderDisplay());
                             return true;
                         }
                     }
@@ -938,6 +943,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 importLogs.setData(dataMap);
                 importLogs.setErrorDescription("wrong building and address format");
                 importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR);
+                importLogs.setFieldName(column.getHeaderDisplay());
                 return true;
             }
         }
@@ -959,6 +965,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 importLogs.setData(dataMap);
                 importLogs.setErrorDescription("customer enterprise admins format error");
                 importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADMIN_FORMAT_ERROR);
+                importLogs.setFieldName(column.getHeaderDisplay());
                 return true;
             }
         }
@@ -985,6 +992,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 importLogs.setData(dataMap);
                 importLogs.setErrorDescription("can't find any scope items ");
                 importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ITEM_ERROR);
+                importLogs.setFieldName(column.getHeaderDisplay());
                 return true;
             }
         }
@@ -1007,6 +1015,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setData(dataMap);
                     importLogs.setErrorDescription("wrong trackingUid and contacPhone format");
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
+                    importLogs.setFieldName(column.getHeaderDisplay());
                     return true;
                 }
                 enterpriseCustomer.setTrackingName(username);

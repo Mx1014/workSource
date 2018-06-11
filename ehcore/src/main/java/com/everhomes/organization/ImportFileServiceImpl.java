@@ -93,7 +93,11 @@ public class ImportFileServiceImpl implements ImportFileService {
                 List<ImportFileResultLog> logs = response.getLogs();
                 if (logs != null) {
                     for (ImportFileResultLog log : logs) {
-                        log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        if(StringUtils.isNotBlank(log.getFieldName())){
+                            log.setErrorDescription(log.getFieldName() + localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        }else {
+                            log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        }
                     }
                 }
             }
