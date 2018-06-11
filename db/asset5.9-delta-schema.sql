@@ -51,6 +51,7 @@ PRIMARY KEY (`id`)
 ALTER TABLE `eh_activities` ADD COLUMN `organization_id` BIGINT COMMENT '企业ID';
 -- 活动报名表增加支付系统订单ID，关联支付订单.
 ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_order_id` BIGINT COMMENT '支付系统订单ID';
+ALTER TABLE `eh_activity_roster` ADD COLUMN `refund_pay_order_id` BIGINT COMMENT '支付系统退款订单ID';
 -- yanlong.liang END
 
 
