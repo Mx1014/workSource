@@ -2,10 +2,7 @@ package com.everhomes.menu;
 
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
-import com.everhomes.rest.menu.GetTreeWebMenusByNamespaceCommand;
-import com.everhomes.rest.menu.GetTreeWebMenusByNamespaceResponse;
-import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
-import com.everhomes.rest.menu.UpdateMenuScopesByNamespaceCommand;
+import com.everhomes.rest.menu.*;
 
 import java.util.List;
 
@@ -24,4 +21,8 @@ public interface WebMenuService {
     void updateMenuScopesByNamespace(UpdateMenuScopesByNamespaceCommand cmd);
 
     void refleshMenuByPortalVersion(Long versionId);
+
+    ListMenuForPcEntryResponse listMenuForPcEntry(ListMenuForPcEntryCommand cmd);
+
+    ListMenuForPcEntryServicesResponse listMenuForPcEntryServices(ListMenuForPcEntryServicesCommand cmd);
 }

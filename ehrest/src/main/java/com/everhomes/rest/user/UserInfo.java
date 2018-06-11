@@ -66,6 +66,7 @@ public class UserInfo {
     private String avatarUri;
     private Integer namespaceId;
     private String namespaceUserToken;
+    private String namespaceUserType;
 
     private String uuid;
 
@@ -325,6 +326,14 @@ public class UserInfo {
 
     public void setRegionCodes(List<Integer> regionCodes) {
         this.regionCodes = regionCodes;
+    }
+
+    public String getNamespaceUserType() {
+        return namespaceUserType;
+    }
+
+    public void setNamespaceUserType(String namespaceUserType) {
+        this.namespaceUserType = namespaceUserType;
     }
 
     @Override

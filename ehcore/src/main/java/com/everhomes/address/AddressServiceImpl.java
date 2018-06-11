@@ -92,6 +92,8 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -110,7 +112,7 @@ import static com.everhomes.rest.ui.user.SceneType.DEFAULT;
 import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
 
 @Component
-public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
+public class AddressServiceImpl implements AddressService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddressServiceImpl.class);
 
     private static final String ADMIN_IMPORT_DATA_SEPERATOR = "admin.import.data.seperator";
@@ -193,13 +195,22 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private FieldService fieldService;
-
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhCommunities.class, null), this);
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhCommunities.class, null), this);
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
         // TODO monitor changeEnergyMeter notifications for cache invalidation
         return Action.none;

@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.general_approval.*;
 import com.alibaba.fastjson.JSON;
@@ -96,7 +95,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Override
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         // TODO Auto-generated method stub
-        FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+        FlowCase flowCase = ctx.getRootState().getFlowCase();
         LOGGER.debug("审批被驳回,handler 执行 onFlowCaseAbsorted  userType : " + ctx.getCurrentEvent().getUserType());
         GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
         handler.onFlowCaseAbsorted(ctx);
@@ -203,7 +202,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     public void onFlowCaseEnd(FlowCaseState ctx) {
         // 审批通过 ( 如果 stepType 不是驳回 就是正常结束,进入处理 )
         if (!(ctx.getStepType() == FlowStepType.ABSORT_STEP)) {
-            FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+            FlowCase flowCase = ctx.getRootState().getFlowCase();
             LOGGER.debug("审批终止(通过),handler 执行 onFlowCaseEnd  step type:" + ctx.getStepType());
             GeneralApprovalHandler handler;
             //  兼容以前的版本，老版本未使用上 refer_id 故其值为0

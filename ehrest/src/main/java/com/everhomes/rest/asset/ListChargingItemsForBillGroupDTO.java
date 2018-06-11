@@ -18,6 +18,7 @@ import java.util.List;
  * <li>billingCycle:计费周期，2：按月；3：按季度；4：按年</li>
  * <li>billItemGenerationMonth: 费项产生的月数</li>
  * <li>billItemGenerationDay: 费项产生的日数</li>
+ * <li>billItemGenerationType: 1: 费项产生项第几个月份；2:费项产色黄姑娘第几个月份第几号；3：费用周期最后一天产生</li>
  *</ul>
  */
 public class ListChargingItemsForBillGroupDTO {
@@ -31,6 +32,15 @@ public class ListChargingItemsForBillGroupDTO {
     private Byte billingCycle;
     private Integer billItemGenerationMonth;
     private Integer billItemGenerationDay;
+    private Byte billItemGenerationType;
+
+    public Byte getBillItemGenerationType() {
+        return billItemGenerationType;
+    }
+
+    public void setBillItemGenerationType(Byte billItemGenerationType) {
+        this.billItemGenerationType = billItemGenerationType;
+    }
 
     @Override
     public String toString() {

@@ -10,7 +10,9 @@ import java.util.List;
  *     <li>id: id</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>moduleName: 模块名</li>
+ *     <li>moduleId: 模块id</li>
  *     <li>moduleUrl: 跳转链接</li>
+ *     <li>instanceConfig: 一些额外信息</li>
  * </ul>
  */
 public class JumpModuleDTO {
@@ -20,8 +22,12 @@ public class JumpModuleDTO {
     private Integer namespaceId;
 
     private String moduleName;
+    
+    private Long moduleId;
 
     private String moduleUrl;
+    
+    private String instanceConfig;
 
     private Long parentId;
 
@@ -80,4 +86,20 @@ public class JumpModuleDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public String getInstanceConfig() {
+		return instanceConfig;
+	}
+
+	public void setInstanceConfig(String instanceConfig) {
+		this.instanceConfig = instanceConfig;
+	}
 }
