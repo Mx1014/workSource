@@ -4,6 +4,8 @@ package com.everhomes.welfare;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,7 +62,19 @@ public class WelfareReceiverProviderImpl implements WelfareReceiverProvider {
 				.orderBy(Tables.EH_WELFARE_RECEIVERS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, WelfareReceiver.class));
 	}
-	
+
+	@Override
+	public List<WelfareReceiver> listWelfareReceiver(Long welfareId) {
+		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_WELFARE_RECEIVERS)
+				.where(Tables.EH_WELFARE_RECEIVERS.WELFARE_ID.eq(welfareId))
+				.orderBy(Tables.EH_WELFARE_RECEIVERS.ID.asc())
+				.fetch();
+		if (null == records) {
+			return null;
+		}
+		return records.map(r -> ConvertHelper.convert(r, WelfareReceiver.class));
+	}
+
 	private EhWelfareReceiversDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

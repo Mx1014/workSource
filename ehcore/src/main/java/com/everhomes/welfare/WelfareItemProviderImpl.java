@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +65,19 @@ public class WelfareItemProviderImpl implements WelfareItemProvider {
 				.orderBy(Tables.EH_WELFARE_ITEMS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, WelfareItem.class));
 	}
-	
+
+	@Override
+	public List<WelfareItem> listWelfareItem(Long welfareId) {
+		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_WELFARE_ITEMS)
+				.where(Tables.EH_WELFARE_ITEMS.WELFARE_ID.eq(welfareId))
+				.orderBy(Tables.EH_WELFARE_ITEMS.ID.asc())
+				.fetch();
+		if (null == records) {
+			return null;
+		}
+		return records.map(r -> ConvertHelper.convert(r, WelfareItem.class));
+	}
+
 	private EhWelfareItemsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
