@@ -118,6 +118,7 @@ public class AssetPayServiceImpl implements AssetPayService{
                 dto.setAccountId(payUserDTO.getId());
                 // 用户向支付系统注册帐号时填写的帐号名称
                 dto.setAccountName(payUserDTO.getRemark());
+                dto.setAccountAliasName(payUserDTO.getUserAliasName());//企业名称（认证企业）
                 // 帐号类型，1-个人帐号、2-企业帐号
                 Integer userType = payUserDTO.getUserType();
                 if(userType != null && userType.equals(2)) {
