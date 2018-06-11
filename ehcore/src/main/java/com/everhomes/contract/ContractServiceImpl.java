@@ -98,6 +98,7 @@ import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -601,8 +602,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}*/
 		Calendar cal=Calendar.getInstance();
 		StringBuffer contractNumber = new StringBuffer();
+		//获取规则
+		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
 		
-		if (communityExist == null) {
+		if (communityExist == null || contractNumberRulejsonStr == null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("MM");
 			java.util.Date month  = Calendar.getInstance().getTime();
 			//收款
@@ -616,7 +619,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
 			}
 		}
-		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
+		
 		GenerateContractNumberRule contractNumberRulejson = (GenerateContractNumberRule)StringHelper.fromJsonString(contractNumberRulejsonStr, GenerateContractNumberRule.class);
 		
 		String Sparefield = contractNumberRulejson.getSparefield();
