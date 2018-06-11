@@ -767,11 +767,11 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public ActivityBizPayee getActivityPayee(Long organizationId) {
+    public ActivityBizPayee getActivityPayee(Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityBizPayee.class));
         SelectQuery<EhActivityBizPayeeRecord> query = context.selectQuery(Tables.EH_ACTIVITY_BIZ_PAYEE);
-        if (organizationId != null) {
-            query.addConditions(Tables.EH_ACTIVITY_BIZ_PAYEE.ORGANIZATION_ID.eq(organizationId));
+        if (categoryId != null) {
+            query.addConditions(Tables.EH_ACTIVITY_BIZ_PAYEE.OWNER_ID.eq(categoryId));
         }
         EhActivityBizPayeeRecord activityBizPayee = query.fetchOne();
         if (activityBizPayee == null) {

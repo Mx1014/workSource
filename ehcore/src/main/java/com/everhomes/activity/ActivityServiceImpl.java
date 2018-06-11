@@ -6201,12 +6201,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public GetActivityPayeeDTO getActivityPayee(GetActivityPayeeCommand cmd) {
-        if (cmd.getOrganizationId() == null) {
-            LOGGER.error("organizationId cannot be null.");
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "organizationId cannot be null.");
+                    "CategoryId cannot be null.");
         }
-	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
         GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
         if (activityBizPayee != null) {
             activityPayeeDTO.setAccountId(activityBizPayee.getBizPayeeId());
@@ -6253,20 +6253,22 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd) {
-        if (cmd.getOrganizationId() == null) {
-            LOGGER.error("organizationId cannot be null.");
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "organizationId cannot be null.");
+                    "CategoryId cannot be null.");
         }
         if (cmd.getPayeeId() == null) {
             LOGGER.error("payeeId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "payeeId cannot be null.");
         }
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
         if (activityBizPayee == null) {
             ActivityBizPayee persist = new ActivityBizPayee();
-            persist.setOrganizationId(cmd.getOrganizationId());
+            persist.setNamespaceId(UserContext.getCurrentNamespaceId());
+            persist.setBizPayeeType(OwnerType.ORGANIZATION.getCode());
+            persist.setOwnerId(cmd.getCategoryId());
             persist.setBizPayeeId(cmd.getPayeeId());
             this.activityProvider.CreateActivityPayee(persist);
         }else {
