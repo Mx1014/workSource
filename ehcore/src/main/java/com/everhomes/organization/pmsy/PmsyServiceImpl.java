@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.AssetPayService;
+import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -73,6 +75,9 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
 	private PayService payService;
+	
+	@Autowired
+	private AssetPayService assetPayService;
 	
 	@Override
 	public List<PmsyPayerDTO> listPmPayers(){
@@ -459,7 +464,16 @@ public class PmsyServiceImpl implements PmsyService{
 		//preOrderCommand.setAmount(Long.parseLong("10"));//杨崇鑫用于测试
 		preOrderCommand.setClientAppName(cmd.getClientAppName());
 
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		
+		//通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+        /*cmd.setBillGroupId(427L);
+        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
+        if(paymentBillGroup != null) {
+        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
+        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
+        }
+        PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);*/
+		PreOrderDTO callBack = assetPayService.createPreOrder(preOrderCommand);
 
 		return callBack;
 	}
