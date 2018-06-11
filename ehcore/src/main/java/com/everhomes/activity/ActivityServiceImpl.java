@@ -814,6 +814,15 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
                     "no roster.");
         }
+        if (roster.getPayOrderId() != null) {
+            activityProvider.deleteRoster(roster);
+            roster.setId(null);
+            roster.setPayOrderId(null);
+            Long orderNo = this.onlinePayService.createBillId(DateHelper
+                    .currentGMTTime().getTime());
+            roster.setOrderNo(orderNo);
+            activityProvider.createActivityRoster(roster);
+        }
         Activity activity = activityProvider.findActivityById(roster.getActivityId());
         if(activity == null){
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
@@ -836,7 +845,7 @@ public class ActivityServiceImpl implements ActivityService {
         PayUserDTO payUserDTO = checkAndCreatePaymentUser(payerId,UserContext.getCurrentNamespaceId());
         createOrderCommand.setPayerUserId(payUserDTO.getId());
 
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getOrganizationId());
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getCategoryId());
         if (activityBizPayee == null) {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
                     "no payee.");
@@ -851,7 +860,7 @@ public class ActivityServiceImpl implements ActivityService {
         createOrderCommand.setOrderType(com.everhomes.pay.order.OrderType.PURCHACE.getCode());
         createOrderCommand.setExpirationMillis(expiredTime);
         createOrderCommand.setGoodsName("活动报名");
-
+        createOrderCommand.setSourceType(1);
         createOrderCommand.setClientAppName(cmd.getClientAppName());
 
         //微信公众号支付，重新设置ClientName，设置支付方式和参数
@@ -875,6 +884,12 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
+        User userById = userProvider.findUserById(UserContext.currentUserId());
+        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), UserContext.getCurrentNamespaceId());
+        String userIdenify = null;
+        if(userIdentifier != null) {
+            userIdenify = userIdentifier.getIdentifierToken();
+        }
         PayUserDTO payUserDTO = new PayUserDTO();
         //根据支付帐号ID列表查询帐号信息
         if(LOGGER.isDebugEnabled()) {
@@ -891,6 +906,7 @@ public class ActivityServiceImpl implements ActivityService {
         }else {
             payUserDTO = payUserDTOs.get(0);
         }
+        String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         return payUserDTO;
     }
 
@@ -905,36 +921,13 @@ public class ActivityServiceImpl implements ActivityService {
         OrderCommandResponse response = createOrderRestResponse.getResponse();
         callback = ConvertHelper.convert(response, PreOrderDTO.class);
         callback.setExpiredIntervalTime(response.getExpirationMillis());
-        callback.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));
+        List<PayMethodDTO> list = new ArrayList<>();
+        for (com.everhomes.pay.order.PayMethodDTO payMethodDTO : response.getPaymentMethods()) {
+            PayMethodDTO p = ConvertHelper.convert(payMethodDTO,PayMethodDTO.class);
+            list.add(p);
+        }
+        callback.setPayMethod(list);
         return callback;
-    }
-
-    private List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
-        List<PayMethodDTO> payMethods = new ArrayList<>();
-        String format = "{\"getOrderInfoUrl\":\"%s\"}";
-        PayMethodDTO alipay = new PayMethodDTO();
-        alipay.setPaymentName("支付宝支付");
-        PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
-        alipayParamsDTO.setPayType("A01");
-        alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
-        String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
-        alipay.setPaymentLogo(url);
-        alipay.setPaymentParams(alipayParamsDTO);
-        alipay.setPaymentType(8);
-        payMethods.add(alipay);
-
-        PayMethodDTO wxpay = new PayMethodDTO();
-        wxpay.setPaymentName("微信支付");
-        wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
-        url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
-        wxpay.setPaymentLogo(url);
-        PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
-        wxParamsDTO.setPayType("no_credit");
-        wxpay.setPaymentParams(wxParamsDTO);
-        wxpay.setPaymentType(1);
-
-        payMethods.add(wxpay);
-        return payMethods;
     }
 
     @Override
@@ -2080,7 +2073,7 @@ public class ActivityServiceImpl implements ActivityService {
 		}else {
 		    Long orderId = refundV3(activity, roster, userId);
 		    if (orderId != null) {
-		        roster.setPayOrderId(orderId);
+		        roster.setRefundPayOrderId(orderId);
             }
         }
 
