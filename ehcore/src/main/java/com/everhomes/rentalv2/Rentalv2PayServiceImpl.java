@@ -320,8 +320,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
         PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
         dto.setAmount(cmd.getAmount());
-        //List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
-        //dto.setPayMethod(payMethods);
+        List<PayMethodDTO> payMethods = getPayMethods(orderCommandResponse.getOrderPaymentStatusQueryUrl());
+        dto.setPayMethod(payMethods);
         dto.setOrderId(cmd.getOrderId());
         return dto;
     }
