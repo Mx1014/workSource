@@ -1724,6 +1724,15 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
+    public List<String> listArchivesDismissReason(){
+        List<String> results = new ArrayList<>();
+        for(ArchivesDismissReason reason : ArchivesDismissReason.values()){
+            results.add(reason.getType());
+        }
+        return results;
+    }
+
+    @Override
     public ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesDismissEmployeesResponse response = new ListArchivesDismissEmployeesResponse();

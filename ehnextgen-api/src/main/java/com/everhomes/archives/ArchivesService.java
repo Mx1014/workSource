@@ -90,6 +90,8 @@ public interface ArchivesService {
 
     CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd);
 
+    List<String> listArchivesDismissReason();
+
     ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 
     GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);

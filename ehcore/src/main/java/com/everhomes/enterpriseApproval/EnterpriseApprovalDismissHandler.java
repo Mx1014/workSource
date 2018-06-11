@@ -59,7 +59,7 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
                     val.setApplierDepartment(archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getDetailId())));
                     val.setApplierJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(member.getDetailId())));
                 }
-                fieldDTO.setFieldValue(StringHelper.toJsonString(val));
+                fieldDTO.setFieldExtra(StringHelper.toJsonString(val));
             }
         }
     }

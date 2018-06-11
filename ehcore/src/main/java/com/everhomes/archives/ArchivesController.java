@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 2017.08.11
@@ -311,8 +311,22 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /archives/listArchivesDismissReason</b>
+     * <p>9-1.获取离职原因</p>
+     */
+    @RequestMapping("listArchivesDismissReason")
+    @RestReturn(value = String.class, collection = true)
+    public RestResponse listArchivesDismissReason(){
+        List<String> res = archivesService.listArchivesDismissReason();
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /archives/listArchivesDismissEmployees</b>
-     * <p>9.离职员工列表</p>
+     * <p>9-2.离职员工列表</p>
      */
     @RequestMapping("listArchivesDismissEmployees")
     @RestReturn(value = ListArchivesDismissEmployeesResponse.class)
