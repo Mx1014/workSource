@@ -19,3 +19,6 @@ UPDATE eh_service_modules SET action_type=13,multiple_flag=1 WHERE NAME='合同�
 -- App请求地址配置
 SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_configurations`),0);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'contract.app.url', '${home.url}/property-management/build/index.html?hideNavigationBar=1&categoryId=${categoryId}#/contract#sign_suffix', 'contract app url', '0', NULL);
+
+-- 更新企业管理客户级别其他--》历史客户
+UPDATE eh_var_field_items SET display_name='历史客户' WHERE module_name='enterprise_customer' and field_id=5 and display_name='其他';

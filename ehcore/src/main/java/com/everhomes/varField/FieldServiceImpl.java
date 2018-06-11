@@ -428,6 +428,10 @@ public class FieldServiceImpl implements FieldService {
         if(globalFlag) {
             scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
         }
+        if (scopeFields != null && scopeFields.size() < 1) {
+        	scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), null);
+		}
+        
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
             Map<Long, FieldDTO> dtoMap = new HashMap<>();
