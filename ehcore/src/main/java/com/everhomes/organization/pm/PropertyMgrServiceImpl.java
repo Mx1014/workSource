@@ -4905,9 +4905,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         owner.setOrgOwnerTypeId(ownerType.getId());
         owner.setNamespaceId(cmd.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
-        if(cmd.getCustomerExtraTels() != null){
+        if(cmd.getCustomerExtraTels() != null && cmd.getCustomerExtraTels().size() > 0){
             try{
                 owner.setContactExtraTels(StringHelper.toJsonString(cmd.getCustomerExtraTels()));
+                //set owner's contact token for possible unknown uses
+				owner.setContactToken(cmd.getCustomerExtraTels().get(0));
             }catch (Exception e){
                 LOGGER.error("failed to convert customerExtraTels into jsonarray, custoemrExtratel is={}", cmd.getCustomerExtraTels());
             }

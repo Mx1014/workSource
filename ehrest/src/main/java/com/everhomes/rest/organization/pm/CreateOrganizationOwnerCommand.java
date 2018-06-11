@@ -37,7 +37,7 @@ public class CreateOrganizationOwnerCommand {
     private Long communityId;
     @NotNull @Size(max = 20)
     private String contactName;
-    @NotNull @Size(max = 20)
+//    @NotNull @Size(max = 20)
     private String contactToken;
     @NotNull
     private Long orgOwnerTypeId;
