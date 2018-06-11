@@ -822,7 +822,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
 
-        createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+        createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
 
         BigDecimal amout = activity.getChargePrice();
@@ -887,7 +887,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
-            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), namespaceId.toString());
+            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), "NS"+namespaceId.toString());
         }else {
             payUserDTO = payUserDTOs.get(0);
         }
@@ -906,7 +906,6 @@ public class ActivityServiceImpl implements ActivityService {
         callback = ConvertHelper.convert(response, PreOrderDTO.class);
         callback.setExpiredIntervalTime(response.getExpirationMillis());
         callback.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));
-        //缺设置付款方式
         return callback;
     }
 
@@ -2163,7 +2162,7 @@ public class ActivityServiceImpl implements ActivityService {
         createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
         createOrderCommand.setRefundOrderId(roster.getPayOrderId());
         createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
-        createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+        createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
         String backUrl = homeUrl + contextPath + backUri;
@@ -6202,12 +6201,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public GetActivityPayeeDTO getActivityPayee(GetActivityPayeeCommand cmd) {
-        if (cmd.getOrganizationId() == null) {
-            LOGGER.error("organizationId cannot be null.");
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "organizationId cannot be null.");
+                    "CategoryId cannot be null.");
         }
-	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
         GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
         if (activityBizPayee != null) {
             activityPayeeDTO.setAccountId(activityBizPayee.getBizPayeeId());
@@ -6254,20 +6253,22 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd) {
-        if (cmd.getOrganizationId() == null) {
-            LOGGER.error("organizationId cannot be null.");
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "organizationId cannot be null.");
+                    "CategoryId cannot be null.");
         }
         if (cmd.getPayeeId() == null) {
             LOGGER.error("payeeId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "payeeId cannot be null.");
         }
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
         if (activityBizPayee == null) {
             ActivityBizPayee persist = new ActivityBizPayee();
-            persist.setOrganizationId(cmd.getOrganizationId());
+            persist.setNamespaceId(UserContext.getCurrentNamespaceId());
+            persist.setBizPayeeType(OwnerType.ORGANIZATION.getCode());
+            persist.setOwnerId(cmd.getCategoryId());
             persist.setBizPayeeId(cmd.getPayeeId());
             this.activityProvider.CreateActivityPayee(persist);
         }else {
@@ -6280,15 +6281,15 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public CheckPayeeIsUsefulResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd) {
-        if (cmd.getOrganizationId() == null) {
-            LOGGER.error("organizationId cannot be null.");
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "organizationId cannot be null.");
+                    "CategoryId cannot be null.");
         }
         CheckPayeeIsUsefulResponse checkPayeeIsUsefulResponse = new CheckPayeeIsUsefulResponse();
         checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.NULL.getCode());
 
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
         List<Long> idList = new ArrayList<>();
         idList.add(activityBizPayee.getBizPayeeId());
         List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);

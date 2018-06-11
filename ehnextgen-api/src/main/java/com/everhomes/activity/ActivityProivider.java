@@ -169,7 +169,7 @@ public interface ActivityProivider {
 	void deleteActivityCategories(Long id);
 
 
-	ActivityBizPayee getActivityPayee(Long organizationId);
+	ActivityBizPayee getActivityPayee(Long categoryId);
 
 	void CreateActivityPayee(ActivityBizPayee activityBizPayee);
 
