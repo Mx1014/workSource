@@ -944,7 +944,7 @@ public class AssetServiceImpl implements AssetService {
         }
         if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
             // 转换
-             Long assetCategoryId = serviceModuleAppService.getOriginIdFromMappingApp(cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+             Long assetCategoryId = serviceModuleAppService.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
              cmd.setCategoryId(assetCategoryId);
          }
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId()
@@ -1012,6 +1012,11 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd) {
         LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
+        // 转categoryId
+        Long categoryId = serviceModuleAppService.getOriginIdFromMappingApp(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID);
+        if(categoryId == null){
+            categoryId = 0l;
+        }
         Long contractId = cmd.getContractId();
         String contractNum = cmd.getContractNum();
         // generated a record in eh_payment_contract_receiver to indicate that the process is in working
@@ -1135,6 +1140,7 @@ public class AssetServiceImpl implements AssetService {
                 BillItemsExpectancy exp = billItemsExpectancies.get(g);
                 // build a billItem
                 PaymentBillItems item = new PaymentBillItems();
+                item.setCategoryId(categoryId);
                 ContractProperty property = exp.getProperty();
                 PaymentBillGroup group = exp.getGroup();
                 PaymentChargingItemScope itemScope = exp.getItemScope();
@@ -1190,6 +1196,7 @@ public class AssetServiceImpl implements AssetService {
                     nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
                 }
                 newBill.setId(nextBillId);
+                newBill.setCategoryId(categoryId);
                 PaymentBillGroup group = exp.getGroup();
                 //周期时间
                 newBill.setDateStr(exp.getBillDateStr());
@@ -3311,7 +3318,7 @@ public class AssetServiceImpl implements AssetService {
         }
         if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
            // 转换
-            Long assetCategoryId = serviceModuleAppService.getOriginIdFromMappingApp(cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+            Long assetCategoryId = serviceModuleAppService.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
             cmd.setCategoryId(assetCategoryId);
         }
         return assetProvider.listAvailableChargingItems(cmd);

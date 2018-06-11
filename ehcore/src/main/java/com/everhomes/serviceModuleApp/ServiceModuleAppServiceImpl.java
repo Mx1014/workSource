@@ -204,8 +204,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
-	public Long getOriginIdFromMappingApp(Long originId, long targetModuleId) {
-		return serviceModuleAppProvider.getOriginIdFromMappingApp(originId, targetModuleId);
+	public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
+		return serviceModuleAppProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId);
 	}
 
 	@Override

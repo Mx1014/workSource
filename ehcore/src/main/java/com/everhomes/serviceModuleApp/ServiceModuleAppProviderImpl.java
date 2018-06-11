@@ -261,15 +261,15 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public Long getOriginIdFromMappingApp(final Long originId, long targetModuleId) {
+	public Long getOriginIdFromMappingApp(final Long moduleId, final Long originId, long targetModuleId) {
 	    if(originId == null) return null;
         final Long[] ret = {null};
 		getContext(AccessSpec.readOnly()).select(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE
 				, Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE, Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE,
                 Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE)
 				.from(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-				.where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(originId)
-						.or(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(originId)))
+				.where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(originId).and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE.eq(moduleId)))
+				.or(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(originId).and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE.eq(moduleId)))
 				.fetch()
 				.forEach(r ->{
                     Long valueF = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE);

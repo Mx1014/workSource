@@ -38,7 +38,7 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listServiceModuleAppByOriginId(Long originId);
 
-    Long getOriginIdFromMappingApp(Long originId, long targetModuleId);
+    Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
 
 	void insertAppMapping(EhServiceModuleAppMappings relation);
 
