@@ -97,6 +97,9 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
+import jdk.nashorn.internal.parser.JSONParser;
 import net.greghaines.jesque.Job;
 import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
@@ -4767,6 +4770,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 owner.setIdCardNumber(cmd.getIdCardNumber());
             if (cmd.getRegisteredResidence() != null)
                 owner.setRegisteredResidence(cmd.getRegisteredResidence());
+            //added mutiple tels for customer by wentian 2016/6/11
+            if (cmd.getCustomerExtraTels() != null){
+				JsonArray array = new JsonParser().parse(StringHelper.toJsonString(cmd.getCustomerExtraTels())).getAsJsonArray();
+				owner.setContactExtraTels(array.toString());
+			}
             UserGender gender = UserGender.fromCode(cmd.getGender());
             if (gender != null) {
                 owner.setGender(gender.getCode());
@@ -4897,6 +4905,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         owner.setOrgOwnerTypeId(ownerType.getId());
         owner.setNamespaceId(cmd.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
+        if(cmd.getCustomerExtraTels() != null){
+            try{
+                owner.setContactExtraTels(StringHelper.toJsonString(cmd.getCustomerExtraTels()));
+            }catch (Exception e){
+                LOGGER.error("failed to convert customerExtraTels into jsonarray, custoemrExtratel is={}", cmd.getCustomerExtraTels());
+            }
+		}
         UserGender gender = UserGender.fromCode(cmd.getGender());
         if (gender != null) {
             owner.setGender(gender.getCode());
@@ -5648,6 +5663,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 String.valueOf(owner.getGender()), currentLocale());
         if (genderLocale != null) {
             dto.setGender(genderLocale.getText());
+        }
+        if(owner.getContactExtraTels() != null){
+            String contactExtraTels = owner.getContactExtraTels();
+            List<String> o = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+            dto.setCustomerExtraTels(o);
         }
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(owner.getOrgOwnerTypeId());
         if (ownerType != null) {

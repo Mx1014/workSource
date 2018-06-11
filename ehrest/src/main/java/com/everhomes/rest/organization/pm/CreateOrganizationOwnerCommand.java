@@ -65,6 +65,15 @@ public class CreateOrganizationOwnerCommand {
     private String ownerType;
     private Long ownerId;
     private Integer namespaceId;
+    private List<String> customerExtraTels;
+
+    public List<String> getCustomerExtraTels() {
+        return customerExtraTels;
+    }
+
+    public void setCustomerExtraTels(List<String> customerExtraTels) {
+        this.customerExtraTels = customerExtraTels;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

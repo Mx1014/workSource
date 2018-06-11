@@ -51,6 +51,15 @@ public class OrganizationOwnerDTO {
     private String authType;
 
     private String primaryFlag;
+    private List<String> customerExtraTels;
+
+    public List<String> getCustomerExtraTels() {
+        return customerExtraTels;
+    }
+
+    public void setCustomerExtraTels(List<String> customerExtraTels) {
+        this.customerExtraTels = customerExtraTels;
+    }
 
     @ItemType(OrganizationOwnerAddressDTO.class)
     private List<OrganizationOwnerAddressDTO> addresses;

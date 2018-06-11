@@ -24,6 +24,7 @@ import java.util.List;
  * <li>avatar: 头像URI地址</li>
  * <li>ownerType: ownerType EhCommunities 权限校验时用的</li>
  * <li>ownerId: ownerId, communityId</li>
+ * <li>contractExtraTels: an individual customer's multiple tels</li>
  * </ul>
  */
 public class UpdateOrganizationOwnerCommand {
@@ -53,6 +54,16 @@ public class UpdateOrganizationOwnerCommand {
     private String ownerType;
     private Long ownerId;
     private Integer namespaceId;
+
+    private List<String> customerExtraTels;
+
+    public List<String> getCustomerExtraTels() {
+        return customerExtraTels;
+    }
+
+    public void setCustomerExtraTels(List<String> customerExtraTels) {
+        this.customerExtraTels = customerExtraTels;
+    }
 
     @ItemType(OrganizationOwnerAddressCommand.class)
     private List<OrganizationOwnerAddressCommand> addresses;
