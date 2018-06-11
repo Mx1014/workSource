@@ -22,13 +22,27 @@ import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.*;
+import com.everhomes.enterprise.EnterpriseAddress;
+import com.everhomes.enterprise.EnterpriseCommunityMap;
+import com.everhomes.enterprise.EnterpriseContact;
+import com.everhomes.enterprise.EnterpriseContactEntry;
+import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.family.*;
+import com.everhomes.family.Family;
+import com.everhomes.family.FamilyBillingAccount;
+import com.everhomes.family.FamilyBillingTransactions;
+import com.everhomes.family.FamilyProvider;
+import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
-import com.everhomes.group.*;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupAdminStatus;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberLog;
+import com.everhomes.group.GroupMemberLogProvider;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleString;
@@ -39,17 +53,56 @@ import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.organization.*;
+import com.everhomes.organization.BillingAccountHelper;
+import com.everhomes.organization.BillingAccountType;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationBillingAccount;
+import com.everhomes.organization.OrganizationBillingTransactions;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationOrder;
+import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationTask;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.promotion.PromotionService;
-import com.everhomes.pushmessage.*;
+import com.everhomes.pushmessage.PushMessage;
+import com.everhomes.pushmessage.PushMessageProvider;
+import com.everhomes.pushmessage.PushMessageResult;
+import com.everhomes.pushmessage.PushMessageResultProvider;
+import com.everhomes.pushmessage.PushMessageStatus;
+import com.everhomes.pushmessage.PushMessageTargetType;
+import com.everhomes.pushmessage.PushMessageType;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.AddressLivingStatus;
+import com.everhomes.rest.address.AddressServiceErrorCode;
+import com.everhomes.rest.address.ApartmentAbstractDTO;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CreateApartmentCommand;
+import com.everhomes.rest.address.DeleteApartmentCommand;
+import com.everhomes.rest.address.GetApartmentDetailCommand;
+import com.everhomes.rest.address.GetApartmentDetailResponse;
+import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListApartmentsCommand;
+import com.everhomes.rest.address.ListApartmentsResponse;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsResponse;
+import com.everhomes.rest.address.UpdateApartmentCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
@@ -60,22 +113,220 @@ import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
-import com.everhomes.rest.family.*;
-import com.everhomes.rest.forum.*;
+import com.everhomes.rest.family.ApproveMemberCommand;
+import com.everhomes.rest.family.FamilyBillingTransactionDTO;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.family.LeaveFamilyCommand;
+import com.everhomes.rest.family.RejectMemberCommand;
+import com.everhomes.rest.family.RevokeMemberCommand;
+import com.everhomes.rest.forum.CancelLikeTopicCommand;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListTopicCommand;
+import com.everhomes.rest.forum.ListTopicCommentCommand;
+import com.everhomes.rest.forum.NewCommentCommand;
+import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.forum.PostPrivacy;
+import com.everhomes.rest.forum.PropertyPostDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.ImageBody;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.organization.AccountType;
+import com.everhomes.rest.organization.BillTransactionResult;
+import com.everhomes.rest.organization.GetOrgDetailCommand;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationOrderStatus;
+import com.everhomes.rest.organization.OrganizationOrderType;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.OrganizationTaskStatus;
+import com.everhomes.rest.organization.OrganizationTaskType;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.PaidType;
+import com.everhomes.rest.organization.TxType;
+import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.AddOrganizationOwnerCarUserCommand;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
+import com.everhomes.rest.organization.pm.CommunityPropMemberCommand;
+import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCarCommand;
 import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
+import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DefaultChargingItemDTO;
+import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyDTO;
+import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
+import com.everhomes.rest.organization.pm.DeleteDefaultChargingItemCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAttachmentCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerBehaviorCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarCommand;
 import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.DeletePmBillCommand;
+import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
+import com.everhomes.rest.organization.pm.DeletePropMemberCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeleteRelationOfOrganizationOwnerAndCarCommand;
+import com.everhomes.rest.organization.pm.ExportOrganizationOwnerCarsCommand;
+import com.everhomes.rest.organization.pm.ExportOrganizationsOwnersCommand;
+import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
+import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
+import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
+import com.everhomes.rest.organization.pm.FindPmBillByOrderNoCommand;
+import com.everhomes.rest.organization.pm.GetFamilyStatisticCommand;
+import com.everhomes.rest.organization.pm.GetFamilyStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.GetOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.GetOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommand;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
 import com.everhomes.rest.organization.pm.GetRequestInfoCommand;
+import com.everhomes.rest.organization.pm.GetRequestInfoResponse;
+import com.everhomes.rest.organization.pm.ImportOrganizationOwnerCarsCommand;
+import com.everhomes.rest.organization.pm.ImportOrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.ImportOrganizationsOwnersCommand;
+import com.everhomes.rest.organization.pm.InsertPmBillCommand;
+import com.everhomes.rest.organization.pm.InsertPmBillsCommand;
+import com.everhomes.rest.organization.pm.ListApartmentOrganizationOwnerBehaviorsCommand;
+import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommand;
+import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListDefaultChargingItemsCommand;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommand;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerAddressesCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerAttachmentsCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerBehaviorsCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarByOrgOwnerCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarResponse;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarsByAddressCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticByAgeDTO;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerTypesCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersByCarCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
+import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListParkingCardCategoriesCommand;
+import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropAddressMappingCommand;
+import com.everhomes.rest.organization.pm.ListPropAddressMappingCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropBillCommand;
+import com.everhomes.rest.organization.pm.ListPropBillCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropCommunityAddressCommand;
+import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropInvitedUserCommand;
+import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropMemberCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropPostCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.OnlinePayPmBillCommand;
+import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAttachmentDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorStatus;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
+import com.everhomes.rest.organization.pm.OrganizationOwnerCarAttachmentDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerCarDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerCarStatus;
+import com.everhomes.rest.organization.pm.OrganizationOwnerLocaleStringScope;
+import com.everhomes.rest.organization.pm.OrganizationOwnerOwnerCarPrimaryFlag;
+import com.everhomes.rest.organization.pm.OrganizationOwnerStatus;
+import com.everhomes.rest.organization.pm.OrganizationOwnerTypeDTO;
+import com.everhomes.rest.organization.pm.OweFamilyDTO;
+import com.everhomes.rest.organization.pm.OwedType;
+import com.everhomes.rest.organization.pm.ParkingCardCategoryDTO;
+import com.everhomes.rest.organization.pm.PayPmBillByAddressIdCommand;
+import com.everhomes.rest.organization.pm.PmBillEntityType;
+import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
+import com.everhomes.rest.organization.pm.PmBillOperLogType;
+import com.everhomes.rest.organization.pm.PmBillsDTO;
+import com.everhomes.rest.organization.pm.PmMemberStatus;
+import com.everhomes.rest.organization.pm.PropAddressMappingDTO;
+import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
+import com.everhomes.rest.organization.pm.PropBillDTO;
+import com.everhomes.rest.organization.pm.PropBillItemDTO;
+import com.everhomes.rest.organization.pm.PropCommunityBillDateCommand;
+import com.everhomes.rest.organization.pm.PropCommunityBillIdCommand;
+import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
+import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
+import com.everhomes.rest.organization.pm.PropInvitedUserDTO;
+import com.everhomes.rest.organization.pm.PropOwnerDTO;
+import com.everhomes.rest.organization.pm.PropertyMemberDTO;
+import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
+import com.everhomes.rest.organization.pm.QueryPropTopicByCategoryCommand;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnersByconditionCommand;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
+import com.everhomes.rest.organization.pm.SendNoticeCommand;
+import com.everhomes.rest.organization.pm.SendNoticeMode;
+import com.everhomes.rest.organization.pm.SendNoticeToPmAdminCommand;
+import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
+import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
+import com.everhomes.rest.organization.pm.SetOrganizationOwnerAsCarPrimaryCommand;
+import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
+import com.everhomes.rest.organization.pm.UpdateDefaultChargingItemCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressAuthTypeCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressStatusCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillsDto;
+import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
+import com.everhomes.rest.organization.pm.UploadOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
-import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.SetCurrentCommunityCommand;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserLocalStringCode;
+import com.everhomes.rest.user.UserTokenCommand;
+import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationOwnerCarSearcher;
@@ -87,8 +338,19 @@ import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateStatisticHelper;
+import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
@@ -98,7 +360,11 @@ import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import net.greghaines.jesque.Job;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -119,7 +385,11 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -130,7 +400,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -265,8 +545,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Autowired
 	private DefaultChargingItemProvider defaultChargingItemProvider;
-    
-    private String queueName = "property-mgr-push";
+
+	@Autowired
+	private ImportFileService importFileService;
+
+	private String queueName = "property-mgr-push";
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     
@@ -6364,7 +6647,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }*/
 
     @Override
-    public void importOrganizationOwners(@Valid ImportOrganizationsOwnersCommand cmd, MultipartFile[] file) {
+    public ImportFileTaskDTO importOrganizationOwners(@Valid ImportOrganizationsOwnersCommand cmd, MultipartFile[] file) {
         User user = UserContext.current().getUser();
 		if(cmd.getNamespaceId() == 999971) {
 			LOGGER.error("Insufficient privilege, importOrganizationOwners");
@@ -6377,8 +6660,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         ArrayList resultList = processorExcel(file[0]);
-        List<CommunityPmOwner> ownerList = dbProvider.execute(status -> processorOrganizationOwner(user.getId(),
-                cmd.getOrganizationId(), cmd.getCommunityId(), cmd.getNamespaceId(), resultList));
+		ImportFileTask task =  processorOrganizationOwner(user.getId(), cmd.getOrganizationId(), cmd.getCommunityId(), cmd.getNamespaceId(), resultList);
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 		//用 bulkUpdate不会更新 by xiongying20171009
 //        pmOwnerSearcher.bulkUpdate(ownerList);
     }
@@ -6394,80 +6677,153 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
 	}
 
-	private List<CommunityPmOwner> processorOrganizationOwner(long userId, long organizationId, Long communityId, Integer namespaceId, ArrayList resultList) {
-		if(resultList != null && resultList.size() > 0) {
-            List<CommunityPmOwner> ownerList = new ArrayList<>();
-            List<String> contactTokenList = new ArrayList<>();
-            int row = resultList.size();
-            for (int rowIndex = 2; rowIndex < row ; rowIndex++) {
-                RowResult result = (RowResult)resultList.get(rowIndex);
-                if (Stream.of(result.getA(), result.getB(), result.getC(), result.getD(), result.getE(), result.getF()).anyMatch(StringUtils::isEmpty)) {
-                    continue;
-                }
-                // 检查手机号的唯一性
-                if (contactTokenList.contains(RowResult.trimString(result.getC()))) {
-                	// 支持同一个人导入多行，但只能生成一个业主信息，add by tt, 170427
-                	String contactToken = RowResult.trimString(result.getC());
-                	List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId, communityId, contactToken);
-                	if (pmOwners != null && !pmOwners.isEmpty()) {
-                		CommunityPmOwner pmOwner = pmOwners.get(0);
-                		Address address = parseAddress(namespaceId, communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
-                		Byte livingStatus = parseLivingStatus(RowResult.trimString(result.getF()));
-        				createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, pmOwner.getId(), OrganizationOwnerAddressAuthType.INACTIVE);
-        				if (StringUtils.hasLength(result.getG())) {
-        					long time = parseDate(RowResult.trimString(result.getG())).getTime();
-        					createOrganizationOwnerBehavior(pmOwner.getId(), address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
-        				}
-					}
-                	continue;
-                	// comment by tt, 170427
-//                    LOGGER.error("Import organization owner contactToken repeat, contactToken = {}.", result.getC().trim());
-//                    throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CONTACT_TOKEN_REPEAT,
-//                            "Import organization owner contactToken repeat, contactToken = %s.", result.getC().trim());
-                }
-                contactTokenList.add(RowResult.trimString(result.getC()));
-                checkContactTokenUnique(communityId, RowResult.trimString(result.getC()));
-
-                CommunityPmOwner owner = new CommunityPmOwner();
-                owner.setContactName(RowResult.trimString(result.getA()));
-                owner.setContactToken(RowResult.trimString(result.getC()));
-                Address address = parseAddress(namespaceId, communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
-                owner.setGender(parseGender(RowResult.trimString(result.getH())));
-                owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
-                owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
-                owner.setMaritalStatus(RowResult.trimString(result.getJ()));
-                owner.setJob(RowResult.trimString(result.getK()));
-                owner.setCompany(RowResult.trimString(result.getL()));
-                owner.setIdCardNumber(RowResult.trimString(result.getM()));
-                owner.setRegisteredResidence(RowResult.trimString(result.getN()));
-                owner.setNamespaceId(namespaceId);
-                owner.setCreatorUid(userId);
-                owner.setOrganizationId(organizationId);
-                owner.setCommunityId(communityId == null ? null : communityId.toString());
-                owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
-
-				long ownerId = propertyMgrProvider.createPropOwner(owner);
-				pmOwnerSearcher.feedDoc(owner);
-				Byte livingStatus = parseLivingStatus(RowResult.trimString(result.getF()));
-				createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
-
-				if (StringUtils.hasLength(result.getG())) {
-					long time = parseDate(RowResult.trimString(result.getG())).getTime();
-					createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
+	private ImportFileTask processorOrganizationOwner(long userId, long organizationId, Long communityId, Integer namespaceId, ArrayList resultList) {
+		if (resultList != null && resultList.size() > 0) {
+			//增加导入错误提示信息
+			ImportFileTask task = new ImportFileTask();
+			task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+			task.setOwnerId(organizationId);
+			task.setType(ImportFileTaskType.INDIVIDUAL_CUSTOMER.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+				ImportFileResponse response = new ImportFileResponse();
+				List<ImportOrganizationOwnerDTO> datas = handleImportOrganizationOwnersData(resultList);
+				if (datas.size() > 0) {
+					//设置导出报错的结果excel的标题
+					response.setTitle(datas.get(0));
+					datas.remove(0);
 				}
-				ownerList.add(owner);
-			}
-            if (ownerList.isEmpty()) {
-                LOGGER.error("Import organization owner error.");
-                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_NO_DATA,
-                        "Import organization owner error.");
-            }
-            return ownerList;
-        } else {
+				List<ImportFileResultLog<ImportOrganizationOwnerDTO>> results = importOrganizationOwnerData(organizationId, communityId, namespaceId, datas);
+				response.setTotalCount((long) datas.size());
+				if (results != null) {
+					response.setFailCount((long) results.size());
+				}
+				response.setLogs(results);
+				return response;
+			}, task);
+			return task;
+		} else {
 			LOGGER.error("excel data format is not correct.rowCount=" + resultList);
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"excel data format is not correct");
 		}
+	}
+
+	private List<ImportFileResultLog<ImportOrganizationOwnerDTO>> importOrganizationOwnerData(long organizationId, Long communityId, Integer namespaceId, List<ImportOrganizationOwnerDTO> datas) {
+		List<ImportFileResultLog<ImportOrganizationOwnerDTO>> resultLogs = new ArrayList<>();
+		List<String> contactTokenList = new ArrayList<>();
+		if(datas==null || datas.size()==0){
+			return resultLogs ;
+		}
+
+		for (ImportOrganizationOwnerDTO dto : datas) {
+			ImportFileResultLog<ImportOrganizationOwnerDTO> log = new ImportFileResultLog<>(PropertyServiceErrorCode.SCOPE);
+			CommunityPmOwner owner = ConvertHelper.convert(dto, CommunityPmOwner.class);
+			// 校验必填项目
+			Boolean mandatoryFlag = Stream.of(dto.getContactName(), dto.getContactType(), dto.getContactToken(), dto.getGender(), dto.getBuilding(), dto.getAddress(), dto.getLivingStatus()).anyMatch(StringUtils::isEmpty);
+			if (mandatoryFlag) {
+				LOGGER.error("organization owner mandatory column is empty, data = {}", dto);
+				log.setData(dto);
+				log.setErrorLog("eorganization owner mandatory column is empty");
+				log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_MANDATORY_COLUMN);
+				resultLogs.add(log);
+				continue;
+			}
+			// 校验楼栋门牌是否存在
+			Address address = parseAddress(namespaceId, communityId, dto.getBuilding(), dto.getAddress());
+			if (address == null) {
+				LOGGER.error("organization owner building and address is not exist , data = {}", dto);
+				log.setData(dto);
+				log.setErrorLog("organization owner building and address is not exist ");
+				log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_ADDRESS_NOT_EXISTS);
+				resultLogs.add(log);
+				continue;
+			}
+			//校验时间格式
+			if (parseDate(dto.getLivingTime()) == null) {
+				LOGGER.error("organization owner dateTime format error  , data = {}", dto);
+				log.setData(dto);
+				log.setErrorLog("organization owner dateTime format error ");
+				log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_DATE_FORMAT_ERROR);
+				resultLogs.add(log);
+				continue;
+			}
+			//校验入驻状态
+			if (null == parseLivingStatus(dto.getLivingStatus())) {
+				LOGGER.error("living status is not illegal  , data = {}", dto);
+				log.setData(dto);
+				log.setErrorLog("living status is not illegal ");
+				log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_LIVING_STATUS_FORMAT_ERROR);
+				resultLogs.add(log);
+				continue;
+			}
+
+			// 检查手机号的唯一性
+			if (contactTokenList.contains(dto.getContactToken())) {
+				// 支持同一个人导入多行，但只能生成一个业主信息，add by tt, 170427
+				List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId, communityId, dto.getContactToken());
+				if (pmOwners != null && !pmOwners.isEmpty()) {
+					CommunityPmOwner pmOwner = pmOwners.get(0);
+					owner.setId(pmOwner.getId());
+				}
+			}
+			contactTokenList.add(dto.getContactToken());
+			// 校验手机号
+			List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(currentNamespaceId(), communityId, dto.getContactToken());
+			if (pmOwners != null && pmOwners.size() > 0) {
+				LOGGER.error("organization owner contact phone is exists in this community  , data = {}", dto);
+				log.setData(dto);
+				log.setErrorLog("organization owner contact phone is exists in this community ");
+				log.setCode(PropertyServiceErrorCode.ERROR_OWNER_EXIST);
+				resultLogs.add(log);
+			}
+			owner.setNamespaceId(namespaceId);
+			owner.setCreatorUid(UserContext.currentUserId());
+			owner.setOrganizationId(organizationId);
+			owner.setCommunityId(communityId == null ? null : communityId.toString());
+			owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
+			owner.setAddressId(address.getId());
+			Long ownerId = owner.getId();
+			if (ownerId == null) {
+				ownerId = propertyMgrProvider.createPropOwner(owner);
+				pmOwnerSearcher.feedDoc(owner);
+				Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
+				createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
+			}
+			if (StringUtils.hasLength(dto.getLivingTime())) {
+				long time = parseDate(dto.getLivingTime()).getTime();
+				createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
+			}
+		}
+		return resultLogs;
+	}
+
+	private List<ImportOrganizationOwnerDTO> handleImportOrganizationOwnersData(ArrayList resultList) {
+		List<ImportOrganizationOwnerDTO> organizationOwnerDTOS = new ArrayList<>();
+		if (resultList == null || resultList.size() == 0) {
+			return organizationOwnerDTOS;
+		}
+		for (int rowIndex = 1; rowIndex < resultList.size() ; rowIndex++) {
+			RowResult result = (RowResult) resultList.get(rowIndex);
+			ImportOrganizationOwnerDTO owner = new ImportOrganizationOwnerDTO();
+			owner.setContactName(RowResult.trimString(result.getA()));
+			owner.setContactType(RowResult.trimString(result.getB()));
+			owner.setContactToken(RowResult.trimString(result.getC()));
+			owner.setGender(RowResult.trimString(result.getD()));
+			owner.setBuilding(RowResult.trimString(result.getE()));
+			owner.setAddress(RowResult.trimString(result.getF()));
+			owner.setLivingStatus(RowResult.trimString(result.getG()));
+			owner.setLivingTime(RowResult.trimString(result.getH()));
+			owner.setBirthday(RowResult.trimString(result.getI()));
+			owner.setMaritalStatus(RowResult.trimString(result.getJ()));
+			owner.setJob(RowResult.trimString(result.getK()));
+			owner.setCompany(RowResult.trimString(result.getL()));
+			owner.setIdCardNumber(RowResult.trimString(result.getM()));
+			owner.setRegisteredResidence(RowResult.trimString(result.getN()));
+
+			organizationOwnerDTOS.add(owner);
+		}
+		return organizationOwnerDTOS;
 	}
 
 	private List<OrganizationOwnerCar> processorOrganizationOwnerCar(Long communityId, ArrayList resultList) {
@@ -6562,8 +6918,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE, livingStatus, currentLocale());
 		if (localeString == null) {
 			LOGGER.error("The livingStatus {} is invalid.", livingStatus);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
-					"The livingStatus %s is invalid.", livingStatus);
+//			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
+//					"The livingStatus %s is invalid.", livingStatus);
+			return null;
 		}
 		return Byte.valueOf(localeString.getCode());
 	}
@@ -6574,8 +6931,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (address == null) {
             String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);
             LOGGER.error("The address {} is not exist.", addressText);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_ADDRESS_ERROR,
-					"The address %s is not exist.", addressText);
+//			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_ADDRESS_ERROR,
+//					"The address %s is not exist.", addressText);
 		}
 		return address;
 	}
