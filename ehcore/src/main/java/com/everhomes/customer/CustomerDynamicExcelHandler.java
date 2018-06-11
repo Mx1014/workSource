@@ -77,8 +77,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -804,8 +806,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         switch (type) {
                             case "Integer":
                             case "Long":
+                            case "Double":
                             case "BigDecimal":
-                                if (column.getValue() != null && !NumberUtils.isNumber(column.getValue())) {
+                                if (StringUtils.isNotBlank(column.getValue()) && !NumberUtils.isNumber(column.getValue())) {
                                     Map<String, String> dataMap = new LinkedHashMap<>();
                                     originColumns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                                     LOGGER.error("customer import data number format error : field ={}", column.getHeaderDisplay());
@@ -844,7 +847,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     }
 
                 } catch (NoSuchFieldException e) {
-                    LOGGER.error("no such field exceltion : field ={}", column.getHeaderDisplay());
+                    LOGGER.error("no such field exceltion : field ={},exception{}", column.getHeaderDisplay(), e);
                     flag = false;
                     break;
                 }
@@ -916,6 +919,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             //todo:校验格式
             String[] buildingNames = null;
             try {
+                String  regex  = "^((?:(?!([,，/])).)*/(?:(?!([,，/])).)*,)*(?:(?!([,，/])).)*/(?:(?!([,，/])).)*";
+                if(!Pattern.matches(regex,customerAddressString)){
+                    throw  new Exception("customer enterprise admins format error");
+                }
                 customerAddressString = customerAddressString.replaceAll("\n", "");
                 buildingNames = customerAddressString.split(",");
                 if (buildingNames.length > 0) {
@@ -949,16 +956,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
         if (StringUtils.isNotBlank(customerAdminString)) {
             try {
-                String[] adminStrings = customerAdminString.split(",");
-                if (adminStrings.length > 0) {
-                    for (int i = 0; i < adminStrings.length; i++) {
-                        String[] adminInfo = adminStrings[i].split("\\(");
-                        String contactName = adminInfo[0];
-                        String contactToken = adminStrings[i].substring(adminStrings[i].indexOf("(") + 1, adminStrings[i].indexOf(")"));
-                    }
+                String  regex  = "^((?:(?!([,|()])).)*\\(\\d+\\),)*(?:(?!([,|()])).)*\\(\\d+\\)";
+                if(!Pattern.matches(regex,customerAdminString)){
+                    throw  new Exception("customer enterprise admins format error");
                 }
             } catch (Exception e) {
-                //todo:校验格式
                 Map<String, String> dataMap = new LinkedHashMap<>();
                 columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
                 LOGGER.error("customer enterprise admins format error: field ={}", column.getHeaderDisplay());
@@ -973,6 +975,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     }
 
     private boolean dealDynamicItemsAndTrackingUidField(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, List<DynamicColumnDTO> columns, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column) {
+       if(StringUtils.isBlank(column.getValue())){
+           return false;
+       }
         if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
                 || "sourceItemId".equals(column.getFieldName()) || "contactGenderItemId".equals(column.getFieldName())
                 || "corpNatureItemId".equals(column.getFieldName()) || "corpIndustryItemId".equals(column.getFieldName())
@@ -1005,6 +1010,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 String contactPhone = "";
                 try {
                     if(StringUtils.isNotEmpty(column.getValue())){
+                        String  regex  = "^((?:(?!([,|()])).)*\\(\\d+\\),)*(?:(?!([,|()])).)*\\(\\d+\\)";
+                        if(!Pattern.matches(regex,column.getValue())){
+                            throw  new Exception("wrong trackingUid and contacPhone format");
+                        }
                         username =  column.getValue().split("\\(")[0];
                         contactPhone = column.getValue().substring(column.getValue().indexOf("(") + 1, column.getValue().indexOf(")"));
                     }
@@ -1026,7 +1035,14 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 if (users != null && users.size() > 0) {
                     column.setValue(users.get(0).getId().toString());
                 } else {
-                    column.setValue(null);
+                    Map<String, String> dataMap = new LinkedHashMap<>();
+                    columns.forEach((c)-> dataMap.put(c.getFieldName(), c.getValue()));
+                    LOGGER.error("can not find tracking users   : field ={}",column.getHeaderDisplay());
+                    importLogs.setData(dataMap);
+                    importLogs.setErrorDescription("can not find tracking users");
+                    importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
+                    importLogs.setFieldName(column.getHeaderDisplay());
+                    return true;
                 }
             } else {
                 column.setValue(String.valueOf(UserContext.currentUserId()));
@@ -1051,11 +1067,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             }
 
             //对比 如果被更新有数据则补上exist
-            try {
-                compareCustomerFieldValues(exist, enterpriseCustomer);
-            } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
-                LOGGER.error("invoke compare error :{}", e);
-            }
+            compareCustomerFieldValues(exist, enterpriseCustomer);
+
             if (exist.getOrganizationId() == null || exist.getOrganizationId() == 0) {
                 if(StringUtils.isNotBlank(customerAddressString)){
                 //此种场景有企业管理员 需要自动加入organizationMembers 表 用于后面用户注册激活
@@ -1093,7 +1106,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
     }
 
-    private void compareCustomerFieldValues(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
+    private void compareCustomerFieldValues(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer)  {
         // compare customer from excel and db exist and filter all blank fields
         Class<?> clz = EnterpriseCustomer.class;
         Field[] fields = clz.getSuperclass().getDeclaredFields();
@@ -1101,15 +1114,24 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             Object existData = null;
             Object excelData = null;
             for (Field field : fields) {
-                PropertyDescriptor descriptor = new PropertyDescriptor(field.getName(), clz);
-                Method method = descriptor.getReadMethod();
-                existData = method.invoke(exist);
-                excelData = method.invoke(enterpriseCustomer);
-                if (excelData == null || excelData.equals("")) {
-                    if (existData != null && excelData != "") {
-                        Method writeMethod = descriptor.getWriteMethod();
-                        writeMethod.invoke(enterpriseCustomer, existData);
+                try {
+                    if(field.getName().equals("serialVersionUID")){
+                        continue;
                     }
+                    PropertyDescriptor descriptor = new PropertyDescriptor(field.getName(), clz);
+                    Method method = descriptor.getReadMethod();
+                    if (method != null) {
+                        existData = method.invoke(exist);
+                        excelData = method.invoke(enterpriseCustomer);
+                        if (excelData == null || excelData.equals("")) {
+                            if (existData != null && excelData != "") {
+                                Method writeMethod = descriptor.getWriteMethod();
+                                writeMethod.invoke(enterpriseCustomer, existData);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("compare invoke error:{}", e);
                 }
             }
         }
@@ -1306,6 +1328,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 case "Long":
                     val = Long.parseLong((String)value);
                     break;
+                case "Double":
+                    val = Double.parseDouble((String)value);
+                    break;
                 case "Timestamp":
                     if(((String)value).length()<1){
                         val = null;
@@ -1320,31 +1345,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     Pattern pattern3 = Pattern.compile(regex3);
                     Pattern pattern4 = Pattern.compile(regex4);
                     TemporalAccessor q = null;
-                    if(pattern1.matcher(value.toString()).matches()){
-                        q = formatter1.parse(value.toString());
-                    }else if(pattern2.matcher(value.toString()).matches()){
-                        q =formatter2.parse(value.toString());
-                    }else if(pattern3.matcher(value.toString()).matches()){
-                        q = formatter3.parse(value.toString());
-                    }else if(pattern4.matcher(value.toString()).matches()){
-                        q = formatter4.parse(value.toString());
+                    if (pattern1.matcher(value.toString()).matches()) {
+                        val = Timestamp.valueOf(LocalDateTime.parse(val.toString(), formatter1));
+                    } else if (pattern2.matcher(value.toString()).matches()) {
+                        val = Timestamp.valueOf(LocalDateTime.parse(val.toString(), formatter2));
+                    } else if (pattern3.matcher(value.toString()).matches()) {
+                        val = new Timestamp(Date.valueOf(LocalDate.parse(val.toString(), formatter3)).getTime());
+                    } else if (pattern4.matcher(value.toString()).matches()) {
+                        val = new Timestamp(Date.valueOf(LocalDate.parse(val.toString(), formatter4)).getTime());
                     }
 
-                    val = Timestamp.valueOf(LocalDateTime.from(q));
-
-//                    Date date = new Date();
-//
-//                    if(sdf == null) {
-//                        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//                    }
-//                    try {
-//                        date = sdf.parse((String) value);
-//                    } catch (ParseException e) {
-//                        val = null;
-//                        break;
-//                    }
-//
-//                    val = new Timestamp(date.getTime());
                     break;
                 case "Integer":
                     val = Integer.parseInt((String)value);

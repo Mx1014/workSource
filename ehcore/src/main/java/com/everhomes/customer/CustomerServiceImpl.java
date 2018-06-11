@@ -2456,21 +2456,26 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
-        if (entryInfos != null && entryInfos.size() > 0) {
-            return entryInfos.stream().map(entryInfo -> {
-                return convertCustomerEntryInfoDTO(entryInfo);
-            }).collect(Collectors.toList());
+        entryInfos = removeDuplicatedEntryInfo(entryInfos);
+        if (entryInfos.size() > 0) {
+            return entryInfos.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
         }
         return null;
+    }
+
+    private List<CustomerEntryInfo> removeDuplicatedEntryInfo(List<CustomerEntryInfo> entryInfos) {
+        Map<Long, CustomerEntryInfo> map = new HashMap<>();
+        if(entryInfos!=null && entryInfos.size()>0){
+            entryInfos.forEach((e)-> map.putIfAbsent(e.getAddressId(), e));
+        }
+        return new ArrayList<>(map.values());
     }
 
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos != null && entryInfos.size() > 0) {
-            return entryInfos.stream().map(entryInfo -> {
-                return convertCustomerEntryInfoDTO(entryInfo);
-            }).collect(Collectors.toList());
+            return entryInfos.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
         }
         return null;
     }

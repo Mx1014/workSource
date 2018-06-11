@@ -36,4 +36,5 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_ADDRESS_NOT_EXIST_ERROR = 10028;  //楼栋门牌不存在
     int ERROR_CUSTOMER_NUM_FORMAT_ERROR = 10029;  //数字格式不对
     int ERROR_CUSTOMER_DATE_FORMAT_ERROR = 10030;  //日期格式不对
+    int ERROR_CUSTOMER_TRACKING_USER_ERROR = 10031;  //跟进人找不到
 }
