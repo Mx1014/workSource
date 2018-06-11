@@ -110,9 +110,9 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         String bodyType = msg.getMeta().get("bodyType");
      
         if(null == bodyType) {
-        	//判断消息内容是否为空，为空则抛出异常
+        	//判断消息内容是否为空，为空且登录用户为系统用户时，则抛出异常  
         	// add by huanglm  20180607 for 缺陷 #29428
-        	if(StringUtils.isBlank(deviceMessage.getAlert())){
+        	if(StringUtils.isBlank(deviceMessage.getAlert()) &&(destLogin.getUserId() < User.MAX_SYSTEM_USER_ID)){
         		throw RuntimeErrorException.errorWith(MessagingErrorCode.SCOPE, MessagingErrorCode.NULL_MESSAGE_CODE,
     					"content is null ");
         	}
@@ -175,9 +175,9 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
             }
         }
         
-        //判断消息内容是否为空，为空则抛出异常  
+        //判断消息内容是否为空，为空且登录用户为系统用户时，则抛出异常  
     	// add by huanglm  20180607 for 缺陷 #29428
-    	if(StringUtils.isBlank(deviceMessage.getAlert())){
+    	if(StringUtils.isBlank(deviceMessage.getAlert()) &&(destLogin.getUserId() < User.MAX_SYSTEM_USER_ID)){
     		throw RuntimeErrorException.errorWith(MessagingErrorCode.SCOPE, MessagingErrorCode.NULL_MESSAGE_CODE,
 					"content is null ");
     	}
