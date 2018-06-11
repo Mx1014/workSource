@@ -1,5 +1,6 @@
--- 访客管理1.0start
--- 访客管理1.0事由列表 by dengs,20180507
+-- 通用脚本
+-- by dengs,20180507
+-- ISSUE-21443 访客管理1.0
 INSERT INTO `eh_visitor_sys_visit_reason` (`id`, `namespace_id`, `owner_type`, `owner_id`, `visit_reason`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES ('1', '0', 'community', '0', '临时来访', '2', '0', now(), '0', now());
 INSERT INTO `eh_visitor_sys_visit_reason` (`id`, `namespace_id`, `owner_type`, `owner_id`, `visit_reason`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES ('2', '0', 'community', '0', '入职', '2', '0', now(), '0', now());
 INSERT INTO `eh_visitor_sys_visit_reason` (`id`, `namespace_id`, `owner_type`, `owner_id`, `visit_reason`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES ('3', '0', 'community', '0', '面试', '2', '0', now(), '0', now());
@@ -68,4 +69,4 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('vis
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1410','zh_CN','计划到访时间不能早于当前时间');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1411','zh_CN','配对码错误，请重新输入');
 
--- 访客管理1.0end
+-- ISSUE-21443 访客管理1.0 END
