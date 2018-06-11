@@ -14,6 +14,7 @@ import java.io.Serializable;
  *     <li>newsSize: 显示多少条</li>
  *     <li>recommendType: 推荐类型</li>
  *     <li>moduleId: moduleId</li>
+ *     <li>appId: appId</li>
  *     <li>actionType: actionType</li>
  *     <li>serviceModuleAppInstanceConfig: serviceModuleAppInstanceConfig</li>
  * </ul>
@@ -27,6 +28,7 @@ public class OPPushInstanceConfig implements Serializable {
     private Integer newsSize;
     private Byte recommendType;
     private Long moduleId;
+    private Long appId;
     private Byte actionType;
     private Object serviceModuleAppInstanceConfig;
 
@@ -84,6 +86,14 @@ public class OPPushInstanceConfig implements Serializable {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     public Byte getActionType() {

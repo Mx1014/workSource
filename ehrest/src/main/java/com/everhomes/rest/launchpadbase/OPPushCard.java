@@ -9,22 +9,32 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>routerJson: 内容的路由信息，一般是通过Id路由的。因为有些内容的id是String，有些内容的跳转路由不止一个参数。因此此处使用json，由具体业务后台和客户端约定具体内容。其中活动使用ActivityContentRouterJson模型。</li>
+ *     <li>routerPath: routerPath</li>
+ *     <li>routerQuery: routerQuery</li>
  *     <li>properties: 需要展现的一些字段，需要和客户端预定字段和顺序，推荐按照显示的从上到下、从左到右显示放置properties</li>
  * </ul>
  */
 public class OPPushCard {
 
-    private String routerJson;
-
+    private String routerPath;
+    private String routerQuery;
     private List<Object> properties;
 
-    public String getRouterJson() {
-        return routerJson;
+
+    public String getRouterPath() {
+        return routerPath;
     }
 
-    public void setRouterJson(String routerJson) {
-        this.routerJson = routerJson;
+    public void setRouterPath(String routerPath) {
+        this.routerPath = routerPath;
+    }
+
+    public String getRouterQuery() {
+        return routerQuery;
+    }
+
+    public void setRouterQuery(String routerQuery) {
+        this.routerQuery = routerQuery;
     }
 
     public List<Object> getProperties() {

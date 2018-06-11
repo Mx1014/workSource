@@ -4,14 +4,17 @@ package com.everhomes.launchpad.oppushHandler;
 import com.everhomes.activity.ActivityService;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.launchpad.OPPushHandler;
+import com.everhomes.module.RouterInfoService;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.OPPushCard;
 import com.everhomes.rest.launchpadbase.routerjson.ActivityContentRouterJson;
+import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,6 +34,12 @@ public class OPPushActivityHandler implements OPPushHandler {
 
     @Autowired
     private LaunchPadService launchPadService;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+
+    @Autowired
+    private RouterInfoService routerService;
 
     @Override
     public List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context) {
@@ -63,7 +72,10 @@ public class OPPushActivityHandler implements OPPushHandler {
                 ActivityContentRouterJson contentRouterJson = new ActivityContentRouterJson();
                 contentRouterJson.setForumId(dto.getForumId());
                 contentRouterJson.setTopicId(dto.getPostId());
-                card.setRouterJson(contentRouterJson.toString());
+                RouterInfo routerInfo = routerService.getRouterInfo(10600L, "/detail", contentRouterJson.toString());
+
+                card.setRouterPath(routerInfo.getPath());
+                card.setRouterQuery(routerInfo.getQuery());
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());
                 properties.add(dto.getSubject());
@@ -90,6 +102,6 @@ public class OPPushActivityHandler implements OPPushHandler {
     public String getInstanceConfig(Object instanceConfig) {
 
         OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
-        return config.getServiceModuleAppInstanceConfig().toString();
+        return StringHelper.toJsonString(config.getServiceModuleAppInstanceConfig());
     }
 }

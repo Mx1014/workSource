@@ -4,15 +4,25 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>moduleId: moduleId</li>
  *     <li>path: 跳转路径</li>
  *     <li>query: 跳转参数，例如：论坛的query为forumId=xxx&topicId=yyy</li>
  * </ul>
  */
 public class RouterInfo {
 
-	String path;
+	private Long moduleId;
+	private String path;
 
-	String query;
+	private String query;
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
 
 	public String getPath() {
 		return path;

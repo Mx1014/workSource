@@ -12,7 +12,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.*;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
@@ -22,8 +21,6 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
-import com.everhomes.rest.acl.ServiceModuleEntryConstans;
-import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.rest.launchpadbase.AppDTO;
@@ -35,15 +32,9 @@ import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.module.ServiceModuleLocationType;
 import com.everhomes.rest.module.ServiceModuleSceneType;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.*;
-import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
-import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.google.gson.reflect.TypeToken;
@@ -52,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import sun.rmi.runtime.Log;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -110,7 +100,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
 
 	@Autowired
-	private RouterService routerService;
+	private RouterInfoService routerService;
 
 	@Autowired
 	private LaunchPadService launchPadService;
@@ -463,7 +453,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				appDTO.setActionData(launchPadService.refreshActionData(appDTO.getActionData()));
 
                 //填充路由信息
-				populateRouter(appDTO);
+				RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), app.getName(), app.getInstanceConfig());
+				appDTO.setRouterPath(routerInfo.getPath());
+				appDTO.setRouterQuery(routerInfo.getQuery());
 
 				ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
 				if(profile != null && profile.getIconUri() != null){
@@ -482,32 +474,35 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return response;
 	}
 
-	private void populateRouter(AppDTO appDTO){
-		String query = "appId=" + appDTO.getAppId();
+	@Override
+	public RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData){
+		String query = "appId=" + appId;
 		try {
 			// 加上默认的参数appId和title
-			query = query + "&title=" + URLEncoder.encode(appDTO.getName(), "UTF-8");
+			query = query + "&title=" + URLEncoder.encode(title, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.warn("query encode, query=", query);
 		}
 
-		RouterInfo routerInfo = routerService.getRouterInfo(appDTO.getModuleId(), "/index", appDTO.getActionData());
+		RouterInfo routerInfo = routerService.getRouterInfo(moduleId, "/index", actionData);
 		if(routerInfo != null){
-			appDTO.setRouterPath(routerInfo.getPath());
 			if(routerInfo.getQuery() != null){
 				query = query  + "&" + routerInfo.getQuery();
 			}
-			appDTO.setRouterQuery(query);
+			//routerInfo.setQuery(query);
 
 		}else {
+			routerInfo = new RouterInfo();
+
 			//没有实现接口的模块默认的返回
-			appDTO.setRouterPath("/index");
-			String queryInDefaultWay = routerService.getQueryInDefaultWay(appDTO.getActionData());
+			routerInfo.setPath("/index");
+			String queryInDefaultWay = routerService.getQueryInDefaultWay(actionData);
 			if(queryInDefaultWay != null){
 				query = query  + "&" + queryInDefaultWay;
 			}
-			appDTO.setRouterQuery(query);
 		}
+		routerInfo.setQuery(query);
+		return routerInfo;
 	}
 
 	@Override
