@@ -1032,14 +1032,15 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
+            enterpriseCustomer.setId(exist.getId());
+            enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             try {
                 createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             } catch (Exception e) {
                 //todo:接口过时 没有批量删除 需要基线提供
                 LOGGER.error("create enterprise admin error :{}", e);
             }
-            enterpriseCustomer.setId(exist.getId());
-            enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
+
             //对比 如果被更新有数据则补上exist
             try {
                 compareCustomerFieldValues(exist, enterpriseCustomer);
