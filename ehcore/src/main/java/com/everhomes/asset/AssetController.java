@@ -1125,12 +1125,12 @@ public class AssetController extends ControllerBase {
 	@RequestMapping(value = "listPaymentBillDetail")
 	@RestReturn(PaymentOrderBillDTO.class)
 	public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-	    ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
+	    ListPaymentBillResp listPaymentBillResp = assetService.listPaymentBill(cmd);
 	    PaymentOrderBillDTO result = new PaymentOrderBillDTO();
-	    if(listPaymentBillResp != null && listPaymentBillResp.getList() != null
-	            && listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
-	            && listPaymentBillResp.getList().get(0).getChildren() != null) {
-	        result = listPaymentBillResp.getList().get(0).getChildren().get(0);
+	    if(listPaymentBillResp != null && listPaymentBillResp.getPaymentOrderBillDTOs() != null
+	            && listPaymentBillResp.getPaymentOrderBillDTOs().size() != 0 
+	            && listPaymentBillResp.getPaymentOrderBillDTOs().get(0) != null) {
+	        result = listPaymentBillResp.getPaymentOrderBillDTOs().get(0);
 	    }
 	    RestResponse response = new RestResponse(result);
 	    return response;
