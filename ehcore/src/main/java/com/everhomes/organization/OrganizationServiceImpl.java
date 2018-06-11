@@ -1488,7 +1488,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //创建Organization类的对象
                     Organization organization1 = new Organization();
                     //封装信息
-                    organization1.setAdminTargetId(organizationMember.getId());
+                    organization1.setAdminTargetId(organizationMember.getTargetId());
                     organization1.setId(organization.getId());
                     //更新eh_organizations表信息
                     organizationProvider.updateOrganizationByOrgId(organization1);
