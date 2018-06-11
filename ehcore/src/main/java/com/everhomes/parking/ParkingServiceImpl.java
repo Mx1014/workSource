@@ -28,9 +28,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
-import com.everhomes.pay.order.CreateOrderCommand;
-import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.*;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rentalv2.utils.RentalUtils;
@@ -38,6 +36,9 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
@@ -97,7 +98,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Component
 public class ParkingServiceImpl implements ParkingService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
-	public static final String BIZ_ORDER_NUM_SPILT = "_";
+	public static final String BIZ_ORDER_NUM_SPILT = "_";//业务订单分隔符
+	public static final String BIZ_ACCOUNT_PRE = "NS";//账号前缀
 
 	@Autowired
 	private List<ParkingVendorHandler> allListeners;
@@ -566,7 +568,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
-		param.setClientAppName(cmd.getClientAppName());
+		param.setClientAppName("Android_OA");//todo
 
 		return (PreOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V2);
 
@@ -726,7 +728,7 @@ public class ParkingServiceImpl implements ParkingService {
 			bussinessType = ParkingBusinessType.TEMPFEE;
 		}
 		User user = UserContext.current().getUser();
-		String sNamespaceId = UserContext.getCurrentNamespaceId()+"";		//todo
+		String sNamespaceId = BIZ_ACCOUNT_PRE+"1";		//todo
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
 				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
@@ -739,7 +741,7 @@ public class ParkingServiceImpl implements ParkingService {
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		createOrderCommand.setAccountCode(sNamespaceId);
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
-		createOrderCommand.setClientAppName(clientAppName);
+		createOrderCommand.setClientAppName("Android_OA");//todo
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
@@ -759,7 +761,15 @@ public class ParkingServiceImpl implements ParkingService {
 		OrderCommandResponse response = purchaseOrder.getResponse();
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
-		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
+		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+		if(paymentMethods!=null){
+			preDto.setPayMethod(paymentMethods.stream().map(r->{
+				PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+				convert.setPaymentLogo(contentServerService.parserUri(convert.getPaymentLogo()));
+				return convert;
+			}).collect(Collectors.toList()));//todo
+		}
+//		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
 		return preDto;
 	}
 
@@ -2014,12 +2024,12 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		CreateOrderCommand refundOrder = new CreateOrderCommand();
 		refundOrder.setRefundOrderId(Long.valueOf(order.getPayOrderNo()));
-		refundOrder.setBizOrderNum(generateBizOrderNum(UserContext.getCurrentNamespaceId()+"",OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
+		String sNamespaceId = BIZ_ACCOUNT_PRE+"1";//todo
+		refundOrder.setBizOrderNum(generateBizOrderNum(sNamespaceId+"",OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
 		refundOrder.setAmount(amount);
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		refundOrder.setBackUrl(callbackurl);
-		String sNamespaceId = UserContext.getCurrentNamespaceId()+"";		//todo
 		refundOrder.setAccountCode(sNamespaceId);
 		LOGGER.info("refund order params = "+refundOrder);
 		CreateOrderRestResponse refundResponse = sdkPayService.createRefundOrder(refundOrder);
@@ -2850,8 +2860,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
-		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getOwnerId() + ""));
+		checkOwner(cmd.getOwnerType(),cmd.getCommunityId());
+		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
 		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
 		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
 		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);

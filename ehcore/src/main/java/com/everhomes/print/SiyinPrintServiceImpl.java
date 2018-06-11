@@ -83,6 +83,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private static final Pattern emailregex = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");    
 	private static final String REDIS_PRINT_IDENTIFIER_TOKEN = "print-uid";
 	private static final String BIZ_ORDER_NUM_SPILT = "_";
+	public static final String BIZ_ACCOUNT_PRE = "NS";
 	//redis记录用户打印任务的数量
 	public static final String REDIS_PRINTING_TASK_COUNT = "print-task-count";
 	//redis中存储的验证打印记录的时间点，
@@ -543,7 +544,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 //		return dto;
 
 		User user = UserContext.current().getUser();
-		String sNamespaceId = "999951";		//todo
+		String sNamespaceId = BIZ_ACCOUNT_PRE+"999951";		//todo
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		ListBizPayeeAccountDTO payerDto = siyinPrintOrderProvider.createPersonalPayUserIfAbsent(user.getId() + "",
 				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
@@ -576,7 +577,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		OrderCommandResponse response = purchaseOrder.getResponse();
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
-		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
+		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+		if(paymentMethods!=null){
+			preDto.setPayMethod(paymentMethods.stream().map(r->{
+				PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+				convert.setPaymentLogo(contentServerService.parserUri(convert.getPaymentLogo()));
+				return convert;
+			}).collect(Collectors.toList()));//todo
+		}
 		return preDto;
 	}
 
@@ -1532,8 +1540,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
-		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getOwnerId() + ""));
+		checkOwner(cmd.getOwnerType(),cmd.getCommunityId());
+		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
 		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
 		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
 		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
