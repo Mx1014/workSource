@@ -2262,7 +2262,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		preOrderCommand.setPayerId(order.getRentalUid());
 		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-
+		preOrderCommand.setExtendInfo(String.format("项目名称:%s,资源名称:%s", communityProvider.findCommunityById(order.getCommunityId()).getName()
+				,order.getResourceName()));
 		//公众号支付
 		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
 			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
@@ -3954,9 +3955,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		preOrderCommand.setPayerId(order.getRentalUid());
 		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-
-
 		preOrderCommand.setClientAppName(clientAppName);
+		preOrderCommand.setExtendInfo(String.format("项目名称:%s,资源名称:%s", communityProvider.findCommunityById(order.getCommunityId()).getName()
+												,order.getResourceName()));
 
 		//微信公众号支付，重新设置ClientName，设置支付方式和参数
 		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
