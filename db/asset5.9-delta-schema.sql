@@ -43,8 +43,10 @@ PRIMARY KEY (`id`)
 -- yanlong.liang 发起活动的企业与收款方账户映射表
 CREATE TABLE `eh_activity_biz_payee` (
 `id`  bigint(20) NOT NULL ,
+`namespace_id` int not null,
+`owner_id` bigint not null COMMENT '应用类型id',
 `biz_payee_id` bigint(20) NOT NULL COMMENT '收款方账户ID',
-`organization_id` bigint(20) NOT NULL COMMENT '企业ID',
+`biz_payee_type` VARCHAR(128) COMMENT '收款方账户类型：EhUsers/EhOrganizations',
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- 活动表增加企业ID，用于查询收款方.

@@ -822,7 +822,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
 
-        createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+        createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
 
         BigDecimal amout = activity.getChargePrice();
@@ -887,7 +887,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
-            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), namespaceId.toString());
+            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), "NS"+namespaceId.toString());
         }else {
             payUserDTO = payUserDTOs.get(0);
         }
@@ -906,7 +906,6 @@ public class ActivityServiceImpl implements ActivityService {
         callback = ConvertHelper.convert(response, PreOrderDTO.class);
         callback.setExpiredIntervalTime(response.getExpirationMillis());
         callback.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));
-        //缺设置付款方式
         return callback;
     }
 
@@ -2163,7 +2162,7 @@ public class ActivityServiceImpl implements ActivityService {
         createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
         createOrderCommand.setRefundOrderId(roster.getPayOrderId());
         createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
-        createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+        createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
         String backUrl = homeUrl + contextPath + backUri;
