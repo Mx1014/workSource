@@ -6281,15 +6281,15 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public CheckPayeeIsUsefulResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd) {
-        if (cmd.getOrganizationId() == null) {
-            LOGGER.error("organizationId cannot be null.");
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "organizationId cannot be null.");
+                    "CategoryId cannot be null.");
         }
         CheckPayeeIsUsefulResponse checkPayeeIsUsefulResponse = new CheckPayeeIsUsefulResponse();
         checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.NULL.getCode());
 
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getOrganizationId());
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
         List<Long> idList = new ArrayList<>();
         idList.add(activityBizPayee.getBizPayeeId());
         List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);
