@@ -824,7 +824,7 @@ public class AssetServiceImpl implements AssetService {
         ListPaymentBillResp result;
 		try {
 			result = listPaymentBill(cmd);
-			List<PaymentBillResp> dtos = result.getList();
+			List<PaymentOrderBillDTO> dtos = result.getPaymentOrderBillDTOs();
 	        Calendar c = newClearedCalendar();
 	        int year = c.get(Calendar.YEAR);
 	        int month = c.get(Calendar.MONTH);
@@ -837,50 +837,50 @@ public class AssetServiceImpl implements AssetService {
 	        List<exportPaymentOrdersDetail> dataList = new ArrayList<>();
 	        //组装datalist来确定propertyNames的值
 	        for(int i = 0; i < dtos.size(); i++) {
-	        	List<PaymentOrderBillDTO> paymentOrderBillDTOs = dtos.get(i).getChildren();
-	        	if(paymentOrderBillDTOs != null) {
-	        		for(int j = 0;j < paymentOrderBillDTOs.size();j++) {
-		        		PaymentOrderBillDTO dto = paymentOrderBillDTOs.get(j);
-			        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
-			            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
-			            detail.setBillGroupName(dto.getBillGroupName());
-			            //组装所有的收费项信息
-			            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
-			            String billItemListMsg = "";
-			            if(billItemDTOList != null) {
-			            	for(int k = 0; k < billItemDTOList.size();k++) {
-			            		BillItemDTO billItemDTO = billItemDTOList.get(k);
-			            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
-			            	}
-			            }
-			            detail.setBillItemListMsg(billItemListMsg);
-			            detail.setTargetName(dto.getTargetName());
-			            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
-			            detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
-			            switch (dto.getPaymentType()) {
-							case 0:
-								detail.setPaymentType("微信");
-								break;
-							case 1:
-								detail.setPaymentType("支付宝");
-								break;
-							case 2:
-								detail.setPaymentType("对公转账");
-								break;
-							default:
-								break;
-						}
-			            detail.setAmountReceived(dto.getAmountReceived());
-			            detail.setAmountReceivable(dto.getAmountReceivable());
-			            detail.setAmoutExemption(dto.getAmountExemption());
-			            detail.setAmountSupplement(dto.getAmountSupplement());
-			            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
-			            detail.setPayTime(dto.getPayTime());
-			            detail.setPayerTel(dto.getPayerTel());
-			            detail.setPayerName(dto.getPayerName());
-			            detail.setAddresses(dto.getAddresses());
-			            dataList.add(detail);
-		        	}
+	        	PaymentOrderBillDTO dto = dtos.get(i);
+	        	if(dto != null) {
+		        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
+		            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+		            detail.setBillGroupName(dto.getBillGroupName());
+		            //组装所有的收费项信息
+		            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
+		            String billItemListMsg = "";
+		            if(billItemDTOList != null) {
+		            	for(int k = 0; k < billItemDTOList.size();k++) {
+		            		BillItemDTO billItemDTO = billItemDTOList.get(k);
+		            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
+		            	}
+		            }
+		            detail.setBillItemListMsg(billItemListMsg);
+		            detail.setTargetName(dto.getTargetName());
+		            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
+		            //detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
+		            detail.setPaymentStatus("已完成");
+		            if(dto.getPaymentType() != null) {
+		            	switch (dto.getPaymentType()) {
+						case 0:
+							detail.setPaymentType("微信");
+							break;
+						case 1:
+							detail.setPaymentType("支付宝");
+							break;
+						case 2:
+							detail.setPaymentType("对公转账");
+							break;
+						default:
+							break;
+		            	}
+		            }
+		            detail.setAmountReceived(dto.getAmountReceived());
+		            detail.setAmountReceivable(dto.getAmountReceivable());
+		            detail.setAmoutExemption(dto.getAmountExemption());
+		            detail.setAmountSupplement(dto.getAmountSupplement());
+		            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
+		            detail.setPayTime(dto.getPayTime());
+		            detail.setPayerTel(dto.getPayerTel());
+		            detail.setPayerName(dto.getPayerName());
+		            detail.setAddresses(dto.getAddresses());
+		            dataList.add(detail);
 	        	}
 	        }
 	        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
