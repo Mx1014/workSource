@@ -13,16 +13,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetPayService;
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
@@ -52,6 +58,10 @@ import com.everhomes.rest.pmsy.PmsyPayerStatus;
 import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPaymentBillGroups;
+import com.everhomes.server.schema.tables.EhPaymentBills;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsDao;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -78,6 +88,9 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
 	private AssetPayService assetPayService;
+	
+	@Autowired
+    private DbProvider dbProvider;
 	
 	@Override
 	public List<PmsyPayerDTO> listPmPayers(){
@@ -466,15 +479,18 @@ public class PmsyServiceImpl implements PmsyService{
 
 		
 		//通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
-        /*cmd.setBillGroupId(427L);
-        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
-        if(paymentBillGroup != null) {
-        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
-        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-        }
-        PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);*/
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(t.BIZ_PAYEE_ID, t.BIZ_PAYEE_TYPE);
+        query.addFrom(t);
+        query.addConditions(t.NAMESPACE_ID.eq(999993));//这里写死了海岸馨的域空间，因为是定制开发
+        query.fetch().map(r -> {
+            preOrderCommand.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));
+            preOrderCommand.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));
+            return null;
+        });
 		PreOrderDTO callBack = assetPayService.createPreOrder(preOrderCommand);
-
 		return callBack;
 	}
 	

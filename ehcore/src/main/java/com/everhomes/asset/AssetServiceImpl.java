@@ -823,7 +823,7 @@ public class AssetServiceImpl implements AssetService {
         }
         ListPaymentBillResp result;
 		try {
-			result = paymentService.listPaymentBill(cmd);
+			result = listPaymentBill(cmd);
 			List<PaymentBillResp> dtos = result.getList();
 	        Calendar c = newClearedCalendar();
 	        int year = c.get(Calendar.YEAR);

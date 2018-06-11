@@ -154,6 +154,8 @@ nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth
 pay.appKey: d7c0c950-d57d-4290-9318-f927dcca92c2
 pay.secretKey: 9chyeKh90WLE7NB912U2G0Jhh8Iy+U4mFzDkBMByeF88UrE7H+58Z44XkUOWywaKwdNXikUx2KAMszoEhsK4OQ==
 pay.payHomeUrl: http://payv2-alpha.zuolin.com/pay
+pay.localServerUrl: http://ycx-pay-test.zuolin.com/evh
+
 
 
 
