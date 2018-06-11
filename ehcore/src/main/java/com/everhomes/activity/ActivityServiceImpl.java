@@ -823,7 +823,7 @@ public class ActivityServiceImpl implements ActivityService {
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
 
         createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
-        createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
+        createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
 
         BigDecimal amout = activity.getChargePrice();
         if(amout == null){
@@ -869,7 +869,8 @@ public class ActivityServiceImpl implements ActivityService {
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCommand.setBackUrl(backUrl);
         PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
-
+        roster.setPayOrderId(callBack.getOrderId());
+        activityProvider.updateRoster(roster);
         return callBack;
     }
 
@@ -879,7 +880,8 @@ public class ActivityServiceImpl implements ActivityService {
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("checkAndCreatePaymentUser request={}", payerId);
         }
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Arrays.asList(payerId));
+        String payerid = OwnerType.USER.getCode()+payerId;
+        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(payerid);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("checkAndCreatePaymentUser response={}", payUserDTOs);
         }
@@ -902,8 +904,38 @@ public class ActivityServiceImpl implements ActivityService {
         }
         OrderCommandResponse response = createOrderRestResponse.getResponse();
         callback = ConvertHelper.convert(response, PreOrderDTO.class);
+        callback.setExpiredIntervalTime(response.getExpirationMillis());
+        callback.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));
         //缺设置付款方式
         return callback;
+    }
+
+    private List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+        List<PayMethodDTO> payMethods = new ArrayList<>();
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        PayMethodDTO alipay = new PayMethodDTO();
+        alipay.setPaymentName("支付宝支付");
+        PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
+        alipayParamsDTO.setPayType("A01");
+        alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+        String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
+        alipay.setPaymentLogo(url);
+        alipay.setPaymentParams(alipayParamsDTO);
+        alipay.setPaymentType(8);
+        payMethods.add(alipay);
+
+        PayMethodDTO wxpay = new PayMethodDTO();
+        wxpay.setPaymentName("微信支付");
+        wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+        url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
+        wxpay.setPaymentLogo(url);
+        PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
+        wxParamsDTO.setPayType("no_credit");
+        wxpay.setPaymentParams(wxParamsDTO);
+        wxpay.setPaymentType(1);
+
+        payMethods.add(wxpay);
+        return payMethods;
     }
 
     @Override
@@ -2130,7 +2162,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
         createOrderCommand.setRefundOrderId(roster.getPayOrderId());
-        createOrderCommand.setBizOrderNum(roster.getOrderNo().toString());
+        createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
         createOrderCommand.setAccountCode(UserContext.getCurrentNamespaceId().toString());
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
@@ -6191,7 +6223,7 @@ public class ActivityServiceImpl implements ActivityService {
                     "organizationId cannot be null.");
         }
 	    List<ActivityPayeeDTO> dtoList = new ArrayList<>();
-	    String prefix = "EhOrganizations";
+	    String prefix = OwnerType.ORGANIZATION.getCode();
 	    List<PayUserDTO> list = this.payServiceV2.getPayUserList(prefix + cmd.getOrganizationId().toString(), String.valueOf(0));
 	    if (list != null && list.size() > 0) {
             for (PayUserDTO r : list) {
