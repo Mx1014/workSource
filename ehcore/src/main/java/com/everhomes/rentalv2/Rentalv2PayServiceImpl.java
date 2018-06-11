@@ -320,20 +320,19 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
         PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
         dto.setAmount(cmd.getAmount());
-        List<PayMethodDTO> payMethods = getPayMethods(orderCommandResponse.getOrderPaymentStatusQueryUrl());
+        List<PayMethodDTO> payMethods = getPayMethods();
         dto.setPayMethod(payMethods);
         dto.setOrderId(cmd.getOrderId());
         return dto;
     }
 
-    public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+    public List<PayMethodDTO> getPayMethods() {
         List<PayMethodDTO> payMethods = new ArrayList<>();
-        String format = "{\"getOrderInfoUrl\":\"%s\"}";
         PayMethodDTO alipay = new PayMethodDTO();
         alipay.setPaymentName("支付宝支付");
         PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
         alipayParamsDTO.setPayType("A01");
-        alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+        alipay.setExtendInfo(getPayMethodExtendInfo());
         String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
         alipay.setPaymentLogo(url);
         alipay.setPaymentParams(alipayParamsDTO);
@@ -342,7 +341,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
         PayMethodDTO wxpay = new PayMethodDTO();
         wxpay.setPaymentName("微信支付");
-        wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+        wxpay.setExtendInfo(getPayMethodExtendInfo());
         url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
         wxpay.setPaymentLogo(url);
         PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
@@ -352,6 +351,14 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
         payMethods.add(wxpay);
         return payMethods;
+    }
+
+    private String getPayMethodExtendInfo(){
+        String payV2HomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
+        String getOrderInfoUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.orderPaymentStatusQueryUri", "");
+
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        return String.format(format, payV2HomeUrl+getOrderInfoUri);
     }
 
     @Override
@@ -470,8 +477,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         dto.setAmount(cmd.getAmount());
         dto.setExtendInfo(cmd.getExtendInfo());
 
-        //TODO 支付方式组装
-        //dto.setPayMethod(payMethods);
+
+        dto.setPayMethod(getPayMethods());
         return dto;
     }
 
