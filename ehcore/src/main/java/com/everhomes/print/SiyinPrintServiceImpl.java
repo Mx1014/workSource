@@ -544,7 +544,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 //		return dto;
 
 		User user = UserContext.current().getUser();
-		String sNamespaceId = BIZ_ACCOUNT_PRE+"999951";		//todo
+		String sNamespaceId = BIZ_ACCOUNT_PRE+"1";		//todo
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		ListBizPayeeAccountDTO payerDto = siyinPrintOrderProvider.createPersonalPayUserIfAbsent(user.getId() + "",
 				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
@@ -556,8 +556,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		createOrderCommand.setAccountCode(sNamespaceId);
-		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
-		createOrderCommand.setClientAppName(cmd.getClientAppName());
+		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo()));
+		createOrderCommand.setClientAppName("Android_OA");//todo
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
@@ -1688,6 +1688,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
 					order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
 					order.setPaidTime(payTimeStamp);
+					order.setPayOrderNo(cmd.getOrderId()+"");
 					siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 				}
 
