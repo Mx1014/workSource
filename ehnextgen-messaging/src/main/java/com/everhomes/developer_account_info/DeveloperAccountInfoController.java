@@ -4,10 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.Valid;
 
 import org.elasticsearch.common.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +23,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.developer_account_info.CreateDeveloperAccountDTO;
 import com.everhomes.rest.developer_account_info.DeveloperAccountInfoCommand;
 
 
@@ -31,7 +36,8 @@ import com.everhomes.rest.developer_account_info.DeveloperAccountInfoCommand;
 @RestController
 @RequestMapping("/developer")
 public class DeveloperAccountInfoController extends ControllerBase {
-  //  private static final Logger LOGGER = LoggerFactory.getLogger(DeveloperAccountInfoController.class);
+	
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeveloperAccountInfoController.class);
     
     @Autowired
     DeveloperAccountInfoService developerAccountInfoService;
@@ -44,7 +50,7 @@ public class DeveloperAccountInfoController extends ControllerBase {
      * @return
      */
     @RequestMapping("createDeveloperAccountInfo")
-    @RestReturn(value=String.class)
+    @RestReturn(value=CreateDeveloperAccountDTO.class)
     public RestResponse createDeveloperAccountInfo(@Valid DeveloperAccountInfoCommand cmd,
     			@RequestParam(value = "attachment_file_", required = true) MultipartFile[] files) {
     	
@@ -55,22 +61,44 @@ public class DeveloperAccountInfoController extends ControllerBase {
             response.setErrorDescription("File not found");
             return response;
         }
-        
-        DeveloperAccountInfo bo = new DeveloperAccountInfo();
-        bo.setBundleIds(cmd.getBundleIds());
-        bo.setAuthkeyId(cmd.getAuthkeyId());
-        bo.setTeamId(cmd.getTeamId());
+               
         try {
         	StringBuffer sb = removeAnnotations(files[0]);
         	if(sb == null ||  StringUtils.isBlank(sb.toString())){
         		response.setErrorCode(ErrorCodes.ERROR_INVALID_PARAMETER);
                 response.setErrorDescription("Cannot read file");
         	}else{
-        		bo.setAuthkey(sb.toString().getBytes());
-                developerAccountInfoService.createDeveloperAccountInfo(bo);
-                
-                response.setErrorCode(ErrorCodes.SUCCESS);
-                response.setErrorDescription("OK");
+        		List<String> bundleIds = bundleIdSorter(cmd.getBundleIds());
+        		if(bundleIds !=null && bundleIds.size()>0){
+        			//初始化返回对象
+        			CreateDeveloperAccountDTO dto = new CreateDeveloperAccountDTO();
+        			List<String> success = new ArrayList<String>();
+        			List<String> failure = new ArrayList<String>();
+        			//循环创建
+        			for(String bundleId : bundleIds){
+        				DeveloperAccountInfo bo = new DeveloperAccountInfo();
+        		        bo.setBundleIds(bundleId);
+        		        bo.setAuthkeyId(cmd.getAuthkeyId());
+        		        bo.setTeamId(cmd.getTeamId());
+        				bo.setAuthkey(sb.toString().getBytes());
+        				try{
+        					developerAccountInfoService.createDeveloperAccountInfo(bo);
+        					//创建成功的bundleId 放进success 组中
+        					success.add(bundleId);
+        				}catch(Exception e){
+        					//创建时报异常的bundleId 放进failure 组中
+        					failure.add(bundleId);
+        					//还是得告诉后台报的什么错
+        					LOGGER.error("createDeveloperAccountInfo error : bundleId="+bundleId+",Exception="+e.getMessage()); 
+        				}                       
+        			}
+        			dto.setSuccess(success); 
+        			dto.setFailure(failure);
+        			response.setResponseObject(dto);
+                    response.setErrorCode(ErrorCodes.SUCCESS);
+                    response.setErrorDescription("OK");
+        			
+        		}
         	}
             
         } catch (IOException e) {
@@ -106,5 +134,24 @@ public class DeveloperAccountInfoController extends ControllerBase {
 	             } 
 				 return sb;			
     	} 
+    
+    /**
+     * 将拼接的bundleId 拆分成数组
+     * @param bundleIds
+     * @return
+     */
+    private List<String> bundleIdSorter(String bundleIds){
+    	ArrayList<String> al = new ArrayList<String>();
+    	if(!StringUtils.isBlank(bundleIds)){
+    		String[] bs = bundleIds.split(";");
+    		//剔除空项
+    		for(String str : bs){
+    			if(!StringUtils.isBlank(str)){
+    				al.add(str);
+    			}
+    		}
+    	}
+    	return al;
+    }
 	
 }

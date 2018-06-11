@@ -86,7 +86,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PusherServiceImpl.class);
     private final static String MESSAGE_INDEX_ID = "indexId";
     private final static String TYPE_PRODUCTION = "production";
-    private final static String TYPE_DEVELOP = "develop";
+    //private final static String TYPE_DEVELOP = "develop";
+    /**
+     * add by huanglm 20180611,默认bundleId "com.ios" ,
+     * 凡是取不到开发者信息的时候就取这个bundleId对应的开发都信息
+     */
+    private final static String DEFAULT_BUNDLEID = "com.ios";
 
     @Autowired
     private BorderConnectionProvider borderConnectionProvider;
@@ -742,23 +747,24 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         	if(TYPE_PRODUCTION.equals(pusherServiceType)){
         		isProductionGateway = true ;
         	}
-        //bundleId 为空的情况一般是旧应用的推送，为了兼容需要从映射表中取得bundleId（新应用bundleId不能为空）
+        //bundleId 为空的情况一般是旧应用的推送，为了兼容需要从映射表中取得bundleId（新应用bundleId一般不为空）
         if(StringUtils.isBlank(bundleId)){
         	String pidentyfy = destLogin.getPusherIdentify();
         	if(StringUtils.isBlank(pidentyfy)){
-        		 LOGGER.error("bundleId is null  and pusherIdentify is null , Unable to establish a connection");
-                 return null;
-        	}
-        	//获取域空间ID，该值无论如何都得有值
-            Integer namespaceId = destLogin.getNamespaceId() ;
-            namespaceId = UserContext.getCurrentNamespaceId(namespaceId); 
-            BundleidMapper bmapper = bundleidMapperProvider.findBundleidMapperByParams(namespaceId, pidentyfy);
-            if(bmapper == null || StringUtils.isBlank(bmapper.getBundleId())){
-            	LOGGER.error("namespaceId = "+namespaceId+";identify = "+pidentyfy+"; can not find data or bundleId from mapper table ");
-                return null;
-            }else{
-            	bundleId = bmapper.getBundleId();
-            }       	
+        		 LOGGER.warn("bundleId is null  and pusherIdentify is null , it will use DEFAULT_BUNDLEID");
+                // return null;
+        	}else{
+        		//获取域空间ID，该值无论如何都得有值
+                Integer namespaceId = destLogin.getNamespaceId() ;
+                namespaceId = UserContext.getCurrentNamespaceId(namespaceId); 
+                BundleidMapper bmapper = bundleidMapperProvider.findBundleidMapperByParams(namespaceId, pidentyfy);
+                if(bmapper == null || StringUtils.isBlank(bmapper.getBundleId())){
+                	LOGGER.warn("namespaceId = "+namespaceId+";identify = "+pidentyfy+"; can not find data or bundleId from mapper table ,it will use DEFAULT_BUNDLEID");
+                    //return null;
+                }else{
+                	bundleId = bmapper.getBundleId();
+                }   
+        	}        	    	
         }
         
     	//优先从http2ClientMaps 中   取，如没有再创建新的连接
@@ -769,9 +775,14 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         		
                 //获取开发者信息
                 DeveloperAccountInfo  dlaInfo = developerAccountInfoProvider.getDeveloperAccountInfoByBundleId(bundleId);
+                //取不到开发者账号，则取默认的开发者账号
+                if(dlaInfo == null){
+                	LOGGER.warn("bundleId is "+bundleId+" ; can not find DeveloperAccountInfo ,it will use DEFAULT_BUNDLEID");
+                	dlaInfo = developerAccountInfoProvider.getDeveloperAccountInfoByBundleId(DEFAULT_BUNDLEID);
+                }
                 if(dlaInfo == null ){
                 	//查询不到开发者信息，则不往下走了，因为没法建立与APNs服务的连接
-                    LOGGER.warn("DeveloperAccountInfo is null  and Unable to establish a connection");
+                    LOGGER.warn("can not find DeveloperAccountInfo by DEFAULT_BUNDLEID  and Unable to establish a connection");
                     return null;
                 }
                 byte[] authkey = dlaInfo.getAuthkey();

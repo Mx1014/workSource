@@ -6,9 +6,11 @@ import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.messaging.PusherService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class DeveloperAccountInfoServiceImpl implements DeveloperAccountInfoService {
@@ -21,6 +23,10 @@ public class DeveloperAccountInfoServiceImpl implements DeveloperAccountInfoServ
 	
 	@Override
 	public void createDeveloperAccountInfo(DeveloperAccountInfo bo) {
+		//测试异常用
+		/*if("com.techpark.ios.zuolin03".equals(bo.getBundleIds())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"I mean it !");
+		}*/
 		//查看是否已存在
 		DeveloperAccountInfo resultBo = developerAccountInfoProvider.getDeveloperAccountInfoByBundleId(bo.getBundleIds());
 		//存在则先删除再新增
