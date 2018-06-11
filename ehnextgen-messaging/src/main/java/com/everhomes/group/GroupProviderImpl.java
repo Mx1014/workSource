@@ -62,7 +62,9 @@ public class GroupProviderImpl implements GroupProvider {
     @Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
     @Override
     public void createGroup(Group group) {
-        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhGroups.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         group.setId(id);
         group.setUuid(UUID.randomUUID().toString());
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -453,7 +455,7 @@ public class GroupProviderImpl implements GroupProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
         EhGroupMembersRecord record = (EhGroupMembersRecord)context.select().from(EH_GROUP_MEMBERS)
             .where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
-            .and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(memberType))
+                .and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(memberType))
             .and(EH_GROUP_MEMBERS.MEMBER_ID.eq(memberId))
             .fetchAny();
         return ConvertHelper.convert(record, GroupMember.class);

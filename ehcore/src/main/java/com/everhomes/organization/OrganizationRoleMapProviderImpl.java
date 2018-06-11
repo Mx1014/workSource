@@ -16,10 +16,13 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationRoleMapDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationRoleMap;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhOrganizationRoleMapRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -33,6 +36,9 @@ public class OrganizationRoleMapProviderImpl implements OrganizationRoleMapProvi
 	
 	@Autowired
     private ShardingProvider shardingProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
 	@Override
 	public List<OrganizationRoleMap> listOrganizationRoleMaps(Long ownerId, EntityType ownerType, PrivateFlag privateFlag) {
@@ -72,7 +78,9 @@ public class OrganizationRoleMapProviderImpl implements OrganizationRoleMapProvi
 	
 	@Override
 	public void createOrganizationRoleMap(OrganizationRoleMap organizationRoleMap) {
-		long id = shardingProvider.allocShardableContentId(EhOrganizationRoleMap.class).second();
+        // eh_organizations表是global表，不能使用key table表的方式来获取id  modify by lqs 20180516
+		//long id = shardingProvider.allocShardableContentId(EhOrganizationRoleMap.class).second();
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationRoleMap.class));
 		organizationRoleMap.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationRoleMap.class, id));
 		EhOrganizationRoleMapDao dao = new EhOrganizationRoleMapDao(context.configuration());

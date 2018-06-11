@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.cache.CacheAccessor;
@@ -29,7 +31,7 @@ import com.everhomes.server.schema.tables.records.EhLocaleTemplatesRecord;
 import com.everhomes.util.ConvertHelper;
 
 @Component
-public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
+public class LocaleTemplateProviderImpl implements LocaleTemplateProvider, ApplicationListener<ContextRefreshedEvent> {
     
     @Autowired
     private DbProvider dbProvider;
@@ -40,10 +42,19 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
     
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516  
+    //@PostConstruct
     public void setup() {
         CacheAccessor accessor = this.cacheProvice.getCacheAccessor("LocaleStringFind");
         accessor.clear();
+    }
+   
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
     
     @Cacheable(value="LocaleTemplateById", key="#id")
@@ -136,5 +147,13 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
         }
         
         return objs;
+    }
+
+    @Override
+    public List<LocaleTemplate> findLocaleTemplateByCode(String ... scopes) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return dslContext.selectFrom(Tables.EH_LOCALE_TEMPLATES)
+                .where(Tables.EH_LOCALE_TEMPLATES.SCOPE.in(scopes))
+                .fetchInto(LocaleTemplate.class);
     }
 }

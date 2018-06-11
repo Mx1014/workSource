@@ -77,6 +77,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.JumpType;
+import com.everhomes.rest.yellowPage.PrivilegeType;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchOrgRequestInfoCommand;
@@ -109,6 +110,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	
 	@Autowired
 	private YellowPageProvider yellowPageProvider;
+	
+	@Autowired
+	private YellowPageService yellowPageService;
+	
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	
@@ -526,9 +531,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public SearchRequestInfoResponse searchRequestInfo(
 			SearchRequestInfoCommand cmd) {
-		
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4050040540L, cmd.getAppId(), null,0L);//申请记录权限
+		if (cmd.getAppId()!=null) {
+			yellowPageService.checkPrivilege(PrivilegeType.APPLY_RECORD, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 		}
 
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
@@ -538,13 +542,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+            		.field("creatorMobile", 1.3f)
                     .field("creatorName", 1.2f)
                     .field("serviceOrganization", 1.1f)
                     .field("creatorOrganization", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("creatorName").addHighlightedField("serviceOrganization").addHighlightedField("creatorOrganization");
+            builder.addHighlightedField("creatorMobile").addHighlightedField("creatorName")
+            .addHighlightedField("serviceOrganization").addHighlightedField("creatorOrganization");
             
         }
         FilterBuilder fb = null;

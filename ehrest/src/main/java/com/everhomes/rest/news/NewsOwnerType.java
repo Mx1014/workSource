@@ -4,8 +4,8 @@ package com.everhomes.rest.news;
 /**
  * 
  * <ul>
- * <li>ORGANIZATION: 组织</li>
- * <li>COMMUNITY: 项目</li>
+ * <li>ORGANIZATION("organization"): 组织</li>
+ * <li>COMMUNITY("EhCommunities"): 项目</li>
  * </ul>
  */
 public enum NewsOwnerType {

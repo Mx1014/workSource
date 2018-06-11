@@ -95,7 +95,7 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 					"the pay of fee is fail.");
 		}
 		Map payFeeMap2 = (Map) payFeeList.get(0);
-		List payFeeList2 = (List) map2.get("Syswin");
+		List payFeeList2 = (List) payFeeMap2.get("Syswin");
 		
 		payFeeListOuter:
 		for(Object o:payFeeList2){

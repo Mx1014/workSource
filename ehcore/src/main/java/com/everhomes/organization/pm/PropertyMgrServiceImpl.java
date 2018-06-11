@@ -11,12 +11,14 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -34,6 +36,7 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
@@ -49,7 +52,12 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.*;
@@ -98,6 +106,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -130,7 +140,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
  */
 @Component 
-public class PropertyMgrServiceImpl implements PropertyMgrService {
+public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrServiceImpl.class);
 	private static final String ASSIGN_TASK_AUTO_COMMENT = "assign.task.auto.comment";
 	private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
@@ -259,12 +269,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     private String queueName = "property-mgr-push";
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-	
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
 	@Override
 	public void applyPropertyMember(applyPropertyMemberCommand cmd) {
 		User user  = UserContext.current().getUser();
@@ -2235,8 +2254,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if (cmd.getStatus() != null) {
 			Long organizationId = findOrganizationByCommunity(community);
 			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-			communityAddressMapping.setLivingStatus(cmd.getStatus());
-			organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			if (communityAddressMapping != null) {
+				communityAddressMapping.setLivingStatus(cmd.getStatus());
+				organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			}else {
+				communityAddressMapping = new CommunityAddressMapping();
+				communityAddressMapping.setOrganizationId(organizationId);
+				communityAddressMapping.setCommunityId(community.getId());
+				communityAddressMapping.setAddressId(address.getId());
+				communityAddressMapping.setOrganizationAddress(address.getAddress());
+				communityAddressMapping.setLivingStatus(cmd.getStatus());
+				communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+				organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+			}
 		}
 
 		if (!StringUtils.isEmpty(cmd.getApartmentName())) {
@@ -2246,6 +2277,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			address.setApartmentName(cmd.getApartmentName());
 			address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
+			//update EH_Contract_Building_Mapping
+			List<ContractBuildingMapping> contractBuildingMappingList = addressProvider.findContractBuildingMappingByAddressId(address.getId());
+			if(contractBuildingMappingList != null && contractBuildingMappingList.size()>0) {
+				for (ContractBuildingMapping contractBuildingMapping : contractBuildingMappingList) {
+					contractBuildingMapping.setApartmentName(cmd.getApartmentName());
+					addressProvider.updateContractBuildingMapping(contractBuildingMapping);
+				}
+			}
 		}
 
 		if (cmd.getAreaSize() != null) {
@@ -2325,8 +2364,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		communityProvider.updateBuilding(building);
 		communityProvider.updateCommunity(community);
-
+		
 	}
+
+	
 
 	@Override
 	public GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd) {

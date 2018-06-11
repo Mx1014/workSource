@@ -114,7 +114,7 @@ public class ParkingController extends ControllerBase {
         
     	ParkingTempFeeDTO dto = parkingService.getParkingTempFee(cmd);
         RestResponse response = new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorCode(ErrorCodes.SUCCESS);  
         response.setErrorDescription("OK");
         return response;
     }

@@ -110,7 +110,7 @@ public interface ArchivesService {
 
     void ArchivesNotificationConfig(ArchivesNotificationCommand cmd);
 
-    void initArchivesNotification();
+//    void initArchivesNotification();
 
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 

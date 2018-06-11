@@ -44,8 +44,12 @@ public class AclinkHandshakeInterceptor implements HandshakeInterceptor {
             Map<String, String> params = new HashMap<String, String>();
             params.put("uuid", vs[0]);
             params.put("encryptBase64", vs[1]);
-            
-            ResponseEntity<String> result = httpRestCallProvider.syncRestCall("/aclink/connecting", params);
+            //---by liuyilin 20180419 内网服务器链接,先暂用6位匹配码作为uuid
+			ResponseEntity<String> result = (vs[0] != null && vs[0].length() == 6)
+					? httpRestCallProvider.syncRestCall("/aclink/serverConnecting", params)
+					: httpRestCallProvider.syncRestCall("/aclink/connecting", params);
+			//--- httpRestCallProvider.syncRestCall("/aclink/connecting", params);
+					
             if(result.getStatusCode() != HttpStatus.OK) {
                 response.setStatusCode(result.getStatusCode());
                 return false;
