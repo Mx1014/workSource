@@ -887,7 +887,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		command.setIsEffectiveImmediately((byte)0);
 		command.setCategoryId(contract.getCategoryId());
-		command.setModuleId(21200);
+		command.setModuleId(21200l);
 		assetService.paymentExpectanciesCalculate(command);
 	}
 
