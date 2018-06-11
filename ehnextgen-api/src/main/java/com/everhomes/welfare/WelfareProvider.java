@@ -11,6 +11,6 @@ public interface WelfareProvider {
 
 	Welfare findWelfareById(Long id);
 
-	List<Welfare> listWelfare();
+	List<Welfare> listWelfare(Long ownerId);
 
 }

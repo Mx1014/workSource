@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,10 +60,15 @@ public class WelfareProviderImpl implements WelfareProvider {
 	}
 	
 	@Override
-	public List<Welfare> listWelfare() {
-		return getReadOnlyContext().select().from(Tables.EH_WELFARES)
+	public List<Welfare> listWelfare(Long ownerId) {
+		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_WELFARES)
+				.where(Tables.EH_WELFARES.OWNER_ID.eq(ownerId))
 				.orderBy(Tables.EH_WELFARES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, Welfare.class));
+				.fetch();
+		if(null == records){
+			return null;
+		}
+		return records.map(r -> ConvertHelper.convert(r, Welfare.class));
 	}
 	
 	private EhWelfaresDao getReadWriteDao() {

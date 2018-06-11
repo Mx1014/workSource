@@ -13,4 +13,5 @@ public interface WelfareReceiverProvider {
 
 	List<WelfareReceiver> listWelfareReceiver();
 
+	List<WelfareReceiver> listWelfareReceiver(Long welfareId);
 }

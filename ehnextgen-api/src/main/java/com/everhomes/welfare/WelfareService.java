@@ -11,15 +11,15 @@ import com.everhomes.rest.welfare.SendWelfareCommand;
 public interface WelfareService {
 
 
-	public ListWelfaresResponse listWelfares(ListWelfaresCommand cmd);
+	ListWelfaresResponse listWelfares(ListWelfaresCommand cmd);
 
 
-	public void draftWelfare(DraftWelfareCommand cmd);
+	void draftWelfare(DraftWelfareCommand cmd);
 
 
-	public void sendWelfare(SendWelfareCommand cmd);
+	void sendWelfare(SendWelfareCommand cmd);
 
 
-	public GetUserWelfareResponse getUserWelfare(GetUserWelfareCommand cmd);
+	GetUserWelfareResponse getUserWelfare(GetUserWelfareCommand cmd);
 
 }

@@ -13,4 +13,6 @@ public interface WelfareItemProvider {
 
 	List<WelfareItem> listWelfareItem();
 
+
+	List<WelfareItem> listWelfareItem(Long welfareId);
 }
