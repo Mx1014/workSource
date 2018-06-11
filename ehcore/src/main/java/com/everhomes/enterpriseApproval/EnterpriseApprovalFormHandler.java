@@ -200,18 +200,6 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         return Long.valueOf(approvalNo.toString());
     }
 
-    private EnterpriseApprovalHandler getEnterpriseApprovalHandler(Long referId) {
-        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
-        if (ga != null) {
-            EnterpriseApprovalHandler handler = PlatformContext.getComponent(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX
-                    + ga.getApprovalAttribute());
-            if (handler != null) {
-                return handler;
-            }
-        }
-        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.ENTERPRISE_APPROVAL_DEFAULT_HANDLER_NAME);
-    }
-
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
         //  get the basic data
@@ -232,7 +220,12 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         if (form == null)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
                     EnterpriseApprovalServiceErrorCode.ERROR_FORM_NOT_FOUND, "form not found");
+
+        //  extra process
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(approvalId);
+        handler.processFormFields(fieldDTOs, cmd);
+
 
         //  organizationId is still needed
         GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
@@ -256,4 +249,15 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         return handler.getGeneralFormReminder(cmd);
     }
 
+    private EnterpriseApprovalHandler getEnterpriseApprovalHandler(Long referId) {
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
+        if (ga != null) {
+            EnterpriseApprovalHandler handler = PlatformContext.getComponent(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX
+                    + ga.getApprovalAttribute());
+            if (handler != null) {
+                return handler;
+            }
+        }
+        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.ENTERPRISE_APPROVAL_DEFAULT_HANDLER_NAME);
+    }
 }

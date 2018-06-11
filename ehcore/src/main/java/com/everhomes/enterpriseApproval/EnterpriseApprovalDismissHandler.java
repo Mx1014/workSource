@@ -8,6 +8,7 @@ import com.everhomes.flow.FlowCaseState;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.archives.ArchivesDismissType;
 import com.everhomes.rest.archives.ArchivesOperationType;
@@ -15,14 +16,12 @@ import com.everhomes.rest.archives.ArchivesParameter;
 import com.everhomes.rest.archives.DismissArchivesEmployeesCommand;
 import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
 import com.everhomes.rest.enterpriseApproval.ComponentDismissApplicationValue;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
-import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +45,24 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
 
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
+
+    @Override
+    public void processFormFields(List<GeneralFormFieldDTO> fieldDTOs, GetTemplateBySourceIdCommand cmd){
+        Long userId = UserContext.currentUserId();
+
+        for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
+            if(GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.EMPLOY_APPLICATION)){
+                ComponentDismissApplicationValue val = new ComponentDismissApplicationValue();
+                OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOwnerId(), userId);
+                if(member != null){
+                    val.setApplierName(member.getContactName());
+                    val.setApplierDepartment(archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getDetailId())));
+                    val.setApplierJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(member.getDetailId())));
+                }
+                fieldDTO.setFieldValue(StringHelper.toJsonString(val));
+            }
+        }
+    }
 
     @Override
     public void onApprovalCreated(FlowCase flowCase) {

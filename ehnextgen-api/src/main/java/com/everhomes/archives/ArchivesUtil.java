@@ -1,25 +1,15 @@
 package com.everhomes.archives;
 
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.archives.*;
-import com.everhomes.rest.general_approval.GeneralFormFieldAttribute;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.organization.EmployeeStatus;
 import com.everhomes.rest.organization.EmployeeType;
 import com.everhomes.rest.organization.MaritalFlag;
-import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.UserGender;
-import org.springframework.util.StringUtils;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ArchivesUtil {
 

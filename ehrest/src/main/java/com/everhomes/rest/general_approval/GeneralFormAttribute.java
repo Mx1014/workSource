@@ -5,16 +5,16 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * <ul>
- * <li>DEFAULT("DEFAULT"): 系统字段 </li>
- * <li>CUSTOMIZE("CUSTOMIZE"): 自定义字段</li>
+ * <li>DEFAULT("DEFAULT"): 系统表单 </li>
+ * <li>CUSTOMIZE("CUSTOMIZE"): 自定义表单</li>
  * </ul>
  */
-public enum GeneralFormFieldAttribute {
+public enum GeneralFormAttribute {
     DEFAULT("DEFAULT"), CUSTOMIZE("CUSTOMIZE");
 
     private String code;
 
-    private GeneralFormFieldAttribute(String code) {
+    private GeneralFormAttribute(String code) {
         this.code = code;
     }
 
@@ -22,8 +22,8 @@ public enum GeneralFormFieldAttribute {
         return code;
     }
 
-    public static GeneralFormFieldAttribute fromCode(String code) {
-        for (GeneralFormFieldAttribute v : GeneralFormFieldAttribute.values()) {
+    public static GeneralFormAttribute fromCode(String code) {
+        for (GeneralFormAttribute v : GeneralFormAttribute.values()) {
             if (StringUtils.equals(v.getCode(), code))
                 return v;
         }
