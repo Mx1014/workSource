@@ -3074,9 +3074,9 @@ public class ParkingServiceImpl implements ParkingService {
 	public void rechargeOrderMigration() {
 		Long pageAnchor = null;
 		Integer pageSize = 100;
-		List<PaymentOrderRecord> records = parkingProvider.listParkingPaymentOrderRecords(pageAnchor,pageSize);
 		boolean hasNext = true;
 		while (hasNext) {
+			List<PaymentOrderRecord> records = parkingProvider.listParkingPaymentOrderRecords(pageAnchor,pageSize);
 			for (PaymentOrderRecord record : records) {
 				ParkingRechargeOrder parkingOrder = parkingProvider.findParkingRechargeOrderById(record.getOrderId());
 				if (parkingOrder == null) {
