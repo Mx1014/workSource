@@ -714,7 +714,7 @@ public class GroupServiceImpl implements GroupService {
          }
 
          cmdResponse.setGroups(groups.stream().map((r)-> {
-             Long userId = user != null ? user.getId() : 0;
+             Long userId = user != null && user.getId() != 0 ? user.getId() : -1;
              return toGroupDTO(userId, r);
          }).collect(Collectors.toList()));
          
@@ -3139,14 +3139,13 @@ public class GroupServiceImpl implements GroupService {
         // it is more efficient to do in this way due to the reason that
         // we need to tell whether or not the user is a member of the group
         //
-        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(group.getId(), 
-            EntityType.USER.getCode(), uid);
+        GroupMember member = groupProvider.findGroupMemberByMemberInfo(group.getId(), EntityType.USER.getCode(), uid);
         
-        List<Long> userInRoles = new ArrayList<>();
-        userInRoles.add(Role.AuthenticatedUser);
+        // List<Long> userInRoles = new ArrayList<>();
+        // userInRoles.add(Role.AuthenticatedUser);
         
        //Gives user rights to the club property,modify by sfyan 20160505
-        List<Long> memberForumPrivileges = new ArrayList<Long>();
+        List<Long> memberForumPrivileges = new ArrayList<>();
         if(member != null) {
             groupDto.setMemberOf((byte)1);
             groupDto.setMemberNickName(member.getMemberNickName());
@@ -3157,18 +3156,18 @@ public class GroupServiceImpl implements GroupService {
             groupDto.setJoinTime(member.getCreateTime());
             
             if(GroupPostFlag.fromCode(group.getPostFlag()) == GroupPostFlag.ALL||
-            		member.getMemberRole().longValue() == Role.ResourceAdmin || 
-                    member.getMemberRole().longValue() == Role.ResourceOperator ||
-                    member.getMemberRole().longValue() == Role.ResourceCreator ) {
+                    member.getMemberRole() == Role.ResourceAdmin ||
+                    member.getMemberRole() == Role.ResourceOperator ||
+                    member.getMemberRole() == Role.ResourceCreator ) {
                 if(GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.ACTIVE){
                 	memberForumPrivileges.add(PrivilegeConstants.ForumNewTopic);
                 	memberForumPrivileges.add(PrivilegeConstants.ForumDeleteTopic);
                 	memberForumPrivileges.add(PrivilegeConstants.ForumDeleteTopic);
                 	memberForumPrivileges.add(PrivilegeConstants.ForumNewReply);
-                	userInRoles.add(Role.ResourceUser);
+                	// userInRoles.add(Role.ResourceUser);
                 }
-
             }
+            groupDto.setMemberForumPrivileges(memberForumPrivileges);
 
             // 此代码有问题，会把很多不相干的数据查出来，导致数据非常多，
             // 我也不是很清楚业务逻辑，没法改，而且客户端那边说也没用上，所以就注释掉了
@@ -3179,7 +3178,6 @@ public class GroupServiceImpl implements GroupService {
             
 //            AclAccessor forumPrivileges = this.aclProvider.getAccessor(
 //                    EntityType.FORUM.getCode(), group.getOwningForumId(), userInRoles);
-            groupDto.setMemberForumPrivileges(memberForumPrivileges);
         } else {
             groupDto.setMemberOf((byte)0);
             groupDto.setMemberNickName("");
@@ -3191,7 +3189,6 @@ public class GroupServiceImpl implements GroupService {
                     groupDto.setMemberNickName(orgmember.getContactName());
                 }
             }
-
         }
     }
     

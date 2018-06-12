@@ -5,12 +5,14 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.pay.order.PayOrderCommand;
-import com.everhomes.pay.order.QueryOrderPaymentStatusCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.PayOrderRestResponse;
 import com.everhomes.rest.pay.controller.QueryOrderPaymentStatusRestResponse;
+import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.*;
+
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,11 +133,11 @@ public class PayController extends ControllerBase {
      * <b>URL: /pay/payOrder</b>
      * <p>转发支付订单接口</p>
      */
-    @SuppressDiscover//暂时解决编译问题
+    @SuppressDiscover //暂时解决编译问题
     @RequestMapping("payOrder")
-    @RestReturn(value=PayOrderRestResponse.class)
+    @RestReturn(value=PayOrderCommandResponse.class)
     public RestResponse payOrder(PayOrderCommand cmd) {
-        PayOrderRestResponse cmdResponse = payService.payOrder(cmd);
+        PayOrderCommandResponse cmdResponse = payService.payOrder(cmd);
 
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -149,9 +151,9 @@ public class PayController extends ControllerBase {
      */
     @SuppressDiscover//暂时解决编译问题
     @RequestMapping("queryOrderPaymentStatus")
-    @RestReturn(value=QueryOrderPaymentStatusRestResponse.class)
+    @RestReturn(value=QueryOrderPaymentStatusCommandResponse.class)
     public RestResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd) {
-        QueryOrderPaymentStatusRestResponse cmdResponse = payService.queryOrderPaymentStatus(cmd);
+        QueryOrderPaymentStatusCommandResponse cmdResponse = payService.queryOrderPaymentStatus(cmd);
         RestResponse response = new RestResponse(cmdResponse);
 
         response.setErrorCode(ErrorCodes.SUCCESS);

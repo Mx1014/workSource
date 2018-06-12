@@ -361,4 +361,10 @@ public interface PunchProvider {
 
 	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId,
 			Date startDate, Date endDate);
+ 
+	List<PunchLog> listPunchLogs(Long userId, Long companyId, String startDay, String endDay);
+
+	public List<Long> listPunchLogEnterprise(String startDayString, String endDayString);
+
+	public List<Long> listPunchLogUserId(Long enterpriseId, String startDayString, String endDayString);
 }

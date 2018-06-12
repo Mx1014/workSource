@@ -18,14 +18,14 @@ import java.util.List;
  * <li>flowMainId: flowId</li>
  * <li>flowVersion: 工作流版本</li>
  * <li>namespaceId: 域空间id</li>
- * <li>flowStepType: 动作类型</li>
+ * <li>flowStepType: 动作类型 {@link com.everhomes.rest.flow.FlowStepType}</li>
  * <li>buttonName: 按钮名称</li>
  * <li>needProcessor: 是否需要处理人{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>needSubject: 是否需要填写内容{@link com.everhomes.rest.approval.TrueOrFalseFlag}, needProcessor + needSubject 有任何一个就要跳到下个界面</li>
  * <li>subjectRequiredFlag: 填写内容是否必填{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>remindCount: ??</li>
  * <li>description: 描述</li>
- * <li>params: 参数</li>
+ * <li>param: 参数</li>
  * <li>needSelectBranch: 下一个节点是判断节点并且是需要用户选择分支为1，否则为0{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>conditionNodeId: 下一个条件节点id</li>
  * <li>evaluateStep: 评价跳转 no_step:不跳转</li>
@@ -51,7 +51,7 @@ public class FlowButtonDTO {
     private Integer remindCount;
     private String description;
     private String evaluateStep;
-    private String params;
+    private String param;
     private Integer defaultOrder;
 
     private Byte needSelectBranch;
@@ -195,13 +195,6 @@ public class FlowButtonDTO {
         this.subjectRequiredFlag = subjectRequiredFlag;
     }
 
-    public String getParams() {
-        return params;
-    }
-
-    public void setParams(String params) {
-        this.params = params;
-    }
 
     public Long getConditionNodeId() {
         return conditionNodeId;
@@ -239,5 +232,13 @@ public class FlowButtonDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getParam() {
+		return param;
+	}
+
+	public void setParam(String param) {
+		this.param = param;
+	}
 }
 

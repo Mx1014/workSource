@@ -11,5 +11,5 @@ public interface MessageMetaConstant {
     public static final String POPUP_FLAG = "popup-flag";
     public static final String VOICE_REMIND = "voice-remind";
     public static final String MESSAGE_SUBJECT = "message-subject";// 通知消息会有消息标题
-    // public static final String MESSAGE_TYPE = "message-type";// 区分通知和会话消息
+    public static final String PERSIST_TYPE = "persist-type";// 消息持久化类型 @link com.everhomes.rest.messaging.MessagePersistType
 }

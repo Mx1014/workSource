@@ -7,6 +7,7 @@ public class AclinkWebSocketMessage {
     private Long seq;
     private Integer type;
     private String payload;
+    private String uuid;
     
     public Long getId() {
         return id;
@@ -34,7 +35,14 @@ public class AclinkWebSocketMessage {
         this.payload = payload;
     }
     
-    @Override
+    
+    public String getUuid() {
+		return uuid;
+	}
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
