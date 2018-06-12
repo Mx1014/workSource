@@ -923,9 +923,23 @@ public class ActivityServiceImpl implements ActivityService {
         OrderCommandResponse response = createOrderRestResponse.getResponse();
         callback = ConvertHelper.convert(response, PreOrderDTO.class);
         callback.setExpiredIntervalTime(response.getExpirationMillis());
+
+        //组装支付方式
         List<PayMethodDTO> list = new ArrayList<>();
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
         for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
-            PayMethodDTO payMethodDTO = ConvertHelper.convert(p, PayMethodDTO.class);
+            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+            payMethodDTO.setPaymentName(p.getPaymentName());
+            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
+            payMethodDTO.setPaymentLogo(paymentLogo);
+            payMethodDTO.setPaymentType(p.getPaymentType());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
+            if(bizPaymentParamsDTO != null) {
+                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+            }
+            payMethodDTO.setPaymentParams(paymentParamsDTO);
             list.add(payMethodDTO);
         }
         callback.setPayMethod(list);
