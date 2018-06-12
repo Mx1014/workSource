@@ -183,8 +183,16 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
         //  approval number added by approval1.6
         String countKey = ENTERPRISE_APPROVAL_NO + namespaceId + organizationId;
-        String count;
-        if (op.get(countKey) == null) {
+        StringBuilder approvalNo = new StringBuilder(format.format(LocalDate.now()));
+        Long increment = op.increment(countKey, 1L);
+        String count = String.valueOf(increment);
+        for (int i = 0; i < 4 - count.length(); i++)
+            approvalNo.append("0");
+        approvalNo.append(count);
+        return Long.valueOf(approvalNo.toString());
+    }
+//        String count;
+        /*if (op.get(countKey) == null) {
             LocalDate tomorrowStart = LocalDate.now().plusDays(1);
             long seconds = (java.sql.Date.valueOf(tomorrowStart).getTime() - System.currentTimeMillis()) / 1000;
             op.set(countKey, "1", seconds, TimeUnit.SECONDS);
@@ -192,13 +200,10 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         } else {
             count = (String) op.get(countKey);
         }
-        StringBuilder approvalNo = new StringBuilder(format.format(LocalDate.now()));
-        for (int i = 0; i < 4 - count.length(); i++)
-            approvalNo.append("0");
+
         approvalNo.append(count);
-        op.increment(countKey, 1L);
-        return Long.valueOf(approvalNo.toString());
-    }
+        return
+    }*/
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {

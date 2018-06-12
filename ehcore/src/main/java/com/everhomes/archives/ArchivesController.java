@@ -317,7 +317,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("listArchivesDismissReason")
     @RestReturn(value = String.class, collection = true)
     public RestResponse listArchivesDismissReason(){
-        List<String> res = archivesService.listArchivesDismissReason();
+        ListDismissCatagoriesResponse  res = archivesService.listArchivesDismissReason();
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

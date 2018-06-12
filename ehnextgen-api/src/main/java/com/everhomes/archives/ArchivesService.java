@@ -90,7 +90,7 @@ public interface ArchivesService {
 
     CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd);
 
-    List<String> listArchivesDismissReason();
+    ListDismissCatagoriesResponse listArchivesDismissReason();
 
     ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 

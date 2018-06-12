@@ -1724,12 +1724,14 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public List<String> listArchivesDismissReason(){
+    public ListDismissCatagoriesResponse listArchivesDismissReason(){
+        ListDismissCatagoriesResponse res = new ListDismissCatagoriesResponse();
         List<String> results = new ArrayList<>();
         for(ArchivesDismissReason reason : ArchivesDismissReason.values()){
             results.add(reason.getType());
         }
-        return results;
+        res.setReasons(results);
+        return res;
     }
 
     @Override
