@@ -8,6 +8,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.paySDK.PaySettings;
+import com.everhomes.user.UserContext;
 
 /**
  * @author ycx
@@ -22,8 +24,11 @@ public class PaySDKProxyImpl implements ApplicationListener<ContextRefreshedEven
     
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
-            //init();
+        	String appKey = configurationProvider.getValue(0,"pay.v2.appKey", "");
+        	String secretKey = configurationProvider.getValue(0,"pay.v2.secretKey", "");
+        	String payHomeUrl = configurationProvider.getValue(0,"pay.v2.payHomeUrl", "");
+        	String localServerUrl = configurationProvider.getValue(0,"home.url", "") + "/evh";
+        	PaySettings.init(appKey, secretKey, payHomeUrl, localServerUrl);
         }
     }
-    
 }
