@@ -147,4 +147,6 @@ public interface ParkingService {
     void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd);
 
     void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd);
+
+    void initPayeeAccount(String json);
 }

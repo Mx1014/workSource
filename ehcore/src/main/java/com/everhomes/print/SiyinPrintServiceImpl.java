@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONArray;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
@@ -544,7 +545,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 //		return dto;
 
 		User user = UserContext.current().getUser();
-		String sNamespaceId = BIZ_ACCOUNT_PRE+"1";		//todo
+		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		ListBizPayeeAccountDTO payerDto = siyinPrintOrderProvider.createPersonalPayUserIfAbsent(user.getId() + "",
 				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
@@ -557,7 +558,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		createOrderCommand.setAccountCode(sNamespaceId);
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo()));
-		createOrderCommand.setClientAppName("Android_OA");//todo
+		createOrderCommand.setClientAppName(cmd.getClientAppName());//todoed
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
@@ -578,11 +579,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
 		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
 		if(paymentMethods!=null){
-			preDto.setPayMethod(paymentMethods.stream().map(r->{
-				PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
-				convert.setPaymentLogo(contentServerService.parserUri(convert.getPaymentLogo()));
-				return convert;
+			preDto.setPayMethod(paymentMethods.stream().map(bizPayMethod->{
+				PayMethodDTO payMethodDTO = ConvertHelper.convert(bizPayMethod, PayMethodDTO.class);
+				payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+				payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+				String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+				payMethodDTO.setPaymentLogo(paymentLogo);
+				payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+				PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+				com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+				if(bizPaymentParamsDTO != null) {
+					paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+				}
+				payMethodDTO.setPaymentParams(paymentParamsDTO);
+
+				return payMethodDTO;
 			}).collect(Collectors.toList()));//todo
 		}
 		return preDto;
@@ -1610,6 +1623,50 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		return convert;
 
+	}
+
+	@Override
+	public void initPayeeAccount(String json) {
+		User user = UserContext.current().getUser();
+		if(user.getId()!=1){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error person, must system user 1");
+		}
+		JSONArray accounts = JSONObject.parseArray(json);
+		if(accounts==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error json");
+		}
+
+		for (Object object : accounts) {
+			JSONObject account = JSONObject.parseObject(object.toString());
+			if(account==null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"error account");
+			}
+			Integer namespaceId = account.getInteger("namespaceId"); if(namespaceId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty namespaceId");}
+			String ownerType = account.getString("ownerType");if(ownerType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerType");}
+			Long ownerId = account.getLong("ownerId");if(ownerId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerId");}
+			String bussnessType = account.getString("bussnessType");if(bussnessType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty bussnessType");}
+			List<SiyinPrintBusinessPayeeAccount> oldaccounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts(null, namespaceId,ownerType, ownerId);
+			Long payeeId = account.getLong("payeeId");if(payeeId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeId");}
+			String payeeUserType = account.getString("payeeUserType");if(payeeUserType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeUserType");}
+			if(oldaccounts!=null && oldaccounts.size()>0){
+				SiyinPrintBusinessPayeeAccount payeeAccount = oldaccounts.get(0);
+				payeeAccount.setPayeeId(payeeId);
+				payeeAccount.setPayeeUserType(payeeUserType);
+				siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(payeeAccount);
+			}else{
+				SiyinPrintBusinessPayeeAccount payeeAccount = new SiyinPrintBusinessPayeeAccount();
+				payeeAccount.setNamespaceId(namespaceId);
+				payeeAccount.setOwnerType(ownerType);
+				payeeAccount.setOwnerId(ownerId);
+				payeeAccount.setPayeeId(payeeId);
+				payeeAccount.setPayeeUserType(payeeUserType);
+				payeeAccount.setStatus((byte)2);
+				siyinBusinessPayeeAccountProvider.createSiyinPrintBusinessPayeeAccount(payeeAccount);
+			}
+		}
 	}
 
 	@Override

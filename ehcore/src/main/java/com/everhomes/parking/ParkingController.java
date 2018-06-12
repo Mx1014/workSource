@@ -13,6 +13,7 @@ import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
@@ -323,6 +324,21 @@ public class ParkingController extends ControllerBase {
     public RestResponse delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 
         parkingService.delBusinessPayeeAccount(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /parking/initPayeeAccount </b>
+     * <p>将老的账户初始化到账号表</p>
+     */
+    @RequestMapping("initPayeeAccount")
+    @RestReturn(value=String.class)
+    public RestResponse initPayeeAccount(@RequestParam(value="json", required=true) String json) {
+        parkingService.initPayeeAccount(json);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

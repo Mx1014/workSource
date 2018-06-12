@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -46,6 +47,7 @@ import com.everhomes.rest.rentalv2.*;
 
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
+import kafka.utils.Json;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -568,7 +570,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
-		param.setClientAppName("Android_OA");//todo
+		param.setClientAppName(cmd.getClientAppName());//todoed
 
 		return (PreOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V2);
 
@@ -728,7 +730,7 @@ public class ParkingServiceImpl implements ParkingService {
 			bussinessType = ParkingBusinessType.TEMPFEE;
 		}
 		User user = UserContext.current().getUser();
-		String sNamespaceId = BIZ_ACCOUNT_PRE+"1";		//todo
+		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
 				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
@@ -741,7 +743,7 @@ public class ParkingServiceImpl implements ParkingService {
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		createOrderCommand.setAccountCode(sNamespaceId);
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
-		createOrderCommand.setClientAppName("Android_OA");//todo
+		createOrderCommand.setClientAppName(clientAppName);//todoed
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
@@ -762,11 +764,23 @@ public class ParkingServiceImpl implements ParkingService {
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
 		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
 		if(paymentMethods!=null){
-			preDto.setPayMethod(paymentMethods.stream().map(r->{
-				PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
-				convert.setPaymentLogo(contentServerService.parserUri(convert.getPaymentLogo()));
-				return convert;
+			preDto.setPayMethod(paymentMethods.stream().map(bizPayMethod->{
+				PayMethodDTO payMethodDTO = ConvertHelper.convert(bizPayMethod, PayMethodDTO.class);
+				payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+				payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+				String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+				payMethodDTO.setPaymentLogo(paymentLogo);
+				payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+				PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+				com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+				if(bizPaymentParamsDTO != null) {
+					paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+				}
+				payMethodDTO.setPaymentParams(paymentParamsDTO);
+
+				return payMethodDTO;
 			}).collect(Collectors.toList()));//todo
 		}
 //		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
@@ -2024,7 +2038,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		CreateOrderCommand refundOrder = new CreateOrderCommand();
 		refundOrder.setRefundOrderId(Long.valueOf(order.getPayOrderNo()));
-		String sNamespaceId = BIZ_ACCOUNT_PRE+"1";//todo
+		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();//todo
 		refundOrder.setBizOrderNum(generateBizOrderNum(sNamespaceId+"",OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
 		refundOrder.setAmount(amount);
 		String homeurl = configProvider.getValue("home.url", "");
@@ -2938,6 +2952,58 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		parkingBusinessPayeeAccountProvider.deleteParkingBusinessPayeeAccount(cmd.getId());
+	}
+
+	@Override
+	public void initPayeeAccount(String json) {
+		User user = UserContext.current().getUser();
+		if(user.getId()!=1){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error person, must system user 1");
+		}
+		JSONArray accounts = JSONObject.parseArray(json);
+		if(accounts==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error json");
+		}
+
+		for (Object object : accounts) {
+			JSONObject account = JSONObject.parseObject(object.toString());
+			if(account==null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"error account");
+			}
+			Integer namespaceId = account.getInteger("namespaceId"); if(namespaceId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty namespaceId");}
+			String ownerType = account.getString("ownerType");if(ownerType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerType");}
+			Long ownerId = account.getLong("ownerId");if(ownerId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerId");}
+			Long parkingLotId = account.getLong("parkingLotId");if(parkingLotId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty parkingLotId");}
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+			if(parkingLot==null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"invaild parkingLot");
+			}
+			String bussnessType = account.getString("bussnessType");if(bussnessType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty bussnessType");}
+			List<ParkingBusinessPayeeAccount> oldaccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, namespaceId,ownerType, ownerId, parkingLotId, bussnessType);
+			Long payeeId = account.getLong("payeeId");if(payeeId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeId");}
+			String payeeUserType = account.getString("payeeUserType");if(payeeUserType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeUserType");}
+			if(oldaccounts!=null && oldaccounts.size()>0){
+				ParkingBusinessPayeeAccount payeeAccount = oldaccounts.get(0);
+				payeeAccount.setPayeeId(payeeId);
+				payeeAccount.setPayeeUserType(payeeUserType);
+				parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(payeeAccount);
+			}else{
+				ParkingBusinessPayeeAccount payeeAccount = new ParkingBusinessPayeeAccount();
+				payeeAccount.setNamespaceId(namespaceId);
+				payeeAccount.setOwnerType(ownerType);
+				payeeAccount.setOwnerId(ownerId);
+				payeeAccount.setParkingLotId(parkingLotId);
+				payeeAccount.setParkingLotName(parkingLot.getName());
+				payeeAccount.setBusinessType(bussnessType);
+				payeeAccount.setPayeeId(payeeId);
+				payeeAccount.setPayeeUserType(payeeUserType);
+				payeeAccount.setStatus((byte)2);
+				parkingBusinessPayeeAccountProvider.createParkingBusinessPayeeAccount(payeeAccount);
+			}
+		}
 	}
 
 	@Override

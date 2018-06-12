@@ -74,4 +74,6 @@ public interface SiyinPrintService {
 	void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response);
 
     void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd);
+
+    void initPayeeAccount(String json);
 }

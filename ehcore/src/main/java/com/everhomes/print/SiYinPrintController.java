@@ -457,6 +457,21 @@ public class SiYinPrintController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /siyinprint/initPayeeAccount </b>
+	 * <p>将老的账户初始化到账号表</p>
+	 */
+	@RequestMapping("initPayeeAccount")
+	@RestReturn(value=String.class)
+	public RestResponse initPayeeAccount(@RequestParam(value="json", required=true) String json) {
+		siyinPrintService.initPayeeAccount(json);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
 	 *
 	 * <b>URL: /siyinprint/mfpLogNotificationV2</b>
 	 * <p>21.司印方调用，任务日志处理</p>
