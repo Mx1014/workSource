@@ -757,7 +757,7 @@ public class ParkingServiceImpl implements ParkingService {
 		OrderCommandResponse response = purchaseOrder.getResponse();
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
-		preDto.setPayMethod(response.getPaymentMethods());//todo
+		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
 		return preDto;
 	}
 

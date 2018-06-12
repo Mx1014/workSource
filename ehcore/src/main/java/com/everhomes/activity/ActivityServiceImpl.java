@@ -921,7 +921,12 @@ public class ActivityServiceImpl implements ActivityService {
         OrderCommandResponse response = createOrderRestResponse.getResponse();
         callback = ConvertHelper.convert(response, PreOrderDTO.class);
         callback.setExpiredIntervalTime(response.getExpirationMillis());
-        callback.setPayMethod(response.getPaymentMethods());
+        List<PayMethodDTO> list = new ArrayList<>();
+        for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
+            PayMethodDTO payMethodDTO = ConvertHelper.convert(p, PayMethodDTO.class);
+            list.add(payMethodDTO);
+        }
+        callback.setPayMethod(list);
         return callback;
     }
 
