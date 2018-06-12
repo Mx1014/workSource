@@ -8,13 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.*;
 
 @Service
-public class RouterInfoServiceImpl implements RouterService {
+public class RouterInfoServiceImpl implements RouterInfoService {
 
     private static final Logger logger = LoggerFactory.getLogger(RouterInfoServiceImpl.class);
 

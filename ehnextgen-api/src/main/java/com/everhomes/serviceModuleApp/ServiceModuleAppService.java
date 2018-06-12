@@ -3,6 +3,7 @@ package com.everhomes.serviceModuleApp;
 
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
+import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
@@ -39,6 +40,8 @@ public interface ServiceModuleAppService {
     ListServiceModuleAppsByOrganizationIdResponse listServiceModuleAppsByOrganizationId(ListServiceModuleAppsByOrganizationIdCommand cmd);
 
     ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd);
+
+    RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData);
 
     void updateStatus(UpdateStatusCommand cmd);
 

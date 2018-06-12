@@ -32,6 +32,8 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ApplyPolicy;
+import com.everhomes.rest.launchpadbase.AppContext;
+import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
 import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
@@ -450,12 +452,13 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public List<BannerDTO> getBannersBySceneNew(GetBannersBySceneCommand cmd) {
-        SceneTokenDTO sceneToken = userService.checkSceneToken(UserContext.currentUserId(), cmd.getSceneToken());
+        //SceneTokenDTO sceneToken = userService.checkSceneToken(UserContext.currentUserId(), cmd.getSceneToken());
 
-        Long communityId = parseCommunityIdFromSceneToken(sceneToken);
+        AppContext appContext = UserContext.current().getAppContext();
+        //Long communityId = parseCommunityIdFromSceneToken(sceneToken);
 
-        if (communityId != null) {
-            List<Banner> bannerList = bannerProvider.listBannersByCommunityId(sceneToken.getNamespaceId(), communityId);
+        if (appContext != null && appContext.getCommunityId() != null) {
+            List<Banner> bannerList = bannerProvider.listBannersByCommunityId(UserContext.getCurrentNamespaceId(), appContext.getCommunityId());
             return bannerList.stream().map(r -> {
                 BannerDTO dto = toBannerDTO(r);
                 // 本来posterPath是 cs:// 开头的
@@ -479,6 +482,28 @@ public class BannerServiceImpl implements BannerService {
                 if (BannerTargetType.fromCode(r.getTargetType()) == BannerTargetType.APP) {
                     dto.setName(r.getVendorTag());
                 }
+
+                BannerTargetType targetType = BannerTargetType.fromCode(dto.getTargetType());
+                BannerTargetHandler handler = PlatformContext.getComponent(
+                        BannerTargetHandler.BANNER_TARGET_HANDLER_PREFIX + targetType.getCode());
+
+                try {
+                    RouterInfo routerInfo = handler.getRouterInfo(dto.getTargetData());
+
+                    if(routerInfo != null){
+                        dto.setModuleId(routerInfo.getModuleId());
+                        dto.setRouterPath(routerInfo.getPath());
+                        dto.setRouterQuery(routerInfo.getQuery());
+                    }
+
+
+                } catch (Exception e) {
+                    throw RuntimeErrorException.errorWith(e,
+                            BannerServiceErrorCode.SCOPE,
+                            BannerServiceErrorCode.ERROR_TARGET_HANDLE_ERROR,
+                            "Parse targetData error, targetData: %s.", dto.getActionType());
+                }
+
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -803,13 +828,14 @@ public class BannerServiceImpl implements BannerService {
             banner.setActionData(result.getActionData());
             banner.setVendorTag(result.getAppName());
 
+            banner.setAppId(result.getAppId());
             banner.setCreatorUid(userId);
             banner.setBannerGroup("Default");
             banner.setStatus(BannerStatus.ACTIVE.getCode());
             banner.setScopeCode(ScopeType.COMMUNITY.getCode());
             banner.setScopeId(communityId);
 
-            Integer minOrder = bannerProvider.getMinOrderByCommunityId(cmd.getNamespaceId(), communityId);
+            Integer minOrder = bannerProvider.getMinOrderByCommunityId(UserContext.getCurrentNamespaceId(), communityId);
             banner.setOrder(minOrder == null ? 10 : minOrder - 1);
             bannerProvider.createBanner(banner);
         }

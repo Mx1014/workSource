@@ -3,7 +3,7 @@ package com.everhomes.module;
 
 import com.everhomes.rest.module.RouterInfo;
 
-public interface RouterService {
+public interface RouterInfoService {
 
 	RouterInfo getRouterInfo(Long moduleId, String path, String jsonStr);
 

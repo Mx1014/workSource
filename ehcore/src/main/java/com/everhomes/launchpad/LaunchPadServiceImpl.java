@@ -49,6 +49,7 @@ import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.OPPush;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
+import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
@@ -65,6 +66,7 @@ import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.widget.OPPushInstanceConfig;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.server.schema.Tables;
@@ -151,6 +153,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	@Autowired
 	private LaunchPadIndexProvider launchPadIndexProvider;
 
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
 
 	@Autowired
 	private BannerService bannerService;
@@ -2822,11 +2826,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	@Override
 	public ListBannersResponse listBanners(ListBannersCommand cmd) {
 
-		String sceneToken = getSceneTokenByCommunityId(cmd.getContext().getCommunityId());
+		//String sceneToken = getSceneTokenByCommunityId(cmd.getContext().getCommunityId());
+		if(UserContext.current().getAppContext() == null){
+			UserContext.current().setAppContext(cmd.getContext());
+		}
 
-		GetBannersBySceneCommand bannerCmd = new GetBannersBySceneCommand();
-		bannerCmd.setSceneToken(sceneToken);
-		List<BannerDTO> bannerDTOS =  bannerService.getBannersBySceneNew(bannerCmd);
+		//GetBannersBySceneCommand bannerCmd = new GetBannersBySceneCommand();
+		//bannerCmd.setSceneToken(sceneToken);
+		List<BannerDTO> bannerDTOS =  bannerService.getBannersBySceneNew(null);
 
 		ListBannersResponse response = new ListBannersResponse();
 		response.setDtos(bannerDTOS);
@@ -2842,12 +2849,22 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		OPPush oppush = (OPPush)StringHelper.fromJsonString(cmd.getInstanceConfig(), OPPush.class);
 		OPPushHandler opPushHandler = getOPPushHandler(oppush.getItemGroup());
 		if(opPushHandler != null){
-			response.setModuleId(opPushHandler.getModuleId());
+
 			response.setActionType(opPushHandler.getActionType());
 			List<OPPushCard> opPushCards = opPushHandler.listOPPushCard(cmd.getLayoutId(), cmd.getInstanceConfig(), cmd.getContext());
+			response.setCards(opPushCards);
 			String instanceConfig = opPushHandler.getInstanceConfig(cmd.getInstanceConfig());
 			response.setInstanceConfig(instanceConfig);
-			response.setCards(opPushCards);
+
+			//appId 和 moduleId
+			OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(cmd.getInstanceConfig(), OPPushInstanceConfig.class);
+
+			ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getAppId());
+
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(config.getModuleId(), config.getAppId(), serviceModuleApp.getName(),instanceConfig);
+			response.setRouterPath(routerInfo.getPath());
+			response.setRouterQuery(routerInfo.getQuery());
+			response.setModuleId(routerInfo.getModuleId());
 		}
 
 		return response;
