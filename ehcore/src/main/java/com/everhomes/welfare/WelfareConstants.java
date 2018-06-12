@@ -11,6 +11,6 @@ public class WelfareConstants {
     static final int ERROR_CANNOT_SEND = 10001;  //不能删除
     static final int ERROR_CANNOT_DRAFT = 10002;  //不能草稿
 
-    public static final String SEND_NOTIFICATION_SCOPE = "welfare_msg";
+    public static final String SEND_NOTIFICATION_SCOPE = "welfare.msg";
     public static final int SEND_NOTIFICATION_CODE = 1 ;
 }
