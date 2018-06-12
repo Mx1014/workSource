@@ -130,6 +130,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
                 fieldDTO.setDepartment(department.getName());
                 fieldDTO.setDepartmentId(department.getId());
             }
+            //  approval number added by approval1.6
             fieldDTO.setApprovalNo(generateApprovalNumber(namespaceId, cmd.getOrganizationId()));
             caseCommand.setAdditionalFieldDTO(fieldDTO);
 
@@ -176,12 +177,14 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         return dto;
     }
 
+    /**
+     * 根据域空间.公司.日期来生成对应的审批编号
+     */
     private Long generateApprovalNumber(Integer namespaceId, Long organizationId) {
         RedisTemplate template = bigCollectionProvider.getMapAccessor(ENTERPRISE_APPROVAL_NO, "").getTemplate(new StringRedisSerializer());
         ValueOperations op = template.opsForValue();
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-        //  approval number added by approval1.6
         String opKey = ENTERPRISE_APPROVAL_NO + namespaceId + organizationId + LocalDate.now().toString();
         StringBuilder result = new StringBuilder(format.format(LocalDate.now()));
 
@@ -194,19 +197,6 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         result.append(number);
         return Long.valueOf(result.toString());
     }
-//        String count;
-        /*if (op.get(countKey) == null) {
-            LocalDate tomorrowStart = LocalDate.now().plusDays(1);
-            long seconds = (java.sql.Date.valueOf(tomorrowStart).getTime() - System.currentTimeMillis()) / 1000;
-            op.set(countKey, "1", seconds, TimeUnit.SECONDS);
-            count = "1";
-        } else {
-            count = (String) op.get(countKey);
-        }
-
-        approvalNo.append(count);
-        return
-    }*/
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
