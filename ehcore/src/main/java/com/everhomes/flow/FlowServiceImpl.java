@@ -4406,7 +4406,7 @@ public class FlowServiceImpl implements FlowService {
             for (Long u : users) {
                 UserInfo ui = userService.getUserSnapshotInfo(u);
                 if (ui != null) {
-                    OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(u, ul.getOrganizationId());
+                    OrganizationMember om = organizationProvider.findOrganizationMemberByUIdAndOrgId(u, ul.getOrganizationId());
                     if (om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
                         ui.setNickName(om.getContactName());
                     }
@@ -4508,7 +4508,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public void fixupUserInfo(Long organizationId, UserInfo userInfo) {
         if (userInfo != null) {
-            OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(userInfo.getId(), organizationId);
+            OrganizationMember om = organizationProvider.findOrganizationMemberByUIdAndOrgId(userInfo.getId(), organizationId);
             if (om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
                 userInfo.setNickName(om.getContactName());
             }

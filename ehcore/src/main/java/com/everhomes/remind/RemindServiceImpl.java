@@ -76,7 +76,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -495,7 +494,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         cmd.setUserId(cmd.getUserId() != null ? cmd.getUserId() : UserContext.currentUserId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getOwnerId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getUserId(), cmd.getOwnerId());
 
         ListSharingPersonsResponse response = new ListSharingPersonsResponse();
         if (member == null || member.getDetailId() == null) {
@@ -854,7 +853,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         QueryShareRemindsCondition queryRequest = ConvertHelper.convert(cmd, QueryShareRemindsCondition.class);
         queryRequest.setNamespaceId(UserContext.getCurrentNamespaceId());
         queryRequest.setShareUserId(cmd.getShareUserId());
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), cmd.getOwnerId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
         if (member != null) {
             queryRequest.setCurrentUserDetailId(member.getDetailId());
         }
@@ -947,7 +946,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
                                     UserContext.current().getUser().getLocale(),
                                     "The remind is not exist"));
         }
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), cmd.getOwnerId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
 
         if (!remindProvider.checkRemindShareToUser(member.getDetailId(), remind.getId())) {
             throw RuntimeErrorException
@@ -1023,7 +1022,7 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     }
 
     private String getContractNameByUserId(Long userId, Long organizationId) {
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
         if (member != null) {
             return member.getContactName();
         }

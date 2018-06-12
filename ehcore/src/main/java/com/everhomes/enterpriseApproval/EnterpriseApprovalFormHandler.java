@@ -9,17 +9,13 @@ import com.everhomes.flow.*;
 import com.everhomes.general_approval.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalServiceErrorCode;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -98,7 +94,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
             //  3.check the user is in the scope(判断是否在范围内)
             OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getOrganizationId());
             if (member == null)
-                member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getOrganizationId());
+                member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOrganizationId());
             if (!generalApprovalService.checkTheApprovalScope(scopes, member))
                 throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_ILLEGAL_APPROVAL,
                         "The user is not in the approval scope");

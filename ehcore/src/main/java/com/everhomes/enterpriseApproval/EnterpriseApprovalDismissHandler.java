@@ -8,7 +8,6 @@ import com.everhomes.flow.FlowCaseState;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.archives.ArchivesDismissType;
 import com.everhomes.rest.archives.ArchivesOperationType;
@@ -53,7 +52,7 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
         for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
             if(GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.EMPLOY_APPLICATION)){
                 ComponentDismissApplicationValue val = new ComponentDismissApplicationValue();
-                OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOwnerId(), userId);
+                OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOwnerId());
                 if(member != null){
                     val.setApplierName(member.getContactName());
                     val.setApplierDepartment(archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getDetailId())));
@@ -67,7 +66,7 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
     @Override
     public void onApprovalCreated(FlowCase flowCase) {
         //  1.cancel the archives operate
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
         if(member != null){
             archivesService.cancelArchivesOperation(member.getNamespaceId(), member.getDetailId(), ArchivesOperationType.DISMISS.getCode());
         }
@@ -87,7 +86,7 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
 
     @Override
     public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
         if (member != null) {
             //  1.cancel the archives operate
             archivesService.cancelArchivesOperation(member.getNamespaceId(), member.getDetailId(), ArchivesOperationType.DISMISS.getCode());

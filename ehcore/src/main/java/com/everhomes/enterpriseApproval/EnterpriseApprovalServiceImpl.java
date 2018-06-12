@@ -559,7 +559,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     private String getUserRealName(Long userId, Long ownerId) {
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, ownerId);
         if (member != null)
             return member.getContactName();
         return null;
@@ -838,7 +838,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         //  get the user's info
         OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getOwnerId());
         if (member == null)
-            member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
+            member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOwnerId());
         //  check the approval by scope and filter it
         for (int i = groups.size() - 1; i >= 0; i--) {
             EnterpriseApprovalGroupDTO group = groups.get(i);

@@ -23,8 +23,6 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.CommunityService;
-import com.everhomes.core.AppConfig;
-import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
@@ -35,36 +33,27 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.*;
-import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus;
 import com.everhomes.rest.organization.*;
 
 import com.everhomes.rest.pmtask.*;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.*;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1730,7 +1719,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //
 //		List<OrganizationMember> organizationMembers = new ArrayList<>();
 //		for(PmTaskTarget t: targets) {
-//			OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(t.getTargetId(), cmd.getOrganizationId());
+//			OrganizationMember m = organizationProvider.findOrganizationMemberByUIdAndOrgId(t.getTargetId(), cmd.getOrganizationId());
 //			if(null != m)
 //				organizationMembers.add(m);
 //		}
@@ -2192,7 +2181,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<OrgAddressDTO> addressDTOs = convertAddress(organizations, communityId);
 			//选一个公司获得通讯录名字
 			if (organizations.size()>0){
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),organizations.get(0).getId());
+				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(),organizations.get(0).getId());
 				response.setUserName(member.getContactName());
 			}
 			response.setOrganizationList(addressDTOs);

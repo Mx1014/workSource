@@ -443,7 +443,7 @@ public class RentalCommonServiceImpl {
             sb.append("请在确认后联系客服线下退款:");
             RentalResource rs = getRentalResource(order.getResourceType(),order.getRentalResourceId());
             if (rs.getOfflinePayeeUid()!=null){
-                OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
+                OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
                 if(null!=member){
                     sb.append(member.getContactName());
                     UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getTargetId(), IdentifierType.MOBILE.getCode());

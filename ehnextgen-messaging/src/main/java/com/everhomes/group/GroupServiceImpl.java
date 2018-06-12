@@ -635,7 +635,7 @@ public class GroupServiceImpl implements GroupService {
                 dto.setName(organization.getName());
                 dto.setMemberOf((byte)1);
 
-                OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
+                OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organization.getId());
                 if (member != null && member.getStatus() != null)
                     dto.setMemberStatus(member.getStatus());
                 else
@@ -808,7 +808,7 @@ public class GroupServiceImpl implements GroupService {
 
         if(listOrg != null){
             for(OrganizationDTO org : listOrg){
-                OrganizationMember org_member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
+                OrganizationMember org_member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, org.getId());
                 // 过滤待审核·审核中 by lei.lv
                 if(org_member.getStatus().equals(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode()) || org_member.getStatus().equals(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode())){
                     continue;
@@ -1154,7 +1154,7 @@ public class GroupServiceImpl implements GroupService {
     	            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "Unable to find the group organization");
         		}
         		
-        		OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(memberId, organization.getId());
+        		OrganizationMember orgMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(memberId, organization.getId());
         		if(null == orgMember){
         			LOGGER.error("Group organization member not found, operatorUid = {}, groupId = {}, memberId = {}, organizationId = {}", operatorUid, groupId, memberId, organization.getId());
     	            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_MEMBER_NOT_FOUND, "Unable to find the group organization member");
@@ -3184,7 +3184,7 @@ public class GroupServiceImpl implements GroupService {
 
             Organization organization = organizationProvider.findOrganizationByGroupId(group.getId());
             if(organization != null){
-                OrganizationMember orgmember = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, organization.getId());
+                OrganizationMember orgmember = organizationProvider.findOrganizationMemberByUIdAndOrgId(uid, organization.getId());
                 if(orgmember != null && orgmember.getContactName() != null){
                     groupDto.setMemberNickName(orgmember.getContactName());
                 }

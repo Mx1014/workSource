@@ -1312,7 +1312,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * modify cause member_detail by lei lv 7.224
      **/
     @Override
-    public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId) {
+    public OrganizationMember findOrganizationMemberByUIdAndOrgId(Long userId, Long organizationId) {
 
         Long enterpriseId = getTopOrganizationId(organizationId);
 

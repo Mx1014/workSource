@@ -400,7 +400,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     private String getUserRealName(Long userId, Long ownerId) {
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, ownerId);
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, ownerId);
         if (member != null)
             return member.getContactName();
         //  若没有真实姓名则返回空
@@ -656,7 +656,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<GeneralApprovalDTO> approvals = listGeneralApproval(cmd).getDtos();
         OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getOwnerId());
         if(member == null)
-            member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
+            member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOwnerId());
         if (approvals != null && approvals.size() > 0) {
             for(GeneralApprovalDTO approval : approvals){
                 if(checkTheApprovalScope(approval.getScopes(), member))
@@ -688,7 +688,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public String getUserRealName(GetUserRealNameCommand cmd) {
         User user = UserContext.current().getUser();
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getOwnerId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), cmd.getOwnerId());
         if (member != null)
             return member.getContactName();
         //  若没有真实姓名则返回昵称

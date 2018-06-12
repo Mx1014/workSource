@@ -42,7 +42,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -172,7 +171,7 @@ public class ParkingServiceImpl implements ParkingService {
 			String plateOwnerName = user.getNickName();
 
 			if(null != organizationId) {
-				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
 				if(null != organizationMember) {
 					plateOwnerName = organizationMember.getContactName();
 				}
@@ -600,7 +599,7 @@ public class ParkingServiceImpl implements ParkingService {
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
-		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getPayerEnterpriseId());
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), cmd.getPayerEnterpriseId());
 		if(null != organizationMember) {
 			if(null == cmd.getPlateOwnerName())
 				cmd.setPlateOwnerName(organizationMember.getContactName());
@@ -1879,7 +1878,7 @@ public class ParkingServiceImpl implements ParkingService {
 			String plateOwnerName = user.getNickName();
 
 			if(null != organizationId) {
-				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
+				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), organizationId);
 				if(null != organizationMember) {
 					plateOwnerName = organizationMember.getContactName();
 				}

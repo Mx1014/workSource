@@ -1149,7 +1149,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         dto.setServiceUserId(org.getServiceUserId());
 
-        OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, id);
+        OrganizationMember m = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, id);
         if (null != m) {
             dto.setMember(ConvertHelper.convert(m, OrganizationMemberDTO.class));
         }
@@ -1441,7 +1441,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         //3. 找到管理公司的这个人
         for (OrganizationCommunityDTO organizationCommunityDTO : organizationCommunityList) {
-            OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(serviceUserId, organizationCommunityDTO.getOrganizationId());
+            OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(serviceUserId, organizationCommunityDTO.getOrganizationId());
             if (organizationMember != null) {
                 OrganizationServiceUser user = new OrganizationServiceUser();
                 user.setServiceUserId(serviceUserId);
@@ -2091,7 +2091,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private OrganizationMember checkUserNotInOrg(Long userId, Long orgId) {
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
         if (member == null) {
             LOGGER.error("User is not in the organization.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2101,7 +2101,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void checkUserInOrg(Long userId, Long orgId) {
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
         if (member != null) {
             LOGGER.error("User is in the organization.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2512,7 +2512,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "creatorTag format is wrong.");
         }
         if (!creatorTag.getCode().equals(PostEntityTag.USER.getCode())) {
-            OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
+            OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), organization.getId());
             if (member == null) {
                 LOGGER.error("could not found member in the organization.");
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3444,7 +3444,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
-        OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
+        OrganizationMember orgMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organization.getId());
         if (orgMember != null) {
             organizationDto.setMemberStatus(orgMember.getStatus());
             if(OrganizationMemberGroupType.fromCode(orgMember.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
@@ -3635,7 +3635,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationDTO org = this.organizationProvider.findOrganizationByIdAndOrgType(orgCommunitys.get(i).getOrganizationId(), cmd.getOrganizationType());
                 if (org != null) {
                     User user = UserContext.current().getUser();
-                    OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), org.getId());
+                    OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), org.getId());
                     if (member != null && member.getStatus() != null)
                         org.setMemberStatus(member.getStatus());
                     else
@@ -4008,7 +4008,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private OrganizationMember checkOperOrgMember(Long userId, Long orgId) {
-        OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+        OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
         if (operOrgMember == null) {
             LOGGER.error("Operator not found.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4018,7 +4018,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private OrganizationMember checkDesOrgMember(Long userId, Long orgId) {
-        OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+        OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
         if (desOrgMember == null) {
             LOGGER.error("User is not in the organization.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4049,7 +4049,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private void sendSmToOrgMemberForAssignOrgTopic(Organization organization, OrganizationMember operOrgMember, OrganizationMember desOrgMember, OrganizationTask task) {
 
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), organization.getId());
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getCreatorUid(), organization.getId());
         List<Tuple<String, Object>> variables = null;
         //组织代发求助帖
         if (member != null) {
@@ -4191,7 +4191,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             //创建组织成员
             if (cmd.isUserJoin()) {
-                OrganizationMember orgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), org.getId());
+                OrganizationMember orgMember = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), org.getId());
                 if (orgMember != null) {
                     LOGGER.error("user have be organization member.");
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -5480,7 +5480,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 //	private void joinPartnerOrganization(User user, Organization organization) {
 //        try {
-//            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
+//            OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), organization.getId());
 //            if(member != null) {
 //                LOGGER.error("Organization member already existed, userId=" + user.getId() + ", partnerId=" + organization.getId());
 //                return;
@@ -5706,7 +5706,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         userRoleIds = new ArrayList<Long>();
 
-//		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
+//		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), organizationId);
 //
 //		if(null == organizationMember){
 //			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
@@ -5752,7 +5752,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         // Check exists
-        OrganizationMember organizationmember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getTargetId(), organization.getId());
+        OrganizationMember organizationmember = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getTargetId(), organization.getId());
         if (null != organizationmember) {
 
             OrganizationDTO organizationDTO = ConvertHelper.convert(organization, OrganizationDTO.class);
@@ -9613,7 +9613,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "Enterprise contact target user id can not be null");
         }
 
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(targetId, enterpriseId);
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(targetId, enterpriseId);
         if (member == null) {
             LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid
                     + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
@@ -9878,7 +9878,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             command.setTopicId(task.getApplyEntityId());
             command.setContentType(PostContentType.TEXT.getCode());
             Map<String, Object> map = new HashMap<String, Object>();
-            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), cmd.getOrganizationId());
+            OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getTargetId(), cmd.getOrganizationId());
             if (null != member) {
                 map.put("targetUName", member.getContactName());
                 map.put("targetUToken", member.getContactToken());
@@ -10011,7 +10011,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             returnNoPrivileged(privileges, user);
         }
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), cmd.getOrganizationId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getTargetId(), cmd.getOrganizationId());
         if (null != member) {
             map.put("operatorUName", user.getNickName());
             map.put("operatorUToken", userIdentifier.getIdentifierToken());
@@ -10148,7 +10148,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
-            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), cmd.getOrganizationId());
+            OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getTargetId(), cmd.getOrganizationId());
             if (null != member) {
                 task.setTargetName(member.getContactName());
                 task.setTargetToken(member.getContactToken());
@@ -11675,7 +11675,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != detail) {
                 dto.setDisplayName(detail.getDisplayName());
             }
-            OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, r.getId());
+            OrganizationMember m = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, r.getId());
             if (null != m) {
                 dto.setMemberStatus(m.getStatus());
             }

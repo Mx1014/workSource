@@ -50,7 +50,7 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
         for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
             if(GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.EMPLOY_APPLICATION)){
                 ComponentEmployApplicationValue val = new ComponentEmployApplicationValue();
-                OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOwnerId(), userId);
+                OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOwnerId());
                 if(member != null){
                     OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
                     val.setApplierName(member.getContactName());
@@ -81,7 +81,7 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
 
     @Override
     public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase){
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
         if (member != null) {
             //  1.cancel the archives operate
             archivesService.cancelArchivesOperation(member.getNamespaceId(), member.getDetailId(), ArchivesOperationType.EMPLOY.getCode());

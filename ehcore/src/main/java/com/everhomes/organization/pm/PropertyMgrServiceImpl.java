@@ -11,14 +11,12 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -52,12 +50,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.*;
@@ -113,7 +106,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -299,7 +291,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	}
 
 	private void checkUserInOrg(Long userId, Long orgId) {
-		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId,orgId);
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId,orgId);
 		if(member != null){
 			LOGGER.error("User is in the organization.");
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -314,7 +306,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter organizationId [ %s ]", orgId);
 		}
-		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
 		if(member == null){
 			LOGGER.error("User is not in the organization.");
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -6620,7 +6612,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		if (resourceType == EntityType.ORGANIZATIONS) {
 		    // requestId 已经无法使用了，组织架构那边改了好多
 			/*OrganizationMember organizationMember = organizationProvider.
-                    findOrganizationMemberByOrgIdAndUId(cmd.getRequestorUid(), cmd.getResourceId());*/
+                    findOrganizationMemberByUIdAndOrgId(cmd.getRequestorUid(), cmd.getResourceId());*/
 			OrganizationMember organizationMember = null;
 					List<OrganizationMember> organizationMemberList = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(cmd.getResourceId(),cmd.getRequestorUid());
 			if(organizationMemberList != null){

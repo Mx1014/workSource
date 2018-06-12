@@ -2868,7 +2868,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
 //                    "Invalid parameter organizationId [ null ]");
 //        }
 //        Long userId = UserContext.current().getUser().getId();
-//        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+//        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
 //        if (member == null) {
 //            LOGGER.error("User is not in the organization.");
 //            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

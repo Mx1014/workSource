@@ -1628,7 +1628,7 @@ public class SalaryServiceImpl implements SalaryService {
         sgf.setFilerUid(userId);
         sgf.setFilerName(findNameByOwnerAndUser(ownerId, userId));
 //        Organization organization = organizationProvider.findOrganizationById(ownerId);
-//        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
+//        OrganizationMember member = punchService.findOrganizationMemberByUIdAndOrgId(userId, organization.getPath());
 //        if (null != member) {
 //            sgf.setFilerName(member.getContactName());
 //        }
