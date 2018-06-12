@@ -332,6 +332,20 @@ public class ParkingController extends ControllerBase {
 
 
     /**
+     * <b>URL: /parking/rechargeOrderMigration </b>
+     * <p>迁移支付系统订单号到停车订单表</p>
+     */
+    @RequestMapping("rechargeOrderMigration")
+    @RestReturn(value=String.class)
+    public RestResponse rechargeOrderMigration() {
+        parkingService.rechargeOrderMigration();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /parking/initPayeeAccount </b>
      * <p>将老的账户初始化到账号表</p>
      */

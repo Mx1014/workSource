@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
@@ -1254,5 +1255,17 @@ public class ParkingProviderImpl implements ParkingProvider {
 			dto.setAccountStatus(Byte.valueOf(payUserList.getRegisterStatus() + ""));
 		}
 		return dto;
+	}
+
+	@Override
+	public List<PaymentOrderRecord> listParkingPaymentOrderRecords(Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentOrderRecords.class));
+		return context.select()
+				.from(Tables.EH_PAYMENT_ORDER_RECORDS)
+				.where(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_TYPE.eq("parking"))
+				.and(Tables.EH_PAYMENT_ORDER_RECORDS.ID.gt(pageAnchor))
+				.orderBy(Tables.EH_PAYMENT_ORDER_RECORDS.ID)
+				.limit(pageSize)
+				.fetch().map(r->ConvertHelper.convert(r,PaymentOrderRecord.class));
 	}
 }

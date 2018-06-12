@@ -26,7 +26,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.order.PayService;
+import com.everhomes.order.*;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.*;
@@ -74,8 +74,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
@@ -3072,4 +3070,28 @@ public class ParkingServiceImpl implements ParkingService {
 		return sNamespaceId+BIZ_ORDER_NUM_SPILT+pyCode+BIZ_ORDER_NUM_SPILT+orderNo;
 	}
 
+	@Override
+	public void rechargeOrderMigration() {
+		Long pageAnchor = null;
+		Integer pageSize = 100;
+		List<PaymentOrderRecord> records = parkingProvider.listParkingPaymentOrderRecords(pageAnchor,pageSize);
+		boolean hasNext = true;
+		while (hasNext) {
+			for (PaymentOrderRecord record : records) {
+				ParkingRechargeOrder parkingOrder = parkingProvider.findParkingRechargeOrderById(record.getOrderId());
+				if (parkingOrder == null) {
+					continue;
+				}
+				parkingOrder.setPayOrderNo(record.getPaymentOrderId() + "");
+				parkingProvider.updateParkingRechargeOrder(parkingOrder);
+			}
+			if(records.size()<pageSize){
+				hasNext = false;
+			}
+			else
+			{
+				pageAnchor=records.get(records.size()-1).getId();
+			}
+		}
+	}
 }

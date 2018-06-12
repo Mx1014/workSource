@@ -149,4 +149,6 @@ public interface ParkingService {
     void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd);
 
     void initPayeeAccount(String json);
+
+    void rechargeOrderMigration();
 }
