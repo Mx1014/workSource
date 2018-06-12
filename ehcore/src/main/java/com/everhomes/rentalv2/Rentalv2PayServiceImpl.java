@@ -12,15 +12,16 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.pay.order.CreateOrderCommand;
-import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.pay.order.SourceType;
+import com.everhomes.pay.order.*;
+import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
@@ -44,6 +45,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -89,7 +92,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     @Override
     public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
-        String userPrefix = "EhBizBusinesses";
+        //String userPrefix = "EhBizBusinesses";
+        String userPrefix = "EhOrganizations";
         List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(userPrefix + cmd.getOrganizationId(), cmd.getCommunityId().toString());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("List rental payee accounts(response), orgnizationId={}, tags={}, response={}", cmd.getOrganizationId(), cmd.getCommunityId(), GsonUtil.toJson(payUserDTOs));
@@ -215,17 +219,9 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     @Override
     public Long getRentalOrderPayeeAccount(Long rentalBillId) {
         RentalOrder order = rentalv2Provider.findRentalBillById(rentalBillId);
-        //查特殊账户
-        List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-                null, RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId(), null, null);
-        if (accounts != null && accounts.size()>0)
-            return accounts.get(0).getAccountId();
-        //查通用账户
-        accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
-                null, RuleSourceType.DEFAULT.getCode(), order.getResourceTypeId(), null, null);
-        if (accounts != null && accounts.size()>0)
-            return accounts.get(0).getAccountId();
-        return null;
+        RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+
+        return handler.getAccountId(order);
     }
 
     private ListBizPayeeAccountDTO convertAccount(PayUserDTO payUserDTO){
@@ -266,7 +262,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         }
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
-            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent("EhUsers" + payerId.toString(), namespaceId.toString());
+            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent("EhUsers" + payerId.toString(), "NS"+namespaceId.toString());
             String defaultPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"default.bind.phone", "");
             payServiceV2.bandPhone(payUserDTO.getId(), defaultPhone);
 
@@ -278,6 +274,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     @Override
     public PreOrderDTO createPreOrder(PreOrderCommand cmd,RentalOrder order) {
+        UserContext.setCurrentNamespaceId(1);
+        //cmd.setClientAppName("");
         PreOrderDTO preOrderDTO = null;
         //1、查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
         Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByOrderNo(cmd.getOrderId());
@@ -311,7 +309,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
 
         //6、保存订单信息
-        saveOrderRecord( cmd.getOrderId(),orderCommandResponse, cmd.getBizPayeeId());
+        saveOrderRecord( cmd,orderCommandResponse);
 
 
         return preOrderDTO;
@@ -320,8 +318,9 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
         PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
         dto.setAmount(cmd.getAmount());
-        List<PayMethodDTO> payMethods = getPayMethods();
-        dto.setPayMethod(payMethods);
+        List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = orderCommandResponse.getPaymentMethods();
+        if (paymentMethods != null)
+             dto.setPayMethod(paymentMethods.stream().map(r->ConvertHelper.convert(r,PayMethodDTO.class)).collect(Collectors.toList()));
         dto.setOrderId(cmd.getOrderId());
         return dto;
     }
@@ -372,8 +371,9 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"rental.refund.v2.callback.url", "");
         String backUrl = homeUrl + contextPath + backUri;
         cmd.setBackUrl(backUrl);
+        cmd.setAccountCode("NS"+record.getNamespaceId().toString());
         CreateOrderRestResponse refundOrder = payServiceV2.createRefundOrder(cmd);
-        if(refundOrder != null || refundOrder.getErrorCode() != null
+        if(refundOrder != null && refundOrder.getErrorCode() != null
                 && refundOrder.getErrorCode().equals(HttpStatus.OK.value())){
 
         } else{
@@ -385,11 +385,13 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         }
     }
 
-    private void saveOrderRecord(Long orderNo, OrderCommandResponse orderCommandResponse, Long bizPayeeId) {
+    private void saveOrderRecord(PreOrderCommand cmd , OrderCommandResponse orderCommandResponse) {
         Rentalv2OrderRecord record = new Rentalv2OrderRecord();
-        record.setOrderNo(orderNo);
+        record.setOrderNo(cmd.getOrderId());
         record.setBizOrderNum(orderCommandResponse.getBizOrderNum());
-        record.setAccountId(bizPayeeId);
+        record.setPayOrderId(orderCommandResponse.getOrderId());
+        record.setAccountId(cmd.getBizPayeeId());
+        record.setAmount(cmd.getAmount());
         record.setOrderCommitNonce(orderCommandResponse.getOrderCommitNonce());
         record.setOrderCommitTimestamp(orderCommandResponse.getOrderCommitTimestamp());
         record.setOrderCommitToken(orderCommandResponse.getOrderCommitToken());
@@ -452,7 +454,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         createOrderCmd.setOrderRemark4(null);
         createOrderCmd.setOrderRemark5(null);
         if(UserContext.getCurrentNamespaceId() != null) {
-            createOrderCmd.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+            createOrderCmd.setAccountCode("NS"+UserContext.getCurrentNamespaceId());
         }
         createOrderCmd.setCommitFlag(0);
         if(cmd.getCommitFlag() != null){
@@ -476,14 +478,19 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         PreOrderDTO dto = ConvertHelper.convert(record, PreOrderDTO.class);
         dto.setAmount(cmd.getAmount());
         dto.setExtendInfo(cmd.getExtendInfo());
-
-
-        dto.setPayMethod(getPayMethods());
+        ListClientSupportPayMethodCommandResponse response = payServiceV2.listClientSupportPayMethod("NS"+UserContext.getCurrentNamespaceId(),
+                cmd.getClientAppName());
+        List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+        if (paymentMethods != null)
+             dto.setPayMethod(paymentMethods.stream().map(r->ConvertHelper.convert(r,PayMethodDTO.class)).collect(Collectors.toList()));
         return dto;
     }
 
     @Override
     public void payNotify(OrderPaymentNotificationCommand cmd) {
+        if (!PayUtil.verifyCallbackSignature(cmd))
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "signature wrong");
         if(cmd.getPaymentStatus() == null) {
             LOGGER.info(" ----------------- - - - PAY FAIL command is "+cmd.toString());
         }
@@ -493,7 +500,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             this.dbProvider.execute((TransactionStatus status) -> {
                 Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
                 RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
-                order.setPaidMoney(order.getPaidMoney().add(new java.math.BigDecimal(cmd.getAmount()/100.0)));
+                order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
                 switch (cmd.getPaymentType()){
                     case 1:
                     case 7:
@@ -533,6 +540,14 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                 return null;
             });
         }
+    }
+
+    public BigDecimal changePayAmount(Long amount){
+
+        if(amount == null){
+            return new BigDecimal(0);
+        }
+        return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
     }
 
     private void onOrderRecordSuccess(RentalOrder order){
@@ -597,6 +612,9 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     @Override
     public void refundNotify(OrderPaymentNotificationCommand cmd) {
+        if (!PayUtil.verifyCallbackSignature(cmd))
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "signature wrong");
         this.dbProvider.execute((TransactionStatus status) -> {
             Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
             RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByOrderNo(record.getOrderNo().toString());

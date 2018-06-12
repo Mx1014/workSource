@@ -119,6 +119,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Time;
@@ -215,8 +216,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
 	@Autowired
 	private Rentalv2PricePackageProvider rentalv2PricePackageProvider;
-	@Autowired
-	private PayService payService;
 	@Autowired
 	private PayProvider payProvider;
 	@Autowired
@@ -1727,6 +1726,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
 		rentalBill.setPackageName(cmd.getPackageName());
 		rentalBill.setScene(null != sceneTokenDTO ? sceneTokenDTO.getScene() : null);
+		rentalBill.setNamespaceId(UserContext.getCurrentNamespaceId());
 		//设置订单模式
 		rentalBill.setPayMode(rsType.getPayMode());
 		rentalBill.setReserveTime(new Timestamp(System.currentTimeMillis()));
@@ -2257,7 +2257,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalv2Provider.updateRentalBill(order);//更新新的订单号
 		}
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
-		Long amount = payService.changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
+		Long amount = changePayAmount(order.getPayTotalMoney().subtract(order.getPaidMoney()));
 		preOrderCommand.setAmount(amount);
 
 		preOrderCommand.setPayerId(order.getRentalUid());
@@ -3727,7 +3727,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd) {
 		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
-		order.setPayTotalMoney(payService.changePayAmount(cmd.getAmount()));
+		order.setPayTotalMoney(changePayAmount(cmd.getAmount()));
 		rentalv2Provider.updateRentalBill(order);
 		//删除记录方便重新下单
 		payProvider.deleteOrderRecordByOrder(OrderType.OrderTypeEnum.RENTALORDER.getPycode(), Long.valueOf(order.getOrderNo()));
@@ -3950,7 +3950,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
-		Long amount = payService.changePayAmount(order.getPayTotalMoney());
+		Long amount = changePayAmount(order.getPayTotalMoney());
 		preOrderCommand.setAmount(amount);
 
 		preOrderCommand.setPayerId(order.getRentalUid());
@@ -3985,6 +3985,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setBillId(order.getId());
 
 		return response;
+	}
+
+	public Long changePayAmount(BigDecimal amount){
+
+		if(amount == null){
+			return 0L;
+		}
+		return  amount.multiply(new BigDecimal(100)).longValue();
+	}
+
+	public BigDecimal changePayAmount(Long amount){
+
+		if(amount == null){
+			return new BigDecimal(0);
+		}
+		return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
 	}
 
 	@Override
