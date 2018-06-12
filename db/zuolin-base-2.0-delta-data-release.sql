@@ -16,6 +16,8 @@ insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'building',10005,'zh_CN','该项目下不存在该楼栋');
 INSERT INTO EH_LOCALE_TEMPLATES(`id`,scope,code,locale,description,`text`,namespace_id)VALUES(@id := @id+1,'workbench',1,'zh_CN','开启工作台','"${organizationName}"开启工作台' , 2);
 INSERT INTO EH_LOCALE_TEMPLATES(`id`,scope,code,locale,description,`text`,namespace_id)VALUES(@id := @id+1,'workbench',2,'zh_CN','关闭工作台','"${organizationName}"关闭工作台' , 2);
+-- add by yuanlei
+update eh_locale_templates set `text` = '${userName}（${contactToken}）已成为${organizationName}企业超级管理员。' where code = 20 and scope = 'organization.notification' and namespace_id = 0;
 
 
 -- 客户端处理方式

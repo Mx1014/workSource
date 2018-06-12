@@ -1502,7 +1502,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-                toTargetTemplateCode,
+				toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1530,7 +1530,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-                toOtherTemplateCode,
+				toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1833,8 +1833,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			String contactToken = userProvider.findContactTokenByOwnerUidAndNamespaceId(user.getId(),namespaceId);
 
 			// 删除原来的超管权限
-			/*deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);*/
-			deleteOrganizationAdmin(cmd.getOrganizationId(), contactToken, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			/*deleteOrganizationAdmin(cmd.getOrganizationId(), contactToken, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);*/
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
 			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
 			if(detail != null){
