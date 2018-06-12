@@ -1,0 +1,12 @@
+--
+-- #30750 gogs config  add by xq.tian  2018/06/15
+--
+SET @eh_configurations_id = (SELECT MAX(id) FROM eh_configurations);
+INSERT INTO ehcore.eh_configurations (id, name, value, description, namespace_id, display_name)
+  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.server.url', 'http://10.1.10.79:3000/api/v1', 'gogs server', 0, '');
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
+  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.admin.name', 'zuolin', 'gogs admin name', 0, '');
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
+  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.admin.token', '70d7a1d32c747249b061834adcf1412c8888d768', 'gogs admin token', 0, '');
+
+-- #30750 END
