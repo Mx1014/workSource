@@ -626,17 +626,24 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             if (GeneralFormStatus.fromCode(gf.getStatus()) == GeneralFormStatus.CONFIG) {
                 gf = convertFormFromTemplate(gf, form, cmd);
                 generalFormProvider.updateGeneralForm(gf);
-                return gf.getFormOriginId();
             } else {
+                Long version = gf.getFormVersion();
                 gf.setStatus(GeneralFormStatus.INVALID.getCode());
                 generalFormProvider.updateGeneralForm(gf);
+                gf = ConvertHelper.convert(form, GeneralForm.class);
+                gf = convertFormFromTemplate(gf, form, cmd);
+                gf.setStatus(GeneralFormStatus.CONFIG.getCode());
+                gf.setFormVersion(version + 1);
+                generalFormProvider.createGeneralForm(gf);
             }
+            return gf.getFormOriginId();
+        } else {
+            gf = ConvertHelper.convert(form, GeneralForm.class);
+            gf = convertFormFromTemplate(gf, form, cmd);
+            gf.setStatus(GeneralFormStatus.CONFIG.getCode());
+            gf.setFormVersion(0L);
+            return generalFormProvider.createGeneralForm(gf);
         }
-        gf = ConvertHelper.convert(form, GeneralForm.class);
-        gf = convertFormFromTemplate(gf, form, cmd);
-        gf.setStatus(GeneralFormStatus.CONFIG.getCode());
-        gf.setFormVersion(0L);
-        return generalFormProvider.createGeneralForm(gf);
     }
 
     private GeneralForm convertFormFromTemplate(GeneralForm gf, GeneralFormTemplate form, CreateFormTemplatesCommand cmd) {
