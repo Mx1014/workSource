@@ -292,10 +292,11 @@ public class EnergyPlanProviderImpl implements EnergyPlanProvider {
     }
 
     @Override
-    public EnergyPlan listNewestAutoReadingPlans(Integer namespaceId) {
+    public EnergyPlan listNewestAutoReadingPlans(Integer namespaceId,Long comunityId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<EnergyPlan> plans = context.selectFrom(Tables.EH_ENERGY_PLANS)
                 .where(Tables.EH_ENERGY_PLANS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENERGY_PLANS.TARGET_ID.eq(comunityId))
                 .and(Tables.EH_ENERGY_PLANS.STATUS.eq(CommonStatus.AUTO.getCode()))
                 .orderBy(Tables.EH_ENERGY_PLANS.ID.desc())
                 .fetchInto(EnergyPlan.class);

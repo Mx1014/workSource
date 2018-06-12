@@ -240,7 +240,9 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public void createActivityRoster(ActivityRoster createRoster) {
-        Long id = shardingProvider.allocShardableContentId(EhActivityRoster.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        Long id = this.dbProvider.allocPojoRecordId(EhActivityRoster.class);
+        //Long id = shardingProvider.allocShardableContentId(EhActivityRoster.class).second();
         if(createRoster.getUuid() == null) {
             createRoster.setUuid(UUID.randomUUID().toString());
         }
