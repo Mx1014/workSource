@@ -1363,7 +1363,8 @@ public class PortalServiceImpl implements PortalService {
 					// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 					// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
 					// 二楼：sb事务 + 1
-					sequenceService.syncSequence();
+					// 三楼：大师好样的，事务好了。
+					//sequenceService.syncSequence();
 
 					UserContext.setCurrentUser(user);
 					//同步和发布的时候不用预览账号
@@ -2156,7 +2157,9 @@ public class PortalServiceImpl implements PortalService {
 
 		// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 		// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
-		sequenceService.syncSequence();
+
+		// 大师好样的，事务好了。
+		//sequenceService.syncSequence();
 
 		//同步和发布的时候不用预览账号
 		UserContext.current().setPreviewPortalVersionId(null);
