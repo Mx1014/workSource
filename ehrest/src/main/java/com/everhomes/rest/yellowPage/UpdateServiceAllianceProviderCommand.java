@@ -37,7 +37,13 @@ public class UpdateServiceAllianceProviderCommand {
 	@NotNull
 	private String contactName;
 	
-
+	@NotNull
+	private Long appId;
+	
+	@NotNull
+	private Long currentPMId;
+	
+	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -92,6 +98,26 @@ public class UpdateServiceAllianceProviderCommand {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+
+	public Long getAppId() {
+		return appId;
+	}
+
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
 	}
 
 }

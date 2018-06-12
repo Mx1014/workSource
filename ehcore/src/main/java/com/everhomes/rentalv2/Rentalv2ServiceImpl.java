@@ -109,6 +109,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -134,7 +136,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Component
-public class Rentalv2ServiceImpl implements Rentalv2Service {
+public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener<ContextRefreshedEvent> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2ServiceImpl.class);
 
@@ -261,11 +263,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		return null;
 	}
-
-	@PostConstruct
+	
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+	//@PostConstruct
 	public void setup() {
 		workerPoolFactory.getWorkerPool().addQueue(queueName);
 	}
+	
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
 
 	private String processFlowURL(Long flowCaseId, String flowUserType, Long moduleId) {
 		return "zl://workflow/detail?flowCaseId=" + flowCaseId + "&flowUserType=" + flowUserType + "&moduleId=" + moduleId;
@@ -6796,6 +6807,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		siteItem.setName(cmd.getItemName());
 		siteItem.setPrice(cmd.getItemPrice());
 		siteItem.setDescription(cmd.getDescription());
+		siteItem.setCounts(cmd.getCounts());
 		rentalv2Provider.updateRentalSiteItem(siteItem);
 	}
 

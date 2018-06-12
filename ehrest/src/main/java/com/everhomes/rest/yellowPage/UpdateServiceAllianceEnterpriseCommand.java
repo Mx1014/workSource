@@ -41,6 +41,8 @@ import com.everhomes.util.StringHelper;
  *  <li>summaryDescription : 概要描述</li>
  *  <li>onlineServiceUid : 在线服务用户的id</li>
  *  <li>onlineServiceUname : 在线服务用户的名称</li>
+ *  <li>appId : 校验权限时填写应用id</li>
+ *  <li>currentPMId : 填写当前管理公司id用于校验权限</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -79,6 +81,26 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	
 	private Long     categoryId;
 	
+	private Long     appId;
+	
+	private Long     currentPMId;
+	
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
+
 	@ItemType(ServiceAllianceAttachmentDTO.class)
 	private List<ServiceAllianceAttachmentDTO> attachments;
 

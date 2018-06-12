@@ -53,7 +53,9 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     public Long createDoorAccess(DoorAccess obj) {
         // 主表的ID不能使用getSequence的方式 by lqs 20160430
         //long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAccess.class));
-        long id = this.shardingProvider.allocShardableContentId(EhDoorAccess.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhDoorAccess.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhDoorAccess.class).second();
         obj.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getId()));
         obj.setId(id);

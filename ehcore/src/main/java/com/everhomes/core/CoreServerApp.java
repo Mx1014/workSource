@@ -7,11 +7,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 //import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
 import com.everhomes.atomikos.AtomikosHelper;
+import com.everhomes.sequence.MysqlSequenceProviderImpl;
 
 /**
  * Spring boot main class. Its class name need to be packaged to let Spring boot bootstrap processStat
@@ -22,9 +25,10 @@ import com.everhomes.atomikos.AtomikosHelper;
  * @author Kelven Yang
  *
  */
-@ComponentScan(value={"com.everhomes"})
+@ComponentScan(value={"com.everhomes"}, excludeFilters={
+        @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value={MysqlSequenceProviderImpl.class})})
 @EnableAutoConfiguration(exclude={
-//    XADataSourceAutoConfiguration.class,
+    XADataSourceAutoConfiguration.class,
     DataSourceAutoConfiguration.class, 
     HibernateJpaAutoConfiguration.class,
     FreeMarkerAutoConfiguration.class
