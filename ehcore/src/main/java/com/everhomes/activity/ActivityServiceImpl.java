@@ -845,7 +845,7 @@ public class ActivityServiceImpl implements ActivityService {
         PayUserDTO payUserDTO = checkAndCreatePaymentUser(payerId,UserContext.getCurrentNamespaceId());
         createOrderCommand.setPayerUserId(payUserDTO.getId());
 
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getCategoryId());
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getCategoryId(),activity.getNamespaceId());
         if (activityBizPayee == null) {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
                     "no payee.");
@@ -921,12 +921,7 @@ public class ActivityServiceImpl implements ActivityService {
         OrderCommandResponse response = createOrderRestResponse.getResponse();
         callback = ConvertHelper.convert(response, PreOrderDTO.class);
         callback.setExpiredIntervalTime(response.getExpirationMillis());
-        List<PayMethodDTO> list = new ArrayList<>();
-        for (com.everhomes.pay.order.PayMethodDTO payMethodDTO : response.getPaymentMethods()) {
-            PayMethodDTO p = ConvertHelper.convert(payMethodDTO,PayMethodDTO.class);
-            list.add(p);
-        }
-        callback.setPayMethod(list);
+        callback.setPayMethod(response.getPaymentMethods());
         return callback;
     }
 
@@ -2156,6 +2151,7 @@ public class ActivityServiceImpl implements ActivityService {
         createOrderCommand.setRefundOrderId(roster.getPayOrderId());
         createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
         createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
+        createOrderCommand.setSourceType(1);
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
         String backUrl = homeUrl + contextPath + backUri;
@@ -6199,7 +6195,7 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "CategoryId cannot be null.");
         }
-	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
+	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
         GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
         if (activityBizPayee != null) {
             activityPayeeDTO.setAccountId(activityBizPayee.getBizPayeeId());
@@ -6256,7 +6252,7 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "payeeId cannot be null.");
         }
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
         if (activityBizPayee == null) {
             ActivityBizPayee persist = new ActivityBizPayee();
             persist.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -6282,7 +6278,7 @@ public class ActivityServiceImpl implements ActivityService {
         CheckPayeeIsUsefulResponse checkPayeeIsUsefulResponse = new CheckPayeeIsUsefulResponse();
         checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.NULL.getCode());
 
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId());
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
         List<Long> idList = new ArrayList<>();
         idList.add(activityBizPayee.getBizPayeeId());
         List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);
