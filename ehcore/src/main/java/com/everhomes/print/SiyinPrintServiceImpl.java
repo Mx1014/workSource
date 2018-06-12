@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
@@ -29,6 +31,8 @@ import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.print.*;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +78,8 @@ import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.xml.XMLToJSON;
 import com.google.gson.JsonObject;
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * 
  *  @author:dengs 2017年6月22日
@@ -162,6 +168,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public SiyinPrintBusinessPayeeAccountProvider siyinBusinessPayeeAccountProvider;
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+	public NamespaceProvider namespaceProvider;
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
@@ -1624,15 +1632,59 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return convert;
 
 	}
+	private JSONArray getNewsFromExcel(MultipartFile[] files) {
+		List<RowResult> resultList = null;
+		try {
+			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+		} catch (IOException e) {
+			LOGGER.error("processStat Excel error");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
+		}
 
+		if (resultList != null && resultList.size() > 0) {
+			final JSONArray array = new JSONArray();
+			for (int i = 1, len = resultList.size(); i < len; i++) {
+				RowResult result = resultList.get(i);
+				String name = RowResult.trimString(result.getA());
+				if(name==null || !name.contains("打印")){
+					continue;
+				}
+				String namespaceId = RowResult.trimString(result.getB());
+				Namespace namespace = namespaceProvider.findNamespaceById(Integer.valueOf(namespaceId));
+				if(namespace==null){
+					continue;
+				}
+				String organizationType = RowResult.trimString(result.getC());
+				String organizationId = RowResult.trimString(result.getD());
+				String payType = RowResult.trimString(result.getE());
+				String payUserId = RowResult.trimString(result.getF());
+				List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(Long.valueOf(organizationId));
+				if(communities==null || communities.size()==0){
+					continue;
+				}
+				for (OrganizationCommunity community : communities) {
+					JSONObject account = new JSONObject();
+					account.put("namespaceId",namespaceId);
+					account.put("ownerType",PrintOwnerType.COMMUNITY.getCode());
+					account.put("ownerId",community.getCommunityId());
+					account.put("payeeId",payUserId);
+					account.put("payeeUserType",OwnerType.ORGANIZATION.getCode());
+					array.add(account);
+				}
+			}
+			return array;
+		}
+		return null;
+	}
 	@Override
-	public void initPayeeAccount(String json) {
+	public void initPayeeAccount(MultipartFile[] files) {
 		User user = UserContext.current().getUser();
 		if(user.getId()!=1){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"error person, must system user 1");
 		}
-		JSONArray accounts = JSONObject.parseArray(json);
+		JSONArray accounts = getNewsFromExcel(files);
 		if(accounts==null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"error json");
@@ -1647,7 +1699,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			Integer namespaceId = account.getInteger("namespaceId"); if(namespaceId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty namespaceId");}
 			String ownerType = account.getString("ownerType");if(ownerType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerType");}
 			Long ownerId = account.getLong("ownerId");if(ownerId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerId");}
-			String bussnessType = account.getString("bussnessType");if(bussnessType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty bussnessType");}
 			List<SiyinPrintBusinessPayeeAccount> oldaccounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts(null, namespaceId,ownerType, ownerId);
 			Long payeeId = account.getLong("payeeId");if(payeeId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeId");}
 			String payeeUserType = account.getString("payeeUserType");if(payeeUserType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeUserType");}

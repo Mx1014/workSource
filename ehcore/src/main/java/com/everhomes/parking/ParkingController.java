@@ -25,6 +25,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestDoc(value="Parking controller", site="parking")
 @RestController
@@ -351,8 +352,8 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("initPayeeAccount")
     @RestReturn(value=String.class)
-    public RestResponse initPayeeAccount(@RequestParam(value="json", required=true) String json) {
-        parkingService.initPayeeAccount(json);
+    public RestResponse initPayeeAccount(@RequestParam("attachment") MultipartFile[] files) {
+        parkingService.initPayeeAccount(files);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

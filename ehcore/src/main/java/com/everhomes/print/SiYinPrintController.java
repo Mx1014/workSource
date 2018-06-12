@@ -32,6 +32,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.util.RequireAuthentication;
 
+import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Decoder;
 
 @RestDoc(value="print controller", site="print")
@@ -462,8 +463,8 @@ public class SiYinPrintController extends ControllerBase {
 	 */
 	@RequestMapping("initPayeeAccount")
 	@RestReturn(value=String.class)
-	public RestResponse initPayeeAccount(@RequestParam(value="json", required=true) String json) {
-		siyinPrintService.initPayeeAccount(json);
+	public RestResponse initPayeeAccount(@RequestParam("attachment") MultipartFile[] files) {
+		siyinPrintService.initPayeeAccount(files);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

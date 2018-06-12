@@ -26,7 +26,10 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.order.*;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
 import com.everhomes.pay.order.*;
@@ -36,6 +39,7 @@ import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -47,6 +51,8 @@ import com.everhomes.rest.rentalv2.*;
 
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import kafka.utils.Json;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -93,6 +99,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Component
@@ -151,6 +158,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public ParkingBusinessPayeeAccountProvider parkingBusinessPayeeAccountProvider;
 	@Autowired
 	public ParkingOrderEmbeddedV2Handler parkingOrderEmbeddedV2Handler;
+	@Autowired
+	public NamespaceProvider namespaceProvider;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -2951,15 +2960,71 @@ public class ParkingServiceImpl implements ParkingService {
 	public void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		parkingBusinessPayeeAccountProvider.deleteParkingBusinessPayeeAccount(cmd.getId());
 	}
+	private JSONArray getNewsFromExcel(MultipartFile[] files) {
+		List<RowResult> resultList = null;
+		try {
+			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+		} catch (IOException e) {
+			LOGGER.error("processStat Excel error");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
+		}
 
+		if (resultList != null && resultList.size() > 0) {
+			final JSONArray array = new JSONArray();
+			for (int i = 1, len = resultList.size(); i < len; i++) {
+				RowResult result = resultList.get(i);
+				String name = RowResult.trimString(result.getA());
+				if(name==null || !name.contains("停车")){
+					continue;
+				}
+				String namespaceId = RowResult.trimString(result.getB());
+				Namespace namespace = namespaceProvider.findNamespaceById(Integer.valueOf(namespaceId));
+				if(namespace==null){
+					continue;
+				}
+				String organizationType = RowResult.trimString(result.getC());
+				String organizationId = RowResult.trimString(result.getD());
+				String payType = RowResult.trimString(result.getE());
+				String payUserId = RowResult.trimString(result.getF());
+				List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(Long.valueOf(organizationId));
+				if(communities==null || communities.size()==0){
+					continue;
+				}
+				for (OrganizationCommunity community : communities) {
+					List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), community.getCommunityId());
+					if(parkingLots==null ||parkingLots.size()==0){
+						continue;
+					}
+					for (ParkingLot parkingLot : parkingLots) {
+						ParkingBusinessType[] values = ParkingBusinessType.values();
+						for (ParkingBusinessType value : values) {
+							JSONObject account = new JSONObject();
+							account.put("namespaceId",namespaceId);
+							account.put("ownerType",parkingLot.getOwnerType());
+							account.put("ownerId",parkingLot.getOwnerId());
+							account.put("parkingLotId",parkingLot.getId());
+							account.put("bussnessType",value);
+							account.put("payeeId",payUserId);
+							account.put("payeeUserType",OwnerType.ORGANIZATION.getCode());
+							array.add(account);
+						}
+					}
+				}
+			}
+			return array;
+		}
+		return null;
+	}
 	@Override
-	public void initPayeeAccount(String json) {
+	public void initPayeeAccount(MultipartFile[] files) {
 		User user = UserContext.current().getUser();
 		if(user.getId()!=1){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"error person, must system user 1");
 		}
-		JSONArray accounts = JSONObject.parseArray(json);
+		JSONArray accounts = getNewsFromExcel(files);
+		LOGGER.info("accounts:"+StringHelper.toJsonString(accounts)+"");
 		if(accounts==null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"error json");
@@ -3038,33 +3103,33 @@ public class ParkingServiceImpl implements ParkingService {
 		return enumOwnerType;
 	}
 
-	public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
-		List<PayMethodDTO> payMethods = new ArrayList<>();
-		String format = "{\"getOrderInfoUrl\":\"%s\"}";
-		PayMethodDTO alipay = new PayMethodDTO();
-		alipay.setPaymentName("支付宝支付");
-		PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
-		alipayParamsDTO.setPayType("A01");
-		alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
-		String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
-		alipay.setPaymentLogo(url);
-		alipay.setPaymentParams(alipayParamsDTO);
-		alipay.setPaymentType(8);
-		payMethods.add(alipay);
-
-		PayMethodDTO wxpay = new PayMethodDTO();
-		wxpay.setPaymentName("微信支付");
-		wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
-		url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
-		wxpay.setPaymentLogo(url);
-		PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
-		wxParamsDTO.setPayType("no_credit");
-		wxpay.setPaymentParams(wxParamsDTO);
-		wxpay.setPaymentType(1);
-
-		payMethods.add(wxpay);
-		return payMethods;
-	}
+//	public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+//		List<PayMethodDTO> payMethods = new ArrayList<>();
+//		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+//		PayMethodDTO alipay = new PayMethodDTO();
+//		alipay.setPaymentName("支付宝支付");
+//		PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
+//		alipayParamsDTO.setPayType("A01");
+//		alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+//		String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
+//		alipay.setPaymentLogo(url);
+//		alipay.setPaymentParams(alipayParamsDTO);
+//		alipay.setPaymentType(8);
+//		payMethods.add(alipay);
+//
+//		PayMethodDTO wxpay = new PayMethodDTO();
+//		wxpay.setPaymentName("微信支付");
+//		wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+//		url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
+//		wxpay.setPaymentLogo(url);
+//		PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
+//		wxParamsDTO.setPayType("no_credit");
+//		wxpay.setPaymentParams(wxParamsDTO);
+//		wxpay.setPaymentType(1);
+//
+//		payMethods.add(wxpay);
+//		return payMethods;
+//	}
 
 	private String generateBizOrderNum(String sNamespaceId, String pyCode, Long orderNo) {
 		return sNamespaceId+BIZ_ORDER_NUM_SPILT+pyCode+BIZ_ORDER_NUM_SPILT+orderNo;

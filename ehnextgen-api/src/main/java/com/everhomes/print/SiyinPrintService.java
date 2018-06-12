@@ -13,6 +13,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -75,5 +76,5 @@ public interface SiyinPrintService {
 
     void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd);
 
-    void initPayeeAccount(String json);
+    void initPayeeAccount(MultipartFile[] files);
 }
