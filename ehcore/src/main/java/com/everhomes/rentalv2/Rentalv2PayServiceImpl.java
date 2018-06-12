@@ -274,8 +274,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     @Override
     public PreOrderDTO createPreOrder(PreOrderCommand cmd,RentalOrder order) {
-        UserContext.setCurrentNamespaceId(1);
-        //cmd.setClientAppName("");
+        //UserContext.setCurrentNamespaceId(1);
         PreOrderDTO preOrderDTO = null;
         //1、查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
         Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByOrderNo(cmd.getOrderId());
