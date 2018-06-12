@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 
-@Component
+@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE )
 public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHandler {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivitySignupOrderV2CallBackHandler.class);
@@ -36,12 +36,6 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
     
     @Autowired
     private ActivityService activityService;
-    
-	@Autowired
-	private CoordinationProvider coordinationProvider;
-
-	@Autowired
-	private PayService payService;
 
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
