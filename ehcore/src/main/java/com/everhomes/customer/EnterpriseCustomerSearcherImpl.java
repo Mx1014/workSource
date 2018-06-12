@@ -539,13 +539,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
         if (entryInfos != null && entryInfos.size() > 0) {
 //            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
-            entryInfos = entryInfos.stream().map((e) -> {
-                String addressName = e.getAddressName();
-                if (addressName != null) {
-                    e.setAddressName(addressName.replaceFirst("-", "/"));
-                }
-                return e;
-            }).collect(Collectors.toList());
+            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
         return dto;

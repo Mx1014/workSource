@@ -761,6 +761,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
         //列表里导入时：
         EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
+        enterpriseCustomer.setAdminFlag((byte) 0);
         enterpriseCustomer.setNamespaceId(customerInfo.getNamespaceId());
         enterpriseCustomer.setCommunityId(customerInfo.getCommunityId());
         enterpriseCustomer.setOwnerId(customerInfo.getOwnerId());
@@ -1230,6 +1231,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 //修改企业是否设置管理员
                 EnterpriseCustomer customer = customerProvider.findById(enterpriseCustomer.getId());
                 customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+                enterpriseCustomer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
                 customerProvider.updateEnterpriseCustomer(customer);
                 customerSearcher.feedDoc(customer);
             }

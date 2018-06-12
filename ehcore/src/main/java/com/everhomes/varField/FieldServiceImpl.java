@@ -1910,19 +1910,19 @@ public class FieldServiceImpl implements FieldService {
         }
         // 三种情况 要求删除的item不显示
         if (fieldItem != null) {
-            Map<Long, ScopeFieldGroup> scopeFieldGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, communityId, fieldItem.getModuleName());
+            List<Long> items = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
             // community
-            if (scopeFieldGroupMap != null && scopeFieldGroupMap.size() > 0) {
+            if (items != null && items.size() > 0) {
                 fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
             } else {
                 //namespace
-                Map<Long, ScopeFieldGroup> namespaceGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, null, fieldItem.getModuleName());
-                if (namespaceGroupMap != null && namespaceGroupMap.size() > 0) {
+                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
+                if (fields != null && fields.size() > 0) {
                     fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
                 } else {
                     //global
-                    Map<Long, ScopeFieldGroup> globalGroupMap = fieldProvider.listScopeFieldGroups(0, null, fieldItem.getModuleName());
-                    if (globalGroupMap != null && globalGroupMap.size() > 0) {
+                    List<Long> groups = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
+                    if (groups != null && groups.size() > 0) {
                         fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
                     }
                 }
@@ -1937,23 +1937,42 @@ public class FieldServiceImpl implements FieldService {
         ScopeFieldItem fieldItem = null;
         Boolean namespaceFlag = true;
         Boolean globalFlag = true;
-        if(communityId != null) {
+        if (communityId != null) {
             fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
-            if(fieldItem != null) {
+            if (fieldItem != null) {
                 namespaceFlag = false;
                 globalFlag = false;
             }
         }
-        if(namespaceFlag) {
+        if (namespaceFlag) {
             fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
-            if(fieldItem!=null){
+            if (fieldItem != null) {
                 globalFlag = false;
             }
         }
-        if(globalFlag){
+        if (globalFlag) {
             fieldItem = fieldProvider.findScopeFieldItemByDisplayName(0, null, moduleName, displayName);
         }
-
+        // 三种情况 要求删除的item不显示
+        if (fieldItem != null) {
+            List<Long> scopeIds = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
+            // community
+            if (scopeIds != null && scopeIds.size() > 0) {
+                fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
+            } else {
+                //namespace
+                List<Long> namespaceIds = fieldProvider.checkCustomerField(namespaceId, null, fieldItem.getModuleName());
+                if (namespaceIds != null && namespaceIds.size() > 0) {
+                    fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
+                } else {
+                    //global
+                    List<Long> globalIds = fieldProvider.checkCustomerField(0, null, fieldItem.getModuleName());
+                    if (globalIds != null && globalIds.size() > 0) {
+                        fieldItem = fieldProvider.findScopeFieldItemByDisplayName(0, null, moduleName, displayName);
+                    }
+                }
+            }
+        }
         return fieldItem;
     }
 
@@ -2077,7 +2096,5 @@ public class FieldServiceImpl implements FieldService {
         dto.setChildrenGroup(trees);
         return dto;
     }
-
-
 
 }
