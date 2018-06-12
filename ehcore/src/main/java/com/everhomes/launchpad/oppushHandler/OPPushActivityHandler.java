@@ -12,6 +12,7 @@ import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.OPPushCard;
 import com.everhomes.rest.launchpadbase.routerjson.ActivityContentRouterJson;
 import com.everhomes.rest.module.RouterInfo;
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
@@ -76,6 +77,7 @@ public class OPPushActivityHandler implements OPPushHandler {
 
                 card.setRouterPath(routerInfo.getPath());
                 card.setRouterQuery(routerInfo.getQuery());
+                card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());
                 properties.add(dto.getSubject());

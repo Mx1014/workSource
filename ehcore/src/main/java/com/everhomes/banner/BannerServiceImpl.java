@@ -496,6 +496,9 @@ public class BannerServiceImpl implements BannerService {
                         dto.setRouterQuery(routerInfo.getQuery());
                     }
 
+                    Byte clientHandlerType = handler.getClientHandlerType(dto.getTargetData());
+                    dto.setClientHandlerType(clientHandlerType);
+
 
                 } catch (Exception e) {
                     throw RuntimeErrorException.errorWith(e,

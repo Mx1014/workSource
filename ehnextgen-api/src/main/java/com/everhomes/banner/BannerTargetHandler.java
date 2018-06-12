@@ -16,4 +16,6 @@ public interface BannerTargetHandler {
     }
 
     RouterInfo getRouterInfo(String targetData);
+
+    Byte getClientHandlerType(String targetData);
 }

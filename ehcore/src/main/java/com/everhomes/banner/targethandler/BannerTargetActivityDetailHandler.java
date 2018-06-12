@@ -10,6 +10,7 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpadbase.routerjson.ActivityContentRouterJson;
 import com.everhomes.rest.module.RouterInfo;
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
@@ -66,5 +67,10 @@ public class BannerTargetActivityDetailHandler implements BannerTargetHandler {
         }
         routerInfo.setModuleId(10600L);
         return routerInfo;
+    }
+
+    @Override
+    public Byte getClientHandlerType(String targetData) {
+        return ClientHandlerType.NATIVE.getCode();
     }
 }

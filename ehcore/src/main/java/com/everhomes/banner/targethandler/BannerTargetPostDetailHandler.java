@@ -9,6 +9,7 @@ import com.everhomes.rest.common.PostDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.RouterInfo;
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -68,5 +69,10 @@ public class BannerTargetPostDetailHandler implements BannerTargetHandler {
         routerInfo.setModuleId(10100L);
 
         return routerInfo;
+    }
+
+    @Override
+    public Byte getClientHandlerType(String targetData) {
+        return ClientHandlerType.NATIVE.getCode();
     }
 }

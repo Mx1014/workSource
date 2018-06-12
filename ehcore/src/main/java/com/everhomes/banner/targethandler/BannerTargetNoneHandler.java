@@ -23,4 +23,9 @@ public class BannerTargetNoneHandler implements BannerTargetHandler {
     public RouterInfo getRouterInfo(String targetData) {
         return null;
     }
+
+    @Override
+    public Byte getClientHandlerType(String targetData) {
+        return null;
+    }
 }
