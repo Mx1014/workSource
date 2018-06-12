@@ -29,7 +29,7 @@ public class BusinessPayeeAccountDTO {
     private String parkingLotName;
     private String businessType;
     private Long payeeId;
-    private Integer payeeUserType;
+    private String payeeUserType;
     private String payeeUserName;
     private String payeeUserAliasName;
     private Integer payeeRegisterStatus;
@@ -100,11 +100,11 @@ public class BusinessPayeeAccountDTO {
         this.payeeId = payeeId;
     }
 
-    public Integer getPayeeUserType() {
+    public String getPayeeUserType() {
         return payeeUserType;
     }
 
-    public void setPayeeUserType(Integer payeeUserType) {
+    public void setPayeeUserType(String payeeUserType) {
         this.payeeUserType = payeeUserType;
     }
 

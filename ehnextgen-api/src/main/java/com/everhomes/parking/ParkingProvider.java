@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import org.jooq.SortField;
 
@@ -153,4 +154,6 @@ public interface ParkingProvider {
     void createParkingSpaceLog(ParkingSpaceLog log);
 
     ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String userId, String accountCode,String userIdenify, String tag1, String tag2, String tag3);
+
+    List<PaymentOrderRecord> listParkingPaymentOrderRecords(Long pageAnchor, Integer pageSize);
 }

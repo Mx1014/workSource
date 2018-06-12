@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -25,19 +26,24 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.order.PayService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.order.*;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
-import com.everhomes.pay.order.CreateOrderCommand;
-import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.*;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
@@ -45,6 +51,9 @@ import com.everhomes.rest.rentalv2.*;
 
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import kafka.utils.Json;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -71,8 +80,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
@@ -92,11 +99,15 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Component
 public class ParkingServiceImpl implements ParkingService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
+	public static final String BIZ_ORDER_NUM_SPILT = "_";//业务订单分隔符
+	public static final String BIZ_ACCOUNT_PRE = "NS";//账号前缀
+
 	@Autowired
 	private List<ParkingVendorHandler> allListeners;
 	@Autowired
@@ -147,6 +158,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public ParkingBusinessPayeeAccountProvider parkingBusinessPayeeAccountProvider;
 	@Autowired
 	public ParkingOrderEmbeddedV2Handler parkingOrderEmbeddedV2Handler;
+	@Autowired
+	public NamespaceProvider namespaceProvider;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -564,7 +577,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
-		param.setClientAppName(cmd.getClientAppName());
+		param.setClientAppName(cmd.getClientAppName());//todoed
 
 		return (PreOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V2);
 
@@ -713,7 +726,7 @@ public class ParkingServiceImpl implements ParkingService {
 				extendInfo ="项目："+community.getName()+"；停车场："+parkingLot.getName();
 			}
 		}
-		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
+//		LOGGER.info("createAppPreOrder clientAppName={}", clientAppName);
 //		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
 //				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount,null, null, null,extendInfo);
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType());
@@ -724,7 +737,7 @@ public class ParkingServiceImpl implements ParkingService {
 			bussinessType = ParkingBusinessType.TEMPFEE;
 		}
 		User user = UserContext.current().getUser();
-		String sNamespaceId = "999951";		//todo
+		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
 				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
@@ -736,8 +749,8 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		createOrderCommand.setAccountCode(sNamespaceId);
-		createOrderCommand.setBizOrderNum(parkingRechargeOrder.getId()+"");
-		createOrderCommand.setClientAppName(clientAppName);
+		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
+		createOrderCommand.setClientAppName(clientAppName);//todoed
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
@@ -757,7 +770,27 @@ public class ParkingServiceImpl implements ParkingService {
 		OrderCommandResponse response = purchaseOrder.getResponse();
 		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
 		preDto.setExpiredIntervalTime(response.getExpirationMillis());
-		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
+		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		if(paymentMethods!=null){
+			preDto.setPayMethod(paymentMethods.stream().map(bizPayMethod->{
+				PayMethodDTO payMethodDTO = ConvertHelper.convert(bizPayMethod, PayMethodDTO.class);
+				payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+				payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+				String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+				payMethodDTO.setPaymentLogo(paymentLogo);
+				payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+				PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+				com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+				if(bizPaymentParamsDTO != null) {
+					paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+				}
+				payMethodDTO.setPaymentParams(paymentParamsDTO);
+
+				return payMethodDTO;
+			}).collect(Collectors.toList()));//todo
+		}
+//		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
 		return preDto;
 	}
 
@@ -1993,9 +2026,9 @@ public class ParkingServiceImpl implements ParkingService {
 			refundParkingOrderV2(cmd, order);
 		}
 
-		order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
-		order.setRefundTime(new Timestamp(System.currentTimeMillis()));
-		parkingProvider.updateParkingRechargeOrder(order);
+//		order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
+//		order.setRefundTime(new Timestamp(System.currentTimeMillis()));
+//		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
 	private void refundParkingOrderV2 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
@@ -2008,30 +2041,30 @@ public class ParkingServiceImpl implements ParkingService {
 		if(order.getPayOrderNo()==null){
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
-					"支付订单号不存在");
+					"支付系统订单号不存在");
 		}
 		CreateOrderCommand refundOrder = new CreateOrderCommand();
-		refundOrder.setRefundOrderId(order.getOrderNo());
-		refundOrder.setBizOrderNum(createOrderNo(parkingLot)+"");
+		refundOrder.setRefundOrderId(Long.valueOf(order.getPayOrderNo()));
+		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();//todo
+		refundOrder.setBizOrderNum(generateBizOrderNum(sNamespaceId+"",OrderType.OrderTypeEnum.PARKING.getPycode(),order.getOrderNo()));
 		refundOrder.setAmount(amount);
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		refundOrder.setBackUrl(callbackurl);
-		String sNamespaceId = "999951";		//todo
 		refundOrder.setAccountCode(sNamespaceId);
 		LOGGER.info("refund order params = "+refundOrder);
 		CreateOrderRestResponse refundResponse = sdkPayService.createRefundOrder(refundOrder);
 //		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getId(), refoundOrderNo, amount);
 
-		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-
-		} else{
+		if(refundResponse == null || refundResponse.getErrorCode() == null || !refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 			LOGGER.error("Refund failed from vendor, cmd={}, response={}",
 					cmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"bill refund error");
 		}
+		order.setStatus(ParkingRechargeOrderStatus.REFUNDING.getCode());
+		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
 	private void refundParkingOrderV1 (RefundParkingOrderCommand cmd, ParkingRechargeOrder order) {
@@ -2848,8 +2881,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
-		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getOwnerId() + ""));
+		checkOwner(cmd.getOwnerType(),cmd.getCommunityId());
+		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
 		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
 		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
 		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
@@ -2911,6 +2944,7 @@ public class ParkingServiceImpl implements ParkingService {
 			BusinessPayeeAccountDTO convert = ConvertHelper.convert(r, BusinessPayeeAccountDTO.class);
 			PayUserDTO payUserDTO = map.get(convert.getPayeeId());
 			if(payUserDTO!=null){
+				convert.setPayeeUserType(payUserDTO.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());
 				convert.setPayeeUserName(payUserDTO.getUserName());
 				convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
 				convert.setPayeeAccountCode(payUserDTO.getAccountCode());
@@ -2925,6 +2959,114 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		parkingBusinessPayeeAccountProvider.deleteParkingBusinessPayeeAccount(cmd.getId());
+	}
+	private JSONArray getNewsFromExcel(MultipartFile[] files) {
+		List<RowResult> resultList = null;
+		try {
+			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+		} catch (IOException e) {
+			LOGGER.error("processStat Excel error");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
+		}
+
+		if (resultList != null && resultList.size() > 0) {
+			final JSONArray array = new JSONArray();
+			for (int i = 1, len = resultList.size(); i < len; i++) {
+				RowResult result = resultList.get(i);
+				String name = RowResult.trimString(result.getA());
+				if(name==null || !name.contains("停车")){
+					continue;
+				}
+				String namespaceId = RowResult.trimString(result.getB());
+				Namespace namespace = namespaceProvider.findNamespaceById(Integer.valueOf(namespaceId));
+				if(namespace==null){
+					continue;
+				}
+				String organizationType = RowResult.trimString(result.getC());
+				String organizationId = RowResult.trimString(result.getD());
+				String payType = RowResult.trimString(result.getE());
+				String payUserId = RowResult.trimString(result.getF());
+				List<OrganizationCommunity> communities = organizationProvider.listOrganizationCommunities(Long.valueOf(organizationId));
+				if(communities==null || communities.size()==0){
+					continue;
+				}
+				for (OrganizationCommunity community : communities) {
+					List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), community.getCommunityId());
+					if(parkingLots==null ||parkingLots.size()==0){
+						continue;
+					}
+					for (ParkingLot parkingLot : parkingLots) {
+						ParkingBusinessType[] values = ParkingBusinessType.values();
+						for (ParkingBusinessType value : values) {
+							JSONObject account = new JSONObject();
+							account.put("namespaceId",namespaceId);
+							account.put("ownerType",parkingLot.getOwnerType());
+							account.put("ownerId",parkingLot.getOwnerId());
+							account.put("parkingLotId",parkingLot.getId());
+							account.put("bussnessType",value);
+							account.put("payeeId",payUserId);
+							account.put("payeeUserType",OwnerType.ORGANIZATION.getCode());
+							array.add(account);
+						}
+					}
+				}
+			}
+			return array;
+		}
+		return null;
+	}
+	@Override
+	public void initPayeeAccount(MultipartFile[] files) {
+		User user = UserContext.current().getUser();
+		if(user.getId()!=1){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error person, must system user 1");
+		}
+		JSONArray accounts = getNewsFromExcel(files);
+		LOGGER.info("accounts:"+StringHelper.toJsonString(accounts)+"");
+		if(accounts==null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error json");
+		}
+
+		for (Object object : accounts) {
+			JSONObject account = JSONObject.parseObject(object.toString());
+			if(account==null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"error account");
+			}
+			Integer namespaceId = account.getInteger("namespaceId"); if(namespaceId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty namespaceId");}
+			String ownerType = account.getString("ownerType");if(ownerType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerType");}
+			Long ownerId = account.getLong("ownerId");if(ownerId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerId");}
+			Long parkingLotId = account.getLong("parkingLotId");if(parkingLotId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty parkingLotId");}
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+			if(parkingLot==null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"invaild parkingLot");
+			}
+			String bussnessType = account.getString("bussnessType");if(bussnessType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty bussnessType");}
+			List<ParkingBusinessPayeeAccount> oldaccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, namespaceId,ownerType, ownerId, parkingLotId, bussnessType);
+			Long payeeId = account.getLong("payeeId");if(payeeId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeId");}
+			String payeeUserType = account.getString("payeeUserType");if(payeeUserType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeUserType");}
+			if(oldaccounts!=null && oldaccounts.size()>0){
+				ParkingBusinessPayeeAccount payeeAccount = oldaccounts.get(0);
+				payeeAccount.setPayeeId(payeeId);
+				payeeAccount.setPayeeUserType(payeeUserType);
+				parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(payeeAccount);
+			}else{
+				ParkingBusinessPayeeAccount payeeAccount = new ParkingBusinessPayeeAccount();
+				payeeAccount.setNamespaceId(namespaceId);
+				payeeAccount.setOwnerType(ownerType);
+				payeeAccount.setOwnerId(ownerId);
+				payeeAccount.setParkingLotId(parkingLotId);
+				payeeAccount.setParkingLotName(parkingLot.getName());
+				payeeAccount.setBusinessType(bussnessType);
+				payeeAccount.setPayeeId(payeeId);
+				payeeAccount.setPayeeUserType(payeeUserType);
+				payeeAccount.setStatus((byte)2);
+				parkingBusinessPayeeAccountProvider.createParkingBusinessPayeeAccount(payeeAccount);
+			}
+		}
 	}
 
 	@Override
@@ -2961,31 +3103,60 @@ public class ParkingServiceImpl implements ParkingService {
 		return enumOwnerType;
 	}
 
-	public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
-		List<PayMethodDTO> payMethods = new ArrayList<>();
-		String format = "{\"getOrderInfoUrl\":\"%s\"}";
-		PayMethodDTO alipay = new PayMethodDTO();
-		alipay.setPaymentName("支付宝支付");
-		PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
-		alipayParamsDTO.setPayType("A01");
-		alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
-		String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
-		alipay.setPaymentLogo(url);
-		alipay.setPaymentParams(alipayParamsDTO);
-		alipay.setPaymentType(8);
-		payMethods.add(alipay);
+//	public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+//		List<PayMethodDTO> payMethods = new ArrayList<>();
+//		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+//		PayMethodDTO alipay = new PayMethodDTO();
+//		alipay.setPaymentName("支付宝支付");
+//		PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
+//		alipayParamsDTO.setPayType("A01");
+//		alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+//		String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
+//		alipay.setPaymentLogo(url);
+//		alipay.setPaymentParams(alipayParamsDTO);
+//		alipay.setPaymentType(8);
+//		payMethods.add(alipay);
+//
+//		PayMethodDTO wxpay = new PayMethodDTO();
+//		wxpay.setPaymentName("微信支付");
+//		wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+//		url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
+//		wxpay.setPaymentLogo(url);
+//		PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
+//		wxParamsDTO.setPayType("no_credit");
+//		wxpay.setPaymentParams(wxParamsDTO);
+//		wxpay.setPaymentType(1);
+//
+//		payMethods.add(wxpay);
+//		return payMethods;
+//	}
 
-		PayMethodDTO wxpay = new PayMethodDTO();
-		wxpay.setPaymentName("微信支付");
-		wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
-		url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
-		wxpay.setPaymentLogo(url);
-		PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
-		wxParamsDTO.setPayType("no_credit");
-		wxpay.setPaymentParams(wxParamsDTO);
-		wxpay.setPaymentType(1);
+	private String generateBizOrderNum(String sNamespaceId, String pyCode, Long orderNo) {
+		return sNamespaceId+BIZ_ORDER_NUM_SPILT+pyCode+BIZ_ORDER_NUM_SPILT+orderNo;
+	}
 
-		payMethods.add(wxpay);
-		return payMethods;
+	@Override
+	public void rechargeOrderMigration() {
+		Long pageAnchor = null;
+		Integer pageSize = 100;
+		boolean hasNext = true;
+		while (hasNext) {
+			List<PaymentOrderRecord> records = parkingProvider.listParkingPaymentOrderRecords(pageAnchor,pageSize);
+			for (PaymentOrderRecord record : records) {
+				ParkingRechargeOrder parkingOrder = parkingProvider.findParkingRechargeOrderById(record.getOrderId());
+				if (parkingOrder == null) {
+					continue;
+				}
+				parkingOrder.setPayOrderNo(record.getPaymentOrderId() + "");
+				parkingProvider.updateParkingRechargeOrder(parkingOrder);
+			}
+			if(records.size()<pageSize){
+				hasNext = false;
+			}
+			else
+			{
+				pageAnchor=records.get(records.size()-1).getId();
+			}
+		}
 	}
 }

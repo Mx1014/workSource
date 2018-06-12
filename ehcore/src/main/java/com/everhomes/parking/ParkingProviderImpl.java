@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
@@ -1240,11 +1241,11 @@ public class ParkingProviderImpl implements ParkingProvider {
 					"创建个人付款账户失败");
 		}
 		String s = sdkPayService.bandPhone(payUserList.getId(), userIdenify);
-		//todo
-//		if(s==null || !"OK".equalsIgnoreCase(s)){
-//			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
-//					"绑定个人手机号码失败");
-//		}
+		//todoed
+		if(s==null || !"OK".equalsIgnoreCase(s)){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
+					"绑定个人手机号码失败");
+		}
 		ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
 		dto.setAccountId(payUserList.getId());
 		dto.setAccountType(payUserList.getUserType()==2? OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
@@ -1254,5 +1255,17 @@ public class ParkingProviderImpl implements ParkingProvider {
 			dto.setAccountStatus(Byte.valueOf(payUserList.getRegisterStatus() + ""));
 		}
 		return dto;
+	}
+
+	@Override
+	public List<PaymentOrderRecord> listParkingPaymentOrderRecords(Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentOrderRecords.class));
+		return context.select()
+				.from(Tables.EH_PAYMENT_ORDER_RECORDS)
+				.where(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_TYPE.eq("parking"))
+				.and(Tables.EH_PAYMENT_ORDER_RECORDS.ID.gt(pageAnchor))
+				.orderBy(Tables.EH_PAYMENT_ORDER_RECORDS.ID)
+				.limit(pageSize)
+				.fetch().map(r->ConvertHelper.convert(r,PaymentOrderRecord.class));
 	}
 }
