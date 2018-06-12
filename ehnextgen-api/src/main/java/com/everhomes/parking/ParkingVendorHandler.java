@@ -127,4 +127,6 @@ public interface ParkingVendorHandler {
     List<ParkingActualClearanceLogDTO> getTempCardLogs(ParkingClearanceLog r);
 
     String applyTempCard(ParkingClearanceLog log);
+
+    void refreshToken();
 }

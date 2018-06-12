@@ -27,14 +27,9 @@ import com.everhomes.rest.wx.CheckAuthCommand;
 import com.everhomes.rest.wx.CheckAuthResponse;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import org.apache.http.Consts;
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.ParseException;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -52,6 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,7 +77,7 @@ import com.everhomes.rest.user.UserGender;
 @RestDoc(value = "WX Auth Controller", site = "core")
 @RestController
 @RequestMapping("/wxauth")
-public class WXAuthController {// extends ControllerBase
+public class WXAuthController implements ApplicationListener<ContextRefreshedEvent> {// extends ControllerBase
 	private static final Logger LOGGER = LoggerFactory.getLogger(WXAuthController.class);
     
     private final static String KEY_NAMESPACE = "ns";
@@ -127,8 +124,17 @@ public class WXAuthController {// extends ControllerBase
 
     @Autowired
     private ContentServerService contentServerService;
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            openHttpClient();
+        }
+    }
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     private CloseableHttpClient openHttpClient() {
         if (isHttpClientOpen()) {
             return this.httpClient;
@@ -528,6 +534,11 @@ public class WXAuthController {// extends ControllerBase
         }
         
         userService.signupByThirdparkUser(wxUser, request);
+
+        //signupByThirdparkUser里面已经设置过一次了但是setDefaultCommunity有个问题，但是有一个问题setDefaultCommunity限定了对应的namespaceResource只能是1。
+        //add by yanjun 201805091940
+        userService.setDefaultCommunityForWx(wxUser.getId(), namespaceId);
+
         UserLogin userLogin = userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
 
         // 添加CurrentUser用于后期，检查identifi add by yanjun 20170926
@@ -561,7 +572,18 @@ public class WXAuthController {// extends ControllerBase
         String result = null;
         try {
             httpclient = HttpClients.createDefault();
+
             HttpGet httpGet = new HttpGet(url);
+
+            //使用测试环境没有固定ip代理访问，从有外网ip的服务器访问微信，从而实现固定id
+            String wechatProxyHost = configurationProvider.getValue("wechat.proxy.host", null);
+            int wechatProxyPort = configurationProvider.getIntValue("wechat.proxy.port", 0);
+            if(wechatProxyHost != null && wechatProxyPort != 0){
+                HttpHost proxy = new HttpHost(wechatProxyHost, wechatProxyPort);
+                RequestConfig requestConfig = RequestConfig.custom().setProxy(proxy).build();
+                httpGet.setConfig(requestConfig);
+            }
+
             response = httpclient.execute(httpGet);
 
             int status = response.getStatusLine().getStatusCode();

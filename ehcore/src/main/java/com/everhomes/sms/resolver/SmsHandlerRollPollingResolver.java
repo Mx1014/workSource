@@ -40,7 +40,7 @@ public class SmsHandlerRollPollingResolver extends AbstractSmsHandlerResolver {
                 SmsHandler hd = handlers.get(unknownHandler.get(random.nextInt(0, unknownHandler.size())).toLowerCase());
                 putHandlerAndPhone(handlerToPhonesMap, phoneNumber, hd);
             } else {
-                smsLogMap.values().stream().sorted(Comparator.comparing(EhSmsLogs::getCreateTime)).findFirst().ifPresent(r -> {
+                smsLogMap.values().stream().min(Comparator.comparing(EhSmsLogs::getCreateTime)).ifPresent(r -> {
                     SmsHandler hd = handlers.get(r.getHandler().toLowerCase());
                     putHandlerAndPhone(handlerToPhonesMap, phoneNumber, hd);
                 });

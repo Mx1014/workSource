@@ -121,8 +121,9 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 
 //			JSONObject paramJson = JSONObject.parseObject(params);
 //			String nodeType = paramJson.getString("nodeType");
-
+			task.setStatus(FlowCaseStatus.PROCESS.getCode());
 			task.setFlowCaseId(flowCase.getId());
+			task.setStatus(flowCase.getStatus());
 			pmTaskProvider.updateTask(task);
 			return task;
 		});

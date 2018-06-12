@@ -1,40 +1,98 @@
 package com.everhomes.customer;
 
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.*;
-
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.customer.*;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.varField.FieldParams;
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
-
+import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
+import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.openapi.techpark.AllFlag;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhCustomerAccountsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerDepartureInfosDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorStatisticsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEntryInfosDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEventsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTaxesDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAdminsDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomerAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
+import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
+import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
+import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
+import com.everhomes.server.schema.tables.pojos.EhCustomerDepartureInfos;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicatorStatistics;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
+import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTaxes;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAdmins;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAttachments;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
+import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
+import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerAccountsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerCommercialsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerDepartureInfosRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorStatisticsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEntryInfosRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEventsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerInvestmentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerPatentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTalentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTaxesRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCustomerAdminsRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -42,9 +100,34 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.SelectOffsetStep;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -484,6 +567,27 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), CustomerTalent.class);
+    }
+
+    @Override
+    public CustomerTalent findCustomerTalentByPhone(String phone, Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTalentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TALENTS);
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.PHONE.eq(phone));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTalent> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTalent.class));
+            return null;
+        });
+
+        if(result != null && result.size() > 0) {
+            return result.get(0);
+        }
+
+        return null;
     }
 
     @Override
@@ -1391,7 +1495,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhCustomerTrackingsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKINGS);
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
+//        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
+        query.addOrderBy(Tables.EH_CUSTOMER_TRACKINGS.CREATE_TIME.desc());
         List<CustomerTracking> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerTracking.class));
@@ -1465,7 +1570,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
 
 	@Override
-	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist) {
+	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
 		CustomerEvent event = new CustomerEvent(); 
 		event.setId(id);
@@ -1474,7 +1579,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		event.setCustomerId(customer.getId());
 		event.setCustomerName(customer.getName());
 		event.setContactName(customer.getContactName());
-		String content = null;
+        event.setDeviceType(deviceType);
+        String content = null;
 		switch(i){
 		case 1 : 
 			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
@@ -1581,24 +1687,26 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					        }
 						}
                         if("trackingUid".equals(field.getFieldName())) {
-                            if("-1".equals(oldData)) {
+                            if (oldData == null || oldData.equals("")|| oldData.equals("空")) {
                                 oldData = "空";
                             } else {
                                 oldData = exist.getTrackingName();
                             }
 
-                            if("-1".equals(newData)) {
+                            if (newData == null || newData.equals("")||newData.equals("空")) {
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();
                             }
-
                         }
-						Map<String,Object> map = new HashMap<String,Object>();
+                        Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);
 						map.put("newData", newData);
 						content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
+						if(field.getFieldParam().contains("image")){
+                            content = content.split(":")[0];
+                        }
 						buffer.append(content);
 						buffer.append(";");
 					}
@@ -1628,11 +1736,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		assert(customer.getId() != null);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
-        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
-        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, -1l)
-        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_NAME, "")
-        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
-        	   .execute();
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        dao.update(customer);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
 	}
 
@@ -1819,5 +1924,175 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         }
 
         return result.get(0).getVersion();
+    }
+
+    @Override
+    public List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId, Long appId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhAuthorizationRelationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATION_RELATIONS);
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID.eq(moduleId));
+        if (appId != null) {
+            query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.APP_ID.eq(appId));
+        }
+        query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.ALL_PROJECT_FLAG.eq(AllFlag.ALL.getCode())
+                .or(Tables.EH_AUTHORIZATION_RELATIONS.PROJECT_JSON.like("%"+communityId+"%")));
+        return query.fetchInto(AuthorizationRelation.class);
+    }
+
+    @Override
+    public void updateEnterpriseBannerUri(Long customerId, List<AttachmentDescriptor> banners) {
+        deleteCustomerBannerUriByCustomerId(customerId);
+        if (banners != null && banners.size() > 0) {
+            banners.forEach((b) -> createCustomerBannerUri(customerId, b));
+        }
+    }
+
+    private void createCustomerBannerUri(Long customerId, AttachmentDescriptor banner) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAttachments.class));
+        CustomerAttachements attachement = new CustomerAttachements();
+        attachement = ConvertHelper.convert(banner, CustomerAttachements.class);
+        attachement.setId(id);
+        attachement.setCustomerId(customerId);
+        attachement.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        attachement.setCreatorUid(UserContext.currentUserId());
+        EhEnterpriseCustomerAttachmentsDao dao = new EhEnterpriseCustomerAttachmentsDao(context.configuration());
+        dao.insert(attachement);
+    }
+
+    private void deleteCustomerBannerUriByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
+                .execute();
+    }
+
+    @Override
+    public void createEnterpriseCustomerAdminRecord(Long customerId, String contactName,String contactType, String contactToken,Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomerAdmins.class));
+        CustomerAdminRecord record = new CustomerAdminRecord();
+        record.setContactName(contactName);
+        record.setContactToken(contactToken);
+        record.setCustomerId(customerId);
+        record.setContactType(contactType);
+        record.setId(id);
+        record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        record.setCreatorUid(UserContext.currentUserId());
+        record.setNamespaceId(namespaceId);
+        record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
+        dao.insert(record);
+    }
+
+    @Override
+    public void deleteEnterpriseCustomerAdminRecord(Long customerId, String contactToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contactToken).and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId)))
+                .execute();
+    }
+
+    @Override
+    public void updateEnterpriseCustomerAdminRecord(String contacToken,Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        List<CustomerAdminRecord> records = context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(contacToken))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
+                .fetchInto(CustomerAdminRecord.class);
+        if (records != null && records.size() > 0) {
+            for (CustomerAdminRecord record : records) {
+                record.setContactType(OrganizationMemberTargetType.USER.getCode());
+                EhEnterpriseCustomerAdminsDao dao = new EhEnterpriseCustomerAdminsDao(context.configuration());
+                dao.update(record);
+            }
+        }
+    }
+
+    @Override
+    public List<CustomerAdminRecord> listEnterpriseCustomerAdminRecords(Long customerId, String contactType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomerAdminsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId));
+        if (contactType != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE.eq(contactType));
+        }
+        return query.fetchInto(CustomerAdminRecord.class);
+    }
+
+    @Override
+    public List<EnterpriseAttachment> listEnterpriseCustomerPostUri(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
+                .fetchInto(EnterpriseAttachment.class);
+    }
+
+    @Override
+    public List<Organization> listNoSyncOrganizations(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        List<Long> organizationIds = context.selectDistinct(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID)
+//                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+//                .fetchInto(Long.class);
+//        List<Long> namespaceId = context.selectDistinct(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID)
+//                .from(Tables.EH_LAUNCH_PAD_ITEMS)
+//                .where(Tables.EH_LAUNCH_PAD_ITEMS.ACTION_TYPE.eq(ActionType.PARKENTERPRISE.getCode()))
+//                .fetchInto(Long.class);
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+//        query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(organizationIds));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+//        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.in(namespaceId));
+        //大师说暂时可以用item来区分使用园区企业应用的namespaceId
+        if (namespaceId != null) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        }
+        return query.fetchInto(Organization.class);
+    }
+
+    @Override
+    public void deleteAllCustomerEntryInfo(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId))
+                .execute();
+    }
+
+    @Override
+    public void deleteAllEnterpriseCustomerAdminRecord(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(id))
+                .execute();
+    }
+
+    @Override
+    public void deleteCustomerEntryInfoByCustomerIdAndAddressId(Long customerId, Long addressId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId))
+                .and(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.eq(addressId))
+                .execute();
+    }
+
+    @Override
+    public void deleteCustomerEntryInfoByCustomerIdAndAddressIds(Long customerId, List<Long> addressIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.CUSTOMER_ID.eq(customerId))
+                .and(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.in(addressIds))
+                .execute();
+    }
+
+    @Override
+    public void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .set(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TYPE, OrganizationMemberTargetType.USER.getCode())
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
+                .execute();
     }
 }

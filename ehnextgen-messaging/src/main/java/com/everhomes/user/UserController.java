@@ -25,6 +25,9 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.message.MessageRecordDto;
+import com.everhomes.rest.message.MessageRecordStatus;
+import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.BlockingEventCommand;
 import com.everhomes.rest.messaging.GetSercetKeyForScanCommand;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -655,12 +658,12 @@ public class UserController extends ControllerBase {
 		long senderBoxSequence = this.userService.getNextStoreSequence(UserContext.current().getLogin(),
 				UserContext.current().getLogin().getNamespaceId(), message.getAppId());
 
-		cmd.getChannels().forEach((channel) -> {
+		// cmd.getChannels().forEach((channel) -> {
 			messagingService.routeMessage(UserContext.current().getLogin(),
 					cmd.getAppId() != null ? cmd.getAppId() : App.APPID_MESSAGING,
-							channel.getChannelType(), channel.getChannelToken(), message,
+							mainChannel.getChannelType(), mainChannel.getChannelToken(), message,
 							cmd.getDeliveryOption() != null ? cmd.getDeliveryOption() : 0);
-		});
+		// });
 
 		return new RestResponse(senderBoxSequence);
 	}
@@ -680,7 +683,6 @@ public class UserController extends ControllerBase {
 	        FetchMessageCommandResponse cmdResponse = this.messagingService.fetchPastToRecentMessages(cmd);
 	        long endTime = System.currentTimeMillis();
 	        LOGGER.info("fetchPastToRecentMessages took=" + (endTime - startTime) + " milliseconds");
-
 	        response.setResponseObject(cmdResponse);
 	        return response;
 	    } catch(Exception ex) {
@@ -1048,9 +1050,7 @@ public class UserController extends ControllerBase {
 		return null;
 	}
 
-	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
-			HttpServletResponse response) {
-
+	private static void setCookieInResponse(String name, String value, HttpServletRequest request, HttpServletResponse response) {
 		Cookie cookie = findCookieInRequest(name, request);
 		if(cookie == null)
 			cookie = new Cookie(name, value);
@@ -1535,5 +1535,21 @@ public class UserController extends ControllerBase {
 		resp.setErrorDescription("OK");
 		return resp;
 	}
+
+	/**
+	 * <b>URL: /user/isUserAuth</b>
+	 * <p>判断用户是否为认证用户</p>
+	 * @return
+	 */
+	@RequestMapping("isUserAuth")
+	@RestReturn(String.class)
+	public RestResponse isUserAuth() {
+		RestResponse resp = new RestResponse(userService.isUserAuth());
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+
 
 }

@@ -9,6 +9,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.techpark.punch.*;
@@ -40,17 +41,18 @@ import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.zxing.Result;
 import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
 @RequestMapping("/punch")
 public class PunchAdminController extends ControllerBase {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PunchAdminController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PunchAdminController.class);
 
-	@Autowired
-	private PunchService punchService;
-	@Autowired
-	private UserService userService; 
+    @Autowired
+    private PunchService punchService;
+    @Autowired
+    private UserService userService;
 //	/**
 //	 * <b>URL: /punch/addPunchTimeRule</b>
 //	 * <p>
@@ -66,7 +68,7 @@ public class PunchAdminController extends ControllerBase {
 //		response.setErrorDescription("OK");
 //		return response;
 //	}	
-	
+
 //	/**
 //	 * <b>URL: /punch/updatePunchTimeRule</b>
 //	 * <p>
@@ -98,7 +100,7 @@ public class PunchAdminController extends ControllerBase {
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
-	
+
 //	/**
 //	 * <b>URL: /punch/listPunchTimeRuleList</b>
 //	 * <p>
@@ -378,63 +380,64 @@ public class PunchAdminController extends ControllerBase {
 //	}
 //	
 
-	//排班规则
+    //排班规则
 
-	/**
-	 * <b>URL: /punch/listPunchScheduling</b>
-	 * <p>
-	 * 查询某个月的班次
-	 * </p>
-	 */
-	@RequestMapping("listPunchScheduling")
-	@RestReturn(value = ListPunchSchedulingMonthResponse.class)
-	public RestResponse listPunchScheduling(@Valid ListPunchSchedulingMonthCommand cmd) {
-		ListPunchSchedulingMonthResponse resp = punchService.listPunchScheduling(cmd);
-		RestResponse response = new RestResponse(resp);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /punch/exportPunchScheduling</b>
-	 * <p>
-	 * 导出排班表
-	 * </p>
-	 */
-	@RequestMapping("exportPunchScheduling")
-	public  RestResponse exportPunchScheduling(@Valid ListPunchSchedulingMonthCommand cmd,HttpServletResponse response ) {
-		punchService.exportPunchScheduling(cmd, response );
+    /**
+     * <b>URL: /punch/listPunchScheduling</b>
+     * <p>
+     * 查询某个月的班次
+     * </p>
+     */
+    @RequestMapping("listPunchScheduling")
+    @RestReturn(value = ListPunchSchedulingMonthResponse.class)
+    public RestResponse listPunchScheduling(@Valid ListPunchSchedulingMonthCommand cmd) {
+        ListPunchSchedulingMonthResponse resp = punchService.listPunchScheduling(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /punch/exportPunchScheduling</b>
+     * <p>
+     * 导出排班表
+     * </p>
+     */
+    @RequestMapping("exportPunchScheduling")
+    public RestResponse exportPunchScheduling(@Valid ListPunchSchedulingMonthCommand cmd, HttpServletResponse response) {
+        punchService.exportPunchScheduling(cmd, response);
 //		RestResponse response = new RestResponse(commandResponse);
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");
-		return new RestResponse();
-	}
+        return new RestResponse();
+    }
 
 
-	/**
-	 * <b>URL: /punch/exportPunchSchedulingTemplate</b>
-	 * <p>
-	 * 导出排班表模板
-	 * </p>
-	 */
-	@RequestMapping("exportPunchSchedulingTemplate")
-	public  HttpServletResponse exportPunchSchedulingTemplate(@Valid ListPunchSchedulingMonthCommand cmd,HttpServletResponse response ) {
-		HttpServletResponse commandResponse = punchService.exportPunchSchedulingTemplate(cmd, response );
+    /**
+     * <b>URL: /punch/exportPunchSchedulingTemplate</b>
+     * <p>
+     * 导出排班表模板
+     * </p>
+     */
+    @RequestMapping("exportPunchSchedulingTemplate")
+    public HttpServletResponse exportPunchSchedulingTemplate(@Valid ListPunchSchedulingMonthCommand cmd, HttpServletResponse response) {
+        HttpServletResponse commandResponse = punchService.exportPunchSchedulingTemplate(cmd, response);
 //		RestResponse response = new RestResponse(commandResponse);
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");
-		return commandResponse;
-	}
+        return commandResponse;
+    }
 
 
-	/**
+    /**
      * <b>URL: /punch/importPunchScheduling</b>
      * <p>导入排班表</p>
      */
     @RequestMapping("importPunchScheduling")
     @RestReturn(value = PunchSchedulingDTO.class)
     public RestResponse importPunchScheduling(@RequestParam(value = "attachment") MultipartFile[] files) {
-		PunchSchedulingDTO result = punchService.importPunchScheduling( files);
+        PunchSchedulingDTO result = punchService.importPunchScheduling(files);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -447,38 +450,40 @@ public class PunchAdminController extends ControllerBase {
      */
     @RequestMapping("testimportPunchScheduling")
     @RestReturn(value = PunchSchedulingDTO.class)
-    public RestResponse testimportPunchScheduling( @RequestParam(value = "_attachment_file") MultipartFile[] files) {
+    public RestResponse testimportPunchScheduling(@RequestParam(value = "_attachment_file") MultipartFile[] files) {
         return importPunchScheduling(files);
     }
+
     /**
      * <b>URL: /punch/testimportPunchLogs</b>
      * <p>给登录用户通过excel导入打卡记录--测试用</p>
      */
     @RequestMapping("testimportPunchLogs")
     @RestReturn(value = String.class)
-    public RestResponse testimportPunchLogs(  @RequestParam(value = "_attachment_file") MultipartFile[] files) {
-    	punchService.importPunchLogs(files);
+    public RestResponse testimportPunchLogs(@RequestParam(value = "_attachment_file") MultipartFile[] files) {
+        punchService.importPunchLogs(files);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-	/**
-	 * <b>URL: /punch/updatePunchSchedulings</b>
-	 * <p>
-	 * 更新某个月的班次
-	 * </p>
-	 */
-	@RequestMapping("updatePunchSchedulings")
-	@RestReturn(value = String.class)
-	public RestResponse updatePunchSchedulings(@Valid UpdatePunchSchedulingMonthCommand cmd) {
-		punchService.updatePunchSchedulings(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
+
+    /**
+     * <b>URL: /punch/updatePunchSchedulings</b>
+     * <p>
+     * 更新某个月的班次
+     * </p>
+     */
+    @RequestMapping("updatePunchSchedulings")
+    @RestReturn(value = String.class)
+    public RestResponse updatePunchSchedulings(@Valid UpdatePunchSchedulingMonthCommand cmd) {
+        punchService.updatePunchSchedulings(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 //	
 //	
 //	
@@ -683,395 +688,472 @@ public class PunchAdminController extends ControllerBase {
 //	}
 //	
 
-	//设置打卡规则
-	
-	/**
-	 * <b>URL: punch/addPunchGroup</b>
-	 * <p>
-	 * 新增打卡规则(考勤组)
-	 * </p>
-	 */
-	@RequestMapping("addPunchGroup")
-	@RestReturn(value = PunchGroupDTO.class)
-	public RestResponse addPunchGroup(@Valid AddPunchGroupCommand cmd) {
-		PunchGroupDTO commandResponse = punchService.addPunchGroup(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    //设置打卡规则
 
-	/**
-	 * <b>URL: punch/getPunchGroup</b>
-	 * <p>
-	 * 列出打卡规则(考勤组)
-	 * </p>
-	 */
-	@RequestMapping("getPunchGroup")
-	@RestReturn(value = PunchGroupDTO.class)
-	public RestResponse getPunchGroup(@Valid GetPunchGroupCommand cmd) {
-		PunchGroupDTO commandResponse = punchService.getPunchGroup(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: punch/addPunchGroup</b>
+     * <p>
+     * 新增打卡规则(考勤组)
+     * </p>
+     */
+    @RequestMapping("addPunchGroup")
+    @RestReturn(value = PunchGroupDTO.class)
+    public RestResponse addPunchGroup(@Valid AddPunchGroupCommand cmd) {
+        PunchGroupDTO commandResponse = punchService.addPunchGroup(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-
-	/**
-	 * <b>URL: punch/listPunchGroups</b>
-	 * <p>
-	 * 列出打卡规则(考勤组)
-	 * </p>
-	 */
-	@RequestMapping("listPunchGroups")
-	@RestReturn(value = ListPunchGroupsResponse.class)
-	public RestResponse listPunchGroups(@Valid ListPunchGroupsCommand cmd) {
-		ListPunchGroupsResponse commandResponse = punchService.listPunchGroups(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: punch/getPunchGroupsCount</b>
-	 * <p>
-	 * 获取某公司总人数和关联人数
-	 * </p>
-	 */
-	@RequestMapping("getPunchGroupsCount")
-	@RestReturn(value = GetPunchGroupsCountResponse.class)
-	public RestResponse getPunchGroupsCount(@Valid GetPunchGroupsCountCommand cmd) {
-		GetPunchGroupsCountResponse commandResponse = punchService.getPunchGroupsCount(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: punch/getPunchGroup</b>
+     * <p>
+     * 列出打卡规则(考勤组)
+     * </p>
+     */
+    @RequestMapping("getPunchGroup")
+    @RestReturn(value = PunchGroupDTO.class)
+    public RestResponse getPunchGroup(@Valid GetPunchGroupCommand cmd) {
+        PunchGroupDTO commandResponse = punchService.getPunchGroup(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
+    /**
+     * <b>URL: punch/listPunchGroups</b>
+     * <p>
+     * 列出打卡规则(考勤组)
+     * </p>
+     */
+    @RequestMapping("listPunchGroups")
+    @RestReturn(value = ListPunchGroupsResponse.class)
+    public RestResponse listPunchGroups(@Valid ListPunchGroupsCommand cmd) {
+        ListPunchGroupsResponse commandResponse = punchService.listPunchGroups(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: punch/updatePunchGroup</b>
-	 * <p>
-	 * 更新打卡规则(考勤组)
-	 * </p>
-	 */
-	@RequestMapping("updatePunchGroup")
-	@RestReturn(value = PunchGroupDTO.class)
-	public RestResponse updatePunchGroup(@Valid PunchGroupDTO cmd) {
-		PunchGroupDTO commandResponse = punchService.updatePunchGroup(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
+    /**
+     * <b>URL: punch/getPunchGroupsCount</b>
+     * <p>
+     * 获取某公司总人数和关联人数
+     * </p>
+     */
+    @RequestMapping("getPunchGroupsCount")
+    @RestReturn(value = GetPunchGroupsCountResponse.class)
+    public RestResponse getPunchGroupsCount(@Valid GetPunchGroupsCountCommand cmd) {
+        GetPunchGroupsCountResponse commandResponse = punchService.getPunchGroupsCount(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: punch/deletePunchGroup</b>
-	 * <p>
-	 * 删除打卡规则(考勤组)
-	 * </p>
-	 */
-	@RequestMapping("deletePunchGroup")
-	@RestReturn(value = String.class)
-	public RestResponse deletePunchGroup(@Valid DeleteCommonCommand cmd) {
-		punchService.deletePunchGroup(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	
-	//统计
-	
-	/**
-	 * <b>URL: punch/listPunchStatistics</b>
-	 * <p>
-	 * 查询公司考勤的统计结果
-	 * </p>
-	 */
-	@RequestMapping("listPunchStatistics")
-	@RestReturn(value = ListPunchCountCommandResponse.class)
-	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
-		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
-		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
 
-	/**
-	 * <b>URL: punch/exportPunchStatistics</b>
-	 * <p>
-	 * 导出公司打卡的统计结果
-	 * </p>
-	 */
-	@RequestMapping("exportPunchStatistics")
-	public  RestResponse exportPunchStatistics(@Valid ListPunchCountCommand cmd,HttpServletResponse response ) {
-		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_EXPORT);
-		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response ); 
-		return new RestResponse();
-	}
-	/**
-	 * <b>URL: punch/listPunchMonthLogs</b>
-	 * <p>
-	 * 查询公司某月的考勤明细-具体到每人每天
-	 * </p>
-	 */
-	@RequestMapping("listPunchMonthLogs")
-	@RestReturn(value = ListPunchMonthLogsResponse.class)
-	public RestResponse listPunchMonthLogs(@Valid ListPunchMonthLogsCommand cmd) {
-		ListPunchMonthLogsResponse commandResponse = punchService.listPunchMonthLogs(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
+    /**
+     * <b>URL: punch/updatePunchGroup</b>
+     * <p>
+     * 更新打卡规则(考勤组)
+     * </p>
+     */
+    @RequestMapping("updatePunchGroup")
+    @RestReturn(value = PunchGroupDTO.class)
+    public RestResponse updatePunchGroup(@Valid PunchGroupDTO cmd) {
+        PunchGroupDTO commandResponse = punchService.updatePunchGroup(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: punch/listPunchDetails</b>
-	 * <p>
-	 * 查询 打卡详情
-	 * </p>
-	 */
-	@RequestMapping("listPunchDetails")
-	@RestReturn(value = ListPunchDetailsResponse.class)
-	public RestResponse listPunchDetails(@Valid ListPunchDetailsCommand cmd) {
-		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(),PrivilegeConstants.PUNCH_STATISTIC_QUERY);
-		ListPunchDetailsResponse commandResponse = punchService.listPunchDetails(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
 
-	/**
-	 * <b>URL: punch/exportPunchDetails</b>
-	 * <p>
-	 * 导出公司打卡的详情
-	 * </p>
-	 */
-	@RequestMapping("exportPunchDetails")
-	public RestResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd, HttpServletResponse response) {
-		Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
-		punchService.checkAppPrivilege(ownerId,cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_EXPORT);
-		HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response);
+    /**
+     * <b>URL: punch/deletePunchGroup</b>
+     * <p>
+     * 删除打卡规则(考勤组)
+     * </p>
+     */
+    @RequestMapping("deletePunchGroup")
+    @RestReturn(value = String.class)
+    public RestResponse deletePunchGroup(@Valid DeleteCommonCommand cmd) {
+        punchService.deletePunchGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    //统计
+
+    /**
+     * <b>URL: punch/listPunchStatistics</b>
+     * <p>
+     * 查询公司考勤的统计结果
+     * </p>
+     */
+    @RequestMapping("listPunchStatistics")
+    @RestReturn(value = ListPunchCountCommandResponse.class)
+    public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
+        Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+        punchService.checkAppPrivilege(ownerId, cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_QUERY);
+        ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: punch/exportPunchStatistics</b>
+     * <p>
+     * 导出公司打卡的统计结果
+     * </p>
+     */
+    @RequestMapping("exportPunchStatistics")
+    public RestResponse exportPunchStatistics(@Valid ListPunchCountCommand cmd, HttpServletResponse response) {
+        Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+        punchService.checkAppPrivilege(ownerId, cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_EXPORT);
+        HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response);
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: punch/listPunchMonthLogs</b>
+     * <p>
+     * 查询公司某月的考勤明细-具体到每人每天
+     * </p>
+     */
+    @RequestMapping("listPunchMonthLogs")
+    @RestReturn(value = ListPunchMonthLogsResponse.class)
+    public RestResponse listPunchMonthLogs(@Valid ListPunchMonthLogsCommand cmd) {
+        ListPunchMonthLogsResponse commandResponse = punchService.listPunchMonthLogs(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: punch/listPunchDetails</b>
+     * <p>
+     * 查询 打卡详情
+     * </p>
+     */
+    @RequestMapping("listPunchDetails")
+    @RestReturn(value = ListPunchDetailsResponse.class)
+    public RestResponse listPunchDetails(@Valid ListPunchDetailsCommand cmd) {
+        Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+        punchService.checkAppPrivilege(ownerId, cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_QUERY);
+        ListPunchDetailsResponse commandResponse = punchService.listPunchDetails(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: punch/exportPunchDetails</b>
+     * <p>
+     * 导出公司打卡的详情
+     * </p>
+     */
+    @RequestMapping("exportPunchDetails")
+    public RestResponse exportPunchDetails(@Valid ListPunchDetailsCommand cmd, HttpServletResponse response) {
+        Long ownerId = punchService.getTopEnterpriseId(cmd.getOwnerId());
+        punchService.checkAppPrivilege(ownerId, cmd.getOwnerId(), PrivilegeConstants.PUNCH_STATISTIC_EXPORT);
+        HttpServletResponse commandResponse = punchService.exportPunchDetails(cmd, response);
 //		RestResponse response = new RestResponse(commandResponse);
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");
-		return new RestResponse();
-	}
+        return new RestResponse();
+    }
 
-	/**
-	 * <b>URL: /punch/refreshDayStatistics</b>
-	 * <p>
-	 * 刷新统计结果 前一天的
-	 * </p>
-	 */
-	@RequestMapping("refreshDayStatistics")
-	@RestReturn(value = String.class)
-	public RestResponse refreshDayStatistics() {
-		punchService.dayRefreshLogScheduled();
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /punch/refreshMonthDayLogs</b>
-	 * <p>
-	 * 刷新统计结果 前一天的
-	 * </p>
-	 */
-	@RequestMapping("refreshMonthDayLogs")
-	@RestReturn(value = String.class)
-	public RestResponse refreshMonthDayLogs(@Valid ListPunchMonthLogsCommand cmd) {
-		punchService.refreshMonthDayLogs(cmd.getPunchMonth());
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: /punch/refreshDayStatistics</b>
+     * <p>
+     * 刷新统计结果 前一天的
+     * </p>
+     */
+    @RequestMapping("refreshDayStatistics")
+    @RestReturn(value = String.class)
+    public RestResponse refreshDayStatistics() {
+        punchService.dayRefreshLogScheduled();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <p>
-	 * 查询公司某部门/某人 考勤规则 
-	 * 已经废弃-by 2.5
-	 * </p>
-	 * <b>URL: /punch/getTargetPunchAllRule</b>
-	 */
-	@Deprecated
-	@RequestMapping("getTargetPunchAllRule")
-	@RestReturn(value = GetTargetPunchAllRuleResponse.class)
-	public RestResponse getTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
-		GetTargetPunchAllRuleResponse resp = punchService.getTargetPunchAllRule(cmd);
-		RestResponse response = new RestResponse(resp);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: /punch/refreshMonthDayLogs</b>
+     * <p>
+     * 刷新统计结果 前一天的
+     * </p>
+     */
+    @RequestMapping("refreshMonthDayLogs")
+    @RestReturn(value = String.class)
+    public RestResponse refreshMonthDayLogs(@Valid ListPunchMonthLogsCommand cmd) {
+        punchService.refreshMonthDayLogs(cmd.getPunchMonth());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <p>
-	 * 设置公司某部门/某人 考勤规则 
-	 * 已经废弃-by2.5
-	 * </p>
-	 * <b>URL: /punch/updateTargetPunchAllRule</b>
-	 */
+    /**
+     * <p>
+     * 查询公司某部门/某人 考勤规则
+     * 已经废弃-by 2.5
+     * </p>
+     * <b>URL: /punch/getTargetPunchAllRule</b>
+     */
+    @Deprecated
+    @RequestMapping("getTargetPunchAllRule")
+    @RestReturn(value = GetTargetPunchAllRuleResponse.class)
+    public RestResponse getTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
+        GetTargetPunchAllRuleResponse resp = punchService.getTargetPunchAllRule(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	@Deprecated
-	@RequestMapping("updateTargetPunchAllRule")
-	@RestReturn(value = String.class)
-	public RestResponse updateTargetPunchAllRule(@Valid UpdateTargetPunchAllRuleCommand cmd) {
-		punchService.updateTargetPunchAllRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <p>
+     * 设置公司某部门/某人 考勤规则
+     * 已经废弃-by2.5
+     * </p>
+     * <b>URL: /punch/updateTargetPunchAllRule</b>
+     */
 
-	/**
-	 * <p>
-	 * 清空公司某部门/某人 考勤规则
-	 * </p>
-	 * <b>URL: /punch/deleteTargetPunchAllRule</b>
-	 */
-	@RequestMapping("deleteTargetPunchAllRule")
-	@RestReturn(value = String.class)
-	public RestResponse deleteTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
-		punchService.deleteTargetPunchAllRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    @Deprecated
+    @RequestMapping("updateTargetPunchAllRule")
+    @RestReturn(value = String.class)
+    public RestResponse updateTargetPunchAllRule(@Valid UpdateTargetPunchAllRuleCommand cmd) {
+        punchService.updateTargetPunchAllRule(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-
-	/**
-	 * <p>
-	 * 清空公司某部门/某人 考勤规则
-	 * </p>
-	 * <b>URL: /punch/testPunchDayRefresh</b>
-	 */
-	@RequestMapping("testPunchDayRefresh")
-	@RestReturn(value = String.class)
-	public RestResponse testPunchDayRefresh(@Valid TestPunchDayRefreshCommand cmd) {
-		punchService.testDayRefreshLogs(cmd.getRunDate());
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <p>
+     * 清空公司某部门/某人 考勤规则
+     * </p>
+     * <b>URL: /punch/deleteTargetPunchAllRule</b>
+     */
+    @RequestMapping("deleteTargetPunchAllRule")
+    @RestReturn(value = String.class)
+    public RestResponse deleteTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
+        punchService.deleteTargetPunchAllRule(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
-	/**
-	 * <b>URL: punch/refreshPunchDayLogs</b>
-	 * <p>
-	 * 刷新打卡详情
-	 * </p>
-	 */
-	@RequestMapping("refreshPunchDayLogs")
-	@RestReturn(value = ListPunchDetailsResponse.class)
-	public RestResponse refreshPunchDayLogs(@Valid ListPunchDetailsCommand cmd) {
-		punchService.refreshPunchDayLogs(cmd);
-		RestResponse response = new RestResponse( );
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: punch/refreshPunchGroupScheduled</b>
-	 * <p>
-	 * 刷新次日更新
-	 * </p>
-	 */
-	@RequestMapping("refreshPunchGroupScheduled")
-	@RestReturn(value = String.class)
-	public RestResponse refreshPunchGroupScheduled() {
-		punchService.dayRefreshPunchGroupScheduled();
-		RestResponse response = new RestResponse( );
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: punch/transforSceneToken</b>
-	 * <p>
-	 *  
-	 * </p>
-	 */
-	@RequestMapping("transforSceneToken")
-	@RequireAuthentication(false)
-	@RestReturn(value = SceneTokenDTO.class)
-	public RestResponse transforSceneToken(@Valid TransforSceneTokenCommand cmd) { 
-		SceneTokenDTO sceneToken = userService.checkSceneToken(cmd.getUserId(), cmd.getSceneToken());
-		RestResponse response = new RestResponse(sceneToken);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: punch/getPunchQRCode</b>
-	 * <p>
-	 * 获取二维码图片 返回二进制流
-	 * </p>
-	 */
-	@RequestMapping("getPunchQRCode")
-	@RestReturn(value=String.class)
-	public  RestResponse getPunchQRCode(@Valid GetPunchQRCodeCommand cmd,HttpServletResponse response ) {
-		String resp = punchService.getPunchQRCode(cmd, response );
-		return new RestResponse(resp);
-	}
-
-	/**
-	 * <b>URL: punch/getPunchQRCodeResult</b>
-	 * <p>web调用,长轮询得到扫码结果</p>
-	 */
-	@RequestMapping("getPunchQRCodeResult")
-	@RestReturn(value=String.class)
-	@RequireAuthentication(false)
-	public DeferredResult<RestResponse> getPunchQRCodeResult(@Valid GetPunchQRCodeCommand cmd){
-		return punchService.getPunchQRCodeResult(cmd);
-	}
+    /**
+     * <p>
+     * 清空公司某部门/某人 考勤规则
+     * </p>
+     * <b>URL: /punch/testPunchDayRefresh</b>
+     */
+    @RequestMapping("testPunchDayRefresh")
+    @RestReturn(value = String.class)
+    public RestResponse testPunchDayRefresh(@Valid TestPunchDayRefreshCommand cmd) {
+        punchService.testDayRefreshLogs(cmd.getRunDate());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
-	/**
-	 * <b>URL: punch/invalidPunchQRCode</b>
-	 * <p>web调用,让二维码过期</p>
-	 */
-	@RequestMapping("invalidPunchQRCode")
-	@RestReturn(value=String.class)
-	@RequireAuthentication(false)
-	public RestResponse invalidPunchQRCode(@Valid GetPunchQRCodeCommand cmd){
-		punchService.invalidPunchQRCode(cmd);
-		return new RestResponse();
-	}
+    /**
+     * <b>URL: punch/refreshPunchDayLogs</b>
+     * <p>
+     * 刷新打卡详情
+     * </p>
+     */
+    @RequestMapping("refreshPunchDayLogs")
+    @RestReturn(value = ListPunchDetailsResponse.class)
+    public RestResponse refreshPunchDayLogs(@Valid ListPunchDetailsCommand cmd) {
+        punchService.refreshPunchDayLogs(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: punch/listPunchLogs</b>
-	 * <p>
-	 * 查询某人某天的真实打卡记录
-	 * </p>
-	 */
-	@RequestMapping("listPunchLogs")
-	@RestReturn(value = ListPunchLogsResponse.class)
-	public RestResponse listPunchLogs(@Valid ListPunchLogsCommand cmd) {
-		ListPunchLogsResponse commandResponse = punchService.listPunchLogs(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: punch/refreshPunchGroupScheduled</b>
+     * <p>
+     * 刷新次日更新
+     * </p>
+     */
+    @RequestMapping("refreshPunchGroupScheduled")
+    @RestReturn(value = String.class)
+    public RestResponse refreshPunchGroupScheduled() {
+        punchService.dayRefreshPunchGroupScheduled();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: punch/transforSceneToken</b>
+     * <p>
+     * <p>
+     * </p>
+     */
+    @RequestMapping("transforSceneToken")
+    @RequireAuthentication(false)
+    @RestReturn(value = SceneTokenDTO.class)
+    public RestResponse transforSceneToken(@Valid TransforSceneTokenCommand cmd) {
+        SceneTokenDTO sceneToken = userService.checkSceneToken(cmd.getUserId(), cmd.getSceneToken());
+        RestResponse response = new RestResponse(sceneToken);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: punch/getPunchQRCode</b>
+     * <p>
+     * 获取二维码图片 返回二进制流
+     * </p>
+     */
+    @RequestMapping("getPunchQRCode")
+    @RestReturn(value = String.class)
+    public RestResponse getPunchQRCode(@Valid GetPunchQRCodeCommand cmd, HttpServletResponse response) {
+        String resp = punchService.getPunchQRCode(cmd, response);
+        return new RestResponse(resp);
+    }
+
+    /**
+     * <b>URL: punch/getPunchQRCodeResult</b>
+     * <p>web调用,长轮询得到扫码结果</p>
+     */
+    @RequestMapping("getPunchQRCodeResult")
+    @RestReturn(value = String.class)
+    @RequireAuthentication(false)
+    public DeferredResult<RestResponse> getPunchQRCodeResult(@Valid GetPunchQRCodeCommand cmd) {
+        return punchService.getPunchQRCodeResult(cmd);
+    }
+
+
+    /**
+     * <b>URL: punch/invalidPunchQRCode</b>
+     * <p>web调用,让二维码过期</p>
+     */
+    @RequestMapping("invalidPunchQRCode")
+    @RestReturn(value = String.class)
+    @RequireAuthentication(false)
+    public RestResponse invalidPunchQRCode(@Valid GetPunchQRCodeCommand cmd) {
+        punchService.invalidPunchQRCode(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: punch/listPunchLogs</b>
+     * <p>
+     * 查询某人某天的真实打卡记录
+     * </p>
+     */
+    @RequestMapping("listPunchLogs")
+    @RestReturn(value = ListPunchLogsResponse.class)
+    public RestResponse listPunchLogs(@Valid ListPunchLogsCommand cmd) {
+        ListPunchLogsResponse commandResponse = punchService.listPunchLogs(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>查询假期余额列表</p>
+     * <b>URL: /punch/listVacationBalances</b>
+     */
+    @RequestMapping("listVacationBalances")
+    @RestReturn(ListVacationBalancesResponse.class)
+    public RestResponse listVacationBalances(ListVacationBalancesCommand cmd) {
+        return new RestResponse(punchService.listVacationBalances(cmd));
+    }
+
+    /**
+     * <p>修改余额</p>
+     * <b>URL: /punch/updateVacationBalances</b>
+     */
+    @RequestMapping("updateVacationBalances")
+    @RestReturn(String.class)
+    public RestResponse updateVacationBalances(UpdateVacationBalancesCommand cmd) {
+        punchService.updateVacationBalances(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <p>批量修改余额</p>
+     * <b>URL: /punch/batchUpdateVacationBalances</b>
+     */
+    @RequestMapping("batchUpdateVacationBalances")
+    @RestReturn(String.class)
+    public RestResponse batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd) {
+        punchService.batchUpdateVacationBalances(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <p>分页查询操作日志</p>
+     * <b>URL: /punch/listVacationBalanceLogs</b>
+     */
+    @RequestMapping("listVacationBalanceLogs")
+    @RestReturn(ListVacationBalanceLogsResponse.class)
+    public RestResponse listVacationBalanceLogs(ListVacationBalanceLogsCommand cmd) {
+        return new RestResponse(punchService.listVacationBalanceLogs(cmd));
+    }
+
+    /**
+     * <p>批量导出</p>
+     * <b>URL: /punch/exportVacationBalances</b>
+     */
+    @RequestMapping("exportVacationBalances")
+    @RestReturn(String.class)
+    public RestResponse exportVacationBalances(ExportVacationBalancesCommand cmd) {
+        punchService.exportVacationBalances(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <p>批量导入</p>
+     * <b>URL: /punch/importVacationBalances</b>
+     */
+    @RequestMapping("importVacationBalances")
+    @RestReturn(ImportFileTaskDTO.class)
+    public RestResponse importVacationBalances(@RequestParam(value = "attachment") MultipartFile[] files, ImportVacationBalancesCommand cmd) {
+        ImportFileTaskDTO dto = punchService.importVacationBalances(files, cmd);
+        return new RestResponse(dto);
+    }
+    
+    /**
+     * <p>刷新punchLog的应打卡时间</p>
+     * <b>URL: /punch/addPunchLogShouldPunchTime</b>
+     */
+    @RequestMapping("addPunchLogShouldPunchTime")
+    @RestReturn(String.class)
+    public RestResponse addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd) {
+        punchService.addPunchLogShouldPunchTime( cmd);
+        return new RestResponse();
+    }
+
 }

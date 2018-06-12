@@ -5,6 +5,7 @@ import javax.validation.Valid;
 
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -305,6 +306,23 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	/**
 	 *
+	 * <b>URL: /rental/admin/updateResourceStatus</b>
+	 * <p>
+	 * 开启/关闭 资源预约
+	 * </p>
+	 */
+	@RequestMapping("updateResourceStatus")
+	@RestReturn(String.class)
+	public RestResponse updateResourceStatus(@Valid UpdateResourceAdminCommand cmd){
+		this.rentalService.updateResourceStatus(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
 	 * <b>URL: /rental/admin/updateResourceOrder</b>
 	 * <p>
 	 * 更新资源顺序
@@ -482,7 +500,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 */
 	@RequestMapping("listRentalBills")
 	@RestReturn(value = ListRentalBillsCommandResponse.class)
-	public RestResponse listRentalBills(@Valid ListRentalBillsCommand cmd) {
+	public RestResponse listRentalBills(@Valid com.everhomes.rest.rentalv2.ListRentalBillsCommand cmd) {
 		ListRentalBillsCommandResponse lsitRentalBillsCommandResponse = rentalService
 				.listRentalBills(cmd);
 		RestResponse response = new RestResponse(lsitRentalBillsCommandResponse);
@@ -499,7 +517,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 */
 	@RequestMapping("listActiveRentalBills")
 	@RestReturn(value = ListRentalBillsCommandResponse.class)
-	public RestResponse listActiveRentalBills(@Valid ListRentalBillsCommand cmd) {
+	public RestResponse listActiveRentalBills(@Valid com.everhomes.rest.rentalv2.ListRentalBillsCommand cmd) {
 		ListRentalBillsCommandResponse lsitRentalBillsCommandResponse = rentalService
 				.listActiveRentalBills(cmd);
 		RestResponse response = new RestResponse(lsitRentalBillsCommandResponse);
@@ -516,7 +534,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportRentalBills")
-	public void exportRentalBills(@Valid ListRentalBillsCommand cmd, HttpServletResponse response) {
+	public void exportRentalBills(@Valid com.everhomes.rest.rentalv2.ListRentalBillsCommand cmd, HttpServletResponse response) {
 		rentalService.exportRentalBills(cmd, response );
 	}
 
@@ -818,6 +836,7 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+
 	/**
 	 * <b>URL: /rental/admin/getRentalOrderById</b>
 	 * <p>通过id查询订单</p>
@@ -899,4 +918,36 @@ public class Rentalv2AdminController extends ControllerBase {
 		return response;
 	}
 
+
+	/**
+	 * <b>URL: /rental/admin/queryRentalStatistics</b>
+	 * <p>
+	 * 查询资源预约订单统计信息
+	 * </p>
+	 */
+	@RequestMapping("queryRentalStatistics")
+	@RestReturn(value = QueryRentalStatisticsResponse.class)
+	public RestResponse queryRentalStatistics( QueryRentalStatisticsCommand cmd) {
+		QueryRentalStatisticsResponse statisticsResponse = rentalService.queryRentalStatistics(cmd);
+		RestResponse response = new RestResponse(statisticsResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/queryOrgRentalStatistics</b>
+	 * <p>
+	 * 查询资源预约订单统计信息(公司)
+	 * </p>
+	 */
+	@RequestMapping("queryOrgRentalStatistics")
+	@RestReturn(value = QueryOrgRentalStatisticsResponse.class)
+	public RestResponse queryOrgRentalStatistics( QueryRentalStatisticsCommand cmd) {
+		QueryOrgRentalStatisticsResponse statisticsResponse = rentalService.queryOrgRentalStatistics(cmd);
+		RestResponse response = new RestResponse(statisticsResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

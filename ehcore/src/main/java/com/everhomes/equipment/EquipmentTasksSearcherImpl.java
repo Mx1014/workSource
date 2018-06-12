@@ -189,8 +189,8 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
         //unMappedType
-        builder.addSort(SortBuilders.fieldSort("status").order(SortOrder.ASC));
-        builder.addSort(SortBuilders.fieldSort("endTime").order(SortOrder.DESC));
+//        builder.addSort(SortBuilders.fieldSort("status").order(SortOrder.ASC));
+        builder.addSort(SortBuilders.fieldSort("startTime").order(SortOrder.DESC));
 
         SearchResponse rsp = builder.execute().actionGet();
 
@@ -277,7 +277,7 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             b.field("startTime", task.getExecutiveStartTime());
             b.field("endTime", task.getExecutiveExpireTime());
             b.field("status", task.getStatus());
-            //b.field("taskName", task.getTaskName()).field("index","not_analyzed");
+            b.field("taskName", task.getTaskName());
             b.field("inspectionCategoryId", task.getInspectionCategoryId());
 
             EquipmentInspectionPlans plan = equipmentProvider.getEquipmmentInspectionPlanById(task.getPlanId());

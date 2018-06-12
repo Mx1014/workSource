@@ -1,3 +1,4 @@
+// @formatter
 package com.everhomes.rest.aclink;
 
 import java.util.List;
@@ -5,6 +6,14 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>validCount：有效授权</li>
+ * <li>invalidCount：已失效</li>
+ * <li>total:总数</li>
+ * </ul>
+ *
+ */
 public class AuthVisitorStasticResponse {
     @ItemType(AuthVisitorStasticDTO.class)
     private List<AuthVisitorStasticDTO> dtos;

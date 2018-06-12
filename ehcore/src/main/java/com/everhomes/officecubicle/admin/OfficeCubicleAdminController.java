@@ -3,6 +3,7 @@ package com.everhomes.officecubicle.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.officecubicle.admin.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +17,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.officecubicle.OfficeCubicleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.officecubicle.DeleteSpaceCommand;
-import com.everhomes.rest.officecubicle.admin.AddSpaceCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpaceOrdersResponse;
-import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminCommand;
-import com.everhomes.rest.officecubicle.admin.SearchSpacesAdminResponse;
-import com.everhomes.rest.officecubicle.admin.UpdateSpaceCommand;
 
 /**
  * <ul>
@@ -50,9 +45,115 @@ public class OfficeCubicleAdminController extends ControllerBase {
         return response;
     	
     }
+
+    /**
+     * <b>URL: /officecubicle/listRegions</b>
+     * <p>城市管理-获取区域列表</p>
+     */
+    @RequestMapping("listRegions")
+    @RestReturn(value=ListRegionsResponse.class )
+    public RestResponse listRegions(ListRegionsCommand cmd) {
+        ListRegionsResponse resp = this.officeCubicleService.listRegions(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+    /**
+     * <b>URL: /officecubicle/listProvinceAndCites</b>
+     * <p>城市管理-获取已经设定的省份和城市</p>
+     */
+    @RequestMapping("listProvinceAndCites")
+    @RestReturn(value=ListCitiesResponse.class )
+    public RestResponse listProvinceAndCites(ListCitiesCommand cmd) {
+        ListCitiesResponse resp = this.officeCubicleService.listProvinceAndCites(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+
+    /**
+     * <b>URL: /officecubicle/listCities</b>
+     * <p>城市管理-获取已经设定的城市列表</p>
+     */
+    @RequestMapping("listCities")
+    @RestReturn(value=ListCitiesResponse.class )
+    public RestResponse listCities(ListCitiesCommand cmd) {
+        ListCitiesResponse resp = this.officeCubicleService.listCities(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+    /**
+     * <b>URL: /officecubicle/deleteCity</b>
+     * <p>城市管理-删除城市</p>
+     */
+    @RequestMapping("deleteCity")
+    @RestReturn(value=String.class )
+    public RestResponse deleteCity(DeleteCityCommand cmd) {
+       this.officeCubicleService.deleteCity(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+    /**
+     * <b>URL: /officecubicle/createOrUpdateCity</b>
+     * <p>城市管理-创建/更新城市</p>
+     */
+    @RequestMapping("createOrUpdateCity")
+    @RestReturn(value=String.class )
+    public RestResponse createOrUpdateCity(CreateOrUpdateCityCommand cmd) {
+        this.officeCubicleService.createOrUpdateCity(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+    /**
+     * <b>URL: /officecubicle/reOrderCity</b>
+     * <p>城市管理-城市顺序交换</p>
+     */
+    @RequestMapping("reOrderCity")
+    @RestReturn(value=String.class )
+    public RestResponse reOrderCity(ReOrderCityCommand cmd) {
+        this.officeCubicleService.reOrderCity(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
     
     /**
-     * <b>URL: /officecubicle/addSpace</b> 
+     * <b>URL: /officecubicle/getCityById</b>
+     * <p>城市管理-根据id获取城市详情</p>
+     */
+    @RequestMapping("getCityById")
+    @RestReturn(value=CityDTO.class )
+    public RestResponse getCityById(GetCityByIdCommand cmd) {
+        RestResponse response = new RestResponse(this.officeCubicleService.getCityById(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+
+    /**
+     * <b>URL: /officecubicle/addSpace</b>
      * <p>空间管理-添加空间</p>
      */
     @RequestMapping("addSpace")
@@ -63,9 +164,9 @@ public class OfficeCubicleAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    	
-    } 
-    
+
+    }
+
     /**
      * <b>URL: /officecubicle/updateSpace</b> 
      * <p>空间管理-更新空间</p>
@@ -136,7 +237,7 @@ public class OfficeCubicleAdminController extends ControllerBase {
      * </p>
      */
     @RequestMapping("dataMigration")
-    public RestResponse exprotSpaceOrders() {
+    public RestResponse dataMigration() {
         this.officeCubicleService.dataMigration();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

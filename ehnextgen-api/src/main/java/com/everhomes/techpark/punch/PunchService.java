@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
 
@@ -267,4 +267,22 @@ public interface PunchService {
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
 			String userName, String ownerType, Long ownerId, Long taskId);
+
+	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd);
+
+	public void updateVacationBalances(UpdateVacationBalancesCommand cmd);
+
+	public void batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd);
+
+	public ListVacationBalanceLogsResponse listVacationBalanceLogs(ListVacationBalanceLogsCommand cmd);
+
+	public void exportVacationBalances(ExportVacationBalancesCommand cmd);
+
+	public ImportFileTaskDTO importVacationBalances(MultipartFile[] files, ImportVacationBalancesCommand cmd);
+
+	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
+
+	ArrayList processImportExcel2ArrayList(MultipartFile[] files);
+	
+	void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd);
 }

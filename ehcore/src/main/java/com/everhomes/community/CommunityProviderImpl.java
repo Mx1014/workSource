@@ -108,7 +108,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Override
     public void createCommunity(Long creatorId, Community community) {
-        long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhCommunities.class);
+        //long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
 
         community.setId(id);
         community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -158,7 +160,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Cacheable(value="Community", key="#id" , unless="#result == null")
     @Override
-    public Community findCommunityById(long id) {
+    public Community findCommunityById(Long id) {
         final Community[] result = new Community[1];
 
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result,
@@ -934,9 +936,12 @@ public class CommunityProviderImpl implements CommunityProvider {
         	buildingIds.add(building.getId());
         	mapBuildings.put(building.getId(), building);
         }
-
-        List<Integer> shards = this.shardingProvider.getContentShards(EhBuildings.class, buildingIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
+        
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhBuildings.class, buildingIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhBuildingAttachmentsRecord> query = context.selectQuery(Tables.EH_BUILDING_ATTACHMENTS);
             query.addConditions(Tables.EH_BUILDING_ATTACHMENTS.BUILDING_ID.in(buildingIds));
             query.fetch().map((EhBuildingAttachmentsRecord record) -> {
@@ -1546,7 +1551,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 
     @Override
-    public List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
+    public List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword,List<Long> communityIds, Long pageAnchor,
                                                      Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
 
@@ -1561,6 +1566,9 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         if(null != areaId){
             cond = cond.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));
+        }
+        if (null != communityIds){
+            cond = cond.and(Tables.EH_COMMUNITIES.ID.in(communityIds));
         }
 
         if(!StringUtils.isEmpty(keyword)){

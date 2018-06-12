@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *     <li>skipFlag: 是否支持跳过 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>targetType: 跳转类型 {@link com.everhomes.rest.banner.BannerTargetType}</li>
  *     <li>targetData: 跳转类型对应的data,每种targetType对应的data都不一样,将targetData对象转换成json字符串的形式</li>
+ *     <li>resourceName: 文件名称</li>
  *     <li>actionType: actionType</li>
  *     <li>actionData: actionData</li>
  *     <li>status: 状态 {@link com.everhomes.rest.launchad.LaunchAdStatus}</li>
@@ -39,6 +40,7 @@ public class LaunchAdDTO {
 
     private String targetType;
     private String targetData;
+    private String resourceName;
 
     private Byte actionType;
     private String actionData;
@@ -170,6 +172,14 @@ public class LaunchAdDTO {
 
     public void setTargetData(String targetData) {
         this.targetData = targetData;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
     }
 
     @Override

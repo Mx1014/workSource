@@ -5,7 +5,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.news.*;
 import com.everhomes.util.StringHelper;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -119,6 +127,7 @@ public class NewsController extends ControllerBase {
 	 */
 	@RequestMapping("listNewsForWeb")
 	@RestReturn(ListNewsResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse listNewsForWeb(ListNewsCommand cmd) {
 		ListNewsResponse listNewsResponse = newsService.listNewsForWeb(cmd);
 
@@ -358,6 +367,7 @@ public class NewsController extends ControllerBase {
 	 */
 	@RequestMapping("getNewsTag")
 	@RestReturn(GetNewsTagResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse getNewsTag(GetNewsTagCommand cmd){
 		GetNewsTagResponse getNewsTagResponse = newsService.getNewsTag(cmd);
 
@@ -390,7 +400,8 @@ public class NewsController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getCategoryIdByEntryId")
-	@RestReturn(GetCategoryIdByEntryIdResponse.class)
+	@RestReturn(GetCategoryIdByEntryIdResponse.class)	
+	@RequireAuthentication(false)
 	public RestResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd){
 		RestResponse response = new RestResponse(newsService.getCategoryIdByEntryId(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -398,3 +409,16 @@ public class NewsController extends ControllerBase {
 		return response;
 	}
 }
+
+
+//@Aspect
+//@Component
+// class MyPoxy {
+//		
+//	    @Before("execution(public * com.everhomes.news.NewsController.*(..))")
+//	    public void beforMethod(JoinPoint point){
+//	        String methodName = point.getSignature().getName();
+//	        List<Object> args = Arrays.asList(point.getArgs());
+//	        System.out.println("调用前连接点方法为：" + methodName + ",参数为：" + args);
+//	    }
+//}

@@ -27,6 +27,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.AssociationActionData;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
 import com.everhomes.rest.common.ScopeType;
@@ -62,6 +63,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.lucene.util.UnicodeUtil;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -1358,6 +1361,7 @@ public class PortalServiceImpl implements PortalService {
 
 					// 涉及的表比较多，经常会出现id冲突，sb事务又经常是有问题无法回滚。无奈之举，在此同步一次Sequence。
 					// 大师改好事务之后，遇到有缘人再来此删掉下面这行代码
+					// 二楼：sb事务 + 1
 					sequenceService.syncSequence();
 
 					UserContext.setCurrentUser(user);
@@ -1380,6 +1384,12 @@ public class PortalServiceImpl implements PortalService {
 
 							//更新正式版本标志
 							updateReleaseVersion(namespaceId, cmd.getVersionId());
+						}else {
+
+							//增加预览版本次数，用于生成版本本号
+							PortalVersion releaseVersion = findReleaseVersion(namespaceId);
+							releaseVersion.setPreviewCount(releaseVersion.getPreviewCount() + 1);
+							portalVersionProvider.updatePortalVersion(releaseVersion);
 						}
 
 						//发布应用
@@ -1519,6 +1529,9 @@ public class PortalServiceImpl implements PortalService {
 			publishVersion.setBigVersion(1);
 		}
 		publishVersion.setMinorVersion(0);
+
+		//新版本preview count 为0
+		publishVersion.setPreviewCount(0);
 
 		portalVersionProvider.updatePortalVersion(publishVersion);
 	}
@@ -1665,60 +1678,72 @@ public class PortalServiceImpl implements PortalService {
 
 
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(layout.getNamespaceId());
-		Integer versionCode =  releaseVersion.getDateVersion() * 100 + releaseVersion.getBigVersion();
+		Long versionCode =  releaseVersion.getDateVersion().longValue() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
 
 
-		//正式发布才能更改layout，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
-		if(portalLaunchPadMappings.size() > 0  && PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+//		//正式发布才能更改layout，预览的都用新增的，正式发布时会清除掉当前域空间所有的预览版本数据。
+//		if(portalLaunchPadMappings.size() > 0  && PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+//
+//			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
+//				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
+//				if(null != launchPadLayout){
+////					if(launchPadLayout.getVersionCode().toString().indexOf(now) != -1){
+////						versionCode = launchPadLayout.getVersionCode() + 1;
+////					}
+//
+//					launchPadLayout.setVersionCode(versionCode.longValue());
+//					layoutJson.setVersionCode(versionCode.toString());
+//					String json = StringHelper.toJsonString(layoutJson);
+//					launchPadLayout.setLayoutJson(json);
+//
+//					launchPadProvider.updateLaunchPadLayout(launchPadLayout);
+//
+//				}
+//			}
+//		}else{
 
-			for (PortalLaunchPadMapping mapping: portalLaunchPadMappings) {
-				launchPadLayout = launchPadProvider.findLaunchPadLayoutById(mapping.getLaunchPadContentId());
-				if(null != launchPadLayout){
-//					if(launchPadLayout.getVersionCode().toString().indexOf(now) != -1){
-//						versionCode = launchPadLayout.getVersionCode() + 1;
-//					}
 
-					launchPadLayout.setVersionCode(versionCode.longValue());
-					layoutJson.setVersionCode(versionCode.toString());
-					String json = StringHelper.toJsonString(layoutJson);
-					launchPadLayout.setLayoutJson(json);
-
-					launchPadProvider.updateLaunchPadLayout(launchPadLayout);
-
-				}
-			}
-		}else{
-			layoutJson.setVersionCode(versionCode.toString());
-			String json = StringHelper.toJsonString(layoutJson);
-			launchPadLayout.setNamespaceId(layout.getNamespaceId());
-			launchPadLayout.setName(layout.getName());
-			launchPadLayout.setVersionCode(versionCode.longValue());
-			launchPadLayout.setMinVersionCode(0L);
-			launchPadLayout.setStatus(LaunchPadLayoutStatus.ACTIVE.getCode());
-			launchPadLayout.setScopeCode((byte)0);
-			launchPadLayout.setApplyPolicy((byte)0);
-			launchPadLayout.setScopeId(0L);
-			launchPadLayout.setLayoutJson(json);
-
-			if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
-				launchPadLayout.setPreviewPortalVersionId(versionId);
-			}
-
-			for (SceneType sceneType: SceneType.values()) {
-				if(sceneType == SceneType.DEFAULT ||
-						sceneType == SceneType.PARK_TOURIST ||
-						sceneType == SceneType.PM_ADMIN){
-					launchPadLayout.setSceneType(sceneType.getCode());
-					launchPadProvider.createLaunchPadLayout(launchPadLayout);
-					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
-					mapping.setContentType(EntityType.PORTAL_LAYOUT.getCode());
-					mapping.setPortalContentId(layout.getId());
-					mapping.setCreatorUid(user.getId());
-					mapping.setLaunchPadContentId(launchPadLayout.getId());
-					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+		//上面mapping不靠谱，此处删除所有的同名字的layout  edit by yanjun 201805161519
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.RELEASE){
+			List<LaunchPadLayout> launchPadLayouts = launchPadProvider.getLaunchPadLayouts(layout.getName(), layout.getNamespaceId());
+			if(launchPadLayouts != null){
+				for (LaunchPadLayout deleteLayout: launchPadLayouts){
+					launchPadProvider.deleteLaunchPadLayout(deleteLayout.getId());
 				}
 			}
 		}
+
+		layoutJson.setVersionCode(versionCode.toString());
+		String json = StringHelper.toJsonString(layoutJson);
+		launchPadLayout.setNamespaceId(layout.getNamespaceId());
+		launchPadLayout.setName(layout.getName());
+		launchPadLayout.setVersionCode(versionCode.longValue());
+		launchPadLayout.setMinVersionCode(0L);
+		launchPadLayout.setStatus(LaunchPadLayoutStatus.ACTIVE.getCode());
+		launchPadLayout.setScopeCode((byte)0);
+		launchPadLayout.setApplyPolicy((byte)0);
+		launchPadLayout.setScopeId(0L);
+		launchPadLayout.setLayoutJson(json);
+
+		if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
+			launchPadLayout.setPreviewPortalVersionId(versionId);
+		}
+
+		for (SceneType sceneType: SceneType.values()) {
+			if(sceneType == SceneType.DEFAULT ||
+					sceneType == SceneType.PARK_TOURIST ||
+					sceneType == SceneType.PM_ADMIN){
+				launchPadLayout.setSceneType(sceneType.getCode());
+				launchPadProvider.createLaunchPadLayout(launchPadLayout);
+				PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+				mapping.setContentType(EntityType.PORTAL_LAYOUT.getCode());
+				mapping.setPortalContentId(layout.getId());
+				mapping.setCreatorUid(user.getId());
+				mapping.setLaunchPadContentId(launchPadLayout.getId());
+				portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+			}
+		}
+//		}
 	}
 
 
@@ -1939,15 +1964,42 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	private void setItemLayoutActionData(LaunchPadItem item, String actionData){
-		item.setActionType(ActionType.NAVIGATION.getCode());
 		LayoutActionData data = (LayoutActionData)StringHelper.fromJsonString(actionData, LayoutActionData.class);
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(data.getLayoutId());
 		if(null != layout){
-			NavigationActionData navigationActionData = new NavigationActionData();
-			navigationActionData.setItemLocation(layout.getLocation());
-			navigationActionData.setLayoutName(layout.getName());
-			navigationActionData.setTitle(layout.getLabel());
-			item.setActionData(StringHelper.toJsonString(navigationActionData));
+
+			//tab widget have to use router way
+			boolean routerFlag = false;
+			List<PortalItemGroup> portalItemGroups = portalItemGroupProvider.listPortalItemGroup(layout.getId());
+			if(portalItemGroups !=null) {
+				for (PortalItemGroup itemGroup: portalItemGroups){
+					if(Widget.fromCode(itemGroup.getWidget()) == Widget.TAB){
+						routerFlag = true;
+						break;
+					}
+				}
+			}
+
+			if(routerFlag){
+				PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(layout.getNamespaceId());
+				Long versionCode =  releaseVersion.getDateVersion().longValue() * 10000 + releaseVersion.getBigVersion() * 100 + releaseVersion.getPreviewCount();
+				item.setActionType(ActionType.ROUTER.getCode());
+				AssociationActionData associationActionData = new AssociationActionData();
+				String url = "zl://association/main?layoutName=" + layout.getName() +
+						"&itemLocation=" + layout.getLocation()+
+						"&versionCode=" + versionCode.toString()+
+						"&displayName=" + layout.getLabel();
+				associationActionData.setUrl(url);
+				item.setActionData(associationActionData.toString());
+			}else {
+				item.setActionType(ActionType.NAVIGATION.getCode());
+				NavigationActionData navigationActionData = new NavigationActionData();
+				navigationActionData.setItemLocation(layout.getLocation());
+				navigationActionData.setLayoutName(layout.getName());
+				navigationActionData.setTitle(layout.getLabel());
+				item.setActionData(StringHelper.toJsonString(navigationActionData));
+			}
+
 		}else{
 			LOGGER.error("Unable to find the portal layout.id = {}, actionData = {}", data.getLayoutId(), actionData);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2253,6 +2305,7 @@ public class PortalServiceImpl implements PortalService {
 		newVersion.setParentId(versionId);
 		newVersion.setBigVersion(oldVersion.getBigVersion());
 		newVersion.setMinorVersion(1);
+		newVersion.setPreviewCount(0);
 		newVersion.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		newVersion.setSyncTime(new Timestamp(System.currentTimeMillis()));
 

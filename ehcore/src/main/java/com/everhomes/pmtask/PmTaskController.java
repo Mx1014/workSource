@@ -8,6 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.entity.EntityType;
+import com.everhomes.pmtask.zhuzong.ZhuzongAddresses;
+import com.everhomes.pmtask.zhuzong.ZhuzongCreateTask;
+import com.everhomes.pmtask.zhuzong.ZhuzongTaskDetail;
+import com.everhomes.pmtask.zhuzong.ZhuzongTasks;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
@@ -320,7 +324,7 @@ public class PmTaskController extends ControllerBase {
 //        return response;
 //    }
 
-	
+
 //	/**
 //	 * <b>URL: /pmtask/getTaskLog</b>
 //	 * <p>获取任务完成详情或任务关闭理由</p>
@@ -419,7 +423,7 @@ public class PmTaskController extends ControllerBase {
         return response;
     }
 
-    
+
     /**
      * <b>URL: /pmtask/exportTasks</b>
      * <p>任务导出</p>
@@ -629,6 +633,63 @@ public class PmTaskController extends ControllerBase {
         return resp;
     }
 
+     /*---------------------------- start 以下接口是服务器转发 调用第三方报修系统----------------------------------*/
+    /**
+     * <b>URL: /pmtask/queryThirdAddress</b>
+     * <p>获取第三方地址信息</p>
+     */
+    @RequestMapping("queryThirdAddress")
+    @RestReturn(value = String.class)
+    public RestResponse queryThirdAddress(HttpServletRequest req){
+        Object addresses = pmTaskService.getThirdAddress(req);
+        RestResponse resp = new RestResponse(addresses);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/createThirdTask</b>
+     * <p>创建第三方报修</p>
+     */
+    @RequestMapping("createThirdTask")
+    @RestReturn(value = String.class)
+    public RestResponse createThirdTask(HttpServletRequest req){
+        Object task = pmTaskService.createThirdTask(req);
+        RestResponse resp = new RestResponse(task);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/listThirdTasks</b>
+     * <p>获取第三方报修列表</p>
+     */
+    @RequestMapping("listThirdTasks")
+    @RestReturn(value = String.class)
+    public RestResponse listThirdTasks(HttpServletRequest req){
+        Object tasks = pmTaskService.listThirdTasks(req);
+        RestResponse resp = new RestResponse(tasks);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/getThirdTaskDetail</b>
+     * <p>获取第三方报修详情</p>
+     */
+    @RequestMapping("getThirdTaskDetail")
+    @RestReturn(value = String.class)
+    public RestResponse getThirdTaskDetail(HttpServletRequest req){
+        Object detail = pmTaskService.getThirdTaskDetail(req);
+        RestResponse resp = new RestResponse(detail);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
     /**
      * <b>URL: /pmtask/syncCategories</b>
      * <p>给不同项目拷贝分类(用后删除)</p>
@@ -696,4 +757,85 @@ public class PmTaskController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+
+/*------------------------------- 3.5报修统计 -------------------------------*/
+    /**
+     * <b>URL: /pmtask/getStatSurvey</b>
+     * <p>根据项目Id与起止时间查询统计概况</p>
+     */
+    @RequestMapping("getStatSurvey")
+    @RestReturn(value=PmTaskStatDTO.class)
+    public RestResponse getStatSurvey(GetTaskStatCommand cmd){
+        PmTaskStatDTO res = pmTaskService.getStatSurvey(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getStatByCategory</b>
+     * <p>根据服务类型统计报修数据</p>
+     */
+    @RequestMapping("getStatByCategory")
+    @RestReturn(value=PmTaskStatSubDTO.class,collection = true)
+    public RestResponse getStatByCategory(GetTaskStatCommand cmd){
+        List<PmTaskStatSubDTO> res = pmTaskService.getStatByCategory(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getStatByCreator</b>
+     * <p>根据来源统计报修数据</p>
+     */
+    @RequestMapping("getStatByCreator")
+    @RestReturn(value=PmTaskStatDTO.class,collection = true)
+    public RestResponse getStatByCreator(GetTaskStatCommand cmd){
+        List<PmTaskStatDTO> res = pmTaskService.getStatByCreator(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getStatByStatus</b>
+     * <p>根据状态统计报修数据</p>
+     */
+    @RequestMapping("getStatByStatus")
+    @RestReturn(value=PmTaskStatDTO.class,collection = true)
+    public RestResponse getStatByStatus(GetTaskStatCommand cmd){
+        List<PmTaskStatDTO> res = pmTaskService.getStatByStatus(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/getStatByArea</b>
+     * <p>根据区域统计报修数据</p>
+     */
+    @RequestMapping("getStatByArea")
+    @RestReturn(value=PmTaskStatSubDTO.class,collection = true)
+    public RestResponse getStatByArea(GetTaskStatCommand cmd){
+        List<PmTaskStatSubDTO> res = pmTaskService.getStatByArea(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/exportTaskStat</b>
+     * <p>导出统计列表</p>
+     */
+    @RequestMapping("exportTaskStat")
+    public void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp) {
+        pmTaskService.exportTaskStat(cmd, resp);
+    }
+
 }

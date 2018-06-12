@@ -70,6 +70,16 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
+    public void deleteArchivesStickyContactsByDetailIds(Integer namespaceId, List<Long> detailIds){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhArchivesStickyContactsRecord> query = context.deleteQuery(Tables.EH_ARCHIVES_STICKY_CONTACTS);
+        query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.DETAIL_ID.in(detailIds));
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
+    }
+
+    @Override
     public ArchivesStickyContacts findArchivesStickyContactsById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhArchivesStickyContactsDao dao = new EhArchivesStickyContactsDao(context.configuration());
@@ -329,10 +339,11 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<ArchivesNotifications> listArchivesNotificationsByWeek(Integer weekDay){
+    public List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesNotificationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_NOTIFICATIONS);
         query.addConditions(Tables.EH_ARCHIVES_NOTIFICATIONS.NOTIFY_DAY.eq(weekDay));
+        query.addConditions(Tables.EH_ARCHIVES_NOTIFICATIONS.NOTIFY_TIME.eq(time));
         List<ArchivesNotifications> results = new ArrayList<>();
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, ArchivesNotifications.class));

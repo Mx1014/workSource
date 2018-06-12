@@ -1,7 +1,6 @@
 package com.everhomes.general_approval;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -615,9 +614,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
 
-        if (dtos == null || dtos.size() == 0)
-            return;
-
+        if (dtos != null || dtos.size() > 0)
         for (GeneralApprovalScopeMapDTO dto : dtos) {
             GeneralApprovalScopeMap scope = generalApprovalProvider.findGeneralApprovalScopeMap(namespaceId, approvalId,
                     dto.getSourceId(), dto.getSourceType());
@@ -646,11 +643,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         //  4.delete the scope which is not in the array
         if (detailIds.size() == 0)
             detailIds.add(0L);
-        generalApprovalProvider.deleteOddGeneralApprovalDetailScope(namespaceId, approvalId, detailIds);
-
+        generalApprovalProvider.deleteOddGeneralApprovalScope(namespaceId, approvalId, UniongroupTargetType.MEMBERDETAIL.getCode(), detailIds);
         if (organizationIds.size() == 0)
             organizationIds.add(0L);
-        generalApprovalProvider.deleteOddGeneralApprovalOrganizationScope(namespaceId, approvalId, organizationIds);
+        generalApprovalProvider.deleteOddGeneralApprovalScope(namespaceId, approvalId, UniongroupTargetType.ORGANIZATION.getCode(), organizationIds);
     }
 
     private String getUserRealName(Long userId, Long ownerId) {
@@ -752,9 +748,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             conditionOR = conditionOR.or(condition);
             query.addConditions(conditionOR);
         }
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd.getModuleId()));
-        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd.getModuleType()));
 
         if (null != cmd.getProjectId())
             query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
@@ -1059,10 +1052,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
 
-        //  export with te file download center
+        //  export with the file download center
         Map<String, Object> params = new HashMap<>();
-
-        //  the value could be null if it is not exist.
+        //  the value could be null if it is not exist
         params.put("organizationId", cmd.getOrganizationId());
         params.put("moduleId", cmd.getModuleId());
         params.put("startTime", cmd.getStartTime());
@@ -1080,7 +1072,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
-    public OutputStream getGeneralApprovalOutputStream(ListGeneralApprovalRecordsCommand cmd, Long taskId) {
+    public OutputStream getGeneralApprovalExportStream(ListGeneralApprovalRecordsCommand cmd, Long taskId) {
         cmd.setPageAnchor(null);
         cmd.setPageSize(Integer.MAX_VALUE - 1);
         ListGeneralApprovalRecordsResponse response = listGeneralApprovalRecords(cmd);
@@ -1102,24 +1094,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             workbook.write(out);
-            /*String fileName = "审批记录.xlsx";
-            httpResponse.setContentType("application/msexcel");
-            httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-            OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
-            httpResponse.setContentType("application/msexcel");
-            excelStream.write(out.toByteArray());
-            excelStream.flush();
-            excelStream.close();*/
         } catch (Exception e) {
             LOGGER.error("export error, e = {}", e);
-        } /*finally {
-            try {
-                workbook.close();
-                out.close();
-            } catch (IOException e) {
-                LOGGER.error("close error", e);
-            }
-        }return*/
+        }
         return out;
     }
 
@@ -1225,7 +1202,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  5. the current operator
-        FlowCaseProcessorsProcessor processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
+        FlowCaseProcessorsResolver processorRes = flowService.getCurrentProcessors(data.getFlowCaseId(), true);
         if (processorRes.getProcessorsInfoList() != null && processorRes.getProcessorsInfoList().size() > 0) {
             String processors = "";
             for (int i = 0; i < processorRes.getProcessorsInfoList().size(); i++) {
@@ -1290,23 +1267,30 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd) {
+        Long userId = UserContext.currentUserId();
         ListGeneralApprovalResponse res = new ListGeneralApprovalResponse();
-        List<GeneralApprovalDTO> dtos = new ArrayList<>();
+        List<GeneralApprovalDTO> results = new ArrayList<>();
         cmd.setStatus(GeneralApprovalStatus.RUNNING.getCode());
         if (null == cmd.getModuleType())
             cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
         if (null == cmd.getModuleId())
             cmd.setModuleId(GeneralApprovalController.MODULE_ID);
-        ListGeneralApprovalResponse response = listGeneralApproval(cmd);
-        List<GeneralApprovalDTO> approvals = response.getDtos();
-        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
+//        ListGeneralApprovalResponse response = ;
+        List<GeneralApprovalDTO> approvals = listGeneralApproval(cmd).getDtos();
+        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, cmd.getOwnerId());
+        if(member == null)
+            member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
         if (approvals != null && approvals.size() > 0) {
-            approvals.forEach(r -> {
+            for(GeneralApprovalDTO approval : approvals){
+                if(checkTheScope(approval.getScopes(), member))
+                    results.add(approval);
+            }
+/*            approvals.forEach(r -> {
                 if (checkTheScope(r.getScopes(), member))
                     dtos.add(r);
-            });
+            });*/
         }
-        res.setDtos(dtos);
+        res.setDtos(results);
         return res;
     }
 

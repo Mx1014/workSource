@@ -10,6 +10,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
 
@@ -170,8 +171,6 @@ public interface OrganizationProvider {
 	void createOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
 	void updateOrganizationCommunityRequest(OrganizationCommunityRequest organizationCommunityRequest);
 	void updateOrganizationCommunityRequestByOrgIds(List<Long> orgIds,Byte status, Long uid, Timestamp now);
-	void deleteOrganizationCommunityRequestById(OrganizationCommunityRequest organizationCommunityRequest);
-	OrganizationCommunityRequest getOrganizationCommunityRequestById(Long id);
 	List<OrganizationCommunityRequest> queryOrganizationCommunityRequestByCommunityId(ListingLocator locator, Long comunityId
 			, int count, ListingQueryBuilderCallback queryBuilderCallback);
 	OrganizationCommunityRequest findOrganizationCommunityRequestByOrganizationId(Long communityId, Long organizationId);
@@ -179,14 +178,12 @@ public interface OrganizationProvider {
 																		  ListingQueryBuilderCallback queryBuilderCallback);
 	OrganizationAddress findOrganizationAddressByAddressId(Long addressId);
 	void updateOrganizationAddress(OrganizationAddress oa);
-	public void deleteOrganizationAddressById(Long id);
+	void deleteOrganizationAddressById(Long id);
 	void deleteOrganizationAddress(OrganizationAddress address);
 	List<OrganizationAddress> findOrganizationAddressByOrganizationId(
 			Long organizationId);
 	void deleteOrganizationAddressByOrganizationId(long organizationId);
 	void deleteOrganizationAttachmentsByOrganizationId(long organizationId);
-	Boolean isExistInOrganizationAddresses(long organizationId,
-										   long addressId);
 	Organization findOrganizationByAddressId(long addressId);
 	List<OrganizationAttachment> listOrganizationAttachments(long organizationId);
 	void createOrganizationAddress(OrganizationAddress address);
@@ -199,7 +196,7 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMembersByPhone(String phone);
 	List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName);
 	Organization getOrganizationByGoupId(Long groupId);
-
+	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);
 
 	List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(Long orgId, String memberGroup);
 
@@ -242,9 +239,6 @@ public interface OrganizationProvider {
 
 	Organization findOrganizationByNameAndNamespaceId(String name, Integer namespaceId);
 
-	List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes, String userName);
-
-	List<OrganizationMember> listOrganizationMemberByContactTokens(List<String> contactTokens, Long organizationId);
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds, Byte memberStatus,
 														Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize);
 
@@ -279,8 +273,6 @@ public interface OrganizationProvider {
 
 	OrganizationJobPosition findOrganizationJobPositionByName(String ownerType, Long ownerId, String name);
 
-	void deleteOrganizationJobPositionById(Long id);
-
 	List<OrganizationJobPosition> listOrganizationJobPositions(String ownerType, Long ownerId, String keyword,
 															   Long pageAnchor, Integer pageSize);
 
@@ -291,8 +283,6 @@ public interface OrganizationProvider {
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(List<Long> communityIds);
 
 	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId, String email);
-
-	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
 	Organization findOrganizationByName(String name, Integer namespaceId);
 	Integer getSignupCount(Long organizationId);
 	OrganizationAddress findOrganizationAddress(Long organizationId, Long addressId, Long buildingId);
@@ -316,11 +306,6 @@ public interface OrganizationProvider {
 	void deleteOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping);
 	Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId, String namespaceToken,
 															   String namespaceType);
-
-	List<Organization> listOrganizationByGroupTypesOrderByLevel(String superiorPath, List<String> groupTypes);
-
-	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
-
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 	Integer countOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag);
@@ -333,8 +318,6 @@ public interface OrganizationProvider {
 	List<CommunityAddressMapping> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 	List<CommunityAddressMapping> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 	OrganizationMember findAnyOrganizationMemberByNamespaceIdAndUserId(Integer namespaceId, Long userId, String groupType);
-
-	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
 	OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
 
@@ -355,8 +338,6 @@ public interface OrganizationProvider {
 	ImportFileTask findImportFileTaskById(Long id);
 
 	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);
-
-	OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId);
 
 	/**
 	 * 查询企业下的用户
@@ -380,21 +361,11 @@ public interface OrganizationProvider {
 
 	void deleteOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails);
 
-    void updateOrganizationEmploymentTime(Long detailId, java.sql.Date employeeTime);
-
-	boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
-
-	void updateProfileIntegrity(Long detailId, Integer integrity);
-
 	OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
-
-	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);
 
 	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails, Boolean needUpdate);
 
 	Organization findUnderOrganizationByParentOrgId(Long parentOrgId);
-
-	List<OrganizationMember> listOrganizationMembersByPhoneAndNamespaceId(String phone, Integer namespaceId);
 
 	List<Long> listOrganizationIdByBuildingId(Long buildingId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
 	List<Long> listOrganizationIdByCommunityId(Long communityId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
@@ -423,9 +394,6 @@ public interface OrganizationProvider {
 
 	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
 
-	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
-  
- 
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 
 	// 根据人事档案id获取members，可能会获取到同一域空间下不同总公司的人
@@ -455,17 +423,13 @@ public interface OrganizationProvider {
 	 * 查询非离职状态下所有员工的 detailId
 	 * added by R, 20170719
 	 */
-	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
 													List<Long> orgIds, String groupName, Long creatorUid, CrossShardListingLocator locator, Integer pageSize);
-
 
 	List listOrganizationMembersGroupByToken();
 
 	List listOrganizationMemberByToken(String token);
 
-	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
- 
     String getOrganizationNameById(Long targetId);
 
 	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);
@@ -480,17 +444,15 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 
-	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId);
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId, int pageSize, ListingLocator locator);
+
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Integer pageSize, ListingLocator locator);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId);
-
-	UserOrganizations findUserOrganizationByUserIdAndOrgId(Long userId, Long orgId);
 
 	UserOrganizations findActiveAndWaitUserOrganizationByUserIdAndOrgId(Long userId, Long orgId);
 
 	UserOrganizations findUserOrganizationById(Long id);
-
-	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
 
 	List<OrganizationMember> listOrganizationMembersByIds(List<Long> ids);
 
@@ -536,4 +498,17 @@ public interface OrganizationProvider {
 	List<Organization> listPMOrganizations(Integer namespaceId);
 
 	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId);
+
+	OrganizationCommunityRequest getOrganizationRequest(Long organizationId);
+
+    void deleteAllOrganizationAddressById(Long organizationId);
+
+	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
+
+	Integer getUserOrgAmount(Long targetId);
+
+    OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
+            Long targetId, Long organizationId);
+    OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
+            Long organizationId, String contactToken);
 }

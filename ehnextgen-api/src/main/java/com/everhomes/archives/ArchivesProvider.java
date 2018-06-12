@@ -13,6 +13,8 @@ public interface ArchivesProvider {
 
     void deleteArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
 
+    void deleteArchivesStickyContactsByDetailIds(Integer namespaceId, List<Long> detailIds);
+
     ArchivesStickyContacts findArchivesStickyContactsById(Long id);
 
     List<Long> listArchivesStickyContactsIds(Integer namespaceId, Long organizationId, Integer stickCount);
@@ -55,5 +57,5 @@ public interface ArchivesProvider {
 
     void updateArchivesNotifications(ArchivesNotifications archivesNotification);
 
-    List<ArchivesNotifications> listArchivesNotificationsByWeek(Integer weekDay);
+    List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time);
 }

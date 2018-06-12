@@ -126,6 +126,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -184,7 +186,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  *
  */
 @Component
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 	private static final String SIGN_APP_KEY = "sign.appKey";
 	private static final String EXPIRE_TIME="invitation.expiretime";
@@ -380,10 +382,19 @@ public class UserServiceImpl implements UserService {
 
 	private static final String DEVICE_KEY = "device_login";
 
-	@PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+	//@PostConstruct
 	public void setup() {
 		localBus.subscribe("border.close", LocalBusMessageDispatcher.getDispatcher(this));
 	}
+	
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
 
 	/**
 	 * 从数据库Load安邦的配置信息
@@ -958,34 +969,28 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
-		User user;
-		user = this.userProvider.findUserByAccountName(userIdentifierToken);
+	public UserLogin logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
+		User user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("findUserByAccountName user is null");
             }
 			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			if(identifier != null) {
+				user = this.userProvider.findUserById(identifier.getOwnerUid());
+			} else {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("findClaimedIdentifierByToken identifier is null");
                 }
-				user = this.userProvider.findUserById(identifier.getOwnerUid());
-			}
+            }
 		}
 
-        if (user != null) {
-            if (!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash())) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("logonDryrun validateHashPassword failure");
-                }
-                return null;
-            }
-            if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
-                return null;
-            }
+        if (user != null // 存在用户
+                && UserStatus.fromCode(user.getStatus()) == UserStatus.ACTIVE // 正常状态
+                && EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash()) /*密码正确*/) {
+            return createLogin(user.getNamespaceId(), user, null, null);
         }
-		return user;
+		return null;
 	}
 
 	@Override
@@ -1801,12 +1806,45 @@ public class UserServiceImpl implements UserService {
 					communityId = resources.get(0).getResourceId();
 					updateUserCurrentCommunityToProfile(userId, communityId, namespaceId);
 					if(LOGGER.isInfoEnabled()) {
-						LOGGER.info("Set default community, userId=" + userId + ", communityId=" + communityId 
+						LOGGER.info("Set default community, userId=" + userId + ", communityId=" + communityId
 								+ ", namespaceId=" + namespaceId);
 					}
 				} else {
 					if(LOGGER.isInfoEnabled()) {
-						LOGGER.info("Community not found, ignore to set default community, userId=" + userId  
+						LOGGER.info("Community not found, ignore to set default community, userId=" + userId
+								+ ", namespaceId=" + namespaceId);
+					}
+				}
+			}
+		} catch(Exception e) {
+			LOGGER.error("Failed to set default community, userId=" + userId + ", namespaceId=" + namespaceId, e);
+		}
+
+		return communityId;
+	}
+
+	/**
+	 * 当用户从不同版的APP登录进来时，若之前没有选中的园区，则默认设置一个
+	 * 与setDefaultCommunity不同之处在于resources.size() > 1
+	 * @return 选中的园区ID
+	 */
+	@Override
+	public Long setDefaultCommunityForWx(Long userId, Integer namespaceId) {
+		Long communityId = 0L;
+		try {
+			List<UserCurrentEntity> entityList = listUserCurrentEntity(userId);
+			if(!containPartnerCommunity(namespaceId, entityList)) {
+				List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+				if(resources != null && resources.size() > 1) {
+					communityId = resources.get(0).getResourceId();
+					updateUserCurrentCommunityToProfile(userId, communityId, namespaceId);
+					if(LOGGER.isInfoEnabled()) {
+						LOGGER.info("Set default community, userId=" + userId + ", communityId=" + communityId
+								+ ", namespaceId=" + namespaceId);
+					}
+				} else {
+					if(LOGGER.isInfoEnabled()) {
+						LOGGER.info("Community not found, ignore to set default community, userId=" + userId
 								+ ", namespaceId=" + namespaceId);
 					}
 				}
@@ -3071,6 +3109,10 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 	}
+
+    /*public static void main(String[] args) {
+        System.out.println(GeoHashUtils.encode(121.643166, 31.223298));
+    }*/
 
 	@Override
 	public SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType) {
@@ -5572,6 +5614,9 @@ public class UserServiceImpl implements UserService {
 
 		Integer mypublishFlag = configurationProvider.getIntValue(namespaceId, ConfigConstants.MY_PUBLISH_FLAG, 1);
 		resp.setMyPublishFlag(mypublishFlag.byteValue());
+		//查询不显示的更多地址信息的标志
+		Integer addressDialogStyle = configurationProvider.getIntValue(namespaceId, "zhifuhui.display.flag", 1);
+		resp.setAddressDialogStyle(addressDialogStyle);
 
 		resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", SCAN_FOR_LOGON_SERVER));
 
@@ -6090,5 +6135,12 @@ public class UserServiceImpl implements UserService {
 		SearchUserByIdentifierResponse response = new SearchUserByIdentifierResponse();
 		response.setDtos(dtos);
 		return response;
+	}
+
+	@Override
+	public Byte isUserAuth() {
+		User user = UserContext.current().getUser();
+		int amount = this.organizationProvider.getUserOrgAmount(user.getId());
+		return amount > 0 ? (byte) 1 : (byte) 0;
 	}
 }

@@ -30,7 +30,6 @@ import com.everhomes.rest.quality.SpecificationScopeCode;
 import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.QualityInspectionStatScheduleJob;
-import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.sequence.SequenceProvider;
@@ -96,7 +95,6 @@ import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
@@ -113,7 +111,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -130,7 +130,7 @@ import java.util.Set;
 
 @Component
 @DependsOn("platformContext")
-public class QualityProviderImpl implements QualityProvider {
+public class QualityProviderImpl implements QualityProvider, ApplicationListener<ContextRefreshedEvent> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(QualityProviderImpl.class);
 	
@@ -158,7 +158,9 @@ public class QualityProviderImpl implements QualityProvider {
 	@Value("${equipment.ip}")
 	private String equipmentIp;
 	
-	@PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+	//@PostConstruct
 	public void init() {
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
 		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
@@ -179,15 +181,22 @@ public class QualityProviderImpl implements QualityProvider {
 			});
 		}
 
-		//五分钟后启动通知
-		Long notifyTime = System.currentTimeMillis() + 300000;
-		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-		String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
-		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
-		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
-				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
+//		//五分钟后启动通知
+//		Long notifyTime = System.currentTimeMillis() + 300000;
+//		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+//		String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
+//		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
+//		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
+//				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
 
 	}
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
+    }
 
 	@Override
 	public void createVerificationTasks(QualityInspectionTasks task) {
@@ -455,9 +464,18 @@ public class QualityProviderImpl implements QualityProvider {
 			maps.add(ConvertHelper.convert(r, QualityInspectionStandardGroupMap.class));
 			return null;
 		});
-
-
+		List<QualityInspectionStandardGroupMap> personalGroupMap = listPersonalGroupMaps();
+		if (personalGroupMap != null && personalGroupMap.size() > 0) {
+			maps.addAll(personalGroupMap);
+		}
 		return maps;
+	}
+
+	private List<QualityInspectionStandardGroupMap> listPersonalGroupMaps() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.INSPECTOR_UID.eq(UserContext.currentUserId()));
+		return query.fetchInto(QualityInspectionStandardGroupMap.class);
 	}
 
 	@Override
@@ -829,9 +847,12 @@ public class QualityProviderImpl implements QualityProvider {
         	recordIds.add(record.getId());
         	mapRecords.put(record.getId(), record);
         }
-        
-        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTaskRecords.class, recordIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTaskRecords.class), null, (DSLContext context, Object reducingContext) -> {
+
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTaskRecords.class, recordIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTaskRecords.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionTaskRecords.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhQualityInspectionTaskAttachmentsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS);
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.RECORD_ID.in(recordIds));
             query.fetch().map((EhQualityInspectionTaskAttachmentsRecord record) -> {
@@ -907,9 +928,12 @@ public class QualityProviderImpl implements QualityProvider {
         	standard.setReviewGroup(new ArrayList<>());
         	mapStandards.put(standard.getId(), standard);
         }
-        
-        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionStandards.class, standardIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516       
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionStandards.class, standardIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
             query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.in(standardIds));
             query.fetch().map((EhQualityInspectionStandardGroupMapRecord record) -> {
@@ -1196,10 +1220,12 @@ public class QualityProviderImpl implements QualityProvider {
         	taskIds.add(task.getId());
         	mapTasks.put(task.getId(), task);
         }
-        
-        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTasks.class, taskIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
-            
+ 
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTasks.class, taskIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {    
         	SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.in(taskIds));
             query.fetch().map((EhQualityInspectionTaskRecordsRecord record) -> {
@@ -1623,10 +1649,12 @@ public class QualityProviderImpl implements QualityProvider {
         	standardIds.add(standard.getId());
         	mapStandards.put(standard.getId(), standard);
         }
-        
-        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionStandards.class, standardIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionStandards.class), null, (DSLContext context, Object reducingContext) -> {
-            
+ 
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionStandards.class, standardIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionStandards.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionStandards.class), null, (DSLContext context, Object reducingContext) -> {    
         	SelectQuery<EhQualityInspectionStandardSpecificationMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP);
             query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STANDARD_ID.in(standardIds));
             query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
@@ -1915,10 +1943,12 @@ public class QualityProviderImpl implements QualityProvider {
         	recordIds.add(record.getId());
         	mapRecords.put(record.getId(), record);
         }
-        
-        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTaskRecords.class, recordIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTaskRecords.class), null, (DSLContext context, Object reducingContext) -> {
-            
+ 
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTaskRecords.class, recordIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTaskRecords.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionTaskRecords.class), null, (DSLContext context, Object reducingContext) -> { 
         	SelectQuery<EhQualityInspectionSpecificationItemResultsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
             query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TASK_RECORD_ID.in(recordIds));
             query.fetch().map((EhQualityInspectionSpecificationItemResultsRecord record) -> {
@@ -3043,5 +3073,13 @@ public class QualityProviderImpl implements QualityProvider {
 		todayStart.set(Calendar.SECOND, 0);
 		todayStart.set(Calendar.MILLISECOND, 0);
 		return new Timestamp(todayStart.getTime().getTime());
+	}
+
+	@Override
+	public List<QualityInspectionStandardGroupMap> listPlanGroupMapsByPlanId(Long standardId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
+		return query.fetchInto(QualityInspectionStandardGroupMap.class);
 	}
 }

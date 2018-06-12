@@ -1507,14 +1507,14 @@ public class CommunityServiceImpl implements CommunityService {
 
             if (StringUtils.isNotBlank(cmd.getUserInfoKeyword())) {
                 String keyword = "%" + cmd.getUserInfoKeyword() + "%";
-                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
-                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+//                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+//                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
                 Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword));
                 query.addConditions(condition);
             }
             if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
                 String keyword = "%" + cmd.getCommunityKeyword() + "%";
-                query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
+//                query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
                 query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_GROUPS.INTEGRAL_TAG2.eq(Tables.EH_COMMUNITIES.ID));
                 query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
             }
@@ -2261,7 +2261,13 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<CommunityUserDto> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords());
+
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(
+		        cmd.getNamespaceId(),
+                cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1,
+                CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType(),
+                cmd.getKeywords(), cmd.getStartTime(), cmd.getEndTime());
+
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2353,8 +2359,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
-		//暂时定成查询1000条记录，且总是从第一条开始导出 by 20170630
-		cmd.setPageSize(1000);
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		cmd.setPageSize(pageSize);
 		cmd.setPageAnchor(null);
 
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());

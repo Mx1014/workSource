@@ -2,6 +2,7 @@ package com.everhomes.contract;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -168,10 +169,16 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                 List<Long> addresses = new ArrayList<>();
                 List<Long> buildings = new ArrayList<>();
                 for (ContractBuildingMapping contractApartment : contractApartments) {
-                    addresses.add(contractApartment.getAddressId());
-                    Building building = communityProvider.findBuildingByCommunityIdAndName(contract.getCommunityId(), contractApartment.getBuildingName());
-                    if (building != null) {
-                        buildings.add(building.getId());
+                    try{
+                        addresses.add(contractApartment.getAddressId());
+                        Building building = communityProvider.findBuildingByCommunityIdAndName(contract.getCommunityId(), contractApartment.getBuildingName());
+                        if (building != null) {
+                            buildings.add(building.getId());
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("error occured during sync contract",e);
+                        LOGGER.error("find building failed, contractApartment = {}, contract id ={}", contractApartment, contract.getId());
+                        continue;
                     }
                 }
 
@@ -315,7 +322,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
         Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
         if(contracts != null && contracts.size() > 0) {
-            //一把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
+            //把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
             ids.forEach(id -> {
                 Contract contract = contracts.get(id);
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);

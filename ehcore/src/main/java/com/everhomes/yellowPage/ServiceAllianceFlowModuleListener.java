@@ -32,6 +32,8 @@ import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,14 +45,18 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowEvaluate;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
@@ -75,9 +81,15 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private GroupProvider groupProvider;
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
-
+	
+	@Autowired
+	ServiceAllianceProviderProvider serviceAllianceProvidProvider;
+	
 	@Override
 	public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
@@ -192,8 +204,14 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
 		//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
 		if(ocr == null){
-			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-        	request.setOwnerId(flowCase.getApplierOrganizationId());
+			Group group = this.groupProvider.findGroupById(flowCase.getApplierOrganizationId());
+			if(group!=null){
+				request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+	        	request.setOwnerId(group.getIntegralTag2());
+			}else{
+				request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+	        	request.setOwnerId(flowCase.getApplierOrganizationId());
+			}
 		}else{
 			request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
         	request.setOwnerId(ocr.getCommunityId());
@@ -413,7 +431,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		if (flowCase.getOwnerType() != null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType()))
 			return this.processCustomRequest(flowCase);
 
-
+		flowCase.setCustomObject(getCustomObject(flowCase));
+		
+		
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		if (flowCase.getCreateTime() != null) {
 			entities.add(new FlowCaseEntity("申请时间", flowCase.getCreateTime().toLocalDateTime().format(fmt), FlowCaseEntityType.MULTI_LINE.getCode()));
@@ -437,9 +457,10 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 						GeneralFormDataSourceType.USER_NAME.getCode());
-				dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-				entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
-
+				if(val!=null){
+					dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+					entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+				}
 				//电话
 				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 						GeneralFormDataSourceType.USER_PHONE.getCode());
@@ -449,11 +470,15 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				}
 
 				//企业
-				val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-						GeneralFormDataSourceType.USER_COMPANY.getCode());
-				if (val != null) {
-					dto = getFieldDTO(val.getFieldName(), fieldDTOs);
-					entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+				OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getApplierOrganizationId());
+				//查询出来，如果公司没有在园区，那么flowCase.getApplierOrganizationId()这就是园区id。
+				if(ocr != null) {//如果查询出来公司为空，就不显示公司字段
+					val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+							GeneralFormDataSourceType.USER_COMPANY.getCode());
+					if (val != null) {
+						dto = getFieldDTO(val.getFieldName(), fieldDTOs);
+						entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));
+					}
 				}
 
 				//楼栋门牌
@@ -536,4 +561,63 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			return dto;
 		}).collect(Collectors.toList());
 	}
+	
+	@Override
+	/*
+	 * 评价完成后，对新建事件进行评分更新
+	 * */
+    public void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates) {
+		
+		//获取工作流
+		FlowCase flowCase = ctx.getFlowCase();
+		if (!FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType())) {
+			//非表单审核项，直接返回
+			return;
+		}
+		
+		// 如果评价项是空，直接返回
+		if (CollectionUtils.isEmpty(evaluates)) {
+			return;
+		}
+		
+		// 对每一项进行更新
+		for (FlowEvaluate item : evaluates) {
+			serviceAllianceProvidProvider.updateScoreByEvaluation(flowCase.getId(), item);
+		}
+    }
+	
+	/**
+	 * 根据工作流保存一些业务信息
+	 * @param approvalId
+	 * @return
+	 */
+	private String getCustomObject(FlowCase flowCase) {
+
+		if (!FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType())) {
+			return null;
+		}
+
+		Byte enableProvider = (byte) 0;
+		do {
+
+			GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getOwnerId());
+			if (null == ga) {
+				break;
+			}
+
+			ServiceAlliances sa = yellowPageProvider.queryServiceAllianceTopic(null, null, ga.getModuleId());
+			if (null == sa || null == sa.getEnableProvider()) {
+				break;
+			}
+
+			enableProvider = sa.getEnableProvider();
+
+		} while (false);
+
+		JSONObject json = new JSONObject();
+		json.put("enableProvider", enableProvider);
+
+		return json.toJSONString();
+	}
+	
 }

@@ -13,6 +13,9 @@ import com.everhomes.pmNotify.PmNotifyLog;
 import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
+import com.everhomes.quality.QualityInspectionTasks;
+import com.everhomes.quality.QualityProvider;
+import com.everhomes.quality.QualityService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.app.AppConstants;
@@ -25,6 +28,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.quality.QualityGroupType;
+import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -70,6 +74,8 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private EquipmentService equipmentService;
+    @Autowired
+    private QualityService qualityService;
 
     @Autowired
     private MessagingService messagingService;
@@ -100,6 +106,8 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private EquipmentTasksSearcher equipmentTaskSearchser;
+    @Autowired
+    private QualityProvider qualityProvider;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -109,14 +117,14 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
         workerPoolFactory.getWorkerPool().addQueue(queueNoDelay);
     }
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         //重启时内存中启的job都会消失 所以把没发消息的job加上
         List<PmNotifyRecord> records = pmNotifyProvider.listUnsendRecords();
         if(records != null && records.size() > 0) {
-            records.forEach(record -> {
-                pushIntoEnqueue(record);
-            });
+            records.forEach(this::pushIntoEnqueue);
         }
     }
 
@@ -155,7 +163,11 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {setup();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+            init();
+        }
     }
 
     @Override
@@ -219,6 +231,36 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                 EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
                 taskName = meter.getName();
                 code = EnergyNotificationTemplateCode.ENERGY_TASK_BEFORE_DELAY;
+            }
+            //品质核查通知
+            if(EntityType.QUALITY_TASK.getCode().equals(record.getOwnerType())){
+                scope = EquipmentNotificationTemplateCode.SCOPE;
+                QualityInspectionTasks task = qualityProvider.findVerificationTaskById(record.getOwnerId());
+                taskName = task.getTaskName();
+                if(PmNotifyType.BEFORE_START.equals(notify)) {
+                    time = task.getExecutiveStartTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_BEGIN;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_BEFORE_TASK;
+                } else if(PmNotifyType.BEFORE_DELAY.equals(notify)){
+                    //不是待执行不用提醒
+                    if(!(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))) {
+                        return;
+                    }
+                    time = task.getExecutiveExpireTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_DELAY;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_BEFORE_TASK_DELAY;
+                } else if(PmNotifyType.AFTER_DELAY.equals(notify)){
+                    //不是待执行不用提醒
+                    if(!(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.equals(QualityInspectionTaskStatus.fromStatus(task.getStatus())))) {
+                        return;
+                    }
+                    time = task.getExecutiveExpireTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_AFTER_DELAY;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_AFTER_TASK_DELAY;
+                    //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
+                    qualityProvider.closeTask(task);
+//                    equipmentTaskSearchser.feedDoc(task);
+                }
             }
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("starting proccess sending message to notifyUsers.size={}",notifyUsers.size());
@@ -304,6 +346,13 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     if(EntityType.ENERGY_TASK.getCode().equals(ownerType)) {
                         LOGGER.info("processPmNotifyRecord ownerType: EhEnergyMeterTasks");
                         Set<Long> ids = energyConsumptionService.getTaskGroupUsers(ownerId);
+                        if(ids != null && ids.size() > 0) {
+                            userIds.addAll(ids);
+                        }
+                    }
+                    if(EntityType.QUALITY_TASK.getCode().equals(ownerType)) {
+                        LOGGER.info("processPmNotifyRecord ownerType: EhQualityInspectionTasks");
+                        Set<Long> ids = qualityService.getTaskGroupUsers(ownerId);
                         if(ids != null && ids.size() > 0) {
                             userIds.addAll(ids);
                         }

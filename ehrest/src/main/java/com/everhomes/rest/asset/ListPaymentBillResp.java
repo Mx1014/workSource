@@ -9,6 +9,17 @@ import java.util.List;
  * Created by Wentian Wang on 2017/9/28.
  */
 
+/**
+ * @author change by yangcx
+ * @date 2018年5月19日----下午8:19:29
+ */
+/**
+ *<ul>
+* <li>nextPageAnchor:下页锚点</li>
+ * <li>pageSize:显示数量</li>
+* <li>list:交易明细的集合，参考{@link PaymentBillResp}</li>
+ *</ul>
+ */
 public class ListPaymentBillResp {
     private Long nextPageAnchor;
     private Long pageSize;

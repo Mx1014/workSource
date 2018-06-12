@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2.message_handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rentalv2.*;
@@ -41,26 +42,28 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
     private LocaleTemplateService localeTemplateService;
     @Autowired
     private SmsProvider smsProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
 
-        RentalResourceType type = rentalv2Provider.findRentalResourceTypeById(rentalBill.getResourceTypeId());
+
 
         Map<String, String> map = new HashMap<>();
-        map.put("resourceTypeName", type.getName());
+        map.put("resourceTypeName", "VIP车位预约");
         String content = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
                 RentalNotificationTemplateCode.RENTAL_USER_CANCEL_ORDER, RentalNotificationTemplateCode.locale, map, "");
 
         //给预约人推送订单取消成功消息
         rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), content,
                 rentalBill.getId(), rentalBill.getResourceType());
-        //当有退款时 才发退款的消息和短信
-        if (rentalBill.getStatus() == SiteBillStatus.REFUNDED.getCode()) {
-            String customJson = rentalBill.getCustomObject();
-            VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
+        String customJson = rentalBill.getCustomObject();
+        VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
 
-            String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
+        String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
+        //当有退款时 才发退款的消息
+        if (rentalBill.getStatus() == SiteBillStatus.REFUNDED.getCode()) {
             map = new HashMap<>();
             map.put("useDetail", useDetail);
             map.put("totalAmount", String.valueOf(rentalBill.getPayTotalMoney()));
@@ -71,24 +74,25 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
             rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), refundContent,
                     rentalBill.getId(), rentalBill.getResourceType());
 
-            //给车主发短信
-            String templateScope = SmsTemplateCode.SCOPE;
-            List<Tuple<String, Object>> variables = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
-            smsProvider.addToTupleList(variables, "userName", rentalBill.getUserName());
-            smsProvider.addToTupleList(variables, "userPhone", rentalBill.getUserPhone());
-            smsProvider.addToTupleList(variables, "useDetail", useDetail);
-
-            int templateId = SmsTemplateCode.RENTAL_USER_CANCEL_ORDER;
-
-            String templateLocale = RentalNotificationTemplateCode.locale;
-
-            try {
-                smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
-            }catch (RuntimeException e){
-                LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:"+useInfoDTO.getPlateOwnerPhone());
-            }
-
         }
+        //给车主发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("plateOwnerName", useInfoDTO.getPlateOwnerName());
+        smsProvider.addToTupleList(variables, "userName", rentalBill.getUserName());
+        smsProvider.addToTupleList(variables, "userPhone", rentalBill.getUserPhone());
+        smsProvider.addToTupleList(variables, "useDetail", useDetail);
+
+        int templateId = SmsTemplateCode.RENTAL_USER_CANCEL_ORDER;
+
+        String templateLocale = RentalNotificationTemplateCode.locale;
+
+        try {
+            smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId, templateLocale, variables);
+        }catch (RuntimeException e){
+            LOGGER.error("VipParkingRentalMessageHandler:Wrong Phone Number:"+useInfoDTO.getPlateOwnerPhone());
+        }
+
+
     }
 
     @Override
@@ -150,7 +154,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
             smsProvider.addToTupleList(variables, "userPhone", order.getUserPhone());
             smsProvider.addToTupleList(variables, "useDetail", useDetail);
             smsProvider.addToTupleList(variables, "spaceAddress", useInfoDTO.getSpaceAddress());
-            smsProvider.addToTupleList(variables, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
+            String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+            smsProvider.addToTupleList(variables, "orderDetailUrl", homeUrl+"/vip-parking/build/index.html#/?orderId="+order.getId());
 
             int templateId = SmsTemplateCode.PAY_ORDER_SUCCESS;
 
@@ -236,7 +241,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables, "userPhone", rentalBill.getUserPhone());
         smsProvider.addToTupleList(variables, "useDetail", useDetail);
         smsProvider.addToTupleList(variables, "newEndTime", sdf.format(rentalBill.getEndTime()));
-        smsProvider.addToTupleList(variables, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
+        String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+        smsProvider.addToTupleList(variables, "orderDetailUrl", homeUrl+"/vip-parking/build/index.html#/?orderId="+rentalBill.getId());
 
         int templateId = SmsTemplateCode.RENEW_RENTAL_ORDER_SUCCESS;
 
@@ -250,12 +256,19 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void endReminderSendMessage(RentalOrder rentalBill) {
-        //给车主发短信
+
 
         String customJson = rentalBill.getCustomObject();
         VipParkingUseInfoDTO useInfoDTO = JSONObject.parseObject(customJson, VipParkingUseInfoDTO.class);
         String useDetail = getUseDetailStr(rentalBill, useInfoDTO);
-
+        //消息推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", useDetail);
+        String timeupContent = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+                RentalNotificationTemplateCode.RENTAL_ORDER_TIME_UP, RentalNotificationTemplateCode.locale, map, "");
+        rentalCommonService.sendRouterMessageToUser(rentalBill.getRentalUid(), timeupContent,
+                rentalBill.getId(), rentalBill.getResourceType());
+        //给车主发短信
         String templateScope = SmsTemplateCode.SCOPE;
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", useDetail);
 
@@ -364,7 +377,8 @@ public class VipParkingRentalMessageHandler implements RentalMessageHandler {
         smsProvider.addToTupleList(variables2, "userPhone", rentalBill.getUserPhone());
         smsProvider.addToTupleList(variables2, "useDetail", useDetail);
         smsProvider.addToTupleList(variables2, "spaceNo", oldUseInfoDTO.getSpaceNo());
-        smsProvider.addToTupleList(variables2, "orderDetailUrl", "https://core.zuolin.com/evh/aclink/id=1283jh213a");
+        String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
+        smsProvider.addToTupleList(variables, "orderDetailUrl", homeUrl+"/vip-parking/build/index.html#/?orderId="+rentalBill.getId());
         int templateId2 = SmsTemplateCode.SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER;
         try {
             smsProvider.sendSms(rentalBill.getNamespaceId(), useInfoDTO.getPlateOwnerPhone(), templateScope, templateId2, templateLocale, variables2);

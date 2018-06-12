@@ -24,7 +24,9 @@ public class ImportNewsCommand {
 	private Long ownerId;
 	private Long categoryId;
 	private Long currentPMId;
+	@NotNull
 	private Long currentProjectId;
+	@NotNull
 	private Long appId;
 
 	public Long getAppId() {

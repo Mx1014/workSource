@@ -1,43 +1,21 @@
 // @formatter:off
 package com.everhomes.pm;
 
-import java.util.List;
-
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.everhomes.address.Address;
 import com.everhomes.address.AddressService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.junit.CoreServerTestCase;
-import com.everhomes.organization.pm.CommunityAddressMapping;
-import com.everhomes.organization.pm.CommunityPmBill;
-import com.everhomes.organization.pm.CommunityPmMember;
-import com.everhomes.organization.pm.CommunityPmOwner;
-import com.everhomes.organization.pm.CommunityPmTasks;
-import com.everhomes.organization.pm.PropertyMgrProvider;
-import com.everhomes.organization.pm.PropertyMgrService;
-import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.organization.pm.*;
 import com.everhomes.rest.address.ListAddressByKeywordCommand;
 import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
 import com.everhomes.rest.organization.OrganizationTaskStatus;
-import com.everhomes.rest.organization.pm.DeletePropMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropBillCommand;
-import com.everhomes.rest.organization.pm.ListPropBillCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.PropBillDTO;
-import com.everhomes.rest.organization.pm.PropCommunityBillDateCommand;
-import com.everhomes.rest.organization.pm.PropCommunityBillIdCommand;
-import com.everhomes.rest.organization.pm.PropCommunityBuildAddessCommand;
-import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
-import com.everhomes.rest.organization.pm.PropOwnerDTO;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.sharding.ShardingProvider;
-import org.springframework.cache.annotation.CacheEvict;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+
+import java.util.List;
 
 public class PropertyTest extends CoreServerTestCase {
     
@@ -144,7 +122,7 @@ public class PropertyTest extends CoreServerTestCase {
     }
     @Test
     public void testSendMessageToFamily () {
-    	PropCommunityBuildAddessCommand cmd = new PropCommunityBuildAddessCommand();
+    	SendNoticeCommand cmd = new SendNoticeCommand();
 //    	List<Long> list = new ArrayList<Long>();
 //    	list.add(16129l);
 //    	list.add(17002l);
@@ -157,7 +135,7 @@ public class PropertyTest extends CoreServerTestCase {
 //    	cmd.setBuildingNames();
     	cmd.setCommunityId(9l);
 //    	cmd.setMessage("hello  everyone");
-    	ps.sendNoticeToFamily(cmd);
+    	ps.sendNotice(cmd);
     	
     }
     
