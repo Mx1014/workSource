@@ -1233,7 +1233,7 @@ public class CommunityServiceImpl implements CommunityService {
 				
 				communityProvider.createBuilding(userId, building);
 			}else {
-				building.setAliasName(data.getAliasName());
+				building.setName(data.getName());
 				building.setAddress(data.getAddress());
 				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
