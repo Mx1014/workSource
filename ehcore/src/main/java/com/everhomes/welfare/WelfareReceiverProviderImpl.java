@@ -69,10 +69,29 @@ public class WelfareReceiverProviderImpl implements WelfareReceiverProvider {
 				.where(Tables.EH_WELFARE_RECEIVERS.WELFARE_ID.eq(welfareId))
 				.orderBy(Tables.EH_WELFARE_RECEIVERS.ID.asc())
 				.fetch();
-		if (null == records) {
+		if (null == records || records.size() == 0) {
 			return null;
 		}
 		return records.map(r -> ConvertHelper.convert(r, WelfareReceiver.class));
+	}
+
+	@Override
+	public void deleteWelfareReceivers(Long welfareId) {
+		getReadWriteContext().delete(Tables.EH_WELFARE_RECEIVERS)
+				.where(Tables.EH_WELFARE_RECEIVERS.WELFARE_ID.eq(welfareId)).execute();
+	}
+
+	@Override
+	public WelfareReceiver findWelfareReceiverByUser(Long welfareId, Long userId) {
+
+		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_WELFARE_RECEIVERS)
+				.where(Tables.EH_WELFARE_RECEIVERS.WELFARE_ID.eq(welfareId))
+				.orderBy(Tables.EH_WELFARE_RECEIVERS.ID.asc())
+				.fetch();
+		if (null == records || records.size() == 0) {
+			return null;
+		}
+		return records.get(0).map(r -> ConvertHelper.convert(r, WelfareReceiver.class));
 	}
 
 	private EhWelfareReceiversDao getReadWriteDao() {

@@ -13,4 +13,5 @@ public interface WelfareProvider {
 
 	List<Welfare> listWelfare(Long ownerId);
 
+	void deleteWelfare(Long welfareId);
 }

@@ -72,10 +72,17 @@ public class WelfareItemProviderImpl implements WelfareItemProvider {
 				.where(Tables.EH_WELFARE_ITEMS.WELFARE_ID.eq(welfareId))
 				.orderBy(Tables.EH_WELFARE_ITEMS.ID.asc())
 				.fetch();
-		if (null == records) {
+		if (null == records || records.size() == 0) {
 			return null;
 		}
 		return records.map(r -> ConvertHelper.convert(r, WelfareItem.class));
+	}
+
+	@Override
+	public void deleteWelfareItems(Long welfareId) {
+
+		getReadWriteContext().delete(Tables.EH_WELFARE_ITEMS)
+				.where(Tables.EH_WELFARE_ITEMS.WELFARE_ID.eq(welfareId)).execute();
 	}
 
 	private EhWelfareItemsDao getReadWriteDao() {

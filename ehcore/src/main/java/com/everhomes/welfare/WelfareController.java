@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.welfare;
 
+import com.everhomes.rest.welfare.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,12 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.welfare.DraftWelfareCommand;
-import com.everhomes.rest.welfare.GetUserWelfareCommand;
-import com.everhomes.rest.welfare.GetUserWelfareResponse;
-import com.everhomes.rest.welfare.ListWelfaresCommand;
-import com.everhomes.rest.welfare.ListWelfaresResponse;
-import com.everhomes.rest.welfare.SendWelfareCommand;
 
 @RestController
 @RequestMapping("/welfare")
@@ -62,6 +57,16 @@ public class WelfareController extends ControllerBase {
 	@RestReturn(GetUserWelfareResponse.class)
 	public RestResponse getUserWelfare(GetUserWelfareCommand cmd){
 		return new RestResponse(welfareService.getUserWelfare(cmd));
+	}
+	/**
+	 * <p>删除福利(草稿)</p>
+	 * <b>URL: /welfare/deleteWelfare</b>
+	 */
+	@RequestMapping("deleteWelfare")
+	@RestReturn(String.class)
+	public RestResponse deleteWelfare(DeleteWelfareCommand cmd){
+		welfareService.deleteWelfare(cmd);
+		return new RestResponse();
 	}
 
 }

@@ -15,4 +15,6 @@ public interface WelfareItemProvider {
 
 
 	List<WelfareItem> listWelfareItem(Long welfareId);
+
+	void deleteWelfareItems(Long welfareId);
 }

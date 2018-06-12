@@ -70,7 +70,14 @@ public class WelfareProviderImpl implements WelfareProvider {
 		}
 		return records.map(r -> ConvertHelper.convert(r, Welfare.class));
 	}
-	
+
+	@Override
+	public void deleteWelfare(Long welfareId) {
+		getReadWriteDao().deleteById(welfareId);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWelfares.class, welfareId);
+
+	}
+
 	private EhWelfaresDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

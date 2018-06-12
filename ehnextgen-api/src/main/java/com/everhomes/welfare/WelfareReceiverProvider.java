@@ -14,4 +14,8 @@ public interface WelfareReceiverProvider {
 	List<WelfareReceiver> listWelfareReceiver();
 
 	List<WelfareReceiver> listWelfareReceiver(Long welfareId);
+
+	void deleteWelfareReceivers(Long welfareId);
+
+	WelfareReceiver findWelfareReceiverByUser(Long welfareId, Long userId);
 }

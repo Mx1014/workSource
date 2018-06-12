@@ -1,12 +1,7 @@
 // @formatter:off
 package com.everhomes.welfare;
 
-import com.everhomes.rest.welfare.DraftWelfareCommand;
-import com.everhomes.rest.welfare.GetUserWelfareCommand;
-import com.everhomes.rest.welfare.GetUserWelfareResponse;
-import com.everhomes.rest.welfare.ListWelfaresCommand;
-import com.everhomes.rest.welfare.ListWelfaresResponse;
-import com.everhomes.rest.welfare.SendWelfareCommand;
+import com.everhomes.rest.welfare.*;
 
 public interface WelfareService {
 
@@ -22,4 +17,5 @@ public interface WelfareService {
 
 	GetUserWelfareResponse getUserWelfare(GetUserWelfareCommand cmd);
 
+	void deleteWelfare(DeleteWelfareCommand cmd);
 }
