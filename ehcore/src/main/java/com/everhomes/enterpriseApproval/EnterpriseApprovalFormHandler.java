@@ -79,7 +79,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         if (ga == null || GeneralApprovalStatus.RUNNING.getCode() != ga.getStatus())
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
-                    EnterpriseApprovalServiceErrorCode.ERROR_ILLEGAL_APPROVAL, "The approval's status is not running");
+                    EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_NOT_RUNNING, "The approval's status is not running");
         List<GeneralApprovalScopeMapDTO> scopes = generalApprovalService.listGeneralApprovalScopes(namespaceId, ga.getId());
 
         //  2.get the form by flow(新版通过工作流拿表单，所以必须有工作流)
@@ -96,7 +96,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
             if (member == null)
                 member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOrganizationId());
             if (!generalApprovalService.checkTheApprovalScope(scopes, member))
-                throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_ILLEGAL_APPROVAL,
+                throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_NO_ACCESS,
                         "The user is not in the approval scope");
 
             //  4.compatible with the previous data(兼容旧数据)
