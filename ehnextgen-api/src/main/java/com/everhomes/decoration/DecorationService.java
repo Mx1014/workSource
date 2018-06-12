@@ -44,7 +44,7 @@ public interface DecorationService {
 
     void confirmFee(RequestIdCommand cmd);
 
-    void postApprovalForm(PostApprovalFormCommand cmd);
+    Long postApprovalForm(PostApprovalFormCommand cmd);
 
     void DecorationApplySuccess(Long requestId);
 

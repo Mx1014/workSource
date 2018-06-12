@@ -749,9 +749,10 @@ public class DecorationServiceImpl implements  DecorationService {
     }
 
     @Override
-    public void postApprovalForm(PostApprovalFormCommand cmd) {
+    public Long postApprovalForm(PostApprovalFormCommand cmd) {
         GetTemplateByApprovalIdCommand cmd2 = new GetTemplateByApprovalIdCommand();
         cmd2.setApprovalId(cmd.getApprovalId());
+        Long []flowCaseId = {0L};
         //获取审批
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                 .getApprovalId());
@@ -797,6 +798,7 @@ public class DecorationServiceImpl implements  DecorationService {
             cfcc.setFlowVersion(flow.getFlowVersion());
             FlowCase flowCase = flowService.createFlowCase(cfcc);
             val.setFlowCaseId(flowCase.getId());
+            flowCaseId[0] = flowCase.getId();
             this.decorationProvider.updateApprovalVals(val);
             //将表单数据存起来
             addGeneralFormValuesCommand cmd3 = new addGeneralFormValuesCommand();
@@ -808,6 +810,7 @@ public class DecorationServiceImpl implements  DecorationService {
 
             return null;
         });
+        return flowCaseId[0];
     }
 
     @Override
