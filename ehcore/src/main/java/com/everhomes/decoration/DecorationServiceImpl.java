@@ -1075,7 +1075,7 @@ public class DecorationServiceImpl implements  DecorationService {
 
     @Override
     public DecorationFlowCaseDTO getApprovalVals(getApprovalValsCommand cmd) {
-        List<DecorationApprovalVal> vals = this.decorationProvider.listApprovalVals(cmd.getRequestId(),cmd.getRequestId());
+        List<DecorationApprovalVal> vals = this.decorationProvider.listApprovalVals(cmd.getRequestId(),cmd.getApprovalId());
         if (vals == null || vals.isEmpty())
             return null;
         DecorationFlowCaseDTO dto  = new DecorationFlowCaseDTO();
