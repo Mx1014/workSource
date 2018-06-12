@@ -6,11 +6,9 @@ import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.messaging.PusherService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
-import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class DeveloperAccountInfoServiceImpl implements DeveloperAccountInfoService {
