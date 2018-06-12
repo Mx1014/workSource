@@ -1,29 +1,37 @@
 
 package com.everhomes.asset;
 
-import com.everhomes.constants.ErrorCodes;
-   import com.everhomes.controller.ControllerBase;
-   import com.everhomes.discover.RestDoc;
-   import com.everhomes.discover.RestReturn;
-   import com.everhomes.rest.RestResponse;
-   import com.everhomes.rest.asset.*;
-   import com.everhomes.rest.order.PreOrderDTO;
-   import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-   import com.everhomes.rest.user.UserServiceErrorCode;
-   import com.everhomes.rest.user.admin.ImportDataResponse;
-   import com.everhomes.user.User;
-   import com.everhomes.user.UserContext;
-   import com.everhomes.util.RuntimeErrorException;
-   import org.slf4j.Logger;
-   import org.slf4j.LoggerFactory;
-   import org.springframework.beans.factory.annotation.Autowired;
-   import org.springframework.web.bind.annotation.*;
-   import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
-   import javax.servlet.http.HttpServletRequest;
-   import javax.servlet.http.HttpServletResponse;
-   import javax.validation.Valid;
-   import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 
 /**
 **************************************************************
@@ -1104,8 +1112,7 @@ public RestResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd){
 @RequestMapping(value = "listPaymentBill")
 @RestReturn(ListPaymentBillResp.class)
 public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-//        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
-    ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
+    ListPaymentBillResp result = assetService.listPaymentBill(cmd);
     RestResponse response = new RestResponse(result);
     return response;
 }
@@ -1117,12 +1124,12 @@ public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest r
 @RequestMapping(value = "listPaymentBillDetail")
 @RestReturn(PaymentOrderBillDTO.class)
 public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-    ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
+    ListPaymentBillResp listPaymentBillResp = assetService.listPaymentBill(cmd);
     PaymentOrderBillDTO result = new PaymentOrderBillDTO();
-    if(listPaymentBillResp != null && listPaymentBillResp.getList() != null
-            && listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
-            && listPaymentBillResp.getList().get(0).getChildren() != null) {
-        result = listPaymentBillResp.getList().get(0).getChildren().get(0);
+    if(listPaymentBillResp != null && listPaymentBillResp.getPaymentOrderBillDTOs() != null
+            && listPaymentBillResp.getPaymentOrderBillDTOs().size() != 0 
+            && listPaymentBillResp.getPaymentOrderBillDTOs().get(0) != null) {
+        result = listPaymentBillResp.getPaymentOrderBillDTOs().get(0);
     }
     RestResponse response = new RestResponse(result);
     return response;
@@ -1335,5 +1342,47 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return null;
     }
     
+    /**
+     * <b>URL: /asset/listPayeeAccounts</b>
+     * <p>列出当前项目下所有的收款方账户</p>
+     */
+    @RequestMapping("listPayeeAccounts")
+    @RestReturn(value = ListBizPayeeAccountDTO.class, collection = true)
+    public RestResponse listPayeeAccounts(ListPayeeAccountsCommand cmd){
+    	List<ListBizPayeeAccountDTO> list = assetService.listPayeeAccounts(cmd);
+        RestResponse restResponse = new RestResponse(list);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+	 * <b>URL: /asset/payNotify</b>
+	 * <p>支付模块回调接口，通知支付结果</p>
+	 */
+	@RequestMapping("payNotify")
+	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
+	public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
+		assetService.payNotify(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>由于史晗不肯造张江高科的账单数据，所以只能手动造账单数据用于测试新支付</p>
+	 * <b>URL: /asset/createTestZJGKBill</b>
+	 */
+	@RequestMapping("createTestZJGKBill")
+	@RestReturn(value = ListBillsDTO.class)
+	public RestResponse createTestZJGKBill(){
+	    ListBillsDTO dto = assetService.createTestZJGKBill();
+	    RestResponse response = new RestResponse(dto);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
 }
 
