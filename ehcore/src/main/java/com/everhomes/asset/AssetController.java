@@ -1371,6 +1371,19 @@ public class AssetController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-    
+	
+	/**
+	 * <p>由于史晗不肯造张江高科的账单数据，所以只能手动造账单数据用于测试新支付</p>
+	 * <b>URL: /asset/createTestZJGKBill</b>
+	 */
+	@RequestMapping("createTestZJGKBill")
+	@RestReturn(value = ListBillsDTO.class)
+	public RestResponse createTestZJGKBill(){
+	    ListBillsDTO dto = assetService.createTestZJGKBill();
+	    RestResponse response = new RestResponse(dto);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
 }
 

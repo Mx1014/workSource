@@ -4555,4 +4555,10 @@ public class AssetServiceImpl implements AssetService {
         response.setPaymentOrderBillDTOs(list);
         return response;
 	}
+
+	public ListBillsDTO createTestZJGKBill() {
+		CreateBillCommand cmd = new CreateBillCommand();
+		
+		return assetProvider.creatPropertyBill(cmd);
+	}
 }
