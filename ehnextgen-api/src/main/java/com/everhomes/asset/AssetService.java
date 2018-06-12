@@ -66,7 +66,7 @@ public interface AssetService {
 
 	void OneKeyNotice(OneKeyNoticeCommand cmd);
 
-	ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
+	ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd);
 
 	List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
 
@@ -92,10 +92,6 @@ public interface AssetService {
 
 	String deletExemptionItem(ExemptionItemIdCommand cmd);
 
-	PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd);
-
-	void generateBillsOnContractSigned(String contractNum);
-
 	void upodateBillStatusOnContractStatusChange(Long contractId, String targetStatus);
 
 	PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd);
@@ -111,8 +107,6 @@ public interface AssetService {
 	PaymentBillItems findBillItemById(Long billItemId);
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
-
-	void updateBillSwitchOnTime();
 
 	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
@@ -150,7 +144,7 @@ public interface AssetService {
 
 	List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
-	void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd);
+	void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd);
 
 	ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd);
 
@@ -164,11 +158,7 @@ public interface AssetService {
 
 	FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 
-	void syncCustomer(Integer namespaceId);
-
 	List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
-
-	void activeLateFine();
 
 	void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
 
@@ -181,6 +171,14 @@ public interface AssetService {
     void reCalBill(ReCalBillCommand cmd);
 
     void modifySettledBill(ModifySettledBillCommand cmd);
+
+    UploadCertificateInfoDTO uploadCertificate(UploadCertificateCommand cmd);
+
+	UploadCertificateInfoDTO listUploadCertificates(ListUploadCertificatesCommand cmd);
+
+    JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
+    
+    void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
     void noticeTrigger(Integer namespaceId);
 }

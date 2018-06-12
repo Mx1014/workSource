@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 参数
- * <li>newsToken: 新闻标识</li>
+ * <li>newsToken: 新闻标识-可以解析出newId</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>

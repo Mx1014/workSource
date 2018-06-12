@@ -172,6 +172,7 @@ import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.customer.QuarterStatistics;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomerDataCommand;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.customer.SyncResultViewedCommand;
@@ -581,27 +582,36 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
+        //数据库冗余又从动态表单查的 又要删除不显示  暂时这样
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
         if (categoryItem != null) {
             dto.setCategoryItemName(categoryItem.getItemDisplayName());
+        }else {
+            dto.setCategoryItemName(null);
         }
 //        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
         ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
         if (levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
+        }else {
+            dto.setLevelItemName(null);
         }
         if (null != dto.getCorpIndustryItemId()) {
             ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpIndustryItemId());
             if (null != corpIndustryItem) {
                 dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
+            }else {
+                dto.setCorpIndustryItemName(null);
             }
         }
         if (null != dto.getContactGenderItemId()) {
             ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getContactGenderItemId());
             if (null != contactGenderItem) {
                 dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+            }else {
+                dto.setContactGenderItemName(null);
             }
         }
         if (dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
@@ -611,6 +621,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getPropertyType());
             if (null != propertyTypeItem) {
                 dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+            }else{
+                dto.setPropertyTypeName(null);
             }
         }
 
@@ -618,6 +630,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRegistrationTypeId());
             if (null != registrationTypeItem) {
                 dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
+            }else {
+                dto.setRegistrationTypeName(null);
             }
         }
 
@@ -625,6 +639,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTechnicalFieldId());
             if (null != technicalFieldItem) {
                 dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
+            }else {
+                dto.setTechnicalFieldName(null);
             }
         }
 
@@ -632,6 +648,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTaxpayerTypeId());
             if (null != taxpayerTypeItem) {
                 dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
+            }else {
+                dto.setTaxpayerTypeName(null);
             }
         }
 
@@ -639,6 +657,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRelationWillingId());
             if (null != relationWillingItem) {
                 dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
+            }else {
+                dto.setRelationWillingName(null);
             }
         }
 
@@ -646,6 +666,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getHighAndNewTechId());
             if (null != highAndNewTechItem) {
                 dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
+            }else {
+                dto.setHighAndNewTechName(null);
             }
         }
 
@@ -653,6 +675,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
             if (null != entrepreneurialCharacteristicsItem) {
                 dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
+            }else {
+                dto.setEntrepreneurialCharacteristicsName(null);
             }
         }
 
@@ -660,6 +684,8 @@ public class CustomerServiceImpl implements CustomerService {
             ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSerialEntrepreneurId());
             if (null != serialEntrepreneurItem) {
                 dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
+            }else {
+                dto.setSerialEntrepreneurName(null);
             }
         }
 
@@ -787,6 +813,9 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setCreatorUid(customer.getCreatorUid());
         updateCustomer.setNamespaceCustomerToken(customer.getNamespaceCustomerToken());
         updateCustomer.setNamespaceCustomerType(customer.getNamespaceCustomerType());
+        updateCustomer.setLastTrackingTime(customer.getLastTrackingTime());
+        updateCustomer.setAdminFlag(customer.getAdminFlag());
+        updateCustomer.setVersion(customer.getVersion());
 
         if (cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
@@ -835,7 +864,7 @@ public class CustomerServiceImpl implements CustomerService {
                 command.setAvatar(updateCustomer.getCorpLogoUri());
                 command.setDescription(updateCustomer.getCorpDescription());
                 command.setCommunityId(updateCustomer.getCommunityId());
-                command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
+                command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : (long) updateCustomer.getCorpEmployeeAmount());
                 command.setAddress(updateCustomer.getContactAddress());
                 command.setLongitude(updateCustomer.getLongitude());
                 command.setLatitude(updateCustomer.getLatitude());
@@ -2205,6 +2234,23 @@ public class CustomerServiceImpl implements CustomerService {
         //这里增加入驻信息后自动同步到企业管理
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
+        //管理员同步过去
+        dbProvider.execute((TransactionStatus status) -> {
+            List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
+            if (untrackAdmins != null && untrackAdmins.size() > 0) {
+                untrackAdmins.forEach((r)->{
+                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                    cmd.setContactName(r.getContactName());
+                    cmd.setContactToken(r.getContactToken());
+                    cmd.setOrganizationId(customer.getOrganizationId());
+                    cmd.setNamespaceId(customer.getNamespaceId());
+                    rolePrivilegeService.createOrganizationAdmin(cmd);
+                });
+                enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
+                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+            }
+            return null;
+        });
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
@@ -2279,15 +2325,22 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos == null || entryInfos.size() == 0) {
-            if (organization != null && organization.getId() != 0) {
-                organizationSearcher.deleteById(organization.getId());
-                organizationProvider.deleteOrganization(organization);
+            if (organization != null && organization.getId() != 0 && organization.getId()!=null) {
+//                organizationSearcher.deleteById(organization.getId());
+//                organizationProvider.deleteOrganization(organization);
+                DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
+                command.setCommunityId(cmd.getCommunityId());
+                command.setId(organization.getId());
+                command.setManageOrganizationId(cmd.getOrgId());
+                command.setEnterpriseId(cmd.getOrgId());
+                organizationService.deleteOrganization(command);
                 if (customer != null) {
                     customer.setOrganizationId(0L);
                 }
             }
         }
         //sync to es
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         organizationSearcher.feedDoc(organization);
     }
@@ -2800,16 +2853,27 @@ public class CustomerServiceImpl implements CustomerService {
      */
     @Scheduled(cron = "1 20 2 * * ?")
     public void customerAutoSync() {
-        List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
-        if (communities != null) {
-            for (Community community : communities) {
-                SyncCustomersCommand command = new SyncCustomersCommand();
-                command.setNamespaceId(community.getNamespaceId());
-                command.setCommunityId(community.getId());
-                syncEnterpriseCustomers(command, false);
-                syncIndividualCustomers(command);
-            }
+        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode() + System.currentTimeMillis(), "");
+        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+        Map<String,String> runningMap  =new HashMap<>();
+        this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()).tryEnter(() -> {
+            String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
+            runningMap.put(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), runningFlag);
+            if(StringUtils.isBlank(runningFlag))
+            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), "executing", 5, TimeUnit.HOURS);
+        });
+        if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()))) {
+            List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
+            if (communities != null) {
+                for (Community community : communities) {
+                    SyncCustomersCommand command = new SyncCustomersCommand();
+                    command.setNamespaceId(community.getNamespaceId());
+                    command.setCommunityId(community.getId());
+                    syncEnterpriseCustomers(command, false);
+                    syncIndividualCustomers(command);
+                }
 
+            }
         }
     }
 
@@ -3701,14 +3765,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void syncOrganizationToCustomer() {
+    public void syncOrganizationToCustomer(SyncCustomerDataCommand cmd) {
         //防止执行两次  之前出现过
         Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode() + System.currentTimeMillis(), "");
         RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-        String runningFlag = getSyncTaskToken(redisTemplate);
+        String runningFlag = getSyncTaskToken(redisTemplate,CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
         if(StringUtils.isEmpty(runningFlag)) {
             redisTemplate.opsForValue().set(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), "executing", 2, TimeUnit.HOURS);
-            List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations();
+            List<Organization> organizations = enterpriseCustomerProvider.listNoSyncOrganizations(cmd.getNamespaceId());
             if (organizations != null && organizations.size() > 0) {
                 organizations.forEach((organization -> {
                     try {
@@ -3744,19 +3808,19 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
-    private String getSyncTaskToken(RedisTemplate redisTemplate) {
-        Map<String, String> map = makeSyncTaskToken(redisTemplate);
+    private String getSyncTaskToken(RedisTemplate redisTemplate,String code) {
+        Map<String, String> map = makeSyncTaskToken(redisTemplate,code);
         if(map == null) {
             return null;
         }
-        return  map.get(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
+        return  map.get(code);
     }
 
-    private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate) {
-        Object o = redisTemplate.opsForValue().get(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode());
+    private Map<String, String> makeSyncTaskToken(RedisTemplate redisTemplate,String code) {
+        Object o = redisTemplate.opsForValue().get(code);
         if(o != null) {
             Map<String, String> keys = new HashMap<>();
-            keys.put(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode(), (String)o);
+            keys.put(code, (String)o);
             return keys;
         } else {
             return null;
@@ -3778,9 +3842,15 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpOpAddress(enterprise.getAddress());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount() == null ? null : enterprise.getMemberCount().intValue());
             customer.setPostUri(postUri);
             customer.setNickName(enterprise.getDisplayName());
             customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -3793,14 +3863,19 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setNamespaceId(organization.getNamespaceId());
             customer.setOrganizationId(organization.getId());
             customer.setName(organization.getName());
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount() == null ? null : enterprise.getMemberCount().intValue());
             customer.setPostUri(postUri);
             customer.setNickName(enterprise.getDisplayName());
             customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 

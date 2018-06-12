@@ -90,18 +90,26 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         if (message instanceof TextMessage) {
             //LOGGER.info("Received client message. session= " + session.getId() + ", message: " + message.getPayload());
 
-            PduFrame frame = PduFrame.fromJson((String)message.getPayload());
-            if(frame == null) {
-                LOGGER.error("Unrecognized client message, session=" + session.getId() + ", payload=" + message.getPayload());
-                return;
+            try {
+                if("Ping".equalsIgnoreCase((String)message.getPayload())) {
+                    return;
+                }
+                PduFrame frame = PduFrame.fromJson((String)message.getPayload());
+                if(frame == null) {
+                    LOGGER.error("Unrecognized client message, session=" + session.getId() + ", payload=" + message.getPayload());
+                    return;
+                }
+                
+                if(frame.getName() == null || frame.getName().isEmpty()) {
+                    LOGGER.error("Missing name in frame, session=" + session.getId() + ", payload=" + message.getPayload());
+                    return;
+                }
+                
+                NamedHandlerDispatcher.invokeHandler(this, frame.getName(), session, frame);    
+            } catch(Exception ex) {
+                LOGGER.error("unknown error", ex);
             }
             
-            if(frame.getName() == null || frame.getName().isEmpty()) {
-                LOGGER.error("Missing name in frame, session=" + session.getId() + ", payload=" + message.getPayload());
-                return;
-            }
-            
-            NamedHandlerDispatcher.invokeHandler(this, frame.getName(), session, frame);
         }
         else if (message instanceof PongMessage) {
             handlePongMessage(session, (PongMessage) message);

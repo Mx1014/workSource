@@ -2,8 +2,6 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
-import javax.validation.Valid;
-
 /**
  * <ul>
  *     <li>flowNodeId: 节点 ID</li>

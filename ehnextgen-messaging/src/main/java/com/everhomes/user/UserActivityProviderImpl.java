@@ -233,6 +233,11 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 
     @Override
     public List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize, Byte communityType, Byte userSourceType, String keywords) {
+        return listUnAuthUsersByProfileCommunityId(namespaceId, communityId, anchor, pagesize, communityType, userSourceType, keywords, null, null);
+    }
+
+    @Override
+    public List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize, Byte communityType, Byte userSourceType, String keywords, Long startTime, Long endTime) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
 
         SelectQuery<Record> query = context.select(Tables.EH_USERS.fields()).from(Tables.EH_USERS).getQuery();
@@ -263,6 +268,11 @@ public class UserActivityProviderImpl implements UserActivityProvider {
             Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + keywords + "%");
             cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + keywords + "%"));
             query.addConditions(cond);
+        }
+
+        if (startTime != null && endTime != null) {
+            query.addConditions(Tables.EH_USERS.CREATE_TIME.gt(new Timestamp(startTime)));
+            query.addConditions(Tables.EH_USERS.CREATE_TIME.le(new Timestamp(endTime)));
         }
 
         query.addOrderBy(Tables.EH_USERS.ID.desc());

@@ -29,7 +29,15 @@ public class ModifyBillGroupCommand {
     private Integer dueDay;
     @NotNull
     private Byte dueDayType;
+    private Byte billDayType;
 
+    public Byte getBillDayType() {
+        return billDayType;
+    }
+
+    public void setBillDayType(Byte billDayType) {
+        this.billDayType = billDayType;
+    }
 
     private Integer namespaceId;
     private String ownerType;

@@ -50,6 +50,20 @@ public class CommentServiceImpl implements CommentService {
 			handler.deleteComment(cmd);
 		}
 	}
+	
+	@Override
+	public GetCommentsResponse getComment(GetCommentCommand cmd) {
+		
+		GetCommentsResponse resp = new GetCommentsResponse();
+		
+		OwnerTokenDTO ownerTokenDto =getOwnerTokenDTO(cmd.getOwnerToken());
+		CommentHandler handler =  getCommentHandler(ownerTokenDto.getType());
+		if(handler != null){
+			resp = handler.getComment(cmd);
+		}
+		
+		return resp;
+	}
 
 	/**
 	 * 老的类型中ownerToken是Long类型的id，如快讯；新的类型封装的OwnerTokenDTO，包括type和id，如论坛。 add by yanjun 20170601

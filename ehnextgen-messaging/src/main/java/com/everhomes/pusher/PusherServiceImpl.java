@@ -51,6 +51,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -113,7 +114,10 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     ConcurrentMap<String, ApnsService> certMaps = new ConcurrentHashMap<String, ApnsService>();
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 
+    // 由于本方法没有内容，故并没有使用ApplicationListener，若后面在setup上增加逻辑请同时增加ApplicationListener by lqs 20180516
+    //@PostConstruct
     public void setup() {
 //        workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
@@ -452,6 +456,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                         record.setBody(mb.getContent());
                         record.setStatus(MessageRecordStatus.CORE_FETCH.getCode());
                         record.setMeta(mb.getMeta());
+                        record.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
                         Map data_map = (Map) StringHelper.fromJsonString(mb.getContent(), Map.class);
                         if(data_map.get("extra") != null){
                             Map extraData = (Map)data_map.get("extra");

@@ -2590,30 +2590,45 @@ public class ForumServiceImpl implements ForumService {
         checkStickPostPrivilege(operatorId, cmd.getOrganizationId(), cmd.getPostId());
         checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
 
-        dbProvider.execute((status) -> {
-            Post post = this.forumProvider.findPostById(cmd.getPostId());
+        List<Long> postIds = new ArrayList<>();
+        postIds.add(cmd.getPostId());
 
-            post.setStickFlag(cmd.getStickFlag());
-
-            if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
-                post.setStickTime(new Timestamp(System.currentTimeMillis()));
-            }else {
-                post.setStickTime(null);
+        List<Post> posts = forumProvider.listPostsByRealPostId(cmd.getPostId());
+        if(posts != null && posts.size() > 0){
+            for (Post post: posts){
+                postIds.add(post.getId());
             }
+        }
 
-            forumProvider.updatePost(post);
-            if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
-                Activity activity = activityProvider.findSnapshotByPostId(cmd.getPostId());
-                activity.setStickFlag(cmd.getStickFlag());
+
+        dbProvider.execute((status) -> {
+
+            for (Long postId: postIds){
+                Post post = this.forumProvider.findPostById(postId);
+
+                post.setStickFlag(cmd.getStickFlag());
 
                 if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
-                    activity.setStickTime(new Timestamp(System.currentTimeMillis()));
+                    post.setStickTime(new Timestamp(System.currentTimeMillis()));
                 }else {
-                    activity.setStickTime(null);
+                    post.setStickTime(null);
                 }
 
-                activityProivider.updateActivity(activity);
+                forumProvider.updatePost(post);
+                if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
+                    Activity activity = activityProvider.findSnapshotByPostId(postId);
+                    activity.setStickFlag(cmd.getStickFlag());
+
+                    if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
+                        activity.setStickTime(new Timestamp(System.currentTimeMillis()));
+                    }else {
+                        activity.setStickTime(null);
+                    }
+
+                    activityProivider.updateActivity(activity);
+                }
             }
+
             return null;
         });
     }
