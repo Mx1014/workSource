@@ -398,6 +398,18 @@
         </dependency>
         <!-- 深圳湾物业缴费对接所需依赖：axis 1.4 jar end -->
         
+        <dependency>
+		    <groupId>com.everhomes</groupId>
+		    <artifactId>pay-sdk</artifactId>
+		    <version>${pay-sdk.version}</version>
+		    <exclusions>  
+        		<exclusion>
+          			<groupId>org.springframework.boot</groupId>  
+          			<artifactId>spring-boot-starter-web</artifactId>  
+        		</exclusion>  
+      		</exclusions>   
+		</dependency>
+        
 	</dependencies>
 
 	<build>

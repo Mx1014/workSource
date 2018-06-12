@@ -61,12 +61,6 @@
             <version>${ehutil-common.version}</version>
         </dependency>
         
-        <dependency>
-		    <groupId>com.everhomes</groupId>
-		    <artifactId>pay-sdk</artifactId>
-		    <version>1.0.0-SNAPSHOT</version>
-		</dependency>
-        
         <!-- 深圳湾物业缴费对接所需依赖：axis 1.4 jar start -->
         <dependency>
             <groupId>org.apache.axis</groupId>
