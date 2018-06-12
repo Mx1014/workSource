@@ -37,6 +37,7 @@ import com.everhomes.discover.ItemType;
  *  <li>createTime:创建楼栋地址时间</li>
  *  <li>attachments:楼栋附件信息</li>
  *  <li>buildingNumber:楼栋编号</li>
+ *  <li>trafficDescription:交通说明</li>
  * </ul>
  *
  */

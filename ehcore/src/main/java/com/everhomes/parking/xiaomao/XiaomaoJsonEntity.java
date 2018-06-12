@@ -2,9 +2,18 @@ package com.everhomes.parking.xiaomao;
 
 import com.everhomes.util.StringHelper;
 
-public class XiaomaoJsonEntity {
+public class XiaomaoJsonEntity<T> {
 	private Integer flag;
 	private String message;
+	private T data;
+
+	public T getData() {
+		return data;
+	}
+
+	public void setData(T data) {
+		this.data = data;
+	}
 
 	public Integer getFlag() {
 		return flag;
@@ -26,4 +35,9 @@ public class XiaomaoJsonEntity {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
+	public boolean isSuccess() {
+		return flag != null && flag == 1;
+	}
+
 }

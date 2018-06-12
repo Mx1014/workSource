@@ -12,6 +12,8 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -32,7 +34,7 @@ import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
 
 @Service
-public class RecommendationServiceImpl implements RecommendationService {
+public class RecommendationServiceImpl implements RecommendationService, ApplicationListener<ContextRefreshedEvent> {
     @Autowired
     private CommonWorkerPool workerPool;
     
@@ -53,9 +55,18 @@ public class RecommendationServiceImpl implements RecommendationService {
     
     private final String queueName = "recommend";
     
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         workerPool.addQueue(queueName);
+    }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
     
     @Override

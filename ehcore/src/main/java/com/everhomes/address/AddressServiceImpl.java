@@ -92,6 +92,8 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -110,7 +112,7 @@ import static com.everhomes.rest.ui.user.SceneType.DEFAULT;
 import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
 
 @Component
-public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
+public class AddressServiceImpl implements AddressService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddressServiceImpl.class);
 
     private static final String ADMIN_IMPORT_DATA_SEPERATOR = "admin.import.data.seperator";
@@ -193,13 +195,22 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private FieldService fieldService;
-
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhCommunities.class, null), this);
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhCommunities.class, null), this);
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
         // TODO monitor changeEnergyMeter notifications for cache invalidation
         return Action.none;
@@ -1957,15 +1968,22 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				errorLogs.add(log);
 				continue;
 			}
+			if (StringUtils.isEmpty(data.getStatus())) {
+				log.setData(data);
+				log.setErrorLog("apartmentStatus is null");
+				log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_STATUS_EMPTY);
+				errorLogs.add(log);
+				continue;
+			}
 
-            Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+            /*Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
 			if(address != null) {
                 log.setData(data);
                 log.setErrorLog("apartment name is exist in building");
                 log.setCode(AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME);
                 errorLogs.add(log);
                 continue;
-            }
+            }*/
 
             double areaSize = 0;
             double chargeArea = 0;
@@ -2019,6 +2037,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     continue;
                 }
             }
+            if (StringUtils.isNotEmpty(data.getOrientation()) && (data.getOrientation()).length()>20) {
+            	log.setData(data);
+				log.setErrorLog("orientation lenth error");
+				log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_ORIENTATION_LENTH);
+				errorLogs.add(log);
+				continue;
+            }
 			
 			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
 		}
@@ -2046,7 +2071,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             }
         }
 
-        Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());
+        //Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + data.getApartmentName());
+        Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
+
         if (address == null) {
         	address = new Address();
             address.setCommunityId(community.getId());
@@ -2062,10 +2089,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
-            address.setNamespaceAddressType(data.getNamespaceAddressType());
-            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
+//            address.setNamespaceAddressType(data.getNamespaceAddressType());
+//            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
+            address.setOrientation(data.getOrientation());
         	addressProvider.createAddress(address);
 		}else {
 //            address.setBuildArea(buildArea);
@@ -2073,9 +2101,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setSharedArea(shareArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
-            address.setNamespaceAddressType(data.getNamespaceAddressType());
-            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
+//            address.setNamespaceAddressType(data.getNamespaceAddressType());
+//            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            if (StringUtils.isNotBlank(data.getOrientation())) {
+            	address.setOrientation(data.getOrientation());
+			}
             addressProvider.updateAddress(address);
 		}
 
@@ -2099,9 +2130,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 data.setChargeArea(trim(r.getE()));
                 data.setSharedArea(trim(r.getF()));
                 data.setRentArea(trim(r.getG()));
+                data.setOrientation(trim(r.getH()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
-                data.setNamespaceAddressType(trim(r.getH()));
-                data.setNamespaceAddressToken(trim(r.getI()));
+//                data.setNamespaceAddressType(trim(r.getH()));
+//                data.setNamespaceAddressToken(trim(r.getI()));
 				list.add(data);
 			}
 		}

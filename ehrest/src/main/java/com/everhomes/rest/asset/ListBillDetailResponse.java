@@ -11,23 +11,32 @@ import java.util.List;
  *<ul>
  * <li>billId:账单id</li>
  * <li>dateStr:账期</li>
+ * <li>dateStrBegin:账单开始时间，参与排序</li>
+ * <li>dateStrEnd:账单结束时间，参与排序</li>
  * <li>contractNum:合同编号</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>apartmentName: 门牌名称</li>
  * <li>noticeTel:催缴电话</li>
+ * <li>customerTel:客户手机号</li>
  * <li>targetName:客户名称</li>
  * <li>targetId:客户id</li>
  * <li>targetType:客户type</li>
  * <li>billGroupDTO:账单组，包括减免项和收费项目的集合，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ * <li>certificateNote:客户上传缴费凭证后的留言</li>
+ * <li>billStatus:账单缴费状态（0：未缴，1：已缴）</li>
+ * <li>uploadCertificateDTOList:上传的所有缴费凭证的图片地址</li>
  *</ul>
  */
 public class ListBillDetailResponse {
     private Long billId;
     private Long billGroupId;
     private String dateStr;
+    private String dateStrBegin;
+    private String dateStrEnd;
     private String buildingName;
     private String apartmentName;
     private String noticeTel;
+    private String customerTel;
     private String targetName;
     private String targetType;
     private Long targetId;
@@ -35,8 +44,37 @@ public class ListBillDetailResponse {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
+    //add by tangcen
+    private String certificateNote;
+    private Byte billStatus;
+	@ItemType(UploadCertificateDTO.class)
+	private List<UploadCertificateDTO> uploadCertificateDTOList;
+	
+    public Byte getBillStatus() {
+		return billStatus;
+	}
 
-    public String getInvoiceNum() {
+	public void setBillStatus(Byte billStatus) {
+		this.billStatus = billStatus;
+	}
+
+	public String getCertificateNote() {
+		return certificateNote;
+	}
+
+	public void setCertificateNote(String certificateNote) {
+		this.certificateNote = certificateNote;
+	}
+
+	public List<UploadCertificateDTO> getUploadCertificateDTOList() {
+		return uploadCertificateDTOList;
+	}
+
+	public void setUploadCertificateDTOList(List<UploadCertificateDTO> uploadCertificateDTOList) {
+		this.uploadCertificateDTOList = uploadCertificateDTOList;
+	}
+
+	public String getInvoiceNum() {
         return invoiceNum;
     }
 
@@ -141,4 +179,28 @@ public class ListBillDetailResponse {
     public ListBillDetailResponse() {
 
     }
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
+	}
 }

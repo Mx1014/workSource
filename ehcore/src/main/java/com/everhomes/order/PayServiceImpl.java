@@ -6,7 +6,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -20,24 +19,20 @@ import com.everhomes.query.QueryBuilder;
 import com.everhomes.query.QueryCondition;
 import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.StringRestResponse;
-import com.everhomes.rest.group.GroupServiceErrorCode;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.pay.controller.QueryBalanceRestResponse;
-import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
+import com.everhomes.rest.order.PayOrderCommand;
+import com.everhomes.rest.order.PayOrderCommandResponse;
+import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
+import com.everhomes.rest.order.QueryOrderPaymentStatusCommandResponse;
+import com.everhomes.rest.pay.controller.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -165,6 +160,24 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
      */
     @Override
     public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId, Long expiration) {
+        return  createAppPreOrder(namespaceId,clientAppName,orderType,orderId,payerId,amount,resourceType,resourceId,expiration,null);
+    }
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount 支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @param resourceType 订单资源类型
+     * @param resourceId  订单资源类型ID
+     * @param expiration 过期时间
+     * @param extendInfo 额外信息
+     * @return
+     */
+    @Override
+    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId, Long expiration, String extendInfo) {
 
 
         //app支付
@@ -178,11 +191,11 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setResourceType(resourceType);
         cmd.setResourceId(resourceId);
         cmd.setExpiration(expiration);
+        cmd.setExtendInfo(extendInfo);
 
         LOGGER.info("createAppPreOrder cmd={}", cmd);
         return  createPreOrder(cmd);
     }
-
     /**
      *
      * @param namespaceId 域空间
@@ -871,6 +884,48 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setBizOrderNum(String.valueOf(orderRecordId));
 
         return cmd;
+    }
+
+
+    @Override
+    public PayOrderCommandResponse payOrder(PayOrderCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Pay order, cmd={}", cmd);
+        }
+        PayOrderRestResponse response = restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_PAYORDER_URL,
+                cmd,
+                PayOrderRestResponse.class);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Pay order, response={}", response);
+        }
+        
+        // 由于使用非rest包的类会导致编译rest包报错，故把原来从pay工程里引用的command和response类拷贝一份放到core server的rest包里
+        // by lqs 20180517
+        //return response;
+        return ConvertHelper.convert(response.getResponse(), PayOrderCommandResponse.class);
+    }
+
+    @Override
+    public QueryOrderPaymentStatusCommandResponse queryOrderPaymentStatus(QueryOrderPaymentStatusCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query order payment status, cmd={}", cmd);
+        }
+        QueryOrderPaymentStatusRestResponse response = restClient.restCall(
+                "POST",
+                ApiConstants.ORDER_QUERYORDERPAYMENTSTATUS_URL,
+                cmd,
+                QueryOrderPaymentStatusRestResponse.class);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query order payment status, response={}", response);
+        }
+        
+        // 由于使用非rest包的类会导致编译rest包报错，故把原来从pay工程里引用的command和response类拷贝一份放到core server的rest包里
+        // by lqs 20180517
+        return ConvertHelper.convert(response.getResponse(), QueryOrderPaymentStatusCommandResponse.class);
     }
     
     @Override

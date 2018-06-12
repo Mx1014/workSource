@@ -60,6 +60,9 @@ public interface UserService {
     void setUserAccountInfo(SetUserAccountInfoCommand cmd);
     CommunityDTO setUserCurrentCommunity(long communityId);
     Long setDefaultCommunity(Long userId, Integer namespaceId);
+
+    Long setDefaultCommunityForWx(Long userId, Integer namespaceId);
+
     void updateUserCurrentCommunityToProfile(Long userId, Long communityId, Integer namespaceId);
 
     List<UserIdentifierDTO> listUserIdentifiers();
@@ -324,4 +327,6 @@ public interface UserService {
     List<SceneDTO> listAnbangRelatedScenes(ListAnBangRelatedScenesCommand cmd);
     String makeAnbangRedirectUrl(Long userId, String location,
             Map<String, String[]> paramMap);
+
+    Byte isUserAuth();
 }

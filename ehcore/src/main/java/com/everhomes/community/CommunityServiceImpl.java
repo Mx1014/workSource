@@ -630,6 +630,14 @@ public class CommunityServiceImpl implements CommunityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), null);
+		//过滤富文本
+		for (int i = 0; i < buildings.size(); i++) {
+			Building building = buildings.get(i);
+			String trafficDescription = parseHtml(building.getTrafficDescription());
+			String description = parseHtml(building.getDescription());
+			building.setDescription(description);
+			building.setTrafficDescription(trafficDescription);
+        }
 		
 		this.communityProvider.populateBuildingAttachments(buildings);
         
@@ -649,6 +657,17 @@ public class CommunityServiceImpl implements CommunityService {
         }).collect(Collectors.toList());
 
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
+	}
+	
+	//处理富文本方法
+	public static String parseHtml(String html) {
+		if (html == null || html == "") {
+			return html = "";
+		} else {
+			html = html.replaceAll("<.*?>", " ").replaceAll("", "");
+			html = html.replaceAll("<.*?", "");
+			return html;
+		}
 	}
 
 	private void processDetailUrl(BuildingDTO dto) {
@@ -670,9 +689,10 @@ public class CommunityServiceImpl implements CommunityService {
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
 
 			List<BuildingExportDetailDTO> data = buildings.stream().map(this::convertToExportDetail).collect(Collectors.toList());
-			String[] propertyNames = {"communtiyName", "name", "buildingNumber", "aliasName", "address", "latitudeLongitude", "areaSize", "managerName", "contact"};
-			String[] titleNames = {"园区名称", "楼栋名称", "楼栋编号", "简称", "地址", "经纬度", "面积", "联系人", "联系电话"};
-			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20};
+			String[] propertyNames = {"name", "buildingNumber", "aliasName", "address", "latitudeLongitude", "trafficDescription", "managerName", "contact", "areaSize", "description"};
+			String[] titleNames = {"楼栋名称", "楼栋编号", "简称", "地址", "经纬度", "交通说明", "联系人", "联系电话","面积（平米）", "楼栋介绍"};
+			
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
 		} else {
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
@@ -1200,8 +1220,8 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setCommunityId(communityId);
 				building.setDescription(data.getDescription());
 				building.setTrafficDescription(data.getTrafficDescription());
-				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
-				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
+//				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
+//				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
@@ -1213,7 +1233,7 @@ public class CommunityServiceImpl implements CommunityService {
 				
 				communityProvider.createBuilding(userId, building);
 			}else {
-				building.setAliasName(data.getAliasName());
+				building.setName(data.getName());
 				building.setAddress(data.getAddress());
 				building.setManagerName(data.getContactor());
 				building.setContact(data.getPhone());
@@ -1227,8 +1247,12 @@ public class CommunityServiceImpl implements CommunityService {
 				}else {
 					///////////////////////////////////
 				}
-				building.setDescription(data.getDescription());
-				building.setTrafficDescription(data.getTrafficDescription());
+				if (StringUtils.isNotBlank(data.getDescription())) {
+					building.setDescription(data.getDescription());
+				}
+				if (StringUtils.isNotBlank(data.getTrafficDescription())) {
+					building.setTrafficDescription(data.getTrafficDescription());
+				}
 				
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
@@ -1238,12 +1262,18 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setLongitude(null);
 					building.setLatitude(null);
 				}
-
-				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
-				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
+				if (StringUtils.isNotBlank(data.getBuildingNumber())) {
+					building.setBuildingNumber(data.getBuildingNumber());
+				}
+				if (StringUtils.isNotBlank(data.getAliasName())) {
+					building.setAliasName(data.getAliasName());
+				}
+//				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
+//				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				building.setNamespaceId(community.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
-				
+				building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 				communityProvider.updateBuilding(building);
 			}
 		}
@@ -1301,17 +1331,19 @@ public class CommunityServiceImpl implements CommunityService {
 					StringUtils.isNotBlank(r.getI())) {
 				ImportBuildingDataDTO data = new ImportBuildingDataDTO();
 				data.setName(trim(r.getA()));
-				data.setAliasName(trim(r.getB()));
-				data.setAddress(trim(r.getC()));
-				data.setLongitudeLatitude(trim(r.getD()));
-				data.setTrafficDescription(trim(r.getE()));
-				data.setAreaSize(trim(r.getF()));
+				data.setBuildingNumber(trim(r.getB()));
+				data.setAliasName(trim(r.getC()));
+				data.setAddress(trim(r.getD()));
+				data.setLongitudeLatitude(trim(r.getE()));
+				data.setTrafficDescription(trim(r.getF()));
 				data.setContactor(trim(r.getG()));
 				data.setPhone(trim(r.getH()));
-				data.setDescription(trim(r.getI()));
+				data.setAreaSize(trim(r.getI()));
+				data.setDescription(trim(r.getJ()));
+				
 				//加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
-				data.setNamespaceBuildingType(trim(r.getJ()));
-				data.setNamespaceBuildingToken(trim(r.getK()));
+				//data.setNamespaceBuildingType(trim(r.getK()));
+				//data.setNamespaceBuildingToken(trim(r.getL()));
 				list.add(data);
 			}
 		}
@@ -1507,14 +1539,14 @@ public class CommunityServiceImpl implements CommunityService {
 
             if (StringUtils.isNotBlank(cmd.getUserInfoKeyword())) {
                 String keyword = "%" + cmd.getUserInfoKeyword() + "%";
-//                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
-//                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
+                query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+                query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
                 Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword));
                 query.addConditions(condition);
             }
             if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
                 String keyword = "%" + cmd.getCommunityKeyword() + "%";
-//                query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
+                query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
                 query.addJoin(Tables.EH_COMMUNITIES, JoinType.JOIN, Tables.EH_GROUPS.INTEGRAL_TAG2.eq(Tables.EH_COMMUNITIES.ID));
                 query.addConditions(Tables.EH_COMMUNITIES.NAME.like(keyword));
             }
@@ -2261,7 +2293,13 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<CommunityUserDto> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords());
+
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(
+		        cmd.getNamespaceId(),
+                cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1,
+                CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType(),
+                cmd.getKeywords(), cmd.getStartTime(), cmd.getEndTime());
+
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2353,8 +2391,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
-		//暂时定成查询1000条记录，且总是从第一条开始导出 by 20170630
-		cmd.setPageSize(1000);
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		cmd.setPageSize(pageSize);
 		cmd.setPageAnchor(null);
 
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());

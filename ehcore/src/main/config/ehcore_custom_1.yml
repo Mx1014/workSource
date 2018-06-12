@@ -140,3 +140,6 @@ ems.sys.account: A1234567890Z
 ems.sys.password: e10adc3949ba59abbe56e057f20f883e
 
 schedule.running.flag: 1
+
+# 允许在 nashorn 中通过 Java.type 访问的类
+nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService

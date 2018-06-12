@@ -58,31 +58,7 @@ public class ContractDTO {
 	private Long categoryItemId;
 
 	private String categoryItemName;
-
-	public Long getCategoryItemId() {
-		return categoryItemId;
-	}
-
-	public void setCategoryItemId(Long categoryItemId) {
-		this.categoryItemId = categoryItemId;
-	}
-
-	public String getCategoryItemName() {
-		return categoryItemName;
-	}
-
-	public void setCategoryItemName(String categoryItemName) {
-		this.categoryItemName = categoryItemName;
-	}
-
-	public String getPartyAName() {
-		return partyAName;
-	}
-
-	public void setPartyAName(String partyAName) {
-		this.partyAName = partyAName;
-	}
-
+	
 	private String contactor;
 	
 	private String contract;
@@ -107,6 +83,30 @@ public class ContractDTO {
 	private String namespaceContractToken;
 
 	private Byte paymentFlag;
+
+	public Long getCategoryItemId() {
+		return categoryItemId;
+	}
+
+	public void setCategoryItemId(Long categoryItemId) {
+		this.categoryItemId = categoryItemId;
+	}
+
+	public String getCategoryItemName() {
+		return categoryItemName;
+	}
+
+	public void setCategoryItemName(String categoryItemName) {
+		this.categoryItemName = categoryItemName;
+	}
+
+	public String getPartyAName() {
+		return partyAName;
+	}
+
+	public void setPartyAName(String partyAName) {
+		this.partyAName = partyAName;
+	}
 
 	public Byte getPaymentFlag() {
 		return paymentFlag;

@@ -3,9 +3,7 @@ package com.everhomes.customer;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.address.Address;
 import com.everhomes.asset.AssetService;
-import com.everhomes.building.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -14,23 +12,33 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.openapi.ZjSyncdataBackup;
 import com.everhomes.openapi.ZjSyncdataBackupProvider;
-import com.everhomes.organization.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
-import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.community.NamespaceCommunityType;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.EbeiCustomer;
+import com.everhomes.rest.customer.EbeiJsonEntity;
+import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.openapi.shenzhou.SyncFlag;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.NamespaceOrganizationType;
+import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
+import com.everhomes.rest.organization.OrganizationCommunityRequestType;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -39,10 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import java.io.IOException;
-import java.sql.Date;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -313,7 +318,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setContactPhone(ebeiCustomer.getContactPhone());
             customer.setStatus(CommonStatus.ACTIVE.getCode());
             customer.setCreatorUid(1L);
-            customer.setTrackingUid(-1L);
+//            customer.setTrackingUid(-1L);
             customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setOperatorUid(1L);
             customer.setUpdateTime(customer.getCreateTime());
@@ -328,7 +333,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(communityId, organization);
             //项目要求不要把联系人同步为管理员 20180125
-//            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
+            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
             organizationSearcher.feedDoc(organization);
             return null;
         });
@@ -337,7 +342,10 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
     // 需要把同步过来的业务人员添加为我司系统对应组织的管理员
     private void insertOrUpdateOrganizationMembers(Integer namespaceId, Organization organization, String contact, String contactPhone) {
-
+       // #31149
+        if (namespaceId == 999983) {
+            return;
+        }
         if (StringUtils.isBlank(contact) || StringUtils.isBlank(contactPhone) || organization == null) {
             return ;
         }
@@ -463,9 +471,9 @@ public class EbeiCustomerHandle implements CustomerHandle {
             customer.setOperatorUid(1L);
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setVersion(ebeiCustomer.getVersion());
-            if(customer.getTrackingUid() == null) {
-                customer.setTrackingUid(-1L);
-            }
+//            if(customer.getTrackingUid() == null) {
+//                customer.setTrackingUid(-1L);
+//            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 

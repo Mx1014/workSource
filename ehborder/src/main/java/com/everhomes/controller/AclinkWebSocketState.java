@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.controller;
 
 import java.util.Arrays;
@@ -63,6 +64,10 @@ public class AclinkWebSocketState {
             
             AclinkWebSocketMessage cmd = new AclinkWebSocketMessage();
             cmd.setId(this.getId());
+            //by liuyilin 20180419 TODO local server syncWebsocketMessages
+            if(this.getUuid().length() == 6){
+            	cmd.setType(1);
+            }
             handler.nextMessage(cmd, session, this);
             this.loopCnt++;
         }
@@ -91,6 +96,15 @@ public class AclinkWebSocketState {
             handler.nextMessage(cmd, session, this);
             this.loopCnt++;
         }
+    }
+    
+    public void onRequest(byte[] buf, WebSocketSession session, AclinkWebSocketHandler handler){
+    	AclinkWebSocketMessage cmd = new AclinkWebSocketMessage();
+        cmd.setId(this.getId());
+        cmd.setSeq(new Long(0));
+        cmd.setType(new Integer(0));
+        cmd.setPayload(Base64.encodeBase64String(Arrays.copyOfRange(buf, 10, buf.length)));
+        handler.excuteMessage(cmd, session, this);
     }
     
     public void onServerMessage(AclinkWebSocketMessage cmd, WebSocketSession session, AclinkWebSocketHandler handler) {
