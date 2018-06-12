@@ -160,7 +160,8 @@ public interface AssetProvider {
     void changeOrderStaus(Long orderId, Byte finalOrderStatus);
 
     void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId);
-
+    
+    void changeOrderPaymentType(Long orderId, Integer paymentType);
 
     PaymentUser findByOwner(String userType, Long id);
 
