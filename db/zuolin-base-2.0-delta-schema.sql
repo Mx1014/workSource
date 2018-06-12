@@ -167,7 +167,7 @@ ALTER TABLE eh_organizations ADD COLUMN `service_support_flag` tinyint(4) DEFAUL
 
 -- 增加办公地点表
 -- add by leiyuan
-CREATE TABLE `eh_organization_workPlaces` (
+CREATE TABLE `eh_organization_workplaces` (
   `id` bigint(20) NOT NULL COMMENT '主键id',
   `organization_id` bigint(20) DEFAULT NULL COMMENT '组织id',
   `workplace_name` varchar(50) DEFAULT NULL COMMENT '办公点名称',
@@ -177,7 +177,7 @@ CREATE TABLE `eh_organization_workPlaces` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- 增加办公地点与楼栋门牌的关系表
-CREATE TABLE `eh_communityAndBuilding_relationes` (
+CREATE TABLE `eh_communityandbuilding_relationes` (
   `id` bigint(20) NOT NULL COMMENT '主键id',
   `building_id` bigint(20) DEFAULT NULL COMMENT '楼栋id',
   `community_id` bigint(20) DEFAULT NULL COMMENT '所在项目id' ,
