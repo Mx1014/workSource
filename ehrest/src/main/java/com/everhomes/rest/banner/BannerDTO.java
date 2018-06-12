@@ -1,5 +1,6 @@
 package com.everhomes.rest.banner;
 
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -26,6 +27,7 @@ import java.sql.Timestamp;
  *     <li>appId: appId</li>
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
+ *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
  * </ul>
  */
 public class BannerDTO {
@@ -51,6 +53,7 @@ public class BannerDTO {
     private Long appId;
     private String routerPath;
     private String routerQuery;
+    private Byte clientHandlerType;
 
     public Long getId() {
         return id;
@@ -210,6 +213,14 @@ public class BannerDTO {
 
     public void setRouterQuery(String routerQuery) {
         this.routerQuery = routerQuery;
+    }
+
+    public Byte getClientHandlerType() {
+        return clientHandlerType;
+    }
+
+    public void setClientHandlerType(Byte clientHandlerType) {
+        this.clientHandlerType = clientHandlerType;
     }
 
     @Override

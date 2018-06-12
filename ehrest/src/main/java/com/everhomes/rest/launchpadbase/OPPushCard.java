@@ -2,6 +2,7 @@
 package com.everhomes.rest.launchpadbase;
 
 
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * <ul>
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
+ *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
  *     <li>properties: 需要展现的一些字段，需要和客户端预定字段和顺序，推荐按照显示的从上到下、从左到右显示放置properties</li>
  * </ul>
  */
@@ -18,6 +20,7 @@ public class OPPushCard {
 
     private String routerPath;
     private String routerQuery;
+    private Byte clientHandlerType;
     private List<Object> properties;
 
 
@@ -35,6 +38,14 @@ public class OPPushCard {
 
     public void setRouterQuery(String routerQuery) {
         this.routerQuery = routerQuery;
+    }
+
+    public Byte getClientHandlerType() {
+        return clientHandlerType;
+    }
+
+    public void setClientHandlerType(Byte clientHandlerType) {
+        this.clientHandlerType = clientHandlerType;
     }
 
     public List<Object> getProperties() {

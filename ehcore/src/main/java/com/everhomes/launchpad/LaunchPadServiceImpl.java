@@ -56,6 +56,7 @@ import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrganizationIdCommand;
@@ -2859,12 +2860,19 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			//appId 和 moduleId
 			OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(cmd.getInstanceConfig(), OPPushInstanceConfig.class);
 
-			ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getAppId());
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(config.getModuleId(), config.getAppId(), serviceModuleApp.getName(),instanceConfig);
-			response.setRouterPath(routerInfo.getPath());
-			response.setRouterQuery(routerInfo.getQuery());
-			response.setModuleId(routerInfo.getModuleId());
+			if(config.getAppId() != null){
+				ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getAppId());
+
+				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(config.getModuleId(), config.getAppId(), serviceModuleApp.getName(),instanceConfig);
+				response.setRouterPath(routerInfo.getPath());
+				response.setRouterQuery(routerInfo.getQuery());
+				response.setModuleId(routerInfo.getModuleId());
+				response.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
+			}else {
+				response.setClientHandlerType(ClientHandlerType.OUTSIDE_URL.getCode());
+			}
+
 		}
 
 		return response;

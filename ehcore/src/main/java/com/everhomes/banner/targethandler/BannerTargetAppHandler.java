@@ -3,11 +3,10 @@ package com.everhomes.banner.targethandler;
 import com.everhomes.banner.BannerTargetHandleResult;
 import com.everhomes.banner.BannerTargetHandler;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.module.RouterInfoService;
-import com.everhomes.module.RouterInfoServiceImpl;
-import com.everhomes.module.ServiceModuleService;
+import com.everhomes.module.*;
 import com.everhomes.rest.banner.targetdata.BannerAppTargetData;
 import com.everhomes.rest.module.RouterInfo;
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.RuntimeErrorException;
@@ -26,6 +25,9 @@ public class BannerTargetAppHandler implements BannerTargetHandler {
 
     @Autowired
     ServiceModuleAppService serviceModuleAppService;
+
+    @Autowired
+    ServiceModuleProvider serviceModuleProvider;
 
     @Override
     public BannerTargetHandleResult evaluate(String targetData) {
@@ -60,5 +62,22 @@ public class BannerTargetAppHandler implements BannerTargetHandler {
         }
 
         return routerInfo;
+    }
+
+    @Override
+    public Byte getClientHandlerType(String targetData) {
+        BannerAppTargetData tData = (BannerAppTargetData) StringHelper.fromJsonString(targetData, BannerAppTargetData.class);
+
+        ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(tData.getOriginId());
+
+        if(serviceModuleApp != null){
+            ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(serviceModuleApp.getModuleId());
+            if(serviceModule != null){
+                return serviceModule.getClientHandlerType();
+            }
+
+        }
+
+        return ClientHandlerType.NATIVE.getCode();
     }
 }

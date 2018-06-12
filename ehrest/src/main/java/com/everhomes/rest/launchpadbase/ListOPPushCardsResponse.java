@@ -2,6 +2,7 @@
 package com.everhomes.rest.launchpadbase;
 
 
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -17,6 +18,7 @@ import java.util.List;
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
  *     <li>cards: 卡片信息{@link OPPushCard}</li>
+ *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
  * </ul>
  */
 public class ListOPPushCardsResponse {
@@ -28,6 +30,7 @@ public class ListOPPushCardsResponse {
     private String instanceConfig;
     private String routerPath;
     private String routerQuery;
+    private Byte clientHandlerType;
     private List<OPPushCard> cards;
 
     public Long getModuleId() {
@@ -84,6 +87,14 @@ public class ListOPPushCardsResponse {
 
     public void setRouterQuery(String routerQuery) {
         this.routerQuery = routerQuery;
+    }
+
+    public Byte getClientHandlerType() {
+        return clientHandlerType;
+    }
+
+    public void setClientHandlerType(Byte clientHandlerType) {
+        this.clientHandlerType = clientHandlerType;
     }
 
     public List<OPPushCard> getCards() {
