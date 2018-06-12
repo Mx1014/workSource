@@ -2839,6 +2839,15 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t.ID.eq(orderId))
                 .execute();
     }
+    
+    public void changeOrderPaymentType(Long orderId, Integer paymentType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        context.update(t)
+                .set(t.PAYMENT_TYPE,paymentType != null ? paymentType.toString() : "")
+                .where(t.ID.eq(orderId))
+                .execute();
+    }
 
     @Override
     public void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId) {
@@ -4754,7 +4763,10 @@ public class AssetProviderImpl implements AssetProvider {
         Long ownerId = cmd.getCommunityId();
         String dateStrBegin = cmd.getDateStrBegin();
         String dateStrEnd = cmd.getDateStrEnd();
+        String startPayTime = cmd.getStartPayTime();
+        String endPayTime = cmd.getEndPayTime();
         String targetName = cmd.getTargetName();
+        Integer paymentType = cmd.getPaymentType();
         //卸货结束
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -4781,7 +4793,33 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
         }
         if(!org.springframework.util.StringUtils.isEmpty(targetName)){
-        	query.addConditions(t.TARGET_NAME.like(targetName));
+        	query.addConditions(t.TARGET_NAME.like("%" + targetName + "%"));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(startPayTime)){
+            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(endPayTime)){
+            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(paymentType)){
+        	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
+            //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+            //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
+            if(paymentType.equals(0)) {//微信
+            	query.addConditions(t4.PAYMENT_TYPE.eq("1")
+            			.or(t4.PAYMENT_TYPE.eq("7"))
+            			.or(t4.PAYMENT_TYPE.eq("9"))
+            			.or(t4.PAYMENT_TYPE.eq("12"))
+            			.or(t4.PAYMENT_TYPE.eq("21"))
+            	);
+            }else if(paymentType.equals(1)) {//支付宝
+            	query.addConditions(t4.PAYMENT_TYPE.eq("8")
+            			.or(t4.PAYMENT_TYPE.eq("10"))
+            			.or(t4.PAYMENT_TYPE.eq("13"))
+            	);
+            }else if(paymentType.equals(2)){//对公转账
+            	query.addConditions(t4.PAYMENT_TYPE.eq("2"));
+            }
         }
         query.addConditions(t2.STATUS.eq(1));//EhAssetPaymentOrderBills中的status1代表支付成功
         query.addOrderBy(t3.CREATE_TIME.desc());
