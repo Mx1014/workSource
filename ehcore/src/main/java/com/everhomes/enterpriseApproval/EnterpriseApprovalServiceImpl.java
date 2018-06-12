@@ -472,15 +472,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         response.setResult(TrueOrFalseFlag.FALSE.getCode());
-        List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId());
+        List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId(), true);
         if (templates.size() == 0)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_TEMPLATE_NOT_EXIST, "" +
                     "Approval templates not exist. Please check it.");
         Integer counts = enterpriseApprovalProvider.countGeneralApprovalInTemplateIds(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), templates.stream().map(EnterpriseApprovalTemplate::getId).collect(Collectors.toList()));
-/*        GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
-                cmd.getOwnerType(), templates.get(0).getId());
-        if (ga == null)*/
         if (counts != templates.size())
             response.setResult(TrueOrFalseFlag.TRUE.getCode());
         return response;
@@ -489,7 +486,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     //  Create enterprise approval templates.
     @Override
     public void createApprovalTemplates(CreateApprovalTemplatesCommand cmd) {
-        List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId());
+        List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId(), false);
         //  1.判断审批模板中是否有对应的表单模板
         //  2.没有则直接创建审批
         //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联

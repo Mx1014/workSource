@@ -74,11 +74,13 @@ public class EnterpriseApprovalProviderImpl implements EnterpriseApprovalProvide
     }
 
     @Override
-    public List<EnterpriseApprovalTemplate> listEnterpriseApprovalTemplateByModuleId(Long moduleId) {
+    public List<EnterpriseApprovalTemplate> listEnterpriseApprovalTemplateByModuleId(Long moduleId, boolean defaultFlag) {
         List<EnterpriseApprovalTemplate> results = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnterpriseApprovalTemplatesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_APPROVAL_TEMPLATES);
         query.addConditions(Tables.EH_ENTERPRISE_APPROVAL_TEMPLATES.MODULE_ID.eq(moduleId));
+        //  可能存在 非系统审批 需要默认生成
+        if(defaultFlag)
         query.addConditions(Tables.EH_ENTERPRISE_APPROVAL_TEMPLATES.APPROVAL_ATTRIBUTE.ne(GeneralApprovalAttribute.CUSTOMIZE.getCode()));
         query.fetch().map(r -> {
             results.add(ConvertHelper.convert(r, EnterpriseApprovalTemplate.class));

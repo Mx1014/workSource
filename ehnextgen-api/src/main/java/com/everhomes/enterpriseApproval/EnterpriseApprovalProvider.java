@@ -14,7 +14,7 @@ public interface EnterpriseApprovalProvider {
 
     Integer countGeneralApprovalInTemplateIds(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, List<Long> templateIds);
 
-    List<EnterpriseApprovalTemplate> listEnterpriseApprovalTemplateByModuleId(Long moduleId);
+    List<EnterpriseApprovalTemplate> listEnterpriseApprovalTemplateByModuleId(Long moduleId, boolean defaultFlag);
 
     List<Long> listGeneralApprovalIdsByGroupId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long groupId);
 
