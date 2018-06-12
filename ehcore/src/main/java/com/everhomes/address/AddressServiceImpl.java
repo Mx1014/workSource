@@ -1968,6 +1968,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				errorLogs.add(log);
 				continue;
 			}
+			if (StringUtils.isEmpty(data.getStatus())) {
+				log.setData(data);
+				log.setErrorLog("apartmentStatus is null");
+				log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_STATUS_EMPTY);
+				errorLogs.add(log);
+				continue;
+			}
 
             /*Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
 			if(address != null) {
@@ -2029,6 +2036,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     errorLogs.add(log);
                     continue;
                 }
+            }
+            if (StringUtils.isNotEmpty(data.getOrientation()) && (data.getOrientation()).length()>20) {
+            	log.setData(data);
+				log.setErrorLog("orientation lenth error");
+				log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_ORIENTATION_LENTH);
+				errorLogs.add(log);
+				continue;
             }
 			
 			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
