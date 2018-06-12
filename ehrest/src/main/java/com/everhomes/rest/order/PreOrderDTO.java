@@ -32,7 +32,7 @@ public class PreOrderDTO {
     private String payInfo;
     private String extendInfo;
     @ItemType(PayMethodDTO.class)
-    private List<com.everhomes.pay.order.PayMethodDTO> payMethod;
+    private List<PayMethodDTO> payMethod;
 
     public PreOrderDTO() {
     }
@@ -110,11 +110,11 @@ public class PreOrderDTO {
         this.extendInfo = extendInfo;
     }
 
-    public List<com.everhomes.pay.order.PayMethodDTO> getPayMethod() {
+    public List<PayMethodDTO> getPayMethod() {
         return payMethod;
     }
 
-    public void setPayMethod(List<com.everhomes.pay.order.PayMethodDTO> list) {
+    public void setPayMethod(List<PayMethodDTO> list) {
         this.payMethod = list;
     }
 }
