@@ -2170,7 +2170,9 @@ public class ActivityServiceImpl implements ActivityService {
         }
         createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
         createOrderCommand.setRefundOrderId(roster.getPayOrderId());
-        createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
+        Long orderNo = this.onlinePayService.createBillId(DateHelper
+                .currentGMTTime().getTime());
+        createOrderCommand.setBizOrderNum("activity"+orderNo);
         createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setSourceType(1);
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
