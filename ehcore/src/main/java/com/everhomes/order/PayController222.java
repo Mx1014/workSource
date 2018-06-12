@@ -21,8 +21,8 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/pay")
-public class PayController extends ControllerBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(PayController.class);
+public class PayController222 extends ControllerBase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PayController222.class);
 	
 	@Autowired
 	private PayService payService;

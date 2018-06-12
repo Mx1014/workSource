@@ -1,4 +1,4 @@
--- 为账单组管理增加“收款方账户”字段
+-- 为账单组管理增加“收款方账户”字段  by cx.yang
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_type` VARCHAR(128) COMMENT '收款方账户类型：EhUsers/EhOrganizations';
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_id` BIGINT COMMENT '收款方账户id';
 
@@ -43,14 +43,17 @@ PRIMARY KEY (`id`)
 -- yanlong.liang 发起活动的企业与收款方账户映射表
 CREATE TABLE `eh_activity_biz_payee` (
 `id`  bigint(20) NOT NULL ,
+`namespace_id` int not null,
+`owner_id` bigint not null COMMENT '应用类型id',
 `biz_payee_id` bigint(20) NOT NULL COMMENT '收款方账户ID',
-`organization_id` bigint(20) NOT NULL COMMENT '企业ID',
+`biz_payee_type` VARCHAR(128) COMMENT '收款方账户类型：EhUsers/EhOrganizations',
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- 活动表增加企业ID，用于查询收款方.
 ALTER TABLE `eh_activities` ADD COLUMN `organization_id` BIGINT COMMENT '企业ID';
 -- 活动报名表增加支付系统订单ID，关联支付订单.
 ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_order_id` BIGINT COMMENT '支付系统订单ID';
+ALTER TABLE `eh_activity_roster` ADD COLUMN `refund_pay_order_id` BIGINT COMMENT '支付系统退款订单ID';
 -- yanlong.liang END
 
 

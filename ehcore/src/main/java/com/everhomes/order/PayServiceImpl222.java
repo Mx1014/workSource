@@ -722,8 +722,8 @@ public class PayServiceImpl222 implements PayService, ApplicationListener<Contex
         dto.setAmount(cmd.getAmount());
         dto.setExtendInfo(cmd.getExtendInfo());
 
-        List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
-        dto.setPayMethod(payMethods);
+        //List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
+        //dto.setPayMethod(payMethods);
         Long expiredIntervalTime = getExpiredIntervalTime(cmd.getExpiration());
         dto.setExpiredIntervalTime(expiredIntervalTime);
         return dto;
@@ -732,8 +732,8 @@ public class PayServiceImpl222 implements PayService, ApplicationListener<Contex
     private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd, PaymentServiceConfig service){
         PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
         dto.setAmount(cmd.getAmount());
-        List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
-        dto.setPayMethod(payMethods);
+        //List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
+        //dto.setPayMethod(payMethods);
         Long expiredIntervalTime = getExpiredIntervalTime(cmd.getExpiration());
         dto.setExpiredIntervalTime(expiredIntervalTime);
         dto.setOrderId(cmd.getOrderId());
@@ -753,7 +753,7 @@ public class PayServiceImpl222 implements PayService, ApplicationListener<Contex
         return expiredIntervalTime;
     }
 
-    private List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, PaymentParamsDTO paramsDTO, PaymentServiceConfig service){
+    /*private List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, PaymentParamsDTO paramsDTO, PaymentServiceConfig service){
 
         List<PayMethodDTO> payMethods = payProvider.listPayMethods(namespaceId, paymentType, service.getOrderType(),
                 service.getOwnerType(), service.getOwnerId(), service.getResourceType(), service.getResourceId());
@@ -780,7 +780,7 @@ public class PayServiceImpl222 implements PayService, ApplicationListener<Contex
         }
 
         return payMethods;
-    }
+    }*/
 
 //    public List<PayMethodDTO> listPayMethod() throws Exception {
 //        List<PaymentType> paymentTypes = paymentTypeDao.listByCd(new ListPaymentTypeByCdCmd());

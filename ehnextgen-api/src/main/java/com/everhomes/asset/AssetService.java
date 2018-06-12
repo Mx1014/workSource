@@ -193,4 +193,6 @@ public interface AssetService {
     void payNotify(OrderPaymentNotificationCommand cmd);
     	
     ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd);
+    
+    ListBillsDTO createTestZJGKBill();
 }

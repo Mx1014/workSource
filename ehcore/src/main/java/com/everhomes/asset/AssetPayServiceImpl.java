@@ -30,6 +30,7 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderDTO;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.SettlementType;
@@ -42,6 +43,7 @@ import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayOrderDTO;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
@@ -55,9 +57,13 @@ import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
@@ -68,12 +74,14 @@ public class AssetPayServiceImpl implements AssetPayService{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(AssetPayServiceImpl.class);
 	
-	private static final Long SYSTEMID = 5L;
-	
-	private RestClient restClient = null;
-	
 	@Autowired 
     private PayService payServiceV2;
+	
+	@Autowired 
+	private UserProvider userProvider;
+	
+	@Autowired
+	private ContentServerService contentServerService;
 	
 	@Autowired
     private PayProvider payProvider;
@@ -110,6 +118,7 @@ public class AssetPayServiceImpl implements AssetPayService{
                 dto.setAccountId(payUserDTO.getId());
                 // 用户向支付系统注册帐号时填写的帐号名称
                 dto.setAccountName(payUserDTO.getRemark());
+                dto.setAccountAliasName(payUserDTO.getUserAliasName());//企业名称（认证企业）
                 // 帐号类型，1-个人帐号、2-企业帐号
                 Integer userType = payUserDTO.getUserType();
                 if(userType != null && userType.equals(2)) {
@@ -133,7 +142,13 @@ public class AssetPayServiceImpl implements AssetPayService{
     public PreOrderDTO createPreOrder(PreOrderCommand cmd) {
         PreOrderDTO preOrderDTO = null;
         //1、检查买方（付款方）是否有会员，无则创建
-        PayUserDTO payUserDTO = checkAndCreatePaymentUser(cmd.getPayerId(), cmd.getNamespaceId());
+        User userById = userProvider.findUserById(UserContext.currentUserId());
+        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
+        String userIdenify = null;
+        if(userIdentifier != null) {
+        	userIdenify = userIdentifier.getIdentifierToken();
+        }
+        PayUserDTO payUserDTO = checkAndCreatePaymentUser(cmd.getPayerId().toString(), "NS" + cmd.getNamespaceId().toString(), userIdenify, null, null, null);
         if(payUserDTO != null) {
         	cmd.setPayerId(payUserDTO.getId());
         }else {
@@ -152,11 +167,18 @@ public class AssetPayServiceImpl implements AssetPayService{
         
         //3、组装报文，发起下单请求
         OrderCommandResponse orderCommandResponse = createOrder(cmd);
+        
+        //4、组装支付方式
+        preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
+        
+        
+		//preOrderDTO.setPayMethod(orderCommandResponse.getPaymentMethods());//todo
+		//preOrderDTO.setPayMethod(getPayMethods(orderCommandResponse.getOrderPaymentStatusQueryUrl()));//todo
 
-        //4、保存订单信息
+        //5、保存订单信息
         saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
 
-        //5、返回
+        //6、返回
         return preOrderDTO;
     }
     
@@ -164,9 +186,19 @@ public class AssetPayServiceImpl implements AssetPayService{
     	if(LOGGER.isDebugEnabled()) {
     		LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
     	}
-    	if(cmd == null || cmd.getPaymentErrorCode() != "200") {
+    	//if(cmd == null || cmd.getPaymentErrorCode() != "200") {
+    	if(cmd == null) {
     		LOGGER.error("payNotify fail, cmd={}", cmd);
     	}
+    	//检查订单是否存在
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderNum(cmd.getBizOrderNum());
+        if(orderRecord == null){
+            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not find order record");
+        }
+        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
+        cmd.setOrderId(orderRecord.getOrderId());
     	SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
         com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
         if(orderType != null) {
@@ -176,21 +208,21 @@ public class AssetPayServiceImpl implements AssetPayService{
                         //支付成功
                         handler.paySuccess(srvCmd);
                     }
-                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-                        //支付失败
-                        handler.payFail(srvCmd);
-                    }
+//                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+//                        //支付失败
+//                        handler.payFail(srvCmd);
+//                    }
                     break;
-                case REFUND:
-                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-                        //退款成功
-                        handler.refundSuccess(srvCmd);
-                    }
-                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-                        //退款失败
-                        handler.refundFail(srvCmd);
-                    }
-                    break;
+//                case REFUND:
+//                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+//                        //退款成功
+//                        handler.refundSuccess(srvCmd);
+//                    }
+//                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+//                        //退款失败
+//                        handler.refundFail(srvCmd);
+//                    }
+//                    break;
                 default:
                     LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
             }
@@ -206,26 +238,32 @@ public class AssetPayServiceImpl implements AssetPayService{
         //PaymentOrderId为支付系统传来的orderId
         record.setPaymentOrderId(orderCommandResponse.getOrderId());
         record.setPaymentOrderType(paymentOrderType);
+        record.setServiceConfigId(-1L);//暂时置为-1
+        record.setOrderType("wuyeCode");
         payProvider.createPaymentOrderRecord(record);
     }
     
     //检查买方（付款方）会员，无则创建
-    private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
+    private PayUserDTO checkAndCreatePaymentUser(String userId, String accountCode,String userIdenify, String tag1, String tag2, String tag3){
     	PayUserDTO payUserDTO = new PayUserDTO();
+    	String payerid = OwnerType.USER.getCode()+userId;
         //根据tag查询支付帐号
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("checkAndCreatePaymentUser request={}", payerId);
+            LOGGER.debug("getPayUserList payerid={}", payerid);
         }
-        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList("EhUsers" + payerId.toString());
+        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(payerid);
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("checkAndCreatePaymentUser response={}", payUserDTOs);
+            LOGGER.debug("getPayUserList response={}", payUserDTOs);
         }
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
-        	payUserDTO = payServiceV2.createPersonalPayUserIfAbsent("EhUsers" + payerId.toString(), namespaceId.toString());
-        	if(payUserDTO != null) {
-        		payServiceV2.bandPhone(payUserDTO.getId(), "手机号????");
-        	}
+        	LOGGER.info("createPersonalPayUserIfAbsent payerid = {}, accountCode = {}, userIdenify={}",payerid,accountCode,userIdenify);
+        	payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerid, accountCode);
+        	if(payUserDTO==null){
+    			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
+    					"创建个人付款账户失败");
+    		}
+        	String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         }else {
         	payUserDTO = payUserDTOs.get(0);
         }
@@ -242,7 +280,7 @@ public class AssetPayServiceImpl implements AssetPayService{
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "create order fail");
         }
-        OrderCommandResponse  response = createOrderResp.getResponse();
+        OrderCommandResponse response = createOrderResp.getResponse();
         return response;
     }
     
@@ -259,14 +297,20 @@ public class AssetPayServiceImpl implements AssetPayService{
         createOrderCmd.setClientAppName(cmd.getClientAppName());
         createOrderCmd.setPayerUserId(cmd.getPayerId());//付款方ID
         createOrderCmd.setPayeeUserId(cmd.getBizPayeeId());//收款方ID
-        createOrderCmd.setAmount(cmd.getAmount());//需要将元转化为分，使用此类: AmountUtil.unitToCent()
+        createOrderCmd.setAmount(cmd.getAmount());
         createOrderCmd.setPaymentParams(flattenMap);
         createOrderCmd.setPaymentType(cmd.getPaymentType());
         if(cmd.getExpiration() != null) {
             createOrderCmd.setExpirationMillis(cmd.getExpiration());
         }
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"asset.pay.v2.callback.url", "");
+        String backUri;
+        if(UserContext.getCurrentNamespaceId().equals(999993)) {
+        	//由于海岸馨服务是定制的
+        	backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pmsy.pay.v2.callback.url", "");
+        }else {
+        	backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"asset.pay.v2.callback.url", "");
+        }
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCmd.setBackUrl(backUrl);
         createOrderCmd.setExtendInfo(cmd.getExtendInfo());
@@ -281,7 +325,7 @@ public class AssetPayServiceImpl implements AssetPayService{
 	    createOrderCmd.setOrderRemark4(null);
 	    createOrderCmd.setOrderRemark5(null);
 	    if(UserContext.getCurrentNamespaceId() != null) {
-	    	createOrderCmd.setAccountCode(UserContext.getCurrentNamespaceId().toString());
+	    	createOrderCmd.setAccountCode("NS" + UserContext.getCurrentNamespaceId().toString());
 	    }
         return createOrderCmd;
     }
@@ -302,5 +346,59 @@ public class AssetPayServiceImpl implements AssetPayService{
         if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-response=" + GsonUtil.toJson(response));}
         return response;
     }
+    
+    private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
+        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+        List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
+        List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
+        	PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+        	payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+        	payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
+        	String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+        	payMethodDTO.setPaymentLogo(paymentLogo);
+        	payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+        	PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+        	com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+        	if(bizPaymentParamsDTO != null) {
+        		paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+        	}
+        	payMethodDTO.setPaymentParams(paymentParamsDTO);
+        	payMethods.add(payMethodDTO);
+        }
+        dto.setPayMethod(payMethods);
+        dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
+        dto.setAmount(cmd.getAmount());
+        dto.setOrderId(cmd.getOrderId());
+        return dto;
+    }
+    /*public List<PayMethodDTO> getPayMethods(String paymentStatusQueryUrl) {
+		List<PayMethodDTO> payMethods = new ArrayList<>();
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		PayMethodDTO alipay = new PayMethodDTO();
+		alipay.setPaymentName("支付宝支付");
+		PaymentParamsDTO alipayParamsDTO = new PaymentParamsDTO();
+		alipayParamsDTO.setPayType("A01");
+		alipay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+		String url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveVpEWTNPV0kwWlRJMU0yRTFNakJtWkRCalpETTVaalUzTkdaaFltRmtOZw");
+		alipay.setPaymentLogo(url);
+		alipay.setPaymentParams(alipayParamsDTO);
+		alipay.setPaymentType(8);
+		payMethods.add(alipay);
+
+		PayMethodDTO wxpay = new PayMethodDTO();
+		wxpay.setPaymentName("微信支付");
+		wxpay.setExtendInfo(String.format(format, paymentStatusQueryUrl));
+		url = contentServerService.parserUri("cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw");
+		wxpay.setPaymentLogo(url);
+		PaymentParamsDTO wxParamsDTO = new PaymentParamsDTO();
+		wxParamsDTO.setPayType("no_credit");
+		wxpay.setPaymentParams(wxParamsDTO);
+		wxpay.setPaymentType(1);
+
+		payMethods.add(wxpay);
+		return payMethods;
+	}*/
 
 }

@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by Wentian Wang on 2017/9/28.
  */
-//@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.WUYE_CODE)
+@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.WUYE_CODE)
 public class Zuolin_PayCallBack implements PaymentCallBackHandler{
     private static final Logger LOGGER = LoggerFactory.getLogger(Zuolin_PayCallBack.class);
 
@@ -37,7 +37,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
         Map<String,Integer> billStatuses = new HashMap<>();
         List<Long> billIds = new ArrayList<>();
         for(int i = 0; i < bills.size(); i++){
-            AssetPaymentOrderBills bill = bills.get(i);
+            AssetPaymentOrderBills bill = bills.get(i); 
             //ORDER_BILL  中 1代表成功
             billStatuses.put(bill.getBillId(),1);
             billIds.add(Long.parseLong(bills.get(i).getBillId()));

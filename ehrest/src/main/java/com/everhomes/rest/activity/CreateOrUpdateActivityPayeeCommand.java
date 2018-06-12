@@ -5,22 +5,22 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>organizationId: 企业ID</li>
+ *     <li>categoryId: 应用ID</li>
  *     <li>payeeId: 收款方ID</li>
  * </ul>
  */
 public class CreateOrUpdateActivityPayeeCommand {
 
-    private Long organizationId;
+    private Long categoryId;
 
     private Long payeeId;
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getCategoryId() {
+        return categoryId;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public Long getPayeeId() {

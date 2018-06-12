@@ -5,19 +5,20 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>organizationId: 企业ID</li>
+ *     <li>categoryId: 应用ID</li>
  * </ul>
  */
 public class GetActivityPayeeCommand {
-    private Long organizationId;
+    private Long categoryId;
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getCategoryId() {
+        return categoryId;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
