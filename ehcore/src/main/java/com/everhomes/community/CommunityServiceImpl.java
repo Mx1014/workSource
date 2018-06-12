@@ -4077,7 +4077,7 @@ public class CommunityServiceImpl implements CommunityService {
         return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
     }
 	
-		@Override
+	@Override
 	public ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd) {
 		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
@@ -4102,6 +4102,211 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return response;
 
+	}
+	
+	//导入项目信息
+	@Override
+	public ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile file) {
+		Long userId = UserContext.current().getUser().getId();
+		ImportFileTask task = new ImportFileTask();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId((cmd.getNamespaceId()).longValue());
+			task.setType(ImportFileTaskType.COMMUNITY.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+					ImportFileResponse response = new ImportFileResponse();
+					List<ImportCommunityDataDTO> datas = handleImportCommunityData(resultList);
+					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
+						response.setTitle(datas.get(0));
+						datas.remove(0);
+					}
+					List<ImportFileResultLog<ImportCommunityDataDTO>> results = importCommunityDataAdmin(datas, userId, cmd);
+					response.setTotalCount((long)datas.size());
+					response.setFailCount((long)results.size());
+					response.setLogs(results);
+					return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+	
+	private List<ImportFileResultLog<ImportCommunityDataDTO>> importCommunityDataAdmin(List<ImportCommunityDataDTO> datas,
+			Long userId, ImportCommunityCommand cmd) {
+		
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		//Community community = communityProvider.findCommunityById(communityId);
+		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
+		
+		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
+		if(orgMem != null) {
+			orgMem.stream().map(r -> {
+				ct.put(r.getContactToken(), r);
+				return null;
+			});
+		}
+		List<ImportFileResultLog<ImportCommunityDataDTO>> list = new ArrayList<>();
+		for (ImportCommunityDataDTO data : datas) {
+			ImportFileResultLog<ImportCommunityDataDTO> log = checkCommunityData(data, cmd.getNamespaceId());
+			if (log != null) {
+				list.add(log);
+				continue;
+			}
+			
+			Community community = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), data.getName());
+			if (community == null) {
+				community = new Community();
+				community.setName(data.getName());
+				community.setCommunityNumber(data.getCommunityNumber());
+				community.setAliasName(data.getAliasName());
+				community.setCityName(data.getCityName());
+				community.setAreaName(data.getAreaName());
+				community.setAddress(data.getAddress());
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					community.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
+				if (StringUtils.isNotBlank(data.getRentArea())) {
+					community.setRentArea(Double.valueOf(data.getRentArea()));
+				}
+				
+				//查询省，市，区 插入region
+				Long provinceId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName()), 0L);  //创建省
+				Long cityId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName(), data.getCityName()), provinceId);  //创建市
+				Long areaId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName(), data.getCityName(), data.getAreaName()), cityId);  //创建区县
+				
+				//设置默认的forumId，要使用原有的项目里的forumId
+				ListingLocator locator = new ListingLocator();
+				List<Community> communities = communityProvider.listCommunities(UserContext.getCurrentNamespaceId(), locator, 1, null);
+				if(communities != null && communities.size() > 0){
+					community.setDefaultForumId(communities.get(0).getDefaultForumId());
+					community.setFeedbackForumId(communities.get(0).getFeedbackForumId());
+				}else {
+					community.setDefaultForumId(1L);
+					community.setFeedbackForumId(2L);
+				}
+				community.setCityId(cityId);
+				community.setAreaId(areaId);
+				community.setCommunityType((byte)1);
+				community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				community.setAptCount(0);
+				
+				//插入园区
+				//communityProvider.createCommunity(userId, community);
+				community = createCommunityData(userId, community);
+				//园区和域空间关联
+				createNamespaceResource(cmd.getNamespaceId(), community.getId());
+				communitySearcher.feedDoc(community);
+			}else {
+				
+				community.setName(data.getName());
+				if (StringUtils.isNotBlank(data.getCommunityNumber())) {
+					community.setCommunityNumber(data.getCommunityNumber());
+				}
+				if (StringUtils.isNotBlank(data.getAliasName())) {
+					community.setAliasName(data.getAliasName());
+				}
+				if (StringUtils.isNotBlank(data.getCityName())) {
+					community.setCityName(data.getCityName());
+				}
+				if (StringUtils.isNotBlank(data.getAreaName())) {
+					community.setAreaName(data.getAreaName());
+				}
+				if (StringUtils.isNotBlank(data.getAddress())) {
+					community.setAddress(data.getAddress());
+				}
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					community.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
+				if (StringUtils.isNotBlank(data.getRentArea())) {
+					community.setRentArea(Double.valueOf(data.getRentArea()));
+				}
+				
+				//查询省，市，区 插入region
+				Long provinceId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName()), 0L);  //创建省
+				Long cityId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName(), data.getCityName()), provinceId);  //创建市
+				Long areaId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName(), data.getCityName(), data.getAreaName()), cityId);  //创建区县
+				
+				community.setCityId(cityId);
+				community.setAreaId(areaId);
+				
+				communityProvider.updateCommunity(community);
+				communitySearcher.feedDoc(community);
+			}
+		}
+		return list;
+	}
+	
+	private Community createCommunityData(Long userId, Community cmd) {
+		//创建社区
+		Community community = ConvertHelper.convert(cmd, Community.class);
+		communityProvider.createCommunity(userId, community);
+		return community;
+	}
+	
+	private ImportFileResultLog<ImportCommunityDataDTO> checkCommunityData(ImportCommunityDataDTO data, Integer namespaceId) {
+		ImportFileResultLog<ImportCommunityDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
+		
+		if (StringUtils.isEmpty(data.getName())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_NAME_EMPTY);
+			log.setData(data);
+			log.setErrorLog("Community name cannot be empty");
+			return log;
+		}
+		//检查项目编号,一个域空间下只存在一个项目编号
+		if (StringUtils.isEmpty(data.getCommunityNumber())) {
+			Community community = communityProvider.findCommunityByNumber(data.getCommunityNumber(), namespaceId);
+			if(community != null) {
+				log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_NUMBER_EXIST);
+				log.setData(data);
+				log.setErrorLog("CommunityNumber exist ");
+				return log;
+			}
+		}
+		
+		if (StringUtils.isEmpty(data.getAddress()) && (data.getAddress()).length()>50) {
+			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_LENGTH);
+			log.setData(data);
+			log.setErrorLog("address length error");
+			return log;
+		}
+		
+		return null;
+	}
+	
+	private List<ImportCommunityDataDTO> handleImportCommunityData(List resultList) {
+		List<ImportCommunityDataDTO> list = new ArrayList<>();
+		for(int i = 1; i < resultList.size(); i++) {
+			RowResult r = (RowResult) resultList.get(i);
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
+					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || 
+					StringUtils.isNotBlank(r.getI())) {
+				ImportCommunityDataDTO data = new ImportCommunityDataDTO();
+				data.setName(trim(r.getA()));
+				data.setCommunityNumber(trim(r.getB()));
+				data.setAliasName(trim(r.getC()));
+				data.setCityName(trim(r.getD()));
+				data.setAreaName(trim(r.getE()));
+				data.setAddress(trim(r.getF()));
+				data.setAreaSize(trim(r.getG()));
+				data.setRentArea(trim(r.getH()));
+				
+				list.add(data);
+			}
+		}
+		return list;
 	}
 }
 

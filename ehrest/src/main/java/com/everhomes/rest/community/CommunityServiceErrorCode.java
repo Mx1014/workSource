@@ -15,7 +15,8 @@ public interface CommunityServiceErrorCode {
     static final int ERROR_INVALID_PARAMETER = 10010; //楼栋小区信息不存在
     static final int ERROR_COMMUNITY_NUMBER_EXIST = 10011; //项目编号已存在
     static final int ERROR_BUILDING_NUMBER_EXIST = 10012; //楼栋编号已存在
-    
+    static final int ERROR_COMMUNITY_NAME_EMPTY = 10013; //项目名称不能为空
+    static final int ERROR_ADDRESS_LENGTH = 10014; //项目地址超过指定长度
     
     int ERROR_BUILDING_NAME_EMPTY = 20001;
     int ERROR_ADDRESS_EMPTY = 20002;
