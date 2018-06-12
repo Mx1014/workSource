@@ -711,6 +711,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     if (cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
                     }
+                    if(cmd.getLivingStatus() != null){
+                        selectSql = selectSql.and(Tables.EH_ADDRESSES.LIVING_STATUS.eq(cmd.getLivingStatus()));
+                    }
 
                     selectSql.fetch().map((r) -> {
                         ApartmentDTO apartment = new ApartmentDTO();
@@ -726,6 +729,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     return true;
                 });
         Collections.sort(results);
+        for(ApartmentDTO dto : results){
+
+        }
         long endTime = System.currentTimeMillis();
         LOGGER.info("List apartments by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);

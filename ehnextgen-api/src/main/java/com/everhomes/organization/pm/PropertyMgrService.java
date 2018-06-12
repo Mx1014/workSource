@@ -471,4 +471,6 @@ public interface PropertyMgrService {
     void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd);
     DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd);
     List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
+
+    void createReservation(CreateReservationCommand cmd);
 }

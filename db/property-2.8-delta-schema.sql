@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS `eh_pm_resoucre_reservations`;
 CREATE TABLE `eh_pm_resoucre_reservations` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`enterprise_customer_id` BIGINT COMMENT 'primary id of eh_enterprise_customer',
+	`address_id` BIGINT COMMENT 'id of eh_addresses',
 	`start_time` TIMESTAMP NOT NULL COMMENT 'start time of this reservation',
 	`end_time` TIMESTAMP NOT NULL COMMENT 'end time of this reservation',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '1. inactive; 2: active; 3: deleted;',

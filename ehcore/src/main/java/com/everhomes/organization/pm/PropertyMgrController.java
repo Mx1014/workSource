@@ -14,6 +14,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
@@ -1046,6 +1047,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping("listPropApartments")
 	@RestReturn(value=ListPropApartmentsResponse.class)
 	public RestResponse listPropApartments(@Valid ListPropApartmentsByKeywordCommand cmd) {
+		// TODO: 2018/6/12 增加返回参数，是否和预定有关联；增加请求参数，根据居住状态来查询 
 		ListPropApartmentsResponse results =  propertyMgrService.listNewPropApartmentsByKeyword(cmd);
 		RestResponse response = new RestResponse(results);
 
@@ -2118,5 +2120,54 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse listDefaultChargingItems(ListDefaultChargingItemsCommand cmd){
 		return new RestResponse(propertyMgrService.listDefaultChargingItems(cmd));
 	}
-
+	// TODO: 2018/6/12  
+	/**
+	 * <p>list all reservations given addresses</p>
+	 * <b>URL: /pm/listReservations</b>
+	 */
+	@RequestMapping("listReservations")
+	@RestReturn(value = ListReservationsDTO.class, collection = true)
+	public RestResponse listReservations(ListReservationsCommand cmd){
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	// TODO: 2018/6/12  
+	/**
+	 * <p>create a reservation on a given address for a given enterprise customer</p>
+	 * <b>URL: /pm/createReservation</b>
+	 */
+	@RequestMapping("createReservation")
+	public RestResponse createReservation(CreateReservationCommand cmd){
+		propertyMgrService.createReservation(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+		// TODO: 2018/6/12
+	/**
+	 * <p>update a reservation </p>
+	 * <b>URL: /pm/updateReservation</b>
+	 */
+	@RequestMapping("updateReservation")
+	public RestResponse updateReservation(UpdateReservationCommand cmd){
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	// TODO: 2018/6/12
+	/**
+	 * <p>delete an reservation</p>
+	 * <b>URL: /pm/deletaReservation</b>
+	 */
+	@RequestMapping("deleteReservation")
+	public RestResponse deleteReservation(DeleteReservationCommand cmd){
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

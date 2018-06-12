@@ -2045,6 +2045,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
+	public void insertResourceReservation(PmResourceReservation resourceReservation) {
+		EhPmResoucreReservationsDao dao = new EhPmResoucreReservationsDao(this.dbProvider.getDslContext(AccessSpec.readWrite()).configuration());
+		dao.insert(resourceReservation);
+	}
+
+	@Override
     public ParkingCardCategory findParkingCardCategory(Byte cardType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_PARKING_CARD_CATEGORIES)

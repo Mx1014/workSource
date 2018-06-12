@@ -1,0 +1,72 @@
+//@formatter:off
+package com.everhomes.rest.organization.pm;
+
+import java.sql.Timestamp;
+
+/**
+ * Created by Wentian Wang on 2018/6/12.
+ */
+/**
+ *<ul>
+ * <li>addressId: 门牌id</li>
+ * <li>enterpriseCustomerId: 企业客户id</li>
+ * <li>startTime: 开始时间, 时间戳，非精确选择的时间字段需要置为0，例如传来的时间最多精确到分钟，那么秒钟到0，如果有业务场景不满足再更改</li>
+ * <li>endTime：结束时间</li>
+ *</ul>
+ */
+public class CreateReservationCommand {
+    private Long addressId;
+    private Long enterpriseCustomerId;
+    private Timestamp startTime;
+    private Timestamp endTime;
+    private Long communityId;
+    private Integer namespaceId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getEnterpriseCustomerId() {
+        return enterpriseCustomerId;
+    }
+
+    public void setEnterpriseCustomerId(Long enterpriseCustomerId) {
+        this.enterpriseCustomerId = enterpriseCustomerId;
+    }
+
+    public Timestamp getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Timestamp startTime) {
+        this.startTime = startTime;
+    }
+
+    public Timestamp getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Timestamp endTime) {
+        this.endTime = endTime;
+    }
+}

@@ -35,6 +35,7 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
@@ -80,8 +81,10 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationOwnerCarSearcher;
 import com.everhomes.search.PMOwnerSearcher;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.EhPmResoucreReservations;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwnerCars;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -265,6 +268,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Autowired
 	private DefaultChargingItemProvider defaultChargingItemProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
     
     private String queueName = "property-mgr-push";
 
@@ -6703,6 +6709,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			return items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
 		}
 		return null;
+	}
+
+	@Override
+	public void createReservation(CreateReservationCommand cmd) {
+		PmResourceReservation resourceReservation = new PmResourceReservation();
+		long nextId = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmResoucreReservations.class));
+		resourceReservation.setId(nextId);
+		resourceReservation.setCommunityId(cmd.getCommunityId());
+		resourceReservation.setNamespaceId(cmd.getNamespaceId());
+		resourceReservation.setCreatorUid(UserContext.currentUserId());
+		resourceReservation.setEndTime(cmd.getEndTime());
+		resourceReservation.setStartTime(cmd.getStartTime());
+		resourceReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
+		resourceReservation.setStatus((byte)2);
+		resourceReservation.setAddressId(cmd.getAddressId());
+		propertyMgrProvider.insertResourceReservation(resourceReservation);
 	}
 
 	private void dealDefaultChargingItemProperty(DefaultChargingItem item, List<DefaultChargingItemPropertyDTO> apartments) {
