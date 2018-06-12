@@ -1,6 +1,7 @@
 package com.everhomes.decoration;
 
 import com.everhomes.general_form.GeneralFormModuleHandler;
+import com.everhomes.rest.decoration.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
@@ -13,11 +14,17 @@ import org.springframework.stereotype.Component;
 public class DecorationFormHandler implements GeneralFormModuleHandler {
     @Autowired
     private DecorationProvider decorationProvider;
+    @Autowired
+    private DecorationService decorationService;
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
 
-
+        PostApprovalFormCommand cmd2 = new PostApprovalFormCommand();
+        cmd2.setRequestId(cmd.getSourceId());
+        cmd2.setValues(cmd.getValues());
+        cmd2.setApprovalId(cmd.getOwnerId());
+        decorationService.postApprovalForm(cmd2);
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd,PostGeneralFormDTO.class);
         return dto;
     }
