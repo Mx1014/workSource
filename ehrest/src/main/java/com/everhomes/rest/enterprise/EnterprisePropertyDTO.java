@@ -19,7 +19,7 @@ public class EnterprisePropertyDTO {
     private Long organizationId;
     //办公地点名称
     private String siteName;
-    private String wholeAdderssName;
+    private String wholeAddressName;
     private List<OrganizationSiteApartmentDTO> siteDtos;
     private Long id;
 
@@ -63,12 +63,12 @@ public class EnterprisePropertyDTO {
         this.siteDtos = siteDtos;
     }
 
-    public String getWholeAdderssName() {
-        return wholeAdderssName;
+    public String getWholeAddressName() {
+        return wholeAddressName;
     }
 
-    public void setWholeAdderssName(String wholeAdderssName) {
-        this.wholeAdderssName = wholeAdderssName;
+    public void setWholeAddressName(String wholeAddressName) {
+        this.wholeAddressName = wholeAddressName;
     }
 
     @Override

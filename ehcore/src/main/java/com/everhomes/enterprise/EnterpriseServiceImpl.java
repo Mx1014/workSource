@@ -245,11 +245,11 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     dto.setName(v.iterator().next().getName());
                     dto.setOrganizationId(k);
                     dto.setId(v.iterator().next().getId());
-                    if(v.iterator().next().getWholeAdderssName() != null){
-                        v.stream().map(EnterprisePropertyDTO::getWholeAdderssName).reduce((r1, r2) -> r1+","+r2).ifPresent(dto::setWholeAdderssName);
-                        dto.setWholeAdderssName(v.iterator().next().getWholeAdderssName());
+                    if(v.iterator().next().getWholeAddressName() != null){
+                        v.stream().map(EnterprisePropertyDTO::getWholeAddressName).reduce((r1, r2) -> r1+","+r2).ifPresent(dto::setWholeAddressName);
+                        dto.setWholeAddressName(v.iterator().next().getWholeAddressName());
                     }else{
-                        dto.setWholeAdderssName("");
+                        dto.setWholeAddressName("");
                     }
                     newEnterprisePropertyDTOS.add(dto);
                 });
