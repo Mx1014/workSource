@@ -182,14 +182,17 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
 
         //  approval number added by approval1.6
-        String countKey = ENTERPRISE_APPROVAL_NO + namespaceId + organizationId;
-        StringBuilder approvalNo = new StringBuilder(format.format(LocalDate.now()));
-        Long increment = op.increment(countKey, 1L);
-        String count = String.valueOf(increment);
-        for (int i = 0; i < 4 - count.length(); i++)
-            approvalNo.append("0");
-        approvalNo.append(count);
-        return Long.valueOf(approvalNo.toString());
+        String opKey = ENTERPRISE_APPROVAL_NO + namespaceId + organizationId + LocalDate.now().toString();
+        StringBuilder result = new StringBuilder(format.format(LocalDate.now()));
+
+        Long increment = op.increment(opKey, 1L);
+        op.getOperations().expire(opKey, 24, TimeUnit.HOURS);
+        String number = String.valueOf(increment);
+        for (int i = 0; i < 4 - number.length(); i++)
+            result.append("0");
+
+        result.append(number);
+        return Long.valueOf(result.toString());
     }
 //        String count;
         /*if (op.get(countKey) == null) {
