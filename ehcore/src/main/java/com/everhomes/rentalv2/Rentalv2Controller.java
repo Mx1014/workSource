@@ -633,6 +633,7 @@ public class Rentalv2Controller extends ControllerBase {
 	 * <b>URL: /rental/payNotify <b>
 	 * <p>支付回调</p>
 	 */
+	@RequireAuthentication(false)
 	@RequestMapping("payNotify")
 	@RestReturn(String.class)
 	public RestResponse payNotify(OrderPaymentNotificationCommand cmd) {
@@ -648,6 +649,7 @@ public class Rentalv2Controller extends ControllerBase {
      * <b>URL: /rental/refundNotify <b>
      * <p>退款回调</p>
      */
+	@RequireAuthentication(false)
     @RequestMapping("refundNotify")
     @RestReturn(String.class)
     public RestResponse refundNotify(OrderPaymentNotificationCommand  cmd) {
