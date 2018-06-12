@@ -1946,6 +1946,23 @@ public class UserProviderImpl implements UserProvider {
         return userIdentifier;
     }
 
+    /**
+     * 根据ownerUid和namespaceId来查询手机号
+     * @param ownerUid
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public String findContactTokenByOwnerUidAndNamespaceId(Long ownerUid , Integer namespaceId){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //2.查询Eh_user_identifiers表
+        String contactToken = context.select(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN).from(Tables.EH_USER_IDENTIFIERS)
+                .where(Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(ownerUid))
+                .and(Tables.EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId)).fetchOneInto(String.class);
+        return contactToken;
+    }
+
 
     
 }

@@ -1827,9 +1827,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void updateTopAdminstrator(CreateOrganizationAdminCommand cmd) {
 		dbProvider.execute((TransactionStatus status) -> {
-			// 删除原来的超管权限
-			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 
+			User user = UserContext.current().getUser();
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			String contactToken = userProvider.findContactTokenByOwnerUidAndNamespaceId(user.getId(),namespaceId);
+
+			// 删除原来的超管权限
+			/*deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);*/
+			deleteOrganizationAdmin(cmd.getOrganizationId(), contactToken, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
 			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
 			if(detail != null){

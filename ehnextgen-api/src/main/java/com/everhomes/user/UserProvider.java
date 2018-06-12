@@ -194,4 +194,12 @@ public interface UserProvider {
      */
     UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(String identifierToken,Integer namespaceId);
 
+    /**
+     * 根据ownerUid和namespaceId来查询手机号
+     * @param ownerUid
+     * @param namespaceId
+     * @return
+     */
+    String findContactTokenByOwnerUidAndNamespaceId(Long ownerUid , Integer namespaceId);
+
 }
