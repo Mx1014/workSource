@@ -21,6 +21,7 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
 import org.apache.commons.lang.StringUtils;
@@ -225,7 +226,12 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                     }
                 	return d;
                 }).collect(Collectors.toList()));
-                
+                //客户额外手机号添加
+                try{
+                    dto.setCustomerExtraTels((List<String>)StringHelper.fromJsonString(r.getContactExtraTels(), ArrayList.class));
+                }catch (Exception e){
+                    LOGGER.error("failed to convert contact extra tels json to list, pmowner id ={}", r.getId());
+                }
                 return dto;
             }).collect(Collectors.toList()));
 
