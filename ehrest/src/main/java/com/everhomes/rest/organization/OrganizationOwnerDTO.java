@@ -5,7 +5,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
 import com.everhomes.util.StringHelper;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,6 +50,10 @@ public class OrganizationOwnerDTO {
     private String authType;
 
     private String primaryFlag;
+
+    private String building;
+
+    private  String address;
 
     @ItemType(OrganizationOwnerAddressDTO.class)
     private List<OrganizationOwnerAddressDTO> addresses;
@@ -210,4 +213,22 @@ public class OrganizationOwnerDTO {
 	public void setAddresses(List<OrganizationOwnerAddressDTO> addresses) {
 		this.addresses = addresses;
 	}
+
+    public String getBuilding() {
+        return building;
+    }
+
+    public void setBuilding(String building) {
+        this.building = building;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+
 }
