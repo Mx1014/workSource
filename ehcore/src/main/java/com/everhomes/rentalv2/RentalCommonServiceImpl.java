@@ -262,7 +262,7 @@ public class RentalCommonServiceImpl {
         rentalRefundOrder.setResourceType(order.getResourceType());
 
         rentalRefundOrder.setAmount(orderAmount);
-        rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+        rentalRefundOrder.setStatus(SiteBillStatus.REFUNDING.getCode());
         rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         if (UserContext.current().getUser()!=null)
              rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
