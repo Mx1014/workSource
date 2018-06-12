@@ -2,6 +2,8 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -6303,7 +6305,8 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void payNotify(OrderPaymentNotificationCommand cmd) {
-        ActivitySignupOrderV2CallBackHandler handler = new ActivitySignupOrderV2CallBackHandler();
+        ActivitySignupOrderV2CallBackHandler handler = PlatformContext.getComponent(
+                PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
         }

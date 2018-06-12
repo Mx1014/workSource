@@ -26,6 +26,7 @@ import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PayOrderCommand;
 import com.everhomes.rest.order.PayOrderCommandResponse;
 import com.everhomes.rest.order.PaymentParamsDTO;
@@ -261,7 +262,7 @@ public class PayServiceImpl222 implements PayService, ApplicationListener<Contex
      * @return
      */
     @Override
-    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount,  String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId, Long expiration) {
+    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId, Long expiration) {
 
         //app支付
         PreOrderCommand cmd = new PreOrderCommand();
