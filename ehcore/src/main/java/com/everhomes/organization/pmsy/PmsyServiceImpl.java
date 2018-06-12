@@ -33,6 +33,8 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -585,4 +587,11 @@ public class PmsyServiceImpl implements PmsyService{
 		}
 		return null;
 	}
+	
+	public void payNotify(OrderPaymentNotificationCommand cmd) {
+    	PaymentCallBackHandler handler = PlatformContext.getComponent(
+    			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.PM_SIYUAN_CODE);
+    	//支付模块回调接口，通知支付结果
+    	assetPayService.payNotify(cmd, handler);
+    }
 }

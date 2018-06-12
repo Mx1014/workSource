@@ -9,6 +9,9 @@ update `eh_rentalv2_order_record` t1 right join `eh_rentalv2_orders` t2 on t1.`o
 -- by cx.yang 支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 VALUES ('asset.pay.v2.callback.url', '/asset/payNotify', '物业缴费新支付回调接口', '0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+VALUES ('pmsy.pay.v2.callback.url', '/pmsy/payNotify', '物业缴费新支付回调接口', '999993');
+
 -- 由于海岸馨服务是定制的，web没有账单组管理，所以需要初始化收款方账户配置
 SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_bill_groups`),0);
 INSERT INTO `eh_payment_bill_groups` VALUES (@id := @id + 1, '999993', '999993', 'community', '物业缴费', '2', '5', '0', UTC_TIMESTAMP(), NULL, NULL, '1', NULL, NULL, NULL, '4', 
@@ -37,6 +40,8 @@ update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id=
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1006' where namespace_id=999983;
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1001' where namespace_id=999985;
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1003' where namespace_id=999990;
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4443' where namespace_id=999993;
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4422' where namespace_id=999979;
 
 -- by cx.yang 新支付end
 
