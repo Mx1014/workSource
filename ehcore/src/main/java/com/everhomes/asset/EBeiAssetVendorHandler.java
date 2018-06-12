@@ -183,6 +183,8 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
             dto.setNoticeTel(source.getNoticeTels());
             dto.setOwnerType("community");
             dto.setDateStr(source.getChargePeriod());
+            dto.setDateStrBegin(source.getChargePeriod());//为了兼容账单开始时间
+            dto.setDateStrEnd(source.getChargePeriod());//为了兼容账单结束时间
             dto.setTargetName(source.getCustomerName());
 //            dto.setTargetId();
             dto.setTargetType("eh_organization");
