@@ -10,12 +10,12 @@ import java.util.List;
  * <li>reasons: 离职原因</li>
  * </ul>
  */
-public class ListDismissCatagoriesResponse {
+public class ListDismissCategoriesResponse {
 
     @ItemType(String.class)
     private List<String> reasons;
 
-    public ListDismissCatagoriesResponse() {
+    public ListDismissCategoriesResponse() {
     }
 
     public List<String> getReasons() {

@@ -1724,8 +1724,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public ListDismissCatagoriesResponse listArchivesDismissReason(){
-        ListDismissCatagoriesResponse res = new ListDismissCatagoriesResponse();
+    public ListDismissCategoriesResponse listArchivesDismissCategories(){
+        ListDismissCategoriesResponse res = new ListDismissCategoriesResponse();
         List<String> results = new ArrayList<>();
         for(ArchivesDismissReason reason : ArchivesDismissReason.values()){
             results.add(reason.getType());
