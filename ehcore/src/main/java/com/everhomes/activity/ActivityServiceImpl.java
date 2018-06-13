@@ -867,12 +867,19 @@ public class ActivityServiceImpl implements ActivityService {
 
         //微信公众号支付，重新设置ClientName，设置支付方式和参数
         if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
-
             if(createOrderCommand.getClientAppName() == null){
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
                 createOrderCommand.setClientAppName("wechat_" + namespaceId);
             }
             createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            paymentParamsDTO.setPayType("no_credit");
+            User user = UserContext.current().getUser();
+            paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+            Map<String, String> flattenMap = new HashMap<>();
+            StringHelper.toStringMap(null, paymentParamsDTO, flattenMap);
+            createOrderCommand.setPaymentParams(flattenMap);
+            createOrderCommand.setCommitFlag(1);
         }
 
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
