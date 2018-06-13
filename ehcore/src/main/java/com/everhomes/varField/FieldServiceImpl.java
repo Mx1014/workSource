@@ -1230,13 +1230,17 @@ public class FieldServiceImpl implements FieldService {
             long uid = Long.parseLong(invoke.toString());
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(uid);
             if(null != detail && null != detail.getContactName()){
-                invoke = String.valueOf(detail.getContactName());
+                invoke = String.valueOf(detail.getContactName()+"("+detail.getContactToken()+")");
             }else{
                 if(uid > 0) {
                     try {
                         UserInfo userInfo = userService.getUserInfo(uid);
                         if(userInfo != null){
-                            invoke = String.valueOf(userInfo.getNickName());
+                            String contackToken = null;
+                            if(userInfo.getPhones()!=null && userInfo.getPhones().size()>0){
+                               contackToken  = userInfo.getPhones().get(0);
+                            }
+                            invoke = String.valueOf(userInfo.getNickName()+"("+contackToken+")");
                         } else {
                             LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
                         }
