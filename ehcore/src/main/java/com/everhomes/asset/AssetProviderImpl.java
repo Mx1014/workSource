@@ -20,8 +20,10 @@ import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
+import org.jooq.UpdateQuery;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
@@ -51,6 +54,7 @@ import com.everhomes.rest.asset.BillGroupDTO;
 import com.everhomes.rest.asset.BillIdAndAmount;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.BillingCycle;
 import com.everhomes.rest.asset.ConfigChargingItems;
 import com.everhomes.rest.asset.CreateBillCommand;
 import com.everhomes.rest.asset.CreateBillGroupCommand;
@@ -82,6 +86,7 @@ import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -109,6 +114,7 @@ import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetPaymentOrderBillsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetPaymentOrderDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillCertificateDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillItemsDao;
@@ -124,14 +130,18 @@ import com.everhomes.server.schema.tables.daos.EhPaymentNoticeConfigDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillCertificate;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentBillsRecord;
+import com.everhomes.server.schema.tables.records.EhPaymentChargingStandardsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DecimalUtils;
 import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
@@ -153,6 +163,9 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private CoordinationProvider coordinationProvider;
+    
+    @Autowired
+    private ContractProvider contractProvider;
 
 
     @Override
@@ -1263,7 +1276,6 @@ public class AssetProviderImpl implements AssetProvider {
                     }
                     exemptionItem.setTargetname(targetName);
                     exemptionItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
                     exemptionItems.add(exemptionItem);
 
                     if(amount.compareTo(zero)==-1 || (exemptionItemDTO.getIsPlus() != null && exemptionItemDTO.getIsPlus().byteValue() == (byte)0)){
