@@ -453,7 +453,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				appDTO.setActionData(launchPadService.refreshActionData(appDTO.getActionData()));
 
                 //填充路由信息
-				RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), app.getName(), app.getInstanceConfig());
+				RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), app.getName(), appDTO.getActionData());
 				appDTO.setRouterPath(routerInfo.getPath());
 				appDTO.setRouterQuery(routerInfo.getQuery());
 
