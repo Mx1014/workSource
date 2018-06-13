@@ -2093,7 +2093,7 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public String getNewsQR(UpdateNewsCommand cmd) {
-		String url = this.configProvider.getValue("home.url","") + "/html/news_text_review.html?newsToken=";
+        String url = this.configProvider.getValue("home.url","localhost") + "/html/news_text_preview.html?newsToken=";
 		String token;
 		if(null == cmd.getId()){
 			CreateNewsResponse result = this.createNews(ConvertHelper.convert(cmd,CreateNewsCommand.class));
