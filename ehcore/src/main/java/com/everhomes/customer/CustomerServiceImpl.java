@@ -3642,6 +3642,8 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setTargetId(s.getTargetId());
                 dto.setTargetType(s.getTargetType());
                 dto.setContactName(s.getContactName());
+                dto.setGender(s.getGender());
+                dto.setContactToken(s.getContactToken());
             });
         }
         List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
@@ -3657,6 +3659,8 @@ public class CustomerServiceImpl implements CustomerService {
                     dto.setTargetId(r.getTargetId());
                     dto.setTargetType(r.getTargetType());
                     dto.setContactName(r.getContactName());
+                    dto.setGender(r.getGender());
+                    dto.setContactToken(r.getIdentifierToken());
                     users.add(dto);
                 }
             });

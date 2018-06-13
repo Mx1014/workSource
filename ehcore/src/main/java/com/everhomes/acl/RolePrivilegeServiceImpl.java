@@ -3095,8 +3095,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			dto.setAllFlag(module_dto.getAllFlag());
 
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(module_dto.getTargetId());
-			if(detail != null)
+			if(detail != null){
 				dto.setContactName(detail.getContactName());
+				dto.setGender(detail.getGender());
+			}
 
 			// 园区控制范围数据
 			ServiceModuleAuthorizationsDTO c_dto = processServiceModuleApps(r, ModuleManagementType.COMMUNITY_CONTROL.getCode());
