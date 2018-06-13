@@ -71,8 +71,9 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('vis
 
 -- ISSUE-21443 访客管理1.0 END
 
-
--- merge from workplatform-1.0  start by yanjun 201806131554
+-- 通用脚本
+-- start by yanjun 201806131554
+-- merge from workplatform-1.0
 
 update eh_portal_layout_templates set status = 0 where id in (3, 4, 5) and label like '%主页签门户%';
 
@@ -547,4 +548,4 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('77000000', 'OA管理', '70000010', NULL, NULL, '1', '2', '/70000010/77000000', 'organization', '30', NULL, '2', 'system', 'classify', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('78000000', 'ERP', '70000010', NULL, NULL, '1', '2', '/70000010/78000000', 'organization', '40', NULL, '2', 'system', 'classify', '2');
 
--- merge from workplatform-1.0 end by yanjun 201806131554
+-- end by yanjun 201806131554
