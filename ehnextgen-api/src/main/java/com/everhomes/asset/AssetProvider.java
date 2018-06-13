@@ -342,5 +342,10 @@ public interface AssetProvider {
 	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
 	void setRent(Long contractId, BigDecimal rent);
+	//add by tangcen
+	void deleteUnsettledBillsOnContractId(Long contractId, Long nextBillId);
+	PaymentBills getFirstUnsettledBill(Long id);
+	List<PaymentBillItems> findBillItemsByBillId(Long billId);
+	void updatePaymentBills(PaymentBills bill);
 
 }

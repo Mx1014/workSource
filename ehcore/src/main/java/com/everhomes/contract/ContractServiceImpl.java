@@ -705,7 +705,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
-
+		
 		//调用计算明细
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -1349,6 +1349,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
 					"contractNumber is already exist");
 		}
+		
 		if(cmd.getContractStartDate() != null) {
 			contract.setContractStartDate(setToBegin(cmd.getContractStartDate()));
 		}
@@ -1381,6 +1382,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		contractProvider.updateContract(contract);
+		
+		//如果是变更合同，将父合同中关联的未出账单记为无效账单 by tangcen
+		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))&&
+				!ContractStatus.DRAFT.equals(ContractStatus.fromStatus(cmd.getStatus()))) {
+			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),
+					contract.getParentId(),contract.getCreateTime());
+		}
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
@@ -1437,8 +1445,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
-//		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
-//		assetService.deleteUnsettledBillsOnContractId(contract.getId());
+		//将此合同关联的未出账单记为无效账单 by tangcen
+		if (cmd.getCostGenerationMethod()!=null) {
+			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
+		}
+		
 		if(cmd.getPaymentFlag() == 1) {
 			addToFlowCase(contract, flowcasePaymentContractOwnerType);
 		}else {
@@ -1841,7 +1852,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if(creator != null) {
 				dto.setCreatorName(creator.getNickName());
 			}
-
+				
 		}
 
 		if(dto.getDenunciationUid() != null) {

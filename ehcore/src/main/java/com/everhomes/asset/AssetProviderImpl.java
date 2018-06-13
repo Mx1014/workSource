@@ -4696,4 +4696,72 @@ public class AssetProviderImpl implements AssetProvider {
 	                .where(Tables.EH_CONTRACTS.ID.eq(contractId))
 	                .execute();
 	}
+
+	//add by tangcen 2018年6月12日16:18:51
+	@Override
+	public void deleteUnsettledBillsOnContractId(Long contractId,Long nextBillId) {
+	    EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+                List<Long> billIds = context.select(t.ID)
+                        .from(t)
+                        .where(t.CONTRACT_ID.eq(contractId))
+                        .and(t.SWITCH.eq((byte) 0))
+                        .fetch(t.ID);
+                //删除时保存最近的一条未出账单信息
+                billIds.remove(nextBillId);
+                context.delete(t)
+                        .where(t.ID.in(billIds))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.BILL_ID.in(billIds))
+                        .execute();
+                return null;
+            });
+            return null;
+        });
+		
+	}
+	
+	//add by tangcen 2018年6月12日16:18:51
+	@Override
+	public PaymentBills getFirstUnsettledBill(Long contractId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+		Record record = context.select()
+					            .from(t)
+					            .where(t.CONTRACT_ID.eq(contractId))
+					            .and(t.SWITCH.eq((byte) 0))
+					            .orderBy(t.DATE_STR.asc())
+					            .limit(1)
+					            .fetchOne();
+       return ConvertHelper.convert(record, PaymentBills.class);         
+	}
+	
+	//add by tangcen 2018年6月12日
+	@Override
+	public List<PaymentBillItems> findBillItemsByBillId(Long billId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+		List<PaymentBillItems> result = new ArrayList<>();
+		context.select()
+			   .from(t)
+			   .where(t.BILL_ID.eq(billId))
+			   .fetch()
+			   .forEach(r->{
+				   PaymentBillItems billItem = ConvertHelper.convert(r, PaymentBillItems.class);
+				   result.add(billItem);
+			   });
+		return result;
+	}
+
+	//add by tangcen 2018年6月12日
+	@Override
+	public void updatePaymentBills(PaymentBills bill) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
+        dao.update(bill);
+	}
 }

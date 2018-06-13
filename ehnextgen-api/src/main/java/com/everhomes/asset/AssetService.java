@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -9,6 +10,8 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -185,4 +188,6 @@ public interface AssetService {
     long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
 
 	void saveInstanceConfig(long categoryId, String ret);
+	//add by tangcen
+	void deleteUnsettledBillsOnContractId(Byte costGenerationMethod, Long contractId, Timestamp endTime);
 }

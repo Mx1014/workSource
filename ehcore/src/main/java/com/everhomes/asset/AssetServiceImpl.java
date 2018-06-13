@@ -29,6 +29,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleScope;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.Contract;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -4623,4 +4624,83 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return judgeAppShowPayResponse;
 	}
+	
+	//add by tangcen 2018年6月12日
+	/**
+	 * costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数
+	 * contractId:要处理的合同id
+	 * endTime:合同实际结束时间
+	 */
+	@Override
+	public void deleteUnsettledBillsOnContractId(Byte costGenerationMethod,Long contractId,Timestamp endTime) {
+		//得到距离当前时间最近的一条未出账单的相关信息
+		PaymentBills bill = assetProvider.getFirstUnsettledBill(contractId);
+		List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+		if (costGenerationMethod == (byte)0) {
+			assetProvider.deleteUnsettledBillsOnContractId(contractId,bill.getId());
+		}else if (costGenerationMethod == (byte)1) {
+			dealFirstUnsettledBill(bill,endTime);
+			dealFirstUnsettledBillItems(billItems,endTime);
+			assetProvider.updatePaymentBills(bill);
+			for (PaymentBillItems paymentBillItems : billItems) {
+				assetProvider.updatePaymentItem(paymentBillItems);
+			}
+		}
+		
+	}
+	//计算截断后最近的一条未出账单 add by tangcen 2018年6月12日
+	private void dealFirstUnsettledBill(PaymentBills bill,Timestamp endTime){
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+		try {
+			Date dateBegin = yyyyMMdd.parse(bill.getDateStrBegin());
+			Date dateEnd = yyyyMMdd.parse(bill.getDateStrEnd());
+			int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
+			int actualPeriod = daysBetween_date(dateBegin,endTime);
+			bill.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceivable()));
+			bill.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceived()));
+			bill.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,bill.getAmountOwed()));
+			String actualDateStrEnd = yyyyMM.format(endTime);
+			bill.setDateStrEnd(actualDateStrEnd);
+		} catch (ParseException e) {
+			if(LOGGER.isDebugEnabled()) {
+	            LOGGER.error("parse date error!");
+	        }
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "parse date error once");
+		}
+		
+	}
+	//计算截断后最近的一条未出账单明细  add by tangcen 2018年6月12日
+	private void dealFirstUnsettledBillItems(List<PaymentBillItems> billItems,Timestamp endTime){
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+		for (PaymentBillItems billItem : billItems) {
+			try {
+				Date dateBegin = yyyyMMdd.parse(billItem.getDateStrBegin());
+				Date dateEnd = yyyyMMdd.parse(billItem.getDateStrEnd());
+				int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
+				int actualPeriod = daysBetween_date(dateBegin,endTime);
+				billItem.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceivable()));
+				billItem.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceived()));
+				billItem.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountOwed()));
+				String actualDateStrEnd = yyyyMM.format(endTime);
+				billItem.setDateStrEnd(actualDateStrEnd);
+			} catch (ParseException e) {
+				if(LOGGER.isDebugEnabled()) {
+		            LOGGER.error("parse date error!");
+		        }
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "parse date error once");
+			}
+		}
+	}
+	//add by tangcen 2018年6月12日
+	private BigDecimal calculateFee(int agreedPeriod, int actualPeriod, BigDecimal amount) {
+		BigDecimal factor1 = new BigDecimal(actualPeriod);
+		BigDecimal factor2 = new BigDecimal(agreedPeriod);
+		BigDecimal factor = factor1.divide(factor2,4,BigDecimal.ROUND_FLOOR);
+		return amount.multiply(factor).setScale(2, BigDecimal.ROUND_FLOOR);
+	}
+	
 }
