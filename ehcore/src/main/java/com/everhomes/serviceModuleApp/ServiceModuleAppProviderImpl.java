@@ -419,8 +419,12 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		query.addJoin(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.ORGANIZATION_ID.eq(orgId));
 
+		//同一个公司可能有多个园区给他授权同给一个应用的权限，可能会产生多个授权记录
+		query.addGroupBy(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID);
+
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER.asc());
+
 
 		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
 		return apps;
