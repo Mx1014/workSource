@@ -2,7 +2,6 @@
 package com.everhomes.videoconf;
 
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.OrderType;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX  + OrderType.VIDEOCONF_CODE )
 public class VideoConfV2CallBackHandler implements PaymentCallBackHandler {
@@ -29,13 +29,13 @@ public class VideoConfV2CallBackHandler implements PaymentCallBackHandler {
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 
-	@Autowired
-	private PayService payService;
+	//@Autowired
+	//private PayService payService;
 
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 		OnlinePayBillCommand cmd1 = new OnlinePayBillCommand();
-		cmd1.setPayAmount(payService.changePayAmount(cmd.getAmount()).toString());
+		cmd1.setPayAmount(changePayAmount(cmd.getAmount()).toString());
 		cmd1.setOrderNo(String.valueOf(cmd.getOrderId()));
 		cmd1.setPayAccount(cmd.getAmount().toString());
 		cmd1.setPayStatus("success");
@@ -47,7 +47,7 @@ public class VideoConfV2CallBackHandler implements PaymentCallBackHandler {
 	public void payFail(SrvOrderPaymentNotificationCommand cmd) {
 
 		OnlinePayBillCommand cmd1 = new OnlinePayBillCommand();
-		cmd1.setPayAmount(payService.changePayAmount(cmd.getAmount()).toString());
+		cmd1.setPayAmount(changePayAmount(cmd.getAmount()).toString());
 		cmd1.setOrderNo(String.valueOf(cmd.getOrderId()));
 		cmd1.setPayAccount(cmd.getAmount().toString());
 		cmd1.setPayStatus("fail");
@@ -71,4 +71,12 @@ public class VideoConfV2CallBackHandler implements PaymentCallBackHandler {
 					"payAmount and chargePrice is not equal.");
 		}
 	}
+	
+    private  BigDecimal changePayAmount(Long amount){
+
+        if(amount == null){
+            return new BigDecimal(0);
+        }
+        return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+    }
 }
