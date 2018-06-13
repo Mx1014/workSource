@@ -262,8 +262,8 @@ public class Utils {
      */
     static Timestamp getTimestampByAddThirtyDays(long source, int month) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(source);
-        calendar.add(Calendar.DAY_OF_MONTH,30*month);
+        calendar.setTimeInMillis(source+1000);
+        calendar.add(Calendar.DAY_OF_MONTH,30*month-1);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
