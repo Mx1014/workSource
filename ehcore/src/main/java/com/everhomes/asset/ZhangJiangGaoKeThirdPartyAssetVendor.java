@@ -5,7 +5,6 @@ import com.everhomes.asset.zjgkVOs.*;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
@@ -56,8 +55,6 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
 
     @Autowired
     private UserProvider userProvider;
-    @Autowired
-    private PayService payService;
     @Autowired
     private AssetPayService assetPayService;
 

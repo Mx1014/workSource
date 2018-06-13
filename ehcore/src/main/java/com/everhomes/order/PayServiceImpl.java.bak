@@ -61,7 +61,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 @Service
-public class PayServiceImpl222 implements PayService, ApplicationListener<ContextRefreshedEvent> {
+public class PayServiceImpl implements PayService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
 

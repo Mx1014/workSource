@@ -17,7 +17,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -107,9 +106,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     @Autowired
     private ContractServiceImpl contractService;
 
-    @Autowired
-    private PayService payService;
-    
     @Autowired
     private ImportFileService importFileService;
 
