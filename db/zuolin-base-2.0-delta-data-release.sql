@@ -231,11 +231,15 @@ INSERT INTO `eh_launch_pad_indexs` (`id`, `namespace_id`, `type`, `name`, `confi
 INSERT INTO `eh_launch_pad_indexs` (`id`, `namespace_id`, `type`, `name`, `config_json`, `icon_uri`, `selected_icon_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`, `default_order`) VALUES ('3', '2', '3', '消息', '{}', 'cs://1/image/aW1hZ2UvTVRvNFltTmhNREU0TXpFd01UZGtZV1k0TTJGbVlXWTNPR1k0T1RZd1ltRTFNZw', 'cs://1/image/aW1hZ2UvTVRwbU5tSTNNV1EzTWpOa016WmtaRE15TTJOaVpHSTFZbUprWVRSak1qaGhaZw', '2', '2018-04-20 10:12:37', '2018-04-20 10:12:40', '1', '1', '1', '3');
 INSERT INTO `eh_launch_pad_indexs` (`id`, `namespace_id`, `type`, `name`, `config_json`, `icon_uri`, `selected_icon_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`, `default_order`) VALUES ('4', '2', '4', '我的', '{}', 'cs://1/image/aW1hZ2UvTVRvMU1HUmxZMkUxWXpnMU5HRTBZelkzT1dNM01EUXlOekpsWkRVeFpEY3pZZw', 'cs://1/image/aW1hZ2UvTVRvd016Wm1NekZoTnpSbU16WTFZV1E1WTJVeFkyUTJNamxtTURabVkyTmpPQQ', '2', '2018-04-20 10:12:37', '2018-04-20 10:12:40', '1', '1', '1', '4');
 
+-- 清除运营后台的广场信息，广场是固定的不允许发布修改。 add by yanjun201806131527
+DELETE FROM `eh_portal_layouts` WHERE namespace_id = 2;
+
+
 -- 增加应用、项目和公司菜单
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030000', '应用管理', '15000000', NULL, 'application-management', '1', '2', '/15000000/15030000', 'zuolin', '3', NULL, '2', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15040000', '项目管理', '15000000', NULL, 'project-management', '1', '2', '/15000000/15040000', 'zuolin', '4', NULL, '2', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15050000', '企业管理', '15000000', NULL, 'business-admin', '1', '2', '/15000000/15050000', 'zuolin', '5', NULL, '2', 'system', 'module', NULL);
-DELETE FROM `ehcore`.`eh_web_menus` WHERE `id`='15030100';
-DELETE FROM `ehcore`.`eh_web_menus` WHERE `id`='15030200';
-DELETE FROM `ehcore`.`eh_web_menus` WHERE `id`='15030300';
+DELETE FROM `eh_web_menus` WHERE `id`='15030100';
+DELETE FROM `eh_web_menus` WHERE `id`='15030200';
+DELETE FROM `eh_web_menus` WHERE `id`='15030300';
 
