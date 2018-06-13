@@ -64,7 +64,9 @@ public class DoorAuthDTO {
     private Byte authRuleType;
     private Integer totalAuthAmount;
     private Integer validAuthAmount;
-
+    private String localAuthKey;
+    private String qrString;
+    private Byte rightOpen;
 
     public String getAddress() {
         return address;
@@ -307,7 +309,37 @@ public class DoorAuthDTO {
 	}
 
 
-    @Override
+	public String getLocalAuthKey() {
+		return localAuthKey;
+	}
+
+
+	public void setLocalAuthKey(String localAuthKey) {
+		this.localAuthKey = localAuthKey;
+	}
+	
+
+	public String getQrString() {
+		return qrString;
+	}
+
+
+	public void setQrString(String qrString) {
+		this.qrString = qrString;
+	}
+
+
+	public Byte getRightOpen() {
+		return rightOpen;
+	}
+
+
+	public void setRightOpen(Byte rightOpen) {
+		this.rightOpen = rightOpen;
+	}
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -42,6 +42,18 @@ public class AclinkAdminController extends ControllerBase {
     @Autowired
     DoorAccessProvider doorAccessProvider;
     
+    @Autowired
+    AclinkServerService aclinkServerService;
+    
+    @Autowired
+    AclinkCameraService aclinkCameraService;
+    
+    @Autowired
+    AclinkIpadService aclinkIpadService;
+    
+    @Autowired
+    private FaceRecognitionPhotoService faceRecognitionPhotoService;
+    
     /**
      * <b>URL: /admin/aclink/searchDoorAccess</b>
      * <p>获取门禁列表</p>
@@ -567,6 +579,414 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
+    
+    /**
+     * <b>URL: /admin/aclink/generateMarchUUID</b>
+     * <p>生成唯一配对码 </p>
+     * @return
+     */
+    @RequestMapping("generateMarchUUID")
+    @RestReturn(value=CreateMarchUUIDResponse.class)
+    public RestResponse createMarchUUID(CreateMarchUUIDCommand cmd){
+    	RestResponse response = new RestResponse(aclinkServerService.generateUUID(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/listLocalServers</b>
+     * <p>获取本地服务器列表 </p>
+     * @return
+     */
+    @RequestMapping("listLocalServers")
+    @RestReturn(value=ListAclinkServersResponse.class)
+    public RestResponse listLocalServers(AclinkListLocalServersCommand cmd){
+    	RestResponse response = new RestResponse(aclinkServerService.listLocalServers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/queryDoorAccessByServer</b>
+     * <p>根据本地服务器id查询门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("queryDoorAccessByServer")
+    @RestReturn(value=QueryDoorAccessByServerResponse.class)
+    public RestResponse getDoorAccessByServer(QueryDoorAccessByServerCommand cmd){
+    	RestResponse response = new RestResponse(doorAccessService.listDoorAccessByServerId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/queryServerRelations</b>
+     * <p>根据本地服务器查询关联设备</p>
+     * @return
+     */
+    @RequestMapping("queryServerRelations")
+    @RestReturn(value=QueryServerRelationsResponse.class)
+    public RestResponse getDevicesByServer(QueryServerRelationsCommand cmd){
+    	RestResponse response = new RestResponse(aclinkServerService.queryServerRelations(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/createLocalServers</b>
+     * <p>新增内网服务器</p>
+     */
+    @RequestMapping("createLocalServers")
+    @RestReturn(value=String.class)
+    public RestResponse addLocalServers(CreateLocalServersCommand cmd){
+    	aclinkServerService.createLocalServer(cmd);
+    	//TODO 异常处理   名称是否可重复？
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/updateLocalServers</b>
+     * <p>修改内网服务器</p>
+     */
+    @RequestMapping("updateLocalServers")
+    @RestReturn(value=String.class)
+    public RestResponse updateLocalServers(UpdateLocalServersCommand cmd){
+    	//名称是否可重复？
+    	aclinkServerService.updateLocalServer(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/deleteLocalServers</b>
+     * <p>删除内网服务器</p>
+     */
+    @RequestMapping("deleteLocalServers")
+    @RestReturn(value=String.class)
+    public RestResponse deleteLocalServers(DeleteLocalServerCommand cmd){
+    	aclinkServerService.deleteLocalServer(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/listLocalCameras</b>
+     * <p>获取内网摄像头列表 </p>
+     * @return
+     */
+    @RequestMapping("listLocalCameras")
+    @RestReturn(value=ListLocalCamerasResponse.class)
+    public RestResponse listLocalCameras(ListLocalCamerasCommand cmd){
+    	CrossShardListingLocator locator = new CrossShardListingLocator();
+    	locator.setAnchor(cmd.getPageAnchor());
+    	RestResponse response = new RestResponse(aclinkCameraService.listLocalCameras(locator,cmd.getOwnerId(),cmd.getOwnerType(),null,null,null,null,cmd.getPageSize()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/queryLocalCameras</b>
+     * <p>查找内网摄像头列表 </p>
+     * @return
+     */
+    @RequestMapping("queryLocalCameras")
+    @RestReturn(value=ListAclinkServersResponse.class)
+    public RestResponse queryLocalCameras(QueryAclinkCamerasCommand cmd){
+    	CrossShardListingLocator locator = new CrossShardListingLocator();
+    	locator.setAnchor(cmd.getPageAnchor());
+    	RestResponse response = new RestResponse(aclinkCameraService.listLocalCameras(locator,cmd.getOwnerId(),cmd.getOwnerType(),cmd.getServerId(),cmd.getDoorAccessId(),cmd.getEnterStatus(),cmd.getLinkStatus(),cmd.getPageSize()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/createLocalCameras</b>
+     * <p>新增内网摄像头</p>
+     */
+    @RequestMapping("createLocalCameras")
+    @RestReturn(value=String.class)
+    public RestResponse addLocalCameras(CreateLocalCamerasCommand cmd){
+    	aclinkCameraService.createLocalCamera(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/updateLocalCameras</b>
+     * <p>修改内网摄像头</p>
+     */
+    @RequestMapping("updateLocalCameras")
+    @RestReturn(value=String.class)
+    public RestResponse updateLocalCameras(UpdateLocalCamerasCommand cmd){
+    	aclinkCameraService.updateLocalCamera(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/deleteLocalCameras</b>
+     * <p>删除内网摄像头</p>
+     */
+    @RequestMapping("deleteLocalCameras")
+    @RestReturn(value=String.class)
+    public RestResponse deleteLocalCameras(DeleteLocalCamerasCommand cmd){
+    	aclinkCameraService.deleteLocalCameras(cmd.getId());
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/listLocalIpad</b>
+     * <p>获取内网ipad列表 </p>
+     * @return
+     */
+    @RequestMapping("listLocalIpad")
+    @RestReturn(value=ListLocalIpadResponse.class)
+    public RestResponse listLocalIpad(ListLocalIpadCommand cmd){
+    	CrossShardListingLocator locator = new CrossShardListingLocator();
+    	locator.setAnchor(cmd.getPageAnchor());
+    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,cmd.getOwnerId(),cmd.getOwnerType(),null,null,null,null,null,null,cmd.getPageSize()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/queryLocalIpad</b>
+     * <p>查找内网ipad列表 </p>
+     * @return
+     */
+    @RequestMapping("queryLocalIpad")
+    @RestReturn(value=ListLocalIpadResponse.class)
+    public RestResponse queryLocalIpads(QueryAclinkIpadCommand cmd){
+    	CrossShardListingLocator locator = new CrossShardListingLocator();
+    	locator.setAnchor(cmd.getPageAnchor());
+    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,cmd.getOwnerId(),cmd.getOwnerType(),cmd.getServerId(),cmd.getDoorAccessId(),cmd.getEnterStatus(),cmd.getLinkStatus(),cmd.getStatus(),null,cmd.getPageSize()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/createLocalIpad</b>
+     * <p>新增内网ipad</p>
+     */
+    @RequestMapping("createLocalIpad")
+    @RestReturn(value=String.class)
+    public RestResponse addLocalIpad(CreateLocalIpadCommand cmd){
+    	aclinkIpadService.createLocalIpad(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/updateLocalIpad</b>
+     * <p>修改内网ipad</p>
+     */
+    @RequestMapping("updateLocalIpad")
+    @RestReturn(value=String.class)
+    public RestResponse updateLocalIpad(UpdateLocalIpadCommand cmd){
+    	aclinkIpadService.updateLocalIpad(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/deleteLocalIpad</b>
+     * <p>删除内网ipad</p>
+     */
+    @RequestMapping("deleteLocalIpad")
+    @RestReturn(value=String.class)
+    public RestResponse deleteLocalIpad(DeleteLocalIpadCommand cmd){
+    	aclinkIpadService.deleteLocalIpad(cmd.getId());
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/syncLocalServer</b>
+     * <p>从云同步内网服务器</p>
+     */
+    @RequestMapping("syncLocalServer")
+    @RestReturn(value=SyncLocalServerResponse.class)
+    public RestResponse syncLocalServer(SyncLocalServerCommand cmd){
+    	aclinkServerService.syncLocalServer(cmd.getId());
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/pairLocalServer</b>
+     * <p> 内网服务器配对</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("pairLocalServer")
+    @RestReturn(value=PairLocalServerResponse.class)
+    public RestResponse pairLocalServer(PairLocalServerCommand cmd){
+    	RestResponse response = new RestResponse(aclinkServerService.pairLocalServer(cmd.getUuid(), cmd.getIpAddress(), cmd.getVersion()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * <b>URL: /admin/aclink/updateServerSyncTime</b>
+     * <p> 内网服务器同步成功后更新同步时间</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("updateServerSyncTime")
+    @RestReturn(value=String.class)
+    public RestResponse updateServerSyncTime(UpdateServerSyncTimeCommand cmd){
+    	aclinkServerService.updateServerSyncTime(cmd.getServerId());
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/syncLocalPhotoByUserId</b>
+     * <p>通知内网服务器拉取人脸识别照片 </p>
+     * @return
+     */
+    @RequestMapping("syncLocalPhotoByUserId")
+    @RestReturn(value=String.class)
+    public RestResponse listFacialRecognitionPhotoByUser(SyncLocalPhotoByUserIdCommand cmd){
+    	//同步单个用户,根据ownerId查内网服务器uuid,通过borderServer通知内网服务器,由内网服务器根据userId拉取数据
+    	RestResponse response = new RestResponse();
+    	faceRecognitionPhotoService.syncLocalPhotoByUserId(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/syncLocalUserData</b>
+     * <p>同步人脸识别照片及授权(注册用户) </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("syncLocalUserData")
+    @RestReturn(value=SyncLocalUserDataResponse.class)
+    public RestResponse syncLocalUserData(SyncLocalUserDataCommand cmd){
+    	//同步单个用户,根据ownerId查内网服务器uuid,通过borderServer通知内网服务器,由内网服务器根据userId拉取数据
+    	RestResponse response = new RestResponse(faceRecognitionPhotoService.syncLocalUserData(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * 
+     * <b>URL: /admin/aclink/syncLocalVistorData</b>
+     * <p>同步人脸识别照片及授权(访客) </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("syncLocalVistorData")
+    @RestReturn(value=SyncLocalVistorDataResponse.class)
+    public RestResponse syncLocalVistorData(SyncLocalVistorDataCommand cmd){
+    	//同步访客信息
+    	RestResponse response = new RestResponse(faceRecognitionPhotoService.syncLocalVistorData(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/updateUserSyncTime</b>
+     * <p>更新用户同步时间 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("updateUserSyncTime")
+    @RestReturn(value=String.class)
+    public RestResponse updateUserSyncTime(UpdateUserSyncTimeCommand cmd){
+    	faceRecognitionPhotoService.updateUserSyncTime(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/updateVistorSyncTime</b>
+     * <p>更新访客同步时间 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("updateVistorSyncTime")
+    @RestReturn(value=String.class)
+    public RestResponse updateVistorSyncTime(UpdateVistorSyncTimeCommand cmd){
+    	faceRecognitionPhotoService.updateVistorSyncTimes(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/updateVistorSyncState</b>
+     * <p>更新访客同步时间 </p>
+     * @return
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("updateVistorSyncState")
+    @RestReturn(value=String.class)
+    public RestResponse updateVistorSyncState(UpdateVistorSyncTimeCommand cmd){
+    	faceRecognitionPhotoService.invalidVistorSyncState(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+//createLocalVisitorAuth Test
+    /**
+     * 
+     * <b>URL: /admin/aclink/createLocalVisitorAuth</b>
+     * <p>更新用户同步时间 </p>
+     * @return
+     */
+    @RequestMapping("createLocalVisitorAuth")
+    @RestReturn(value=String.class)
+    public RestResponse createLocalVisitorAuth(CreateLocalVistorCommand cmd){
+    	RestResponse response = new RestResponse();
+    	doorAccessService.createLocalVisitorAuth(cmd);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

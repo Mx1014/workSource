@@ -11,7 +11,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractService;
 import com.everhomes.contract.ContractServiceImpl;
-import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -23,7 +22,6 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderCommand;
@@ -33,31 +31,18 @@ import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
-import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
-import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.search.OrganizationSearcher;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhAddresses;
-import com.everhomes.server.schema.tables.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.EhPaymentBills;
-import com.everhomes.server.schema.tables.EhPaymentLateFine;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
-import com.everhomes.server.schema.tables.records.EhPaymentBillsRecord;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RegularExpressionUtils;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.jooq.DSLContext;
-import org.jooq.GroupConcatOrderByStep;
-import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -544,6 +529,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 dto.setIsPlus((byte)1);
             }
         }
+        //返回时增加缴费凭证留言和缴费凭证图片的信息（add by tangcen）
+        ListUploadCertificatesCommand listUploadCertificatesCommand = new ListUploadCertificatesCommand();
+        listUploadCertificatesCommand.setBillId(cmd.getBillId());
+        UploadCertificateInfoDTO uploadCertificateInfoDTO = assetService.listUploadCertificates(listUploadCertificatesCommand);
+        response.setCertificateNote(uploadCertificateInfoDTO.getCertificateNote());
+        response.setUploadCertificateDTOList(uploadCertificateInfoDTO.getUploadCertificateDTOList());
         return response;
     }
 
@@ -1406,6 +1397,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                             exemptionItemDTO = new ExemptionItemDTO();
                             exemptionItemDTO.setAmount(new BigDecimal(data[j]).multiply(new BigDecimal("-1")));
                             exemptionItemDTO.setIsPlus((byte)0);
+                            exemptionItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(exemptionItemDTO);
                         }
                     }catch(Exception e){
@@ -1424,6 +1416,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                             increaseItemDTO = new ExemptionItemDTO();
                             increaseItemDTO.setAmount(new BigDecimal(data[j]));
                             increaseItemDTO.setIsPlus((byte)1);
+                            increaseItemDTO.setDateStr(dateStr);
                             exemptionItemDTOList.add(increaseItemDTO);
                         }
                     }catch(Exception e){

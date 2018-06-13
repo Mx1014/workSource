@@ -27,7 +27,7 @@ import com.everhomes.discover.ItemType;
  * <li>rightFaceOpen:扫脸开门权限 1有0无</li>
  * </ul>
  */
-public class AesUserKeyDTO {
+public class AesUserKeyDTO implements Comparable<AesUserKeyDTO>{
     private Byte     status;
     private Byte     keyId;
     private Long     createTimeMs;
@@ -43,6 +43,7 @@ public class AesUserKeyDTO {
     private Long authId;
     private String macCopy;
     private Byte rightRemote;
+    private Byte rightFaceOpen;
 
     
 
@@ -223,8 +224,33 @@ public class AesUserKeyDTO {
 	public void setRightRemote(Byte rightRemote) {
 		this.rightRemote = rightRemote;
 	}
-    @Override
+
+
+
+	public Byte getRightFaceOpen() {
+		return rightFaceOpen;
+	}
+
+
+
+	public void setRightFaceOpen(Byte rightFaceOpen) {
+		this.rightFaceOpen = rightFaceOpen;
+	}
+
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	@Override
+	public int compareTo(AesUserKeyDTO o) {
+		if(this.authId < o.getAuthId()){
+			return 1;
+		}
+		return -1;
+	}
 }

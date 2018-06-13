@@ -10,6 +10,10 @@ public class AccessControlActionData {
     private int isSupportSmart; 	//是否支持智能门禁，0不支持、1支持
 
     private int isSupportQR; 		//是否支持二维码门禁，0不支持，1支持
+    
+    private int isSupportFace;		//是否支持人脸识别,0否1是
+    
+    private int isSupportLongRange;	//是否支持远程开门,0否1是
 
     private String doorId;
 
@@ -65,7 +69,23 @@ public class AccessControlActionData {
         this.isHighlight = isHighlight;
     }
 
-    @Override
+    public int getIsSupportFace() {
+		return isSupportFace;
+	}
+
+	public void setIsSupportFace(int isSupportFace) {
+		this.isSupportFace = isSupportFace;
+	}
+
+	public int getIsSupportLongRange() {
+		return isSupportLongRange;
+	}
+
+	public void setIsSupportLongRange(int isSupportLongRange) {
+		this.isSupportLongRange = isSupportLongRange;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

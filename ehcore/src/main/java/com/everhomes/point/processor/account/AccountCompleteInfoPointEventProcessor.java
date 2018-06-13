@@ -34,7 +34,8 @@ public class AccountCompleteInfoPointEventProcessor extends GeneralPointEventPro
 
     private boolean isValid(LocalEvent localEvent) {
         User user = userProvider.findUserById(localEvent.getContext().getUid());
-        return isValid(user.getAvatar())
+        return user != null
+                && isValid(user.getAvatar())
                 && isValid(user.getBirthday())
                 && isValid(user.getStatusLine())
                 && isValid(user.getOccupation());

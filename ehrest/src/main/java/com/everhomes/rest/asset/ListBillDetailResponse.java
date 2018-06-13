@@ -22,6 +22,9 @@ import java.util.List;
  * <li>targetId:客户id</li>
  * <li>targetType:客户type</li>
  * <li>billGroupDTO:账单组，包括减免项和收费项目的集合，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ * <li>certificateNote:客户上传缴费凭证后的留言</li>
+ * <li>billStatus:账单缴费状态（0：未缴，1：已缴）</li>
+ * <li>uploadCertificateDTOList:上传的所有缴费凭证的图片地址</li>
  *</ul>
  */
 public class ListBillDetailResponse {
@@ -41,8 +44,37 @@ public class ListBillDetailResponse {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
+    //add by tangcen
+    private String certificateNote;
+    private Byte billStatus;
+	@ItemType(UploadCertificateDTO.class)
+	private List<UploadCertificateDTO> uploadCertificateDTOList;
+	
+    public Byte getBillStatus() {
+		return billStatus;
+	}
 
-    public String getInvoiceNum() {
+	public void setBillStatus(Byte billStatus) {
+		this.billStatus = billStatus;
+	}
+
+	public String getCertificateNote() {
+		return certificateNote;
+	}
+
+	public void setCertificateNote(String certificateNote) {
+		this.certificateNote = certificateNote;
+	}
+
+	public List<UploadCertificateDTO> getUploadCertificateDTOList() {
+		return uploadCertificateDTOList;
+	}
+
+	public void setUploadCertificateDTOList(List<UploadCertificateDTO> uploadCertificateDTOList) {
+		this.uploadCertificateDTOList = uploadCertificateDTOList;
+	}
+
+	public String getInvoiceNum() {
         return invoiceNum;
     }
 

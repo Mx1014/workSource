@@ -51,7 +51,9 @@ public class LianXinTongSmsHandler implements SmsHandler, ApplicationListener<Co
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        initAccount();
+        if(event.getApplicationContext().getParent() == null) {
+            initAccount();
+        }
     }
 
     private void initAccount() {

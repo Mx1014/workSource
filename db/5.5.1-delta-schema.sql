@@ -327,4 +327,154 @@ ALTER TABLE `eh_service_alliance_jump_module`
 
 -- 超级管理员 Added by janson
 ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
+-- 能耗抄表精度  by jiarui
+ALTER TABLE `eh_energy_meter_reading_logs`
+	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `meter_id`;
+ALTER TABLE `eh_energy_meter_tasks`
+	MODIFY COLUMN `last_task_reading`  decimal(10,2) NULL DEFAULT NULL AFTER `executive_expire_time`;
+ALTER TABLE `eh_energy_meter_tasks`
+	MODIFY COLUMN `reading`  decimal(10,2) NULL DEFAULT NULL AFTER `last_task_reading`;
 
+-- added a new column for eh_payment_bill_groups by wentian
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `bills_day_type` TINYINT NOT NULL DEFAULT 4 COMMENT '1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期首月第几日';
+
+-- ISSUE#26184 门禁人脸识别 by liuyilin 201180524
+-- 内网服务器表创建
+CREATE TABLE `eh_aclink_servers` (
+    `id` BIGINT(20) NOT NULL,
+    `name` VARCHAR(32) DEFAULT NULL,
+	`namespace_id` INT(11) NOT NULL DEFAULT '0',
+	`uuid` VARCHAR(6) NOT NULL COMMENT '配对码',
+    `ip_address` VARCHAR(128) DEFAULT NULL COMMENT 'IP地址',
+	`link_status` TINYINT NOT NULL DEFAULT '0' COMMENT '联网状态',
+	`active_time` DATETIME DEFAULT NULL COMMENT '激活时间',
+	`sync_time`  DATETIME DEFAULT NULL COMMENT '上次同步时间',
+	`version` VARCHAR(8) DEFAULT NULL COMMENT '版本号',
+	`owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '组织id',
+	`owner_type` TINYINT NOT NULL DEFAULT '0' COMMENT '组织类型',
+	`aes_server_key` VARCHAR(64) COMMENT 'AES公钥',
+	`status` TINYINT NOT NULL DEFAULT '0' COMMENT '激活状态0未激活1已激活2已删除',
+	`creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId' ,
+	`create_time` DATETIME NOT NULL COMMENT '记录创建时间' ,
+	`operator_uid` BIGINT NULL COMMENT '记录更新人userId' ,
+	`operate_time` DATETIME NULL COMMENT '记录更新时间' ,
+	PRIMARY KEY (`id`),
+	UNIQUE `u_eh_aclink_servers_uuid`(`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '内网服务器表';
+
+-- 内网ipad表创建
+CREATE TABLE `eh_aclink_ipads` (
+	`id` BIGINT(20) NOT NULL,
+	`name` VARCHAR(32) DEFAULT NULL,
+	`door_access_id` BIGINT(20) NOT NULL COMMENT '关联门禁id',
+	`enter_status` TINYINT DEFAULT '0' COMMENT '进出标识 1进0出',
+	`uuid` VARCHAR(6) NOT NULL COMMENT '配对码',
+	`link_status` TINYINT NOT NULL DEFAULT '0' COMMENT '联网状态',
+	`server_id` BIGINT(20) COMMENT '服务器id',
+	`active_time` DATETIME DEFAULT NULL COMMENT '激活时间',
+	`status` TINYINT NOT NULL DEFAULT '0' COMMENT '激活状态0未激活1已激活2已删除',
+	`creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId' ,
+	`create_time` DATETIME NOT NULL COMMENT '记录创建时间' ,
+	`operator_uid` BIGINT NULL COMMENT '记录更新人userId' ,
+	`operate_time` DATETIME NULL COMMENT '记录更新时间' ,
+	PRIMARY KEY (`id`),
+	UNIQUE `u_eh_aclink_ipads_uuid`(`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '内网ipad表';
+
+-- 内网摄像头表创建
+CREATE TABLE `eh_aclink_cameras` (
+	`id` BIGINT(20) NOT NULL,
+	`name` VARCHAR(32) DEFAULT NULL,
+	`door_access_id` BIGINT NOT NULL COMMENT '关联门禁id',
+	`enter_status` TINYINT DEFAULT '0' COMMENT '进出标识 1进0出',
+	`link_status` TINYINT NOT NULL DEFAULT '0' COMMENT '联网状态',
+	`ip_address` VARCHAR(128) DEFAULT NULL COMMENT 'IP地址',
+	`server_id` BIGINT(20) COMMENT '服务器id',
+	`status` TINYINT NOT NULL DEFAULT '1' COMMENT '状态1正常2已删除',
+	`creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId' ,
+	`create_time` DATETIME NOT NULL COMMENT '记录创建时间' ,
+	`operator_uid` BIGINT NULL COMMENT '记录更新人userId' ,
+	`operate_time` DATETIME NULL COMMENT '记录更新时间' ,
+	`key_code` VARCHAR(128) NOT NULL COMMENT '摄像头密钥' ,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4  COMMENT = '内网摄像头表';
+
+-- 门禁与服务器多对一关联
+ALTER TABLE `eh_door_access`
+ADD `local_server_id` BIGINT(20) COMMENT '服务器id';
+
+-- 人脸识别照片表创建
+CREATE TABLE `eh_face_recognition_photos` (
+	`id` BIGINT(20) NOT NULL,
+    `user_id` BIGINT(20) COMMENT '用户id(正式用户)',
+	`auth_id` BIGINT(20) COMMENT '授权id(访客)',
+	`user_type` TINYINT NOT NULL DEFAULT '0' COMMENT '照片关联的用户类型,0正式用户,1访客',
+	`img_uri` VARCHAR(2048) COMMENT '照片uri',
+	`img_url` VARCHAR(2048) NOT NULL COMMENT '照片url',
+	`sync_time` DATETIME COMMENT '上次同步时间时间' ,
+	`status` TINYINT NOT NULL DEFAULT '1' COMMENT '状态1正常2已删除',
+	`creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId' ,
+	`create_time` DATETIME NOT NULL COMMENT '记录创建时间' ,
+	`operator_uid` BIGINT NULL COMMENT '记录更新人userId' ,
+	`operate_time` DATETIME NULL COMMENT '记录更新时间' ,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4  COMMENT = '人脸识别照片表';
+
+-- 门禁版本包url长度限制修改
+ALTER TABLE eh_aclink_firmware MODIFY COLUMN `download_url` VARCHAR(1024);
+ALTER TABLE eh_aclink_firmware MODIFY COLUMN `info_url` VARCHAR(1024);
+
+-- issue28839允许修改门禁开门方式,增加字段表示是否支持二维码
+ALTER TABLE `eh_door_access` ADD COLUMN `has_qr` TINYINT NOT NULL DEFAULT '1' COMMENT '门禁二维码能力0无1有';
+
+-- End by: yilin Liu
+
+
+-- 大沙河梯控
+-- by shiheng.ma
+-- 新增字段 第三方KeyU字段
+ALTER TABLE `eh_door_auth`
+ADD COLUMN `key_u` VARCHAR(16) NULL DEFAULT NULL COMMENT '第三方用户秘钥' AFTER `right_remote`;
+
+-- 新增字段 授权楼层
+ALTER TABLE `eh_door_access`
+ADD COLUMN `floor_id` VARCHAR(2000) NULL DEFAULT NULL COMMENT '授权楼层' AFTER `groupId`;
+-- 大沙河梯控 end
+
+-- 唐岑
+ALTER TABLE `eh_contract_param_group_map` ADD COLUMN `user_id` BIGINT DEFAULT 0 COMMENT '用户id';
+
+-- 给eh_payment_bills表添加支付方式、留言、账单是否有缴费凭证的标志字段  by Steve Tang
+ALTER TABLE `eh_payment_bills` ADD COLUMN `payment_type` int DEFAULT null COMMENT '账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）';
+
+ALTER TABLE `eh_payment_bills` ADD COLUMN `certificate_note` varchar(255) DEFAULT NULL COMMENT '上传凭证图片时附加的留言';
+
+ALTER TABLE `eh_payment_bills` ADD COLUMN `is_upload_certificate` tinyint(4) DEFAULT null COMMENT '该账单是否上传了缴费凭证（0:否，1：是）';
+
+-- 创建缴费凭证表
+DROP TABLE IF EXISTS `eh_payment_bill_certificate`;
+
+CREATE TABLE `eh_payment_bill_certificate` (
+  `id` bigint(20) NOT NULL,
+  `bill_id` bigint(20) NOT NULL COMMENT '该凭证记录对应的账单id',
+  `certificate_uri` varchar(255) DEFAULT NULL COMMENT '上传凭证图片的uri',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- issue-31047 摄像头增加账号 by liuyilin
+ALTER TABLE `eh_aclink_cameras` ADD COLUMN `account` VARCHAR(128) NOT NULL DEFAULT 'admin' COMMENT '摄像头账号';
+-- END issue-31047
+
+-- lei.yuan 智慧银星查询应用管理员时，请求接口响应超时，所以添加表索引进行优化
+alter table eh_authorizations add index owner_type_index(`owner_type`);
+alter table eh_authorizations add index owner_id_index(`owner_id`);
+alter table eh_authorizations add index target_type_index(`target_type`);
+alter table eh_authorizations add index target_id_index(`target_id`);
+alter table eh_authorization_control_configs add index control_id_index(`control_id`);
+alter table eh_authorization_control_configs add index user_id_index(`user_id`);
+alter table eh_organization_member_details add index target_id_index(`target_id`);
+alter table eh_door_auth add index string_tag3_index (`string_tag3`);
+alter table eh_organization_members add index detail_id_index (`detail_id`);
+alter table eh_organization_members add index group_path_index (`group_path`);
+alter table eh_portal_versions add index namespace_id_index(`namespace_id`);
+alter table eh_service_module_apps add index origin_id_index(`origin_id`);

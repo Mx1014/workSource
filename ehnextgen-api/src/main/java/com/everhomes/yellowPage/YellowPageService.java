@@ -86,4 +86,8 @@ public interface YellowPageService {
 	GetExtraAllianceEventResponse getExtraAllianceEvent(GetExtraAllianceEventCommand cmd);
 	
 	void exportServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd,  HttpServletResponse httpResp);
+	
+	String transferServiceToCommunity();
+
+	void checkPrivilege(PrivilegeType privilegeType, Long currentPMId, Long appId, Long checkCommunityId);
 }
