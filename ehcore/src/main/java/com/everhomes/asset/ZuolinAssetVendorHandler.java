@@ -17,7 +17,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -108,9 +107,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     private ContractServiceImpl contractService;
 
     @Autowired
-    private PayService payService;
-    
-    @Autowired
     private ImportFileService importFileService;
 
     @Autowired
@@ -121,6 +117,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     
     @Autowired
     private AssetPayService assetPayService;
+    
+    @Autowired
+    private com.everhomes.paySDK.api.PayService payServiceV2;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -871,6 +870,37 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         Long billGroupId = enclosedBills.get(0).getBillGroupId();
                         dto.setBillGroupName(assetProvider.getbillGroupNameById(billGroupId));
                         dto.setBillGroupId(billGroupId);
+                        //新增收款方账户类型、账户ID字段 
+                        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(billGroupId);
+                        if(paymentBillGroup != null) {
+                        	dto.setBizPayeeId(paymentBillGroup.getBizPayeeId());
+                        	dto.setBizPayeeType(paymentBillGroup.getBizPayeeType());
+                        	//由于收款方审核状态存在修改的情况，故重新请求电商
+                            List<Long> userIds = new ArrayList<Long>();
+                            userIds.add(paymentBillGroup.getBizPayeeId());
+                            if(LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("listBillGroups(request), cmd={}", userIds);
+                            }
+                            List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+                            if(LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
+                            }
+                            if(payUserDTOs != null && payUserDTOs.size() != 0) {
+                            	for(int i = 0;i < payUserDTOs.size();i++) {
+                            		if(payUserDTOs.get(i).getId() != null && dto.getBizPayeeId() != null &&
+                            			payUserDTOs.get(i).getId().equals(dto.getBizPayeeId())){
+                            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
+                                        if(registerStatus != null && registerStatus.intValue() == 1) {
+                                            dto.setRegisterStatus(PaymentUserStatus.ACTIVE.getCode());
+                                        } else {
+                                            dto.setRegisterStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                                        }
+                                	}
+                                }
+                            }
+                        }
+                        
                         if(enclosedBills.get(0).getContractId() != null){
                             dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
                         }

@@ -832,7 +832,15 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+        setPreOrder(cmd,createOrderCommand,roster,activity);
 
+        PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
+        roster.setPayOrderId(callBack.getOrderId());
+        activityProvider.updateRoster(roster);
+        return callBack;
+    }
+
+    private void setPreOrder(CreateSignupOrderV2Command cmd, CreateOrderCommand createOrderCommand, ActivityRoster roster, Activity activity) {
         createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
 
@@ -846,8 +854,13 @@ public class ActivityServiceImpl implements ActivityService {
         Long payerId = UserContext.currentUserId();
         PayUserDTO payUserDTO = checkAndCreatePaymentUser(payerId,UserContext.getCurrentNamespaceId());
         createOrderCommand.setPayerUserId(payUserDTO.getId());
-
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getCategoryId(),activity.getNamespaceId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(activity.getCategoryId(), activity.getNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(),activity.getNamespaceId());
         if (activityBizPayee == null) {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
                     "no payee.");
@@ -867,22 +880,25 @@ public class ActivityServiceImpl implements ActivityService {
 
         //微信公众号支付，重新设置ClientName，设置支付方式和参数
         if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
-
             if(createOrderCommand.getClientAppName() == null){
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
                 createOrderCommand.setClientAppName("wechat_" + namespaceId);
             }
-            createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+            createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            paymentParamsDTO.setPayType("no_credit");
+            User user = UserContext.current().getUser();
+            paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+            Map<String, String> flattenMap = new HashMap<>();
+            StringHelper.toStringMap(null, paymentParamsDTO, flattenMap);
+            createOrderCommand.setPaymentParams(flattenMap);
+            createOrderCommand.setCommitFlag(1);
         }
 
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCommand.setBackUrl(backUrl);
-        PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
-        roster.setPayOrderId(callBack.getOrderId());
-        activityProvider.updateRoster(roster);
-        return callBack;
     }
 
     private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
@@ -949,39 +965,66 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
 //		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
+        CreateSignupOrderV2Command createSignupOrderV2Command = new CreateSignupOrderV2Command();
+        createSignupOrderV2Command.setActivityId(cmd.getActivityId());
+        createSignupOrderV2Command.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
 
-		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-		if(roster == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-					"no roster.");
-		}
-		Activity activity = activityProvider.findActivityById(roster.getActivityId());
-		if(activity == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-					"no activity.");
-		}
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        if (roster.getPayOrderId() != null) {
+            activityProvider.deleteRoster(roster);
+            roster.setId(null);
+            roster.setPayOrderId(null);
+            Long orderNo = this.onlinePayService.createBillId(DateHelper
+                    .currentGMTTime().getTime());
+            roster.setOrderNo(orderNo);
+            activityProvider.createActivityRoster(roster);
+        }
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
 
-		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
+        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+        setPreOrder(createSignupOrderV2Command,createOrderCommand,roster,activity);
 
-		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
-		orderCmdBody.setBody(orderCmd);
 
-		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
-
-		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
-
-		if(response.getResult()){
-			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
-					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
-			return response.getBody();
-		}
-		else{
-			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
-					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
-					"CreateWechatJsPayOrder error");
-		}
+        CreateOrderRestResponse createOrderRestResponse = this.payServiceV2.createPurchaseOrder(createOrderCommand);
+        CreateWechatJsPayOrderResp callback = new CreateWechatJsPayOrderResp();
+        if (createOrderRestResponse.getErrorCode() != 200) {
+            LOGGER.error("create order fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "create order fail");
+        }
+        OrderCommandResponse response = createOrderRestResponse.getResponse();
+        callback = ConvertHelper.convert(response,CreateWechatJsPayOrderResp.class);
+        callback.setPayNo(response.getOrderId().toString());
+        return callback;
+//		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
+//
+//		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
+//		orderCmdBody.setBody(orderCmd);
+//
+//		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
+//
+//		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
+//
+//		if(response.getResult()){
+//			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
+//					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+//			return response.getBody();
+//		}
+//		else{
+//			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
+//					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+//					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
+//					"CreateWechatJsPayOrder error");
+//		}
 	}
 
 
@@ -6218,7 +6261,13 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "CategoryId cannot be null.");
         }
-	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
         GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
         if (activityBizPayee != null) {
             activityPayeeDTO.setAccountId(activityBizPayee.getBizPayeeId());
@@ -6275,12 +6324,18 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "payeeId cannot be null.");
         }
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
         if (activityBizPayee == null) {
             ActivityBizPayee persist = new ActivityBizPayee();
             persist.setNamespaceId(UserContext.getCurrentNamespaceId());
             persist.setBizPayeeType(OwnerType.ORGANIZATION.getCode());
-            persist.setOwnerId(cmd.getCategoryId());
+            persist.setOwnerId(activityCategories.getId());
             persist.setBizPayeeId(cmd.getPayeeId());
             this.activityProvider.CreateActivityPayee(persist);
         }else {
@@ -6301,7 +6356,17 @@ public class ActivityServiceImpl implements ActivityService {
         CheckPayeeIsUsefulResponse checkPayeeIsUsefulResponse = new CheckPayeeIsUsefulResponse();
         checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.NULL.getCode());
 
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
+        if (activityBizPayee == null) {
+            return checkPayeeIsUsefulResponse;
+        }
         List<Long> idList = new ArrayList<>();
         idList.add(activityBizPayee.getBizPayeeId());
         List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);

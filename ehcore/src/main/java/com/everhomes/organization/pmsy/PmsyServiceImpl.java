@@ -1,6 +1,7 @@
 package com.everhomes.organization.pmsy;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,8 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetPayService;
-import com.everhomes.asset.AssetProvider;
-import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -32,7 +31,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.app.AppConstants;
@@ -62,8 +60,6 @@ import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
-import com.everhomes.server.schema.tables.EhPaymentBills;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsDao;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -84,9 +80,6 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
     private ConfigurationProvider configProvider;
-	
-	@Autowired
-	private PayService payService;
 	
 	@Autowired
 	private AssetPayService assetPayService;
@@ -470,7 +463,7 @@ public class PmsyServiceImpl implements PmsyService{
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
 		preOrderCommand.setOrderId(order.getId());
-		Long amount = payService.changePayAmount(order.getOrderAmount());
+		Long amount = changePayAmount(order.getOrderAmount());
 		preOrderCommand.setAmount(amount);
 
 		preOrderCommand.setPayerId(UserContext.currentUserId());
@@ -587,6 +580,22 @@ public class PmsyServiceImpl implements PmsyService{
 		}
 		return null;
 	}
+	
+	private Long changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return 0L;
+        }
+        return  amount.multiply(new BigDecimal(100)).longValue();
+    }
+
+	private BigDecimal changePayAmount(Long amount){
+
+        if(amount == null){
+            return new BigDecimal(0);
+        }
+        return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+    }
 	
 	public void payNotify(OrderPaymentNotificationCommand cmd) {
     	PaymentCallBackHandler handler = PlatformContext.getComponent(
