@@ -408,28 +408,44 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Byte locationType = null;
 		Byte sceneType = null;
 
+
+		boolean installFlag = false;
+		boolean manageFlag = false;
+
 		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
 			locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
+			orgId = cmd.getContext().getOrganizationId();
 			Card cardConfig = (Card)StringHelper.fromJsonString(cmd.getInstanceConfig(), Card.class);
 			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
-				orgId = cmd.getContext().getOrganizationId();
 				appType = ServiceModuleAppType.OA.getCode();
 				sceneType = ServiceModuleSceneType.CLIENT.getCode();
-			}else if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.COMMUNITY){
-				OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getContext().getCommunityId());
-				orgId = organizationProperty.getOrganizationId();
+
+				installFlag = true;
+			} else if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.COMMUNITY){
+				//OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getContext().getCommunityId());
+				//orgId = organizationProperty.getOrganizationId();
 				appType = ServiceModuleAppType.COMMUNITY.getCode();
 				sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
+
+				manageFlag = true;
 			}
+
 		}else if (Widget.fromCode(cmd.getWidget()) == Widget.NAVIGATOR){
 			locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
 			OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getContext().getCommunityId());
 			orgId = organizationProperty.getOrganizationId();
 			appType = ServiceModuleAppType.COMMUNITY.getCode();
 			sceneType = ServiceModuleSceneType.CLIENT.getCode();
+
+			installFlag = true;
 		}
 
-		List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType);
+		List<ServiceModuleApp> apps = null;
+		if(installFlag) {
+			apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType);
+		}else if(manageFlag){
+			apps = serviceModuleAppProvider.listManageServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType);
+		}
 
 		if(apps != null && apps.size() > 0){
 			for (ServiceModuleApp app: apps){

@@ -39,7 +39,9 @@ public interface ServiceModuleAppProvider {
 
     List<ServiceModuleApp> listServiceModuleApp(Integer namespaceId, Long versionId, Long moduleId, String keywords, List<Long> developerIds, Byte appType, Byte mobileFlag, Byte pcFlag, Byte independentConfigFlag, Byte supportThirdFlag);
 
-    List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType);
+	List<ServiceModuleApp> listManageServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType);
+
+	List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType);
 
     List<ServiceModuleApp> listSystemApps(Long versionId);
 
