@@ -53,9 +53,122 @@ update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id=
 
 -- by cx.yang 新支付end
 
--- by yanlong.liang 支付回调
+-- by yanlong.liang
+-- 支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 VALUES ('activity.pay.v2.callback.url', '/activity/payNotify', '活动报名新支付回调接口', '0');
+-- 活动支付订单迁移
+update eh_activity_roster r,eh_payment_order_records t set r.pay_order_id = t.payment_order_id where t.order_type = 'activitySignupOrder' and r.order_no = t.order_id ;
+update eh_activity_roster r,eh_payment_order_records t set r.refund_pay_order_id = t.payment_order_id where t.order_type = 'activitySignupOrder' and r.refund_order_no = t.order_id ;
+
+-- 收款方账号迁移
+SET @id = ifnull((SELECT MAX(id) FROM `eh_activity_biz_payee`),0);
+set @namespace_id = 1;
+set @account_id = 2327;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999944;
+set @account_id = 4592;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999946;
+set @account_id = 4333;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999947;
+set @account_id = 4241;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999948;
+set @account_id = 4334;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999950;
+set @account_id = 4303;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999951;
+set @account_id = 4208;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999952;
+set @account_id = 4335;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999955;
+set @account_id = 4242;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999957;
+set @account_id = 4197;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999958;
+set @account_id = 4249;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999959;
+set @account_id = 3799;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999961;
+set @account_id = 3777;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999963;
+set @account_id = 4590;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999966;
+set @account_id = 1005;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999967;
+set @account_id = 4526;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999971;
+set @account_id = 1000;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999973;
+set @account_id = 1004;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999981;
+set @account_id = 3800;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999979;
+set @account_id = 4422;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999979;
+set @account_id = 4422;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+-- yanlong.liang END
+
+
 
 -- by st.zheng
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
