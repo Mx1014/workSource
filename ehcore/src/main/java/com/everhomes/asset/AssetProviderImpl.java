@@ -19,9 +19,7 @@ import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.Record1;
 import org.jooq.Result;
-import org.jooq.Select;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
 import org.jooq.UpdateQuery;
@@ -42,14 +40,12 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
-import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.OrderDTO;
 import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
-import com.everhomes.pay.user.UserAccountInfo;
+import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
 import com.everhomes.rest.asset.AssetBillStatus;
@@ -87,7 +83,6 @@ import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
 import com.everhomes.rest.asset.ModifyBillGroupCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
-import com.everhomes.rest.asset.PaymentBillResp;
 import com.everhomes.rest.asset.PaymentExpectancyDTO;
 import com.everhomes.rest.asset.PaymentOrderBillDTO;
 import com.everhomes.rest.asset.PaymentVariable;
@@ -145,7 +140,6 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
-import com.everhomes.server.schema.tables.records.EhAssetPaymentOrderBillsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentBillsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentChargingStandardsRecord;
@@ -153,12 +147,11 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.AmountUtil;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DecimalUtils;
+import com.everhomes.util.GsonUtil;
 import com.everhomes.util.IntegerUtil;
-import com.everhomes.util.LongUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
 import com.mysql.jdbc.StringUtils;
@@ -182,7 +175,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private ContractProvider contractProvider;
-    
+
     @Autowired 
     private PayService payService;
     
@@ -191,7 +184,7 @@ public class AssetProviderImpl implements AssetProvider {
     
     @Autowired
     private UserProvider userProvider;
-    
+
     @Override
     public void creatAssetBill(AssetBill bill) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetBills.class));
@@ -1037,6 +1030,7 @@ public class AssetProviderImpl implements AssetProvider {
 		        return null;
         });
         response.setAmountReceivable(amountReceivable[0]);
+        amountOwed[0] = DecimalUtils.negativeValueFilte(amountOwed[0]);
         response.setAmountOwed(amountOwed[0]);
         response.setDatestr(dateStrBegin[0] + "~" + dateStrEnd[0]);
         response.setShowBillDetailForClientDTOList(dtos);
@@ -2798,7 +2792,7 @@ public class AssetProviderImpl implements AssetProvider {
         long nextSequence = nextBlockSequence - bills.size()+1;
         List<EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
         for(int i = 0; i < bills.size(); i ++){
-        	EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
+            EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
             BillIdAndAmount billIdAndAmount = bills.get(i);
             orderBill.setId(nextSequence++);
             orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
@@ -2836,6 +2830,15 @@ public class AssetProviderImpl implements AssetProvider {
         EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
         context.update(t)
                 .set(t.STATUS,finalOrderStatus)
+                .where(t.ID.eq(orderId))
+                .execute();
+    }
+    
+    public void changeOrderPaymentType(Long orderId, Integer paymentType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        context.update(t)
+                .set(t.PAYMENT_TYPE,paymentType != null ? paymentType.toString() : "")
                 .where(t.ID.eq(orderId))
                 .execute();
     }
@@ -2932,13 +2935,13 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
         //更改金钱
         context.update(t)
-                .set(t.AMOUNT_OWED,new BigDecimal("0"))
                 .set(t.AMOUNT_RECEIVED,t.AMOUNT_OWED)
+                .set(t.AMOUNT_OWED,BigDecimal.ZERO)
                 .where(t.ID.in(billIds))
                 .execute();
         context.update(t1)
-                .set(t1.AMOUNT_OWED,new BigDecimal("0"))
                 .set(t1.AMOUNT_RECEIVED,t1.AMOUNT_OWED)
+                .set(t1.AMOUNT_OWED,BigDecimal.ZERO)
                 .where(t1.BILL_ID.in(billIds))
                 .execute();
 
@@ -3237,8 +3240,6 @@ public class AssetProviderImpl implements AssetProvider {
         group.setOwnerId(cmd.getOwnerId());
         group.setOwnerType(cmd.getOwnerType());
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        group.setBizPayeeId(cmd.getBizPayeeId());//增加收款方id
-        group.setBizPayeeType(cmd.getBizPayeeType());//增加收款方类型
         EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
         dao.insert(group);
     }
@@ -4754,7 +4755,10 @@ public class AssetProviderImpl implements AssetProvider {
         Long ownerId = cmd.getCommunityId();
         String dateStrBegin = cmd.getDateStrBegin();
         String dateStrEnd = cmd.getDateStrEnd();
+        String startPayTime = cmd.getStartPayTime();
+        String endPayTime = cmd.getEndPayTime();
         String targetName = cmd.getTargetName();
+        Integer paymentType = cmd.getPaymentType();
         //卸货结束
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -4781,7 +4785,33 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
         }
         if(!org.springframework.util.StringUtils.isEmpty(targetName)){
-        	query.addConditions(t.TARGET_NAME.like(targetName));
+        	query.addConditions(t.TARGET_NAME.like("%" + targetName + "%"));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(startPayTime)){
+            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(endPayTime)){
+            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(paymentType)){
+        	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
+            //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+            //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
+            if(paymentType.equals(0)) {//微信
+            	query.addConditions(t4.PAYMENT_TYPE.eq("1")
+            			.or(t4.PAYMENT_TYPE.eq("7"))
+            			.or(t4.PAYMENT_TYPE.eq("9"))
+            			.or(t4.PAYMENT_TYPE.eq("12"))
+            			.or(t4.PAYMENT_TYPE.eq("21"))
+            	);
+            }else if(paymentType.equals(1)) {//支付宝
+            	query.addConditions(t4.PAYMENT_TYPE.eq("8")
+            			.or(t4.PAYMENT_TYPE.eq("10"))
+            			.or(t4.PAYMENT_TYPE.eq("13"))
+            	);
+            }else if(paymentType.equals(2)){//对公转账
+            	query.addConditions(t4.PAYMENT_TYPE.eq("2"));
+            }
         }
         query.addConditions(t2.STATUS.eq(1));//EhAssetPaymentOrderBills中的status1代表支付成功
         query.addOrderBy(t3.CREATE_TIME.desc());
@@ -4993,5 +5023,4 @@ public class AssetProviderImpl implements AssetProvider {
         vo.setBillGroupDTO(dto);
         return vo;
     }
-	
 }

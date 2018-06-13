@@ -521,7 +521,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if (members != null && members.size()>0) {
             dto.setTrackingPhone(members.get(0).getContactToken());
         }
-        if (customer.getLastTrackingTime() != null && customer.getTrackingUid() != null && customer.getTrackingUid() != -1) {
+        if (customer.getLastTrackingTime() != null) {
             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
             dto.setTrackingPeriod(result);
         }

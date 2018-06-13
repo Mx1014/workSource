@@ -25,4 +25,9 @@ INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`,
     
 update eh_payment_accounts set app_key='402bca3f-e1be-4c9a-a975-cfa28d9b9e12' where name='beta-zuolinAccount';
 update eh_payment_accounts set secret_key='566HI0h7GiloRywFYobfP+Wy2gFTygxdwK/VQGRkB8PNz0AHhMrfvExLiYYGLUCIXHdOnFRvr//gyND0sgLBag==' where name='beta-zuolinAccount';   
+
+
+-- 服务联盟数据迁移 add by huangmingbo 2018.06.05
+-- /yellowPage/transferServiceToCommunity
+-- 参数:1802
     

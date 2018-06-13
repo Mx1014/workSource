@@ -2,6 +2,8 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -830,7 +832,15 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+        setPreOrder(cmd,createOrderCommand,roster,activity);
 
+        PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
+        roster.setPayOrderId(callBack.getOrderId());
+        activityProvider.updateRoster(roster);
+        return callBack;
+    }
+
+    private void setPreOrder(CreateSignupOrderV2Command cmd, CreateOrderCommand createOrderCommand, ActivityRoster roster, Activity activity) {
         createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
 
@@ -865,22 +875,25 @@ public class ActivityServiceImpl implements ActivityService {
 
         //微信公众号支付，重新设置ClientName，设置支付方式和参数
         if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
-
             if(createOrderCommand.getClientAppName() == null){
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
                 createOrderCommand.setClientAppName("wechat_" + namespaceId);
             }
-            createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+            createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            paymentParamsDTO.setPayType("no_credit");
+            User user = UserContext.current().getUser();
+            paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+            Map<String, String> flattenMap = new HashMap<>();
+            StringHelper.toStringMap(null, paymentParamsDTO, flattenMap);
+            createOrderCommand.setPaymentParams(flattenMap);
+            createOrderCommand.setCommitFlag(1);
         }
 
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCommand.setBackUrl(backUrl);
-        PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
-        roster.setPayOrderId(callBack.getOrderId());
-        activityProvider.updateRoster(roster);
-        return callBack;
     }
 
     private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
@@ -921,9 +934,23 @@ public class ActivityServiceImpl implements ActivityService {
         OrderCommandResponse response = createOrderRestResponse.getResponse();
         callback = ConvertHelper.convert(response, PreOrderDTO.class);
         callback.setExpiredIntervalTime(response.getExpirationMillis());
+
+        //组装支付方式
         List<PayMethodDTO> list = new ArrayList<>();
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
         for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
-            PayMethodDTO payMethodDTO = ConvertHelper.convert(p, PayMethodDTO.class);
+            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+            payMethodDTO.setPaymentName(p.getPaymentName());
+            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
+            payMethodDTO.setPaymentLogo(paymentLogo);
+            payMethodDTO.setPaymentType(p.getPaymentType());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
+            if(bizPaymentParamsDTO != null) {
+                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+            }
+            payMethodDTO.setPaymentParams(paymentParamsDTO);
             list.add(payMethodDTO);
         }
         callback.setPayMethod(list);
@@ -933,39 +960,66 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
 //		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
+        CreateSignupOrderV2Command createSignupOrderV2Command = new CreateSignupOrderV2Command();
+        createSignupOrderV2Command.setActivityId(cmd.getActivityId());
+        createSignupOrderV2Command.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
 
-		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-		if(roster == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-					"no roster.");
-		}
-		Activity activity = activityProvider.findActivityById(roster.getActivityId());
-		if(activity == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-					"no activity.");
-		}
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        if (roster.getPayOrderId() != null) {
+            activityProvider.deleteRoster(roster);
+            roster.setId(null);
+            roster.setPayOrderId(null);
+            Long orderNo = this.onlinePayService.createBillId(DateHelper
+                    .currentGMTTime().getTime());
+            roster.setOrderNo(orderNo);
+            activityProvider.createActivityRoster(roster);
+        }
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
 
-		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
+        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+        setPreOrder(createSignupOrderV2Command,createOrderCommand,roster,activity);
 
-		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
-		orderCmdBody.setBody(orderCmd);
 
-		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
-
-		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
-
-		if(response.getResult()){
-			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
-					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
-			return response.getBody();
-		}
-		else{
-			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
-					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
-					"CreateWechatJsPayOrder error");
-		}
+        CreateOrderRestResponse createOrderRestResponse = this.payServiceV2.createPurchaseOrder(createOrderCommand);
+        CreateWechatJsPayOrderResp callback = new CreateWechatJsPayOrderResp();
+        if (createOrderRestResponse.getErrorCode() != 200) {
+            LOGGER.error("create order fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "create order fail");
+        }
+        OrderCommandResponse response = createOrderRestResponse.getResponse();
+        callback = ConvertHelper.convert(response,CreateWechatJsPayOrderResp.class);
+        callback.setPayNo(response.getOrderId().toString());
+        return callback;
+//		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
+//
+//		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
+//		orderCmdBody.setBody(orderCmd);
+//
+//		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
+//
+//		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
+//
+//		if(response.getResult()){
+//			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
+//					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+//			return response.getBody();
+//		}
+//		else{
+//			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
+//					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+//					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
+//					"CreateWechatJsPayOrder error");
+//		}
 	}
 
 
@@ -2154,7 +2208,9 @@ public class ActivityServiceImpl implements ActivityService {
         }
         createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
         createOrderCommand.setRefundOrderId(roster.getPayOrderId());
-        createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
+        Long orderNo = this.onlinePayService.createBillId(DateHelper
+                .currentGMTTime().getTime());
+        createOrderCommand.setBizOrderNum("activity"+orderNo);
         createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setSourceType(1);
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
@@ -6303,7 +6359,8 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void payNotify(OrderPaymentNotificationCommand cmd) {
-        ActivitySignupOrderV2CallBackHandler handler = new ActivitySignupOrderV2CallBackHandler();
+        ActivitySignupOrderV2CallBackHandler handler = PlatformContext.getComponent(
+                PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
         }

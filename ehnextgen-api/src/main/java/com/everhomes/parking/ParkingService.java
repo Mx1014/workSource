@@ -13,6 +13,7 @@ import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ParkingService {
     List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
@@ -147,4 +148,8 @@ public interface ParkingService {
     void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd);
 
     void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd);
+
+    void initPayeeAccount(MultipartFile[] files);
+
+    void rechargeOrderMigration();
 }

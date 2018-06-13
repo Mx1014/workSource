@@ -707,11 +707,17 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+    public ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd) {
+    	AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        return handler.listBillDetail(cmd);
+        ListBillDetailCommand ncmd = new ListBillDetailCommand();
+        try{
+            ncmd.setBillId(Long.valueOf(cmd.getBillId()));
+        }catch (Exception e){
+            //todo
+        }
+        return handler.listBillDetail(ncmd);
     }
 
     @Override

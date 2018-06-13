@@ -4,6 +4,8 @@ import com.everhomes.rest.messaging.MessageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServerHttpRequest;
@@ -18,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class CommonHandshakeInterceptor implements HandshakeInterceptor {
+public class CommonHandshakeInterceptor implements HandshakeInterceptor, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonHandshakeInterceptor.class);
 
@@ -31,7 +33,16 @@ public class CommonHandshakeInterceptor implements HandshakeInterceptor {
     @Autowired
     private HttpRestCallProvider httpRestCallProvider;
 
-    @PostConstruct
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180525
+    //@PostConstruct
     public void setup() {
 //        String triggerName = StatTransactionScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
 //        String jobName = triggerName;
