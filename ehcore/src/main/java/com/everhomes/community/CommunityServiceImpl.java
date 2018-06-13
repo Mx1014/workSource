@@ -4189,7 +4189,7 @@ public class CommunityServiceImpl implements CommunityService {
 				
 				//设置默认的forumId，要使用原有的项目里的forumId
 				ListingLocator locator = new ListingLocator();
-				List<Community> communities = communityProvider.listCommunities(UserContext.getCurrentNamespaceId(), locator, 1, null);
+				List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
 				if(communities != null && communities.size() > 0){
 					community.setDefaultForumId(communities.get(0).getDefaultForumId());
 					community.setFeedbackForumId(communities.get(0).getFeedbackForumId());
@@ -4202,10 +4202,18 @@ public class CommunityServiceImpl implements CommunityService {
 				community.setCommunityType((byte)1);
 				community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				community.setAptCount(0);
+				community.setNamespaceId(cmd.getNamespaceId());
 				
 				//插入园区
 				//communityProvider.createCommunity(userId, community);
 				community = createCommunityData(userId, community);
+				//添加企业可见园区,管理公司可以看到添加的园区
+				OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+				organizationCommunity.setCommunityId(community.getId());
+				organizationCommunity.setOrganizationId(cmd.getOrganizationId());
+				organizationProvider.createOrganizationCommunity(organizationCommunity);
+				
+				
 				//园区和域空间关联
 				createNamespaceResource(cmd.getNamespaceId(), community.getId());
 				communitySearcher.feedDoc(community);
@@ -4266,7 +4274,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return log;
 		}
 		//检查项目编号,一个域空间下只存在一个项目编号
-		if (StringUtils.isEmpty(data.getCommunityNumber())) {
+		if (StringUtils.isNotEmpty(data.getCommunityNumber())) {
 			Community community = communityProvider.findCommunityByNumber(data.getCommunityNumber(), namespaceId);
 			if(community != null) {
 				log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_NUMBER_EXIST);
@@ -4280,6 +4288,12 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_LENGTH);
 			log.setData(data);
 			log.setErrorLog("address length error");
+			return log;
+		}
+		if (StringUtils.isEmpty(data.getProvinceName()) || StringUtils.isEmpty(data.getCityName()) || StringUtils.isEmpty(data.getAreaName())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_PROVINCECITYAREA_EMPTY);
+			log.setData(data);
+			log.setErrorLog("provinceCityArea name cannot be empty");
 			return log;
 		}
 		
@@ -4297,11 +4311,12 @@ public class CommunityServiceImpl implements CommunityService {
 				data.setName(trim(r.getA()));
 				data.setCommunityNumber(trim(r.getB()));
 				data.setAliasName(trim(r.getC()));
-				data.setCityName(trim(r.getD()));
-				data.setAreaName(trim(r.getE()));
-				data.setAddress(trim(r.getF()));
-				data.setAreaSize(trim(r.getG()));
-				data.setRentArea(trim(r.getH()));
+				data.setProvinceName(trim(r.getD()));
+				data.setCityName(trim(r.getE()));
+				data.setAreaName(trim(r.getF()));
+				data.setAddress(trim(r.getG()));
+				data.setAreaSize(trim(r.getH()));
+				data.setRentArea(trim(r.getI()));
 				
 				list.add(data);
 			}

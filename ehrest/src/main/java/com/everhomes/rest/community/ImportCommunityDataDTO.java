@@ -49,12 +49,13 @@ public class ImportCommunityDataDTO {
 	private String name;
 	private String communityNumber;
 	private String aliasName;
+	private String provinceName;
 	private String cityName;
 	private String areaName;
 	private String address;
 	private String areaSize;
 	private String rentArea;
-	private String provinceName;
+
 
 	public String getProvinceName() {
 		return provinceName;
