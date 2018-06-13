@@ -6364,6 +6364,9 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
+        if (activityBizPayee == null) {
+            return checkPayeeIsUsefulResponse;
+        }
         List<Long> idList = new ArrayList<>();
         idList.add(activityBizPayee.getBizPayeeId());
         List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);
