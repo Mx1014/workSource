@@ -29,7 +29,7 @@ public class DecorationPortalPublishHandler implements PortalPublishHandler {
         JSONObject json = new JSONObject();
         if (!homeUrl.endsWith("/"))
             homeUrl += "/";
-        String url = homeUrl + "decoration-management/build/index.html?ns="+namespaceId+"#/home#sign_suffix";
+        String url = homeUrl + "decoration-management/build/index.html#/home?ns="+namespaceId+"?sign_suffix";
         json.put("url",url);
         return json.toJSONString();
     }
