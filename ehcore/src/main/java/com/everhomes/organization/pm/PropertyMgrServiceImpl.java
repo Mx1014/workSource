@@ -6840,6 +6840,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             for (Field field : fields) {
                 PropertyDescriptor descriptor = null;
                 try {
+                    if(field.getName().equals("serialVersionUID")){
+                        continue;
+                    }
                     descriptor = new PropertyDescriptor(field.getName(), clz);
                     Method method = descriptor.getReadMethod();
                     if (method != null) {
