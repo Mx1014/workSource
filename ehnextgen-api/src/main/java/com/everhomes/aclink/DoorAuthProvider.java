@@ -31,7 +31,7 @@ public interface DoorAuthProvider {
 
     List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count);
 
-    List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, Byte rightRemote, int count);
+    List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, Byte rightRemote, String driver, int count);
 
     DoorAuth getLinglingDoorAuthByUuid(String uuid);
 

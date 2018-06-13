@@ -201,6 +201,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -280,7 +282,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  * Created by xq.tian on 2016/10/25.
  */
 @Service
-public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
+public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, ApplicationListener<ContextRefreshedEvent> {
 
     final String downloadDir ="\\download\\";
 
@@ -453,8 +455,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENERGY_MODULE, ActionType.OFFICIAL_URL.getCode(), null, orgId, communityId);
     }
-
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
         String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
@@ -472,6 +476,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
+    }
+    
     private void checkEnergyMeterUnique(Long id, Long communityId, String meterNumber, String meterName) {
         EnergyMeter meter = meterProvider.findByName(communityId, meterName);
         if(meter != null && !meter.getId().equals(id)) {
@@ -5055,13 +5066,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
         List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
+        EnergyPlan autoPlans = energyPlanProvider.listNewestAutoReadingPlans(cmd.getNamespaceId(),cmd.getCommunityId());
+        List<Long> planIds = new ArrayList<>();
+        planIds.add(0L);
+        if (autoPlans != null) {
+            planIds.add(autoPlans.getId());
+        }
         if (maps != null && maps.size() > 0) {
-            List<Long> planIds = maps.stream().map(EnergyPlanGroupMap::getPlanId).collect(Collectors.toList());
-            EnergyPlan autoPlans = energyPlanProvider.listNewestAutoReadingPlans(cmd.getNamespaceId());
-            if (autoPlans != null) {
-                planIds.add(autoPlans.getId());
-            }
-            planIds.add(0L);
+            List<Long> plans = maps.stream().map(EnergyPlanGroupMap::getPlanId).collect(Collectors.toList());
+            if (plans != null && plans.size() > 0)
+                planIds.addAll(plans);
+        }
+        if(planIds.size()>0){
             List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getCommunityId(),
                     cmd.getOwnerId(), 0L, Integer.MAX_VALUE - 1, taskUpdateTime);
 

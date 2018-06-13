@@ -14,4 +14,5 @@ public interface OrganizationSearcher {
     void syncFromDb();
     GroupQueryResult query(SearchOrganizationCommand cmd); 
     OrganizationQueryResult queryOrganization(SearchOrganizationCommand cmd);
+    OrganizationQueryResult fuzzyQueryOrganizationByName(SearchOrganizationCommand cmd);
 }

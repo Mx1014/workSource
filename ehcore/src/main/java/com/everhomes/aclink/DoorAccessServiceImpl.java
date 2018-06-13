@@ -111,6 +111,8 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
@@ -139,7 +141,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
-public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber {
+public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
     
     @Autowired
@@ -301,11 +303,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private final static String URL_GETAPPINFOS = "http://sdk.api.jia-r.com/projectManage/getAppInfos";
     private final static String URL_GETKEYU = "http://sdk.api.jia-r.com/projectManage/getKeyU";
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         Security.addProvider(new BouncyCastleProvider());
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUserIdentifiers.class, null);
         localBus.subscribe(subcribeKey, this);
+    }
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
     
     private AlipayClient getAlipayClient() {
@@ -1637,8 +1648,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         LOGGER.info("timeout for cmdId=", cmdId);
     }
     
-    List<AesUserKey> listAesUserKeyByUser(User user, ListingLocator locator, Integer count) {
         //TODO cache AesUserKey
+    List<AesUserKey> listAesUserKeyByUser(User user, ListingLocator locator, Integer count) {
         if(locator == null || locator.getAnchor() == null || locator.getAnchor() == 0){
         	locator = new ListingLocator();
         }
@@ -1646,7 +1657,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	count = 60;
         }
 
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), count));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, DoorAccessDriverType.ZUOLIN.getCode(), count));
         
         //TODO when the key is invalid, MUST invalid it and generate a command.
         
@@ -1686,7 +1697,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<AesUserKey> aesUserKeys = this.listAesUserKeyByUser(user, locator, cmd.getPageSize());
+        //避免现网客户端反复取数据,锚点传0就取全部,不返回下一页锚点,待下一版客户端修复后删掉即可  byliuyilin 20180608
+        if(cmd.getPageAnchor() != null && cmd.getPageAnchor() == 0){
+        	cmd.setPageSize(0);
+        }
+        //end 20180608
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, DoorAccessDriverType.ZUOLIN.getCode(), cmd.getPageSize() != null && cmd.getPageSize() >0 ?cmd.getPageSize() + 1 : 0));
+        //TODO when the key is invalid, MUST invalid it and generate a command.
+        List<AesUserKey> aesUserKeys = new ArrayList<AesUserKey>();
+        for(DoorAuth auth : auths) {
+            AesUserKey aesUserKey = generateAesUserKey(user, auth);
+            if(aesUserKey != null) {
+                aesUserKeys.add(aesUserKey);    
+                }
+            }
+        
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(AesUserKey key : aesUserKeys) {
             AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
@@ -1702,9 +1727,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 dtos.add(dto);    
             }
         }
-        
+        Collections.sort(dtos);
         if(cmd.getPageSize() != null && cmd.getPageSize() > 0 && dtos.size() > cmd.getPageSize()){
-        	locator.setAnchor(dtos.get(dtos.size() - 1).getAuthId());
+        	for(DoorAuth auth : auths) {
+        		if(dtos.get(dtos.size() - 1).getAuthId().equals(auth.getId())){
+        			locator.setAnchor(auth.getCreateTime().getTime());
+        		}
+                }
         	dtos.remove(dtos.size() - 1);
         }
         resp.setNextPageAnchor(locator.getAnchor());
@@ -1745,7 +1774,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), cmd.getRightRemote(), cmd.getPageSize());
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), cmd.getRightRemote(), null, cmd.getPageSize());
 
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
@@ -3000,8 +3029,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         User user = UserContext.current().getUser();
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         DoorAuth auth = createZuolinQrAuth(user, doorAccess, cmd);
-
-
         String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
@@ -4753,7 +4780,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
 	@Override
-	public void excuteMessage(String msg) {
+	public void excuteMessage(AclinkWebSocketMessage cmd) {
+		String msg = cmd.getPayload();
+		String uuid = cmd.getUuid();
+		DoorAccess door = doorAccessProvider.queryDoorAccessByUuid(uuid);
+		if(door == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND,
+                    "sender not found ");
+		}
 		byte[] msgArr = Base64.decodeBase64(msg);
 		byte cmdNumber = msgArr[0];
 		if(cmdNumber == 0x10){
@@ -4765,6 +4799,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(authId);
 				if (doorAuth != null && doorAuth.getStatus().equals(DoorAuthStatus.VALID.getCode())
 						&& doorAuth.getValidAuthAmount() > 0 && doorAuth.getValidEndMs() > System.currentTimeMillis()) {
+					if(doorAuth.getDoorId().longValue() != door.getId().longValue() && doorAuth.getDoorId().longValue() != door.getGroupid().longValue()){
+						throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR,
+		                        "sender and msg not pair ");
+					}
 					doorAuth.setValidAuthAmount(doorAuth.getValidAuthAmount() - 1);
 					doorAuthProvider.updateDoorAuth(doorAuth);
 					validResult = "true";
@@ -4968,7 +5006,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		User user = UserContext.current().getUser();
 		ListingLocator locator = new ListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, cmd.getPageSize() == null? 0 : cmd.getPageSize());
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(locator, user.getId(), null, null, cmd.getPageSize() == null? 0 : cmd.getPageSize());
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
             AesUserKeyDTO dto = new AesUserKeyDTO();
@@ -5033,17 +5071,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
         dto.setQrString(auth.getQrKey());
-        NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
-        SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
-        createPhotoCmd.setUserType((byte) 1);
-        createPhotoCmd.setImgUri(cmd.getHeadImgUri());
-        createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
-        createPhotoCmd.setAuthId(auth.getId());
-        faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
-
-        cmd1.setDoorId(cmd.getDoorId());
-        faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
-		return dto;
+        if(cmd.getHeadImgUri() != null && !cmd.getHeadImgUri().isEmpty()){
+            NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+            SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
+            createPhotoCmd.setUserType((byte) 1);
+            createPhotoCmd.setImgUri(cmd.getHeadImgUri());
+            createPhotoCmd.setImgUrl(contentServerService.parserUri(createPhotoCmd.getImgUri()));
+            createPhotoCmd.setAuthId(auth.getId());
+            faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
+            
+            cmd1.setDoorId(cmd.getDoorId());
+            faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+        }
+    	return dto;
 	}
 
 	/**
@@ -5062,5 +5102,4 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		}
 		return 0;
 	}
-
 }

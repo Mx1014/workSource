@@ -568,15 +568,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
-//        if(!cmd.getOwnerType().equals("community")){
-//            throw new RuntimeException("保存账单不在一个园区");
-//        }
-//        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
-//        if(targetDto!=null){
-//            cmd.setContractId(targetDto.getContractId());
-//            cmd.setTargetId(targetDto.getTargetId());
-//        }
-//        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
         return assetProvider.creatPropertyBill(cmd);
     }
 
@@ -1175,8 +1166,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         if(claimedIdentifierByToken!=null){
                             cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
                         }
-                        cmd.setCustomerTel(data[j]);
                     }
+                    cmd.setCustomerTel(data[j]);
                 }
                 else if(headers[j].equals("*账单开始时间")){
                     cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));

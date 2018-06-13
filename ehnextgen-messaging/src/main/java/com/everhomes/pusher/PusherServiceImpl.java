@@ -114,7 +114,10 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     ConcurrentMap<String, ApnsService> certMaps = new ConcurrentHashMap<String, ApnsService>();
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 
+    // 由于本方法没有内容，故并没有使用ApplicationListener，若后面在setup上增加逻辑请同时增加ApplicationListener by lqs 20180516
+    //@PostConstruct
     public void setup() {
 //        workerPoolFactory.getWorkerPool().addQueue(queueName);
     }

@@ -296,6 +296,37 @@ public class AssetServiceImpl implements AssetService {
 
     private void NoticeWithTextAndMessage(String ownerType,Long ownerId,List<BillIdAndType> billIdAndTypes, List<NoticeInfo> noticeInfos) {
         List<Long> uids = new ArrayList<>();
+                //客户在系统内，把需要推送的uid放在list中
+        List<NoticeInfo> infos = new ArrayList<>();
+        for (int i = 0; i < noticeInfos.size(); i++) {
+            NoticeInfo noticeInfo = noticeInfos.get(i);
+            Long targetId = noticeInfo.getTargetId();
+            if (targetId != null && targetId != 0l) {
+                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                    uids.add(noticeInfo.getTargetId());
+                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
+                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
+//                    tempCmd.setOwnerId(cmd.getOwnerId());
+//                    tempCmd.setOwnerType(cmd.getOwnerType());
+                    tempCmd.setOwnerId(ownerId);
+                    tempCmd.setOwnerType(ownerType);
+                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
+                    //企业超管是1005？不是1001
+                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
+                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
+                        uids.add(organizationContactDTOS.get(j).getTargetId());
+                        //新增一个noticeInfo
+                        NoticeInfo n = ConvertHelper.convert(noticeInfo, NoticeInfo.class);
+                        //只更改电话信息为企业联系人的contact token
+                        n.setPhoneNums(organizationContactDTOS.get(j).getContactToken());
+                        infos.add(n);
+                    }
+                    LOGGER.info("notice uids found = {}"+uids.size());
+                }
+            }
+        }
+        noticeInfos.addAll(infos);
+
         try {
             for (int i = 0; i < noticeInfos.size(); i++) {
                 NoticeInfo noticeInfo = noticeInfos.get(i);
@@ -322,29 +353,6 @@ public class AssetServiceImpl implements AssetService {
             LOGGER.error("YZX MAIL SEND FAILED");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "YZX MAIL SEND FAILED");
-        }
-        //客户在系统内，把需要推送的uid放在list中
-        for (int i = 0; i < noticeInfos.size(); i++) {
-            NoticeInfo noticeInfo = noticeInfos.get(i);
-            Long targetId = noticeInfo.getTargetId();
-            if (targetId != null && targetId != 0l) {
-                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
-                    uids.add(noticeInfo.getTargetId());
-                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
-                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
-//                    tempCmd.setOwnerId(cmd.getOwnerId());
-//                    tempCmd.setOwnerType(cmd.getOwnerType());
-                    tempCmd.setOwnerId(ownerId);
-                    tempCmd.setOwnerType(ownerType);
-                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
-                    //企业超管是1005？不是1001
-                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
-                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
-                        uids.add(organizationContactDTOS.get(j).getTargetId());
-                    }
-                    LOGGER.info("notice uids found = {}"+uids.size());
-                }
-            }
         }
 
         for (int k = 0; k < uids.size(); k++) {
@@ -395,6 +403,44 @@ public class AssetServiceImpl implements AssetService {
 
     private void NoticeWithTextAndMessage(List<Long> billIds, List<NoticeInfo> noticeInfos) {
         List<AssetAppNoticePak> uids = new ArrayList<>();
+                //客户在系统内，把需要推送的uid放在list中
+        List<NoticeInfo> extraInfos = new ArrayList<>();
+        for (int i = 0; i < noticeInfos.size(); i++) {
+            NoticeInfo noticeInfo = noticeInfos.get(i);
+            Long targetId = noticeInfo.getTargetId();
+            if (targetId != null && targetId != 0l) {
+                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                    AssetAppNoticePak pak = createAssetAppNoticePak(noticeInfo);
+                    pak.setUid(noticeInfo.getTargetId());
+                    uids.add(pak);
+                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
+//                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
+//                    tempCmd.setOwnerId(noticeInfo.getOwnerId());
+//                    tempCmd.setOwnerType(noticeInfo.getOwnerType());
+//                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
+//                    //企业超管是1005？不是1001
+//                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
+                    ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+                    cmd1.setOrganizationId(noticeInfo.getTargetId());
+                    cmd1.setActivationFlag((byte)1);
+                    cmd1.setOwnerType("EhOrganizations");
+                    cmd1.setOwnerId(null);
+                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
+                        AssetAppNoticePak pak = createAssetAppNoticePak(noticeInfo);
+                        pak.setUid(organizationContactDTOS.get(j).getTargetId());
+                        // 新增一个通知对象，电话改下
+                        NoticeInfo info = ConvertHelper.convert(noticeInfo, NoticeInfo.class);
+                        info.setPhoneNums(organizationContactDTOS.get(j).getContactToken());
+
+                        extraInfos.add(info);
+                        uids.add(pak);
+                    }
+                    LOGGER.info("notice paks assembled = {}"+uids);
+                }
+            }
+        }
+        noticeInfos.addAll(extraInfos);
         try {
             for (int i = 0; i < noticeInfos.size(); i++) {
                 NoticeInfo noticeInfo = noticeInfos.get(i);
@@ -430,37 +476,7 @@ public class AssetServiceImpl implements AssetService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "sms notice failed once");
         }
-        //客户在系统内，把需要推送的uid放在list中
-        for (int i = 0; i < noticeInfos.size(); i++) {
-            NoticeInfo noticeInfo = noticeInfos.get(i);
-            Long targetId = noticeInfo.getTargetId();
-            if (targetId != null && targetId != 0l) {
-                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
-                    AssetAppNoticePak pak = createAssetAppNoticePak(noticeInfo);
-                    pak.setUid(noticeInfo.getTargetId());
-                    uids.add(pak);
-                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
-//                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
-//                    tempCmd.setOwnerId(noticeInfo.getOwnerId());
-//                    tempCmd.setOwnerType(noticeInfo.getOwnerType());
-//                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
-//                    //企业超管是1005？不是1001
-//                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
-                    ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
-                    cmd1.setOrganizationId(noticeInfo.getTargetId());
-                    cmd1.setActivationFlag((byte)1);
-                    cmd1.setOwnerType("EhOrganizations");
-                    cmd1.setOwnerId(null);
-                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
-                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
-                        AssetAppNoticePak pak = createAssetAppNoticePak(noticeInfo);
-                        pak.setUid(organizationContactDTOS.get(j).getTargetId());
-                        uids.add(pak);
-                    }
-                    LOGGER.info("notice paks assembled = {}"+uids);
-                }
-            }
-        }
+
         for (int k = 0; k < uids.size(); k++) {
             try {
                 AssetAppNoticePak pak = uids.get(k);
@@ -705,11 +721,17 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+    public ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        return handler.listBillDetail(cmd);
+        ListBillDetailCommand ncmd = new ListBillDetailCommand();
+        try{
+            ncmd.setBillId(Long.valueOf(cmd.getBillId()));
+        }catch (Exception e){
+            //todo
+        }
+        return handler.listBillDetail(ncmd);
     }
 
     @Override
@@ -795,7 +817,7 @@ public class AssetServiceImpl implements AssetService {
 //            }
             detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
             detail.setTargetName(dto.getTargetName());
-            detail.setDateStr(dto.getDateStr());
+            detail.setDateStr(dto.getDateStr()); 
             // 增加发票单号 by wentian 2018/4/27
             detail.setInvoiceNum(dto.getInvoiceNum());
             // 增加账单开始时间、账单结束时间、楼栋名称、门牌名称、客户手机号
@@ -808,10 +830,9 @@ public class AssetServiceImpl implements AssetService {
             dataList.add(detail);
         }
 
-        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","addresses","amountReceivable","amountReceived","amountOwed","status","noticeTimes", "invoiceNum"};
-        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋门牌","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"
-                , "发票单号"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","addresses","amountReceivable","amountReceived","amountOwed","status","invoiceNum"};
+        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋门牌","应收(元)","已收(元)","欠收(元)","缴费状态", "发票单号"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
@@ -837,47 +858,49 @@ public class AssetServiceImpl implements AssetService {
 	        //组装datalist来确定propertyNames的值
 	        for(int i = 0; i < dtos.size(); i++) {
 	        	List<PaymentOrderBillDTO> paymentOrderBillDTOs = dtos.get(i).getChildren();
-	        	for(int j = 0;j < paymentOrderBillDTOs.size();j++) {
-	        		PaymentOrderBillDTO dto = paymentOrderBillDTOs.get(j);
-		        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
-		            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
-		            detail.setBillGroupName(dto.getBillGroupName());
-		            //组装所有的收费项信息
-		            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
-		            String billItemListMsg = "";
-		            if(billItemDTOList != null) {
-		            	for(int k = 0; k < billItemDTOList.size();k++) {
-		            		BillItemDTO billItemDTO = billItemDTOList.get(k);
-		            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
-		            	}
-		            }
-		            detail.setBillItemListMsg(billItemListMsg);
-		            detail.setTargetName(dto.getTargetName());
-		            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
-		            detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
-		            switch (dto.getPaymentType()) {
-						case 0:
-							detail.setPaymentType("微信");
-							break;
-						case 1:
-							detail.setPaymentType("支付宝");
-							break;
-						case 2:
-							detail.setPaymentType("对公转账");
-							break;
-						default:
-							break;
-					}
-		            detail.setAmountReceived(dto.getAmountReceived());
-		            detail.setAmountReceivable(dto.getAmountReceivable());
-		            detail.setAmoutExemption(dto.getAmountExemption());
-		            detail.setAmountSupplement(dto.getAmountSupplement());
-		            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
-		            detail.setPayTime(dto.getPayTime());
-		            detail.setPayerTel(dto.getPayerTel());
-		            detail.setPayerName(dto.getPayerName());
-		            detail.setAddresses(dto.getAddresses());
-		            dataList.add(detail);
+	        	if(paymentOrderBillDTOs != null) {
+	        		for(int j = 0;j < paymentOrderBillDTOs.size();j++) {
+		        		PaymentOrderBillDTO dto = paymentOrderBillDTOs.get(j);
+			        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
+			            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+			            detail.setBillGroupName(dto.getBillGroupName());
+			            //组装所有的收费项信息
+			            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
+			            String billItemListMsg = "";
+			            if(billItemDTOList != null) {
+			            	for(int k = 0; k < billItemDTOList.size();k++) {
+			            		BillItemDTO billItemDTO = billItemDTOList.get(k);
+			            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
+			            	}
+			            }
+			            detail.setBillItemListMsg(billItemListMsg);
+			            detail.setTargetName(dto.getTargetName());
+			            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
+			            detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
+			            switch (dto.getPaymentType()) {
+							case 0:
+								detail.setPaymentType("微信");
+								break;
+							case 1:
+								detail.setPaymentType("支付宝");
+								break;
+							case 2:
+								detail.setPaymentType("对公转账");
+								break;
+							default:
+								break;
+						}
+			            detail.setAmountReceived(dto.getAmountReceived());
+			            detail.setAmountReceivable(dto.getAmountReceivable());
+			            detail.setAmoutExemption(dto.getAmountExemption());
+			            detail.setAmountSupplement(dto.getAmountSupplement());
+			            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
+			            detail.setPayTime(dto.getPayTime());
+			            detail.setPayerTel(dto.getPayerTel());
+			            detail.setPayerName(dto.getPayerName());
+			            detail.setAddresses(dto.getAddresses());
+			            dataList.add(detail);
+		        	}
 	        	}
 	        }
 	        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
@@ -2665,22 +2688,28 @@ public class AssetServiceImpl implements AssetService {
                     formulaJson = formulaJson.replace("qf",amountOwed.toString());
                     BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
                     //开始构造一条滞纳金记录
-                    PaymentLateFine fine = new PaymentLateFine();
-                    long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
-                    fine.setId(nextSequence);
-                    fine.setName(item.getChargingItemName() + "滞纳金");
-                    fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    //查看item是否已经有滞纳金产生了
+                    PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+                    boolean isInsert = false;
+                    if(fine == null){
+                        isInsert = true;
+                        fine = new PaymentLateFine();
+                        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+                        fine.setId(nextSequence);
+                        fine.setName(item.getChargingItemName() + "滞纳金");
+                        fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        fine.setBillId(item.getBillId());
+                        fine.setBillItemId(item.getId());
+                        fine.setCommunityId(item.getOwnerId());
+                        fine.setNamespaceId(item.getNamespaceId());
+                        fine.setCustomerId(item.getTargetId());
+                        fine.setCustomerType(item.getTargetType());
+                    }
                     fine.setAmount(fineAmount);
-                    fine.setBillId(item.getBillId());
-                    fine.setBillItemId(item.getId());
-                    fine.setCommunityId(item.getOwnerId());
-                    fine.setNamespaceId(item.getNamespaceId());
-                    fine.setCustomerId(item.getTargetId());
-                    fine.setCustomerType(item.getTargetType());
                     fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId());
+                    assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
                     // 重新计算下账单
-                    assetProvider.reCalBillById(item.getBillId());
+//                    assetProvider.reCalBillById(item.getBillId());
                 }
             }
         });
