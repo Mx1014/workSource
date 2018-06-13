@@ -548,6 +548,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
+    DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -6696,10 +6699,35 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (mandatoryFlag) {
                 LOGGER.error("organization owner mandatory column is empty, data = {}", dto);
                 log.setData(dto);
+                // 这里不是动态表单 暂时用这个
+                String fieldName = getDisplayName(dto);
+                log.setFieldName(fieldName);
                 log.setErrorLog("eorganization owner mandatory column is empty");
                 log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_MANDATORY_COLUMN);
                 resultLogs.add(log);
                 continue;
+            }
+            Long orgOwnerTypeId = null;
+            if((orgOwnerTypeId = parseOrgOwnerTypeId(dto.getContactType()))==null){
+                LOGGER.error("organization owner type is not exist, data = {}", dto);
+                log.setData(dto);
+                log.setErrorLog("eorganization owner type is not exist,");
+                log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_CUSTOMER_TYPE_ERROR);
+                resultLogs.add(log);
+                continue;
+            } else {
+                owner.setOrgOwnerTypeId(orgOwnerTypeId);
+            }
+            //校验性别
+            if (!UserGender.FEMALE.equals(UserGender.fromText(dto.getGender())) && !UserGender.MALE.equals(UserGender.fromText(dto.getGender()))) {
+                LOGGER.error("gender is not correct , data = {}", dto);
+                log.setData(dto);
+                log.setErrorLog("gender is not correct");
+                log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_GENDER_FORMAT_ERROR);
+                resultLogs.add(log);
+                continue;
+            } else {
+                owner.setGender(UserGender.fromText(dto.getGender()).getCode());
             }
             // 校验楼栋门牌是否存在
             Address address = parseAddress(namespaceId, communityId, dto.getBuilding(), dto.getAddress());
@@ -6708,15 +6736,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 log.setData(dto);
                 log.setErrorLog("organization owner building and address is not exist ");
                 log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_ADDRESS_NOT_EXISTS);
-                resultLogs.add(log);
-                continue;
-            }
-            //校验时间格式
-            if (parseDate(dto.getLivingTime()) == null) {
-                LOGGER.error("organization owner dateTime format error  , data = {}", dto);
-                log.setData(dto);
-                log.setErrorLog("organization owner dateTime format error ");
-                log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_DATE_FORMAT_ERROR);
                 resultLogs.add(log);
                 continue;
             }
@@ -6729,28 +6748,40 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 resultLogs.add(log);
                 continue;
             }
+            //校验时间格式
+            java.sql.Date date = null;
+            if ((date = parseDate(dto.getLivingTime())) == null && org.apache.commons.lang.StringUtils.isNotBlank(dto.getLivingTime())) {
+                LOGGER.error("organization owner dateTime format error  , data = {}", dto);
+                log.setData(dto);
+                log.setErrorLog("organization owner dateTime format error ");
+                log.setFieldName("迁入日期");
+                log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_DATE_FORMAT_ERROR);
+                resultLogs.add(log);
+                continue;
+            }
+            //校验时间格式
+            if ((date = parseDate(dto.getBirthday())) == null && org.apache.commons.lang.StringUtils.isNotBlank(dto.getBirthday())) {
+                LOGGER.error("organization owner dateTime format error  , data = {}", dto);
+                log.setData(dto);
+                log.setErrorLog("organization owner dateTime format error ");
+                log.setFieldName("生日");
+                log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_DATE_FORMAT_ERROR);
+                resultLogs.add(log);
+                continue;
+            } else {
+                owner.setBirthday(date);
+            }
 
             // 检查手机号的唯一性
-            if (contactTokenList.contains(dto.getContactToken())) {
+            CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
+            if (exist != null) {
                 // 支持同一个人导入多行，但只能生成一个业主信息，add by tt, 170427
-                List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId, communityId, dto.getContactToken());
-                if (pmOwners != null && !pmOwners.isEmpty()) {
-                    CommunityPmOwner pmOwner = pmOwners.get(0);
-                    // remove new data which is blank
-                    compareOwnerInfo(pmOwner, owner);
-                    owner.setId(pmOwner.getId());
-                }
+                // remove new data which is blank
+                compareOwnerInfo(exist, owner);
+                owner.setId(exist.getId());
             }
             contactTokenList.add(dto.getContactToken());
-//			// 校验手机号
-//			List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(currentNamespaceId(), communityId, dto.getContactToken());
-//			if (pmOwners != null && pmOwners.size() > 0) {
-//				LOGGER.error("organization owner contact phone is exists in this community  , data = {}", dto);
-//				log.setData(dto);
-//				log.setErrorLog("organization owner contact phone is exists in this community ");
-//				log.setCode(PropertyServiceErrorCode.ERROR_OWNER_EXIST);
-//				resultLogs.add(log);
-//			}
+
             owner.setNamespaceId(namespaceId);
             owner.setCreatorUid(UserContext.currentUserId());
             owner.setOrganizationId(organizationId);
@@ -6761,16 +6792,42 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (ownerId == null) {
                 ownerId = propertyMgrProvider.createPropOwner(owner);
                 pmOwnerSearcher.feedDoc(owner);
-            } else {
-                Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
-                createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
             }
+            Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
+            createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
+
             if (StringUtils.hasLength(dto.getLivingTime())) {
                 long time = parseDate(dto.getLivingTime()).getTime();
                 createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
             }
         }
         return resultLogs;
+    }
+
+    private String getDisplayName(ImportOrganizationOwnerDTO dto) {
+        String displayName = null;
+        if(dto.getContactName()==null){
+            displayName = "客户名称";
+        }
+        if(dto.getContactType()==null){
+            displayName = "客户类型";
+        }
+        if(dto.getContactToken()==null){
+            displayName = "手机号码";
+        }
+        if(dto.getGender()==null){
+            displayName = "性别";
+        }
+        if(dto.getBuilding()==null){
+            displayName = "楼栋";
+        }
+        if(dto.getAddress()==null){
+            displayName = "门牌";
+        }
+        if(dto.getLivingStatus()==null){
+            displayName = "是否在户";
+        }
+        return displayName;
     }
 
     private void compareOwnerInfo(CommunityPmOwner exist, CommunityPmOwner owner) {
@@ -6810,20 +6867,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         for (int rowIndex = 1; rowIndex < resultList.size(); rowIndex++) {
             RowResult result = (RowResult) resultList.get(rowIndex);
             ImportOrganizationOwnerDTO owner = new ImportOrganizationOwnerDTO();
-            owner.setContactName(RowResult.trimString(result.getA()));
-            owner.setContactType(RowResult.trimString(result.getB()));
-            owner.setContactToken(RowResult.trimString(result.getC()));
-            owner.setGender(RowResult.trimString(result.getD()));
-            owner.setBuilding(RowResult.trimString(result.getE()));
-            owner.setAddress(RowResult.trimString(result.getF()));
-            owner.setLivingStatus(RowResult.trimString(result.getG()));
-            owner.setLivingTime(RowResult.trimString(result.getH()));
-            owner.setBirthday(RowResult.trimString(result.getI()));
-            owner.setMaritalStatus(RowResult.trimString(result.getJ()));
-            owner.setJob(RowResult.trimString(result.getK()));
-            owner.setCompany(RowResult.trimString(result.getL()));
-            owner.setIdCardNumber(RowResult.trimString(result.getM()));
-            owner.setRegisteredResidence(RowResult.trimString(result.getN()));
+            owner.setContactName(RowResult.trimString(result.getA()) == null ? "" : RowResult.trimString(result.getA()));
+            owner.setContactType(RowResult.trimString(result.getB()) == null ? "" : RowResult.trimString(result.getB()));
+            owner.setContactToken(RowResult.trimString(result.getC()) == null ? "" : RowResult.trimString(result.getC()));
+            owner.setGender(RowResult.trimString(result.getD()) == null ? "" : RowResult.trimString(result.getD()));
+            owner.setBuilding(RowResult.trimString(result.getE()) == null ? "" : RowResult.trimString(result.getE()));
+            owner.setAddress(RowResult.trimString(result.getF()) == null ? "" : RowResult.trimString(result.getF()));
+            owner.setLivingStatus(RowResult.trimString(result.getG()) == null ? "" : RowResult.trimString(result.getG()));
+            owner.setLivingTime(RowResult.trimString(result.getH()) == null ? "" : RowResult.trimString(result.getH()));
+            owner.setBirthday(RowResult.trimString(result.getI()) == null ? "" : RowResult.trimString(result.getI()));
+            owner.setMaritalStatus(RowResult.trimString(result.getJ()) == null ? "" : RowResult.trimString(result.getJ()));
+            owner.setJob(RowResult.trimString(result.getK()) == null ? "" : RowResult.trimString(result.getK()));
+            owner.setCompany(RowResult.trimString(result.getL()) == null ? "" : RowResult.trimString(result.getL()));
+            owner.setIdCardNumber(RowResult.trimString(result.getM()) == null ? "" : RowResult.trimString(result.getM()));
+            owner.setRegisteredResidence(RowResult.trimString(result.getN()) == null ? "" : RowResult.trimString(result.getN()));
 
             organizationOwnerDTOS.add(owner);
         }
@@ -6944,9 +7001,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     private Long parseOrgOwnerTypeId(String orgOwnerTypeName) {
         OrganizationOwnerType type = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(orgOwnerTypeName);
         if (type == null) {
-            LOGGER.error("The organization owner type {} is not exist.", orgOwnerTypeName);
-            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
-                    "The organization owner type %s is not exist.", orgOwnerTypeName);
+//            LOGGER.error("The organization owner type {} is not exist.", orgOwnerTypeName);
+//            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
+//                    "The organization owner type %s is not exist.", orgOwnerTypeName);
+            return null;
         }
         return type.getId();
     }

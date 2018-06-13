@@ -13,8 +13,8 @@ public class ImportOrganizationOwnerDTO {
     private String gender = "";
     private String building = "";
     private String address = "";
-    private String livingStatus;
-    private String livingTime;
+    private String livingStatus="";
+    private String livingTime="";
     private String birthday = "";
     private String maritalStatus = "";
     private String job = "";
