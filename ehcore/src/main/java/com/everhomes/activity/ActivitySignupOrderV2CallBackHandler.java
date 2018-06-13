@@ -2,7 +2,6 @@
 package com.everhomes.activity;
 
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
