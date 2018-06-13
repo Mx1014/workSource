@@ -5883,7 +5883,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             String[] propertyNames = {"contactName", "orgOwnerType", "contactToken", "gender","building","address", "livingStatus", "birthdayDate", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
             String[] titleNames = {"姓名", "客户类型", "手机号码", "性别","楼栋","门牌", "是否在户", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
-            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30};
+            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30, 30, 40, 40};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, owners);
         } else {
             // LOGGER.error("Organization owner are not exist.");
