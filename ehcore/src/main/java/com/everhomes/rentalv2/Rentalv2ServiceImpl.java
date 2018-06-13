@@ -39,7 +39,6 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayProvider;
-import com.everhomes.order.PayService;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.parking.vip_parking.DingDingParkingLockHandler;
