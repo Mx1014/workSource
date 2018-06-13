@@ -2831,20 +2831,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 		if (itemResults != null && itemResults.size() > 0) {
 			results = itemResults.stream()
-					.map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
-					.collect(Collectors.toList());
-//            //兼容上一版 只有在result表中才有equipmentId
-//
-//            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
-//                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
-//            } else {
-//                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
-//            }
-//            if (equipment != null){
-//                dto.setEquipmentName(equipment.getName());
-//                dto.setLocation(equipment.getLocation());
-//                dto.setEquipmentId(equipment.getId());
-//            }
+					.map(result -> {
+						InspectionItemResult itemResult = ConvertHelper.convert(result, InspectionItemResult.class);
+						EquipmentInspectionItems itemDetail = equipmentProvider.findEquipmentInspectionItem(itemResult.getItemId());
+						if (itemDetail != null) {
+							itemResult.setValueJason(itemDetail.getValueJason());
+						}
+						return itemResult;
+					}).collect(Collectors.toList());
+
 		}
 		if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
 			equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
