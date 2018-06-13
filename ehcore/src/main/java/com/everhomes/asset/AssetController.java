@@ -1340,6 +1340,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * <p>用于创建账单时，判断个人用户是否关联了该账单所包含的楼栋门牌</p>
      */
     @RequestMapping("isUserExistInAddress")
+    @RestReturn(value=IsUserExistInAddressResponse.class)
     public RestResponse isUserExistInAddress(IsUserExistInAddressCmd cmd){
     	IsUserExistInAddressResponse response = assetService.isUserExistInAddress(cmd);
         RestResponse restResponse = new RestResponse(response);
