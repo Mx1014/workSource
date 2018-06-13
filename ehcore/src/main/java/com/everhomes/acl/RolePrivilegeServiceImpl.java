@@ -507,6 +507,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
+		
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+      if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+                    "non-privileged.");
+        }
+	      
 		dbProvider.execute((TransactionStatus status) -> {
 			//根据组织id、用户姓名、手机号、超级管理员权限代号、机构管理，超级管理员，拥有 所有权限、来创建超级管理员
 			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
@@ -1502,7 +1509,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toOtherTemplateCode,
+                toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1530,7 +1537,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toTargetTemplateCode,
+                toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1789,7 +1796,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//否则就没有加入
 			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByContactTokenAndOrgId(cmd.getOrganizationId(),cmd.getContactToken());
 			//判断
-			if(organizationMember != null){
+			if(organizationMember != null && organizationMember.getStatus() != null && organizationMember.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
 				//说明之前已经加入了公司
 				response.setIsJoined(TrueOrFalseFlag.TRUE.getCode());
 			}else{
@@ -1826,15 +1833,21 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void updateTopAdminstrator(CreateOrganizationAdminCommand cmd) {
+	    Organization org = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+	    if(org == null) {
+	          throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+	                    "organization not find");
+	    }
+	    
+	    if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+	        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+	                "non-privileged.");
+	    }
+	    
 		dbProvider.execute((TransactionStatus status) -> {
-
-			User user = UserContext.current().getUser();
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
-			String contactToken = userProvider.findContactTokenByOwnerUidAndNamespaceId(user.getId(),namespaceId);
-
 			// 删除原来的超管权限
 			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
-			/*deleteOrganizationAdmin(cmd.getOrganizationId(), contactToken, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);*/
+
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
 			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
 			if(detail != null){
@@ -1997,6 +2010,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
 					"params ownerType error.");
 		}
+		
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+      if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+                    "non-privileged.");
+        }
 
 		dbProvider.execute((TransactionStatus status) -> {
 			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
@@ -2658,6 +2677,29 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		return new OrganizationContactDTO();
 	}
+	
+	   private Long getOrUpdateTopAdministratorByOrganizationId(Long orgId, List<OrganizationMember> members){
+	        Organization org = checkOrganization(orgId);
+	        if(org != null) {
+	            if (org.getAdminTargetId() != null && !org.getAdminTargetId().equals(0l)) {
+	                return org.getAdminTargetId();
+	            } else {
+	                //设置默认超级管理员
+	                if(members != null && members.size() > 0) {
+	                    for(OrganizationMember mb : members) {
+	                        if(mb.getTargetId() != null) {
+	                            org.setAdminTargetId(mb.getTargetId());
+	                            organizationProvider.updateOrganization(org);
+	                            break;
+	                        }
+	                            
+	                    }
+	                    
+	                }
+	            }
+	        }
+	        return null;
+	    }
 
 	@Override
     public GetAdministratorInfosByUserIdResponse getAdministratorInfosByUserId(GetAdministratorInfosByUserIdCommand cmd) {
@@ -2679,52 +2721,29 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
 						OrganizationMemberTargetType.USER.getCode(), 1000, new ListingLocator());
 
-			boolean isSystemAdmin = members.stream().anyMatch(r -> r.getTargetId().equals(cmd.getUserId()));
-			response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
-
+		boolean isSystemAdmin = members.stream().anyMatch(r -> r.getTargetId().equals(cmd.getUserId()));
+		response.setIsSystemAdminFlag(isSystemAdmin ? TrueOrFalseFlag.TRUE.getCode() : TrueOrFalseFlag.FALSE.getCode());
 
 
 		//modify by lei yuan
-		Long adminTargetId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-/*		//根据adminTargetId来查询eh_organization_members表中的target_id字段
-		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(adminTargetId);
-		if(organizationMember != null){
-			if(adminTargetId != null && organizationMember.getTargetId().equals(cmd.getUserId())){
-				response.setIsTopAdminFlag(AllFlagType.YES.getCode());
-
-				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
-				if(identifier != null){
-					response.setTopAdminToken(identifier.getIdentifierToken());
-				}
-				User user = userProvider.findUserById(cmd.getUserId());
-				if(user != null){
-					response.setTopAdminName(user.getNickName());
-				}
-			}else{
-				response.setIsTopAdminFlag(AllFlagType.NO.getCode());
-			}
-		}*/
-
-		//超级管理员的判断是根据admin_target_id（uid）来查询eh_users表中的信息，如果存在信息的话，那么他就是超级管理员，否则就不是超级管理员
-		//根据admin_target_id来查询eh_users表
-		User user = userProvider.findUserById(adminTargetId);
-		if(user != null){
-			if(adminTargetId != null && user.getId().equals(cmd.getUserId())){
-				response.setIsTopAdminFlag(AllFlagType.YES.getCode());
-
-				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
-				if(identifier != null){
-					response.setTopAdminToken(identifier.getIdentifierToken());
-				}
-				response.setTopAdminName(user.getNickName());
-
-			}else{
-				response.setIsTopAdminFlag(AllFlagType.NO.getCode());
-				response.setTopAdminToken(null);
-				response.setTopAdminName(null);
-			}
-
+		Long topId = getOrUpdateTopAdministratorByOrganizationId(cmd.getOrganizationId(), members);
+		if(topId != null && topId.equals(cmd.getUserId())){
+			response.setIsTopAdminFlag(AllFlagType.YES.getCode());
+		}else{
+			response.setIsTopAdminFlag(AllFlagType.NO.getCode());
 		}
+		
+		if(topId != null) {
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
+			if(identifier != null){
+				response.setTopAdminToken(identifier.getIdentifierToken());
+			}
+			User user = userProvider.findUserById(topId);
+			if(user != null){
+				response.setTopAdminName(user.getNickName());
+			}			
+		}
+
 
 		return response;
     }

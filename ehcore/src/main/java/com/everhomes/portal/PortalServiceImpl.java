@@ -3116,7 +3116,7 @@ public class PortalServiceImpl implements PortalService {
 			try {
 				handler = PlatformContextNoWarnning.getComponent(handlerPrefix + moduleId);
 			}catch (Exception ex){
-				LOGGER.info("PortalPublishHandler not exist moduleId = {}", moduleId);
+				//LOGGER.info("PortalPublishHandler not exist moduleId = {}", moduleId);
 			}
 
 		}
