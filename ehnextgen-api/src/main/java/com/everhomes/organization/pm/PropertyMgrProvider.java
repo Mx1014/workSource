@@ -7,12 +7,14 @@ import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
+import com.everhomes.rest.organization.pm.ReservationStatus;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -499,4 +501,16 @@ public interface PropertyMgrProvider {
 	List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId);
 
     void insertResourceReservation(PmResourceReservation resourceReservation);
+
+    List<PmResourceReservation> listReservationsByAddresses(List<Long> ids);
+
+    boolean isInvolvedWithReservation(Long addressId);
+
+    List<PmResourceReservation> findReservationByAddress(Long addressId, ReservationStatus status);
+
+	void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime,Long enterpriseCustomerId);
+
+	Long changeReservationStatus(Long reservationId, ReservationStatus delted);
+
+	List<ReservationInfo> listRunningReservations();
 }

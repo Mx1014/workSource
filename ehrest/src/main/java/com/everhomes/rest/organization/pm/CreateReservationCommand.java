@@ -12,6 +12,8 @@ import java.sql.Timestamp;
  * <li>enterpriseCustomerId: 企业客户id</li>
  * <li>startTime: 开始时间, 时间戳，非精确选择的时间字段需要置为0，例如传来的时间最多精确到分钟，那么秒钟到0，如果有业务场景不满足再更改</li>
  * <li>endTime：结束时间</li>
+ * <li>communityId</li>
+ * <li>namespaceId</li>
  *</ul>
  */
 public class CreateReservationCommand {
@@ -21,6 +23,7 @@ public class CreateReservationCommand {
     private Timestamp endTime;
     private Long communityId;
     private Integer namespaceId;
+
 
     public Long getCommunityId() {
         return communityId;

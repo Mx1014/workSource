@@ -1047,7 +1047,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping("listPropApartments")
 	@RestReturn(value=ListPropApartmentsResponse.class)
 	public RestResponse listPropApartments(@Valid ListPropApartmentsByKeywordCommand cmd) {
-		// TODO: 2018/6/12 增加返回参数，是否和预定有关联；增加请求参数，根据居住状态来查询 
+		// TODO: 2018/6/12 增加返回参数，是否和预定有关联；增加请求参数，根据居住状态来查询  done
 		ListPropApartmentsResponse results =  propertyMgrService.listNewPropApartmentsByKeyword(cmd);
 		RestResponse response = new RestResponse(results);
 
@@ -2120,7 +2120,7 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse listDefaultChargingItems(ListDefaultChargingItemsCommand cmd){
 		return new RestResponse(propertyMgrService.listDefaultChargingItems(cmd));
 	}
-	// TODO: 2018/6/12  
+	// TODO: 2018/6/12 done
 	/**
 	 * <p>list all reservations given addresses</p>
 	 * <b>URL: /pm/listReservations</b>
@@ -2128,12 +2128,13 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping("listReservations")
 	@RestReturn(value = ListReservationsDTO.class, collection = true)
 	public RestResponse listReservations(ListReservationsCommand cmd){
-		RestResponse response = new RestResponse();
+	    List<ListReservationsDTO> list = propertyMgrService.listReservations(cmd);
+		RestResponse response = new RestResponse(list);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	// TODO: 2018/6/12  
+	// TODO: 2018/6/12
 	/**
 	 * <p>create a reservation on a given address for a given enterprise customer</p>
 	 * <b>URL: /pm/createReservation</b>
@@ -2153,18 +2154,34 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("updateReservation")
 	public RestResponse updateReservation(UpdateReservationCommand cmd){
+		propertyMgrService.updateReservation(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	// TODO: 2018/6/12
+	// TODO: 2018/6/12 done
 	/**
 	 * <p>delete an reservation</p>
 	 * <b>URL: /pm/deletaReservation</b>
 	 */
 	@RequestMapping("deleteReservation")
 	public RestResponse deleteReservation(DeleteReservationCommand cmd){
+		propertyMgrService.deleteReservation(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	// TODO: 2018/6/13
+	/**
+	 * <p>cancel an reservation</p>
+	 * <b>URL: /pm/cancelReservation</b>
+	 */
+	@RequestMapping("cancelReservation")
+	public RestResponse cancelReservation(CancelReservationCommand cmd){
+	    propertyMgrService.cancelReservation(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

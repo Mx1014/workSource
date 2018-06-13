@@ -2051,6 +2051,74 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
+	public List<PmResourceReservation> listReservationsByAddresses(List<Long> ids) {
+		return this.dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID.in(ids))
+				.and(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.notEqual(ReservationStatus.DELTED.getCode()))
+				.fetchInto(PmResourceReservation.class);
+	}
+
+	@Override
+	public boolean isInvolvedWithReservation(Long addressId) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> ids = dslContext.select(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID)
+				.from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID.eq(addressId))
+				.and(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(ReservationStatus.ACTIVE.getCode()))
+				.fetch(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID);
+		if(ids.size() < 1) return false;
+		return true;
+	}
+
+	@Override
+	public List<PmResourceReservation> findReservationByAddress(Long addressId, ReservationStatus status) {
+		return this.dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID.eq(addressId))
+				.and(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(status.getCode()))
+				.fetchInto(PmResourceReservation.class);
+	}
+
+	@Override
+	public void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime, Long enterpriseCustomerId) {
+		this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.ENTERPRISE_CUSTOMER_ID ,enterpriseCustomerId)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.START_TIME, startTime)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME, endTime)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
+				.execute();
+	}
+
+	@Override
+	public Long changeReservationStatus(Long reservationId, ReservationStatus status) {
+		this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS, status.getCode())
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
+				.execute();
+		return	this.dbProvider.getDslContext(AccessSpec.readWrite()).select(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID)
+				.from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
+                .fetchOne(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID);
+	}
+
+	@Override
+	public List<ReservationInfo> listRunningReservations() {
+	    List<ReservationInfo> infos = new ArrayList<>();
+	    this.dbProvider.getDslContext(AccessSpec.readOnly())
+				.select()
+				.from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+                .where(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(ReservationStatus.ACTIVE.getCode()))
+				.fetch()
+				.forEach(r -> {
+					ReservationInfo info = new ReservationInfo();
+					info.setAddressId(r.getValue(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID));
+					info.setEndTime(r.getValue(Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME));
+					info.setReservationId(r.getValue(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID));
+					infos.add(info);
+				});
+		return infos;
+	}
+
+	@Override
     public ParkingCardCategory findParkingCardCategory(Byte cardType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_PARKING_CARD_CATEGORIES)

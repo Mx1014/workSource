@@ -21,6 +21,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.*;
 import com.everhomes.entity.EntityType;
@@ -46,6 +47,7 @@ import com.everhomes.promotion.PromotionService;
 import com.everhomes.pushmessage.*;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.recommend.DateTimeUtils;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
@@ -78,6 +80,7 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationOwnerCarSearcher;
 import com.everhomes.search.PMOwnerSearcher;
@@ -111,6 +114,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -131,6 +135,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
@@ -271,7 +276,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
-    
+
+	@Autowired
+	private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+   	@Autowired
+    private ScheduleProvider scheduleProvider;
+
     private String queueName = "property-mgr-push";
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -2579,6 +2590,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		PropAptStatisticDTO statistics = getStatistics(resultList);
 		
 		ListPropApartmentsResponse response = ConvertHelper.convert(statistics, ListPropApartmentsResponse.class);
+		for(PropFamilyDTO dto : resultList){
+			dto.setReservationInvolved((byte)0);
+			if(AddressLivingStatus.INACTIVE.equals(AddressLivingStatus.fromCode(dto.getLivingStatus()))){
+				if(propertyMgrProvider.isInvolvedWithReservation(dto.getAddressId())){
+					dto.setReservationInvolved((byte)1);
+				}
+			}
+		}
 		response.setResultList(resultList);
 		
 		return response;
@@ -6714,6 +6733,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public void createReservation(CreateReservationCommand cmd) {
 		PmResourceReservation resourceReservation = new PmResourceReservation();
+		List<PmResourceReservation> existReservations = propertyMgrProvider.findReservationByAddress(cmd.getAddressId(), ReservationStatus.ACTIVE);
+		for(PmResourceReservation r : existReservations){
+			if(DateUtil.hasIntersection(r.getStartTime(), r.getEndTime(), cmd.getStartTime(), cmd.getEndTime())){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "in this period of time, there had been" +
+						"valid reservations exist");
+			}
+		}
 		long nextId = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmResoucreReservations.class));
 		resourceReservation.setId(nextId);
 		resourceReservation.setCommunityId(cmd.getCommunityId());
@@ -6724,8 +6750,105 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		resourceReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
 		resourceReservation.setStatus((byte)2);
 		resourceReservation.setAddressId(cmd.getAddressId());
-		propertyMgrProvider.insertResourceReservation(resourceReservation);
+		this.dbProvider.execute((status) -> {
+			int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.INACTIVE);
+			if(effectedRow != 1){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
+						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
+			}
+			propertyMgrProvider.insertResourceReservation(resourceReservation);
+			return null;
+		});
 	}
+
+	@Override
+	public List<ListReservationsDTO> listReservations(ListReservationsCommand cmd) {
+        List<ListReservationsDTO> ret = new ArrayList<>();
+        List<Long> ids = new ArrayList<>();
+        if(cmd.getAddressId() != null){
+        	//find a specific reservation
+			ids.add(cmd.getAddressId());
+		}else{
+			ListPropApartmentsByKeywordCommand temp = new ListPropApartmentsByKeywordCommand();
+			temp.setNamespaceId(cmd.getNamespaceId());
+			temp.setCommunityId(cmd.getCommunityId());
+			temp.setBuildingName(cmd.getBuildingName());
+			temp.setOrganizationId(cmd.getOrganizationId());
+			//取得门牌列表
+			List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(temp).second();
+
+			//门牌转化成门牌id列表
+			List<Long> aptIdList = aptList.stream().map(a->a.getAddressId()).collect(Collectors.toList());
+
+			ids.addAll(aptIdList);
+		}
+		List<PmResourceReservation> list = propertyMgrProvider.listReservationsByAddresses(ids);
+        for(PmResourceReservation r : list){
+        	ListReservationsDTO dto = new ListReservationsDTO();
+        	dto.setAddressName(addressProvider.getAddressNameById(r.getAddressId()));
+        	dto.setCreateUname(userProvider.getNickNameByUid(r.getCreatorUid()));
+        	dto.setEndTime(r.getEndTime());
+        	dto.setStartTime(r.getStartTime());
+        	dto.setEnterpriseCustomerName(enterpriseCustomerProvider.getEnterpriseCustomerNameById(r.getEnterpriseCustomerId()));
+        	dto.setReservationId(r.getId());
+        	dto.setReservationStatus(r.getStatus());
+        	ret.add(dto);
+        }
+        return ret;
+	}
+
+	@Override
+	public void updateReservation(UpdateReservationCommand cmd) {
+    	propertyMgrProvider.updateReservation(cmd.getReservationId(), cmd.getStartTime(), cmd.getEndTime(), cmd.getEnterpriseCustomerId());
+	}
+
+	/**
+	 * delete Reservations and release address
+	 * @param cmd contains id of reservation
+	 */
+	@Override
+	public void deleteReservation(DeleteReservationCommand cmd) {
+		this.dbProvider.execute((status) -> {
+			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.DELTED);
+			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
+			return null;
+		});
+
+	}
+
+	@Override
+	public void cancelReservation(CancelReservationCommand cmd) {
+		this.dbProvider.execute((status) -> {
+			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.INACTIVE);
+			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
+			return null;
+		});
+	}
+
+	@Scheduled(cron = "0 0 */1 * * ?")
+	private void ReservationExpireCheck(){
+		List<ReservationInfo> list = propertyMgrProvider.listRunningReservations();
+		for(ReservationInfo info : list){
+			//if it will expire in the future 1 hour
+			try{
+				LocalDateTime expireTime = info.getEndTime().toLocalDateTime();
+				LocalDateTime timing = LocalDateTime.now(ZoneId.systemDefault()).plusHours(1l);
+				if(expireTime.isBefore(timing)){
+					Map<String,Object> param = new HashMap<String,Object>(){{
+						put("addressId", info.getAddressId());
+						put("reservationId", info.getReservationId());
+					}};
+				    scheduleProvider.scheduleSimpleJob("Address Reservation"+System.currentTimeMillis(),
+							"Address Reservation", Date.from(expireTime.atZone(ZoneId.systemDefault()).toInstant())
+							, ReservationJob.class, param);
+				}
+			}catch (Exception e){
+				LOGGER.error("failed to check reservation one time",e);
+			}
+		}
+
+	}
+
 
 	private void dealDefaultChargingItemProperty(DefaultChargingItem item, List<DefaultChargingItemPropertyDTO> apartments) {
 		List<DefaultChargingItemProperty> existItemProperties = defaultChargingItemProvider.findByItemId(item.getId());

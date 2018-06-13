@@ -2095,4 +2095,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
                 .execute();
     }
+
+    @Override
+    public String getEnterpriseCustomerNameById(Long enterpriseCustomerId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ENTERPRISE_CUSTOMERS.NAME)
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS).where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(enterpriseCustomerId))
+                .fetchOne(Tables.EH_ENTERPRISE_CUSTOMERS.NAME);
+    }
 }

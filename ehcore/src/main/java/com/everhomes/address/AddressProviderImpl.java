@@ -727,4 +727,19 @@ public class AddressProviderImpl implements AddressProvider {
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractBuildingMappings.class, contractBuildingMapping.getId());
 	}
+
+    @Override
+    public String getAddressNameById(Long addressId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ADDRESSES.ADDRESS)
+                .from(Tables.EH_ADDRESSES).where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .fetchOne(Tables.EH_ADDRESSES.ADDRESS);
+    }
+
+    @Override
+    public int changeAddressLivingStatus(Long addressId, AddressLivingStatus status) {
+        return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ADDRESSES)
+                .set(Tables.EH_ADDRESSES.LIVING_STATUS, status.getCode())
+                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .execute();
+    }
 }

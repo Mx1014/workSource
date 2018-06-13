@@ -7,6 +7,7 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
@@ -473,4 +474,12 @@ public interface PropertyMgrService {
     List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
 
     void createReservation(CreateReservationCommand cmd);
+
+    List<ListReservationsDTO> listReservations(ListReservationsCommand cmd);
+
+    void updateReservation(UpdateReservationCommand cmd);
+
+    void deleteReservation(DeleteReservationCommand cmd);
+
+    void cancelReservation(CancelReservationCommand cmd);
 }

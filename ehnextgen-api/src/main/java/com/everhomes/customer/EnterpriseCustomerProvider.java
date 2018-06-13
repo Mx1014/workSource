@@ -186,4 +186,5 @@ public interface EnterpriseCustomerProvider {
 
     void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId,Integer namespaceId);
 
+    String getEnterpriseCustomerNameById(Long enterpriseCustomerId);
 }
