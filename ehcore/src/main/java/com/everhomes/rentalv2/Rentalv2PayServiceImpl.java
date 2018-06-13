@@ -165,6 +165,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             dto.setResourceId(r.getSourceId());
             PayUserDTO payUserDTO = payUserDTOS.stream().filter(t -> t.getId().equals(r.getAccountId())).findFirst().get();
             dto.setAccount(convertAccount(payUserDTO));
+            response.getResourceAccounts().add(dto);
         });
         return response;
     }
