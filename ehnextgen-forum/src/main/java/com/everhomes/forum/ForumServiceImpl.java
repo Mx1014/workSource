@@ -108,6 +108,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -442,6 +443,7 @@ public class ForumServiceImpl implements ForumService {
 
     private Integer getSendMessage(List changeList, Map map, Activity activity){
         Integer code = 0;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         switch (changeList.size()) {
             case 0 : break;
             case 1 :
@@ -452,8 +454,8 @@ public class ForumServiceImpl implements ForumService {
                     code = ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT;
                 }
                 if ("time".equals(type)) {
-                    map.put("startTime", activity.getStartTime());
-                    map.put("endTime", activity.getEndTime());
+                    map.put("startTime", sdf.format(activity.getStartTime()));
+                    map.put("endTime", sdf.format(activity.getEndTime()));
                     code =  ActivityNotificationTemplateCode.ACTIVITY_CHANGE_TIME;
                 }
                 if ("address".equals(type)) {
@@ -467,8 +469,8 @@ public class ForumServiceImpl implements ForumService {
                 String type2 = changeList.get(1).toString();
                 if ("subject".equals(type1) && "time".equals(type2)) {
                     map.put("newPostName", activity.getSubject());
-                    map.put("startTime", activity.getStartTime());
-                    map.put("endTime", activity.getEndTime());
+                    map.put("startTime", sdf.format(activity.getStartTime()));
+                    map.put("endTime", sdf.format(activity.getEndTime()));
                     code = ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT_TIME;
                 }
                 if ("subject".equals(type1) && "address".equals(type2)) {
@@ -477,8 +479,8 @@ public class ForumServiceImpl implements ForumService {
                     code =  ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT_ADDRESS;
                 }
                 if ("time".equals(type1) && "address".equals(type2)) {
-                    map.put("startTime", activity.getStartTime());
-                    map.put("endTime", activity.getEndTime());
+                    map.put("startTime", sdf.format(activity.getStartTime()));
+                    map.put("endTime", sdf.format(activity.getEndTime()));
                     map.put("address", activity.getLocation());
                     code =  ActivityNotificationTemplateCode.ACTIVITY_CHANGE_TIME_ADDRESS;
                 }
@@ -486,8 +488,8 @@ public class ForumServiceImpl implements ForumService {
             case 3 :
             {
                 map.put("newPostName", activity.getSubject());
-                map.put("startTime", activity.getStartTime());
-                map.put("endTime", activity.getEndTime());
+                map.put("startTime", sdf.format(activity.getStartTime()));
+                map.put("endTime", sdf.format(activity.getEndTime()));
                 map.put("address", activity.getLocation());
                 code = ActivityNotificationTemplateCode.ACTIVITY_CHANGE_SUBJECT_TIME_ADDRESS;
             };break;
