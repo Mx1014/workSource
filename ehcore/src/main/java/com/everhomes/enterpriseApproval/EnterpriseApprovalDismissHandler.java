@@ -50,7 +50,7 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
         Long userId = UserContext.currentUserId();
 
         for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
-            if(GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.EMPLOY_APPLICATION)){
+            if(GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.DISMISS_APPLICATION)){
                 ComponentDismissApplicationValue val = new ComponentDismissApplicationValue();
                 OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOwnerId());
                 if(member != null){
