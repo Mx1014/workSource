@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.parking.handler;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.constants.ErrorCodes;
@@ -221,7 +222,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         params.put("ploid",getParkingPloid());
         params.put("realname",request.getPlateOwnerName());
 //        params.put("tel",request.);
-        params.put("sex",order.getPlateNumber());
+//        params.put("sex",order.getPlateNumber());
         params.put("carnumber",request.getPlateNumber());
         params.put("itemtype",request.getCardTypeId());
         params.put("startdate",order.getStartPeriod().getTime());
@@ -262,7 +263,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
 
         order.setErrorDescriptionJson(beeResponse.toString());
         order.setErrorDescription(beeResponse.getMessage());
-        return isSuccess(beeResponse);
+        return isChargeSuccess(beeResponse);
     }
 
 
@@ -290,7 +291,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         //将充值信息存入订单
         order.setErrorDescriptionJson(beeResponse.toString());
         order.setErrorDescription(beeResponse.getMessage());
-        return isSuccess(beeResponse);
+        return isChargeSuccess(beeResponse);
     }
 
     @Override
@@ -334,20 +335,25 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         List<TempCardInfo> tempCardInfos= JSONObject.parseObject(response.getOutList().toString(), new TypeReference<List<TempCardInfo>>(){});
         if(tempCardInfos!=null && tempCardInfos.size()>0) {
             TempCardInfo tempCardInfo = tempCardInfos.get(0);
-            if(tempCardInfo==null || !tempCardInfo.isNormalState()) {
+            if(tempCardInfo==null || !tempCardInfo.isNormalState() || tempCardInfo.isNotParking()) {
                 return dto;
             }
+            BigDecimal price = new BigDecimal(tempCardInfo.getReceivableprice());
+            if(price.compareTo(new BigDecimal(0))==0){
+                return dto;
+            }
+            dto.setPrice(price);
             dto.setPlateNumber(tempCardInfo.getCarnumber());
             dto.setEntryTime(Long.valueOf(tempCardInfo.getIntime()));
             long now = System.currentTimeMillis();
             dto.setPayTime(now);
             dto.setParkingTime(Integer.valueOf(Long.valueOf(tempCardInfo.getParktime())/60000+""));
 //            dto.setDelayTime(15);
-            dto.setPrice(new BigDecimal(tempCardInfo.getReceivableprice()));
             dto.setOriginalPrice(new BigDecimal(tempCardInfo.getOrderamount()));
             //feestate	缴费状态	int	0=无数据;2=免缴费;3=已缴费未超时;4=已缴费需续费;5=需要缴费
             //这里需要干嘛，缴费完成，回调的时候，读取这个token，向停车场缴费需要这个参数。参考 payTempCardFee()
             dto.setOrderToken(tempCardInfo.getOrderid());
+            dto.setDelayTime(configProvider.getIntValue("parking.bee.delayTime",15));//临时车缴费成功了之后，有多长预留的出场时间？一般15到30分，可以在车场配置的
         }
         return dto;
     }
@@ -421,6 +427,22 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
 
     private boolean isSuccess(BeeResponse response){
         return response!=null && response.isSuccess() && response.getOutList()!=null;
+    }
+
+    /**
+     * 是否充值成功
+     * @param response
+     * @return
+     */
+    private boolean isChargeSuccess(BeeResponse response){
+        if(isSuccess(response)){
+            JSONArray outlist = JSONObject.parseArray(response.getOutList().toString());
+            if(outlist!=null && outlist.size()>0){
+                JSONObject result = JSONObject.parseObject(outlist.getString(0));
+                return "1".equalsIgnoreCase(result.getString("state"));
+            }
+        }
+        return false;
     }
 
     protected abstract void processMapParams(TreeMap<String, Object> tmap);

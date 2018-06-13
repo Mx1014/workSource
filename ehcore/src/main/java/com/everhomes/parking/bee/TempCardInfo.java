@@ -165,4 +165,8 @@ public class TempCardInfo {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+    public boolean isNotParking() {
+        return "0".equals(isparking);////是否有停车记录； 1 有， 0 没有
+    }
 }
