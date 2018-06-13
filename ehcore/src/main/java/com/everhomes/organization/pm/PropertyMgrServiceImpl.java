@@ -5872,7 +5872,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                         dto.setAddress(address.getAddress());
                         owners.add(dto);
                     });
-                    owners.remove(r);
+//                    owners.remove(r);
+                }else{
+                    owners.add(ConvertHelper.convert(r, OrganizationOwnerDTO.class));
                 }
             });
 
