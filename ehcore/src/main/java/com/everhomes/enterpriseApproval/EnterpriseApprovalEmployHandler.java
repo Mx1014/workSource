@@ -58,7 +58,7 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
                     val.setApplierJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(member.getDetailId())));
                     val.setCheckInTime(memberDetail.getCheckInTime().toString());
                 }
-                fieldDTO.setFieldValue(StringHelper.toJsonString(val));
+                fieldDTO.setFieldExtra(StringHelper.toJsonString(val));
             }
         }
     }
