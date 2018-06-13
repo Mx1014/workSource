@@ -4274,7 +4274,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return log;
 		}
 		//检查项目编号,一个域空间下只存在一个项目编号
-		if (StringUtils.isNotEmpty(data.getCommunityNumber())) {
+		/*if (StringUtils.isNotEmpty(data.getCommunityNumber())) {
 			Community community = communityProvider.findCommunityByNumber(data.getCommunityNumber(), namespaceId);
 			if(community != null) {
 				log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_NUMBER_EXIST);
@@ -4282,8 +4282,7 @@ public class CommunityServiceImpl implements CommunityService {
 				log.setErrorLog("CommunityNumber exist ");
 				return log;
 			}
-		}
-		
+		}*/
 		if (StringUtils.isEmpty(data.getAddress()) && (data.getAddress()).length()>50) {
 			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_LENGTH);
 			log.setData(data);
