@@ -854,8 +854,13 @@ public class ActivityServiceImpl implements ActivityService {
         Long payerId = UserContext.currentUserId();
         PayUserDTO payUserDTO = checkAndCreatePaymentUser(payerId,UserContext.getCurrentNamespaceId());
         createOrderCommand.setPayerUserId(payUserDTO.getId());
-
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activity.getCategoryId(),activity.getNamespaceId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(activity.getCategoryId(), activity.getNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(),activity.getNamespaceId());
         if (activityBizPayee == null) {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
                     "no payee.");
@@ -6256,7 +6261,13 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "CategoryId cannot be null.");
         }
-	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
         GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
         if (activityBizPayee != null) {
             activityPayeeDTO.setAccountId(activityBizPayee.getBizPayeeId());
@@ -6313,12 +6324,18 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "payeeId cannot be null.");
         }
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
         if (activityBizPayee == null) {
             ActivityBizPayee persist = new ActivityBizPayee();
             persist.setNamespaceId(UserContext.getCurrentNamespaceId());
             persist.setBizPayeeType(OwnerType.ORGANIZATION.getCode());
-            persist.setOwnerId(cmd.getCategoryId());
+            persist.setOwnerId(activityCategories.getId());
             persist.setBizPayeeId(cmd.getPayeeId());
             this.activityProvider.CreateActivityPayee(persist);
         }else {
@@ -6339,7 +6356,14 @@ public class ActivityServiceImpl implements ActivityService {
         CheckPayeeIsUsefulResponse checkPayeeIsUsefulResponse = new CheckPayeeIsUsefulResponse();
         checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.NULL.getCode());
 
-        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
         List<Long> idList = new ArrayList<>();
         idList.add(activityBizPayee.getBizPayeeId());
         List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);
