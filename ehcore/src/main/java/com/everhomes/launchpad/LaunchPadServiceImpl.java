@@ -2867,11 +2867,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(config.getModuleId(), config.getAppId(), serviceModuleApp.getName(),instanceConfig);
 				response.setRouterPath(routerInfo.getPath());
 				response.setRouterQuery(routerInfo.getQuery());
-				response.setModuleId(routerInfo.getModuleId());
 				response.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 			}else {
 				response.setClientHandlerType(ClientHandlerType.OUTSIDE_URL.getCode());
 			}
+
+			response.setModuleId(config.getModuleId());
 
 		}
 

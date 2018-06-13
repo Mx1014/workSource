@@ -1288,10 +1288,17 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		SceneTokenDTO sceneTokenDTO = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
-		Integer namespaceId = sceneTokenDTO.getNamespaceId();
+		//SceneTokenDTO sceneTokenDTO = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+		//Integer namespaceId = sceneTokenDTO.getNamespaceId();
 
-		Long communityId = userService.getCommunityIdBySceneToken(sceneTokenDTO);
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		//Long communityId = userService.getCommunityIdBySceneToken(sceneTokenDTO);
+
+		Long communityId = null;
+		if(UserContext.current().getAppContext() != null){
+			communityId = UserContext.current().getAppContext().getCommunityId();
+		}
 
 		return ConvertHelper.convert(listNews(userId, namespaceId, communityId, cmd.getCategoryId(), cmd.getPageAnchor(), cmd.getPageSize(), NewsStatus.ACTIVE.getCode()),
 				ListNewsBySceneResponse.class);
