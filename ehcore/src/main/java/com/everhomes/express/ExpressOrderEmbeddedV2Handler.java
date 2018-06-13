@@ -1,7 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
-import com.everhomes.order.PayService;
+//import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
@@ -9,14 +9,17 @@ import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.EXPRESS_ORDER_CODE )
 public class ExpressOrderEmbeddedV2Handler implements PaymentCallBackHandler {
 
 	@Autowired
 	private ExpressService expressService;
 
-	@Autowired
-	private PayService payService;
+//	@Autowired
+//	private PayService payService;
 
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
@@ -41,7 +44,7 @@ public class ExpressOrderEmbeddedV2Handler implements PaymentCallBackHandler {
 	public PayCallbackCommand changeCmd(SrvOrderPaymentNotificationCommand from){
 		PayCallbackCommand cmd = new PayCallbackCommand();
 		cmd.setOrderNo(String.valueOf(from.getOrderId()));
-		cmd.setPayAmount(payService.changePayAmount(from.getAmount()).toString());
+		cmd.setPayAmount(new BigDecimal(from.getAmount()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP).toString());
 		return cmd;
 	}
 }

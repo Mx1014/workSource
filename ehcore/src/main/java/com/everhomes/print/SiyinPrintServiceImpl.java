@@ -60,7 +60,7 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
+//import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -144,8 +144,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Autowired
 	private SiyinJobValidateServiceImpl siyinJobValidateServiceImpl;
 
-	@Autowired
-	private PayService payService;
+//	@Autowired
+//	private PayService payService;
 	
 	@Autowired
 	private SiyinUserPrinterMappingProvider siyinUserPrinterMappingProvider;

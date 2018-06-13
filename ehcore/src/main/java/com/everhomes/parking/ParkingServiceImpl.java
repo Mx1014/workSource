@@ -138,8 +138,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private AppProvider appProvider;
 	@Autowired
 	private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
-	@Autowired
-	private PayService payService;
+//	@Autowired
+//	private PayService payService;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
 	@Autowired
