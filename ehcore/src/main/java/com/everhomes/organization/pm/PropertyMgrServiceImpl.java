@@ -5864,7 +5864,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (ownerList != null && ownerList.size() > 0) {
             List<OrganizationOwnerDTO> ownerDTOs = ownerList.stream().map(this::convertOwnerToDTO).collect(Collectors.toList());
             List<OrganizationOwnerDTO> owners = new ArrayList<>();
-            ownerDTOs.stream().map((r) -> {
+            ownerDTOs.forEach((r) -> {
                 if (r.getAddresses() != null && r.getAddresses().size() > 0) {
                     r.getAddresses().forEach((address) -> {
                         OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
@@ -5872,16 +5872,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                         dto.setAddress(address.getAddress());
                         owners.add(dto);
                     });
+//                    owners.remove(r);
+                }else{
+                    owners.add(ConvertHelper.convert(r, OrganizationOwnerDTO.class));
                 }
-                return null;
-            }).collect(Collectors.toList());
+            });
 
             String fileName = String.format("客户信息_%s_%s", community.getName(), DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
             String[] propertyNames = {"contactName", "orgOwnerType", "contactToken", "gender","building","address", "livingStatus", "birthdayDate", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
             String[] titleNames = {"姓名", "客户类型", "手机号码", "性别","楼栋","门牌", "是否在户", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
-            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30};
+            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30, 30, 40, 40};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, owners);
         } else {
             // LOGGER.error("Organization owner are not exist.");
