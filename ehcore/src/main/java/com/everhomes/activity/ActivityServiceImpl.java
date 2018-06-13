@@ -37,7 +37,6 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
 import com.everhomes.organization.*;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
@@ -255,9 +254,6 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Autowired
 	private RosterPayTimeoutService rosterPayTimeoutService;
-
-	@Autowired
-	private PayService payService;
 
 	@Autowired
     private com.everhomes.paySDK.api.PayService payServiceV2;
@@ -752,62 +748,62 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		return dto;
 	}
-
-	@Override
-	public PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd) {
-
-
-		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-		if(roster == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-					"no roster.");
-		}
-		Activity activity = activityProvider.findActivityById(roster.getActivityId());
-		if(activity == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-					"no activity.");
-		}
-
-		PreOrderCommand preOrderCommand = new PreOrderCommand();
-
-		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
-		preOrderCommand.setOrderId(roster.getOrderNo());
-		Long amount = payService.changePayAmount(activity.getChargePrice());
-		preOrderCommand.setAmount(amount);
-
-		preOrderCommand.setPayerId(roster.getUid());
-		preOrderCommand.setNamespaceId(activity.getNamespaceId());
-
-		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
-		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
-		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
-
-
-		preOrderCommand.setExpiration(expiredTime);
-
-
-		preOrderCommand.setClientAppName(cmd.getClientAppName());
-
-		//微信公众号支付，重新设置ClientName，设置支付方式和参数
-		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
-
-			if(preOrderCommand.getClientAppName() == null){
-				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				preOrderCommand.setClientAppName("wechat_" + namespaceId);
-			}
-			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
-			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-			paymentParamsDTO.setPayType("no_credit");
-			User user = UserContext.current().getUser();
-			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
-		}
-
-
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-
-		return callBack;
-	}
+    //更换使用新的支付V3
+//	@Override
+//	public PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd) {
+//
+//
+//		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+//		if(roster == null){
+//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+//					"no roster.");
+//		}
+//		Activity activity = activityProvider.findActivityById(roster.getActivityId());
+//		if(activity == null){
+//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+//					"no activity.");
+//		}
+//
+//		PreOrderCommand preOrderCommand = new PreOrderCommand();
+//
+//		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+//		preOrderCommand.setOrderId(roster.getOrderNo());
+//		Long amount = payService.changePayAmount(activity.getChargePrice());
+//		preOrderCommand.setAmount(amount);
+//
+//		preOrderCommand.setPayerId(roster.getUid());
+//		preOrderCommand.setNamespaceId(activity.getNamespaceId());
+//
+//		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+//		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+//		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+//		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+//
+//
+//		preOrderCommand.setExpiration(expiredTime);
+//
+//
+//		preOrderCommand.setClientAppName(cmd.getClientAppName());
+//
+//		//微信公众号支付，重新设置ClientName，设置支付方式和参数
+//		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
+//
+//			if(preOrderCommand.getClientAppName() == null){
+//				Integer namespaceId = UserContext.getCurrentNamespaceId();
+//				preOrderCommand.setClientAppName("wechat_" + namespaceId);
+//			}
+//			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+//			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//			paymentParamsDTO.setPayType("no_credit");
+//			User user = UserContext.current().getUser();
+//			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+//		}
+//
+//
+//		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+//
+//		return callBack;
+//	}
 
     @Override
     public PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd) {
@@ -2127,12 +2123,10 @@ public class ActivityServiceImpl implements ActivityService {
 		//支付时是不同的版本，此处也要按不同的版本做处理，当前有版本1、2，默认是老版本1 edit by yanjun 20170919
 		if(ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V1){
 			refundV1(activity, roster, userId, refoundOrderNo);
-		}else if (ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V2){
-			refundV2(activity, roster, userId, refoundOrderNo);
 		}else {
-		    Long orderId = refundV3(activity, roster, userId);
-		    if (orderId != null) {
-		        roster.setRefundPayOrderId(orderId);
+            Long orderId = refundV3(activity, roster, userId);
+            if (orderId != null) {
+                roster.setRefundPayOrderId(orderId);
             }
         }
 
@@ -2188,23 +2182,23 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 
 	}
-
-	private void refundV2(Activity activity, ActivityRoster roster, Long userId, Long refoundOrderNo){
-		Long amount = payService.changePayAmount(roster.getPayAmount());
-		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode(), roster.getOrderNo(), refoundOrderNo, amount);
-
-		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-			LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
-					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
-		} else{
-			LOGGER.error("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
-					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFUND_ERROR,
-					"bill  refound error");
-		}
-
-	}
+    //更换使用新的退款V3
+//	private void refundV2(Activity activity, ActivityRoster roster, Long userId, Long refoundOrderNo){
+//		Long amount = payService.changePayAmount(roster.getPayAmount());
+//		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode(), roster.getOrderNo(), refoundOrderNo, amount);
+//
+//		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+//			LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+//					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+//		} else{
+//			LOGGER.error("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+//					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+//			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+//					RentalServiceErrorCode.ERROR_REFUND_ERROR,
+//					"bill  refound error");
+//		}
+//
+//	}
     private Long refundV3(Activity activity, ActivityRoster roster, Long userId){
         CreateOrderCommand createOrderCommand = new CreateOrderCommand();
         BigDecimal amount = activity.getChargePrice();
