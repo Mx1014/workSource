@@ -6,6 +6,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -256,7 +257,7 @@ public class ActivityServiceImpl implements ActivityService {
 	private RosterPayTimeoutService rosterPayTimeoutService;
 
 	@Autowired
-    private com.everhomes.paySDK.api.PayService payServiceV2;
+    private PayService payServiceV2;
 
     @Value("${server.contextPath:}")
     private String contextPath;
