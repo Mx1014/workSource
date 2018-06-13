@@ -520,6 +520,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
         if (members != null && members.size()>0) {
             dto.setTrackingPhone(members.get(0).getContactToken());
+            dto.setTrackingName(dto.getTrackingName() + "(" + dto.getTrackingPhone() + ")");
         }
         if (customer.getLastTrackingTime() != null) {
             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
