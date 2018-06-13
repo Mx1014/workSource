@@ -114,5 +114,9 @@ public interface ArchivesService {
 
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
+    boolean checkDismiss(Long userId, Long orgId);
+
+    boolean checkDismiss(OrganizationMemberDetails member);
+
 //    void syncArchivesDismissStatus();
 }

@@ -2853,4 +2853,32 @@ public class ArchivesServiceImpl implements ArchivesService, ApplicationListener
                 MessagingConstants.MSG_FLAG_STORED.getCode()
         );
     }
+
+    /**
+     * 校验是否离职
+     * created by wuhan
+     */
+    @Override
+    public boolean checkDismiss(Long userId, Long orgId) {
+        OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, orgId);
+        return checkDismiss(member);
+
+    }
+
+    /**
+     * 校验是否离职
+     * created by wuhan
+     */
+    @Override
+    public boolean checkDismiss(OrganizationMemberDetails member) {
+//        if (null != member.getDismissTime()) {
+//            if (DateHelper.currentGMTTime().after(member.getDismissTime())) {
+//                return true;
+//            }
+//        }
+        if (EmployeeStatus.fromCode(member.getEmployeeStatus()) == EmployeeStatus.DISMISSAL) {
+            return true;
+        }
+        return false;
+    }
 }

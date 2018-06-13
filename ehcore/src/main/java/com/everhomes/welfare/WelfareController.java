@@ -43,10 +43,9 @@ public class WelfareController extends ControllerBase {
 	 * <b>URL: /welfare/sendWelfare</b>
 	 */
 	@RequestMapping("sendWelfare")
-	@RestReturn(String.class)
+	@RestReturn(SendWelfaresResponse.class)
 	public RestResponse sendWelfare(SendWelfareCommand cmd){
-		welfareService.sendWelfare(cmd);
-		return new RestResponse();
+		return new RestResponse(welfareService.sendWelfare(cmd));
 	}
 
 	/**

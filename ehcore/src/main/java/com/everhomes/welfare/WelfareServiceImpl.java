@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -16,6 +17,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.socialSecurity.NormalFlag;
 import com.everhomes.rest.welfare.*;
 import com.everhomes.salary.SalaryService;
 import com.everhomes.user.User;
@@ -33,6 +35,8 @@ import org.springframework.stereotype.Component;
 public class WelfareServiceImpl implements WelfareService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WelfareServiceImpl.class);
+    @Autowired
+    private ArchivesService archivesService;
     @Autowired
     private WelfareProvider welfareProvider;
     @Autowired
@@ -149,14 +153,15 @@ public class WelfareServiceImpl implements WelfareService {
     }
 
     @Override
-    public void sendWelfare(SendWelfareCommand cmd) {
+    public SendWelfaresResponse sendWelfare(SendWelfareCommand cmd) {
         String lockName = CoordinationLocks.WELFARE_EDIT_LOCK.getCode();
         if (cmd.getWelfare().getId() != null) {
             lockName = lockName + cmd.getWelfare().getOwnerId() + cmd.getWelfare().getId();
         } else {
             lockName = lockName + cmd.getWelfare().getOwnerId();
         }
-        this.coordinationProvider.getNamedLock(lockName).enter(() -> {
+        return this.coordinationProvider.getNamedLock(lockName).enter(() -> {
+            SendWelfaresResponse response = new SendWelfaresResponse();
             if (cmd.getWelfare().getId() != null) {
                 Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfare().getId());
                 if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
@@ -166,6 +171,24 @@ public class WelfareServiceImpl implements WelfareService {
             }
             cmd.getWelfare().setStatus(WelfareStatus.SENDED.getCode());
             Welfare welfare = saveWelfare(cmd.getWelfare());
+            response.setCheckStatus(NormalFlag.NO.getCode());
+            response.setDismissReceivers(new ArrayList<>());
+            if (archivesService.checkDismiss(cmd.getWelfare().getSenderUid(), cmd.getWelfare().getOwnerId())) {
+                response.setCheckStatus(NormalFlag.YES.getCode());
+                response.setDismissSenderDetailId(cmd.getWelfare().getSenderDetailId());
+                response.setDismissSenderUid(cmd.getWelfare().getSenderUid());
+            }
+                //校验所有人是否离职
+            for(WelfareReceiverDTO receiverDTO :cmd.getWelfare().getReceivers()){
+                if(archivesService.checkDismiss(receiverDTO.getReceiverUid(), cmd.getWelfare().getOwnerId())){
+                    response.setCheckStatus(NormalFlag.YES.getCode());
+                    response.getDismissReceivers().add(receiverDTO);
+                }
+
+            }
+            if (NormalFlag.YES == NormalFlag.fromCode(response.getCheckStatus())) {
+                return response;
+            }
             //todo 转账
 
             //发消息
@@ -173,8 +196,9 @@ public class WelfareServiceImpl implements WelfareService {
                 sendPayslipMessage(welfare.getOperatorName(), welfare.getSubject(), welfare.getId(), r.getReceiverUid());
                 return r;
             });
-            return null;
-        });
+            return response;
+        }).first();
+
     }
 
     private void sendPayslipMessage(String senderName, String subject, Long welfareId, Long receiverId) {

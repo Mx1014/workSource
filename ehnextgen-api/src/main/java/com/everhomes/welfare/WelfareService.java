@@ -12,7 +12,7 @@ public interface WelfareService {
 	void draftWelfare(DraftWelfareCommand cmd);
 
 
-	void sendWelfare(SendWelfareCommand cmd);
+	SendWelfaresResponse sendWelfare(SendWelfareCommand cmd);
 
 
 	GetUserWelfareResponse getUserWelfare(GetUserWelfareCommand cmd);
