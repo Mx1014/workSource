@@ -41,6 +41,7 @@ public class DecorationRequestDTO {
     private Byte status;
     private Byte processorType;
     private Byte cancelFlag;
+    private String cancelReason;
 
     private String decoratorName;
     private String decoratorPhone;
@@ -203,5 +204,13 @@ public class DecorationRequestDTO {
 
     public void setCancelFlag(Byte cancelFlag) {
         this.cancelFlag = cancelFlag;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(String cancelReason) {
+        this.cancelReason = cancelReason;
     }
 }

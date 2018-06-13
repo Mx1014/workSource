@@ -400,6 +400,8 @@ public class DecorationServiceImpl implements  DecorationService {
         String address = cmd.getBuildingName();
         if (cmd.getDoorPlate() != null)
             address += "&"+cmd.getDoorPlate();
+        if (cmd.getCancelFlag() == null)
+            cmd.setCancelFlag((byte)0);
         List<DecorationRequest> requests =  this.decorationProvider.queryDecorationRequests(UserContext.getCurrentNamespaceId(),cmd.getCommunityId(),cmd.getStartTime(),
                 cmd.getEndTime(),address,cmd.getStatus(),cmd.getKeyword(),cmd.getCancelFlag(),pageSize+1,locator);
         if (requests == null || requests.size() == 0)
@@ -523,6 +525,9 @@ public class DecorationServiceImpl implements  DecorationService {
         dto.setAddress(convertAddress(request.getAddress()));
         dto.setStartTime(request.getStartTime().getTime());
         dto.setEndTime(request.getEndTime().getTime());
+        dto.setStatus(request.getStatus());
+        dto.setCancelFlag(request.getCancelFlag());
+        dto.setCancelReason(request.getCancelReason());
 
         dto.setDecoratorName(request.getDecoratorName());
         dto.setDecoratorPhone(request.getDecoratorPhone());

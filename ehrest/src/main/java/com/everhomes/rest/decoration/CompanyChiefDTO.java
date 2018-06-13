@@ -16,7 +16,7 @@ public class CompanyChiefDTO {
     private Long uid;
     private Long companyId;
     private String name;
-    private Long phone;
+    private String phone;
 
     public Long getId() {
         return id;
@@ -50,11 +50,11 @@ public class CompanyChiefDTO {
         this.name = name;
     }
 
-    public Long getPhone() {
+    public String getPhone() {
         return phone;
     }
 
-    public void setPhone(Long phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 }
