@@ -182,5 +182,5 @@ public interface AssetService {
 
     void noticeTrigger(Integer namespaceId);
     //add by tangcen
-	void calculateRentForContract();
+	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
 }

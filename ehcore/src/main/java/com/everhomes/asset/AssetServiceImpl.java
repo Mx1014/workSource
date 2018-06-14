@@ -4544,9 +4544,8 @@ public class AssetServiceImpl implements AssetService {
 	
 	//issue 31594,计算天企汇历史合同的租赁总额字段
 	@Override
-	public void calculateRentForContract(){
-		Integer namespaceId = 999944;
-		List<Contract> contractList = contractProvider.listContractByNamespaceId(namespaceId);
+	public void calculateRentForContract(CalculateRentCommand cmd){
+		List<Contract> contractList = contractProvider.listContractByNamespaceId(cmd.getNamespaceId());
 		if (contractList!=null && contractList.size()>0) {
 			for (Contract contract : contractList) {
 				if (contract.getRent()==null) {
