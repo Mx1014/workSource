@@ -1283,7 +1283,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if(livingStatus != null){
             query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
         }
-        query.fetch().map(r->{
+        query
+				.fetch().map(r->{
 			CommunityAddressMapping mapping = ConvertHelper.convert(r, CommunityAddressMapping.class);
 			map.put(mapping.getAddressId(), mapping);
 			return null;
@@ -2108,9 +2109,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public Long changeReservationStatus(Long reservationId, ReservationStatus status) {
+	public Long changeReservationStatus(Long reservationId, Byte status) {
 		this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_PM_RESOUCRE_RESERVATIONS)
-				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS, status.getCode())
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS, status)
 				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
 				.execute();
 		return	this.dbProvider.getDslContext(AccessSpec.readWrite()).select(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID)
@@ -2123,7 +2124,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	public List<ReservationInfo> listRunningReservations() {
 	    List<ReservationInfo> infos = new ArrayList<>();
 	    this.dbProvider.getDslContext(AccessSpec.readOnly())
-				.select()
+				.select(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID, Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME, Tables.EH_PM_RESOUCRE_RESERVATIONS.ID)
 				.from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
                 .where(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(ReservationStatus.ACTIVE.getCode()))
 				.fetch()
@@ -2137,7 +2138,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return infos;
 	}
 
-	@Override
+    @Override
+    public Byte getReservationPreviousLivingStatusById(Long reservationId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .select(Tables.EH_PM_RESOUCRE_RESERVATIONS.PREVIOUS_LIVING_STATUS)
+                .from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+                .where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
+                .fetchOne(Tables.EH_PM_RESOUCRE_RESERVATIONS.PREVIOUS_LIVING_STATUS);
+    }
+
+    @Override
     public ParkingCardCategory findParkingCardCategory(Byte cardType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_PARKING_CARD_CATEGORIES)

@@ -747,4 +747,23 @@ public class AddressProviderImpl implements AddressProvider {
                 .execute();
     }
 
+    @Override
+    public Byte getAddressLivingStatus(Long addressId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
+                .from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
+        if(aByte == null){
+            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
+                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
+        }
+        if(aByte == null){
+            aByte = 1;
+        }
+        return aByte;
+    }
+
 }

@@ -512,7 +512,9 @@ public interface PropertyMgrProvider {
 
 	void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime,Long enterpriseCustomerId);
 
-	Long changeReservationStatus(Long reservationId, ReservationStatus delted);
+	Long changeReservationStatus(Long reservationId, Byte newStatus);
 
 	List<ReservationInfo> listRunningReservations();
+
+	Byte getReservationPreviousLivingStatusById(Long reservationId);
 }

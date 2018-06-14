@@ -84,4 +84,5 @@ public interface AddressProvider {
 
     int changeAddressLivingStatus(Long addressId, AddressLivingStatus inactive);
 
+    Byte getAddressLivingStatus(Long addressId);
 }

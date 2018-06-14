@@ -104,6 +104,7 @@ import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import net.greghaines.jesque.Job;
+import net.sf.cglib.core.Local;
 import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -129,6 +130,7 @@ import javax.validation.Validator;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -2578,8 +2580,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), aptIdList);
 		
 		//处理小区地址关联表
-//		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
-		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList, cmd.getLivingStatus());
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+//		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList, cmd.getLivingStatus());
 
 		//判断是否欠费
 		Map<Long, Byte> billOwedMap = mapBillOwedFlag(aptIdList);
@@ -2591,7 +2593,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		PropAptStatisticDTO statistics = getStatistics(resultList);
 		
 		ListPropApartmentsResponse response = ConvertHelper.convert(statistics, ListPropApartmentsResponse.class);
+		List<PropFamilyDTO>  filterEdResult = new ArrayList<>();
 		for(PropFamilyDTO dto : resultList){
+		    filterEdResult.add(dto);
+			if(cmd.getLivingStatus() != null){
+                Byte livingStatus = cmd.getLivingStatus();
+                if(dto.getLivingStatus() != livingStatus){
+                    filterEdResult.remove(dto);
+                    continue;
+                }
+			}
 			dto.setReservationInvolved((byte)0);
 			if(AddressLivingStatus.INACTIVE.equals(AddressLivingStatus.fromCode(dto.getLivingStatus()))){
 				if(propertyMgrProvider.isInvolvedWithReservation(dto.getAddressId())){
@@ -2599,8 +2610,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				}
 			}
 		}
-		response.setResultList(resultList);
-		
+//		response.setResultList(resultList);
+		response.setResultList(filterEdResult);
+
 		return response;
 	}
 	
@@ -6735,8 +6747,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	public void createReservation(CreateReservationCommand cmd) {
 		PmResourceReservation resourceReservation = new PmResourceReservation();
 		List<PmResourceReservation> existReservations = propertyMgrProvider.findReservationByAddress(cmd.getAddressId(), ReservationStatus.ACTIVE);
+		Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
+		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
 		for(PmResourceReservation r : existReservations){
-			if(DateUtil.hasIntersection(r.getStartTime(), r.getEndTime(), cmd.getStartTime(), cmd.getEndTime())){
+			if(DateUtil.hasIntersection(r.getStartTime(), r.getEndTime(), start, end)){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "in this period of time, there had been" +
 						"valid reservations exist");
 			}
@@ -6746,19 +6760,31 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		resourceReservation.setCommunityId(cmd.getCommunityId());
 		resourceReservation.setNamespaceId(cmd.getNamespaceId());
 		resourceReservation.setCreatorUid(UserContext.currentUserId());
-		resourceReservation.setEndTime(cmd.getEndTime());
-		resourceReservation.setStartTime(cmd.getStartTime());
+		resourceReservation.setEndTime(start);
+		resourceReservation.setStartTime(end);
 		resourceReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
 		resourceReservation.setStatus((byte)2);
 		resourceReservation.setAddressId(cmd.getAddressId());
+        Byte livingStatus = addressProvider.getAddressLivingStatus(cmd.getAddressId());
+        resourceReservation.setPreviousLivingStatus(livingStatus);
 		this.dbProvider.execute((status) -> {
+
 			// living status的完整枚举记录在前端，后端和数据库没有
-			int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.INACTIVE);
+			int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED);
 			if(effectedRow != 1){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
 						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
 			}
 			propertyMgrProvider.insertResourceReservation(resourceReservation);
+            // 未来1小时内结束的开启一个任务
+            if(end.toLocalDateTime().minusHours(1l).isBefore(LocalDateTime.now()) || end.toLocalDateTime().minusHours(1l).equals(LocalDateTime.now())){
+                HashMap<String, Object> param = new HashMap<>();
+                param.put("addressId", cmd.getAddressId());
+                param.put("reservationId", nextId);
+                scheduleProvider.scheduleSimpleJob("Address Reservation"+System.currentTimeMillis(),
+                        "Address Reservation", Date.from(end.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant())
+                        , ReservationJob.class, param);
+            }
 			return null;
 		});
 	}
@@ -6813,8 +6839,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public void deleteReservation(DeleteReservationCommand cmd) {
 		this.dbProvider.execute((status) -> {
-			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.DELTED);
-			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
+			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.DELTED.getCode());
+//			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
 			return null;
 		});
 
@@ -6822,9 +6848,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public void cancelReservation(CancelReservationCommand cmd) {
+	    Byte previousStatus = propertyMgrProvider.getReservationPreviousLivingStatusById(cmd.getReservationId());
 		this.dbProvider.execute((status) -> {
-			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.INACTIVE);
-			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
+			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), previousStatus);
+			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.INACTIVE);
 			return null;
 		});
 	}

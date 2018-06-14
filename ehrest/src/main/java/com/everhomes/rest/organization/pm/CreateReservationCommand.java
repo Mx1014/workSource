@@ -19,8 +19,8 @@ import java.sql.Timestamp;
 public class CreateReservationCommand {
     private Long addressId;
     private Long enterpriseCustomerId;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private String startTime;
+    private String endTime;
     private Long communityId;
     private Integer namespaceId;
 
@@ -57,19 +57,19 @@ public class CreateReservationCommand {
         this.enterpriseCustomerId = enterpriseCustomerId;
     }
 
-    public Timestamp getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public Timestamp getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
 }

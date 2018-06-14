@@ -6,6 +6,7 @@ CREATE TABLE `eh_pm_resoucre_reservations` (
 	`start_time` TIMESTAMP NOT NULL COMMENT 'start time of this reservation',
 	`end_time` TIMESTAMP NOT NULL COMMENT 'end time of this reservation',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '1. inactive; 2: active; 3: deleted;',
+	`previous_living_status` TINYINT DEFAULT NULL COMMENT 'previous living status in eh_organization_address_mapping',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
   `community_id` BIGINT DEFAULT NULL COMMENT 'id of community',
   `entry_id` BIGINT DEFAULT NULL COMMENT '其他入口的备用字段',
