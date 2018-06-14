@@ -80,6 +80,7 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationOwnerCarSearcher;
@@ -6859,6 +6860,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Scheduled(cron = "0 0 */1 * * ?")
 	private void ReservationExpireCheck(){
+        if (scheduleProvider.getRunningFlag() == RunningFlag.FALSE.getCode()) {
+            return;
+        }
 		List<ReservationInfo> list = propertyMgrProvider.listRunningReservations();
 		for(ReservationInfo info : list){
 			//if it will expire in the future 1 hour
