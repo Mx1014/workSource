@@ -44,6 +44,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -54,6 +55,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
@@ -68,6 +70,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -498,6 +501,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		resp.setPrivileges(infos);
 		return resp;
 	}
+	
+	private boolean checkTopPrivilege(long orgId) {
+        if(this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+       Organization org = organizationProvider.findOrganizationById(orgId);
+       if(org == null) {
+           throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+                "organization not find");
+        }
+      if(org.getAdminTargetId() != null && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+          return false;
+        }
+      
+      return true;
+	}
 
 	/**
 	 * 创建超级管理员
@@ -507,9 +527,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
-		
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-      if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+      if(!checkTopPrivilege(cmd.getOrganizationId())) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
                     "non-privileged.");
         }
@@ -1833,13 +1851,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void updateTopAdminstrator(CreateOrganizationAdminCommand cmd) {
-	    Organization org = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-	    if(org == null) {
-	          throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-	                    "organization not find");
-	    }
-	    
-	    if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+	    if(!checkTopPrivilege(cmd.getOrganizationId())) {
 	        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 	                "non-privileged.");
 	    }
@@ -2011,8 +2023,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params ownerType error.");
 		}
 		
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-      if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+      if(!checkTopPrivilege(cmd.getOrganizationId())) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
                     "non-privileged.");
         }
