@@ -2,15 +2,18 @@
 package com.everhomes.sensitiveWord;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.forum.ForumModuleType;
 import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sensitiveWord.InitSensitiveWordTrieCommand;
+import com.everhomes.rest.sensitiveWord.SensitiveWordErrorCodes;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
 import org.apache.commons.lang.StringUtils;
@@ -93,6 +96,9 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             }
             if (wordList.size() > 0) {
                 createSentiveRecord(cmd, wordList);
+                String words = wordList.toString();
+                throw RuntimeErrorException.errorWith(SensitiveWordErrorCodes.SCOPE, SensitiveWordErrorCodes.DETECTION_OF_SENSITIVE_WORDS,
+                        words.substring(1,words.length()-1));
             }
         }
     }
