@@ -22,7 +22,7 @@ public enum ServiceModuleSceneType {
     public static ServiceModuleSceneType fromCode(Byte code) {
         if (code != null) {
             for (ServiceModuleSceneType value : ServiceModuleSceneType.values()) {
-                if (value.equals(code)) {
+                if (value.getCode() == code.byteValue()) {
                     return value;
                 }
             }

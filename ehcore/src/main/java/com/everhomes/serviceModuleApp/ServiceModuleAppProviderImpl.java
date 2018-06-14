@@ -452,7 +452,6 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 			if(sceneType != null){
 				query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
 			}
-
 		}
 
 		//安装信息

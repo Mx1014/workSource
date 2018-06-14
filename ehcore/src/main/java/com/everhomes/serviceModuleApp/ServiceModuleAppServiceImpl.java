@@ -404,12 +404,16 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
 		Long orgId = null;
+		Long communityId = null;
 		Byte appType = null;
 		Byte locationType = null;
 		Byte sceneType = null;
 
 
+		//广场和工作台OA是查询安装的应用
 		boolean installFlag = false;
+
+		//工作台园区运营是查询授权管理的应用
 		boolean manageFlag = false;
 
 		if(Widget.fromCode(cmd.getWidget()) == Widget.CARD){
@@ -432,7 +436,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		}else if (Widget.fromCode(cmd.getWidget()) == Widget.NAVIGATOR){
 			locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
-			OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getContext().getCommunityId());
+			communityId = cmd.getContext().getCommunityId();
+			OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(communityId);
 			orgId = organizationProperty.getOrganizationId();
 			appType = ServiceModuleAppType.COMMUNITY.getCode();
 			sceneType = ServiceModuleSceneType.CLIENT.getCode();
@@ -451,7 +456,42 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			for (ServiceModuleApp app: apps){
 
 				AppDTO appDTO = ConvertHelper.convert(app, AppDTO.class);
-				appDTO.setName(app.getName());
+
+				//广场的应用设置可见性，并编辑的名称。
+				if(ServiceModuleAppType.fromCode(appType) == ServiceModuleAppType.COMMUNITY && ServiceModuleSceneType.fromCode(sceneType) == ServiceModuleSceneType.CLIENT){
+
+					Community community = communityProvider.findCommunityById(communityId);
+
+					//园区自定义配置的
+					if(community != null && community.getAppSelfConfigFlag() != null && community.getAppSelfConfigFlag().byteValue() == 1){
+						AppCommunityConfig appCommunity = appCommunityConfigProvider.findAppCommunityConfigByCommunityIdAndAppOriginId(communityId, app.getOriginId());
+
+						if(appCommunity != null){
+							if(appCommunity.getVisibilityFlag() != null && appCommunity.getVisibilityFlag().byteValue() == 0){
+								//隐藏的应用要去掉
+								continue;
+							}
+							if(appCommunity.getDisplayName() != null){
+								appDTO.setName(appCommunity.getDisplayName());
+							}
+						}
+
+					}else {
+						//跟随公司的
+						OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), orgId);
+
+						if(orgapp != null){
+							if(orgapp.getVisibilityFlag() != null && orgapp.getVisibilityFlag().byteValue() == 0){
+								//隐藏的应用要去掉
+								continue;
+							}
+							if(orgapp.getDisplayName() != null){
+								appDTO.setName(orgapp.getDisplayName());
+							}
+						}
+					}
+				}
+
 				appDTO.setAppId(app.getOriginId());
 
 				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
@@ -697,6 +737,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			if(config == null){
 				config = new AppCommunityConfig();
 				config.setAppOriginId(cmd.getAppOriginId());
+				config.setCommunityId(cmd.getCommunityId());
 				config.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				config.setCreatorUid(UserContext.currentUserId());
 				config.setDisplayName(cmd.getDisplayName());
