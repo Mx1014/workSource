@@ -1340,8 +1340,8 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * <b>URL: /asset/calculateRentForContract</b>
      */
     @RequestMapping("calculateRentForContract")
-    public RestResponse calculateRentForContract() {
-        assetService.calculateRentForContract();
+    public RestResponse calculateRentForContract(CalculateRentCommand cmd) {
+        assetService.calculateRentForContract(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
