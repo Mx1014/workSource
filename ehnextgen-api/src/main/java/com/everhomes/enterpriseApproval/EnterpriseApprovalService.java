@@ -59,6 +59,6 @@ public interface EnterpriseApprovalService {
 
     ListEnterpriseApprovalsResponse listAvailableEnterpriseApprovals(ListEnterpriseApprovalsCommand cmd);
 
-    List<FlowCaseDetail> listActiveFlowCasesByApprovalId(Long ownerId, Long approvalId);
+    List<FlowCaseDetail> listActiveFlowCasesByApprovalId(Long userId, Long ownerId, Long approvalId);
 
 }

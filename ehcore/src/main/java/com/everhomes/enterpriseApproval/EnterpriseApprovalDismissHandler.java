@@ -46,14 +46,14 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
     private GeneralApprovalValProvider generalApprovalValProvider;
 
     @Override
-    public void processFormFields(List<GeneralFormFieldDTO> fieldDTOs, GetTemplateBySourceIdCommand cmd){
+    public void processFormFields(List<GeneralFormFieldDTO> fieldDTOs, GetTemplateBySourceIdCommand cmd) {
         Long userId = UserContext.currentUserId();
 
-        for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
-            if(GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.DISMISS_APPLICATION)){
+        for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
+            if (GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.DISMISS_APPLICATION)) {
                 ComponentDismissApplicationValue val = new ComponentDismissApplicationValue();
                 OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOwnerId());
-                if(member != null){
+                if (member != null) {
                     val.setApplierName(member.getContactName());
                     val.setApplierDepartment(archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getDetailId())));
                     val.setApplierJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(member.getDetailId())));
@@ -65,15 +65,11 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
 
     @Override
     public void onApprovalCreated(FlowCase flowCase) {
-        //  1.cancel the archives operate
-        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
-        if(member != null){
-            archivesService.cancelArchivesOperation(member.getNamespaceId(), member.getDetailId(), ArchivesOperationType.DISMISS.getCode());
-        }
-        //  2.cancel the flow
-        List<FlowCaseDetail> details = enterpriseApprovalService.listActiveFlowCasesByApprovalId(flowCase.getApplierOrganizationId(), flowCase.getReferId());
-        if(details != null){
-            details.remove(details.size()-1);   //  ignore the new approval
+        //  cancel the flow
+        List<FlowCaseDetail> details = enterpriseApprovalService.listActiveFlowCasesByApprovalId(flowCase.getApplyUserId(),
+                flowCase.getApplierOrganizationId(), flowCase.getReferId());
+        if (details != null) {
+            details.remove(0);   //  ignore the new approval
             List<Long> flowCaseIds = details.stream().map(EhFlowCases::getId).collect(Collectors.toList());
             enterpriseApprovalService.stopApprovalFlows(new ApprovalFlowIdsCommand(flowCaseIds));
         }
@@ -101,7 +97,7 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
             DismissArchivesEmployeesCommand cmd = new DismissArchivesEmployeesCommand();
             cmd.setDetailIds(Collections.singletonList(member.getDetailId()));
             cmd.setOrganizationId(flowCase.getApplierOrganizationId());
-            cmd.setOperationType(ArchivesOperationType.SELF_DISMISS.getCode());
+            cmd.setOperationType(ArchivesOperationType.SELF_DISMISS.getCode()); // operationType for the archives log, the config'type is still DISMISS
             cmd.setDismissType(ArchivesDismissType.QUIT.getCode());
             cmd.setDismissReason(ArchivesUtil.convertToArchivesEnum(val.getDismissReason(), ArchivesParameter.DISMISS_REASON));
             cmd.setDismissRemark(val.getDismissRemark());

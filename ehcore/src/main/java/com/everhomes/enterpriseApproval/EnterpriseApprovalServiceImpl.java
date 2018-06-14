@@ -793,7 +793,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
 
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(approvalId);
-        List<FlowCaseDetail> details = listActiveFlowCasesByApprovalId(organizationId, approvalId);
+        List<FlowCaseDetail> details = listActiveFlowCasesByApprovalId(userId, organizationId, approvalId);
         if (details != null && details.size() > 0) {
             dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
             Map<String, Object> map = new LinkedHashMap<>();
@@ -866,10 +866,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     @Override
-    public List<FlowCaseDetail> listActiveFlowCasesByApprovalId(Long ownerId, Long approvalId) {
+    public List<FlowCaseDetail> listActiveFlowCasesByApprovalId(Long userId, Long ownerId, Long approvalId) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Long userId = UserContext.currentUserId();
-
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
         command.setOrganizationId(ownerId);
         command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
@@ -880,7 +878,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(approvalId));
             query.addConditions(Tables.EH_FLOW_CASES.REFER_TYPE.eq("approval"));
             query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
-            query.addOrderBy(Tables.EH_FLOW_CASES.CREATE_TIME.asc());
             return query;
         });
 

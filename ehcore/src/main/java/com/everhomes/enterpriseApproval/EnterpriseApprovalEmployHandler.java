@@ -44,14 +44,14 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
     private GeneralApprovalValProvider generalApprovalValProvider;
 
     @Override
-    public void processFormFields(List<GeneralFormFieldDTO> fieldDTOs, GetTemplateBySourceIdCommand cmd){
+    public void processFormFields(List<GeneralFormFieldDTO> fieldDTOs, GetTemplateBySourceIdCommand cmd) {
         Long userId = UserContext.currentUserId();
 
-        for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
-            if(GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.EMPLOY_APPLICATION)){
+        for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
+            if (GeneralFormFieldType.fromCode(fieldDTO.getFieldType()).equals(GeneralFormFieldType.EMPLOY_APPLICATION)) {
                 ComponentEmployApplicationValue val = new ComponentEmployApplicationValue();
                 OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOwnerId());
-                if(member != null){
+                if (member != null) {
                     OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
                     val.setApplierName(member.getContactName());
                     val.setApplierDepartment(archivesService.convertToOrgNames(archivesService.getEmployeeDepartment(member.getDetailId())));
@@ -66,9 +66,10 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
     @Override
     public void onApprovalCreated(FlowCase flowCase) {
         //  cancel the flow
-        List<FlowCaseDetail> details = enterpriseApprovalService.listActiveFlowCasesByApprovalId(flowCase.getApplierOrganizationId(), flowCase.getReferId());
+        List<FlowCaseDetail> details = enterpriseApprovalService.listActiveFlowCasesByApprovalId(
+                flowCase.getApplyUserId(), flowCase.getApplierOrganizationId(), flowCase.getReferId());
         if (details != null) {
-            details.remove(details.size() - 1);   //  ignore the new approval
+            details.remove(0);   //  ignore the new approval
             List<Long> flowCaseIds = details.stream().map(EhFlowCases::getId).collect(Collectors.toList());
             enterpriseApprovalService.stopApprovalFlows(new ApprovalFlowIdsCommand(flowCaseIds));
         }
@@ -80,7 +81,7 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
     }
 
     @Override
-    public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase){
+    public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
         OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
         if (member != null) {
             //  1.cancel the archives operate
@@ -88,17 +89,17 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
 
             //  2.set the new operate
             GeneralApprovalVal generalApprovalVal = generalApprovalValProvider.getSpecificApprovalValByFlowCaseId(flowCase.getId(), GeneralFormFieldType.EMPLOY_APPLICATION.getCode());
-            if(generalApprovalVal == null)
+            if (generalApprovalVal == null)
                 return null;
             ComponentEmployApplicationValue val = ConvertHelper.convert(generalApprovalVal.getFieldStr3(), ComponentEmployApplicationValue.class);
-            if(val.getEmploymentTime() == null)
+            if (val.getEmploymentTime() == null)
                 return null;
             EmployArchivesEmployeesCommand cmd = new EmployArchivesEmployeesCommand();
             cmd.setDetailIds(Collections.singletonList(member.getDetailId()));
             cmd.setOrganizationId(flowCase.getApplierOrganizationId());
             cmd.setEmploymentTime(val.getEmploymentTime());
             cmd.setEmploymentEvaluation(val.getEmploymentReason());
-            cmd.setOperationType(ArchivesOperationType.SELF_EMPLOY.getCode());
+            cmd.setOperationType(ArchivesOperationType.SELF_EMPLOY.getCode());  // operationType for the archives log, the config'type is still EMPLOY
             archivesService.employArchivesEmployeesConfig(cmd);
         }
         return null;
