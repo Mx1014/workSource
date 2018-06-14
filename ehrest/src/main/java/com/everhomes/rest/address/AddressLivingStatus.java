@@ -9,6 +9,7 @@ package com.everhomes.rest.address;
  * </ul>
  */
 public enum AddressLivingStatus {
+    // 枚举缺少数据，还有为3等的情况，java文件和数据库没有记录，只有web端有注释记录 by wentian
     INACTIVE((byte)0), ACTIVE((byte)1);
     
     private byte code;

@@ -711,6 +711,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     if (cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
                     }
+                    // living status没有在java文件和数据库中维护；
+                    // 此处获得的living status不是直接返回前的living status，address表的living status并不是唯一性的资产的‘居住状态’的记录者，
+                    // web依赖的可能是其他模块的living status，例如EH_ORGANIZATION_ADDRESS_MAPPINGS中的living status <- by wentian
                     if(cmd.getLivingStatus() != null){
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.LIVING_STATUS.eq(cmd.getLivingStatus()));
                     }

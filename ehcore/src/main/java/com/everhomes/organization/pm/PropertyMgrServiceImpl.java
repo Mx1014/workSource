@@ -2578,8 +2578,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), aptIdList);
 		
 		//处理小区地址关联表
-		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
-		
+//		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList, cmd.getLivingStatus());
+
 		//判断是否欠费
 		Map<Long, Byte> billOwedMap = mapBillOwedFlag(aptIdList);
 		
