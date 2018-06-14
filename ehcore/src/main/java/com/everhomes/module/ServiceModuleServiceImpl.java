@@ -1052,7 +1052,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         Iterator<ServiceModuleDTO> iter = tempList.iterator();
         while (iter.hasNext()) {
             ServiceModuleDTO current = iter.next();
-            if (current.getParentId().equals(parentId) && current.getLevel() <= 3) {
+            if (current.getParentId().equals(parentId)
+                    && (ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.CLASSIFY || ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.MODULE )) {
                 List<ServiceModuleDTO> c_node = getServiceModuleAsLevelTree(tempList, current.getId());
                 current.setServiceModules(c_node);
                 results.add(current);
@@ -1074,10 +1075,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         Iterator<ServiceModuleDTO> iter = tempList.iterator();
         while (iter.hasNext()) {
             ServiceModuleDTO current = iter.next();
-            if (current.getParentId().equals(parentId) && current.getLevel() < 4) {
+            if (current.getParentId().equals(parentId)
+                    &&  (ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.CLASSIFY || ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.MODULE )) {
                 List<ServiceModuleDTO> c_node = getServiceModuleAppsAsLevelTree(tempList, current.getId());
                 current.setServiceModules(c_node);
-                if (current.getLevel() < 3){
+                if (ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.CLASSIFY ){
                     List<Long> moduleIds = c_node.stream().map(ServiceModuleDTO::getId).collect(Collectors.toList());
                     if(moduleIds.size() != 0 && current.getLevel() == 2){
                         //给一级模块设置APPS
