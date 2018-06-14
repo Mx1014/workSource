@@ -261,11 +261,15 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
                     do {
                         JSONObject activeParams = new JSONObject();
                         activeParams.put("cardid", openCardInfo.getCardid());
-                        BeeResponse activeResponse = post(ACTIVE_CARD_ORDER, activeParams);
-                        activeCount ++;
-                        activeFlag = isChargeSuccess(activeResponse);
-                        if(activeFlag){
-                            return true;
+                        try {
+                            BeeResponse activeResponse = post(ACTIVE_CARD_ORDER, activeParams);
+                            activeCount ++;
+                            activeFlag = isChargeSuccess(activeResponse);
+                            if(activeFlag){
+                                return true;
+                            }
+                        }catch (Exception e){
+                            LOGGER.error("ACTIVE_CARD_ORDER exception", e);
                         }
                     }while(!activeFlag && activeCount<3);
                     LOGGER.info("active card 3 times failed");
