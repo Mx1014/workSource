@@ -1209,7 +1209,7 @@ public class DecorationServiceImpl implements  DecorationService {
         //序号
         row.createCell(++i).setCellValue(row.getRowNum());
         //姓名
-        row.createCell(++i).setCellValue(sdfyMdHm.format(new Date(dto.getName())));
+        row.createCell(++i).setCellValue(dto.getName());
         //联系方式
         row.createCell(++i).setCellValue(dto.getPhone());
         //工种
