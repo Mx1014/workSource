@@ -501,6 +501,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		resp.setPrivileges(infos);
 		return resp;
 	}
+	
+	private boolean checkTopPrivilege(long orgId) {
+        if(this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+       Organization org = organizationProvider.findOrganizationById(orgId);
+       if(org == null) {
+           throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+                "organization not find");
+        }
+      if(org.getAdminTargetId() != null && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+          return false;
+        }
+      
+      return true;
+	}
 
 	/**
 	 * 创建超级管理员
@@ -510,14 +527,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
-		boolean isZuolinSystemRoot = false;
-		if(this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
-	            UserContext.current().getUser().getId(), Privilege.Write, null)) {
-		    isZuolinSystemRoot = true;
-		}
-		
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-      if(!isZuolinSystemRoot && (org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId()))) {
+      if(!checkTopPrivilege(cmd.getOrganizationId())) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
                     "non-privileged.");
         }
@@ -1841,13 +1851,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void updateTopAdminstrator(CreateOrganizationAdminCommand cmd) {
-	    Organization org = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-	    if(org == null) {
-	          throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-	                    "organization not find");
-	    }
-	    
-	    if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+	    if(!checkTopPrivilege(cmd.getOrganizationId())) {
 	        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 	                "non-privileged.");
 	    }
@@ -2019,8 +2023,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params ownerType error.");
 		}
 		
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-      if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+      if(!checkTopPrivilege(cmd.getOrganizationId())) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
                     "non-privileged.");
         }
