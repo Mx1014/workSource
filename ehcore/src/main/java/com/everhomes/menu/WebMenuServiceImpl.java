@@ -25,6 +25,7 @@ import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -83,6 +84,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Autowired
 	private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
+	@Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
@@ -154,7 +158,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 		// 公司分配过园区的应用
 		List<Long> authAppIds = serviceModuleAppAuthorizationService.listCommunityAppIdOfOrgId(UserContext.getCurrentNamespaceId(), organizationId);
 		List<ServiceModuleApp> communityApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.COMMUNITY_CONTROL.getCode());
-		List<ServiceModuleApp> orgApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
+
+		//OA类型的要查询安装的应用
+		//List<ServiceModuleApp> orgApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
+		List<ServiceModuleApp> orgApps = serviceModuleAppProvider.listInstallServiceModuleApps(UserContext.getCurrentNamespaceId(), versionId, organizationId, null, null, null);
+
 		List<ServiceModuleApp> unlimitApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 		
 		//填充OA和无限制的应用id

@@ -436,19 +436,32 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
+
+		if(appType != null){
+			query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
+		}
 
 		//入口类型
-		query.addJoin(Tables.EH_SERVICE_MODULE_ENTRIES, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID));
-		query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.LOCATION_TYPE.eq(locationType));
-		query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
+		if(locationType != null || sceneType != null){
+			query.addJoin(Tables.EH_SERVICE_MODULE_ENTRIES, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.MODULE_ID.eq(Tables.EH_SERVICE_MODULE_ENTRIES.MODULE_ID));
+			query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER.asc());
+			if(locationType != null){
+				query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.LOCATION_TYPE.eq(locationType));
+			}
+
+			if(sceneType != null){
+				query.addConditions(Tables.EH_SERVICE_MODULE_ENTRIES.SCENE_TYPE.eq(sceneType));
+			}
+
+		}
 
 		//安装信息
 		query.addJoin(Tables.EH_ORGANIZATION_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));
 		query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(orgId));
 
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
-		query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER.asc());
+
+		query.addGroupBy(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID);
 
 		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
 		return apps;
