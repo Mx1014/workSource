@@ -539,7 +539,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command1.setCommunityId(customer.getCommunityId());
         command1.setCustomerId(customer.getId());
         List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
-        removeDuplicatedEntryInfo(entryInfos);
+        entryInfos = removeDuplicatedEntryInfo(entryInfos);
         if (entryInfos != null && entryInfos.size() > 0) {
 //            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
             entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
