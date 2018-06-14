@@ -82,7 +82,7 @@ public interface AddressProvider {
 
     String getAddressNameById(Long addressId);
 
-    int changeAddressLivingStatus(Long addressId, AddressLivingStatus inactive);
+    int changeAddressLivingStatus(Long addressId, Byte status);
 
     Byte getAddressLivingStatus(Long addressId);
 }

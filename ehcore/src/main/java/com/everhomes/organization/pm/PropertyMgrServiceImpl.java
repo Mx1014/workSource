@@ -6770,7 +6770,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		this.dbProvider.execute((status) -> {
 
 			// living status的完整枚举记录在前端，后端和数据库没有
-			int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED);
+			int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
 			if(effectedRow != 1){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
 						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
@@ -6850,8 +6850,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	public void cancelReservation(CancelReservationCommand cmd) {
 	    Byte previousStatus = propertyMgrProvider.getReservationPreviousLivingStatusById(cmd.getReservationId());
 		this.dbProvider.execute((status) -> {
-			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), previousStatus);
-			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.INACTIVE);
+			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.INACTIVE.getCode());
+			addressProvider.changeAddressLivingStatus(addressId, previousStatus);
 			return null;
 		});
 	}

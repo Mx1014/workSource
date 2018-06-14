@@ -736,13 +736,13 @@ public class AddressProviderImpl implements AddressProvider {
     }
 
     @Override
-    public int changeAddressLivingStatus(Long addressId, AddressLivingStatus status) {
+    public int changeAddressLivingStatus(Long addressId, Byte status) {
 //        return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ADDRESSES)
 //                .set(Tables.EH_ADDRESSES.LIVING_STATUS, status.getCode())
 //                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
 //                .execute();
         return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
-                .set(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS, status.getCode())
+                .set(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS, status)
                 .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
                 .execute();
     }

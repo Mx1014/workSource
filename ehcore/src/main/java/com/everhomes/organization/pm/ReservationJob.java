@@ -26,8 +26,9 @@ public class ReservationJob extends QuartzJobBean {
         JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         Long addressId = (Long)jobDataMap.get("addressId");
         Long reservationId = (Long)jobDataMap.get("reservationId");
+        Byte reservationPreviousLivingStatusById = propertyMgrProvider.getReservationPreviousLivingStatusById(reservationId);
         // todo realease address and inactive reservation
-        addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
-        propertyMgrProvider.changeReservationStatus(reservationId, ReservationStatus.INACTIVE);
+        addressProvider.changeAddressLivingStatus(addressId, reservationPreviousLivingStatusById);
+        propertyMgrProvider.changeReservationStatus(reservationId, ReservationStatus.INACTIVE.getCode());
     }
 }
