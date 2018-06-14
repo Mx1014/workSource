@@ -1382,20 +1382,22 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     continue bill;
                 }
         	}
-        	String buildingName,apartmentName;
+        	String buildingName = null,apartmentName = null;
         	Long addressId = null;
-        	if(address.indexOf("/") != -1) {
-        		buildingName = address.split("/")[0];
-        		apartmentName = address.split("/")[1];
-        		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
-        		if(addressByBuildingApartmentName != null) {
-        			addressId = addressByBuildingApartmentName.getId();
-        		}
-        	}else {
-        		log.setErrorLog("楼栋/门牌格式错误，楼栋门牌要以/分开");
-        		log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
-                datas.add(log);
-                continue bill;
+        	if(address != null && address.trim() != "") {
+        		if(address.indexOf("/") != -1) {
+            		buildingName = address.split("/")[0];
+            		apartmentName = address.split("/")[1];
+            		Address addressByBuildingApartmentName = addressProvider.findAddressByBuildingApartmentName(namespaceId, ownerId, buildingName, apartmentName);
+            		if(addressByBuildingApartmentName != null) {
+            			addressId = addressByBuildingApartmentName.getId();
+            		}
+            	}else {
+            		log.setErrorLog("楼栋/门牌格式错误，楼栋门牌要以/分开");
+            		log.setCode(AssetBillImportErrorCodes.ADDRESS_INCORRECT);
+                    datas.add(log);
+                    continue bill;
+            	}
         	}
             
             for(int j = 0; j < data.length; j++){
