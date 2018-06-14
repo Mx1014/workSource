@@ -361,6 +361,9 @@ public class ForumServiceImpl implements ForumService {
                     "Activity Have been Change");
             Map<String, String> meta = createActivityRouterMeta(url, subject);
             for (ActivityRoster activityRoster : activityRosterList) {
+                if (activity.getCreatorUid() == activityRoster.getUid()) {
+                    continue;
+                }
                 sendMessageCode(activityRoster.getUid(), UserContext.current().getUser().getLocale(), map, code, meta);
             }
         }
