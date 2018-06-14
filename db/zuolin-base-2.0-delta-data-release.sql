@@ -33,7 +33,7 @@ update eh_service_modules set client_handler_type = 3 WHERE id in (49100, 20800,
 -- 默认为园区模块
 UPDATE eh_service_modules set app_type = 1;
 -- 设置oa模块
-UPDATE eh_service_modules set app_type = 0 WHERE id in (50100,  50300, 50500, 50400, 52000, 50600, 54000, 51300, 51400, 55000, 57000, 60100, 60200, 60210, 13000, 20650, 20830, 41020, 50700);
+UPDATE eh_service_modules set app_type = 0 WHERE id in (50100,  50300, 50500, 50400, 52000, 50600, 54000, 51300, 51400, 55000, 57000, 60100, 60200, 60210, 13000, 20650, 20830, 41020, 50700, 41410, 41420, 41430, 41400);
 -- 更新应用信息
 UPDATE eh_service_module_apps a set a.app_type = IFNULL((SELECT b.app_type from eh_service_modules b where b.id = a.module_id), 1);
 
@@ -168,9 +168,10 @@ INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entr
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('222', '40300', '服务热线', '服务热线', '1', '2', '2', '12', '1');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('223', '40300', '服务热线', '服务热线', '2', '4', '1', '11', '1');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('224', '40300', '服务热线', '服务热线', '2', '5', '2', '12', '0');
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('225', '41400', '园区云打印', '云打印管理', '1', '1', '1', '11', '4');
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('226', '41400', '园区云打印', '云打印', '1', '2', '2', '12', '10');
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('227', '41400', '园区云打印', '云打印管理', '2', '4', '1', '11', '11');
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('225', '41400', '企业云打印', '云打印管理', '1', '1', '1', '3', '4');
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('226', '41400', '企业云打印', '云打印', '1', '1', '2', '1', '10');
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('227', '41400', '企业云打印', '云打印管理', '2', '4', '1', '3', '11');
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('228', '41400', '企业云打印', '云打印', '2', '5', '2', '1', '11');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('230', '40700', '快递服务', '快递服务', '1', '2', '2', '12', '10');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('231', '40700', '快递服务', '快递服务', '2', '4', '1', '11', '13');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('234', '41500', '文件管理', '文件管理', '1', '2', '2', '6', '4');
