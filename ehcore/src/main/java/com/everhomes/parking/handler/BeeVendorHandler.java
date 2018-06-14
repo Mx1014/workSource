@@ -9,6 +9,10 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.parking.*;
 import com.everhomes.parking.bee.*;
 import com.everhomes.rest.parking.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
@@ -221,14 +225,24 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         processJSONParams(params);
         params.put("ploid",getParkingPloid());
         params.put("realname",request.getPlateOwnerName());
-//        params.put("tel",request.);
-//        params.put("sex",order.getPlateNumber());
+        UserIdentifier identifier = userService.getUserIdentifier(order.getCreatorUid());
+        if(identifier !=null) {
+            params.put("tel", identifier.getIdentifierToken());
+        }else{
+            params.put("tel", "4008384688");//这是左邻官方账号，对接的人说必须搞个电话账号
+        }
+        params.put("sex","1");//sex  性别参数  1-男  0- 女
         params.put("carnumber",request.getPlateNumber());
         params.put("itemtype",request.getCardTypeId());
         params.put("startdate",order.getStartPeriod().getTime());
         params.put("enddate",order.getEndPeriod().getTime());
         params.put("cardnum",order.getMonthCount().intValue());
-//        params.put("unitprice",order.);
+        ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.valueOf(order.getRateToken()));
+        if(rate!=null) {
+            params.put("unitprice", rate.getPrice().divide(rate.getMonthCount()).intValue());
+        }else{
+            params.put("unitprice", order.getPrice().multiply(order.getMonthCount()));
+        }
         params.put("totalprice",order.getPrice());
 //        params.put("mebtype",null);
 //        params.put("mebtypename",null);
@@ -236,15 +250,25 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         params.put("paymode","1");
         BeeResponse response = post(ADD_CARD, params);
         order.setErrorDescriptionJson(response.toString());
-        if(isSuccess(response)){
+        if(isChargeSuccess(response)){
             List<OpenCardInfo> entities= JSONObject.parseObject(response.getOutList().toString(), new TypeReference<List<OpenCardInfo>>(){});
             if(entities!=null && entities.size()>0){
                 OpenCardInfo openCardInfo = entities.get(0);
                 if(openCardInfo!=null && openCardInfo.getCardid()!=null) {
-                    JSONObject activeParams = new JSONObject();
-                    activeParams.put("cardid",openCardInfo.getCardid());
-                    BeeResponse activeResponse = post(ACTIVE_CARD_ORDER, activeParams);
-                    return isSuccess(activeResponse);
+                    //这里尝试三次激活，否则跳出
+                    int activeCount = 0;
+                    boolean activeFlag = false;
+                    do {
+                        JSONObject activeParams = new JSONObject();
+                        activeParams.put("cardid", openCardInfo.getCardid());
+                        BeeResponse activeResponse = post(ACTIVE_CARD_ORDER, activeParams);
+                        activeCount ++;
+                        activeFlag = isChargeSuccess(activeResponse);
+                        if(activeFlag){
+                            return true;
+                        }
+                    }while(!activeFlag && activeCount<3);
+                    LOGGER.info("active card 3 times failed");
                 }
             }
         }
@@ -360,7 +384,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
 
     @Override
     public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
-
+        updateParkingRechargeOrderRateInfo(parkingLot, order);
     }
 
     private MonthCardInfo getCardInfo(String plateNumber) {
