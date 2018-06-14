@@ -25,6 +25,24 @@ public class ListReservationsDTO {
     private Timestamp endTime;
     private String createUname;
     private Byte reservationStatus;
+    private Long enterpriseCustomerId;
+    private Long addressId;
+
+    public Long getEnterpriseCustomerId() {
+        return enterpriseCustomerId;
+    }
+
+    public void setEnterpriseCustomerId(Long enterpriseCustomerId) {
+        this.enterpriseCustomerId = enterpriseCustomerId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
 
     public Long getReservationId() {
         return reservationId;

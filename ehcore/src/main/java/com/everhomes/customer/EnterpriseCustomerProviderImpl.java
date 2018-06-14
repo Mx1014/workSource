@@ -13,16 +13,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -2101,5 +2092,22 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ENTERPRISE_CUSTOMERS.NAME)
                 .from(Tables.EH_ENTERPRISE_CUSTOMERS).where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(enterpriseCustomerId))
                 .fetchOne(Tables.EH_ENTERPRISE_CUSTOMERS.NAME);
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomerNameAndId(List<Long> ids) {
+        List<EasySearchEnterpriseCustomersDTO> ret = new ArrayList<>();
+        this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .select(Tables.EH_ENTERPRISE_CUSTOMERS.NAME, Tables.EH_ENTERPRISE_CUSTOMERS.ID)
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(ids))
+                .fetch()
+                .forEach(r -> {
+                    EasySearchEnterpriseCustomersDTO dto = new EasySearchEnterpriseCustomersDTO();
+                    dto.setId(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+                    dto.setName(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.NAME));
+                    ret.add(dto);
+                });
+        return ret;
     }
 }

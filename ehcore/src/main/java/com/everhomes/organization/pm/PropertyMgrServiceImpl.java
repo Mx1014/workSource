@@ -6786,10 +6786,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         for(PmResourceReservation r : list){
         	ListReservationsDTO dto = new ListReservationsDTO();
         	dto.setAddressName(addressProvider.getAddressNameById(r.getAddressId()));
+        	dto.setAddressId(r.getAddressId());
         	dto.setCreateUname(userProvider.getNickNameByUid(r.getCreatorUid()));
         	dto.setEndTime(r.getEndTime());
         	dto.setStartTime(r.getStartTime());
         	dto.setEnterpriseCustomerName(enterpriseCustomerProvider.getEnterpriseCustomerNameById(r.getEnterpriseCustomerId()));
+        	dto.setEnterpriseCustomerId(r.getEnterpriseCustomerId());
         	dto.setReservationId(r.getId());
         	dto.setReservationStatus(r.getStatus());
         	ret.add(dto);
