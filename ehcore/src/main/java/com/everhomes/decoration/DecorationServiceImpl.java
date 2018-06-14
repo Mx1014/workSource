@@ -1068,6 +1068,8 @@ public class DecorationServiceImpl implements  DecorationService {
         String address = cmd.getBuildingName();
         if (cmd.getDoorPlate() != null)
             address += "&"+cmd.getDoorPlate();
+        if (cmd.getCancelFlag() == null)
+            cmd.setCancelFlag((byte)0);
         List<DecorationRequest> requests =  this.decorationProvider.queryDecorationRequests(UserContext.getCurrentNamespaceId(),cmd.getCommunityId(),cmd.getStartTime(),
                 cmd.getEndTime(),address,cmd.getStatus(),cmd.getKeyword(),cmd.getCancelFlag(),pageSize,null);
 
@@ -1158,7 +1160,7 @@ public class DecorationServiceImpl implements  DecorationService {
     @Override
     public void exportWorkers(ListWorkersCommand cmd, HttpServletResponse response) {
         Integer pageSize = Integer.MAX_VALUE;
-        List<DecorationWorker> workers = decorationProvider.listWorkersByRequestId(cmd.getRequestId(),cmd.getKeyword(),null,pageSize+1);
+        List<DecorationWorker> workers = decorationProvider.listWorkersByRequestId(cmd.getRequestId(),cmd.getKeyword(),null,pageSize);
         List<DecorationWorkerDTO> dtos = workers.stream().map(r->ConvertHelper.convert(r,DecorationWorkerDTO.class)).collect(Collectors.toList());
         ByteArrayOutputStream out = createWorkersStream(dtos);
 
