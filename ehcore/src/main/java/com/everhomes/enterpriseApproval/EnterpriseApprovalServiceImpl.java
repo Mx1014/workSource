@@ -444,8 +444,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     @Override
     public void deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
         if (cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
-                    EnterpriseApprovalServiceErrorCode.ERROR_NO_OUTERS, "no outers.");
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
+                    EnterpriseApprovalErrorCode.ERROR_NO_OUTERS, "no outers.");
         List<FlowEntitySel> transferOut = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
         for (Long flowCaseId : cmd.getFlowCaseIds()) {
             FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
@@ -474,7 +474,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         response.setResult(TrueOrFalseFlag.FALSE.getCode());
         List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId(), true);
         if (templates.size() == 0)
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_TEMPLATE_NOT_EXIST, "" +
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE, EnterpriseApprovalErrorCode.ERROR_APPROVAL_TEMPLATE_NOT_EXIST, "" +
                     "Approval templates not exist. Please check it.");
         Integer counts = enterpriseApprovalProvider.countGeneralApprovalInTemplateIds(namespaceId, cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), templates.stream().map(EnterpriseApprovalTemplate::getId).collect(Collectors.toList()));
@@ -571,11 +571,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         EnterpriseApprovalGroup group = enterpriseApprovalProvider.findEnterpriseApprovalGroup(cmd.getApprovalGroupId());
         if (group == null)
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_GROUP_NOT_EXIST,
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE, EnterpriseApprovalErrorCode.ERROR_APPROVAL_GROUP_NOT_EXIST,
                     "The approval group not exist.");
         GeneralApproval oldApproval = enterpriseApprovalProvider.findEnterpriseApprovalByName(namespaceId, cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getApprovalName(), cmd.getApprovalGroupId());
         if (oldApproval != null)
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_DUPLICATE_NAME,
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE, EnterpriseApprovalErrorCode.ERROR_DUPLICATE_NAME,
                     "Duplicate approval name.");
 
         GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
@@ -626,7 +626,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         GeneralApproval oldApproval = enterpriseApprovalProvider.findEnterpriseApprovalByName(ga.getNamespaceId(), ga.getModuleId(), ga.getOwnerId(), ga.getOwnerType(), cmd.getApprovalName(), cmd.getApprovalGroupId());
         if (oldApproval != null)
             if (oldApproval.getId().longValue() != ga.getId().longValue())
-                throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_DUPLICATE_NAME,
+                throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE, EnterpriseApprovalErrorCode.ERROR_DUPLICATE_NAME,
                         "Duplicate approval name.");
         EnterpriseApprovalAdditionFieldDTO fieldDTO = new EnterpriseApprovalAdditionFieldDTO();
         fieldDTO.setApprovalGroupId(cmd.getApprovalGroupId());
@@ -729,7 +729,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         Flow flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(), ga.getModuleType(), ga.getId(),
                 FlowOwnerType.GENERAL_APPROVAL.getCode());
         if (flow == null)
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW,
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE, EnterpriseApprovalErrorCode.ERROR_DISABLE_APPROVAL_FLOW,
                     "The approval flow is off !");
         ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
         updateGeneralApproval(ga);
@@ -781,13 +781,13 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         ArchivesOperationalConfigurationDTO archives = archivesService.getArchivesOperationByUserId(userId, organizationId, operationType);
         if (archives != null) {
             dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalChineseCode.SCOPE, EnterpriseApprovalChineseCode.ARCHIVES_TITLE, "zh_CN", "Remind"));
+            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.ARCHIVES_TITLE, "zh_CN", "Remind"));
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("operationTime", archives.getOperateDate());
             map.put("operationType", ArchivesUtil.resolveArchivesEnum(archives.getOperateType(),
                     ArchivesParameter.OPERATION_TYPE));
-            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalChineseCode.SCOPE,
-                    EnterpriseApprovalChineseCode.ARCHIVES_CONTENT, "zh_CN", map, "Content!"));
+            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalStringCode.SCOPE,
+                    EnterpriseApprovalStringCode.ARCHIVES_CONTENT, "zh_CN", map, "Content!"));
             return dto;
         }
 
@@ -795,11 +795,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         List<FlowCaseDetail> details = listActiveFlowCasesByApprovalId(organizationId, approvalId);
         if (details != null && details.size() > 0) {
             dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalChineseCode.SCOPE, EnterpriseApprovalChineseCode.APPROVAL_TITLE, "zh_CN", "Remind"));
+            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPROVAL_TITLE, "zh_CN", "Remind"));
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("approvalName", ga.getApprovalName());
-            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalChineseCode.SCOPE,
-                    EnterpriseApprovalChineseCode.APPROVAL_CONTENT, "zh_CN", map, "Content!"));
+            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalStringCode.SCOPE,
+                    EnterpriseApprovalStringCode.APPROVAL_CONTENT, "zh_CN", map, "Content!"));
             return dto;
         }
 

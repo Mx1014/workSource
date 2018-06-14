@@ -12,7 +12,7 @@ import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalServiceErrorCode;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalErrorCode;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
@@ -78,16 +78,16 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         //  1.check the approval is legal(判断审批是否启用)
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         if (ga == null || GeneralApprovalStatus.RUNNING.getCode() != ga.getStatus())
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
-                    EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_NOT_RUNNING, "The approval's status is not running");
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
+                    EnterpriseApprovalErrorCode.ERROR_APPROVAL_NOT_RUNNING, "The approval's status is not running");
         List<GeneralApprovalScopeMapDTO> scopes = generalApprovalService.listGeneralApprovalScopes(namespaceId, ga.getId());
 
         //  2.get the form by flow(新版通过工作流拿表单，所以必须有工作流)
         Flow flow = flowService.getEnabledFlow(namespaceId, EnterpriseApprovalController.MODULE_ID,
                 EnterpriseApprovalController.MODULE_TYPE, cmd.getApprovalId(), EnterpriseApprovalController.APPROVAL_OWNER_TYPE);
         if (flow == null)
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
-                    EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
+                    EnterpriseApprovalErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
 
 
         GetTemplateByApprovalIdResponse res = dbProvider.execute((TransactionStatus status) -> {
@@ -96,7 +96,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
             if (member == null)
                 member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, cmd.getOrganizationId());
             if (!generalApprovalService.checkTheApprovalScope(scopes, member))
-                throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE, EnterpriseApprovalServiceErrorCode.ERROR_APPROVAL_NO_ACCESS,
+                throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE, EnterpriseApprovalErrorCode.ERROR_APPROVAL_NO_ACCESS,
                         "The user is not in the approval scope");
 
             //  4.compatible with the previous data(兼容旧数据)
@@ -202,8 +202,8 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         Flow flow = flowService.getEnabledFlow(namespaceId, EnterpriseApprovalController.MODULE_ID,
                 EnterpriseApprovalController.MODULE_TYPE, approvalId, EnterpriseApprovalController.APPROVAL_OWNER_TYPE);
         if (flow == null)
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
-                    EnterpriseApprovalServiceErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
+                    EnterpriseApprovalErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
         Long formOriginId = flow.getFormOriginId();
         //  compatible with the previous data
         if (0 == formOriginId) {
@@ -212,8 +212,8 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         }
         GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(formOriginId);
         if (form == null)
-            throw RuntimeErrorException.errorWith(EnterpriseApprovalServiceErrorCode.SCOPE,
-                    EnterpriseApprovalServiceErrorCode.ERROR_FORM_NOT_FOUND, "form not found");
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
+                    EnterpriseApprovalErrorCode.ERROR_FORM_NOT_FOUND, "form not found");
 
         //  extra process
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);

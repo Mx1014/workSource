@@ -1,6 +1,6 @@
 package com.everhomes.rest.enterpriseApproval;
 
-public interface EnterpriseApprovalServiceErrorCode {
+public interface EnterpriseApprovalErrorCode {
 
     String SCOPE = "enterpriseApproval.error";
 
@@ -19,8 +19,8 @@ public interface EnterpriseApprovalServiceErrorCode {
     int ERROR_NO_OUTERS = 10006;    //  没有转移目标
 
 
-    int ERROR_APPROVAL_NOT_RUNNING = 20001;     //  此审批未启用，请联系管理员
+    int ERROR_APPROVAL_NOT_RUNNING = 20001;     //  此审批未启用，请联系管理员。
 
-    int ERROR_APPROVAL_NO_ACCESS = 20002;       //  你不在可见范围，请联系管理员
+    int ERROR_APPROVAL_NO_ACCESS = 20002;       //  你不在可见范围，请联系管理员。
 
 }

@@ -58,7 +58,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '10004', 'zh_CN', '工作流未启用');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '10005', 'zh_CN', '表单未设置');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '10006', 'zh_CN', '未选择目标对象');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '20001', 'zh_CN', '审批未启用或用户不在可见范围内');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '20001', 'zh_CN', '此审批未启用，请联系管理员。');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '20002', 'zh_CN', '你不在可见范围，请联系管理员。');
+
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10001', 'zh_CN', '申请人');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10002', 'zh_CN', '审批编号');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '10003', 'zh_CN', '申请时间');
@@ -79,14 +81,14 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20061', 'zh_CN', '申请离职日期');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20062', 'zh_CN', '离职原因');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '20063', 'zh_CN', '离职原因备注');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '30001', 'zh_CN', '还有未生效的人事操作');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval', '30002', 'zh_CN', '还有审批中的人事申请');
 
 SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '101', 'zh_CN', '操作提示试用期', '${month}个月', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '102', 'zh_CN', '操作提示部门变动', '从 ${oldOrgNames} 调动至 ${newOrgNames}', '0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'enterpriseApproval', '1', 'zh_CN', '转正审批提醒正文', '您原定于${operationTime}${operationType}\r\n现在发起申请将使该${operationType}计划作废\r\n确定仍要提交吗？', '0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'enterpriseApproval', '2', 'zh_CN', '离职审批提醒正文', '您的${approvalName}正在审批中\r\n现在发起申请将使该申请作废\r\n确定仍要提交吗？', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'enterpriseApproval', '1', 'zh_CN', '人事审批提醒标题-计划', '已存在${operationType}计划', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'enterpriseApproval', '2', 'zh_CN', '人事审批提醒标题-审批', '已存在${approvalName}', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'enterpriseApproval', '11', 'zh_CN', '人事审批提醒正文-计划', '原定于${operationTime}${operationType}，继续发起申请，将作废原计划，确定继续吗？', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'enterpriseApproval', '12', 'zh_CN', '人事审批提醒正文-审批', '继续发起申请，将撤回原${approvalName}，确定继续吗？', '0');
 
 -- 审批3.0 end.
 
