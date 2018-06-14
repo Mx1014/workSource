@@ -6686,7 +6686,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     private List<ImportFileResultLog<ImportOrganizationOwnerDTO>> importOrganizationOwnerData(long organizationId, Long communityId, Integer namespaceId, List<ImportOrganizationOwnerDTO> datas) {
         List<ImportFileResultLog<ImportOrganizationOwnerDTO>> resultLogs = new ArrayList<>();
-        List<String> contactTokenList = new ArrayList<>();
+//        List<String> contactTokenList = new ArrayList<>();
         if (datas == null || datas.size() == 0) {
             return resultLogs;
         }
@@ -6780,7 +6780,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 compareOwnerInfo(exist, owner);
                 owner.setId(exist.getId());
             }
-            contactTokenList.add(dto.getContactToken());
+//            contactTokenList.add(dto.getContactToken());
 
             owner.setNamespaceId(namespaceId);
             owner.setCreatorUid(UserContext.currentUserId());
@@ -6792,13 +6792,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (ownerId == null) {
                 ownerId = propertyMgrProvider.createPropOwner(owner);
                 pmOwnerSearcher.feedDoc(owner);
+            }else {
+                propertyMgrProvider.updatePropOwner(owner);
+                pmOwnerSearcher.feedDoc(owner);
             }
-            Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
-            createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
-
-            if (StringUtils.hasLength(dto.getLivingTime())) {
-                long time = parseDate(dto.getLivingTime()).getTime();
-                createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
+            List<OrganizationOwnerAddress> ownerAddresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(namespaceId, ownerId);
+            List<Long> addressIds = new ArrayList<>();
+            if (ownerAddresses != null && ownerAddresses.size() > 0) {
+                addressIds = ownerAddresses.stream().map(OrganizationOwnerAddress::getAddressId).collect(Collectors.toList());
+            }
+            if (!addressIds.contains(address.getId())) {
+                Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
+                createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
+                if (StringUtils.hasLength(dto.getLivingTime())) {
+                    long time = parseDate(dto.getLivingTime()).getTime();
+                    createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
+                }
             }
         }
         return resultLogs;
