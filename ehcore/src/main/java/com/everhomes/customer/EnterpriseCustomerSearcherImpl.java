@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -538,6 +539,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command1.setCommunityId(customer.getCommunityId());
         command1.setCustomerId(customer.getId());
         List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
+        removeDuplicatedEntryInfo(entryInfos);
         if (entryInfos != null && entryInfos.size() > 0) {
 //            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
             entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
@@ -545,7 +547,16 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
         return dto;
     }
-    
+
+    private List<CustomerEntryInfoDTO> removeDuplicatedEntryInfo(List<CustomerEntryInfoDTO> entryInfos) {
+        Map<Long, CustomerEntryInfoDTO> map = new HashMap<>();
+        if (entryInfos != null && entryInfos.size() > 0) {
+            entryInfos.forEach((e) -> map.putIfAbsent(e.getAddressId(), e));
+            return new ArrayList<>(map.values());
+        }
+        return null;
+    }
+
     private Long getTomorrowLastTimestamp(Integer lastTrackingTime) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());

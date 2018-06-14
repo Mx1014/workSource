@@ -988,7 +988,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 || "taxpayerTypeId".equals(column.getFieldName()) || "relationWillingId".equals(column.getFieldName())
                 || "highAndNewTechId".equals(column.getFieldName()) || "entrepreneurialCharacteristicsId".equals(column.getFieldName())
                 || "serialEntrepreneurId".equals(column.getFieldName())) {
-            ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayName(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue());
+           // 历史bug
+           com.everhomes.varField.Field field =  fieldProvider.findField(10L, column.getFieldName());
+
+            ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), field.getId() == null ? 0L : field.getId());
             if(item != null) {
                 column.setValue(item.getItemId().toString());
             }else {

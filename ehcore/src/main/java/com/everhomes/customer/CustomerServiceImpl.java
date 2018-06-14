@@ -3167,6 +3167,18 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerTracking(tracking);
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if (customer != null) {
+            List<CustomerTracking> customerTrackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId());
+            if (customerTrackings != null && customerTrackings.size() > 0) {
+                customer.setLastTrackingTime(customerTrackings.get(0).getTrackingTime());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+//                enterpriseCustomerSearcher.feedDoc(customer);
+            }else {
+                customer.setLastTrackingTime(null);
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            }
+        }
     }
 
     @Override

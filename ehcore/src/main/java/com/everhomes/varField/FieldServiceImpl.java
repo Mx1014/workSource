@@ -1757,7 +1757,6 @@ public class FieldServiceImpl implements FieldService {
             //将map列表中剩下的置为inactive
             groups.forEach(group -> {
                 ScopeFieldGroup scopeFieldGroup = ConvertHelper.convert(group, ScopeFieldGroup.class);
-
                 scopeFieldGroup.setNamespaceId(cmd.getNamespaceId());
                 scopeFieldGroup.setCommunityId(cmd.getCommunityId());
                 if(scopeFieldGroup.getId() == null) {
@@ -1938,45 +1937,69 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName) {
-        ScopeFieldItem fieldItem = null;
-        Boolean namespaceFlag = true;
-        Boolean globalFlag = true;
-        if (communityId != null) {
-            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
-            if (fieldItem != null) {
-                namespaceFlag = false;
-                globalFlag = false;
-            }
-        }
-        if (namespaceFlag) {
-            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
-            if (fieldItem != null) {
-                globalFlag = false;
-            }
-        }
-        if (globalFlag) {
-            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(0, null, moduleName, displayName);
-        }
-        // 三种情况 要求删除的item不显示
-        if (fieldItem != null) {
-            List<Long> scopeIds = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
+          ScopeFieldItem fieldItem = null;
+//        Boolean namespaceFlag = true;
+//        Boolean globalFlag = true;
+//        if (communityId != null) {
+//            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
+//            if (fieldItem != null) {
+//                namespaceFlag = false;
+//                globalFlag = false;
+//            }
+//        }
+//        if (namespaceFlag) {
+//            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
+//            if (fieldItem != null) {
+//                globalFlag = false;
+//            }
+//        }
+//        if (globalFlag) {
+//            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(0, null, moduleName, displayName);
+//        }
+//        // 三种情况 要求删除的item不显示
+//        if (fieldItem != null) {
+            List<Long> scopeIds = fieldProvider.checkCustomerField(namespaceId, communityId, moduleName);
             // community
             if (scopeIds != null && scopeIds.size() > 0) {
                 fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
             } else {
                 //namespace
-                List<Long> namespaceIds = fieldProvider.checkCustomerField(namespaceId, null, fieldItem.getModuleName());
+                List<Long> namespaceIds = fieldProvider.checkCustomerField(namespaceId, null, moduleName);
                 if (namespaceIds != null && namespaceIds.size() > 0) {
                     fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
                 } else {
                     //global
-                    List<Long> globalIds = fieldProvider.checkCustomerField(0, null, fieldItem.getModuleName());
+                    List<Long> globalIds = fieldProvider.checkCustomerField(0, null, moduleName);
                     if (globalIds != null && globalIds.size() > 0) {
                         fieldItem = fieldProvider.findScopeFieldItemByDisplayName(0, null, moduleName, displayName);
                     }
                 }
             }
-        }
+//        }
+        return fieldItem;
+    }
+
+    @Override
+    public ScopeFieldItem findScopeFieldItemByDisplayNameAndFieldId(Integer namespaceId, Long communityId, String moduleName, String displayName, Long fieldId) {
+        ScopeFieldItem fieldItem = null;
+        // 三种情况 要求删除的item不显示
+            List<Long> scopeIds = fieldProvider.checkCustomerField(namespaceId, communityId, moduleName);
+            // community
+            if (scopeIds != null && scopeIds.size() > 0) {
+                fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName,fieldId, displayName);
+            } else {
+                //namespace
+                List<Long> namespaceIds = fieldProvider.checkCustomerField(namespaceId, null, moduleName);
+                if (namespaceIds != null && namespaceIds.size() > 0) {
+                    fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, fieldId,displayName);
+                } else {
+                    //global
+                    List<Long> globalIds = fieldProvider.checkCustomerField(0, null, moduleName);
+                    if (globalIds != null && globalIds.size() > 0) {
+                        fieldItem = fieldProvider.findScopeFieldItemByDisplayName(0, null, moduleName,fieldId, displayName);
+                    }
+                }
+            }
         return fieldItem;
     }
 
