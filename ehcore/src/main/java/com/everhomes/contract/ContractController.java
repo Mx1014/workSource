@@ -314,5 +314,22 @@ public class ContractController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /contract/getDuration</b>
+	 * <p>查找合同截断时的账单时间段</p>
+	 */
+	@RequestMapping("getDuration")
+	@RestReturn(value = DurationParamDTO.class)
+	public RestResponse getDuration(GetDurationParamCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		DurationParamDTO res = contractService.getDuration(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
 
 }

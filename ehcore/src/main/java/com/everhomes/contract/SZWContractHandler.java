@@ -210,6 +210,12 @@ public class SZWContractHandler implements ContractService{
 		return response;
 	}
 
+	@Override
+	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
     
 }

@@ -711,4 +711,10 @@ public class ZJContractHandler implements ContractService{
         }
         return false;
     }
+
+	@Override
+	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

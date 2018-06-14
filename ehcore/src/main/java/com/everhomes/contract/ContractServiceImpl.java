@@ -8,6 +8,7 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBills;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -100,6 +101,8 @@ import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import org.apache.axis.types.Duration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.hibernate.cache.internal.CollectionCacheInvalidator;
@@ -1383,11 +1386,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		contractProvider.updateContract(contract);
 		
-		//如果是变更合同，将父合同中关联的未出账单记为无效账单 by tangcen
+		//对变更合同  by tangcen
+		//将父合同中关联的未出账单记为无效账单
+		//前端传过来的CostGenerationMethod字段实际上是对父合同未出账单的处理方式，因此把CostGenerationMethod的值存在父合同中，而非子合同中
 		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))&&
 				!ContractStatus.DRAFT.equals(ContractStatus.fromStatus(cmd.getStatus()))) {
-			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),
-					contract.getParentId(),contract.getCreateTime());
+			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getCreateTime());
+			contract.setCostGenerationMethod(null);
+			Contract parentContract = checkContract(contract.getParentId());
+			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 		}
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
@@ -1443,6 +1450,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setDenunciationReason(cmd.getDenunciationReason());
 		contract.setDenunciationUid(cmd.getDenunciationUid());
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
+		contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 		//将此合同关联的未出账单记为无效账单 by tangcen
@@ -1925,6 +1933,22 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				dto.setLayoutName(item.getItemDisplayName());
 			}
 		}
+		
+		if (ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			dto.setCostGenerationMethod(parentContract.getCostGenerationMethod());
+			//向前端返回时间范围
+			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(contract.getId());
+			if (chargingItems!=null && chargingItems.size()>0) {
+				ContractChargingItem chargingItem = chargingItems.get(0);
+				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+			}
+			dto.setEndTimeByDay(yyyyMMdd.format(contract.getCreateTime()));
+			PaymentBills bill = assetProvider.getFirstUnsettledBill(parentContract.getId());
+			dto.setEndTimeByPeriod(bill.getDateStrEnd());
+		}
+		
 		processContractApartments(dto);
 		processContractChargingItems(dto);
 		processContractAttachments(dto);
@@ -2379,5 +2403,22 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		DurationParamDTO dto = new DurationParamDTO();
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(cmd.getContractId());
+		if (chargingItems!=null && chargingItems.size()>0) {
+			ContractChargingItem chargingItem = chargingItems.get(0);
+			dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+		}
+		if (cmd.getEndTimeByDay()!=null) {
+			dto.setEndTimeByDay(yyyyMMdd.format(new Timestamp(cmd.getEndTimeByDay())));
+		}
+		PaymentBills bill = assetProvider.getFirstUnsettledBill(cmd.getContractId());
+		dto.setEndTimeByPeriod(bill.getDateStrEnd());
+		return dto;
 	}
 }

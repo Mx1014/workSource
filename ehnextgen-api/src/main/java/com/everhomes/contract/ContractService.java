@@ -51,4 +51,6 @@ public interface ContractService {
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
 
     ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
+    //add by tangcen 2018年6月13日20:19:30
+	DurationParamDTO getDuration(GetDurationParamCommand cmd);
 }

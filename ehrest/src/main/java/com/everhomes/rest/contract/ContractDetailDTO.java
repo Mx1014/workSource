@@ -62,6 +62,7 @@ import java.util.List;
  *     <li>denunciationName: 退约人姓名</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
+ *     <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -144,8 +145,45 @@ public class ContractDetailDTO {
     private BigDecimal lumpSumPayment;
     private String treatyParticulars;
     private Byte paymentFlag;
+    //add by tangcen 2018年6月13日21:16:10
+    private Byte costGenerationMethod;
+    private String startTime;
+	private String endTimeByPeriod;
+	private String endTimeByDay;
+	
+    public String getStartTime() {
+		return startTime;
+	}
 
-    @ItemType(ContractChargingChangeDTO.class)
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTimeByPeriod() {
+		return endTimeByPeriod;
+	}
+
+	public void setEndTimeByPeriod(String endTimeByPeriod) {
+		this.endTimeByPeriod = endTimeByPeriod;
+	}
+
+	public String getEndTimeByDay() {
+		return endTimeByDay;
+	}
+
+	public void setEndTimeByDay(String endTimeByDay) {
+		this.endTimeByDay = endTimeByDay;
+	}
+
+	public Byte getCostGenerationMethod() {
+		return costGenerationMethod;
+	}
+
+	public void setCostGenerationMethod(Byte costGenerationMethod) {
+		this.costGenerationMethod = costGenerationMethod;
+	}
+
+	@ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
