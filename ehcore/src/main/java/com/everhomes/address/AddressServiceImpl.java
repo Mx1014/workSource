@@ -1975,7 +1975,19 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				errorLogs.add(log);
 				continue;
 			}
+			
+			
 
+			if (StringUtils.isNotEmpty(data.getStatus())) {
+				Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
+				if (livingStatus==-1) {
+					log.setData(data);
+					log.setErrorLog("apartmentStatus is error");
+					log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_STATUS_TYPE);
+					errorLogs.add(log);
+					continue;
+				}
+			}
             /*Address address = addressProvider.findActiveAddressByBuildingApartmentName(community.getNamespaceId(), community.getId(), data.getBuildingName(), data.getApartmentName());
 			if(address != null) {
                 log.setData(data);

@@ -22,5 +22,6 @@ public interface AddressServiceErrorCode {
 
     int ERROR_APARTMENT_STATUS_EMPTY = 20011;
     int ERROR_APARTMENT_ORIENTATION_LENTH = 20012;
+    int ERROR_APARTMENT_STATUS_TYPE = 20013;
     
 }

@@ -94,6 +94,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -1317,10 +1318,19 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setErrorLog("latitude longitude error");
 			return log;
 		}
+		//正则校验数字
+		if (StringUtils.isNotEmpty(data.getAreaSize())) {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getAreaSize()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_AREASIZE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("AreaSize format is error");
+				return log;
+			}
+		}
 		
 		return null;
 	}
-
 
 	private List<ImportBuildingDataDTO> handleImportBuildingData(List resultList) {
 		List<ImportBuildingDataDTO> list = new ArrayList<>();

@@ -12,3 +12,5 @@ INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUE
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'address', '20011', 'zh_CN', '门牌状态不能为空');
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'address', '20012', 'zh_CN', '门牌朝向输入过长');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'address', '20013', 'zh_CN', '门牌状态输入格式不正确');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '20006', 'zh_CN', '面积格式错误');
