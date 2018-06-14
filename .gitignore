@@ -62,4 +62,4 @@ ehrest-response/pom.xml
 ehtest-integration/pom.xml
 oauth2-client/pom.xml
 
-ehcore/transaction-logs
+transaction-logs/

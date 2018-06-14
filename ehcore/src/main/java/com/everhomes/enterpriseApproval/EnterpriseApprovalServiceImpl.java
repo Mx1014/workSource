@@ -399,7 +399,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             stepDTO.setFlowCaseId(flowCase.getId());
             stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
             stepDTO.setStepCount(flowCase.getStepCount());
-            stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+            stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
             stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
             stepDTO.setOperatorId(userId);
             flowService.processAutoStep(stepDTO);
