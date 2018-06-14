@@ -69,7 +69,13 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
             JSONObject ret = new JSONObject();
             JSONObject jsonObject = (JSONObject) new JSONParser().parse(instanceConfig);
             String url = (String)jsonObject.get("url");
-            String categoryId = (String)jsonObject.get("categoryId");
+            String categoryId = "";
+            try{
+                Long temp = (Long)jsonObject.get("categoryId");
+                categoryId = String.valueOf(temp);
+            }catch (Exception e){
+                categoryId = (String)jsonObject.get("categoryId");
+            }
             String[] split = url.split("\\?");
             if(split.length != 2){
                 return null;
