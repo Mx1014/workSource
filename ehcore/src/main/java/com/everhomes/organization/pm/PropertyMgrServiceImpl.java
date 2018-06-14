@@ -6815,25 +6815,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     private String getDisplayName(ImportOrganizationOwnerDTO dto) {
         String displayName = null;
-        if(dto.getContactName()==null){
+        if (StringUtils.isEmpty(dto.getContactName())) {
             displayName = "客户名称";
         }
-        if(dto.getContactType()==null){
+        if(StringUtils.isEmpty(dto.getContactType())){
             displayName = "客户类型";
         }
-        if(dto.getContactToken()==null){
+        if (StringUtils.isEmpty(dto.getContactToken())) {
             displayName = "手机号码";
         }
-        if(dto.getGender()==null){
+        if (StringUtils.isEmpty(dto.getGender())) {
             displayName = "性别";
         }
-        if(dto.getBuilding()==null){
+        if (StringUtils.isEmpty(dto.getBuilding())) {
             displayName = "楼栋";
         }
-        if(dto.getAddress()==null){
+        if (StringUtils.isEmpty(dto.getAddress())) {
             displayName = "门牌";
         }
-        if(dto.getLivingStatus()==null){
+        if (StringUtils.isEmpty(dto.getLivingStatus())) {
             displayName = "是否在户";
         }
         return displayName;
