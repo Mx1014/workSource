@@ -781,13 +781,14 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         ArchivesOperationalConfigurationDTO archives = archivesService.getArchivesOperationByUserId(userId, organizationId, operationType);
         if (archives != null) {
             dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.ARCHIVES_TITLE, "zh_CN", "Remind"));
             Map<String, Object> map = new LinkedHashMap<>();
-            map.put("operationTime", archives.getOperateDate());
             map.put("operationType", ArchivesUtil.resolveArchivesEnum(archives.getOperateType(),
                     ArchivesParameter.OPERATION_TYPE));
-            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalStringCode.SCOPE,
-                    EnterpriseApprovalStringCode.ARCHIVES_CONTENT, "zh_CN", map, "Content!"));
+            dto.setTitle(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
+                    EnterpriseApprovalTemplateCode.ARCHIVES_TITLE, "zh_CN", map, "Remind!"));
+            map.put("operationTime", archives.getOperateDate());
+            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
+                    EnterpriseApprovalTemplateCode.ARCHIVES_CONTENT, "zh_CN", map, "Content!"));
             return dto;
         }
 
@@ -795,11 +796,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         List<FlowCaseDetail> details = listActiveFlowCasesByApprovalId(organizationId, approvalId);
         if (details != null && details.size() > 0) {
             dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            dto.setTitle(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPROVAL_TITLE, "zh_CN", "Remind"));
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("approvalName", ga.getApprovalName());
-            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalStringCode.SCOPE,
-                    EnterpriseApprovalStringCode.APPROVAL_CONTENT, "zh_CN", map, "Content!"));
+            dto.setTitle(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
+                    EnterpriseApprovalTemplateCode.APPROVAL_TITLE, "zh_CN", map, "Remind!"));
+            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
+                    EnterpriseApprovalTemplateCode.APPROVAL_CONTENT, "zh_CN", map, "Content!"));
             return dto;
         }
 
