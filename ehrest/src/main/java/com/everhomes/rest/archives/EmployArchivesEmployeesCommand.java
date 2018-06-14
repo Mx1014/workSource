@@ -12,6 +12,7 @@ import java.util.List;
  * <li>organizationId: 公司 id</li>
  * <li>employmentTime: 转正日期</li>
  * <li>employmentEvaluation: 转正评价</li>
+ * <li>logFlag: 0-无需人事记录, 1-需要人事记录</li>
  * </ul>
  */
 public class EmployArchivesEmployeesCommand {
@@ -26,7 +27,7 @@ public class EmployArchivesEmployeesCommand {
     private String employmentEvaluation;
 
     //  同样的操作流程，只是操作类型名称不同时传递次参数 add by ryan.
-    private Byte operationType;
+    private Byte logFlag;
 
     public EmployArchivesEmployeesCommand() {
     }
@@ -63,12 +64,12 @@ public class EmployArchivesEmployeesCommand {
         this.employmentEvaluation = employmentEvaluation;
     }
 
-    public Byte getOperationType() {
-        return operationType;
+    public Byte getLogFlag() {
+        return logFlag;
     }
 
-    public void setOperationType(Byte operationType) {
-        this.operationType = operationType;
+    public void setLogFlag(Byte logFlag) {
+        this.logFlag = logFlag;
     }
 
     @Override

@@ -1068,7 +1068,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         log.setOrganizationId(cmd.getOrganizationId());
         log.setOperationType(ArchivesOperationType.CHECK_IN.getCode());
         log.setOperationTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
-//        Organization department = organizationProvider.findOrganizationById(cmd.getDepartmentIds().get(0));
         log.setStringTag1(getOrgNamesByIds(cmd.getDepartmentIds()));
         log.setStringTag2(ArchivesUtil.resolveArchivesEnum(cmd.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
         Map<String, Object> map = new LinkedHashMap<>();
@@ -1092,11 +1091,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
-                if (cmd.getOperationType() == null) {
-                    log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
-                    log.setStringTag1(cmd.getEmploymentEvaluation());
-                } else
-                    log.setOperationType(cmd.getOperationType());
+                log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
+                log.setStringTag1(cmd.getEmploymentEvaluation());
                 log.setOperatorUid(userId);
                 log.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
                 archivesProvider.createOperationalLog(log);
@@ -1180,10 +1176,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 return dto;
             }).collect(Collectors.toList());
         }
-/*        List<ArchivesLogs> logs = archivesProvider.listArchivesLogs(organizationId, detailId);
-        if (logs != null && logs.size() > 0) {
-            return logs.stream().map(r -> ConvertHelper.convert(r, ArchivesLogDTO.class)).collect(Collectors.toList());
-        }*/
         return results;
     }
 
@@ -1200,6 +1192,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 break;
             case SELF_EMPLOY:
                 map.put(ArchivesParameter.EMPLOYMENT_REASON, log.getStringTag1());
+                break;
             case TRANSFER:
                 if (log.getStringTag1() != null)
                     map.put(ArchivesParameter.DEPARTMENT, log.getStringTag1());
@@ -2559,30 +2552,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
         return results;
     }
-
-    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
-    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
-    //@PostConstruct
-    /*@PostConstruct
-    @Override
-    public void runArchivesNotificationCycle() {
-        if (scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
-            return;
-        ZoneId zoneId = ZoneId.systemDefault();
-        LocalDateTime initTime = LocalDateTime.now().plusHours(1);
-        initTime = LocalDateTime.of(initTime.getYear(), initTime.getMonthValue(), initTime.getDayOfMonth(), initTime.getHour(), 0);
-        ZonedDateTime zdt = initTime.atZone(zoneId);
-        java.util.Date date = java.util.Date.from(zdt.toInstant());
-        scheduleProvider.scheduleRepeatJob(
-                ARCHIVES_NOTIFICATION + date,
-                ARCHIVES_NOTIFICATION + date,
-                date,
-                60 * 60 * 1000,
-                0,
-                ArchivesNotificationJob.class,
-                new HashMap<>());
-        LOGGER.info("======================================== The first ArchivesNotificationJob has been prepared at " + date);
-    }*/
 
     @Override
     public void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime) {

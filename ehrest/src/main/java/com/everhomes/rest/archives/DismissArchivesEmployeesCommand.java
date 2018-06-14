@@ -14,8 +14,7 @@ import java.util.List;
  * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.ArchivesDismissReason}</li>
  * <li>dismissTime: 离职日期</li>
  * <li>dismissRemark: 离职备注</li>
- * <li>socialSecurityEndMonth: 社保减员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
- * <li>accumulationFundEndMonth: 离职减员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
+ * <li>logFlag: 0-无需人事记录, 1-需要人事记录</li>
  * </ul>
  */
 public class DismissArchivesEmployeesCommand {
@@ -34,7 +33,8 @@ public class DismissArchivesEmployeesCommand {
     private String dismissRemark;
 
     //  同样的操作流程，只是操作类型名称不同时传递次参数 add by ryan.
-    private Byte operationType;
+    private Byte logFlag;
+
 
     public DismissArchivesEmployeesCommand() {
     }
@@ -87,12 +87,12 @@ public class DismissArchivesEmployeesCommand {
         this.dismissRemark = dismissRemark;
     }
 
-    public Byte getOperationType() {
-        return operationType;
+    public Byte getLogFlag() {
+        return logFlag;
     }
 
-    public void setOperationType(Byte operationType) {
-        this.operationType = operationType;
+    public void setLogFlag(Byte logFlag) {
+        this.logFlag = logFlag;
     }
 
     @Override
