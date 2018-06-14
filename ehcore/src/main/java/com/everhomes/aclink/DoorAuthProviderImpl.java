@@ -169,8 +169,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
+        query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
         query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc());
-        if(locator.getAnchor() != null) {
+        if(locator.getAnchor() != null && locator.getAnchor() != 0) {
             query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.le(new Timestamp(locator.getAnchor())));
             }
         // count<=0默认查全部
@@ -461,7 +462,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
 
     @Override
-    public List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, Byte rightRemote, int count) {
+    public List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, Byte rightRemote, String driver, int count) {
         return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -470,9 +471,14 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte) 1));
                 if(rightRemote != null && rightRemote == (byte) 1){
                 	query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq((byte) 1));
                 }
+
+	            if(driver != null && !driver.isEmpty()){
+	            	query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));
+	            }
                 return query;
             }
 
