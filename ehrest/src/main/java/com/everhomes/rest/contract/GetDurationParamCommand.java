@@ -24,6 +24,5 @@ public class GetDurationParamCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
 
 }
