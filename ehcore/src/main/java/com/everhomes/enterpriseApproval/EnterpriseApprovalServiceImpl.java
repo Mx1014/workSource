@@ -782,11 +782,11 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         if (archives != null) {
             dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
             Map<String, Object> map = new LinkedHashMap<>();
-            map.put("operationType", ArchivesUtil.resolveArchivesEnum(archives.getOperateType(),
+            map.put("operationType", ArchivesUtil.resolveArchivesEnum(archives.getOperationType(),
                     ArchivesParameter.OPERATION_TYPE));
             dto.setTitle(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
                     EnterpriseApprovalTemplateCode.ARCHIVES_TITLE, "zh_CN", map, "Remind!"));
-            map.put("operationTime", archives.getOperateDate());
+            map.put("operationTime", archives.getOperationDate());
             dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
                     EnterpriseApprovalTemplateCode.ARCHIVES_CONTENT, "zh_CN", map, "Content!"));
             return dto;

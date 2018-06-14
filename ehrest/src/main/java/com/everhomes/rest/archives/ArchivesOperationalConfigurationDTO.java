@@ -8,8 +8,8 @@ import java.sql.Date;
  * <ul>
  * <li>detailId: 员工detailId</li>
  * <li>contactName: 员工姓名</li>
- * <li>operateType: 操作类型 0-入职 1-转正 2-调动 3-离职 参考{@link com.everhomes.rest.archives.ArchivesOperationType}</li>
- * <li>operateDate: 操作时间</li>
+ * <li>operationType: 操作类型 0-入职 1-转正 2-调动 3-离职 参考{@link com.everhomes.rest.archives.ArchivesOperationType}</li>
+ * <li>operationDate: 操作时间</li>
  * <li>status: 状态 0-取消 1-等待 2-已完成 参考{@link com.everhomes.rest.archives.ArchivesOperationStatus}</li>
  * </ul>
  */
@@ -21,9 +21,9 @@ public class ArchivesOperationalConfigurationDTO {
 
     private String contactName;
 
-    private Byte operateType;
+    private Byte operationType;
 
-    private Date operateDate;
+    private Date operationDate;
 
     private Byte status;
 
@@ -54,20 +54,20 @@ public class ArchivesOperationalConfigurationDTO {
         this.contactName = contactName;
     }
 
-    public Byte getOperateType() {
-        return operateType;
+    public Byte getOperationType() {
+        return operationType;
     }
 
-    public void setOperateType(Byte operateType) {
-        this.operateType = operateType;
+    public void setOperationType(Byte operationType) {
+        this.operationType = operationType;
     }
 
-    public Date getOperateDate() {
-        return operateDate;
+    public Date getOperationDate() {
+        return operationDate;
     }
 
-    public void setOperateDate(Date operateDate) {
-        this.operateDate = operateDate;
+    public void setOperationDate(Date operationDate) {
+        this.operationDate = operationDate;
     }
 
     public Byte getStatus() {

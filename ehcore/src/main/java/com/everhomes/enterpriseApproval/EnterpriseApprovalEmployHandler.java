@@ -17,8 +17,9 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,8 @@ import java.util.stream.Collectors;
 public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandler {
 
     static final String ENTERPRISE_APPROVAL_EMPLOY_HANDLER_NAME = EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX + "EMPLOY_APPLICATION";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApprovalEmployHandler.class);
 
     @Autowired
     private ArchivesService archivesService;
@@ -89,14 +92,18 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
 
             //  2.set the new operate
             GeneralApprovalVal generalApprovalVal = generalApprovalValProvider.getSpecificApprovalValByFlowCaseId(flowCase.getId(), GeneralFormFieldType.EMPLOY_APPLICATION.getCode());
-            if (generalApprovalVal == null)
+            if (generalApprovalVal == null){
+                LOGGER.error("No value");
                 return null;
-            ComponentEmployApplicationValue val = ConvertHelper.convert(generalApprovalVal.getFieldStr3(), ComponentEmployApplicationValue.class);
-            if (val.getEmploymentTime() == null)
+            }
+            ComponentEmployApplicationValue val = (ComponentEmployApplicationValue) StringHelper.fromJsonString(generalApprovalVal.getFieldStr3(), ComponentEmployApplicationValue.class);
+            if (val.getEmploymentTime() == null){
+                LOGGER.error("EmploymentTime is null");
                 return null;
+            }
             EmployArchivesEmployeesCommand cmd = new EmployArchivesEmployeesCommand();
             cmd.setDetailIds(Collections.singletonList(member.getDetailId()));
-            cmd.setOrganizationId(flowCase.getApplierOrganizationId());
+            cmd.setOrganizationId(member.getOrganizationId()); // the organizationId must be flowCase's applierOrganizationId
             cmd.setEmploymentTime(val.getEmploymentTime());
             cmd.setEmploymentEvaluation(val.getEmploymentReason());
             cmd.setOperationType(ArchivesOperationType.SELF_EMPLOY.getCode());  // operationType for the archives log, the config'type is still EMPLOY

@@ -19,8 +19,9 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,8 @@ import java.util.stream.Collectors;
 public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandler {
 
     static final String ENTERPRISE_APPROVAL_DISMISS_HANDLER_NAME = EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX + "DISMISS_APPLICATION";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApprovalDismissHandler.class);
 
     @Autowired
     private ArchivesService archivesService;
@@ -89,11 +92,15 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
 
             //  2.set the new operate
             GeneralApprovalVal generalApprovalVal = generalApprovalValProvider.getSpecificApprovalValByFlowCaseId(flowCase.getId(), GeneralFormFieldType.DISMISS_APPLICATION.getCode());
-            if (generalApprovalVal == null)
+            if (generalApprovalVal == null){
+                LOGGER.error("No value");
                 return null;
-            ComponentDismissApplicationValue val = ConvertHelper.convert(generalApprovalVal.getFieldStr3(), ComponentDismissApplicationValue.class);
-            if (val.getDismissTime() == null)
+            }
+            ComponentDismissApplicationValue val = (ComponentDismissApplicationValue) StringHelper.fromJsonString(generalApprovalVal.getFieldStr3(), ComponentDismissApplicationValue.class);
+            if (val.getDismissTime() == null){
+                LOGGER.error("DismissTime is null");
                 return null;
+            }
             DismissArchivesEmployeesCommand cmd = new DismissArchivesEmployeesCommand();
             cmd.setDetailIds(Collections.singletonList(member.getDetailId()));
             cmd.setOrganizationId(flowCase.getApplierOrganizationId());
