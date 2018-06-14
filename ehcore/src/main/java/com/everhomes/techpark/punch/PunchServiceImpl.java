@@ -8771,11 +8771,16 @@ public class PunchServiceImpl implements PunchService {
         		continue;
         	}
             if (log.getPunchType().equals(pucnhType) && log.getPunchIntervalNo().equals(punchIntervalNo)) {
-                if (pucnhType.equals(PunchType.ON_DUTY.getCode())) {
-                    if (result == null || log.getPunchTime().before(result.getPunchTime()))
+            	//added by wh 2018-6-14 如果result为空或者result的punchTime为空直接替换
+            	//之后要判断log的punchTime不为空
+            	if(null == result || result.getPunchTime() == null){
+            		result = log;
+            	}
+            	else if (pucnhType.equals(PunchType.ON_DUTY.getCode())) {
+                    if (log.getPunchTime() != null && log.getPunchTime().before(result.getPunchTime()))
                         result = log;
                 } else if (pucnhType.equals(PunchType.OFF_DUTY.getCode())) {
-                    if (result == null || log.getPunchTime().after(result.getPunchTime()))
+                    if (log.getPunchTime() != null && log.getPunchTime().after(result.getPunchTime()))
                         result = log;
                 }
             }

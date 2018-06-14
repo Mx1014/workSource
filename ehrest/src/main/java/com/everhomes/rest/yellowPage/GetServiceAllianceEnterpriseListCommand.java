@@ -13,7 +13,8 @@ import com.everhomes.util.StringHelper;
  *  <li>type:类型  </li>
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>displayFlag: 是否启用 0-不启用 1-启用 传空则表示所有</li>
- *  <li>nextPageAnchor: 下一页锚点</li>
+ *  <li>nextPageAnchor: 下一页锚点(旧版本使用)</li>
+ *  <li>pageAnchor: 下一页锚点（新版本使用）</li>
  *  <li>pageSize: 每页的数量</li>
  *  <li>sourceRequestType: 客户端或者web端 ,web端请务必传值。 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType}</li>
  * </ul>
@@ -32,6 +33,8 @@ public class GetServiceAllianceEnterpriseListCommand {
 
 	private Long nextPageAnchor;
 
+	private Long pageAnchor;
+	
 	private Integer pageSize;
 	
 	private Byte displayFlag;
@@ -111,6 +114,9 @@ public class GetServiceAllianceEnterpriseListCommand {
 
 
 	public Long getNextPageAnchor() {
+		if (null == nextPageAnchor) {
+			return pageAnchor;
+		}
 		return nextPageAnchor;
 	}
 
@@ -161,5 +167,16 @@ public class GetServiceAllianceEnterpriseListCommand {
 
 	public void setDisplayFlag(Byte displayFlag) {
 		this.displayFlag = displayFlag;
+	}
+
+	public Long getPageAnchor() {
+		if (null == pageAnchor) {
+			return nextPageAnchor;
+		}
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 }
