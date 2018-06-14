@@ -741,6 +741,7 @@ public class AddressProviderImpl implements AddressProvider {
 //                .set(Tables.EH_ADDRESSES.LIVING_STATUS, status.getCode())
 //                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
 //                .execute();
+        LOGGER.info("address living status xfesijfisejsj");
         return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
                 .set(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS, status)
                 .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))

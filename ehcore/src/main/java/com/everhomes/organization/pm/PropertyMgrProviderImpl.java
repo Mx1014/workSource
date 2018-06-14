@@ -2110,6 +2110,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@Override
 	public Long changeReservationStatus(Long reservationId, Byte status) {
+	    LOGGER.info("sdhfsdhfjsdjfsj:   sdfs");
 		this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_PM_RESOUCRE_RESERVATIONS)
 				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS, status)
 				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))

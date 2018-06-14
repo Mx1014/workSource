@@ -6760,14 +6760,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		resourceReservation.setCommunityId(cmd.getCommunityId());
 		resourceReservation.setNamespaceId(cmd.getNamespaceId());
 		resourceReservation.setCreatorUid(UserContext.currentUserId());
-		resourceReservation.setEndTime(start);
-		resourceReservation.setStartTime(end);
+		resourceReservation.setEndTime(end);
+		resourceReservation.setStartTime(start);
 		resourceReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
 		resourceReservation.setStatus((byte)2);
 		resourceReservation.setAddressId(cmd.getAddressId());
         Byte livingStatus = addressProvider.getAddressLivingStatus(cmd.getAddressId());
         resourceReservation.setPreviousLivingStatus(livingStatus);
-		this.dbProvider.execute((status) -> {
+//		this.dbProvider.execute((status) -> {
 
 			// living status的完整枚举记录在前端，后端和数据库没有
 			int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
@@ -6785,9 +6785,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                         "Address Reservation", Date.from(end.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant())
                         , ReservationJob.class, param);
             }
-			return null;
-		});
-	}
+//			return null;
+//		});
+        System.out.println("done");
+    }
 
 	@Override
 	public List<ListReservationsDTO> listReservations(ListReservationsCommand cmd) {

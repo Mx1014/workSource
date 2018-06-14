@@ -2163,7 +2163,7 @@ public class PropertyMgrController extends ControllerBase {
 	// TODO: 2018/6/12 done
 	/**
 	 * <p>delete an reservation</p>
-	 * <b>URL: /pm/deletaReservation</b>
+	 * <b>URL: /pm/deleteReservation</b>
 	 */
 	@RequestMapping("deleteReservation")
 	public RestResponse deleteReservation(DeleteReservationCommand cmd){
