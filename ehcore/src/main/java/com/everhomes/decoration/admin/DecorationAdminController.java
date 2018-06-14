@@ -45,7 +45,7 @@ public class DecorationAdminController extends ControllerBase {
      */
     @RequestMapping("exportRequests")
     public void exportRequests(@Valid SearchRequestsCommand cmd, HttpServletResponse response) {
-        this.decorationService.exportRentalBills(cmd,response);
+        this.decorationService.exportRequests(cmd,response);
     }
 
     /**

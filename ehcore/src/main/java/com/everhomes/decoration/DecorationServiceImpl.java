@@ -1060,7 +1060,7 @@ public class DecorationServiceImpl implements  DecorationService {
     }
 
     @Override
-    public void exportRentalBills(SearchRequestsCommand cmd, HttpServletResponse response) {
+    public void exportRequests(SearchRequestsCommand cmd, HttpServletResponse response) {
         if (cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4300043010L, cmd.getAppId(), null, cmd.getCurrentProjectId());
         }
@@ -1106,6 +1106,7 @@ public class DecorationServiceImpl implements  DecorationService {
         for (DecorationRequestDTO dto:dtos){
             this.setNewRequestsBookRow(sheet,dto);
         }
+
         try {
             wb.write(out);
             wb.close();

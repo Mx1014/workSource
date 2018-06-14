@@ -62,7 +62,7 @@ public interface DecorationService {
 
     GetUserMemberGroupResponse getUserMemberGroup(GetUserMemberGroupCommand cmd);
 
-    void exportRentalBills(SearchRequestsCommand cmd, HttpServletResponse response);
+    void exportRequests(SearchRequestsCommand cmd, HttpServletResponse response);
 
     void exportWorkers(ListWorkersCommand cmd, HttpServletResponse response);
 
