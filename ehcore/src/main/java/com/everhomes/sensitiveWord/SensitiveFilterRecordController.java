@@ -6,10 +6,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.sensitiveWord.admin.GetSensitiveFilterRecordAdminCommand;
-import com.everhomes.rest.sensitiveWord.admin.ListSensitiveFilterRecordAdminCommand;
-import com.everhomes.rest.sensitiveWord.admin.ListSensitiveFilterRecordAdminResponse;
-import com.everhomes.rest.sensitiveWord.admin.SensitiveFilterRecordAdminDTO;
+import com.everhomes.rest.sensitiveWord.admin.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +45,21 @@ public class SensitiveFilterRecordController extends ControllerBase{
     public RestResponse listSensitiveFilterRecord(ListSensitiveFilterRecordAdminCommand cmd) {
         ListSensitiveFilterRecordAdminResponse listSensitiveFilterRecordAdminResponse = this.sensitiveFilterRecordService.listSensitiveRecord(cmd);
         RestResponse response = new RestResponse(listSensitiveFilterRecordAdminResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /sensitiveFilterRecord/getSensitiveWordUrl</b>
+     * <p>获取敏感词文本URL路径</p>
+     *
+     */
+    @RequestMapping("getSensitiveWordUrl")
+    @RestReturn(value = GetSensitiveWordUrlAdminResponse.class)
+    public RestResponse getSensitiveWordUrl() {
+        GetSensitiveWordUrlAdminResponse getSensitiveWordUrlAdminResponse = this.sensitiveFilterRecordService.getSensitiveWordUrl();
+        RestResponse response = new RestResponse(getSensitiveWordUrlAdminResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

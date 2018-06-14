@@ -5,14 +5,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.forum.ForumModuleType;
-import com.everhomes.rest.sensitiveWord.admin.GetSensitiveFilterRecordAdminCommand;
-import com.everhomes.rest.sensitiveWord.admin.ListSensitiveFilterRecordAdminCommand;
-import com.everhomes.rest.sensitiveWord.admin.ListSensitiveFilterRecordAdminResponse;
-import com.everhomes.rest.sensitiveWord.admin.SensitiveFilterRecordAdminDTO;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.rest.sensitiveWord.admin.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -79,5 +73,13 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
             sensitiveFilterRecordAdminDTO.setModuleName(serviceModule.getName());
         }
         return sensitiveFilterRecordAdminDTO;
+    }
+
+    @Override
+    public GetSensitiveWordUrlAdminResponse getSensitiveWordUrl() {
+        String url = configurationProvider.getValue(0, "sensitiveword.url", "");
+        GetSensitiveWordUrlAdminResponse response = new GetSensitiveWordUrlAdminResponse();
+        response.setUrl(url);
+        return response;
     }
 }
