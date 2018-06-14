@@ -8,6 +8,7 @@ import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sensitiveWord.InitSensitiveWordTrieCommand;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.WebTokenGenerator;
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
@@ -18,14 +19,16 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 
 @Component
 public class SensitiveWordServiceImpl implements SensitiveWordService{
 
-    private static AhoCorasickDoubleArrayTrie<String> acdat;
+    private static AhoCorasickDoubleArrayTrie<String> acdat = null;
 
     private static String url;
 
@@ -64,16 +67,23 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
 
     @Override
     public void filterWords(FilterWordsCommand cmd) {
+        cmd.setCreatorUid(UserContext.currentUserId());
+        cmd.setNamespaceId(Long.valueOf(UserContext.getCurrentNamespaceId()));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        cmd.setPublishTime(sdf.format(new Date()));
         List<String> wordList = new ArrayList<>();
-        if (null == acdat) {
-            acdat = new AhoCorasickDoubleArrayTrie<String>();
-        }
-        List<AhoCorasickDoubleArrayTrie.Hit<String>> hits = acdat.parseText(cmd.getText().toUpperCase());
-        for (AhoCorasickDoubleArrayTrie.Hit<String> hit : hits) {
-            wordList.add(hit.value);
-        }
-        if (wordList.size() > 0) {
-            createSentiveRecord(cmd, wordList);
+        if (null != acdat && acdat.size() >0) {
+            for (String text : cmd.getTextList()) {
+                List<AhoCorasickDoubleArrayTrie.Hit<String>> hits = acdat.parseText(text.toUpperCase());
+                for (AhoCorasickDoubleArrayTrie.Hit<String> hit : hits) {
+                    if (!wordList.contains(hit.value)) {
+                        wordList.add(hit.value);
+                    }
+                }
+            }
+            if (wordList.size() > 0) {
+                createSentiveRecord(cmd, wordList);
+            }
         }
     }
 
@@ -119,7 +129,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
             }
         }
         sensitiveFilterRecord.setPublishTime(Timestamp.valueOf(cmd.getPublishTime()));
-        sensitiveFilterRecord.setText(cmd.getText());
+        sensitiveFilterRecord.setText(cmd.getTextList().toString().substring(1,cmd.getTextList().toString().length()-1));
         this.sensitiveFilterRecordProvider.createSensitiveFilterRecord(sensitiveFilterRecord);
     }
 

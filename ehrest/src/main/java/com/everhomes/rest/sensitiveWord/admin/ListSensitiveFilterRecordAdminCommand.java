@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>namespaceId: 域空间ID</li>
+ *     <li>moduleType: 应用类型</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 每一页的数量</li>
  * </ul>
@@ -16,6 +17,8 @@ public class ListSensitiveFilterRecordAdminCommand {
 
     @NotNull
     private Long namespaceId;
+
+    private Byte moduleType;
 
     private Long pageAnchor;
 
@@ -43,6 +46,14 @@ public class ListSensitiveFilterRecordAdminCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Byte getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(Byte moduleType) {
+        this.moduleType = moduleType;
     }
 
     @Override

@@ -41,12 +41,15 @@ public class SensitiveFilterRecordProviderImpl implements SensitiveFilterRecordP
     }
 
     @Override
-    public List<SensitiveFilterRecord> listSensitiveFilterRecord(Long namespaceId, Long pageAnchor, Integer pageSize) {
+    public List<SensitiveFilterRecord> listSensitiveFilterRecord(Long namespaceId, Long moduleId, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhSensitiveFilterRecord.class));
         SelectQuery<EhSensitiveFilterRecordRecord> query = context.selectQuery(Tables.EH_SENSITIVE_FILTER_RECORD);
 
         if (null != namespaceId) {
             query.addConditions(Tables.EH_SENSITIVE_FILTER_RECORD.NAMESPACE_ID.eq(namespaceId));
+        }
+        if (null != moduleId) {
+            query.addConditions(Tables.EH_SENSITIVE_FILTER_RECORD.MODULE_ID.eq(moduleId));
         }
         if (null != pageAnchor && 0L != pageAnchor) {
             query.addConditions(Tables.EH_SENSITIVE_FILTER_RECORD.ID.lt(pageAnchor));

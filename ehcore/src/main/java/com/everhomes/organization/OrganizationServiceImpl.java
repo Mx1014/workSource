@@ -81,6 +81,7 @@ import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -326,6 +327,7 @@ import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
@@ -353,6 +355,7 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
@@ -582,6 +585,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private EnterpriseCustomerProvider customerProvider;
 
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
 
 
     private int getPageCount(int totalCount, int pageSize) {
@@ -2454,8 +2459,40 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
+    //敏感词检测
+    private void filterWords(NewTopicCommand cmd) {
+        List<String> textList = new ArrayList<>();
+        FilterWordsCommand command = new FilterWordsCommand();
+        command.setModuleType(cmd.getModuleType());
+        if (!StringUtils.isEmpty(cmd.getSubject())) {
+            textList.add(cmd.getSubject());
+        }
+        if (!StringUtils.isEmpty(cmd.getContent())) {
+            textList.add(cmd.getContent());
+        }
+        ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                ActivityPostCommand.class);
+        if (activityPostCommand != null) {
+            if (!StringUtils.isEmpty(activityPostCommand.getSubject())){
+                textList.add(activityPostCommand.getSubject());
+            }
+            if (!StringUtils.isEmpty(activityPostCommand.getDescription())) {
+                textList.add(activityPostCommand.getDescription());
+            }
+            if (!StringUtils.isEmpty(activityPostCommand.getContent())) {
+                textList.add(activityPostCommand.getContent());
+            }
+            if (!StringUtils.isEmpty(activityPostCommand.getLocation())) {
+                textList.add(activityPostCommand.getLocation());
+            }
+        }
+        command.setTextList(textList);
+        this.sensitiveWordService.filterWords(command);
+    }
+
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        filterWords(cmd);
         if(cmd.getForumId() == null){
             Forum forum = forumService.findFourmByNamespaceId(cmd.getNamespaceId());
             if(forum != null){

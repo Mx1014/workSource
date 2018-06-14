@@ -43,7 +43,7 @@ public class SensitiveFilterRecordController extends ControllerBase{
      * <p>获取被过滤的日志内容列表</p>
      *
      */
-    @RequestMapping("getSensitiveFilterRecord")
+    @RequestMapping("listSensitiveFilterRecord")
     @RestReturn(value = ListSensitiveFilterRecordAdminResponse.class)
     public RestResponse listSensitiveFilterRecord(ListSensitiveFilterRecordAdminCommand cmd) {
         ListSensitiveFilterRecordAdminResponse listSensitiveFilterRecordAdminResponse = this.sensitiveFilterRecordService.listSensitiveRecord(cmd);

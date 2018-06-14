@@ -3,13 +3,15 @@ package com.everhomes.rest.sensitiveWord;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
  *     <li>namespaceId: 域空间ID</li>
  *     <li>moduleType: 模块类型/li>
  *     <li>creatorUid: 发布人的userId</li>
  *     <li>publishTime: 发布时间</li>
- *     <li>text: 需要检测的文本内容</li>
+ *     <li>textList: 需要检测的文本内容</li>
  * </ul>
  */
 public class FilterWordsCommand {
@@ -18,7 +20,7 @@ public class FilterWordsCommand {
     private Byte moduleType;
     private Long creatorUid;
     private String publishTime;
-    private String text;
+    private List<String> textList;
 
     public Long getNamespaceId() {
         return namespaceId;
@@ -52,12 +54,12 @@ public class FilterWordsCommand {
         this.publishTime = publishTime;
     }
 
-    public String getText() {
-        return text;
+    public List<String> getTextList() {
+        return textList;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setTextList(List<String> textList) {
+        this.textList = textList;
     }
 
     @Override

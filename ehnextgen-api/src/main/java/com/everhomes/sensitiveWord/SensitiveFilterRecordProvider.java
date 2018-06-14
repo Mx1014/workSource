@@ -7,7 +7,7 @@ public interface SensitiveFilterRecordProvider {
 
     void createSensitiveFilterRecord(SensitiveFilterRecord sensitiveFilterRecord);
 
-    List<SensitiveFilterRecord> listSensitiveFilterRecord(Long namespaceId, Long pageAnchor, Integer pageSize);
+    List<SensitiveFilterRecord> listSensitiveFilterRecord(Long namespaceId,Long moduleId, Long pageAnchor, Integer pageSize);
 
     SensitiveFilterRecord getSensitiveFilterRecord(Long id);
 }

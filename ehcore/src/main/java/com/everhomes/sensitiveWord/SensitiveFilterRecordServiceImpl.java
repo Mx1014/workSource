@@ -6,6 +6,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
+import com.everhomes.rest.forum.ForumModuleType;
 import com.everhomes.rest.sensitiveWord.admin.GetSensitiveFilterRecordAdminCommand;
 import com.everhomes.rest.sensitiveWord.admin.ListSensitiveFilterRecordAdminCommand;
 import com.everhomes.rest.sensitiveWord.admin.ListSensitiveFilterRecordAdminResponse;
@@ -45,7 +46,8 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
         }
         ListSensitiveFilterRecordAdminResponse response = new ListSensitiveFilterRecordAdminResponse();
         cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
-        List<SensitiveFilterRecord> list = sensitiveFilterRecordProvider.listSensitiveFilterRecord(cmd.getNamespaceId(), cmd.getPageAnchor(), cmd.getPageSize());
+        Long moduleId = ForumModuleType.fromCode(cmd.getModuleType()).getModuleId();
+        List<SensitiveFilterRecord> list = sensitiveFilterRecordProvider.listSensitiveFilterRecord(cmd.getNamespaceId(), moduleId, cmd.getPageAnchor(), cmd.getPageSize());
         int size = list.size();
         if (size >0) {
             if (size <= cmd.getPageSize()) {
