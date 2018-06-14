@@ -181,4 +181,6 @@ public interface AssetService {
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
     void noticeTrigger(Integer namespaceId);
+    //add by tangcen
+	void calculateRentForContract();
 }

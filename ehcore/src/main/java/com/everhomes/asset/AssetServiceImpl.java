@@ -28,6 +28,8 @@ import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -190,8 +192,12 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private ContentServerService contentServerService;
+    
     @Autowired
     private PaymentService paymentService;
+    
+    @Autowired
+    private ContractProvider contractProvider;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -4534,5 +4540,20 @@ public class AssetServiceImpl implements AssetService {
 			judgeAppShowPayResponse.setAppShowPay(new Byte(appShowPay));
 		}
 		return judgeAppShowPayResponse;
+	}
+	
+	//issue 31594,计算天企汇历史合同的租赁总额字段
+	@Override
+	public void calculateRentForContract(){
+		Integer namespaceId = 999944;
+		List<Contract> contractList = contractProvider.listContractByNamespaceId(namespaceId);
+		if (contractList!=null && contractList.size()>0) {
+			for (Contract contract : contractList) {
+				if (contract.getRent()==null) {
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId());
+			        assetProvider.setRent(contract.getId(),totalAmount);
+				}
+			}
+		}
 	}
 }
