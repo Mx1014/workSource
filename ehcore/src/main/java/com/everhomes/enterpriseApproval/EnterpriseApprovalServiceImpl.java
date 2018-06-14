@@ -100,6 +100,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     @Autowired
     private DbProvider dbProvider;
 
+    private DateTimeFormatter archivesFormatter = DateTimeFormatter.ofPattern("MM月dd日");
+
     @Override
     public ListApprovalFlowRecordsResponse listApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd) {
         ListApprovalFlowRecordsResponse res = new ListApprovalFlowRecordsResponse();
@@ -778,19 +780,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     @Override
     public GeneralFormReminderDTO checkArchivesApproval(Long userId, Long organizationId, Long approvalId, Byte operationType) {
         GeneralFormReminderDTO dto = new GeneralFormReminderDTO();
-        ArchivesOperationalConfigurationDTO archives = archivesService.getArchivesOperationByUserId(userId, organizationId, operationType);
-        if (archives != null) {
-            dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("operationType", ArchivesUtil.resolveArchivesEnum(archives.getOperationType(),
-                    ArchivesParameter.OPERATION_TYPE));
-            dto.setTitle(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
-                    EnterpriseApprovalTemplateCode.ARCHIVES_TITLE, "zh_CN", map, "Remind!"));
-            map.put("operationTime", archives.getOperationDate());
-            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
-                    EnterpriseApprovalTemplateCode.ARCHIVES_CONTENT, "zh_CN", map, "Content!"));
-            return dto;
-        }
 
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(approvalId);
         List<FlowCaseDetail> details = listActiveFlowCasesByApprovalId(userId, organizationId, approvalId);
@@ -802,6 +791,20 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
                     EnterpriseApprovalTemplateCode.APPROVAL_TITLE, "zh_CN", map, "Remind!"));
             dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
                     EnterpriseApprovalTemplateCode.APPROVAL_CONTENT, "zh_CN", map, "Content!"));
+            return dto;
+        }
+
+        ArchivesOperationalConfigurationDTO archives = archivesService.getArchivesOperationByUserId(userId, organizationId, operationType);
+        if (archives != null) {
+            dto.setFlag(TrueOrFalseFlag.TRUE.getCode());
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("operationType", ArchivesUtil.resolveArchivesEnum(archives.getOperationType(),
+                    ArchivesParameter.OPERATION_TYPE));
+            dto.setTitle(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
+                    EnterpriseApprovalTemplateCode.ARCHIVES_TITLE, "zh_CN", map, "Remind!"));
+            map.put("operationTime", archivesFormatter.format(archives.getOperationDate().toLocalDate()));
+            dto.setContent(localeTemplateService.getLocaleTemplateString(EnterpriseApprovalTemplateCode.SCOPE,
+                    EnterpriseApprovalTemplateCode.ARCHIVES_CONTENT, "zh_CN", map, "Content!"));
             return dto;
         }
 
