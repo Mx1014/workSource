@@ -12,6 +12,7 @@ public class DecorationLicenseDTO {
     private String name;
     private String workerType;
     private String qrUrl;
+    private String imageUrl;
 
     public String getName() {
         return name;
@@ -35,5 +36,13 @@ public class DecorationLicenseDTO {
 
     public void setQrUrl(String qrUrl) {
         this.qrUrl = qrUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

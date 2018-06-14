@@ -1025,12 +1025,14 @@ public class DecorationServiceImpl implements  DecorationService {
                 dto.setName(worker.getName());
                 dto.setWorkerType(worker.getWorkerType());
                 dto.setQrUrl(processQrUrl(worker.getQrid()));
+                dto.setImageUrl(this.contentServerService.parserUri(worker.getImage()));
             }
         }else if (cmd.getProcessorType() == ProcessorType.WORKER.getCode()){ //查看工人自己的
             DecorationWorker worker =  this.decorationProvider.queryDecorationWorker(cmd.getRequestId(),cmd.getPhone());
             dto.setName(worker.getName());
             dto.setWorkerType(worker.getWorkerType());
             dto.setQrUrl(processQrUrl(worker.getQrid()));
+            dto.setImageUrl(this.contentServerService.parserUri(worker.getImage()));
             if (worker.getUid() == null){
                 worker.setUid(UserContext.currentUserId());
                 this.decorationProvider.updateDecorationWorker(worker);
