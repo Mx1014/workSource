@@ -83,4 +83,5 @@ public interface AddressProvider {
     String getAddressNameById(Long addressId);
 
     int changeAddressLivingStatus(Long addressId, AddressLivingStatus inactive);
+
 }
