@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.sensitiveWord;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.forum.ForumModuleType;
@@ -12,7 +13,10 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.WebTokenGenerator;
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -26,11 +30,9 @@ import java.util.List;
 import java.util.TreeMap;
 
 @Component
-public class SensitiveWordServiceImpl implements SensitiveWordService{
+public class SensitiveWordServiceImpl implements SensitiveWordService, ApplicationListener<ContextRefreshedEvent>{
 
     private static AhoCorasickDoubleArrayTrie<String> acdat = null;
-
-    private static String url;
 
     private static final String fileName = "C:/Users/Administrator/Desktop/sensitive.txt";
     @Autowired
@@ -39,9 +41,18 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
     private SensitiveFilterRecordProvider sensitiveFilterRecordProvider;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public void initSensitiveWords(InitSensitiveWordTrieCommand cmd) {
+        if (cmd.getUrl() != null && !StringUtils.isBlank(cmd.getUrl())) {
+            configurationProvider.setValue("sensitiveword.url",cmd.getUrl());
+            init(cmd);
+        }
+    }
+
+    private void init(InitSensitiveWordTrieCommand cmd) {
         TreeMap<String, String> map = new TreeMap<String, String>();
 
         if (null == acdat) {
@@ -50,7 +61,6 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
         BufferedReader in = null;
         try{
             URL realUrl = new URL(cmd.getUrl());
-            url = cmd.getUrl();
             String s = null;
 
             URLConnection connection = connect(realUrl);
@@ -93,6 +103,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
         BufferedWriter out = null;
         File file = new File(fileName);
         try{
+            String url = configurationProvider.getValue(0, "sensitiveword.url", "");
             URL realUrl = new URL(url);
             String s = null;
             if (!file.exists()) {
@@ -139,7 +150,8 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
         try {
             InputStream inputStream = new FileInputStream(file);
             UploadCsFileResponse fileResponse = contentServerService.uploadFileToContentServer(inputStream,"dict.txt",token);
-            url = fileResponse.getResponse().getUrl();
+            String url = fileResponse.getResponse().getUrl();
+            configurationProvider.setValue("sensitiveword.url",url);
             System.out.println(fileResponse.getResponse().getUrl());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -164,4 +176,15 @@ public class SensitiveWordServiceImpl implements SensitiveWordService{
         return connection;
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        if (contextRefreshedEvent.getApplicationContext().getParent() == null) {
+            String url = configurationProvider.getValue(0, "sensitiveword.url", "");
+            if (url != null && !StringUtils.isBlank(url)) {
+                InitSensitiveWordTrieCommand cmd = new InitSensitiveWordTrieCommand();
+                cmd.setUrl(url);
+                this.init(cmd);
+            }
+        }
+    }
 }

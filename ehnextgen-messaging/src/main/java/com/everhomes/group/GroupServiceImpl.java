@@ -57,6 +57,7 @@ import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.ui.group.ListNearbyGroupBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
@@ -68,6 +69,7 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.GroupSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhForumPosts;
 import com.everhomes.server.schema.tables.EhUsers;
@@ -178,10 +180,34 @@ public class GroupServiceImpl implements GroupService {
 
     @Autowired
     private LocaleStringService localeStringService;
-    
+
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+
+    //敏感词检测  --add by yanlong.liang 20180614
+    private void filter(CreateGroupCommand cmd) {
+        List<String> textList = new ArrayList<>();
+        FilterWordsCommand command = new FilterWordsCommand();
+        Byte moduleType = (byte)4;
+        if (cmd.getClubType() ==ClubType.GUILD.getCode()) {
+            moduleType = (byte)5;
+        }
+        command.setModuleType(moduleType);
+        if (!StringUtils.isEmpty(cmd.getName())) {
+            textList.add(cmd.getName());
+        }
+        if (!StringUtils.isEmpty(cmd.getDescription())) {
+            textList.add(cmd.getDescription());
+        }
+        command.setTextList(textList);
+        this.sensitiveWordService.filterWords(command);
+    }
+
+
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
+        filter(cmd);
     	Integer namespaceId =  UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
@@ -5472,9 +5498,33 @@ public class GroupServiceImpl implements GroupService {
 		toUser.setOperatorUid(fromUser.getMemberId());
 		groupProvider.updateGroupMember(toUser);
 	}
-	
+
+    //敏感词检测  --add by yanlong.liang 20180614
+    private void filter(CreateBroadcastCommand cmd, Long ownerId) {
+        List<String> textList = new ArrayList<>();
+        FilterWordsCommand command = new FilterWordsCommand();
+        Group group = groupProvider.findGroupById(ownerId);
+        Byte moduleType = (byte)4;
+        if (group != null) {
+            if (group.getClubType() ==ClubType.GUILD.getCode()) {
+                moduleType = (byte)5;
+            }
+        }
+        command.setModuleType(moduleType);
+        if (!StringUtils.isEmpty(cmd.getTitle())) {
+            textList.add(cmd.getTitle());
+        }
+        if (!StringUtils.isEmpty(cmd.getContent())) {
+            textList.add(cmd.getContent());
+        }
+        command.setTextList(textList);
+        this.sensitiveWordService.filterWords(command);
+    }
+
+
 	@Override
 	public CreateBroadcastResponse createBroadcast(CreateBroadcastCommand cmd) {
+        filter(cmd,cmd.getOwnerId());
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		checkCreateBroadcastParameters(userId, cmd);

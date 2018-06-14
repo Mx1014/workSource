@@ -74,6 +74,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.search.SearchContentType;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.forum.*;
 import com.everhomes.rest.ui.user.*;
@@ -83,6 +84,7 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
@@ -214,6 +216,9 @@ public class ForumServiceImpl implements ForumService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
         if(forumId == ForumConstants.SYSTEM_FORUM) {
@@ -231,10 +236,40 @@ public class ForumServiceImpl implements ForumService {
         
         return result;
     }
+    //敏感词检测  --add by yanlong.liang 20180614
+    private void filterWords(NewTopicCommand cmd) {
+        List<String> textList = new ArrayList<>();
+        FilterWordsCommand command = new FilterWordsCommand();
+        command.setModuleType(cmd.getModuleType());
+        if (!StringUtils.isEmpty(cmd.getSubject())) {
+            textList.add(cmd.getSubject());
+        }
+        if (!StringUtils.isEmpty(cmd.getContent())) {
+            textList.add(cmd.getContent());
+        }
+        ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                ActivityPostCommand.class);
+        if (activityPostCommand != null) {
+            if (!StringUtils.isEmpty(activityPostCommand.getSubject())){
+                textList.add(activityPostCommand.getSubject());
+            }
+            if (!StringUtils.isEmpty(activityPostCommand.getDescription())) {
+                textList.add(activityPostCommand.getDescription());
+            }
+            if (!StringUtils.isEmpty(activityPostCommand.getContent())) {
+                textList.add(activityPostCommand.getContent());
+            }
+            if (!StringUtils.isEmpty(activityPostCommand.getLocation())) {
+                textList.add(activityPostCommand.getLocation());
+            }
+        }
+        command.setTextList(textList);
+        this.sensitiveWordService.filterWords(command);
+    }
     
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
-
+        filterWords(cmd);
         //全部都加上论坛入口Id为0，现在没办法真的区分不了这个帖子时属于哪个应用模块，活动、论坛、俱乐部、公告  add by yanjun 20171109
         if(cmd.getForumEntryId() == null){
             cmd.setForumEntryId(0L);
@@ -5147,7 +5182,7 @@ public class ForumServiceImpl implements ForumService {
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         
         NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
-        
+
         PostEntityTag creatorTag = PostEntityTag.USER;
         VisibleRegionType visibleRegionType = null;
         Long visibleRegionId = null;

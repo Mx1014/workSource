@@ -32,7 +32,7 @@ public class ForumCommentHandler implements CommentHandler {
 	@Autowired
 	private SensitiveWordService sensitiveWordService;
 
-	//敏感词检测
+	//敏感词检测 --add by yanlong.liang 20180614
 	private void filterWord(AddCommentCommand cmd, Byte moduleType) {
 		List<String> textList = new ArrayList<>();
 		FilterWordsCommand command = new FilterWordsCommand();

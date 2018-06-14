@@ -585,8 +585,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private EnterpriseCustomerProvider customerProvider;
 
-    @Autowired
-    private SensitiveWordService sensitiveWordService;
 
 
     private int getPageCount(int totalCount, int pageSize) {
@@ -2459,40 +2457,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
-    //敏感词检测
-    private void filterWords(NewTopicCommand cmd) {
-        List<String> textList = new ArrayList<>();
-        FilterWordsCommand command = new FilterWordsCommand();
-        command.setModuleType(cmd.getModuleType());
-        if (!StringUtils.isEmpty(cmd.getSubject())) {
-            textList.add(cmd.getSubject());
-        }
-        if (!StringUtils.isEmpty(cmd.getContent())) {
-            textList.add(cmd.getContent());
-        }
-        ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
-                ActivityPostCommand.class);
-        if (activityPostCommand != null) {
-            if (!StringUtils.isEmpty(activityPostCommand.getSubject())){
-                textList.add(activityPostCommand.getSubject());
-            }
-            if (!StringUtils.isEmpty(activityPostCommand.getDescription())) {
-                textList.add(activityPostCommand.getDescription());
-            }
-            if (!StringUtils.isEmpty(activityPostCommand.getContent())) {
-                textList.add(activityPostCommand.getContent());
-            }
-            if (!StringUtils.isEmpty(activityPostCommand.getLocation())) {
-                textList.add(activityPostCommand.getLocation());
-            }
-        }
-        command.setTextList(textList);
-        this.sensitiveWordService.filterWords(command);
-    }
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
-        filterWords(cmd);
         if(cmd.getForumId() == null){
             Forum forum = forumService.findFourmByNamespaceId(cmd.getNamespaceId());
             if(forum != null){
