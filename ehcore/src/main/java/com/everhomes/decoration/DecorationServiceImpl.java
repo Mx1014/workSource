@@ -284,7 +284,7 @@ public class DecorationServiceImpl implements  DecorationService {
         if(!url.endsWith("/")) {
             url += "/";
         }
-        url += "handle-management/build/index.html#/license-detail?requestId=";
+        url += "decoration-management/build/index.html#/license-detail?requestId=";
         if (requestId != null)
             url += requestId;
         url += "&workerId=";
