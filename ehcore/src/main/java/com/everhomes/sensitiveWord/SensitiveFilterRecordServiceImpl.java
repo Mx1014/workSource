@@ -42,19 +42,21 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
         cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
         Long moduleId = ForumModuleType.fromCode(cmd.getModuleType()).getModuleId();
         List<SensitiveFilterRecord> list = sensitiveFilterRecordProvider.listSensitiveFilterRecord(cmd.getNamespaceId(), moduleId, cmd.getPageAnchor(), cmd.getPageSize());
-        int size = list.size();
-        if (size >0) {
-            if (size <= cmd.getPageSize()) {
-                response.setNextPageAnchor(null);
-            }else {
-                list.remove(size-1);
-                response.setNextPageAnchor(list.get(list.size() - 1).getId());
+        if (list != null) {
+            int size = list.size();
+            if (size >0) {
+                if (size <= cmd.getPageSize()) {
+                    response.setNextPageAnchor(null);
+                }else {
+                    list.remove(size-1);
+                    response.setNextPageAnchor(list.get(list.size() - 1).getId());
+                }
+                response.setDtos(list.stream().map(r -> {
+                    SensitiveFilterRecordAdminDTO sensitiveFilterRecordAdminDTO = ConvertHelper.convert(r, SensitiveFilterRecordAdminDTO.class);
+                    sensitiveFilterRecordAdminDTO.setPublishTime(r.getPublishTime().toString());
+                    return  sensitiveFilterRecordAdminDTO;
+                }).collect(Collectors.toList()));
             }
-            response.setDtos(list.stream().map(r -> {
-                SensitiveFilterRecordAdminDTO sensitiveFilterRecordAdminDTO = ConvertHelper.convert(r, SensitiveFilterRecordAdminDTO.class);
-                sensitiveFilterRecordAdminDTO.setPublishTime(r.getPublishTime().toString());
-                return  sensitiveFilterRecordAdminDTO;
-            }).collect(Collectors.toList()));
         }
         return response;
     }
