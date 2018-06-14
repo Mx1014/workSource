@@ -12,6 +12,8 @@ public class DynamicColumnDTO implements  Cloneable {
      * fieldName 字段的逻辑值
      */
     private String fieldName;
+
+    private Long fieldId;
     /**
      * @param value 给定行号和列号的数据，已经转为了string
      */
@@ -66,6 +68,18 @@ public class DynamicColumnDTO implements  Cloneable {
 
     public void setMandatoryFlag(boolean mandatoryFlag) {
         this.mandatoryFlag = mandatoryFlag;
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
+    }
+
+    public boolean isMandatoryFlag() {
+        return mandatoryFlag;
     }
 
     @Override

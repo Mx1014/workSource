@@ -276,6 +276,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                 dto.setValue(cellValue);
                 dto.setHeaderDisplay(headers.get(k));
                 dto.setFieldName(dynamicFields.get(k).getFieldName());
+                dto.setFieldId(dynamicFields.get(k).getFieldId());
                 dto.setColumnNum(k);
                 columns.add(dto);
             }
