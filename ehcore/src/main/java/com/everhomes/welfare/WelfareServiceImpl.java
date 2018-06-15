@@ -100,6 +100,10 @@ public class WelfareServiceImpl implements WelfareService {
         this.coordinationProvider.getNamedLock(lockName).enter(() -> {
             if (cmd.getWelfare().getId() != null) {
                 Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfare().getId());
+                if(null == welfare){
+                	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
+                            WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
+                }
                 if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
                     throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_CANNOT_DRAFT, "已发送不能保存草稿");
@@ -164,6 +168,10 @@ public class WelfareServiceImpl implements WelfareService {
             SendWelfaresResponse response = new SendWelfaresResponse();
             if (cmd.getWelfare().getId() != null) {
                 Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfare().getId());
+                if(null == welfare){
+                	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
+                            WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
+                }
                 if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
                     throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_CANNOT_SEND, "已发送不能发送");
