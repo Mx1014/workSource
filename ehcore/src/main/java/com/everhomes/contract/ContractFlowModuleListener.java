@@ -3,6 +3,8 @@ package com.everhomes.contract;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -13,10 +15,12 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractType;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.Tuple;
@@ -61,6 +65,12 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private ServiceModuleAppService serviceModuleAppService;
+    
+    @Autowired
+	private EnterpriseCustomerProvider enterpriseCustomerProvider;
+    
+    @Autowired
+	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
 
 //    @Autowired
@@ -116,9 +126,10 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             contract.setStatus(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
             contractProvider.updateContract(contract);
             contractSearcher.feedDoc(contract);
-            
-            if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
-            	dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+            //审批不通过的续约合同，变更合同不修改资产状态
+			if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))
+					&& ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+				dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
 			}
         }else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 
@@ -148,6 +159,13 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 contractSearcher.feedDoc(contract);
             } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
                 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+              //查询企业客户信息，客户状态会由已成交客户变为历史客户
+        		if (contract.getCustomerType()==0) {
+        			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+        			enterpriseCustomer.setLevelItemId(7L);
+        			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+        			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+        		}
             }
         }
     }

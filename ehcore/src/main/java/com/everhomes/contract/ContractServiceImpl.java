@@ -1588,6 +1588,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					});
 				}
 			}
+			//查询企业客户信息
+			if (contract.getCustomerType()==0) {
+				EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+				enterpriseCustomer.setLevelItemId(6L);
+				enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+				enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+			}
 		}
 		
 		
