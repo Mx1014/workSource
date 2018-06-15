@@ -237,7 +237,7 @@ public class ForumServiceImpl implements ForumService {
     public PostDTO createTopic(NewTopicCommand cmd) {
 
 
-        if(cmd.getContentCategory().equals(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY)) {
+        if(cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY)) {
             if (cmd.getOldId() != null) {
                 Post temp = forumProvider.findPostById(cmd.getOldId());
                 if (null == temp) {
