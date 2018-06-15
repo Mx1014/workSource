@@ -2684,7 +2684,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	            } else {
 	                //设置默认超级管理员
 	                if(members != null && members.size() > 0) {
-	                    for(OrganizationMember mb : members) {
+	                    for(int i = members.size()-1; i >= 0; i--) {
+	                    	//reverse order
+	                    	OrganizationMember mb = members.get(i);
 	                        if(mb.getTargetId() != null) {
 	                            org.setAdminTargetId(mb.getTargetId());
 	                            organizationProvider.updateOrganization(org);
