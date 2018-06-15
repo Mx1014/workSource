@@ -34,7 +34,7 @@ public class AccountOpenAppPointEventProcessor extends GeneralPointEventProcesso
 
     private boolean isValid(LocalEvent localEvent) {
         User user = userProvider.findUserById(localEvent.getContext().getUid());
-        return isValid(user.getNickName());
+        return user != null && isValid(user.getNickName());
     }
 
     private boolean isValid(Object o) {

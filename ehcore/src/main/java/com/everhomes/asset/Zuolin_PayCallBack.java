@@ -47,7 +47,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(orderId, finalOrderStatus);
             assetProvider.changeBillStatusOnOrder(billStatuses,orderId);
-            assetProvider.changeBillStatusOnPaiedOff(billIds);
+            assetProvider.changeBillStatusAndPaymentTypeOnPaiedOff(billIds,cmd.getPaymentType());
             return null;
         });
     }

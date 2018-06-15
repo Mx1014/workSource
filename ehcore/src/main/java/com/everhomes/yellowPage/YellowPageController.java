@@ -360,9 +360,9 @@ public class YellowPageController  extends ControllerBase {
      */
     @RequestMapping("listJumpModules")
     @RestReturn(value = JumpModuleDTO.class, collection = true)
-    public RestResponse listJumpModules() {
+    public RestResponse listJumpModules(ListJumpModulesCommand cmd) {
 
-        List<JumpModuleDTO> resp = this.yellowPageService.listJumpModules();
+        List<JumpModuleDTO> resp = this.yellowPageService.listJumpModules(cmd);
 
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -521,5 +521,123 @@ public class YellowPageController  extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+    
+    
+    /**
+   	 * <b>URL: /yellowPage/listServiceAllianceProviders</b> 
+   	 * <p> 获取服务商  </p>
+   	 */
+   	@RequestMapping("listServiceAllianceProviders")
+   	@RestReturn(value = ListServiceAllianceProvidersResponse.class)
+   	public RestResponse listServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd) {
+   		ListServiceAllianceProvidersResponse resp = yellowPageService.listServiceAllianceProviders(cmd);
+    	RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+   	
+    /**
+   	 * <b>URL: /yellowPage/addServiceAllianceProvider</b> 
+   	 * <p> 增加服务商  </p>
+   	 */
+    @RequestMapping("addServiceAllianceProvider")
+    @RestReturn(value=String.class)
+    public RestResponse addServiceAllianceProvider(@Valid AddServiceAllianceProviderCommand cmd) {
+    	 yellowPageService.addServiceAllianceProvider(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/deleteServiceAllianceProvider</b> 
+   	 * <p> 删除服务商  </p>
+   	 */
+    @RequestMapping("deleteServiceAllianceProvider")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceAllianceProvider(@Valid DeleteServiceAllianceProviderCommand cmd) {
+    	 yellowPageService.deleteServiceAllianceProvider(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    
+    /**
+   	 * <b>URL: /yellowPage/updateServiceAllianceProvider</b> 
+   	 * <p> 更新服务商  </p>
+   	 */
+    @RequestMapping("updateServiceAllianceProvider")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceAllianceProvider(@Valid UpdateServiceAllianceProviderCommand cmd) {
+    	 yellowPageService.updateServiceAllianceProvider(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/applyExtraAllianceEvent</b> 
+   	 * <p> 申请新的事件  用于工作流中新增</p>
+   	 */
+    @RequestMapping("applyExtraAllianceEvent")
+    @RestReturn(value=String.class)
+    public RestResponse applyExtraAllianceEvent(@Valid ApplyExtraAllianceEventCommand cmd) {
+    	 yellowPageService.applyExtraAllianceEvent(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/getExtraAllianceEvent</b> 
+   	 * <p> 获取新建的事件</p>
+   	 */
+    @RequestMapping("getExtraAllianceEvent")
+   	@RestReturn(value = GetExtraAllianceEventResponse.class)
+	public RestResponse getExtraAllianceEvent(@Valid GetExtraAllianceEventCommand cmd) {
+		GetExtraAllianceEventResponse resp = yellowPageService.getExtraAllianceEvent(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    
+    /**
+   	 * <b>URL: /yellowPage/exportServiceAllianceProviders</b> 
+   	 * <p> 导出服务商信息  </p>
+   	 */
+   	@RequestMapping("exportServiceAllianceProviders")
+   	@RestReturn(value = String.class)
+   	public RestResponse exportServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd,  HttpServletResponse httpResp) {
+   		yellowPageService.exportServiceAllianceProviders(cmd, httpResp);
+        return new RestResponse();
+    }
+   	
+    /**
+   	 * <b>URL: /yellowPage/transferServiceToCommunity</b> 
+   	 * <p> 数据迁移  </p>
+   	 */
+   	@RequestMapping("transferServiceToCommunity")
+   	@RestReturn(value = String.class)
+	public RestResponse transferServiceToCommunity(GetExtraAllianceEventCommand cmd) {
+
+		RestResponse rsp = new RestResponse();
+		if (cmd.getEventId() == null || !cmd.getEventId().equals(1802L)) {
+			return rsp;
+		}
+
+		String ret = yellowPageService.transferServiceToCommunity();
+		rsp.setErrorCode(ErrorCodes.SUCCESS);
+		rsp.setErrorDescription(ret);
+		return rsp;
+	}
+   	
 
 }

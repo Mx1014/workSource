@@ -73,5 +73,4 @@ public interface ContractProvider {
 
     List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
 
-
 }

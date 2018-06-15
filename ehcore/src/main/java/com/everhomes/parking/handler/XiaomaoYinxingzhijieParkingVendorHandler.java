@@ -238,11 +238,10 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
     private boolean payTempCardFee(ParkingRechargeOrder order) {
         TreeMap<String,String> params = new TreeMap();
         params.put("plateNo", order.getPlateNumber());
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         params.put("orderId", order.getOrderToken());
         params.put("payMoney", order.getPrice().setScale(2).toString());
         String result = post(POSTCHARGE, params);
-        order.setErrorDescription(result);//data 缴费记录号 存储
+        order.setErrorDescriptionJson(result);//data 缴费记录号 存储
 
         JSONObject jsonObject = JSONObject.parseObject(result);
         Object obj = jsonObject.get("flag");

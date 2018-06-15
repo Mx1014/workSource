@@ -106,7 +106,7 @@ public class PaymentServiceImpl implements PaymentService {
         LOGGER.info("payee user payer id is = {}",paymentUser.getPaymentUserId());
         return remoteAccessService.listOrderPayment(cmd);
     }
-
+    
     private String getRealOrderType(Integer namespaceId) {
         PaymentServiceConfig config = assetProvider.findServiceConfig(namespaceId);
         if(config == null) return null;

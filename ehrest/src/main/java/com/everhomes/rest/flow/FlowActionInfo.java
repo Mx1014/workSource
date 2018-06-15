@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>enabled: enabled</li>
+ *     <li>enabled: 开关 {@link com.everhomes.rest.flow.FlowActionStatus}</li>
  *     <li>reminderAfterMinute: reminderAfterMinute</li>
  *     <li>reminderTickMinute: reminderTickMinute</li>
  *     <li>trackerApplier: trackerApplier</li>
@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>templateId: templateId</li>
  *     <li>renderText: renderText</li>
  *     <li>userSelections: userSelections {@link com.everhomes.rest.flow.CreateFlowUserSelectionCommand}</li>
+ *     <li>script: 脚本配置信息 {@link com.everhomes.rest.flow.FlowScriptInfo}</li>
  * </ul>
  */
 public class FlowActionInfo {
@@ -24,7 +25,8 @@ public class FlowActionInfo {
 	private Long templateId;
 	private String renderText;
 	
-	CreateFlowUserSelectionCommand userSelections;
+	private CreateFlowUserSelectionCommand userSelections;
+    private FlowScriptInfo script;
 
 	public Long getReminderAfterMinute() {
 		return reminderAfterMinute;
@@ -90,7 +92,15 @@ public class FlowActionInfo {
 		this.templateId = templateId;
 	}
 
-	@Override
+    public FlowScriptInfo getScript() {
+        return script;
+    }
+
+    public void setScript(FlowScriptInfo script) {
+        this.script = script;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

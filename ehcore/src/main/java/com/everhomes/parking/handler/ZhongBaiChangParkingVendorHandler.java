@@ -140,7 +140,7 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			params.put("car_no", card.getData().getCarNo());
 			params.put("member_name", card.getData().getMemberName());
 			params.put("telephone", card.getData().getTelephone());
-			params.put("start_date", card.getData().getEndTime());
+			params.put("start_date", card.getData().getStartTime());
 			long newStartTime = Utils.strToLong(card.getData().getEndTime(),Utils.DateStyle.DATE_TIME);
 			long now = System.currentTimeMillis();
 			if (newStartTime < now) {
@@ -156,6 +156,8 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			params.put("end_date", endTimestr);
 			params.put("remark", null);
 			params.put("signature", ZhongBaiChangSignatureUtil.getSign(params, secretKey));
+			order.setStartPeriod(new Timestamp(newStartTime));
+			order.setEndPeriod(rechargeEndTimestamp);
 			String result = null;
 			try{
 				result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
@@ -166,8 +168,7 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			}
 			//将充值信息存入订单
 			order.setErrorDescriptionJson(result);
-			order.setStartPeriod(new Timestamp(newStartTime));
-			order.setEndPeriod(rechargeEndTimestamp);
+
 			
 			ZhongBaiChangCardInfo<ZhongBaiChangData> entity = JSONObject.parseObject(result,
 					new TypeReference<ZhongBaiChangCardInfo<ZhongBaiChangData>>() {
@@ -187,6 +188,29 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 		ret.setCardTypes(list);
 
 		return ret;
+	}
+
+	@Override
+	public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+		List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(parkingLot, null, null);
+		if(parkingRechargeRates==null || parkingRechargeRates.size()==0){
+			return null;
+		}
+		ParkingRechargeRateDTO rate = parkingRechargeRates.get(configProvider.getIntValue("parking.recharge.rateseq",0));
+		ParkingExpiredRechargeInfoDTO dto = ConvertHelper.convert(rate,ParkingExpiredRechargeInfoDTO.class);
+		dto.setCardTypeName(rate.getCardType());
+		ZhongBaiChangCardInfo<ZhongBaiChangData> card = getCardInfo(cmd.getPlateNumber());
+		if (card != null && card.isSuccess() && card.getData() != null) {
+			long newStartTime = Utils.strToLong(card.getData().getEndTime(),Utils.DateStyle.DATE_TIME);
+			long now = System.currentTimeMillis();
+			if (newStartTime < now) {
+				newStartTime = now;
+			}
+			dto.setStartPeriod(newStartTime);
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddThisMonth(newStartTime, rate.getMonthCount().intValue());
+			dto.setEndPeriod(rechargeEndTimestamp.getTime());
+		}
+		return dto;
 	}
 
 	@Override
