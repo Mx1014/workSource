@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
 public class ContractInstanceConfig {
 
 	private Long categoryId;
-	private Byte contractApplicationScene;
+	private Byte contractApplicationScene = 0;
 
 	public Byte getContractApplicationScene() {
 		return contractApplicationScene;
