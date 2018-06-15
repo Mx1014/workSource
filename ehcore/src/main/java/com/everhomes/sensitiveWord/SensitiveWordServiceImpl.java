@@ -27,10 +27,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 @Component
 public class SensitiveWordServiceImpl implements SensitiveWordService, ApplicationListener<ContextRefreshedEvent>{
@@ -86,27 +83,25 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
         cmd.setPublishTime(sdf.format(new Date()));
         List<String> wordList = new ArrayList<>();
         if (null != acdat && acdat.size() >0) {
+            Set<String> wordSet = new HashSet<>();
             for (String text : cmd.getTextList()) {
-                String[] chineseWords = text.split("[a-zA-Z]");
+                String[] chineseWords = text.split("[a-zA-Z]+");
                 for (String word : chineseWords) {
                     List<AhoCorasickDoubleArrayTrie.Hit<String>> hits = acdat.parseText(word);
                     for (AhoCorasickDoubleArrayTrie.Hit<String> hit : hits) {
-                        if (!wordList.contains(hit.value)) {
-                            wordList.add(hit.value);
-                        }
+                        wordSet.add(hit.value);
                     }
                 }
-                String[] englishWords = text.split("[^a-zA-Z]");
+                String[] englishWords = text.split("[^a-zA-Z]+");
                 for (String word : englishWords) {
                     int index = acdat.exactMatchSearch(word);
                     if (index > 0) {
                         String hit = acdat.get(index);
-                        if (!wordList.contains(hit)) {
-                            wordList.add(hit);
-                        }
+                        wordSet.add(hit);
                     }
                 }
             }
+            wordList.addAll(wordSet);
             if (wordList.size() > 0) {
                 createSentiveRecord(cmd, wordList);
                 String words = wordList.toString();
