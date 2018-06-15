@@ -28,9 +28,11 @@ public class ListBillGroupsDTO {
     private Integer dueDay;
     private Byte dueDayType;
     
-    private String bizPayeeAccount;
     private String bizPayeeType;
     private Long bizPayeeId;
+    private String accountName;
+    private String accountAliasName;
+    private Byte accountStatus;
 
     public Byte getBillDayType() {
         return billDayType;
@@ -121,11 +123,28 @@ public class ListBillGroupsDTO {
 		this.bizPayeeId = bizPayeeId;
 	}
 
-	public String getBizPayeeAccount() {
-		return bizPayeeAccount;
+	public String getAccountName() {
+		return accountName;
 	}
 
-	public void setBizPayeeAccount(String bizPayeeAccount) {
-		this.bizPayeeAccount = bizPayeeAccount;
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
 	}
+
+	public String getAccountAliasName() {
+		return accountAliasName;
+	}
+
+	public void setAccountAliasName(String accountAliasName) {
+		this.accountAliasName = accountAliasName;
+	}
+
+	public Byte getAccountStatus() {
+		return accountStatus;
+	}
+
+	public void setAccountStatus(Byte accountStatus) {
+		this.accountStatus = accountStatus;
+	}
+
 }

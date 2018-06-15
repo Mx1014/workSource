@@ -91,6 +91,7 @@ import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -1077,9 +1078,18 @@ public class AssetProviderImpl implements AssetProvider {
         if(payUserDTOs != null && payUserDTOs.size() != 0) {
         	for(int i = 0;i < payUserDTOs.size();i++) {
             	for(int j = 0;j < list.size();j++) {
-            		if(payUserDTOs.get(i).getId() != null && list.get(j).getBizPayeeId() != null &&
+            		if(payUserDTOs.get(i) != null && list.get(j) != null &&
+            			payUserDTOs.get(i).getId() != null && list.get(j).getBizPayeeId() != null &&
             			payUserDTOs.get(i).getId().equals(list.get(j).getBizPayeeId())){
-            			list.get(j).setBizPayeeAccount(payUserDTOs.get(i).getRemark());
+            			list.get(j).setAccountName(payUserDTOs.get(i).getRemark());// 用户向支付系统注册帐号时填写的帐号名称
+            			list.get(j).setAccountAliasName(payUserDTOs.get(i).getUserAliasName());//企业名称（认证企业）
+            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
+                        if(registerStatus != null && registerStatus.intValue() == 1) {
+                        	list.get(j).setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                        } else {
+                        	list.get(j).setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                        }
             		}
             	}
             }
