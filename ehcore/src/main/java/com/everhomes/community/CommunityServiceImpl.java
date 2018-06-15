@@ -240,7 +240,14 @@ public class CommunityServiceImpl implements CommunityService {
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 //					"Invalid geoPointList parameter");
 //		}
-
+		//校验名字不能重复
+		Community communityName = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), cmd.getName());
+		if(communityName != null){
+			LOGGER.error("CommunityName is exist communityId=" + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NAME_EXIST, 
+					"CommunityName is exist.");
+		}
+		
 		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null){
 			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
