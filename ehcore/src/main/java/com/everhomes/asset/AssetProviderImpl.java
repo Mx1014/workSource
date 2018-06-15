@@ -3250,6 +3250,8 @@ public class AssetProviderImpl implements AssetProvider {
         group.setOwnerId(cmd.getOwnerId());
         group.setOwnerType(cmd.getOwnerType());
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        group.setBizPayeeId(cmd.getBizPayeeId());//增加收款方id
+        group.setBizPayeeType(cmd.getBizPayeeType());//增加收款方类型
         EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
         dao.insert(group);
     }
