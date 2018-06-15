@@ -15,8 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>senderUid:发放者userId</li>
  * <li>senderDetailId: 发放者detailId</li>
  * <li>senderName: 发放者姓名</li>
- * <li>attachmentImgUri: 图片uri</li>
- * <li>attachmentImgUrl: 图片url</li> 
+ * <li>imgUri: 图片uri</li>
+ * <li>imgUrl: 图片url</li>
  * <li>sendTime: 发送时间</li>
  * </ul>
  */
@@ -30,8 +30,8 @@ public class GetUserWelfareResponse {
     private String senderName;
     private Long senderUid;
     private Long senderDetailId;
-    private String attachmentImgUri;
-    private String attachmentImgUrl; 
+    private String imgUri;
+    private String imgUrl;
     private Long sendTime; 
 
 	public GetUserWelfareResponse() {
@@ -124,26 +124,21 @@ public class GetUserWelfareResponse {
 		this.senderDetailId = senderDetailId;
 	}
 
-
-	public String getAttachmentImgUri() {
-		return attachmentImgUri;
+	public String getImgUri() {
+		return imgUri;
 	}
 
-
-	public void setAttachmentImgUri(String attachmentImgUri) {
-		this.attachmentImgUri = attachmentImgUri;
+	public void setImgUri(String imgUri) {
+		this.imgUri = imgUri;
 	}
 
-
-	public String getAttachmentImgUrl() {
-		return attachmentImgUrl;
+	public String getImgUrl() {
+		return imgUrl;
 	}
 
-
-	public void setAttachmentImgUrl(String attachmentImgUrl) {
-		this.attachmentImgUrl = attachmentImgUrl;
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
 	}
-
 
 	public Long getSendTime() {
 		return sendTime;

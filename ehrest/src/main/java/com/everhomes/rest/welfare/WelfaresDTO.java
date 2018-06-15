@@ -17,8 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>senderUid:发放者userId</li>
  * <li>senderDetailId: 发放者detailId</li>
  * <li>senderName: 发放者姓名</li>
- * <li>attachmentImgUri: 图片uri</li>
- * <li>attachmentImgUrl: 图片url</li>
+ * <li>imgUri: 图片uri</li>
+ * <li>imgUrl: 图片url</li>
  * <li>status: 状态:0-草稿 1-已发送 </li>
  * <li>sendTime: 发送时间</li>
  * <li>creatorName: 创建者</li>
@@ -40,8 +40,8 @@ public class WelfaresDTO {
     private String senderName;
     private Long senderUid;
     private Long senderDetailId;
-    private String attachmentImgUri;
-    private String attachmentImgUrl;
+    private String imgUri;
+    private String imgUrl;
     private Byte status;
     private Long sendTime;
     private String creatorName;
@@ -114,20 +114,20 @@ public class WelfaresDTO {
 		this.senderDetailId = senderDetailId;
 	}
 
-	public String getAttachmentImgUri() {
-		return attachmentImgUri;
+	public String getImgUri() {
+		return imgUri;
 	}
 
-	public void setAttachmentImgUri(String attachmentImgUri) {
-		this.attachmentImgUri = attachmentImgUri;
+	public void setImgUri(String imgUri) {
+		this.imgUri = imgUri;
 	}
 
-	public String getAttachmentImgUrl() {
-		return attachmentImgUrl;
+	public String getImgUrl() {
+		return imgUrl;
 	}
 
-	public void setAttachmentImgUrl(String attachmentImgUrl) {
-		this.attachmentImgUrl = attachmentImgUrl;
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
 	}
 
 	public Byte getStatus() {

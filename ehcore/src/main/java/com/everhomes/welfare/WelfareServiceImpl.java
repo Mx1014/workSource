@@ -68,7 +68,7 @@ public class WelfareServiceImpl implements WelfareService {
     private WelfaresDTO processWelfaresDTO(Welfare r) {
         WelfaresDTO dto = ConvertHelper.convert(r, WelfaresDTO.class);
         dto.setUpdateTime(r.getUpdateTime().getTime());
-        dto.setAttachmentImgUrl(contentServerService.parserUri(r.getAttachmentImgUri(),
+        dto.setImgUrl(contentServerService.parserUri(r.getAttachmentImgUri(),
                 EntityType.USER.getCode(), UserContext.currentUserId()));
         dto.setItems(new ArrayList<>());
         dto.setReceivers(new ArrayList<>());
