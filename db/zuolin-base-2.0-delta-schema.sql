@@ -219,7 +219,7 @@ ALTER TABLE `eh_service_module_apps` ADD COLUMN `system_app_flag`  tinyint(4) NU
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `default_app_flag`  tinyint(4) NULL COMMENT 'installed when organiation was created, 0-no, 1-yes';
 
 -- 修改appId名字，实际为应用originId
-ALTER TABLE `eh_banners` CHANGE COLUMN `appId` `app_id`  bigint(20) NULL DEFAULT NULL AFTER `namespace_id`;
+ALTER TABLE `eh_banners` CHANGE COLUMN `appId` `app_id`  bigint(20) NULL DEFAULT NULL;
 
 -- Already delete in 5.5.1
 ALTER TABLE `eh_organization_member_details` ADD COLUMN `profile_integrity` INTEGER NOT NULL DEFAULT '0';
