@@ -1765,8 +1765,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			dtos.add(processOrganizationContactDTO(member));
 		}
 
-		Long topAdminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		listOrganizationContectDTOResponse.setDtos(dtos.stream().filter(r-> !Objects.equals(r.getTargetId(), topAdminUserId)).collect(Collectors.toList()));
+//		Long topAdminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
+		listOrganizationContectDTOResponse.setDtos(dtos);
 		listOrganizationContectDTOResponse.setNextPageAnchor(locator.getAnchor());
 		return listOrganizationContectDTOResponse;
 	}
