@@ -19,6 +19,7 @@ ehcore/logs
 ehcore/output
 ehcore/src/test/java/com/everhomes/generate
 ehrest/src/test/java/com/everhomes/generate
+ehcore/transaction-logs
 
 *.xml.bak
 *rebel.xml
