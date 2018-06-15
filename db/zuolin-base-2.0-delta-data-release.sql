@@ -56,7 +56,7 @@ INSERT INTO `eh_second_app_types` (`id`, `name`, `app_type`) VALUES ('14', '物�
 INSERT INTO `eh_second_app_types` (`id`, `name`, `app_type`) VALUES ('15', '运营统计', '1');
 
 -- 应用入口信息
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('2', '50100', '组织架构', '通讯录', '1', '1', '2', '2', '0');
+-- INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('2', '50100', '组织架构', '通讯录', '1', '1', '2', '2', '0');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('3', '50100', '组织架构', '组织架构', '2', '4', '1', '4', '1');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('4', '50100', '组织架构', '通讯录', '2', '4', '2', '2', '1');
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('7', '50300', '职级管理', '职级管理', '2', '4', '1', '4', '2');

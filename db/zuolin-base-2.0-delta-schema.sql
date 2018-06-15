@@ -231,4 +231,5 @@ ALTER TABLE eh_organization_member_details ADD COLUMN job_level VARCHAR(256) COM
 ALTER TABLE eh_organization_member_details ADD COLUMN job_level_ids VARCHAR(256) COMMENT '职级Id'
 -- end Janson
 
-
+-- 园区表增加namespace_id索引 add by yanjun 20180615
+alter table eh_communities add index namespace_id_index(`namespace_id`);
