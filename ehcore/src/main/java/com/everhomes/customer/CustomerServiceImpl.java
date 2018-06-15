@@ -911,12 +911,16 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth) {
+        EnterpriseCustomer customer = new EnterpriseCustomer();
         if (checkAuth) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+            customer = checkEnterpriseCustomer(cmd.getId());
+        }else {
+            customer = enterpriseCustomerProvider.findById(cmd.getId());
+            if (customer == null) {
+                return;
+            }
         }
-
-        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
-        checkPrivilege(customer.getNamespaceId());
         //产品功能 #20796 同步过来的不能删
         if (NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
                 || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))) {
@@ -941,7 +945,7 @@ public class CustomerServiceImpl implements CustomerService {
         //企业客户新增成功,保存客户事件
         saveCustomerEvent(2, customer, null,cmd.getDeviceType());
 
-        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
+        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0 && checkAuth) {
             Organization org = organizationProvider.findOrganizationById(customer.getOrganizationId());
             if (org != null && org.getId() != null) {
                 DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
