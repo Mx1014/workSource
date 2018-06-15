@@ -43,6 +43,8 @@ public interface ArchivesService {
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
+    void addArchivesLog(AddArchivesLogCommand cmd);
+
     //  获取员工的部门
     Map<Long, String> getEmployeeDepartment(Long detailId);
 

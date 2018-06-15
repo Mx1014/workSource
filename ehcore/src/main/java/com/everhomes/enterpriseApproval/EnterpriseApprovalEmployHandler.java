@@ -1,6 +1,7 @@
 package com.everhomes.enterpriseApproval;
 
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.db.DbProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseState;
@@ -9,8 +10,10 @@ import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.archives.AddArchivesLogCommand;
 import com.everhomes.rest.archives.ArchivesOperationType;
 import com.everhomes.rest.archives.EmployArchivesEmployeesCommand;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
 import com.everhomes.rest.enterpriseApproval.ComponentEmployApplicationValue;
 import com.everhomes.rest.general_approval.*;
@@ -22,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,6 +50,9 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
 
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public void processFormFields(List<GeneralFormFieldDTO> fieldDTOs, GetTemplateBySourceIdCommand cmd) {
@@ -88,29 +94,46 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
     @Override
     public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
         OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
-        if (member != null) {
+        if (member == null)
+            return null;
+        dbProvider.execute((TransactionStatus status) -> {
             //  1.cancel the archives operate
             archivesService.cancelArchivesOperation(member.getNamespaceId(), member.getDetailId(), ArchivesOperationType.EMPLOY.getCode());
 
             //  2.set the new operate
             GeneralApprovalVal generalApprovalVal = generalApprovalValProvider.getSpecificApprovalValByFlowCaseId(flowCase.getId(), GeneralFormFieldType.EMPLOY_APPLICATION.getCode());
-            if (generalApprovalVal == null){
+            if (generalApprovalVal == null) {
                 LOGGER.error("No value");
                 return null;
             }
             ComponentEmployApplicationValue val = (ComponentEmployApplicationValue) StringHelper.fromJsonString(generalApprovalVal.getFieldStr3(), ComponentEmployApplicationValue.class);
-            if (val.getEmploymentTime() == null){
+            if (val.getEmploymentTime() == null) {
                 LOGGER.error("EmploymentTime is null");
                 return null;
             }
-            EmployArchivesEmployeesCommand cmd = new EmployArchivesEmployeesCommand();
-            cmd.setDetailIds(Collections.singletonList(member.getDetailId()));
-            cmd.setOrganizationId(member.getOrganizationId()); // the organizationId must be flowCase's applierOrganizationId
-            cmd.setEmploymentTime(val.getEmploymentTime());
-            cmd.setEmploymentEvaluation(val.getEmploymentReason());
-            cmd.setOperationType(ArchivesOperationType.SELF_EMPLOY.getCode());  // operationType for the archives log, the config'type is still EMPLOY
-            archivesService.employArchivesEmployeesConfig(cmd);
-        }
+            EmployArchivesEmployeesCommand configCom = new EmployArchivesEmployeesCommand();
+            configCom.setDetailIds(Collections.singletonList(member.getDetailId()));
+            configCom.setOrganizationId(member.getOrganizationId()); // the organizationId must be flowCase's applierOrganizationId
+            configCom.setEmploymentTime(val.getEmploymentTime());
+//                cmd.setEmploymentEvaluation(val.getEmploymentReason());
+            configCom.setLogFlag(TrueOrFalseFlag.FALSE.getCode());  // set the new log here.
+            archivesService.employArchivesEmployeesConfig(configCom);
+
+            //  3.set the new archives log
+            AddArchivesLogCommand logCom = new AddArchivesLogCommand();
+            logCom.setNamespaceId(member.getNamespaceId());
+            logCom.setDetailId(member.getDetailId());
+            logCom.setOrganizationId(member.getOrganizationId());
+            logCom.setOperationType(ArchivesOperationType.SELF_EMPLOY.getCode());
+            logCom.setOperationTime(val.getEmploymentTime());
+            logCom.setStr1(val.getEmploymentReason());
+            logCom.setOperatorUid(member.getTargetId());
+            logCom.setOperatorName(member.getContactName());
+            archivesService.addArchivesLog(logCom);
+            return null;
+        });
+
+
         return null;
     }
 

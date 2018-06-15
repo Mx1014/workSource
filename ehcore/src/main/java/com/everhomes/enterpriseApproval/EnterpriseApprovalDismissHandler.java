@@ -2,6 +2,7 @@ package com.everhomes.enterpriseApproval;
 
 import com.everhomes.archives.ArchivesService;
 import com.everhomes.archives.ArchivesUtil;
+import com.everhomes.db.DbProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseState;
@@ -9,10 +10,8 @@ import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.archives.ArchivesDismissType;
-import com.everhomes.rest.archives.ArchivesOperationType;
-import com.everhomes.rest.archives.ArchivesParameter;
-import com.everhomes.rest.archives.DismissArchivesEmployeesCommand;
+import com.everhomes.rest.archives.*;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
 import com.everhomes.rest.enterpriseApproval.ComponentDismissApplicationValue;
 import com.everhomes.rest.general_approval.*;
@@ -24,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +47,9 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
 
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public void processFormFields(List<GeneralFormFieldDTO> fieldDTOs, GetTemplateBySourceIdCommand cmd) {
@@ -86,30 +89,48 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
     @Override
     public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
         OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(flowCase.getApplyUserId(), flowCase.getApplierOrganizationId());
-        if (member != null) {
+        if (member == null)
+            return null;
+        dbProvider.execute((TransactionStatus status) -> {
             //  1.cancel the archives operate
             archivesService.cancelArchivesOperation(member.getNamespaceId(), member.getDetailId(), ArchivesOperationType.DISMISS.getCode());
 
             //  2.set the new operate
             GeneralApprovalVal generalApprovalVal = generalApprovalValProvider.getSpecificApprovalValByFlowCaseId(flowCase.getId(), GeneralFormFieldType.DISMISS_APPLICATION.getCode());
-            if (generalApprovalVal == null){
+            if (generalApprovalVal == null) {
                 LOGGER.error("No value");
                 return null;
             }
             ComponentDismissApplicationValue val = (ComponentDismissApplicationValue) StringHelper.fromJsonString(generalApprovalVal.getFieldStr3(), ComponentDismissApplicationValue.class);
-            if (val.getDismissTime() == null){
+            if (val.getDismissTime() == null) {
                 LOGGER.error("DismissTime is null");
                 return null;
             }
-            DismissArchivesEmployeesCommand cmd = new DismissArchivesEmployeesCommand();
-            cmd.setDetailIds(Collections.singletonList(member.getDetailId()));
-            cmd.setOrganizationId(flowCase.getApplierOrganizationId());
-            cmd.setOperationType(ArchivesOperationType.SELF_DISMISS.getCode()); // operationType for the archives log, the config'type is still DISMISS
-            cmd.setDismissType(ArchivesDismissType.QUIT.getCode());
-            cmd.setDismissReason(ArchivesUtil.convertToArchivesEnum(val.getDismissReason(), ArchivesParameter.DISMISS_REASON));
-            cmd.setDismissRemark(val.getDismissRemark());
-            archivesService.dismissArchivesEmployeesConfig(cmd);
-        }
+            DismissArchivesEmployeesCommand configCom = new DismissArchivesEmployeesCommand();
+            configCom.setDetailIds(Collections.singletonList(member.getDetailId()));
+            configCom.setOrganizationId(flowCase.getApplierOrganizationId());
+            configCom.setDismissTime(val.getDismissTime());
+            configCom.setLogFlag(TrueOrFalseFlag.FALSE.getCode()); // operationType for the archives log, the config'type is still DISMISS
+//            configCom.setDismissType();
+//            configCom.setDismissReason(ArchivesUtil.convertToArchivesEnum(, ArchivesParameter.DISMISS_REASON));
+//            configCom.setDismissRemark();
+            archivesService.dismissArchivesEmployeesConfig(configCom);
+
+            //  3.set the new archives log
+            AddArchivesLogCommand logCom = new AddArchivesLogCommand();
+            logCom.setNamespaceId(member.getNamespaceId());
+            logCom.setDetailId(member.getDetailId());
+            logCom.setOrganizationId(member.getOrganizationId());
+            logCom.setOperationType(ArchivesOperationType.SELF_DISMISS.getCode());
+            logCom.setOperationTime(val.getDismissTime());
+            logCom.setStr1(ArchivesUtil.resolveArchivesEnum(ArchivesDismissType.QUIT.getCode(), ArchivesParameter.DISMISS_TYPE));
+            logCom.setStr2(val.getDismissReason());
+            logCom.setStr3(val.getDismissRemark());
+            logCom.setOperatorUid(member.getTargetId());
+            logCom.setOperatorName(member.getContactName());
+            archivesService.addArchivesLog(logCom);
+            return null;
+        });
         return null;
     }
 
