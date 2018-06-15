@@ -2861,6 +2861,9 @@ public class ArchivesServiceImpl implements ArchivesService, ApplicationListener
     @Override
     public boolean checkDismiss(Long userId, Long orgId) {
         OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, orgId);
+        if (null == member) {
+            return true;
+        }
         return checkDismiss(member);
 
     }
