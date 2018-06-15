@@ -108,7 +108,7 @@ public class WelfareServiceImpl implements WelfareService {
                 }
                 if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
                     throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
-                            WelfareConstants.ERROR_CANNOT_DRAFT, "已发送不能保存草稿");
+                            WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能保存草稿");
                 }
             }
             cmd.getWelfare().setStatus(WelfareStatus.DRAFT.getCode());
@@ -176,7 +176,7 @@ public class WelfareServiceImpl implements WelfareService {
                 }
                 if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
                     throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
-                            WelfareConstants.ERROR_CANNOT_SEND, "已发送不能发送");
+                            WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能发送");
                 }
             }
             cmd.getWelfare().setStatus(WelfareStatus.SENDED.getCode());
@@ -273,7 +273,7 @@ public class WelfareServiceImpl implements WelfareService {
         Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfareId());
         if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
-                    WelfareConstants.ERROR_CANNOT_DELETE, "已发送不能删除");
+                    WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能删除");
         }
         welfareReceiverProvider.deleteWelfareReceivers(cmd.getWelfareId());
         welfareItemProvider.deleteWelfareItems(cmd.getWelfareId());

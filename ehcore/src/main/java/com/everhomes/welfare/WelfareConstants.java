@@ -7,9 +7,9 @@ public class WelfareConstants {
 
     static final String SCOPE = "welfare";
 
-    static final int ERROR_CANNOT_DELETE = 10000;  //不能删除
-    static final int ERROR_CANNOT_SEND = 10001;  //不能删除
-    static final int ERROR_CANNOT_DRAFT = 10002;  //不能草稿
+//    static final int ERROR_CANNOT_DELETE = 10000;  //不能删除
+    static final int ERROR_WELFARE_SENDED = 10001;  //已发放
+//    static final int ERROR_CANNOT_DRAFT = 10002;  //不能草稿
     static final int ERROR_WELFARE_NOT_FOUND = 10003;  //找不到该福利
 
     public static final String SEND_NOTIFICATION_SCOPE = "welfare.msg";
