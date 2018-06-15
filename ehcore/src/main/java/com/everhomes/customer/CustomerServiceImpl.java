@@ -2350,6 +2350,7 @@ public class CustomerServiceImpl implements CustomerService {
                 command.setId(organization.getId());
                 command.setManageOrganizationId(cmd.getOrgId());
                 command.setEnterpriseId(cmd.getOrgId());
+                command.setCheckAuth(TrueOrFalseFlag.FALSE.getCode());
                 organizationService.deleteOrganization(command);
                 if (customer != null) {
                     customer.setOrganizationId(0L);

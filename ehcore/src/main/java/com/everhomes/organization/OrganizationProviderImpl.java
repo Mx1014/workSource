@@ -4165,7 +4165,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Record record = dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATION_ADDRESSES)
                 .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
-                .fetchOne();
+                .fetchAny();
 
         if (record != null) {
             return ConvertHelper.convert(record, OrganizationAddress.class);
