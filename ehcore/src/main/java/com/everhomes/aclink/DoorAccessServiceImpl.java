@@ -443,10 +443,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                             .and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_ZL_GROUP.getCode())));
                     query.addConditions(cond);
                 } else if(cmd.getGroupId().equals(-1l)) {
-                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())
-                    .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ACLINK_ZL_GROUP.getCode()))
-                    .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ACLINK_HUARUN_GROUP.getCode()))
-                    .or(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l)));
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l));
                 } else if(!cmd.getGroupId().equals(0l)) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
@@ -455,6 +451,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 
                 if(cmd.getDoorType() != null) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+                }else{
+                	//不传doorType,过滤掉巴士门禁 by liuyilin 20180614
+                	query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_BUS.getCode()));
                 }
                 if(cmd.getServerId() != null){
                 	query.addConditions(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID.eq(cmd.getServerId()));
@@ -1002,7 +1001,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     		doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
                     }else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
                         doorAuth.setDriver(DoorAccessDriverType.WANG_LONG.getCode());
-                    } else {
+                    }else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_BUS.getCode())){
+                    	doorAuth.setDriver(DoorAccessDriverType.BUS.getCode());
+                    }else {
                         doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
                     }
                     
@@ -2589,16 +2590,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Override
     public ListDoorAccessQRKeyResponse listDoorAccessQRKey() {
-        return listDoorAccessQRKeyAndGenerateQR(false);
+        return listDoorAccessQRKeyAndGenerateQR(null, false);
+    }
+    
+    @Override
+    public ListDoorAccessQRKeyResponse listBusAccessQRKey() {
+        return listDoorAccessQRKeyAndGenerateQR(DoorAccessDriverType.BUS, false);
     }
 
     @Override
-    public ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(boolean generate) {
+    public ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(DoorAccessDriverType driverType, boolean generate) {
         User user = UserContext.current().getUser();
 
         ListingLocator locator = new ListingLocator();
         //List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.LINGLING, 60));
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), null, 60));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), driverType.getCode(), 60));
         
         ListDoorAccessQRKeyResponse resp = new ListDoorAccessQRKeyResponse();
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
@@ -2618,7 +2624,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             if(doorAccess.getHasQr() != (byte) 1){
             	continue;
             }
-
+            
+            
             if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
             	//Forever + true of rightOpen
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
@@ -5101,5 +5108,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			return 1;
 		}
 		return 0;
+	}
+
+	@Override
+	public void updateAccessType(Long doorId, byte doorType) {
+		DoorAccess da = doorAccessProvider.getDoorAccessById(doorId);
+		if(da == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
+		}
+		da.setDoorType(doorType);
+		doorAccessProvider.updateDoorAccess(da);
 	}
 }
