@@ -5,6 +5,7 @@ CREATE TABLE `eh_welfares` (
   `owner_id` BIGINT DEFAULT NULL COMMENT 'owner resource(user/organization) id',
   `subject` VARCHAR(128) COMMENT '主题名称',
   `content` TEXT COMMENT '祝福语',
+  `sender_name` VARCHAR(128) COMMENT '发放人姓名',
   `sender_uid` BIGINT COMMENT '发放人userId',
   `sender_detail_id` BIGINT COMMENT '发放人detailId',
   `img_uri` VARCHAR(1024) COMMENT '附图uri',

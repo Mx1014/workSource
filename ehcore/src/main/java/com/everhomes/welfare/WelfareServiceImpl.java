@@ -118,7 +118,7 @@ public class WelfareServiceImpl implements WelfareService {
         welfare.setOperatorName(uName);
         if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
             welfare.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            welfare.setSenderUid(UserContext.currentUserId());
+//            welfare.setSenderUid(UserContext.currentUserId());
         }
         if (null == welfare.getId()) {
             welfareProvider.createWelfare(welfare);
