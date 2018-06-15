@@ -6686,7 +6686,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     private List<ImportFileResultLog<ImportOrganizationOwnerDTO>> importOrganizationOwnerData(long organizationId, Long communityId, Integer namespaceId, List<ImportOrganizationOwnerDTO> datas) {
         List<ImportFileResultLog<ImportOrganizationOwnerDTO>> resultLogs = new ArrayList<>();
-        List<String> contactTokenList = new ArrayList<>();
+//        List<String> contactTokenList = new ArrayList<>();
         if (datas == null || datas.size() == 0) {
             return resultLogs;
         }
@@ -6780,7 +6780,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 compareOwnerInfo(exist, owner);
                 owner.setId(exist.getId());
             }
-            contactTokenList.add(dto.getContactToken());
+//            contactTokenList.add(dto.getContactToken());
 
             owner.setNamespaceId(namespaceId);
             owner.setCreatorUid(UserContext.currentUserId());
@@ -6792,13 +6792,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (ownerId == null) {
                 ownerId = propertyMgrProvider.createPropOwner(owner);
                 pmOwnerSearcher.feedDoc(owner);
+            }else {
+                propertyMgrProvider.updatePropOwner(owner);
+                pmOwnerSearcher.feedDoc(owner);
             }
-            Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
-            createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
-
-            if (StringUtils.hasLength(dto.getLivingTime())) {
-                long time = parseDate(dto.getLivingTime()).getTime();
-                createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
+            List<OrganizationOwnerAddress> ownerAddresses = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(namespaceId, ownerId);
+            List<Long> addressIds = new ArrayList<>();
+            if (ownerAddresses != null && ownerAddresses.size() > 0) {
+                addressIds = ownerAddresses.stream().map(OrganizationOwnerAddress::getAddressId).collect(Collectors.toList());
+            }
+            if (!addressIds.contains(address.getId())) {
+                Byte livingStatus = parseLivingStatus(dto.getLivingStatus());
+                createOrganizationOwnerAddress(address.getId(), livingStatus, namespaceId, ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
+                if (StringUtils.hasLength(dto.getLivingTime())) {
+                    long time = parseDate(dto.getLivingTime()).getTime();
+                    createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
+                }
             }
         }
         return resultLogs;
@@ -6806,25 +6815,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     private String getDisplayName(ImportOrganizationOwnerDTO dto) {
         String displayName = null;
-        if(dto.getContactName()==null){
+        if (StringUtils.isEmpty(dto.getContactName())) {
             displayName = "客户名称";
         }
-        if(dto.getContactType()==null){
+        if(StringUtils.isEmpty(dto.getContactType())){
             displayName = "客户类型";
         }
-        if(dto.getContactToken()==null){
+        if (StringUtils.isEmpty(dto.getContactToken())) {
             displayName = "手机号码";
         }
-        if(dto.getGender()==null){
+        if (StringUtils.isEmpty(dto.getGender())) {
             displayName = "性别";
         }
-        if(dto.getBuilding()==null){
+        if (StringUtils.isEmpty(dto.getBuilding())) {
             displayName = "楼栋";
         }
-        if(dto.getAddress()==null){
+        if (StringUtils.isEmpty(dto.getAddress())) {
             displayName = "门牌";
         }
-        if(dto.getLivingStatus()==null){
+        if (StringUtils.isEmpty(dto.getLivingStatus())) {
             displayName = "是否在户";
         }
         return displayName;
