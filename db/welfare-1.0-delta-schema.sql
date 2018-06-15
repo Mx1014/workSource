@@ -7,7 +7,7 @@ CREATE TABLE `eh_welfares` (
   `content` TEXT COMMENT '祝福语',
   `sender_uid` BIGINT COMMENT '发放人userId',
   `sender_detail_id` BIGINT COMMENT '发放人detailId',
-  `attachment_img_uri` VARCHAR(1024) COMMENT '附图uri',
+  `img_uri` VARCHAR(1024) COMMENT '附图uri',
   `status` TINYINT COMMENT '0-草稿 1-发送',
   `send_time` DATETIME DEFAULT NULL, 
   `creator_name` VARCHAR(128)  DEFAULT NULL, 
