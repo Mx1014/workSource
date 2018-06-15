@@ -484,8 +484,14 @@ public class BannerServiceImpl implements BannerService {
                 }
 
                 BannerTargetType targetType = BannerTargetType.fromCode(dto.getTargetType());
+                if(targetType == null) {
+                    return dto;
+                }
                 BannerTargetHandler handler = PlatformContext.getComponent(
                         BannerTargetHandler.BANNER_TARGET_HANDLER_PREFIX + targetType.getCode());
+                if(handler == null) {
+                    return dto;
+                }
 
                 try {
                     RouterInfo routerInfo = handler.getRouterInfo(dto.getTargetData());
