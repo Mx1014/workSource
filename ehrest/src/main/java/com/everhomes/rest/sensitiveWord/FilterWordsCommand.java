@@ -9,6 +9,7 @@ import java.util.List;
  * <ul>
  *     <li>namespaceId: 域空间ID</li>
  *     <li>moduleType: 模块类型/li>
+ *     <li>communityId: 项目ID</li>
  *     <li>creatorUid: 发布人的userId</li>
  *     <li>publishTime: 发布时间</li>
  *     <li>textList: 需要检测的文本内容</li>
@@ -18,6 +19,7 @@ public class FilterWordsCommand {
 
     private Long namespaceId;
     private Byte moduleType;
+    private Long communityId;
     private Long creatorUid;
     private String publishTime;
     private List<String> textList;
@@ -60,6 +62,14 @@ public class FilterWordsCommand {
 
     public void setTextList(List<String> textList) {
         this.textList = textList;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override

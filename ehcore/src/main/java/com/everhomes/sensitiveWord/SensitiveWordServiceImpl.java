@@ -136,6 +136,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
         sensitiveFilterRecord.setNamespaceId(cmd.getNamespaceId());
         sensitiveFilterRecord.setSensitiveWords(wordList.toString().substring(1,wordList.toString().length() - 1));
         sensitiveFilterRecord.setModuleId(ForumModuleType.fromCode(cmd.getModuleType()).getModuleId());
+        sensitiveFilterRecord.setCommunityId(cmd.getCommunityId());
         UserInfo user = this.userService.getUserInfo(cmd.getCreatorUid());
         if (user != null) {
             sensitiveFilterRecord.setCreatorUid(cmd.getCreatorUid());
