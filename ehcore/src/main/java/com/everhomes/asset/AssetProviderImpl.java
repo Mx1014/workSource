@@ -4782,7 +4782,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
-        		t2.BILL_ID, t3.PAYMENT_ORDER_ID, t3.CREATE_TIME, t4.UID);
+        		t2.BILL_ID, t3.PAYMENT_ORDER_ID, t3.CREATE_TIME, t4.UID, t4.PAYMENT_TYPE);
         query.addFrom(t);
         query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
         query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
@@ -4869,6 +4869,12 @@ public class AssetProviderImpl implements AssetProvider {
                 if(userIdentifier != null) {
                 	dto.setPayerTel(userIdentifier.getIdentifierToken());
                 }
+            }
+            try {
+            	Integer queryPaymentType = Integer.parseInt(r.getValue(t4.PAYMENT_TYPE));
+                dto.setPaymentType(convertPaymentType(queryPaymentType));//支付方式
+            }catch(Exception e){
+            	LOGGER.debug("Integer.parseInt, paymentType={}, Exception={}", r.getValue(t4.PAYMENT_TYPE), e);
             }
             list.add(dto);
             return null;
@@ -5098,13 +5104,19 @@ public class AssetProviderImpl implements AssetProvider {
 	}
 	
 	public void transferOrderPaymentType() {
-        //卸货结束
+		DSLContext writeContext = getReadWriteContext();
+		EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
+		writeContext.update(t4)
+	        .set(t4.PAYMENT_TYPE, "8")//由于原来payment_type这个字段没存支付方式，所以都是null，默认全部置为支付宝：8
+	        .execute();
+		
+		//根据支付订单ID列表查询订单信息，如果查的到支付方式，那么刷新支付方式
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
         EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
+        //EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(t3.PAYMENT_ORDER_ID, t4.ID);
         query.addFrom(t);
@@ -5113,7 +5125,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
         query.fetch().map(r -> {
         	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
-        	dto.setBillId(r.getValue(t4.ID));//存EH_ASSET_PAYMENT_ORDER表的id，方便zu
+        	dto.setBillId(r.getValue(t4.ID));//存EH_ASSET_PAYMENT_ORDER表的id，方便更新EH_ASSET_PAYMENT_ORDER表的支付方式
         	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
             list.add(dto);
             return null;
@@ -5125,12 +5137,20 @@ public class AssetProviderImpl implements AssetProvider {
         }
         //支付订单信息一次最多查询100个
         while(payOrderIds.size() >= 99) {
-        	
+        	List<Long> queryIds = payOrderIds.subList(0, 99); 
+        	queryAndTransfer(queryIds, list);
+        	payOrderIds.removeAll(queryIds);
         }
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("transferOrderPaymentType(request), cmd={}", payOrderIds);
+        queryAndTransfer(payOrderIds, list);
+    }
+	
+	private void queryAndTransfer(List<Long> queryIds, List<PaymentOrderBillDTO> list) {
+		DSLContext writeContext = getReadWriteContext();
+		EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("transferOrderPaymentType(request), cmd={}", queryIds);
         }
-        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(payOrderIds);
+        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(queryIds);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("transferOrderPaymentType(response), response={}", GsonUtil.toJson(payOrderDTOs));
         }
@@ -5142,12 +5162,14 @@ public class AssetProviderImpl implements AssetProvider {
             			PaymentOrderBillDTO dto = list.get(j);
             			OrderDTO orderDTO = payOrderDTOs.get(i);
             			if(orderDTO.getPaymentType() != null) {
-            				dto.setPaymentType(convertPaymentType(orderDTO.getPaymentType()));//支付方式
+            				writeContext.update(t4)
+	                            .set(t4.PAYMENT_TYPE, orderDTO.getPaymentType().toString())
+	                            .where(t4.ID.eq(dto.getBillId()))
+	                            .execute();
             			}
-            			list.set(j, dto);
             		}
             	}
             }
         }
-    }
+	}
 }
