@@ -66,6 +66,8 @@ import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
 import com.everhomes.rest.asset.ExemptionItemDTO;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ListAvailableVariablesCommand;
 import com.everhomes.rest.asset.ListAvailableVariablesDTO;
@@ -5035,4 +5037,63 @@ public class AssetProviderImpl implements AssetProvider {
         vo.setBillGroupDTO(dto);
         return vo;
     }
+	
+	public IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
+		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
+        DSLContext context = getReadOnlyContext();
+        EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
+        Byte decouplingFlag = new Byte("1");//用于判断是否是使用默认配置，还是处于解耦状态
+        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))
+                .fetchInto(PaymentChargingItemScope.class);
+        if(scopes != null && scopes.size() != 0) {
+        	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        }
+        return response;
+    }
+	
+	public IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
+		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
+        List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.BROTHER_STANDARD_ID.isNotNull())//用于判断是否是使用默认配置，还是处于解耦状态
+                .fetchInto(PaymentChargingStandardsScopes.class); 
+        if(scopes != null && scopes.size() != 0) {
+        	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        } 
+       return response;
+	}
+	
+	public IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
+		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
+    	List<ListBillGroupsDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        context.select()
+                .from(t)
+                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t.BROTHER_GROUP_ID.isNotNull())
+                .fetch()
+                .map(r -> {
+                    ListBillGroupsDTO dto = new ListBillGroupsDTO();
+                    dto.setBillGroupId(r.getValue(t.ID));
+                    dto.setBillGroupName(r.getValue(t.NAME));
+                    dto.setBrotherGroupId(r.getValue(t.BROTHER_GROUP_ID));//用于判断是否是使用默认配置，还是处于解耦状态
+                    list.add(dto);
+                    return null;
+                });
+        if(list != null && list.size() != 0) {
+			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+		}
+       return response;
+	}
 }

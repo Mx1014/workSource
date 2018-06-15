@@ -4572,4 +4572,22 @@ public class AssetServiceImpl implements AssetService {
 		
 		return assetProvider.creatPropertyBill(cmd);
 	}
+
+	public IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd) {
+		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
+		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){//ownerId为-1代表选择的是全部
+			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        }
+		if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_ITEM.getCode())) {
+			//收费项配置
+			response = assetProvider.isChargingItemsForJudgeDefault(cmd);
+		}else if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_STANDARDS.getCode())) {
+			//收费项计算规则
+			response = assetProvider.isChargingStandardsForJudgeDefault(cmd);
+		}else if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.GROUPS.getCode())) {
+			//账单组
+			response = assetProvider.isBillGroupsForJudgeDefault(cmd);
+		}
+		return response;
+	}
 }

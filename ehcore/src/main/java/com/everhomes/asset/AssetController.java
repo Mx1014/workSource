@@ -1384,5 +1384,20 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
 	    response.setErrorCode(ErrorCodes.SUCCESS);
 	    return response;
 	}
+	
+	/**
+	 * <b>URL: /asset/isProjectNavigateDefault</b>
+	 * <p>项目导航区分全部、解耦 是否使用默认配置</p>
+	 */
+	@RequestMapping("isProjectNavigateDefault")
+	@RestReturn(value = IsProjectNavigateDefaultResp.class)
+	public RestResponse isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd){
+		IsProjectNavigateDefaultResp dto = assetService.isProjectNavigateDefault(cmd);
+	    RestResponse response = new RestResponse(dto);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
 }
 

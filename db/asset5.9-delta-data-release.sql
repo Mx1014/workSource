@@ -12,7 +12,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 	VALUES ('pay.v2.secretKey', 'zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==', '新新支付secretKey', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.payHomeUrl', 'http://payv2-alpha.zuolin.com/pay', '新新支付payHomeUrl', '0');
+	VALUES ('pay.v2.payHomeUrl', 'http://payv2-beta.zuolin.com/pay', '新新支付payHomeUrl', '0');
 	
 -- by cx.yang 支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)

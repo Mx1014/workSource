@@ -33,6 +33,8 @@ public class ListBillGroupsDTO {
     private String accountName;
     private String accountAliasName;
     private Byte accountStatus;
+    
+    private Long brotherGroupId;
 
     public Byte getBillDayType() {
         return billDayType;
@@ -145,6 +147,14 @@ public class ListBillGroupsDTO {
 
 	public void setAccountStatus(Byte accountStatus) {
 		this.accountStatus = accountStatus;
+	}
+
+	public Long getBrotherGroupId() {
+		return brotherGroupId;
+	}
+
+	public void setBrotherGroupId(Long brotherGroupId) {
+		this.brotherGroupId = brotherGroupId;
 	}
 
 }
