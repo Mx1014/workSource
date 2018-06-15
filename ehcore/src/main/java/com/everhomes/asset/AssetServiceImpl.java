@@ -4536,6 +4536,7 @@ public class AssetServiceImpl implements AssetService {
         ListPaymentBillResp response = new ListPaymentBillResp();
         //由于目前支付那边没有办法判断支付异常的情况，但是前端的订单状态查询条件大师说保留，所以如果查询订单异常默认返回空
         if(cmd.getPaymentStatus() != null && cmd.getPaymentStatus().equals(0)) {//订单状态：1：已完成，0：订单异常
+        	response.setPaymentOrderBillDTOs(new ArrayList<PaymentOrderBillDTO>());
         	return response;
         }
         if(cmd.getNamespaceId() == null){
