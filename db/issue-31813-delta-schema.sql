@@ -1,4 +1,4 @@
--- 访客管理1.0start
+﻿-- 访客管理1.0start
 -- 访客管理预约/访客表 , add by dengs, 20180425
 -- DROP TABLE IF EXISTS `eh_visitor_sys_visitors`;
 CREATE TABLE `eh_visitor_sys_visitors` (
@@ -211,7 +211,7 @@ CREATE TABLE `eh_visitor_sys_visit_reason` (
 
 -- 访客管理1.0end
 
--- issue-31813门禁2.9.7客户端支持自定义门禁授权方式 by liuyilin 20180615
+-- issue-31813 门禁2.9.7客户端支持自定义门禁授权方式 by liuyilin 20180615
 ALTER TABLE `eh_door_access` ADD MAX_DURATION INTEGER COMMENT '有效时间最大值(天)';
 ALTER TABLE `eh_door_access` ADD MAX_COUNT INTEGER COMMENT '按次授权最大次数';
 ALTER TABLE `eh_door_access` ADD DEFUALT_INVALID_DURATION INTEGER COMMENT '按次授权默认有效期(天)';
