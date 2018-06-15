@@ -236,6 +236,23 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
 
+
+        if(cmd.getContentCategory().equals(1010L)) {
+            if (cmd.getOldId() != null) {
+                Post temp = forumProvider.findPostById(cmd.getOldId());
+                if (null == temp) {
+                    LOGGER.error("post is null.");
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "post is null.");
+                }
+                ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(temp.getEmbeddedJson(),
+                        ActivityPostCommand.class);
+                if (tempCmd.getStatus() == (byte)2) {
+                    PostDTO post = this.updateTopic(cmd);
+                    return post;
+                }
+            }
+        }
         //全部都加上论坛入口Id为0，现在没办法真的区分不了这个帖子时属于哪个应用模块，活动、论坛、俱乐部、公告  add by yanjun 20171109
         if(cmd.getForumEntryId() == null){
             cmd.setForumEntryId(0L);

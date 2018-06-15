@@ -2464,29 +2464,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 
         }
-        PostDTO post = new PostDTO();
 
-        if (null == cmd.getOldId()) {
-            post = updateOrCreateTopic(cmd);
-        }else {
-            Post temp = forumProvider.findPostById(cmd.getOldId());
-            if (null == temp) {
-                LOGGER.error("post is null.");
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "post is null.");
-            }
-            ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(temp.getEmbeddedJson(),
-                    ActivityPostCommand.class);
-            if (tempCmd.getStatus() == (byte)2) {
-                post = forumService.updateTopic(cmd);
-            } else {
-                post = updateOrCreateTopic(cmd);
-            }
-        }
-        return post;
-    }
-
-    private PostDTO updateOrCreateTopic(NewTopicCommand cmd) {
         if (cmd.getForumId() == null ||
                 cmd.getVisibleRegionType() == null ||
                 cmd.getContentCategory() == null ||
@@ -2510,7 +2488,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 //		this.checkUserHaveRightToNewTopic(cmd,organization);
         /*if(cmd.getEmbeddedAppId() == null)
             cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);*/
-        return forumService.createTopic(cmd);
+        PostDTO post = forumService.createTopic(cmd);
+        return post;
     }
 
     private void convertNewTopicCommand(NewTopicCommand cmd) {
