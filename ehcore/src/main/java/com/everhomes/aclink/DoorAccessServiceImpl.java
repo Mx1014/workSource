@@ -3318,6 +3318,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //        resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_NEWS);
         
+        //验证操作者权限 by liuyilin 20180615
+        User user = UserContext.current().getUser();
+        DoorAuth AprovAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(cmd.getDoorId(), user.getId());
+        if(AprovAuth == null || AprovAuth.getRightVisitor() != (byte) 1){
+        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR,
+                    "操作者无访客授权权限"); 
+        }
+        
         DoorAccessDriverType qrDriver = getQrDriverType(namespaceId);
         DoorAccessDriverType qrDriverExt = getQrDriverExt(namespaceId);
         if(qrDriver.equals(DoorAccessDriverType.LINGLING)) {
