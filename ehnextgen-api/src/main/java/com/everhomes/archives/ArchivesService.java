@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -79,8 +80,6 @@ public interface ArchivesService {
     void deleteArchivesDismissEmployees(Long detailId, Long organizationId);
 
     void deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd);
-
-    void cancelArchivesOperation(Integer namespaceId, Long detailId, Byte operationType);
 
     void executeArchivesConfiguration();
 

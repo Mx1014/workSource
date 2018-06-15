@@ -92,10 +92,7 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
         if (member == null)
             return null;
         dbProvider.execute((TransactionStatus status) -> {
-            //  1.cancel the archives operate
-            archivesService.cancelArchivesOperation(member.getNamespaceId(), member.getDetailId(), ArchivesOperationType.DISMISS.getCode());
-
-            //  2.set the new operate
+            //  1.set the new operate, the old operate will be canceled automatically
             GeneralApprovalVal generalApprovalVal = generalApprovalValProvider.getSpecificApprovalValByFlowCaseId(flowCase.getId(), GeneralFormFieldType.DISMISS_APPLICATION.getCode());
             if (generalApprovalVal == null) {
                 LOGGER.error("No value");
@@ -110,13 +107,13 @@ public class EnterpriseApprovalDismissHandler implements EnterpriseApprovalHandl
             configCom.setDetailIds(Collections.singletonList(member.getDetailId()));
             configCom.setOrganizationId(flowCase.getApplierOrganizationId());
             configCom.setDismissTime(val.getDismissTime());
+            configCom.setDismissType(ArchivesOperationType.SELF_DISMISS.getCode());
+            configCom.setDismissReason(ArchivesUtil.convertToArchivesEnum(val.getDismissReason(), ArchivesParameter.DISMISS_REASON));
+            configCom.setDismissRemark(val.getDismissRemark());
             configCom.setLogFlag(TrueOrFalseFlag.FALSE.getCode()); // operationType for the archives log, the config'type is still DISMISS
-//            configCom.setDismissType();
-//            configCom.setDismissReason(ArchivesUtil.convertToArchivesEnum(, ArchivesParameter.DISMISS_REASON));
-//            configCom.setDismissRemark();
             archivesService.dismissArchivesEmployeesConfig(configCom);
 
-            //  3.set the new archives log
+            //  2.set the new archives log
             AddArchivesLogCommand logCom = new AddArchivesLogCommand();
             logCom.setNamespaceId(member.getNamespaceId());
             logCom.setDetailId(member.getDetailId());

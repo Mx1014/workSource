@@ -1,17 +1,11 @@
 package com.everhomes.rest.archives;
 
-import com.everhomes.util.StringHelper;
-
 public enum ArchivesOperationStatus {
 
     CANCEL((byte) 0), PENDING((byte) 1), COMPLETE((byte) 2);
     private Byte code;
 
-    private ArchivesOperationStatus(Byte code) {
-        this.code = code;
-    }
-
-    private ArchivesOperationStatus(byte code) {
+    ArchivesOperationStatus(byte code) {
         this.code = code;
     }
 

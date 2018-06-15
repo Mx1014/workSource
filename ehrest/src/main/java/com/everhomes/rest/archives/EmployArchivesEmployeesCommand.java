@@ -26,7 +26,7 @@ public class EmployArchivesEmployeesCommand {
 
     private String employmentEvaluation;
 
-    //  同样的操作流程，只是操作类型名称不同时传递次参数 add by ryan.
+    //  当无需生成档案记录的时候,可以使用此标志 add by ryan.
     private Byte logFlag;
 
     public EmployArchivesEmployeesCommand() {

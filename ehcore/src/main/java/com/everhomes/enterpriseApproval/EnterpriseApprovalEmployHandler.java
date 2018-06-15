@@ -97,10 +97,7 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
         if (member == null)
             return null;
         dbProvider.execute((TransactionStatus status) -> {
-            //  1.cancel the archives operate
-            archivesService.cancelArchivesOperation(member.getNamespaceId(), member.getDetailId(), ArchivesOperationType.EMPLOY.getCode());
-
-            //  2.set the new operate
+            //  1.set the new operate, the old operate will be canceled automatically
             GeneralApprovalVal generalApprovalVal = generalApprovalValProvider.getSpecificApprovalValByFlowCaseId(flowCase.getId(), GeneralFormFieldType.EMPLOY_APPLICATION.getCode());
             if (generalApprovalVal == null) {
                 LOGGER.error("No value");
@@ -115,11 +112,11 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
             configCom.setDetailIds(Collections.singletonList(member.getDetailId()));
             configCom.setOrganizationId(member.getOrganizationId()); // the organizationId must be flowCase's applierOrganizationId
             configCom.setEmploymentTime(val.getEmploymentTime());
-//                cmd.setEmploymentEvaluation(val.getEmploymentReason());
+            configCom.setEmploymentEvaluation(val.getEmploymentReason());
             configCom.setLogFlag(TrueOrFalseFlag.FALSE.getCode());  // set the new log here.
             archivesService.employArchivesEmployeesConfig(configCom);
 
-            //  3.set the new archives log
+            //  2.set the new archives log
             AddArchivesLogCommand logCom = new AddArchivesLogCommand();
             logCom.setNamespaceId(member.getNamespaceId());
             logCom.setDetailId(member.getDetailId());
