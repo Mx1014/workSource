@@ -1399,5 +1399,17 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
 	    return response;
 	}
 	
+	/**
+     * <b>URL: /asset/transferOrderPaymentType</b>
+     * <p>以前的订单数据需要刷支付方式，做数据迁移</p>
+     */
+    @RequestMapping("transferOrderPaymentType")
+    public RestResponse transferOrderPaymentType(){
+        assetService.transferOrderPaymentType();
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
 }
 

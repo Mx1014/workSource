@@ -5096,4 +5096,58 @@ public class AssetProviderImpl implements AssetProvider {
 		}
        return response;
 	}
+	
+	public void transferOrderPaymentType() {
+        //卸货结束
+        List<PaymentOrderBillDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
+        EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
+        EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t3.PAYMENT_ORDER_ID, t4.ID);
+        query.addFrom(t);
+        query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
+        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
+        query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
+        query.fetch().map(r -> {
+        	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
+        	dto.setBillId(r.getValue(t4.ID));//存EH_ASSET_PAYMENT_ORDER表的id，方便zu
+        	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
+            list.add(dto);
+            return null;
+        });
+        //调用支付提供的接口查询订单信息
+        List<Long> payOrderIds = new ArrayList<>();
+        for(PaymentOrderBillDTO dto : list) {
+        	payOrderIds.add(Long.parseLong(dto.getPaymentOrderNum()));
+        }
+        //支付订单信息一次最多查询100个
+        while(payOrderIds.size() >= 99) {
+        	
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("transferOrderPaymentType(request), cmd={}", payOrderIds);
+        }
+        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(payOrderIds);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("transferOrderPaymentType(response), response={}", GsonUtil.toJson(payOrderDTOs));
+        }
+        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
+        	for(int i = 0;i < payOrderDTOs.size();i++) {
+            	for(int j = 0;j < list.size();j++) {
+            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
+            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
+            			PaymentOrderBillDTO dto = list.get(j);
+            			OrderDTO orderDTO = payOrderDTOs.get(i);
+            			if(orderDTO.getPaymentType() != null) {
+            				dto.setPaymentType(convertPaymentType(orderDTO.getPaymentType()));//支付方式
+            			}
+            			list.set(j, dto);
+            		}
+            	}
+            }
+        }
+    }
 }

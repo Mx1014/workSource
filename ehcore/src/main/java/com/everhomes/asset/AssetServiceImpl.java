@@ -4577,6 +4577,7 @@ public class AssetServiceImpl implements AssetService {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){//ownerId为-1代表选择的是全部
 			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+			return response;
         }
 		if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_ITEM.getCode())) {
 			//收费项配置
@@ -4589,5 +4590,9 @@ public class AssetServiceImpl implements AssetService {
 			response = assetProvider.isBillGroupsForJudgeDefault(cmd);
 		}
 		return response;
+	}
+
+	public void transferOrderPaymentType() {
+		assetProvider.transferOrderPaymentType();
 	}
 }

@@ -197,4 +197,6 @@ public interface AssetService {
     ListBillsDTO createTestZJGKBill();
 
 	IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd);
+	
+	void transferOrderPaymentType();
 }
