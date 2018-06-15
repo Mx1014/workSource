@@ -409,7 +409,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(org.jooq.tools.StringUtils.isBlank(keyWord)) {
             return new ArrayList<>();
         } else {
-            qb = QueryBuilders.wildcardQuery("name", keyWord+"*");
+            qb = QueryBuilders.wildcardQuery("name.baidu", keyWord+"*");
         }
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
