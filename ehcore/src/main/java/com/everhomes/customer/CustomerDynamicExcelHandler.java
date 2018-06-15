@@ -291,9 +291,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         Integer namespaceId = customerInfo.getNamespaceId();
         Long communityId = customerInfo.getCommunityId();
         String moduleName = customerInfo.getModuleName();
-        Long uid = UserContext.currentUserId();
-        Long ownerId = customerInfo.getOwnerId();
-        String ownerType = customerInfo.getOwnerType();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
             if(sheet == null) {
@@ -1159,6 +1156,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         customerAddressString = customerAddressString.replaceAll("\n", "");
         customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
         organizationProvider.deleteAllOrganizationAddressById(enterpriseCustomer.getOrganizationId());
+        //导入重复的门牌覆盖掉
+        List<Long> addressIds = new ArrayList<>();
         String buildingNames[] = customerAddressString.split(",");
         if(buildingNames.length>0){
             for (String buildingNameString : buildingNames) {
@@ -1166,6 +1165,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 String apartmentName = buildingNameString.split("/")[1];
                 Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
                 Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
+                if(addressIds.contains(address.getId())){
+                    continue;
+                }
+                addressIds.add(address.getId());
                 CustomerEntryInfo entryInfo = new CustomerEntryInfo();
                 entryInfo.setAddress(address.getAddress());
                 entryInfo.setAddressId(address.getId());

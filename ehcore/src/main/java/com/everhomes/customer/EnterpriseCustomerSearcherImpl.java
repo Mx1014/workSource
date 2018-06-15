@@ -366,37 +366,6 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 EnterpriseCustomer customer = customers.get(id);
                 if(customer != null) {
                     EnterpriseCustomerDTO dto = convertToDTO(customer);
-//                ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
-//                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
-//                    if(categoryItem != null) {
-//                        dto.setCategoryItemName(categoryItem.getItemDisplayName());
-//                    }
-////                ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
-//                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
-//                    if(levelItem != null) {
-//                        dto.setLevelItemName(levelItem.getItemDisplayName());
-//                    }
-//                    if(null != dto.getCorpIndustryItemId()){
-//                        ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getCorpIndustryItemId());
-//                        if(null != corpIndustryItem){
-//                            dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
-//                        }
-//                    }
-//                    if(null != dto.getContactGenderItemId()){
-//                        ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getContactGenderItemId());
-//                        if(null != contactGenderItem){
-//                            dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
-//                        }
-//                    }
-//                    if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
-//                        dto.setTrackingName(dto.getTrackingName());
-//                    }
-//                    if(null != dto.getPropertyType()){
-//                        ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getPropertyType());
-//                        if(null != propertyTypeItem){
-//                            dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
-//                        }
-//                    }
                     dtos.add(dto);
                 }
             });
