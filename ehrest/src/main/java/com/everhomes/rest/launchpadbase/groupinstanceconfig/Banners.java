@@ -9,7 +9,7 @@ import java.util.List;
  * <ul>
  *     <li>itemGroup: itemGroup</li>
  *     <li>widthRatio: widthRatio</li>
- *     <li>hightRatio: 宽高比（高）</li>
+ *     <li>heightRatio: 宽高比（高）</li>
  *     <li>shadowFlag: shadowFlag</li>
  *     <li>paddingFlag: paddingFlag</li>
  * </ul>
@@ -18,7 +18,7 @@ public class Banners {
 
     private String itemGroup;
     private Long widthRatio;
-    private Long hightRatio;
+    private Long heightRatio;
     private Byte shadowFlag;
     private Integer paddingFlag;
 
@@ -38,12 +38,12 @@ public class Banners {
         this.widthRatio = widthRatio;
     }
 
-    public Long getHightRatio() {
-        return hightRatio;
+    public Long getHeightRatio() {
+        return heightRatio;
     }
 
-    public void setHightRatio(Long hightRatio) {
-        this.hightRatio = hightRatio;
+    public void setHeightRatio(Long heightRatio) {
+        this.heightRatio = heightRatio;
     }
 
     public Byte getShadowFlag() {
