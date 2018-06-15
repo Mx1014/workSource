@@ -237,7 +237,7 @@ public class ForumServiceImpl implements ForumService {
     public PostDTO createTopic(NewTopicCommand cmd) {
 
 
-        if(cmd.getContentCategory().equals(1010L)) {
+        if(cmd.getContentCategory().equals(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY)) {
             if (cmd.getOldId() != null) {
                 Post temp = forumProvider.findPostById(cmd.getOldId());
                 if (null == temp) {
@@ -5386,10 +5386,6 @@ public class ForumServiceImpl implements ForumService {
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
 
-        if (cmd.getOldId() != null) {
-            NewTopicCommand newTopicCommand = ConvertHelper.convert(cmd, NewTopicCommand.class);
-            return this.updateTopic(newTopicCommand);
-        }
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
