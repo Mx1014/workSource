@@ -2134,6 +2134,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 	// TODO: 2018/6/12
 	/**
 	 * <p>create a reservation on a given address for a given enterprise customer</p>

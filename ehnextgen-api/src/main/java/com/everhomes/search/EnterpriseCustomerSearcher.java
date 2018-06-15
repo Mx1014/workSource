@@ -23,4 +23,6 @@ public interface EnterpriseCustomerSearcher {
     SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd, Boolean isAdmin);
 
     List<EasySearchEnterpriseCustomersDTO> easyQueryEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd);
+
+    List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd);
 }

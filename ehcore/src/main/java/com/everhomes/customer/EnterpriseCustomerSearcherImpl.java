@@ -437,6 +437,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         return  enterpriseCustomerProvider.listEnterpriseCustomerNameAndId(ids);
     }
 
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+         return enterpriseCustomerProvider.listCommunityEnterpriseCustomers(cmd.getCommunityId(), cmd.getNamespaceId());
+    }
+
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
         Integer result = 0;

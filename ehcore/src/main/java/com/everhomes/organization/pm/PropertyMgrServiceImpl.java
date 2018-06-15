@@ -2605,7 +2605,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 }
 			}
 			dto.setReservationInvolved((byte)0);
-			if(AddressLivingStatus.INACTIVE.equals(AddressLivingStatus.fromCode(dto.getLivingStatus()))){
+			if(AddressLivingStatus.OCCUPIED.getCode() == dto.getLivingStatus()){
 				if(propertyMgrProvider.isInvolvedWithReservation(dto.getAddressId())){
 					dto.setReservationInvolved((byte)1);
 				}
@@ -6831,7 +6831,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public void updateReservation(UpdateReservationCommand cmd) {
-    	propertyMgrProvider.updateReservation(cmd.getReservationId(), cmd.getStartTime(), cmd.getEndTime(), cmd.getEnterpriseCustomerId());
+    	Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
+		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
+    	propertyMgrProvider.updateReservation(cmd.getReservationId(), start, end, cmd.getEnterpriseCustomerId());
 	}
 
 	/**

@@ -2110,4 +2110,23 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 });
         return ret;
     }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listCommunityEnterpriseCustomers(Long communityId, Integer namespaceId) {
+        List<EasySearchEnterpriseCustomersDTO> dtos = new ArrayList<>();
+        this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .select()
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.notEqual(CommonStatus.INACTIVE.getCode()))
+                .fetch()
+                .forEach(r -> {
+                    EasySearchEnterpriseCustomersDTO dto = new EasySearchEnterpriseCustomersDTO();
+                    dto.setName(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.NAME));
+                    dto.setId(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+                    dtos.add(dto);
+                });
+        return dtos;
+    }
 }

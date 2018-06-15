@@ -179,6 +179,20 @@ public class CustomerController extends ControllerBase {
         return response;
     }
     /**
+     * <b>URL: /customer/listEnterpriseCustomers</b>
+     * <p>列出所有企业客户）</p>
+     */
+    @RequestMapping("listEnterpriseCustomers")
+    @RestReturn(value = EasySearchEnterpriseCustomersDTO.class, collection = true)
+    public RestResponse listEnterpriseCustomer(EasySearchEnterpriseCustomersCommand cmd) {
+        List<EasySearchEnterpriseCustomersDTO> dtos = enterpriseCustomerSearcher.listEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /customer/syncEnterpriseCustomerIndex</b>
      * <p>同步企业客户</p>
      */

@@ -185,4 +185,6 @@ public interface EnterpriseCustomerProvider {
     String getEnterpriseCustomerNameById(Long enterpriseCustomerId);
 
     List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomerNameAndId(List<Long> ids);
+
+    List<EasySearchEnterpriseCustomersDTO> listCommunityEnterpriseCustomers(Long communityId, Integer namespaceId);
 }
