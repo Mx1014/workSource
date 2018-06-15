@@ -606,9 +606,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		Calendar cal=Calendar.getInstance();
 		StringBuffer contractNumber = new StringBuffer();
 		//获取规则
-		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
+		//String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
 		
-		if (communityExist == null || contractNumberRulejsonStr == null) {
+		if (communityExist == null || communityExist.getContractNumberRulejson() == null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("MM");
 			java.util.Date month  = Calendar.getInstance().getTime();
 			//收款
@@ -622,7 +622,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
 			}
 		}
-		
+		//获取规则
+		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
 		GenerateContractNumberRule contractNumberRulejson = (GenerateContractNumberRule)StringHelper.fromJsonString(contractNumberRulejsonStr, GenerateContractNumberRule.class);
 		
 		String Sparefield = contractNumberRulejson.getSparefield();
