@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 public class ContractCategory extends EhContractCategories  {
 
 	/**
-	 * EhNewsCategories
+	 * EhContractCategories
 	 */
 	private static final long serialVersionUID = 1796117121187200850L;
 

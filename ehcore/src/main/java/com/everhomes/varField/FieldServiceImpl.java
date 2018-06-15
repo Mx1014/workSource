@@ -428,6 +428,10 @@ public class FieldServiceImpl implements FieldService {
         if(globalFlag) {
             scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
         }
+        if (scopeFields != null && scopeFields.size() < 1) {
+        	scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), null);
+		}
+        
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
             Map<Long, FieldDTO> dtoMap = new HashMap<>();
@@ -452,6 +456,11 @@ public class FieldServiceImpl implements FieldService {
                 if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
                 }
+                
+                if (scopeItems != null && scopeItems.size() < 1) {
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+    			}
+                
             } else {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {

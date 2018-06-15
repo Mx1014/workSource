@@ -43,7 +43,6 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
-import com.everhomes.portal.PortalService;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -93,9 +92,7 @@ import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
-import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
@@ -105,7 +102,6 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.axis.types.Duration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
-import org.hibernate.cache.internal.CollectionCacheInvalidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,9 +112,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -221,8 +215,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Autowired
 	private PropertyMgrService propertyMgrService;
 
-	@Autowired
-	private PortalService portalService;
+	/*@Autowired
+	private PortalService portalService;*/
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
@@ -249,8 +243,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Autowired
 	ServiceModuleAppService serviceModuleAppService;
 	
-	@Autowired
-	private ServiceModuleAppProvider serviceModuleAppProvider;
+	/*@Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;*/
 
 	@Autowired
 	private CustomerService customerService;
@@ -264,20 +258,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
-//		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
-//		cmd.setNamespaceId(namespaceId);
-//		cmd.setModuleId(ServiceModuleConstants.CONTRACT_MODULE);
-//		cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
-//		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
-//		Long appId = apps.getServiceModuleApps().get(0).getOriginId();
-//		if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), orgId,
-//				orgId, privilegeId, appId, null, communityId)) {
-//			LOGGER.error("Permission is prohibited, namespaceId={}, orgId={}, ownerType={}, ownerId={}, privilegeId={}",
-//					namespaceId, orgId, EntityType.COMMUNITY.getCode(), communityId, privilegeId);
-//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
-//					"check user privilege error");
-//		}
-		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null,communityId);
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
 	}
 	
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
@@ -624,8 +605,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}*/
 		Calendar cal=Calendar.getInstance();
 		StringBuffer contractNumber = new StringBuffer();
+		//获取规则
+		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
 		
-		if (communityExist == null) {
+		if (communityExist == null || contractNumberRulejsonStr == null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("MM");
 			java.util.Date month  = Calendar.getInstance().getTime();
 			//收款
@@ -639,7 +622,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
 			}
 		}
-		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
+		
 		GenerateContractNumberRule contractNumberRulejson = (GenerateContractNumberRule)StringHelper.fromJsonString(contractNumberRulejsonStr, GenerateContractNumberRule.class);
 		
 		String Sparefield = contractNumberRulejson.getSparefield();
@@ -718,7 +701,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		});
 
 		//计算总的租赁面积
-		Double totalSize = dealContractApartments(contract, cmd.getApartments());
+		Double totalSize = dealContractApartments(contract, cmd.getApartments(), cmd.getContractApplicationScene());
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
@@ -907,6 +890,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		command.setIsEffectiveImmediately((byte)0);
 		command.setCategoryId(contract.getCategoryId());
+		command.setModuleId(21200l);
 		assetService.paymentExpectanciesCalculate(command);
 	}
 
@@ -1056,7 +1040,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		flowService.createFlowCase(createFlowCaseCommand);
 	}
 
-	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
+	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments, Byte contractApplicationScene) {
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
@@ -1097,8 +1081,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					mapping.setStatus(CommonStatus.ACTIVE.getCode());
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
-
-					if(!parentAddressIds.contains(buildingApartment.getAddressId())) {
+					//物业合同不修改资产状态
+					if(!parentAddressIds.contains(buildingApartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
 						//26058  已售的状态不变
 						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
@@ -1118,7 +1102,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
 
-				if(!finalParents.contains(apartment.getAddressId())) {
+				if(!finalParents.contains(apartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
 					//26058  已售的状态不变
 					if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
@@ -1375,7 +1359,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contract.setDownpaymentTime(setToEnd(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
-		Double rentSize = dealContractApartments(contract, cmd.getApartments());
+		Double rentSize = dealContractApartments(contract, cmd.getApartments(), cmd.getContractApplicationScene());
 		if(cmd.getRentSize() == null) {
 			contract.setRentSize(rentSize);
 		}
@@ -1481,6 +1465,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			} else {
 				checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_INVALID, cmd.getOrgId(), cmd.getCommunityId());
 			}
+			
 			contract.setInvalidReason(cmd.getInvalidReason());
 			contract.setInvalidTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			contract.setInvalidUid(UserContext.currentUserId());
@@ -1489,26 +1474,27 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contractSearcher.feedDoc(contract);
 //			//todo 将此合同关联的关联的未出账单删除，但账单记录着不用
 //			assetService.deleteUnsettledBillsOnContractId(contract.getId());
-			//作废合同关联资产释放
-			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
-			if(contractApartments != null && contractApartments.size() > 0) {
-				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
-				contractApartments.forEach(contractApartment -> {
-					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
-					//26058  已售的状态不变
-					if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
-						addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
-					}
+			//作废合同关联资产释放,by dingjianmin 如果是物业合同场景不释放资产
+			if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
+				List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+				if(contractApartments != null && contractApartments.size() > 0) {
+					boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
+					contractApartments.forEach(contractApartment -> {
+						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
+						//26058  已售的状态不变
+						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+							addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+							propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+						}
 
-					if(individualFlag) {
-						propertyMgrService.deleteAddressToOrgOwner(contract.getNamespaceId(), contractApartment.getAddressId(), contract.getCustomerId());
-					}
-				});
+						if(individualFlag) {
+							propertyMgrService.deleteAddressToOrgOwner(contract.getNamespaceId(), contractApartment.getAddressId(), contract.getCustomerId());
+						}
+					});
+				}
 			}
-
 		}
-		//待发起的和审批不通过的能发起审批
+		//待发起的和审批不通过的能发起审批 ，by dingjianmin 如果是物业合同场景不释放资产
 		dbProvider.execute((TransactionStatus status) -> {
 			if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) &&
 					(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))
@@ -1520,6 +1506,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 				//发起审批要把门牌状态置为被占用
 				List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+				
 				if(contractApartments != null && contractApartments.size() > 0) {
 					List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
 					//续约和变更的继承原合同的不用检查也不用改状态
@@ -1539,29 +1526,33 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 							}
 						}
 					}
-
-					List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
-					if(mappings != null && mappings.size() > 0) {
-						//对于审批不通过合同 先检查是否全是待租的，不是的话报错
-						if(ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))){
-							for(CommunityAddressMapping mapping : mappings) {
-								if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-									LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
-									throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
-											"contract apartment is not all free!");
+					
+					//如果不是物业场景，合同发起审批会把门牌置为已占用状态
+					if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
+						List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
+						if(mappings != null && mappings.size() > 0) {
+							//对于审批不通过合同 先检查是否全是待租的，不是的话报错
+							if(ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))){
+								for(CommunityAddressMapping mapping : mappings) {
+									if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+										LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
+										throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
+												"contract apartment is not all free!");
+									}
 								}
 							}
-						}
 
-						mappings.forEach(mapping -> {
-							//26058  已售的状态不变
-							if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-								mapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
-								mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-								propertyMgrProvider.updateOrganizationAddressMapping(mapping);
-							}
-						});
+							mappings.forEach(mapping -> {
+								//26058  已售的状态不变
+								if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+									mapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+									mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+									propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+								}
+							});
+						}
 					}
+
 				}
 
 				contract.setStatus(cmd.getResult());
@@ -1593,25 +1584,39 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+		
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		List<Long> contractAddressIds = new ArrayList<>();
-		if(contractApartments != null && contractApartments.size() > 0) {
-			boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
-			contractAddressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
-			List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(contractAddressIds);
-			if(mappings != null && mappings.size() > 0) {
-				mappings.forEach(mapping -> {
-					//26058  已售的状态不变
-					if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-						mapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
-						propertyMgrProvider.updateOrganizationAddressMapping(mapping);
-					}
-					if(individualFlag) {
-						propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
-					}
-				});
+		//物业合同不修改门牌状态
+		if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
+			
+			if(contractApartments != null && contractApartments.size() > 0) {
+				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
+				contractAddressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+				List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(contractAddressIds);
+				if(mappings != null && mappings.size() > 0) {
+					mappings.forEach(mapping -> {
+						//26058  已售的状态不变
+						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+							mapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
+							propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+						}
+						if(individualFlag) {
+							propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
+						}
+					});
+				}
+			}
+			//查询企业客户信息
+			if (contract.getCustomerType()==0) {
+				EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+				enterpriseCustomer.setLevelItemId(6L);
+				enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+				enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 			}
 		}
+		
+		
 
 		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
@@ -1621,30 +1626,33 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contractProvider.updateContract(parentContract);
 				contractSearcher.feedDoc(parentContract);
 
-				List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
-				if(parentContractApartments != null && parentContractApartments.size() > 0) {
-					List<Long> addressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
-					//去掉已被继承的门牌
-					contractAddressIds.forEach(contractAddressId -> {
-						addressIds.remove(contractAddressId);
-					});
-					List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
-					if(mappings != null && mappings.size() > 0) {
-						boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(parentContract.getCustomerType())) ? true : false;
-						mappings.forEach(mapping -> {
-							//26058  已售的状态不变
-							if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-								mapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-								mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-								propertyMgrProvider.updateOrganizationAddressMapping(mapping);
-							}
-
-							if(individualFlag) {
-								propertyMgrService.deleteAddressToOrgOwner(parentContract.getNamespaceId(), mapping.getAddressId(), parentContract.getCustomerId());
-							}
+				if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
+					List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
+					if(parentContractApartments != null && parentContractApartments.size() > 0) {
+						List<Long> addressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+						//去掉已被继承的门牌
+						contractAddressIds.forEach(contractAddressId -> {
+							addressIds.remove(contractAddressId);
 						});
+						List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
+						if(mappings != null && mappings.size() > 0) {
+							boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(parentContract.getCustomerType())) ? true : false;
+							mappings.forEach(mapping -> {
+								//26058  已售的状态不变
+								if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+									mapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+									mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+									propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+								}
+
+								if(individualFlag) {
+									propertyMgrService.deleteAddressToOrgOwner(parentContract.getNamespaceId(), mapping.getAddressId(), parentContract.getCustomerId());
+								}
+							});
+						}
 					}
 				}
+				
 			}
 		}
 	}
@@ -1813,7 +1821,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				|| ContractStatus.EXPIRING.equals(ContractStatus.fromStatus(contract.getStatus()))  || ContractStatus.DRAFT.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			flag = true;
 		}
-		if (ContractApplicationScene.PROPERTY.equals(cmd.getContractApplicationScene())) {
+		if (ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))) {
 			flag = false;
 		}
 		contract.setStatus(ContractStatus.INACTIVE.getCode());
@@ -2377,11 +2385,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		cmd1.setNamespaceId(cmd.getNamespaceId());
 		cmd1.setOrganizationId(cmd.getOrganizationId());
 		return findContract(cmd);
-//		if(checkAdmin(cmd1)) {
-//			return findContract(cmd);
-//		}
-//
-//		return null;
 	}
 
 	@Override
