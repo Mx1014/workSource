@@ -87,10 +87,23 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
         List<String> wordList = new ArrayList<>();
         if (null != acdat && acdat.size() >0) {
             for (String text : cmd.getTextList()) {
-                List<AhoCorasickDoubleArrayTrie.Hit<String>> hits = acdat.parseText(text.toUpperCase());
-                for (AhoCorasickDoubleArrayTrie.Hit<String> hit : hits) {
-                    if (!wordList.contains(hit.value)) {
-                        wordList.add(hit.value);
+                String[] chineseWords = text.split("[a-zA-Z]");
+                for (String word : chineseWords) {
+                    List<AhoCorasickDoubleArrayTrie.Hit<String>> hits = acdat.parseText(word);
+                    for (AhoCorasickDoubleArrayTrie.Hit<String> hit : hits) {
+                        if (!wordList.contains(hit.value)) {
+                            wordList.add(hit.value);
+                        }
+                    }
+                }
+                String[] englishWords = text.split("[^a-zA-Z]");
+                for (String word : englishWords) {
+                    int index = acdat.exactMatchSearch(word);
+                    if (index > 0) {
+                        String hit = acdat.get(index);
+                        if (!wordList.contains(hit)) {
+                            wordList.add(hit);
+                        }
                     }
                 }
             }

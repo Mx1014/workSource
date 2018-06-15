@@ -40,8 +40,7 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
         }
         ListSensitiveFilterRecordAdminResponse response = new ListSensitiveFilterRecordAdminResponse();
         cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
-        Long moduleId = ForumModuleType.fromCode(cmd.getModuleType()).getModuleId();
-        List<SensitiveFilterRecord> list = sensitiveFilterRecordProvider.listSensitiveFilterRecord(cmd.getNamespaceId(), moduleId, cmd.getPageAnchor(), cmd.getPageSize());
+        List<SensitiveFilterRecord> list = sensitiveFilterRecordProvider.listSensitiveFilterRecord(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), cmd.getPageSize());
         if (list != null) {
             int size = list.size();
             if (size >0) {

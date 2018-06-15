@@ -241,6 +241,7 @@ public class ForumServiceImpl implements ForumService {
         List<String> textList = new ArrayList<>();
         FilterWordsCommand command = new FilterWordsCommand();
         command.setModuleType(cmd.getModuleType());
+        command.setCommunityId(cmd.getCommunityId());
         if (!StringUtils.isEmpty(cmd.getSubject())) {
             textList.add(cmd.getSubject());
         }

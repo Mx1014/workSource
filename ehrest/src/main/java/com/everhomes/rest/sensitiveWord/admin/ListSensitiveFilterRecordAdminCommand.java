@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>namespaceId: 域空间ID</li>
- *     <li>moduleType: 应用类型</li>
+ *     <li>communityId: 项目(园区/小区)ID</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 每一页的数量</li>
  * </ul>
@@ -18,7 +18,7 @@ public class ListSensitiveFilterRecordAdminCommand {
     @NotNull
     private Long namespaceId;
 
-    private Byte moduleType;
+    private Long communityId;
 
     private Long pageAnchor;
 
@@ -48,12 +48,12 @@ public class ListSensitiveFilterRecordAdminCommand {
         this.pageSize = pageSize;
     }
 
-    public Byte getModuleType() {
-        return moduleType;
+    public Long getCommunityId() {
+        return communityId;
     }
 
-    public void setModuleType(Byte moduleType) {
-        this.moduleType = moduleType;
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override
