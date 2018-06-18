@@ -1380,6 +1380,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contract.setCostGenerationMethod(null);
 			Contract parentContract = checkContract(contract.getParentId());
 			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
+			contractProvider.updateContract(parentContract);
 		}
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
@@ -1953,8 +1954,23 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				ContractChargingItem chargingItem = chargingItems.get(0);
 				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
 			}
-			dto.setEndTimeByDay(yyyyMMdd.format(contract.getCreateTime()));
 			PaymentBills bill = assetProvider.getFirstUnsettledBill(parentContract.getId());
+			dto.setEndTimeByPeriod(bill.getDateStrEnd());
+			dto.setEndTimeByDay(yyyyMMdd.format(contract.getCreateTime()));
+		}
+		
+		if (ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			//向前端返回时间范围
+			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(contract.getId());
+			if (chargingItems!=null && chargingItems.size()>0) {
+				ContractChargingItem chargingItem = chargingItems.get(0);
+				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+			}
+			String endTimeStr = yyyyMMdd.format(contract.getDenunciationTime());
+			dto.setEndTimeByDay(endTimeStr);
+			List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(contract.getId(),endTimeStr);
+			PaymentBills bill = bills.get(bills.size()-1);
 			dto.setEndTimeByPeriod(bill.getDateStrEnd());
 		}
 		
@@ -2421,7 +2437,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (cmd.getEndTimeByDay()!=null) {
 			dto.setEndTimeByDay(yyyyMMdd.format(new Timestamp(cmd.getEndTimeByDay())));
 		}
-		PaymentBills bill = assetProvider.getFirstUnsettledBill(cmd.getContractId());
+//		PaymentBills bill = assetProvider.getFirstUnsettledBill(cmd.getContractId());
+		String endTimeStr = yyyyMMdd.format(cmd.getEndTimeByDay());
+		List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(cmd.getContractId(),endTimeStr);
+		PaymentBills bill = bills.get(bills.size()-1);
 		dto.setEndTimeByPeriod(bill.getDateStrEnd());
 		return dto;
 	}

@@ -343,9 +343,10 @@ public interface AssetProvider {
 
 	void setRent(Long contractId, BigDecimal rent);
 	//add by tangcen
-	void deleteUnsettledBillsOnContractId(Long contractId, Long nextBillId);
+	void deleteUnsettledBillsOnContractId(Long contractId, List<Long> billIds);
 	PaymentBills getFirstUnsettledBill(Long id);
 	List<PaymentBillItems> findBillItemsByBillId(Long billId);
 	void updatePaymentBills(PaymentBills bill);
+	List<PaymentBills> getUnsettledBillBeforeEndtime(Long contractId, String endTimeStr);
 
 }

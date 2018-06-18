@@ -4640,15 +4640,24 @@ public class AssetServiceImpl implements AssetService {
 	 */
 	@Override
 	public void deleteUnsettledBillsOnContractId(Byte costGenerationMethod,Long contractId,Timestamp endTime) {
+		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+		String endTimeStr = yyyyMMdd.format(endTime);
 		//得到距离当前时间最近的一条未出账单的相关信息
-		PaymentBills bill = assetProvider.getFirstUnsettledBill(contractId);
-		List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+		//PaymentBills bill = assetProvider.getFirstUnsettledBill(contractId);
+		List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(contractId,endTimeStr);
+		List<Long> billIds = new ArrayList<>();
+		for (PaymentBills bill : bills) {
+			billIds.add(bill.getId());
+		}
 		if (costGenerationMethod == (byte)0) {
-			assetProvider.deleteUnsettledBillsOnContractId(contractId,bill.getId());
+			assetProvider.deleteUnsettledBillsOnContractId(contractId,billIds);
 		}else if (costGenerationMethod == (byte)1) {
+			PaymentBills bill = bills.get(bills.size()-1);
+			List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
 			dealFirstUnsettledBill(bill,endTime);
 			dealFirstUnsettledBillItems(billItems,endTime);
 			assetProvider.updatePaymentBills(bill);
+			assetProvider.deleteUnsettledBillsOnContractId(contractId,billIds);
 			for (PaymentBillItems paymentBillItems : billItems) {
 				assetProvider.updatePaymentItem(paymentBillItems);
 			}
@@ -4658,7 +4667,6 @@ public class AssetServiceImpl implements AssetService {
 	//计算截断后最近的一条未出账单 add by tangcen 2018年6月12日
 	private void dealFirstUnsettledBill(PaymentBills bill,Timestamp endTime){
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
 		try {
 			Date dateBegin = yyyyMMdd.parse(bill.getDateStrBegin());
 			Date dateEnd = yyyyMMdd.parse(bill.getDateStrEnd());
@@ -4667,7 +4675,7 @@ public class AssetServiceImpl implements AssetService {
 			bill.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceivable()));
 			bill.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceived()));
 			bill.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,bill.getAmountOwed()));
-			String actualDateStrEnd = yyyyMM.format(endTime);
+			String actualDateStrEnd = yyyyMMdd.format(endTime);
 			bill.setDateStrEnd(actualDateStrEnd);
 		} catch (ParseException e) {
 			if(LOGGER.isDebugEnabled()) {
@@ -4681,7 +4689,6 @@ public class AssetServiceImpl implements AssetService {
 	//计算截断后最近的一条未出账单明细  add by tangcen 2018年6月12日
 	private void dealFirstUnsettledBillItems(List<PaymentBillItems> billItems,Timestamp endTime){
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
 		for (PaymentBillItems billItem : billItems) {
 			try {
 				Date dateBegin = yyyyMMdd.parse(billItem.getDateStrBegin());
@@ -4691,7 +4698,7 @@ public class AssetServiceImpl implements AssetService {
 				billItem.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceivable()));
 				billItem.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceived()));
 				billItem.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountOwed()));
-				String actualDateStrEnd = yyyyMM.format(endTime);
+				String actualDateStrEnd = yyyyMMdd.format(endTime);
 				billItem.setDateStrEnd(actualDateStrEnd);
 			} catch (ParseException e) {
 				if(LOGGER.isDebugEnabled()) {

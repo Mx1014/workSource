@@ -55,6 +55,8 @@ import com.everhomes.util.*;
 
 import com.everhomes.varField.*;
 import com.google.gson.Gson;
+import com.mysql.fabric.xmlrpc.base.Array;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -4699,7 +4701,7 @@ public class AssetProviderImpl implements AssetProvider {
 
 	//add by tangcen 2018年6月12日16:18:51
 	@Override
-	public void deleteUnsettledBillsOnContractId(Long contractId,Long nextBillId) {
+	public void deleteUnsettledBillsOnContractId(Long contractId,List<Long> billIdsNotToDelete) {
 	    EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
         this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
@@ -4711,7 +4713,7 @@ public class AssetProviderImpl implements AssetProvider {
                         .and(t.SWITCH.eq((byte) 0))
                         .fetch(t.ID);
                 //删除时保存最近的一条未出账单信息
-                billIds.remove(nextBillId);
+                billIds.removeAll(billIdsNotToDelete);
                 context.delete(t)
                         .where(t.ID.in(billIds))
                         .execute();
@@ -4724,6 +4726,31 @@ public class AssetProviderImpl implements AssetProvider {
         });
 		
 	}
+	
+/*	//add by tangcen 2018年6月12日16:18:51
+	//@Override
+	public void deleteUnsettledBillsOnContractId(Long contractId,List<Long> nextBillIds) {
+	    EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+                List<Long> billIds = context.select(t.ID)
+                        .from(t)
+                        .where(t.CONTRACT_ID.eq(contractId))
+                        .and(t.SWITCH.eq((byte) 0))
+                        .fetch(t.ID);
+                //删除时保存最近的一条未出账单信息
+                billIds.remove(nextBillIds);
+                context.update(t)
+                		.set(t.STATUS, (byte)3)
+                		.where(t.ID.in(billIds))
+                		.execute();
+                return null;
+            });
+            return null;
+        });
+	}*/
 	
 	//add by tangcen 2018年6月12日16:18:51
 	@Override
@@ -4763,5 +4790,24 @@ public class AssetProviderImpl implements AssetProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
         dao.update(bill);
+	}
+
+	@Override
+	public List<PaymentBills> getUnsettledBillBeforeEndtime(Long contractId,String endTimestr) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+		List<PaymentBills> result = new ArrayList<>();
+		context.select()
+			   	.from(t)
+			   	.where(t.CONTRACT_ID.eq(contractId))
+	            .and(t.SWITCH.eq((byte) 0))
+	            .and(t.DATE_STR_BEGIN.le(endTimestr))
+	            .orderBy(t.DATE_STR.asc())
+	            .fetch()
+	            .forEach(r->{
+	            	PaymentBills bill = ConvertHelper.convert(r, PaymentBills.class);
+	            	result.add(bill);
+	            });
+		return result;         
 	}
 }

@@ -151,15 +151,7 @@ public class ContractDetailDTO {
 	private String endTimeByPeriod;
 	private String endTimeByDay;
 	
-    public String getStartTime() {
-		return startTime;
-	}
-
-	public void setStartTime(String startTime) {
-		this.startTime = startTime;
-	}
-
-	public String getEndTimeByPeriod() {
+    public String getEndTimeByPeriod() {
 		return endTimeByPeriod;
 	}
 
@@ -173,6 +165,14 @@ public class ContractDetailDTO {
 
 	public void setEndTimeByDay(String endTimeByDay) {
 		this.endTimeByDay = endTimeByDay;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
 	}
 
 	public Byte getCostGenerationMethod() {
