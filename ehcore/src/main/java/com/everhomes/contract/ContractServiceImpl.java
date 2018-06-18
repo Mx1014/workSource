@@ -2029,9 +2029,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	private Long getConfigId(Integer namespaceId, Long categoryId) {
 		List<ServiceModuleApp> serviceModuleApp = serviceModuleAppService.listReleaseServiceModuleApp(namespaceId, 21200L, null, categoryId.toString(), null);
+		LOGGER.info(" serviceModuleApp() = " + serviceModuleApp.toString());
+		
 		if (serviceModuleApp != null && serviceModuleApp.size()>0){
 			return serviceModuleApp.get(0).getId();
 		}
+		
+		LOGGER.info(" return() = " + serviceModuleApp.get(0).getId());
 		return 0L;
 	}
 
@@ -2062,6 +2066,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		List<Contract> contracts = contractProvider.listContractsByAddressId(cmd.getAddressId());
 		Map<Long, Long> categoryConfigMap = new HashMap<Long, Long>();
 		
+		LOGGER.info(" listApartmentContractscmd = " + cmd.toString());
+		LOGGER.info(" listApartmentContractscmdcontracts = " + contracts.toString());
+		
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> {
 				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
@@ -2069,6 +2076,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				if(categoryConfigMap.containsKey(contract.getCategoryId())){
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}else{
+					
+					LOGGER.info(" listApartmentContractscmdgetCategoryId() = " + contract.getCategoryId());
+					
 					categoryConfigMap.put(contract.getCategoryId(), getConfigId(cmd.getNamespaceId(), contract.getCategoryId()));
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}
