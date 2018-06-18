@@ -597,15 +597,27 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
 		if(communityExist == null && cmd.getCommunityId() != null && cmd.getCategoryId() !=null) {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(), cmd.getCategoryId());
-		}/* else if(communityExist == null && cmd.getPayorreceiveContractType() != null && cmd.getCategoryId() !=null) {
-			//communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, null);
-		}*/
+		}
+		
 		Calendar cal=Calendar.getInstance();
 		StringBuffer contractNumber = new StringBuffer();
+		if (communityExist == null) {
+			SimpleDateFormat sdf = new SimpleDateFormat("MM");
+			java.util.Date month  = Calendar.getInstance().getTime();
+			//收款
+			if (ContractPaymentType.RECEIVE.equals(ContractPaymentType.fromStatus(cmd.getPayorreceiveContractType()))) {
+				//HT-ZL-年月-流水号
+				return "HT-ZL-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
+			}
+			//付款
+			if (ContractPaymentType.PAY.equals(ContractPaymentType.fromStatus(cmd.getPayorreceiveContractType()))) {
+				//HT-FK-年月-流水号
+				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
+			}
+		}
 		//获取规则
 		String contractNumberRulejsonStr = communityExist.getContractNumberRulejson();
-		
-		if (communityExist == null || contractNumberRulejsonStr == null) {
+		if (communityExist != null && contractNumberRulejsonStr == null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("MM");
 			java.util.Date month  = Calendar.getInstance().getTime();
 			//收款
