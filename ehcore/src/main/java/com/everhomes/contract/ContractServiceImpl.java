@@ -588,7 +588,7 @@ public class ContractServiceImpl implements ContractService {
 		Calendar cal=Calendar.getInstance();
 		StringBuffer contractNumber = new StringBuffer();
 		
-		if (communityExist == null) {
+		if (communityExist == null || communityExist.getContractNumberRulejson() == null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("MM");
 			java.util.Date month  = Calendar.getInstance().getTime();
 			//收款
