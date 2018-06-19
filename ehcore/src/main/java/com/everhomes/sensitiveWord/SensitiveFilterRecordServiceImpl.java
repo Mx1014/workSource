@@ -79,8 +79,15 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
     @Override
     public GetSensitiveWordUrlAdminResponse getSensitiveWordUrl() {
         String url = configurationProvider.getValue(0, "sensitiveword.url", "");
+        String fileName = configurationProvider.getValue(0, "sensitiveword.fileName", "");
         GetSensitiveWordUrlAdminResponse response = new GetSensitiveWordUrlAdminResponse();
+        if (url != null) {
+            response.setUrl(url);
+        }
         response.setUrl(url);
+        if (fileName != null) {
+            response.setFileName(fileName);
+        }
         return response;
     }
 }

@@ -40,6 +40,7 @@ public class ForumCommentHandler implements CommentHandler {
 		if (!StringUtils.isEmpty(cmd.getContent())) {
 			textList.add(cmd.getContent());
 		}
+		command.setCommunityId(cmd.getCommunityId());
 		command.setTextList(textList);
 		this.sensitiveWordService.filterWords(command);
 	}

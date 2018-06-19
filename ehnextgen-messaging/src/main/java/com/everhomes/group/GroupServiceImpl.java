@@ -200,6 +200,7 @@ public class GroupServiceImpl implements GroupService {
             textList.add(cmd.getDescription());
         }
         command.setTextList(textList);
+        command.setCommunityId(cmd.getCommunityId());
         this.sensitiveWordService.filterWords(command);
     }
 
@@ -5518,6 +5519,7 @@ public class GroupServiceImpl implements GroupService {
             textList.add(cmd.getContent());
         }
         command.setTextList(textList);
+        command.setCommunityId(cmd.getCommunityId());
         this.sensitiveWordService.filterWords(command);
     }
 

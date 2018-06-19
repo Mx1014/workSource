@@ -34,9 +34,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
 
     private static AhoCorasickDoubleArrayTrie<String> acdat = null;
 
-    private static final String fileName = "C:/Users/Administrator/Desktop/sensitive.txt";
-    @Autowired
-    private ContentServerService contentServerService;
+    private final String fliePath = "C:/Users/Administrator/Desktop/";
     @Autowired
     private SensitiveFilterRecordProvider sensitiveFilterRecordProvider;
     @Autowired
@@ -48,6 +46,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
     public void initSensitiveWords(InitSensitiveWordTrieCommand cmd) {
         if (cmd.getUrl() != null && !StringUtils.isBlank(cmd.getUrl())) {
             configurationProvider.setValue("sensitiveword.url",cmd.getUrl());
+            configurationProvider.setValue("sensitiveword.fileName",cmd.getFileName());
             init(cmd);
         }
     }
@@ -115,7 +114,12 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
     public File downloadSensitiveWords() {
         BufferedReader in = null;
         BufferedWriter out = null;
-        File file = new File(fileName);
+        String fileName = configurationProvider.getValue(0, "sensitiveword.fileName", "");
+        if (fileName == null || StringUtils.isBlank(fileName)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "file not exists.");
+        }
+        File file = new File(fliePath+fileName+".txt");
         try{
             String url = configurationProvider.getValue(0, "sensitiveword.url", "");
             URL realUrl = new URL(url);
@@ -144,7 +148,9 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
         sensitiveFilterRecord.setNamespaceId(cmd.getNamespaceId());
         sensitiveFilterRecord.setSensitiveWords(wordList.toString().substring(1,wordList.toString().length() - 1));
         sensitiveFilterRecord.setModuleId(ForumModuleType.fromCode(cmd.getModuleType()).getModuleId());
-        sensitiveFilterRecord.setCommunityId(cmd.getCommunityId());
+        if (cmd.getCommunityId() != null) {
+            sensitiveFilterRecord.setCommunityId(cmd.getCommunityId());
+        }
         UserInfo user = this.userService.getUserInfo(cmd.getCreatorUid());
         if (user != null) {
             sensitiveFilterRecord.setCreatorUid(cmd.getCreatorUid());
@@ -157,20 +163,6 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
         sensitiveFilterRecord.setPublishTime(Timestamp.valueOf(cmd.getPublishTime()));
         sensitiveFilterRecord.setText(cmd.getTextList().toString().substring(1,cmd.getTextList().toString().length()-1));
         this.sensitiveFilterRecordProvider.createSensitiveFilterRecord(sensitiveFilterRecord);
-    }
-
-    private void uploadFileToContentServer() {
-        String token = WebTokenGenerator.getInstance().toWebToken(User.SYSTEM_USER_LOGIN);
-        File file = new File("D:\\dict.txt");
-        try {
-            InputStream inputStream = new FileInputStream(file);
-            UploadCsFileResponse fileResponse = contentServerService.uploadFileToContentServer(inputStream,"dict.txt",token);
-            String url = fileResponse.getResponse().getUrl();
-            configurationProvider.setValue("sensitiveword.url",url);
-            System.out.println(fileResponse.getResponse().getUrl());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     private URLConnection connect(URL url) {
