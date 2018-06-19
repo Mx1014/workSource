@@ -1466,7 +1466,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         continue bill;
                     }
                     item.setBillItemId(itemPojo.getId());
-                    item.setBillItemName(headers[j]);
+                    item.setBillItemName(itemPojo.getName());//解决导入的时候费项名称多了*的bug
                     item.setAmountReceivable(amountReceivable);
                     item.setBuildingName(buildingName);
                     item.setApartmentName(apartmentName);
