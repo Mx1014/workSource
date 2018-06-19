@@ -165,7 +165,8 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
                 }
             }
             if(rate == null){
-                return null;
+                throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+                        "费率未设置");
             }
 
             dto.setOwnerId(cmd.getOwnerId());
