@@ -34,6 +34,7 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.module.AccessControlType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -227,6 +228,7 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setOperatorUid(moduleApp.getCreatorUid());
 		moduleApp.setActionType(serviceModule.getActionType());
 		moduleApp.setModuleControlType(serviceModule.getModuleControlType());
+		moduleApp.setAccessControlType(serviceModule.getAccessControlType());
 
 		//todo
 		moduleApp.setCustomTag(cmd.getCustomTag());
@@ -262,6 +264,8 @@ public class PortalServiceImpl implements PortalService {
 			moduleApp.setCustomPath(createModuleApp.getCustomPath());
 			moduleApp.setModuleControlType(serviceModule.getModuleControlType());
 
+			moduleApp.setAccessControlType(serviceModule.getAccessControlType());
+
 			serviceModuleApps.add(moduleApp);
 		}
 		serviceModuleAppProvider.createServiceModuleApps(serviceModuleApps);
@@ -291,6 +295,9 @@ public class PortalServiceImpl implements PortalService {
 			moduleApp.setCustomTag(cmd.getCustomTag());
 		}
 
+		if(!StringUtils.isEmpty(cmd.getAccessControlType())){
+			moduleApp.setAccessControlType(cmd.getAccessControlType());
+		}
 		moduleApp.setInstanceConfig(cmd.getInstanceConfig());
 		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
@@ -1765,6 +1772,7 @@ public class PortalServiceImpl implements PortalService {
 			item.setItemName(portalItem.getName());
 			if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
 				setItemLayoutActionData(item, portalItem.getActionData());
+				item.setAccessControlType(AccessControlType.All.getCode());
 			}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
 				setItemModuleAppActionData(item, portalItem.getActionData());
 			}
@@ -1833,6 +1841,7 @@ public class PortalServiceImpl implements PortalService {
 			UrlActionData data = new UrlActionData();
 			data.setUrl(instanceConfig.getBizUrl());
 			item.setActionData(StringHelper.toJsonString(data));
+			item.setAccessControlType(AccessControlType.All.getCode());
 		}else if(instanceConfig.getModuleAppId() == null){
 			return;
 		}else{
@@ -1923,14 +1932,17 @@ public class PortalServiceImpl implements PortalService {
 					item.setScopeId(scope.getScopeId());
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
 						setItemLayoutActionData(item, portalItem.getActionData());
+						item.setAccessControlType(AccessControlType.All.getCode());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
 						setItemModuleAppActionData(item, portalItem.getActionData());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ZUOLINURL){
 						item.setActionType(ActionType.OFFICIAL_URL.getCode());
 						item.setActionData(portalItem.getActionData());
+						item.setAccessControlType(AccessControlType.All.getCode());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.THIRDURL){
 						item.setActionType(ActionType.THIRDPART_URL.getCode());
 						item.setActionData(portalItem.getActionData());
+						item.setAccessControlType(AccessControlType.All.getCode());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
 						AllOrMoreActionData data = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 						if(AllOrMoreType.fromCode(data.getType()) == AllOrMoreType.ALL){
@@ -1944,6 +1956,7 @@ public class PortalServiceImpl implements PortalService {
 						item.setActionData(StringHelper.toJsonString(actionData));
 						item.setDefaultOrder(10000);
 						item.setDeleteFlag(DeleteFlagType.NO.getCode());
+						item.setAccessControlType(AccessControlType.All.getCode());
 					}
 
 					if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
@@ -2017,6 +2030,7 @@ public class PortalServiceImpl implements PortalService {
 		if(null != moduleApp){
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			item.setActionType(moduleApp.getActionType());
+			item.setAccessControlType(moduleApp.getAccessControlType());
 			if(null != handler){
 				//一开始发布的时候就已经发布过应用了。
 //				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), item.getItemLabel());
