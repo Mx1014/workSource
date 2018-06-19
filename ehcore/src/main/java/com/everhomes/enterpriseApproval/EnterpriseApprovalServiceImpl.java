@@ -502,9 +502,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
                         //  Create the form before creating the approval.
                         GeneralFormDTO form = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class));
                         //  Then, create the approval.
-                        GeneralApprovalDTO approval = createGeneralApprovalByTemplate(template, form, cmd);
-                        //  Finally, create the flow.
-                        createGeneralApprovalFlow(approval, form);
+                        createGeneralApprovalByTemplate(template, form, cmd);
                     }
                 }
                 return null;
@@ -512,22 +510,24 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
     }
 
-    private GeneralApprovalDTO createGeneralApprovalByTemplate(EnterpriseApprovalTemplate template, GeneralFormDTO form, CreateApprovalTemplatesCommand cmd) {
+    private void createGeneralApprovalByTemplate(EnterpriseApprovalTemplate template, GeneralFormDTO form, CreateApprovalTemplatesCommand cmd) {
         //  check whether the template has been existed by the template id
         GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), template.getId());
-        //  1.just update it when it exist
+        //  1. just update it when it exist
         if (ga != null) {
             ga = processApprovalTemplate(ga, template, form, cmd);
             generalApprovalProvider.updateGeneralApproval(ga);
         } else {
-            //  2.create if it not exist
+            //  2-1. create it if not exist
             ga = ConvertHelper.convert(template, GeneralApproval.class);
             ga = processApprovalTemplate(ga, template, form, cmd);
             generalApprovalProvider.createGeneralApproval(ga);
+            //  2-2. create the flow.
+            createGeneralApprovalFlow(ga, form);
         }
 
-        //  3.initialize the approval scope map
+        //  3. initialize the approval scope map
         Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
         if (org != null) {
             GeneralApprovalScopeMapDTO dto = new GeneralApprovalScopeMapDTO();
@@ -536,7 +536,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             dto.setSourceDescription(org.getName());
             updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Collections.singletonList(dto));
         }
-        return ConvertHelper.convert(ga, GeneralApprovalDTO.class);
     }
 
     private GeneralApproval processApprovalTemplate(GeneralApproval ga, EnterpriseApprovalTemplate template, GeneralFormDTO form, CreateApprovalTemplatesCommand cmd) {
@@ -565,7 +564,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         return ga;
     }
 
-    private void createGeneralApprovalFlow(GeneralApprovalDTO ga, GeneralFormDTO form) {
+    private void createGeneralApprovalFlow(GeneralApproval ga, GeneralFormDTO form) {
         //  1.create the flow
         CreateFlowCommand flowCmd = new CreateFlowCommand();
         flowCmd.setNamespaceId(ga.getNamespaceId());
