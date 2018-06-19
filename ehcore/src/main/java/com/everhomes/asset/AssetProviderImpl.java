@@ -5105,26 +5105,30 @@ public class AssetProviderImpl implements AssetProvider {
 	
 	public void transferOrderPaymentType() {
 		DSLContext writeContext = getReadWriteContext();
+		EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
 		EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
 		writeContext.update(t4)
 	        .set(t4.PAYMENT_TYPE, "8")//由于原来payment_type这个字段没存支付方式，所以都是null，默认全部置为支付宝：8
 	        .execute();
-		
+		writeContext.update(t)
+			.set(t.PAYMENT_TYPE, 8)//由于原来payment_type这个字段没存支付方式，所以都是null，默认全部置为支付宝：8
+			.where(t.STATUS.eq((byte)1))//0: upfinished; 1: paid off（已缴）
+			.execute();
 		//根据支付订单ID列表查询订单信息，如果查的到支付方式，那么刷新支付方式
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
         EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
         //EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t3.PAYMENT_ORDER_ID, t4.ID);
+        query.addSelect(t3.PAYMENT_ORDER_ID, t4.ID, t.ID);
         query.addFrom(t);
         query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
         query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
         query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
         query.fetch().map(r -> {
         	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
+        	dto.setUserId(r.getValue(t.ID));//存eh_payment_bills表的id，方便更新eh_payment_bills表的支付方式
         	dto.setBillId(r.getValue(t4.ID));//存EH_ASSET_PAYMENT_ORDER表的id，方便更新EH_ASSET_PAYMENT_ORDER表的支付方式
         	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
             list.add(dto);
@@ -5146,6 +5150,7 @@ public class AssetProviderImpl implements AssetProvider {
 	
 	private void queryAndTransfer(List<Long> queryIds, List<PaymentOrderBillDTO> list) {
 		DSLContext writeContext = getReadWriteContext();
+		EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
 		EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
 		if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("transferOrderPaymentType(request), cmd={}", queryIds);
@@ -5165,6 +5170,10 @@ public class AssetProviderImpl implements AssetProvider {
             				writeContext.update(t4)
 	                            .set(t4.PAYMENT_TYPE, orderDTO.getPaymentType().toString())
 	                            .where(t4.ID.eq(dto.getBillId()))
+	                            .execute();
+            				writeContext.update(t)
+	                            .set(t.PAYMENT_TYPE, orderDTO.getPaymentType())
+	                            .where(t.ID.eq(dto.getBillId()))
 	                            .execute();
             			}
             		}
