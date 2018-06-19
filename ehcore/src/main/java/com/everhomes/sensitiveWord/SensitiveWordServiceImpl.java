@@ -93,7 +93,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
                 }
                 String[] englishWords = text.split("[^a-zA-Z]+");
                 for (String word : englishWords) {
-                    int index = acdat.exactMatchSearch(word);
+                    int index = acdat.exactMatchSearch(word.toUpperCase());
                     if (index > 0) {
                         String hit = acdat.get(index);
                         wordSet.add(hit);
