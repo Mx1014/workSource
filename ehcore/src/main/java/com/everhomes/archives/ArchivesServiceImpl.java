@@ -982,17 +982,20 @@ public class ArchivesServiceImpl implements ArchivesService {
             case PROBATION:
                 map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
                 map.put("nextDate", employee.getEmploymentTime() != null ? format.format(employee.getEmploymentTime()) : "  无");
-                employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.ARCHIVES_PROBATION_CASE, "zh_CN", map, "");
+                employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
+                        ArchivesLocaleTemplateCode.ARCHIVES_PROBATION_CASE, "zh_CN", map, "");
                 break;
             case DISMISSAL:
                 map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
                 map.put("nextDate", employee.getDismissTime() != null ? format.format(employee.getDismissTime()) : "  无");
-                employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
+                employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
+                        ArchivesLocaleTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
                 break;
             default:
                 map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
                 map.put("nextDate", employee.getContractEndTime() != null ? format.format(employee.getContractEndTime()) : "   无");
-                employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
+                employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
+                        ArchivesLocaleTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
                 break;
         }
         return employeeCase;
@@ -1072,7 +1075,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         command.setStr2(ArchivesUtil.resolveArchivesEnum(cmd.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("month", cmd.getMonth());
-        command.setStr3(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.OPERATION_PROBATION_PERIOD, "zh_CN", map, "months"));
+        command.setStr3(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
+                ArchivesLocaleTemplateCode.OPERATION_PROBATION_PERIOD, "zh_CN", map, ""));
         command.setOperatorUid(userId);
         command.setOperatorName(getEmployeeRealName(userId, cmd.getOrganizationId()));
         addArchivesLog(command);
@@ -1118,17 +1122,20 @@ public class ArchivesServiceImpl implements ArchivesService {
                 if (cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0) {
                     map.put("oldOrgNames", convertToOrgNames(getEmployeeDepartment(detailId)));
                     map.put("newOrgNames", getOrgNamesByIds(cmd.getDepartmentIds()));
-                    command.setStr1(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
+                    command.setStr1(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
+                            ArchivesLocaleTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
                 }
                 if (cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0) {
                     map.put("oldOrgNames", convertToOrgNames(getEmployeeJobPosition(detailId)));
                     map.put("newOrgNames", getOrgNamesByIds(cmd.getJobPositionIds()));
-                    command.setStr2(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
+                    command.setStr2(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
+                            ArchivesLocaleTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
                 }
                 if (cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0) {
                     map.put("oldOrgNames", convertToOrgNames(getEmployeeJobLevel(detailId)));
                     map.put("newOrgNames", getOrgNamesByIds(cmd.getJobLevelIds()));
-                    command.setStr3(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE, ArchivesLocaleTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
+                    command.setStr3(localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
+                            ArchivesLocaleTemplateCode.OPERATION_ORG_CHANGE, "zh_CN", map, ""));
                 }
                 command.setStr4(ArchivesUtil.resolveArchivesEnum(cmd.getTransferType(), ArchivesParameter.TRANSFER_TYPE));
                 command.setStr5(cmd.getTransferReason());
@@ -1176,9 +1183,9 @@ public class ArchivesServiceImpl implements ArchivesService {
         log.setStringTag1(cmd.getStr1());
         log.setStringTag2(cmd.getStr2());
         log.setStringTag3(cmd.getStr3());
-        log.setStringTag3(cmd.getStr4());
-        log.setStringTag3(cmd.getStr5());
-        log.setStringTag3(cmd.getStr6());
+        log.setStringTag4(cmd.getStr4());
+        log.setStringTag5(cmd.getStr5());
+        log.setStringTag6(cmd.getStr6());
         log.setOperatorUid(cmd.getOperatorUid());
         log.setOperatorName(cmd.getOperatorName());
         archivesProvider.createOperationalLog(log);

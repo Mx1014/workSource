@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>flag: 标志 0-否 1-是</li>
+ * <li>flag: 标志 0-无需弹窗 1-需要弹窗</li>
  * <li>results: 配置列表 参考{@link com.everhomes.rest.archives.ArchivesOperationalConfigurationDTO}</li>
  * </ul>
  */
