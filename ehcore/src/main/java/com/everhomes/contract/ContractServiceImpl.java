@@ -1374,13 +1374,23 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		//对变更合同  by tangcen
 		//将父合同中关联的未出账单记为无效账单
 		//前端传过来的CostGenerationMethod字段实际上是对父合同未出账单的处理方式，因此把CostGenerationMethod的值存在父合同中，而非子合同中
-		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))&&
-				!ContractStatus.DRAFT.equals(ContractStatus.fromStatus(cmd.getStatus()))) {
-			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getCreateTime());
+//		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))&&
+//				!ContractStatus.DRAFT.equals(ContractStatus.fromStatus(cmd.getStatus()))) {
+//			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getCreateTime());
+//			contract.setCostGenerationMethod(null);
+//			Contract parentContract = checkContract(contract.getParentId());
+//			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
+//			contractProvider.updateContract(parentContract);
+//		}
+		
+		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))){
 			contract.setCostGenerationMethod(null);
 			Contract parentContract = checkContract(contract.getParentId());
 			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 			contractProvider.updateContract(parentContract);
+			if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getStatus()))){
+				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getCreateTime());
+			}
 		}
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
@@ -2440,8 +2450,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 //		PaymentBills bill = assetProvider.getFirstUnsettledBill(cmd.getContractId());
 		String endTimeStr = yyyyMMdd.format(cmd.getEndTimeByDay());
 		List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(cmd.getContractId(),endTimeStr);
-		PaymentBills bill = bills.get(bills.size()-1);
-		dto.setEndTimeByPeriod(bill.getDateStrEnd());
+		try {
+			PaymentBills bill = bills.get(bills.size()-1);
+			dto.setEndTimeByPeriod(bill.getDateStrEnd());
+		} catch (Exception e) {
+			dto.setEndTimeByPeriod(null);
+			LOGGER.info("the bills size is : " + bills.size());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_BILL_NOT_EXIST,
+					"the bills size for the contract is zero");
+		}
 		return dto;
 	}
 }
