@@ -956,9 +956,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp, HttpServletRequest req) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		if(null == cmd.getPageSize())
-			cmd.setPageSize(pageSize);
+			cmd.setPageSize(99999);
 		List<PmTaskDTO> list = this.searchTasks(cmd).getRequests();
 		Workbook wb = null;
 		InputStream in;

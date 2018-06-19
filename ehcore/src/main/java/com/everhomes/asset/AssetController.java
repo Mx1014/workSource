@@ -1336,6 +1336,19 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     }
     
     /**
+     * <p>计算天企汇历史合同的租赁总额字段接口</p>
+     * <b>URL: /asset/calculateRentForContract</b>
+     */
+    @RequestMapping("calculateRentForContract")
+    public RestResponse calculateRentForContract(CalculateRentCommand cmd) {
+        assetService.calculateRentForContract(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
      * <b>URL: /asset/isUserExistInAddress</b>
      * <p>用于创建账单时，判断个人用户是否关联了该账单所包含的楼栋门牌</p>
      */

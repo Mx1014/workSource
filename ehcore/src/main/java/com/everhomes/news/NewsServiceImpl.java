@@ -1378,9 +1378,11 @@ public class NewsServiceImpl implements NewsService {
 			}
 
 			List<NewsTagDTO> tags = cmd.getTags();
+			long order = 0L;
 			if (tags != null)
 				for (NewsTagDTO dto : tags) {
 					NewsTag tag = ConvertHelper.convert(dto, NewsTag.class);
+					tag.setDefaultOrder(order++);
 					tag.setParentId(parentId);
 					tag.setNamespaceId(parentTag.getNamespaceId());
 					tag.setOwnerType(parentTag.getOwnerType());

@@ -182,5 +182,8 @@ public interface AssetService {
 
     void noticeTrigger(Integer namespaceId);
     
+    //add by tangcen
+	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
+    
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
 }
