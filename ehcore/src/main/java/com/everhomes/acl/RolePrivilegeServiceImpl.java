@@ -1527,7 +1527,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-                toTargetTemplateCode,
+				toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1555,7 +1555,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-                toOtherTemplateCode,
+				toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1777,8 +1777,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			dtos.add(processOrganizationContactDTO(member));
 		}
 
-		Long topAdminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		listOrganizationContectDTOResponse.setDtos(dtos.stream().filter(r-> !Objects.equals(r.getTargetId(), topAdminUserId)).collect(Collectors.toList()));
+//		Long topAdminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
+		listOrganizationContectDTOResponse.setDtos(dtos);
 		listOrganizationContectDTOResponse.setNextPageAnchor(locator.getAnchor());
 		return listOrganizationContectDTOResponse;
 	}
@@ -2697,7 +2697,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	            } else {
 	                //设置默认超级管理员
 	                if(members != null && members.size() > 0) {
-	                    for(OrganizationMember mb : members) {
+	                    for(int i = members.size()-1; i >= 0; i--) {
+	                    	//reverse order
+	                    	OrganizationMember mb = members.get(i);
 	                        if(mb.getTargetId() != null) {
 	                            org.setAdminTargetId(mb.getTargetId());
 	                            organizationProvider.updateOrganization(org);
