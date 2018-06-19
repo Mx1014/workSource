@@ -210,3 +210,9 @@ CREATE TABLE `eh_visitor_sys_visit_reason` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理到访是由表 ';
 
 -- 访客管理1.0end
+
+-- janson 升级链接长度
+ALTER TABLE `ehcore`.`eh_version_urls` CHANGE COLUMN `download_url` `download_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'example configuration: http://serviceurl/download/client-packages/${locale}/andriod-${major}-${minor}-${revision}.apk';
+ALTER TABLE `ehcore`.`eh_version_urls` CHANGE COLUMN `info_url` `info_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html';
+--end
+
