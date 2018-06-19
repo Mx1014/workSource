@@ -16,7 +16,7 @@ import java.io.Serializable;
  *     <li>moduleId: moduleId</li>
  *     <li>appId: appId</li>
  *     <li>actionType: actionType</li>
- *     <li>serviceModuleAppInstanceConfig: serviceModuleAppInstanceConfig</li>
+ *     <li>appConfig: appConfig</li>
  * </ul>
  */
 public class OPPushInstanceConfig implements Serializable {
@@ -30,7 +30,7 @@ public class OPPushInstanceConfig implements Serializable {
     private Long moduleId;
     private Long appId;
     private Byte actionType;
-    private Object serviceModuleAppInstanceConfig;
+    private Object appConfig;
 
     public String getItemGroup() {
         return itemGroup;
@@ -104,12 +104,12 @@ public class OPPushInstanceConfig implements Serializable {
         this.actionType = actionType;
     }
 
-    public Object getServiceModuleAppInstanceConfig() {
-        return serviceModuleAppInstanceConfig;
+    public Object getAppConfig() {
+        return appConfig;
     }
 
-    public void setServiceModuleAppInstanceConfig(Object serviceModuleAppInstanceConfig) {
-        this.serviceModuleAppInstanceConfig = serviceModuleAppInstanceConfig;
+    public void setAppConfig(Object appConfig) {
+        this.appConfig = appConfig;
     }
 
     @Override

@@ -92,7 +92,7 @@ public interface LaunchPadService {
 
     ListOPPushCardsResponse listOPPushCards(ListOPPushCardsCommand cmd);
 
-    OPPushHandler getOPPushHandler(String itemGroup);
+    OPPushHandler getOPPushHandler(Long moduleId);
 
     String getSceneTokenByCommunityId(Long communityId);
 }

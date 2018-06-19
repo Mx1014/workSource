@@ -27,7 +27,10 @@ import java.util.List;
 import static com.everhomes.poll.ProcessStatus.NOTSTART;
 import static com.everhomes.poll.ProcessStatus.UNDERWAY;
 
-@Component(OPPushHandler.OPPUSH_ITEMGROUP_TYPE + OPPushHandler.OPPUSHACTIVITY)
+/**
+ * 活动
+ */
+@Component(OPPushHandler.OPPUSH_ITEMGROUP_TYPE + 10600)
 public class OPPushActivityHandler implements OPPushHandler {
 
     @Autowired
@@ -48,8 +51,8 @@ public class OPPushActivityHandler implements OPPushHandler {
         ListNearbyActivitiesBySceneCommand listCmd = new ListNearbyActivitiesBySceneCommand();
         OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
         Long categoryId = 1L;
-        if(config.getServiceModuleAppInstanceConfig() != null){
-            ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(config.getServiceModuleAppInstanceConfig().toString(), ActivityEntryConfigulation.class);
+        if(config.getAppConfig() != null){
+            ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(config.getAppConfig().toString(), ActivityEntryConfigulation.class);
             if(configulation != null){
                 categoryId = configulation.getCategoryId();
             }
@@ -90,20 +93,10 @@ public class OPPushActivityHandler implements OPPushHandler {
         return listCards;
     }
 
-    @Override
-    public Long getModuleId() {
-        return 10600L;
-    }
-
-    @Override
-    public Byte getActionType() {
-        return 62;
-    }
-
-    @Override
-    public String getInstanceConfig(Object instanceConfig) {
-
-        OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
-        return StringHelper.toJsonString(config.getServiceModuleAppInstanceConfig());
-    }
+//    @Override
+//    public String getInstanceConfig(Object instanceConfig) {
+//
+//        OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
+//        return StringHelper.toJsonString(config.getAppConfig());
+//    }
 }

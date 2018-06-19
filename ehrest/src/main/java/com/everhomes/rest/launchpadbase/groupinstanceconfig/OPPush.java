@@ -7,13 +7,15 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>OPPush的配置信息，现在的关键信息是itemGroup用于区分是哪个类型，其他字段以后再加</li>
- *     <li>itemGroup: itemGroup，例如：活动为OPPushActivity</li>
+ *     <li>itemGroup: 门户板块，例如：活动为OPPushActivity。以前是使用itemGroup区分那种类型的，之后使用模块，moduleId由appId查询得到</li>
+ *     <li>appId: appId</li>
  * </ul>
  */
 public class OPPush {
 
     private String itemGroup;
+
+    private Long appId;
 
     public String getItemGroup() {
         return itemGroup;
@@ -21,6 +23,14 @@ public class OPPush {
 
     public void setItemGroup(String itemGroup) {
         this.itemGroup = itemGroup;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     @Override

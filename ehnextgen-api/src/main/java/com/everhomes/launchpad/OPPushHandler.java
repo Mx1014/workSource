@@ -8,13 +8,8 @@ import java.util.List;
 
 public interface OPPushHandler {
     String OPPUSH_ITEMGROUP_TYPE = "OPPushItemGroupType-";
-    String OPPUSHACTIVITY = "OPPushActivity";
 
     List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context);
 
-    Long getModuleId();
-
-    Byte getActionType();
-
-    String getInstanceConfig(Object instanceConfig);
+    //String getInstanceConfig(Object instanceConfig);
 }

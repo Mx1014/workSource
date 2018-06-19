@@ -20,7 +20,10 @@ import com.everhomes.launchpad.OPPushHandler;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleEntryProvider;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResourceProvider;
@@ -29,6 +32,8 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.portal.PlatformContextNoWarnning;
+import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.PortalService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
 import com.everhomes.rest.banner.BannerDTO;
@@ -158,7 +163,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	private ServiceModuleAppService serviceModuleAppService;
 
 	@Autowired
+	private ServiceModuleProvider serviceModuleProvider;
+
+	@Autowired
 	private BannerService bannerService;
+
+	@Autowired
+	private PortalService portalService;
 	
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
@@ -2848,32 +2859,37 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		ListOPPushCardsResponse response = new ListOPPushCardsResponse();
 
 		OPPush oppush = (OPPush)StringHelper.fromJsonString(cmd.getInstanceConfig(), OPPush.class);
-		OPPushHandler opPushHandler = getOPPushHandler(oppush.getItemGroup());
-		if(opPushHandler != null){
 
-			response.setActionType(opPushHandler.getActionType());
+		if(oppush.getAppId() == null){
+			return response;
+		}
+
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(oppush.getAppId());
+
+		if(serviceModuleApp == null || serviceModuleApp.getModuleId() == null){
+			return response;
+		}
+		response.setAppId(oppush.getAppId());
+		response.setActionType(serviceModuleApp.getActionType());
+
+		//处理方式
+		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(serviceModuleApp.getModuleId());
+		response.setModuleId(serviceModule.getId());
+		response.setClientHandlerType(serviceModule.getClientHandlerType());
+
+		OPPushHandler opPushHandler = getOPPushHandler(serviceModuleApp.getModuleId());
+		if(opPushHandler != null){
 			List<OPPushCard> opPushCards = opPushHandler.listOPPushCard(cmd.getLayoutId(), cmd.getInstanceConfig(), cmd.getContext());
 			response.setCards(opPushCards);
-			String instanceConfig = opPushHandler.getInstanceConfig(cmd.getInstanceConfig());
-			response.setInstanceConfig(instanceConfig);
 
-			//appId 和 moduleId
-			OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(cmd.getInstanceConfig(), OPPushInstanceConfig.class);
+			PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
+			String itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig());
+			//String instanceConfig = opPushHandler.getInstanceConfig(cmd.getInstanceConfig());
+			response.setInstanceConfig(itemActionData);
 
-
-			if(config.getAppId() != null){
-				ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getAppId());
-
-				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(config.getModuleId(), config.getAppId(), serviceModuleApp.getName(),instanceConfig);
-				response.setRouterPath(routerInfo.getPath());
-				response.setRouterQuery(routerInfo.getQuery());
-				response.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
-			}else {
-				response.setClientHandlerType(ClientHandlerType.OUTSIDE_URL.getCode());
-			}
-
-			response.setModuleId(config.getModuleId());
-
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData);
+			response.setRouterPath(routerInfo.getPath());
+			response.setRouterQuery(routerInfo.getQuery());
 		}
 
 		return response;
@@ -2883,15 +2899,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 
 	@Override
-	public OPPushHandler getOPPushHandler(String itemGroup) {
+	public OPPushHandler getOPPushHandler(Long moduleId) {
 		OPPushHandler handler = null;
 
-		if(itemGroup != null) {
+		if(moduleId != null) {
 			String handlerPrefix = OPPushHandler.OPPUSH_ITEMGROUP_TYPE;
 			try {
-				handler = PlatformContext.getComponent(handlerPrefix + itemGroup);
+				handler = PlatformContext.getComponent(handlerPrefix + moduleId);
 			}catch (Exception ex){
-				LOGGER.info("OPPushHandler not exist itemGroup = {}", itemGroup);
+				LOGGER.info("OPPushHandler not exist moduleId = {}", moduleId);
 			}
 
 		}
