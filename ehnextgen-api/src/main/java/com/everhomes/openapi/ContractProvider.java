@@ -41,7 +41,7 @@ public interface ContractProvider {
 
 	List<Contract> listContractByOrganizationId(Long organizationId, Long categoryId);
 	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType);
-	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status);
+	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status, Long categoryId);
 
 	Map<Long, Contract> listContractsByIds(List<Long> ids);
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);

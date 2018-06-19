@@ -329,7 +329,7 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status) {
+	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId));
@@ -342,6 +342,9 @@ public class ContractProviderImpl implements ContractProvider {
 			query.addConditions(Tables.EH_CONTRACTS.STATUS.eq(status));
 		} else {
 			query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
+		}
+		if(categoryId != null) {
+			query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
 		}
 
 		List<Contract> result = new ArrayList<>();

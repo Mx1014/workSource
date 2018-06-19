@@ -13,6 +13,8 @@ public class ContractInstanceConfig {
 
 	private Long categoryId;
 	private Byte contractApplicationScene = 0;
+	
+	private String url;
 
 	public Byte getContractApplicationScene() {
 		return contractApplicationScene;
@@ -28,6 +30,14 @@ public class ContractInstanceConfig {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	@Override

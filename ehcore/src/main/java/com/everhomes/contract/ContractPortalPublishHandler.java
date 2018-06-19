@@ -66,7 +66,9 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 		Map<String, String> variables = new HashMap<String, String>();
 		variables.put("categoryId", categoryId);
 		variables.put("home.url", homeUrl);
-		return StringHelper.interpolate(contractAppUrl, variables);
+		map.setUrl(StringHelper.interpolate(contractAppUrl, variables));
+		return StringHelper.toJsonString(map);
+				//StringHelper.toJsonString(StringHelper.interpolate(contractAppUrl, variables));
 	}
 
 	@Override

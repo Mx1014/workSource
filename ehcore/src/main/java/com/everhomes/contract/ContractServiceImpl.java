@@ -1957,6 +1957,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						command.setCommunityId(cmd.getCommunityId());
 						command.setStatus(cmd.getStatus());
 						command.setEnterpriseCustomerId(customer.getId());
+						command.setCategoryId(cmd.getCategoryId());
 						return listEnterpriseCustomerContracts(command);
 					}
 				}
@@ -1984,6 +1985,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						command.setCommunityId(cmd.getCommunityId());
 						command.setStatus(cmd.getStatus());
 						command.setIndividualCustomerId(owner.getId());
+						command.setCategoryId(cmd.getCategoryId());
 						List<ContractDTO> dtos = listIndividualCustomerContracts(command);
 						if(dtos != null && dtos.size() > 0) {
 							contracts.addAll(dtos);
@@ -2006,7 +2008,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 //			return response;
 //		}
 
-		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode(), cmd.getStatus());
+		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode(), cmd.getStatus(), cmd.getCategoryId());
 		Map<Long, Long> categoryConfigMap = new HashMap<>();
 	
 		if(contracts != null && contracts.size() > 0) {
@@ -2050,7 +2052,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 //			return response;
 //		}
 
-		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode(), cmd.getStatus());
+		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode(), cmd.getStatus(), cmd.getCategoryId());
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
 		}
