@@ -195,7 +195,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 
     @Override
     public GroupQueryResult query(SearchOrganizationCommand cmd) {
-        GroupQueryFilter filter = new GroupQueryFilter();
+//        GroupQueryFilter filter = new GroupQueryFilter();
         int pageNum = 0;
         if(cmd.getPageAnchor() != null) {
             pageNum = cmd.getPageAnchor().intValue();
