@@ -15,6 +15,7 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -141,6 +142,9 @@ public class ImportFileServiceImpl implements ImportFileService{
                 font.setFontName("黑体");
                 style.setFont(font);
                 style.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+                // add by jiarui 2018/6/21 format all cell to text
+                XSSFDataFormat format = wb.createDataFormat();
+                style.setDataFormat(format.getFormat("@"));
 
                 XSSFCellStyle centerStyle = wb.createCellStyle();// 样式对象
                 centerStyle.setFont(font);

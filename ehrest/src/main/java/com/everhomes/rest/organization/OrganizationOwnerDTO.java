@@ -55,6 +55,8 @@ public class OrganizationOwnerDTO {
 
     private  String address;
 
+    private String livingDate = "";
+
     @ItemType(OrganizationOwnerAddressDTO.class)
     private List<OrganizationOwnerAddressDTO> addresses;
     public Long getId() {
@@ -230,5 +232,11 @@ public class OrganizationOwnerDTO {
         this.address = address;
     }
 
+    public String getLivingDate() {
+        return livingDate;
+    }
 
+    public void setLivingDate(String livingDate) {
+        this.livingDate = livingDate;
+    }
 }
