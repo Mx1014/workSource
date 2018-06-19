@@ -166,11 +166,17 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 			List<RelocationRequestAttachment> attachments = relocationProvider.listRelocationRequestAttachments(
 					EntityType.RELOCATION_REQUEST_ITEM.getCode(), r.getId());
-			itemDTO.setAttachments(attachments.stream().map(a -> {
-				AttachmentDescriptor ad = ConvertHelper.convert(a, AttachmentDescriptor.class);
-				ad.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.USER.getCode(), a.getCreatorUid()));
-				return ad;
-			}).collect(Collectors.toList()));
+//			itemDTO.setAttachments(attachments.stream().map(a -> {
+//				AttachmentDescriptor ad = ConvertHelper.convert(a, AttachmentDescriptor.class);
+//				ad.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.USER.getCode(), a.getCreatorUid()));
+//				return ad;
+//			}).collect(Collectors.toList()));
+			if(attachments.size() == 1){
+				RelocationRequestAttachment att = attachments.get(0);
+				AttachmentDescriptor ad = ConvertHelper.convert(att, AttachmentDescriptor.class);
+				ad.setContentUrl(contentServerService.parserUri(att.getContentUri(), EntityType.USER.getCode(), att.getCreatorUid()));
+				itemDTO.setAttachment(ad);
+			}
 
 			return itemDTO;
 		}).collect(Collectors.toList()));
@@ -265,14 +271,20 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 					item.setItemQuantity(r.getItemQuantity());
 					relocationProvider.createRelocationRequestItem(item);
 
-					List<AttachmentDescriptor> attachments = r.getAttachments();
-					if (null != attachments) {
-						attachments.forEach(a -> {
-							RelocationRequestAttachment att = ConvertHelper.convert(a, RelocationRequestAttachment.class);
-							att.setOwnerType(EntityType.RELOCATION_REQUEST_ITEM.getCode());
-							att.setOwnerId(item.getId());
-							relocationProvider.createRelocationRequestAttachment(att);
-						});
+//					List<AttachmentDescriptor> attachments = r.getAttachments();
+//					if (null != attachments) {
+//						attachments.forEach(a -> {
+//							RelocationRequestAttachment att = ConvertHelper.convert(a, RelocationRequestAttachment.class);
+//							att.setOwnerType(EntityType.RELOCATION_REQUEST_ITEM.getCode());
+//							att.setOwnerId(item.getId());
+//							relocationProvider.createRelocationRequestAttachment(att);
+//						});
+//					}
+					if(null != r.getAttachment()){
+						RelocationRequestAttachment att = ConvertHelper.convert(r.getAttachment(), RelocationRequestAttachment.class);
+						att.setOwnerType(EntityType.RELOCATION_REQUEST_ITEM.getCode());
+						att.setOwnerId(item.getId());
+						relocationProvider.createRelocationRequestAttachment(att);
 					}
 				});
 			}
