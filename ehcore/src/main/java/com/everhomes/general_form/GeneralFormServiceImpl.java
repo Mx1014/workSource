@@ -617,7 +617,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public Long createGeneralFormByTemplate(Long templateId, CreateFormTemplatesCommand cmd) {
+    public GeneralFormDTO createGeneralFormByTemplate(Long templateId, CreateFormTemplatesCommand cmd) {
         GeneralFormTemplate form = generalFormProvider.findGeneralFormTemplateByIdAndModuleId(
                 templateId, cmd.getModuleId());
         GeneralForm gf = generalFormProvider.getGeneralFormByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
@@ -636,14 +636,16 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 gf.setFormVersion(version + 1);
                 generalFormProvider.createGeneralForm(gf);
             }
-            return gf.getFormOriginId();
+//            return gf.getFormOriginId();
         } else {
             gf = ConvertHelper.convert(form, GeneralForm.class);
             gf = convertFormFromTemplate(gf, form, cmd);
             gf.setStatus(GeneralFormStatus.CONFIG.getCode());
             gf.setFormVersion(0L);
-            return generalFormProvider.createGeneralForm(gf);
+//            return generalFormProvider.createGeneralForm(gf);
+            generalFormProvider.createGeneralForm(gf);
         }
+        return ConvertHelper.convert(gf, GeneralFormDTO.class);
     }
 
     private GeneralForm convertFormFromTemplate(GeneralForm gf, GeneralFormTemplate form, CreateFormTemplatesCommand cmd) {

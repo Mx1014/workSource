@@ -491,7 +491,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         List<EnterpriseApprovalTemplate> templates = enterpriseApprovalProvider.listEnterpriseApprovalTemplateByModuleId(cmd.getModuleId(), false);
         //  1.判断审批模板中是否有对应的表单模板
         //  2.没有则直接创建审批
-        //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联
+        //  3.有则先创建关联表单的工作流
         if (templates != null && templates.size() > 0) {
             dbProvider.execute((TransactionStatus status) -> {
                 for (EnterpriseApprovalTemplate template : templates) {
@@ -499,10 +499,12 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
                         //  Create Approvals directly.
                         createGeneralApprovalByTemplate(template, null, cmd);
                     } else {
-                        //  Create Forms before creating approvals.
-                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class));
-                        //  Then, start to create approvals.
-                        createGeneralApprovalByTemplate(template, formOriginId, cmd);
+                        //  Create the form before creating the approval.
+                        GeneralFormDTO form = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class));
+                        //  Then, create the approval.
+                        GeneralApprovalDTO approval = createGeneralApprovalByTemplate(template, form, cmd);
+                        //  Finally, create the flow.
+                        createGeneralApprovalFlow(approval, form);
                     }
                 }
                 return null;
@@ -510,18 +512,18 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         }
     }
 
-    private void createGeneralApprovalByTemplate(EnterpriseApprovalTemplate template, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+    private GeneralApprovalDTO createGeneralApprovalByTemplate(EnterpriseApprovalTemplate template, GeneralFormDTO form, CreateApprovalTemplatesCommand cmd) {
         //  check whether the template has been existed by the template id
         GeneralApproval ga = enterpriseApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), template.getId());
         //  1.just update it when it exist
         if (ga != null) {
-            ga = processApprovalTemplate(ga, template, formOriginId, cmd);
+            ga = processApprovalTemplate(ga, template, form, cmd);
             generalApprovalProvider.updateGeneralApproval(ga);
         } else {
             //  2.create if it not exist
             ga = ConvertHelper.convert(template, GeneralApproval.class);
-            ga = processApprovalTemplate(ga, template, formOriginId, cmd);
+            ga = processApprovalTemplate(ga, template, form, cmd);
             generalApprovalProvider.createGeneralApproval(ga);
         }
 
@@ -534,9 +536,10 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             dto.setSourceDescription(org.getName());
             updateGeneralApprovalScope(ga.getNamespaceId(), ga.getId(), Collections.singletonList(dto));
         }
+        return ConvertHelper.convert(ga, GeneralApprovalDTO.class);
     }
 
-    private GeneralApproval processApprovalTemplate(GeneralApproval ga, EnterpriseApprovalTemplate template, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+    private GeneralApproval processApprovalTemplate(GeneralApproval ga, EnterpriseApprovalTemplate template, GeneralFormDTO form, CreateApprovalTemplatesCommand cmd) {
         Long userId = UserContext.currentUserId();
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
@@ -551,13 +554,33 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         BeanUtils.copyProperties(fieldDTO, ga);
         //  Template id insert
         ga.setApprovalTemplateId(template.getId());
-        if (formOriginId != null)
-            ga.setFormOriginId(formOriginId);
+        if (form != null) {
+            ga.setFormOriginId(form.getFormOriginId());
+            ga.setFormVersion(form.getFormVersion());
+        }
         ga.setSupportType(cmd.getSupportType());
         ga.setIconUri(template.getIconUri());
         ga.setOperatorUid(userId);
         ga.setOperatorName(getUserRealName(userId, ga.getOrganizationId()));
         return ga;
+    }
+
+    private void createGeneralApprovalFlow(GeneralApprovalDTO ga, GeneralFormDTO form) {
+        //  1.create the flow
+        CreateFlowCommand flowCmd = new CreateFlowCommand();
+        flowCmd.setNamespaceId(ga.getNamespaceId());
+        flowCmd.setFlowName(ga.getApprovalName());
+        flowCmd.setOrgId(ga.getOrganizationId());
+        flowCmd.setModuleId(ga.getModuleId());
+        flowCmd.setOwnerId(ga.getId());
+        flowCmd.setOwnerType("GENERAL_APPROVAL");
+        FlowDTO flowDTO = flowService.createFlow(flowCmd);
+        //  2.correlate the form
+        UpdateFlowFormCommand flowFormCmd = new UpdateFlowFormCommand();
+        flowFormCmd.setFlowId(flowDTO.getId());
+        flowFormCmd.setFormOriginId(form.getFormOriginId());
+        flowFormCmd.setFormVersion(form.getFormVersion());
+        flowService.createFlowForm(flowFormCmd);
     }
 
     private String getUserRealName(Long userId, Long ownerId) {
@@ -624,6 +647,10 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
         if (ga == null)
             return null;
+        EnterpriseApprovalGroup group = enterpriseApprovalProvider.findEnterpriseApprovalGroup(cmd.getApprovalGroupId());
+        if (group == null)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE, EnterpriseApprovalErrorCode.ERROR_APPROVAL_GROUP_NOT_EXIST,
+                    "The approval group not exist.");
         //  duplicate name checked
         GeneralApproval oldApproval = enterpriseApprovalProvider.findEnterpriseApprovalByName(ga.getNamespaceId(), ga.getModuleId(), ga.getOwnerId(), ga.getOwnerType(), cmd.getApprovalName(), cmd.getApprovalGroupId());
         if (oldApproval != null)
@@ -635,6 +662,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         BeanUtils.copyProperties(fieldDTO, ga);
         ga.setApprovalName(cmd.getApprovalName());
         ga.setApprovalRemark(cmd.getApprovalRemark());
+        if (group.getApprovalIcon() != null)
+            ga.setIconUri(group.getApprovalIcon());
 
         dbProvider.execute((TransactionStatus status) -> {
             //  1.update the approval
