@@ -6635,6 +6635,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         ArrayList resultList = processorExcel(file[0]);
+
+        resultList.removeIf((r) -> r.toString().equals("RowResult: []"));
         ImportFileTask task = processorOrganizationOwner(user.getId(), cmd.getOrganizationId(), cmd.getCommunityId(), cmd.getNamespaceId(), resultList);
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
         //用 bulkUpdate不会更新 by xiongying20171009
