@@ -2994,7 +2994,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	}
 
-	private void exportTaskStatByCategory(GetTaskStatCommand cmd,Sheet sheet){
+	@Override
+	public List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd) {
+		return null;
+	}
+
+	private void exportTaskStatByCategory(GetTaskStatCommand cmd, Sheet sheet){
 	    List<PmTaskStatSubDTO> datalist = this.getStatByCategory(cmd);
         List<String> titles = new ArrayList<>();
 		datalist.forEach(elem ->{

@@ -120,4 +120,6 @@ public interface PmTaskService {
 
 	Object getThirdTaskDetail(HttpServletRequest req);
 
+	List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd);
+
 }

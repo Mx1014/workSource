@@ -838,4 +838,20 @@ public class PmTaskController extends ControllerBase {
         pmTaskService.exportTaskStat(cmd, resp);
     }
 
+
+/*------------------------------- 3.6评价统计 -------------------------------*/
+    /**
+     * <b>URL: /pmtask/getEvalStat</b>
+     * <p>查询项目评价统计</p>
+     */
+    @RequestMapping("getEvalStat")
+    @RestReturn(value=PmTaskStatDTO.class,collection = true)
+    public RestResponse getEvalStat(GetEvalStatCommand cmd){
+        List<PmTaskEvalStatDTO> res = pmTaskService.getEvalStat(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
