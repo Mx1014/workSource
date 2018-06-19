@@ -47,6 +47,7 @@ import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
@@ -275,6 +276,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Autowired
     private ContentServerService contentServerService;
+    
+    @Autowired
+    private LocaleStringService localeStringService;
 
     AlipayClient alipayClient;
     
@@ -3322,8 +3326,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         User user = UserContext.current().getUser();
         DoorAuth AprovAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(cmd.getDoorId(), user.getId());
         if(AprovAuth == null || AprovAuth.getRightVisitor() != (byte) 1){
-        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR,
-                    "操作者无访客授权权限"); 
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
+					AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR,
+					localeStringService.getLocalizedString(String.valueOf(AclinkServiceErrorCode.SCOPE),
+							String.valueOf(AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR),
+							UserContext.current().getUser().getLocale(), "No permisssion"));
         }
         
         DoorAccessDriverType qrDriver = getQrDriverType(namespaceId);
@@ -5122,7 +5129,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	public void updateAccessType(Long doorId, byte doorType) {
 		DoorAccess da = doorAccessProvider.getDoorAccessById(doorId);
 		if(da == null){
-			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
+					AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND,
+					localeStringService.getLocalizedString(String.valueOf(AclinkServiceErrorCode.SCOPE),
+							String.valueOf(AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND),
+							UserContext.current().getUser().getLocale(), "door not found"));
 		}
 		da.setDoorType(doorType);
 		doorAccessProvider.updateDoorAccess(da);
