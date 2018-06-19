@@ -3495,6 +3495,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setUserName(auth.getNickname());
         resp.setValidEndMs(auth.getValidEndMs());
         resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
+        resp.setValidFromMs(auth.getValidFromMs());
+        resp.setValidAuthAmount(auth.getValidAuthAmount());
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
