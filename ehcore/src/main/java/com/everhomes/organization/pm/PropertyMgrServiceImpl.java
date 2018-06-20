@@ -5872,7 +5872,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     r.getAddresses().forEach((address) -> {
                         OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
                         dto.setBuilding(address.getBuilding());
-                        dto.setAddress(address.getAddress());
+                        dto.setAddress(address.getApartment());
                         dto.setLivingDate(address.getLivingDate());
                         dto.setLivingStatus(address.getLivingStatus());
                         owners.add(dto);
@@ -6770,6 +6770,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 continue;
             }
             //校验时间格式
+            if(!validDate(dto.getLivingTime())){
+                LOGGER.error("organization owner dateTime format error  , data = {}", dto);
+                log.setData(dto);
+                log.setErrorLog("organization owner dateTime format error ");
+                log.setFieldName("迁入日期");
+                log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_DATE_INVALIED_ERROR);
+                resultLogs.add(log);
+                continue;
+            }
             java.sql.Date date = null;
             if ((date = parseDate(dto.getLivingTime())) == null && org.apache.commons.lang.StringUtils.isNotBlank(dto.getLivingTime())) {
                 LOGGER.error("organization owner dateTime format error  , data = {}", dto);
@@ -6781,6 +6790,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 continue;
             }
             //校验时间格式
+            if(!validDate(dto.getBirthday())){
+                LOGGER.error("organization owner dateTime is not  exist  , data = {}", dto);
+                log.setData(dto);
+                log.setErrorLog("organization owner dateTime format error ");
+                log.setFieldName("迁入日期");
+                log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_DATE_INVALIED_ERROR);
+                resultLogs.add(log);
+                continue;
+            }
             if ((date = parseDate(dto.getBirthday())) == null && org.apache.commons.lang.StringUtils.isNotBlank(dto.getBirthday())) {
                 LOGGER.error("organization owner dateTime format error  , data = {}", dto);
                 log.setData(dto);
@@ -6832,6 +6850,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             }
         }
         return resultLogs;
+    }
+
+    private boolean validDate(String livingTime) {
+        try {
+            parseDate(livingTime);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 
     private String getDisplayName(ImportOrganizationOwnerDTO dto) {

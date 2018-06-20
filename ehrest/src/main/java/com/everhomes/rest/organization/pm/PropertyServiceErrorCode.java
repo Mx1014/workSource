@@ -36,6 +36,7 @@ public interface PropertyServiceErrorCode {
     int ERROR_IMPORT_MANDATORY_COLUMN    = 18002;// 必填项未填写
     int ERROR_IMPORT_ADDRESS_NOT_EXISTS    = 18003;// 楼栋门牌不存在
     int ERROR_IMPORT_DATE_FORMAT_ERROR    = 18004;//  时间格式不正确
+    int ERROR_IMPORT_DATE_INVALIED_ERROR    = 18008;//  时间无效
     int ERROR_IMPORT_LIVING_STATUS_FORMAT_ERROR    = 18005;//  入驻状态格式不正确
     int ERROR_IMPORT_GENDER_FORMAT_ERROR    = 18006;//  性别枚举不存在
     int ERROR_IMPORT_CUSTOMER_TYPE_ERROR    = 18007;//  客户类型不存在
