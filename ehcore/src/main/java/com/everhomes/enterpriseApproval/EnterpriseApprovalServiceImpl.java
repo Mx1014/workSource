@@ -10,7 +10,6 @@ import com.everhomes.flow.*;
 import com.everhomes.general_approval.*;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
@@ -62,7 +61,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     private EnterpriseApprovalProvider enterpriseApprovalProvider;
 
     @Autowired
-    private GeneralApprovalFlowModuleListener generalApprovalFlowModuleListener;
+    private EnterpriseApprovalFlowModuleListener enterpriseApprovalFlowModuleListener;
 
     @Autowired
     private GeneralFormService generalFormService;
@@ -84,9 +83,6 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Autowired
     private TaskService taskService;
-
-    @Autowired
-    private LocaleStringService localeStringService;
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
@@ -232,7 +228,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         String subTitle = "申请时间:" + formatter.format(new Timestamp(cmd.getStartTime()).toLocalDateTime()) + " ~ " + formatter.format(new Timestamp(cmd.getEndTime()).toLocalDateTime());
         //  3. Set the title of the approval lists
-        List<String> titles = Arrays.asList("审批编号", "提交时间", "申请人", "申请人部门", "表单内容",
+        List<String> titles = Arrays.asList("审批编号", "审批类型", "申请时间", "申请人", "申请人部门", "表单内容",
                 "审批状态", "审批记录", "当前审批人", "督办人");
         //  4. Start to write the excel
         LOGGER.debug("generalApproval++++++++++++++++++++++++++++++: {}", response.getRecords().size());
@@ -312,8 +308,9 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         Cell approvalNoCell = dataRow.createCell(0);
         approvalNoCell.setCellValue(data.getApprovalNo() != null ? data.getApprovalNo().toString() : "");
         dataRow.createCell(1).setCellValue(data.getCreateTime());
-        dataRow.createCell(2).setCellValue(data.getCreatorName());
-        dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
+        dataRow.createCell(2).setCellValue(data.getApprovalType());
+        dataRow.createCell(3).setCellValue(data.getCreatorName());
+        dataRow.createCell(4).setCellValue(data.getCreatorDepartment());
 
         //  2. data from form
         List<FlowCaseEntity> entityLists = getApprovalDetails(data.getFlowCaseId());
@@ -322,23 +319,23 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             for (int i = 4; i < entityLists.size(); i++) {
                 formLogs.append(entityLists.get(i).getKey()).append(" : ").append(entityLists.get(i).getValue()).append("\n");
             }
-            Cell formCell = dataRow.createCell(4);
+            Cell formCell = dataRow.createCell(5);
             formCell.setCellStyle(wrapStyle);
             formCell.setCellValue(formLogs.toString());
         }
 
         //  3. approval status
         if (FlowCaseStatus.PROCESS.getCode().equals(data.getApprovalStatus()))
-            dataRow.createCell(5).setCellValue("处理中");
+            dataRow.createCell(6).setCellValue("处理中");
         else if (FlowCaseStatus.FINISHED.getCode().equals(data.getApprovalStatus()))
-            dataRow.createCell(5).setCellValue("已完成");
+            dataRow.createCell(6).setCellValue("已完成");
         else
-            dataRow.createCell(5).setCellValue("已取消");
+            dataRow.createCell(6).setCellValue("已取消");
 
         //  4. the operator logs of the approval
         SearchFlowOperateLogsCommand logsCommand = new SearchFlowOperateLogsCommand();
         logsCommand.setFlowCaseId(data.getFlowCaseId());
-        logsCommand.setPageSize(100000);
+        logsCommand.setPageSize(Integer.MAX_VALUE - 1);
         logsCommand.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
         List<FlowOperateLogDTO> operateLogLists = flowService.searchFlowOperateLogs(logsCommand).getLogs();
         if (operateLogLists != null && operateLogLists.size() > 0) {
@@ -346,7 +343,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             for (FlowOperateLogDTO operateLog : operateLogLists) {
                 operateLogs.append(operateLog.getFlowUserName()).append(operateLog.getLogContent()).append("\n");
             }
-            Cell logCell = dataRow.createCell(6);
+            Cell logCell = dataRow.createCell(7);
             logCell.setCellStyle(wrapStyle);
             logCell.setCellValue(operateLogs.toString());
         }
@@ -360,7 +357,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             }
             if (!"".equals(processors.toString()))
                 processors = new StringBuilder(processors.substring(0, processors.length() - 1));
-            dataRow.createCell(7).setCellValue(processors.toString());
+            dataRow.createCell(8).setCellValue(processors.toString());
         }
 
         //  6. the current supervisor
@@ -373,13 +370,13 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             }
             if (!"".equals(supervisors.toString()))
                 supervisors = new StringBuilder(supervisors.substring(0, supervisors.length() - 1));
-            dataRow.createCell(8).setCellValue(supervisors.toString());
+            dataRow.createCell(9).setCellValue(supervisors.toString());
         }
     }
 
     private List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-        return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
+        return enterpriseApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
     }
 
     @Override
