@@ -262,6 +262,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	//@PostConstruct
 	public void setup() {
 		workerPoolFactory.getWorkerPool().addQueue(queueName);
+
 	}
 	
     @Override
