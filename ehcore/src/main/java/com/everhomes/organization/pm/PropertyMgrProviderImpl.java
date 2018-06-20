@@ -1433,6 +1433,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
 
 	@Override
+	public OrganizationOwnerBehavior findOrganizationOwnerBehaviorByOwnerAndAddressId(Long id, Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectFrom(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS)
+				.where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.OWNER_ID.eq(id))
+				.and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.ADDRESS_ID.eq(addressId))
+				.fetchAnyInto(OrganizationOwnerBehavior.class);
+	}
+
+	@Override
 	public OrganizationOwnerType findOrganizationOwnerTypeById(Long orgOwnerTypeId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_ORGANIZATION_OWNER_TYPE)

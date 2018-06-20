@@ -5873,6 +5873,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                         OrganizationOwnerDTO dto = ConvertHelper.convert(r, OrganizationOwnerDTO.class);
                         dto.setBuilding(address.getBuilding());
                         dto.setAddress(address.getAddress());
+                        dto.setLivingDate(address.getLivingDate());
+                        dto.setLivingStatus(address.getLivingStatus());
                         owners.add(dto);
                     });
 //                    owners.remove(r);
@@ -5883,10 +5885,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
             String fileName = String.format("客户信息_%s_%s", community.getName(), DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
-            String[] propertyNames = {"contactName", "orgOwnerType", "contactToken", "gender","building","address", "livingStatus", "birthdayDate", "maritalStatus", "job", "company",
+            excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
+                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照提示输入。\n" +
+                    "2、请在表格里面逐行录入数据，建议一次导入不超过500条信息。\n" +
+                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                    "4、日期输入格式：yyyy-MM-dd（2017-01-01）或 yyyy/MM/dd（2017/01/01）\n" +
+                    "5、红色字段为必填项,不填将导致导入失败。\n" +
+                    "6、请注意：手机号码是唯一的，不能重复\n" +
+                    "7、楼栋门牌必须在后台管理真实存在\n" +
+                    "8、身份证号码为18位\n" +
+                    "9、客户类型为：业主、租户、亲属、朋友、保姆、地产中介、其他、无；\n" +
+                    "10、是否在户：是、否\n" +
+                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false);
+            String[] propertyNames = {"contactName", "orgOwnerType", "contactToken", "gender","building","address", "livingStatus","livingDate", "birthdayDate", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
-            String[] titleNames = {"姓名", "客户类型", "手机号码", "性别","楼栋","门牌", "是否在户", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
-            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30, 30, 40, 40};
+            String[] titleNames = {"姓名", "客户类型", "手机号码", "性别","楼栋","门牌", "是否在户", "迁入日期","生日", "婚姻状况", "职业", "单位", "证件号码", "户口所在地"};
+            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40,40, 30, 30, 40, 40};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, owners);
         } else {
             // LOGGER.error("Organization owner are not exist.");
@@ -5922,9 +5936,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
             Address address = addressProvider.findAddressById(r2.getAddressId());
             if (address != null) {
+                OrganizationOwnerBehavior behavior = propertyMgrProvider.findOrganizationOwnerBehaviorByOwnerAndAddressId(owner.getId(), address.getId());
+                if (behavior != null) {
+                    d.setLivingDate(DateUtil.dateToStr(new Date(behavior.getBehaviorTime().getTime()), DateUtil.YMR_SLASH));
+                }
                 d.setAddressId(address.getId());
                 d.setAddress(address.getAddress());
                 d.setApartment(address.getApartmentName());
+                d.setLivingStatus(localeStringProvider.find(OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE, r2.getLivingStatus().toString(), currentLocale()).getText());
                 d.setBuilding(address.getBuildingName());
             }
             return d;
