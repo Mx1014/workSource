@@ -352,6 +352,11 @@ public class WorkReportServiceImpl implements WorkReportService {
         OrganizationMember member = getMemberDepartmentByUserId(userId, cmd.getOwnerId());
         List<WorkReportDTO> reports = new ArrayList<>();
         cmd.setPageSize(10000000);
+        
+        if(member == null) {
+            member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), cmd.getOwnerId());
+        }
+        final OrganizationMember member2 = member;
 
         //  get all work reports.
         List<WorkReport> results = workReportProvider.listWorkReports(
@@ -366,7 +371,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 dto.setReportId(r.getId());
                 dto.setReportType(r.getReportType());
                 //  check the scope.
-                if (checkTheScope(r.getId(), member))
+                if (checkTheScope(r.getId(), member2))
                     reports.add(dto);
             });
         }
