@@ -733,7 +733,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     setToObj(column.getFieldName(), departureInfo, column.getValue(), null);
                                 } catch(Exception e){
                                     LOGGER.warn("one row invoke set method for CustomerDepartureInfo failed");
-                                    failedNumber++;
+                                    failedNumber ++;
                                     flag = false;
                                     break;
                                 }

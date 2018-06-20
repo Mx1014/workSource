@@ -11,6 +11,7 @@ public class ServiceModuleAppsAuthorizationsDto {
     private String contactName;
     private String nickName;
     private String identifierToken;
+    private Byte gender;
     private Byte allFlag;
     private ServiceModuleAuthorizationsDTO communityControlApps;
     private ServiceModuleAuthorizationsDTO orgControlApps;
@@ -107,5 +108,13 @@ public class ServiceModuleAppsAuthorizationsDto {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
     }
 }

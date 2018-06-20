@@ -4524,8 +4524,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				cmd2.setModuleId(Rentalv2Controller.moduleId);
 				ListServiceModuleAppsResponse rsp = portalService.listServiceModuleAppsWithConditon(cmd2);
 				if (rsp!=null && rsp.getServiceModuleApps()!=null) {
-					dto.setAppId(rsp.getServiceModuleApps().get(0).getId());
-					tagAppidMap.put(bill.getResourceTypeId(),rsp.getServiceModuleApps().get(0).getId());
+					dto.setAppId(rsp.getServiceModuleApps().get(0).getOriginId());
+					tagAppidMap.put(bill.getResourceTypeId(),rsp.getServiceModuleApps().get(0).getOriginId());
 				}
 			}else
 				dto.setAppId(tagAppidMap.get(bill.getResourceTypeId()));
@@ -6345,18 +6345,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-		List<Long> siteIds = null;
-		if(null != cmd.getOwnerType()){
-			siteIds = new ArrayList<>();
-			List<RentalSiteRange> siteOwners = this.rentalv2Provider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getResourceType(),
-					cmd.getOwnerType(), cmd.getOwnerId());
-			if(siteOwners !=null)
-				for(RentalSiteRange siteOwner : siteOwners){
-					siteIds.add(siteOwner.getRentalResourceId());
-				}   
-		}
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize+1,null, siteIds, cmd.getCommunityId());
+				locator, pageSize+1,null, null, cmd.getOwnerId());
 		if(null == rentalSites)
 			return response;
 
@@ -6526,19 +6516,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			//List<AddRentalSiteSingleSimpleRule> addSingleRules = createAddRuleParams(priceRule, rule, resource);
 //			seqNum.set(0L);
 //			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)));
-			//TODO 预留1000000个id 以适应自增的结束时间 以后改为唯一标识不用id
+			//TODO 预留100000个id 以适应自增的结束时间 以后改为唯一标识不用id
 			Long cellBeginId = sequenceProvider.getNextSequenceBlock(
-					NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), 1000000);
+					NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), 100000);
 			//创建一个单元格占位 防止同步id时被重置
 			RentalCell cell = new RentalCell();
-			cell.setId(cellBeginId + 999999);
+			cell.setId(cellBeginId + 99999);
 			this.rentalv2Provider.createRentalSiteRule(cell);
 //			for(AddRentalSiteSingleSimpleRule singleCmd: addSingleRules){
 //				//在这里统一处理
 //				addRentalSiteSingleSimpleRule(singleCmd);
 //			}
 			priceRule.setCellBeginId(cellBeginId);
-			priceRule.setCellEndId(cellBeginId + 999999);
+			priceRule.setCellEndId(cellBeginId + 99999);
 		}
 	}
 

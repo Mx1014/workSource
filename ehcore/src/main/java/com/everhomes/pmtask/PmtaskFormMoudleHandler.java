@@ -137,9 +137,9 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
 
         String content = "";
         content += "本次服务的费用清单如下，请进行确认\n";
-        Long total = Long.valueOf(getTextString(getFormItem(cmd.getValues(),"总计").getFieldValue()));
+        Double total = Double.valueOf(getTextString(getFormItem(cmd.getValues(),"总计").getFieldValue()));
         content += "总计:"+total+"元\n";
-        Long serviceFee = Long.valueOf(getTextString(getFormItem(cmd.getValues(),"服务费").getFieldValue()));
+        Double serviceFee = Double.valueOf(getTextString(getFormItem(cmd.getValues(),"服务费").getFieldValue()));
         content += "服务费:"+serviceFee+"元\n";
         content += "物品费:"+(total-serviceFee)+"元\n";
         PostApprovalFormItem subForm = getFormItem(cmd.getValues(),"物品");
