@@ -25,6 +25,8 @@ import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.wx.CheckAuthCommand;
 import com.everhomes.rest.wx.CheckAuthResponse;
+import com.everhomes.rest.wx.CheckWxAuthIsBindPhoneResponse;
+import com.everhomes.rest.wx.WxAuthBindPhoneType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import org.apache.http.*;
@@ -307,6 +309,49 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         }
 	}
 
+    /**
+     * <b>URL: /wxauth/authCallbackByApp</b>
+     * <p>微信授权后由APP调用，参数包含了code，通过code可换取access_token，通过access_token可获取用户信息。</p>
+     */
+    @RequestMapping("authCallbackByApp")
+    @RestReturn(CheckWxAuthIsBindPhoneResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse authCallbackByApp(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(callback calculate), startTime={}", startTime);
+        }
+
+        String requestUrl = request.getRequestURL().toString();
+        Map<String, String> params = getRequestParams(request);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(callback), requestUrl={}, params={}", requestUrl, params);
+        }
+
+        String namespaceInReq = params.get(KEY_NAMESPACE);
+        Integer namespaceId = parseNamespace(namespaceInReq);
+
+        LoginToken loginToken = userService.getLoginToken(request);
+
+        // 因为公众号有一对多的情况，需要增加检查域空间checkUserNamespaceId方法，当域空间不一致时用户登出。   add by yanjun 20170620
+        if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
+            // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
+            processUserInfo(namespaceId, request, response);
+        }
+
+        //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = checkRedirectUserIdentifierV2(namespaceId,params);
+
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(callback calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
+        }
+        RestResponse res = new RestResponse(checkWxAuthIsBindPhoneResponse);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
 	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId, Map<String, String> params){
         LOGGER.info("checkUserIdentifier start");
 
@@ -343,7 +388,33 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         }
 
     }
-	
+
+    private CheckWxAuthIsBindPhoneResponse checkRedirectUserIdentifierV2(Integer namespaceId, Map<String, String> params){
+        LOGGER.info("checkUserIdentifier start");
+        CheckWxAuthIsBindPhoneResponse response = new CheckWxAuthIsBindPhoneResponse();
+        String bandphone = params.get(BINDPHONE);
+        if(bandphone == null || Byte.valueOf(bandphone).byteValue() == 0){
+            LOGGER.info("checkUserIdentifier do not need checkout bindphone");
+            return null;
+        }
+
+        //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+        User user = UserContext.current().getUser();
+        if(user == null){
+            LOGGER.error("checkUserIdentifier exception, it should be in logon status, but it is logoff");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Failed to get usercontent");
+        }
+        UserIdentifier identifier = userService.getUserIdentifier(user.getId());
+        if( identifier == null || identifier.getIdentifierToken() == null){
+            response.setBindType(WxAuthBindPhoneType.NOT_BIND.getCode());
+        }else {
+            LOGGER.info("checkUserIdentifier success");
+            response.setBindType(WxAuthBindPhoneType.BIND.getCode());
+        }
+        return response;
+    }
+
 	private Map<String, String> getRequestParams(HttpServletRequest request) {
 	    Map<String, String> params = new HashMap<String, String>();
 	    Enumeration<String> em = request.getParameterNames();
