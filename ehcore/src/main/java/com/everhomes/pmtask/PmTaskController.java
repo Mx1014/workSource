@@ -845,7 +845,7 @@ public class PmTaskController extends ControllerBase {
      * <p>查询项目评价统计</p>
      */
     @RequestMapping("getEvalStat")
-    @RestReturn(value=PmTaskStatDTO.class,collection = true)
+    @RestReturn(value=PmTaskEvalStatDTO.class,collection = true)
     public RestResponse getEvalStat(GetEvalStatCommand cmd){
         List<PmTaskEvalStatDTO> res = pmTaskService.getEvalStat(cmd);
         RestResponse response = new RestResponse(res);

@@ -128,8 +128,19 @@ public class FlowEvaluateProviderImpl implements FlowEvaluateProvider {
 				query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_VERSION.eq(flowVersion));
 				return query;
 			}
-    		
+
     	});
+    }
+
+    @Override
+    public List<FlowEvaluate> findEvaluatesByFlowMainId(Long flowMainId, Integer flowVersion) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEvaluates.class));
+        SelectQuery<EhFlowEvaluatesRecord> query = context.selectQuery(Tables.EH_FLOW_EVALUATES);
+        if(null != flowMainId)
+            query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_MAIN_ID.eq(flowMainId));
+        if(null != flowVersion)
+            query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_VERSION.eq(flowVersion));
+        return query.fetch().map(record -> ConvertHelper.convert(record,FlowEvaluate.class));
     }
     
     @Override

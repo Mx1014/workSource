@@ -1,6 +1,7 @@
 package com.everhomes.pmtask;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -171,6 +172,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private UserService userService;
 	@Autowired
 	private AddressService addressService;
+	@Autowired
+	private FlowEvaluateProvider flowEvaluateProvider;
+	@Autowired
+	private FlowEvaluateItemProvider flowEvaluateItemProvider;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -2996,7 +3001,33 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd) {
-		return null;
+		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,cmd.getModuleType(),cmd.getOwnerId(),cmd.getOwnerType());
+	 	List<FlowEvaluate> evals =  flowEvaluateProvider.findEvaluatesByFlowMainId(flow.getId(),flow.getFlowVersion());
+	 	Map<Long,List<FlowEvaluate>> evalgroups = evals.stream().collect(Collectors.groupingBy(FlowEvaluate::getEvaluateItemId));
+	 	List<PmTaskEvalStatDTO> dtos = new ArrayList<>();
+	 	evalgroups.entrySet().forEach(e ->{
+	 		PmTaskEvalStatDTO stat = new PmTaskEvalStatDTO();
+	 		int total = e.getValue().size();
+			BigDecimal totalstar;
+	 		Map<Byte,List<FlowEvaluate>> stargroups = e.getValue().stream().collect(Collectors.groupingBy(FlowEvaluate::getStar));
+	 		stargroups.entrySet().forEach(star -> {
+	 			switch (star.getKey()){
+	 				case (byte) 1 : stat.setAmount1(star.getValue().size()); break;
+					case (byte) 2 : stat.setAmount2(star.getValue().size()); break;
+					case (byte) 3 : stat.setAmount3(star.getValue().size()); break;
+					case (byte) 4 : stat.setAmount4(star.getValue().size()); break;
+					case (byte) 5 : stat.setAmount5(star.getValue().size()); break;
+				}
+			});
+	 		stat.setTotalAmount(total);
+			totalstar = BigDecimal.valueOf(stat.getAmount1() + stat.getAmount2() * 2 + stat.getAmount3() * 3 + stat.getAmount4() * 4 + stat.getAmount5() * 5);
+			stat.setEvalAvg(totalstar.divide(BigDecimal.valueOf(total)).setScale(1).toString());
+			FlowEvaluateItem evalItem = this.flowEvaluateItemProvider.getFlowEvaluateItemById(e.getKey());
+			if(null != evalItem)
+				stat.setEvalName(evalItem.getName());
+			dtos.add(stat);
+		});
+		return dtos;
 	}
 
 	private void exportTaskStatByCategory(GetTaskStatCommand cmd, Sheet sheet){
