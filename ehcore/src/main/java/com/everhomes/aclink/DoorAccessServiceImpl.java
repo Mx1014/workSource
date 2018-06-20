@@ -3085,7 +3085,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			auth.setValidAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
 			auth.setValidFromMs(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
 			auth.setKeyValidTime(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
-			auth.setValidEndMs(cmd.getValidEndMs() == null ? (auth.getValidFromMs() + KEY_TICK_7_DAY) : cmd.getValidEndMs());
+			if(cmd.getValidEndMs() == null){
+				auth.setValidEndMs(auth.getValidFromMs() + (doorAccess.getDefualtInvalidDuration() == null ? KEY_TICK_7_DAY : KEY_TICK_ONE_DAY * doorAccess.getDefualtInvalidDuration()));
+			}else{
+				auth.setValidEndMs(cmd.getValidEndMs());
+			}
+			
 			auth.setRightRemote((byte) 1);
 		} else {
 			auth.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
