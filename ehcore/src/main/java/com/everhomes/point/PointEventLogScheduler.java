@@ -249,7 +249,7 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
 
                 for (PointEventLog log : pointEventLogs) {
                     final List<PointResultAction> actions = new ArrayList<>();
-                    dbProvider.execute(s -> {
+                    // dbProvider.execute(s -> {
                         Map<PointScoreLockAndCacheKey, Long> pointKeyToScoreMap = new HashMap<>();
                         // 设置状态为处理中
                         log.setStatus(PointEventLogStatus.PROCESSING.getCode());
@@ -315,8 +315,8 @@ public class PointEventLogScheduler implements ApplicationListener<ContextRefres
                         log.setStatus(PointEventLogStatus.PROCESSED.getCode());
                         pointEventLogProvider.updatePointEventLog(log);
                         persistPointScore(pointKeyToScoreMap);
-                        return true;
-                    });
+                        // return true;
+                    // });
                     actions.stream().filter(Objects::nonNull).forEach(r -> {
                         try {
                             r.doAction();

@@ -31,4 +31,5 @@ public interface QualityConstant {
     public static final String QUALITY_ALL = "quality.all";//品质核查 品质核查全部权限
 
     Long QUALITY_MODULE= 20600L;
+    Long CUSTOMER_MODULE= 21100L;
 }

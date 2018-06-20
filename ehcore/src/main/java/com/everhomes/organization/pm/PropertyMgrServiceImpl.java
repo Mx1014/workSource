@@ -11,12 +11,14 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -34,11 +36,11 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.ResultHolder;
-import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.promotion.PromotionService;
 import com.everhomes.pushmessage.*;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -50,8 +52,12 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.*;
@@ -100,6 +106,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -111,7 +119,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import javax.validation.constraints.Null;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -133,7 +140,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
  */
 @Component 
-public class PropertyMgrServiceImpl implements PropertyMgrService {
+public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrServiceImpl.class);
 	private static final String ASSIGN_TASK_AUTO_COMMENT = "assign.task.auto.comment";
 	private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
@@ -262,12 +269,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     private String queueName = "property-mgr-push";
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-	
-    @PostConstruct
+    
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
+    
 	@Override
 	public void applyPropertyMember(applyPropertyMemberCommand cmd) {
 		User user  = UserContext.current().getUser();
@@ -1112,7 +1128,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public void sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
+	public void sendNotice(SendNoticeCommand cmd) {
 
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 
@@ -1152,7 +1168,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Job job = new Job(
 		        SendNoticeAction.class.getName(),
                 StringHelper.toJsonString(cmd),
-                String.valueOf(UserContext.current().getUser().getId()),
+                String.valueOf(UserContext.currentUserId()),
                 UserContext.current().getScheme(),
 				cmd.getNamespaceId()
         );
@@ -1161,19 +1177,45 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public void pushMessage(PropCommunityBuildAddessCommand cmd,User user){
-		Community community = this.checkCommunity(cmd.getCommunityId());
+	public void pushMessage(SendNoticeCommand cmd, User operator) {
+        MessageBodyType bodyType = MessageBodyType.fromCode(cmd.getMessage());
+        if (bodyType == MessageBodyType.TEXT && StringUtils.isEmpty(cmd.getMessage())) {
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Message body should not empty.");
+        }
 
-		if(community.getCommunityType() == CommunityType.RESIDENTIAL.getCode()) {
-			sendNoticeToCommunityPmOwner(cmd, user);
-		}
-		else if(community.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
-			// sendNoticeToEnterpriseContactor(cmd);
-			this.sendNoticeToOrganizationMember(cmd, user);
-		}
+        SendNoticeMode sendNoticeMode = SendNoticeMode.fromCode(cmd.getSendMode());
+
+        if (sendNoticeMode == SendNoticeMode.NAMESPACE) {
+            sendNoticeToNamespaceUser(cmd);
+        } else {
+            // 八百年前的代码，看都不想看
+            Community community = this.checkCommunity(cmd.getCommunityId());
+
+            if(community.getCommunityType() == CommunityType.RESIDENTIAL.getCode()) {
+                sendNoticeToCommunityPmOwner(cmd, operator);
+            }
+            else if(community.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
+                // sendNoticeToEnterpriseContactor(cmd);
+                this.sendNoticeToOrganizationMember(cmd, operator);
+            }
+        }
 	}
 
-	public void sendNoticeToEnterpriseContactor(PropCommunityBuildAddessCommand cmd) {
+    private void sendNoticeToNamespaceUser(SendNoticeCommand cmd) {
+        String messageBody = processMessage(cmd.getMessage(), cmd.getMessageBodyType(),
+                cmd.getImgUri(), EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        do {
+            List<User> users = userProvider.listUserByNamespace(null, cmd.getNamespaceId(), locator, 200);
+            for (User u : users) {
+                sendNoticeToUserById(u.getId(), messageBody, cmd.getMessageBodyType());
+            }
+        } while (locator.getAnchor() != null);
+    }
+
+    public void sendNoticeToEnterpriseContactor(SendNoticeCommand cmd) {
 
 		Long communityId = cmd.getCommunityId();
 		List<String> buildingNames = cmd.getBuildingNames();
@@ -1246,7 +1288,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public void sendNoticeToOrganizationMember(PropCommunityBuildAddessCommand cmd, User user) {
+	public void sendNoticeToOrganizationMember(SendNoticeCommand cmd, User user) {
 		Long communityId = cmd.getCommunityId();
 		List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
@@ -1421,7 +1463,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
 	}
 
-	private void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd,User user) {
+	private void sendNoticeToCommunityPmOwner(SendNoticeCommand cmd, User user) {
 
 		Integer namespaceId = user.getNamespaceId();
         Long communityId = cmd.getCommunityId();
@@ -1443,7 +1485,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<CommunityPmOwner> owners  = new ArrayList<>();
 		List<Long> familyIds = new ArrayList<>();
 
-		//按电话号码发送
+        //按电话号码发送
 		if(phones != null && phones.size() > 0){
 			List<OrganizationMember> members = new ArrayList<>();
 			for (String phone : phones) {
@@ -2212,8 +2254,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if (cmd.getStatus() != null) {
 			Long organizationId = findOrganizationByCommunity(community);
 			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-			communityAddressMapping.setLivingStatus(cmd.getStatus());
-			organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			if (communityAddressMapping != null) {
+				communityAddressMapping.setLivingStatus(cmd.getStatus());
+				organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			}else {
+				communityAddressMapping = new CommunityAddressMapping();
+				communityAddressMapping.setOrganizationId(organizationId);
+				communityAddressMapping.setCommunityId(community.getId());
+				communityAddressMapping.setAddressId(address.getId());
+				communityAddressMapping.setOrganizationAddress(address.getAddress());
+				communityAddressMapping.setLivingStatus(cmd.getStatus());
+				communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+				organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+			}
 		}
 
 		if (!StringUtils.isEmpty(cmd.getApartmentName())) {
@@ -2223,6 +2277,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			address.setApartmentName(cmd.getApartmentName());
 			address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
+			//update EH_Contract_Building_Mapping
+			List<ContractBuildingMapping> contractBuildingMappingList = addressProvider.findContractBuildingMappingByAddressId(address.getId());
+			if(contractBuildingMappingList != null && contractBuildingMappingList.size()>0) {
+				for (ContractBuildingMapping contractBuildingMapping : contractBuildingMappingList) {
+					contractBuildingMapping.setApartmentName(cmd.getApartmentName());
+					addressProvider.updateContractBuildingMapping(contractBuildingMapping);
+				}
+			}
 		}
 
 		if (cmd.getAreaSize() != null) {
@@ -2302,8 +2364,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		communityProvider.updateBuilding(building);
 		communityProvider.updateCommunity(community);
-
+		
 	}
+
+	
 
 	@Override
 	public GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd) {
@@ -4686,8 +4750,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             }
             if (cmd.getAvatar() != null)
                 owner.setAvatar(cmd.getAvatar());
-            if (cmd.getBirthday() != null)
-                owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+            if (cmd.getBirthday() != null) {
+				owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+			}else {
+            	owner.setBirthday(null);
+			}
             if (cmd.getOrgOwnerTypeId() != null)
                 owner.setOrgOwnerTypeId(cmd.getOrgOwnerTypeId());
             if (cmd.getMaritalStatus() != null)

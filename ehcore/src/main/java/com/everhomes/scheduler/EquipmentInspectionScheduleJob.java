@@ -1,11 +1,13 @@
 package com.everhomes.scheduler;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.EquipmentInspectionPlans;
 import com.everhomes.equipment.EquipmentProvider;
 import com.everhomes.equipment.EquipmentService;
 import com.everhomes.equipment.EquipmentStandardMap;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.util.DateHelper;
 import org.quartz.JobExecutionContext;
@@ -19,6 +21,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -75,13 +79,20 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if (plans != null && plans.size() > 0) {
 			LOGGER.info("createTaskByPlan.....plan size = {}"+plans.size());
 			for (EquipmentInspectionPlans plan : plans) {
-				if (checkPlanRepeat(plan)) {
-					LOGGER.info("EquipmentInspectionScheduleJob: createEquipmentTaskByPlan.");
-					equipmentService.createEquipmentTaskByPlan(plan);
-					plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					equipmentProvider.updateEquipmentInspectionPlan(plan);
+				try {
+					if (checkPlanRepeat(plan)) {
+                        LOGGER.info("EquipmentInspectionScheduleJob: createEquipmentTaskByPlan.");
+                        equipmentService.createEquipmentTaskByPlan(plan);
+                        plan.setLastCreateTasktime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        equipmentProvider.updateEquipmentInspectionPlan(plan);
+                    }
+				} catch (Exception e) {
+                    LOGGER.error("Equipment schdule erro cause by {},planId={}", e, plan.getId());
+					sendErrorMessage(e,plan.getId());
+					e.printStackTrace();
 				}
 			}
+			plans.clear();
 		}
 	}
 
@@ -92,85 +103,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		return isRepeat;
 	}
 
-//	private void createTask() {
-//		if(LOGGER.isInfoEnabled()) {
-//			LOGGER.info("EquipmentInspectionScheduleJob: createTask");
-//		}
-//		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(null);
-//
-//
-//		Map<Long, Set<EquipmentStandardMap>> standardEquipmentMap = new HashMap<>();
-//
-//		if(maps != null && maps.size() > 0) {
-//			for(EquipmentStandardMap map : maps) {
-//				Set<EquipmentStandardMap> equipmentStandardMaps = standardEquipmentMap.get(map.getStandardId());
-//				if(equipmentStandardMaps == null) {
-//					equipmentStandardMaps = new HashSet<EquipmentStandardMap>();
-//				}
-//				equipmentStandardMaps.add(map);
-//
-//				standardEquipmentMap.put(map.getStandardId(), equipmentStandardMaps);
-//			}
-//		}
-//
-//
-//		for (Map.Entry<Long, Set<EquipmentStandardMap>> entry : standardEquipmentMap.entrySet()) {
-//			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(entry.getKey());
-//			if(checkStandard(standard)) {
-//				Set<EquipmentStandardMap> equipmentStandardMaps = entry.getValue();
-//				if(equipmentStandardMaps != null && equipmentStandardMaps.size() > 0) {
-//					for(EquipmentStandardMap equipmentStandardMap : equipmentStandardMaps) {
-//
-//						dbProvider.execute((TransactionStatus status) -> {
-//							if(checkTaskAlreadyCreated(equipmentStandardMap)) {
-//								EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentStandardMap.getTargetId());
-//								if (checkEquipment(equipment)) {
-//									equipmentService.creatTaskByStandard(equipment, standard);
-//
-//									equipmentStandardMap.setLastCreateTaskTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//									equipmentProvider.updateEquipmentStandardMap(equipmentStandardMap);
-//								}
-//
-//								LOGGER.info("equipmentStandardMap: {} ", equipmentStandardMap);
-//							}
-//							return null;
-//						});
-//
-//					}
-//
-//				}
-//
-//			}
-//
-//		}
-//	}
-//
-//
-//	private boolean checkStandard(EquipmentInspectionStandards standard) {
-//		if(standard == null || standard.getStatus() == null
-//						|| !EquipmentStandardStatus.ACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
-//			LOGGER.info("checkStandard: standard is not exist or active! standardId = " + standard.getId());
-//			return false;
-//		}
-//
-//		boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
-//		LOGGER.info("checkStandard: standard id = " + standard.getId()
-//				+ "repeat setting id = "+ standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
-//
-//		return isRepeat;
-//	}
-
-//	private boolean checkEquipment(EquipmentInspectionEquipments equipment) {
-//		if(equipment == null || !EquipmentStatus.IN_USE.equals(EquipmentStatus.fromStatus(equipment.getStatus()))) {
-//			LOGGER.info("equipment is not exist or active! equipmentId = " + equipment.getId());
-//			return false;
-//		}
-//
-//		return true;
-//	}
-
 	private boolean checkTaskAlreadyCreated(EquipmentStandardMap equipmentStandardMap) {
-		//只有一台指定的服务器会生成任务 所以不需要再做判断了 
+		//只有一台指定的服务器会生成任务 所以不需要再做判断了
 //		if(equipmentStandardMap.getLastCreateTaskTime() != null) {
 //			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 //			Long hours = (now.getTime() - equipmentStandardMap.getLastCreateTaskTime().getTime())/(1000*60*60);
@@ -192,5 +126,23 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		equipmentProvider.closeExpiredReviewTasks();
 	}
 
-
+	private void sendErrorMessage(Exception e, Long planId) {
+		String targetEmailAddress = "rui.jia@zuolin.com";
+		String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+		MailHandler handler = PlatformContext.getComponent(handlerName);
+		String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
+		if ("core.zuolin.com".equals(configurationProvider.getValue(0,"home.url", ""))) {
+			try (ByteArrayOutputStream out = new ByteArrayOutputStream(); PrintStream stream = new PrintStream(out)) {
+				e.printStackTrace(stream);
+				String message = out.toString("UTF-8");
+				handler.sendMail(0, account, targetEmailAddress, "Equipment Task Schedule Error,planId:", planId.toString());
+				// out.reset();
+				e.getCause().printStackTrace(stream);
+				message = out.toString("UTF-8");
+				handler.sendMail(0, account, targetEmailAddress, "Equipment Task Schedule Error.Cause By", message);
+			} catch (Exception ignored) {
+				//
+			}
+		}
+	}
 }

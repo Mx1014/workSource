@@ -46,7 +46,7 @@ public interface ContractProvider {
 
 	List<Contract> listContractByOrganizationId(Long organizationId, Long categoryId);
 	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType);
-	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status);
+	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status, Long categoryId);
 
 	Map<Long, Contract> listContractsByIds(List<Long> ids);
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
@@ -86,6 +86,7 @@ public interface ContractProvider {
 	ContractCategory findContractCategoryById(Long categoryId);
 
 	void updateContractCategory(ContractCategory contractCategory);
+
 	//记录合同修改日志 by tangcen
 	void saveContractEvent(int i, Contract contract, Contract exist);
 	void insertContractEvents(ContractEvents event);
@@ -94,4 +95,8 @@ public interface ContractProvider {
 	void saveContractEventAboutAttachment(int opearteType, Contract contract, ContractAttachment contractAttachment);
 	void saveContractEventAboutChargingChange(int adjustAdd, Contract contract,ContractChargingChange contractChargingChange);
 	List<ContractEvents> listContractEvents(Long contractId);
+
+
+    boolean isNormal(Long cid);
+
 }

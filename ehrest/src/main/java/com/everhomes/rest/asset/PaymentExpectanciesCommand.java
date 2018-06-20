@@ -29,20 +29,21 @@ public class PaymentExpectanciesCommand {
     private Byte contractIdType;
     private Byte isEffectiveImmediately;
 	private Long categoryId;
-    
+	private Long moduleId;
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
     @ItemType(RentAdjust.class)
     private List<RentAdjust> rentAdjusts;
     @ItemType(RentFree.class)
     private List<RentFree> rentFrees;
 
-	public Long getCategoryId() {
-		return categoryId;
-	}
-
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
-	}
-	
     public Byte getIsEffectiveImmediately() {
         return isEffectiveImmediately;
     }
@@ -51,6 +52,13 @@ public class PaymentExpectanciesCommand {
         this.isEffectiveImmediately = isEffectiveImmediately;
     }
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     @Override
     public String toString() {

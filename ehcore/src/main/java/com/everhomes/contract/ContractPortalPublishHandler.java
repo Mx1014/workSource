@@ -42,10 +42,11 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 			contractInstanceConfig = new ContractInstanceConfig();
 		}
 		if (contractInstanceConfig.getCategoryId() == null) {
-			ContractCategory contractCategory = createContractCategory(namespaceId, appName);
+			ContractCategory contractCategory = createContractCategory(namespaceId, appName, contractInstanceConfig.getContractApplicationScene());
 			contractInstanceConfig.setCategoryId(contractCategory.getId());
+			contractInstanceConfig.setContractApplicationScene(contractInstanceConfig.getContractApplicationScene());
 		} else {
-			updateContractCategory(namespaceId, contractInstanceConfig.getCategoryId(), appName);
+			updateContractCategory(namespaceId, contractInstanceConfig.getCategoryId(), contractInstanceConfig.getContractApplicationScene(), appName);
 		}
 		return StringHelper.toJsonString(contractInstanceConfig);
 	}
@@ -65,7 +66,9 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 		Map<String, String> variables = new HashMap<String, String>();
 		variables.put("categoryId", categoryId);
 		variables.put("home.url", homeUrl);
-		return StringHelper.interpolate(contractAppUrl, variables);
+		map.setUrl(StringHelper.interpolate(contractAppUrl, variables));
+		return StringHelper.toJsonString(map);
+				//StringHelper.toJsonString(StringHelper.interpolate(contractAppUrl, variables));
 	}
 
 	@Override
@@ -92,7 +95,7 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 		return null;
 	}
 
-	private ContractCategory createContractCategory(Integer namespaceId, String name) {
+	private ContractCategory createContractCategory(Integer namespaceId, String name, Byte contractApplicationScene) {
 		User user = UserContext.current().getUser();
 		ContractCategory contractCategory = new ContractCategory();
 		contractCategory.setNamespaceId(namespaceId);
@@ -103,14 +106,16 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 		contractCategory.setStatus(NewsStatus.ACTIVE.getCode());
 		contractCategory.setCreatorUid(user.getId());
 		contractCategory.setDeleteUid(user.getId());
+		contractCategory.setContractApplicationScene(contractApplicationScene);
 		contractProvider.createContractCategory(contractCategory);
 		return contractCategory;
 	}
 
-	private ContractCategory updateContractCategory(Integer namespaceId, Long categoryId, String name) {
+	private ContractCategory updateContractCategory(Integer namespaceId, Long categoryId, Byte contractApplicationScene, String name) {
 		ContractCategory contractCategory = contractProvider.findContractCategoryById(categoryId);
 		if (null != contractCategory) {
 			contractCategory.setName(name);
+			contractCategory.setContractApplicationScene(contractApplicationScene);;
 			contractProvider.updateContractCategory(contractCategory);
 		} else {
 			LOGGER.error("news category is null. categoryId={}", categoryId);

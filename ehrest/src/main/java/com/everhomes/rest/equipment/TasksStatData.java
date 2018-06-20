@@ -32,6 +32,8 @@ public class TasksStatData {
 
     private Long completeReviewDelay;
 
+    private Long completeInspectionTasks;
+
     public Long getDelayInspection() {
         return delayInspection;
     }
@@ -94,6 +96,15 @@ public class TasksStatData {
 
     public void setCompleteReviewDelay(Long completeReviewDelay) {
         this.completeReviewDelay = completeReviewDelay;
+    }
+
+
+    public Long getCompleteInspectionTasks() {
+        return completeInspectionTasks;
+    }
+
+    public void setCompleteInspectionTasks(Long completeInspectionTasks) {
+        this.completeInspectionTasks = completeInspectionTasks;
     }
 
     @Override

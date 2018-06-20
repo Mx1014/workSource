@@ -1,6 +1,7 @@
 package com.everhomes.flow;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;

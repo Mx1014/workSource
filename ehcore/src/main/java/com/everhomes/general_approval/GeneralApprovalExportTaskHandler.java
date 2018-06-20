@@ -45,7 +45,7 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
             endTime = (Long) params.get("endTime");
         Byte approvalStatus = null;
         if (params.get("approvalStatus") != null)
-            approvalStatus = (Byte) params.get("approvalStatus");
+            approvalStatus = Byte.valueOf(String.valueOf(params.get("approvalStatus")));
         Long approvalId = null;
         if (params.get("approvalId") != null)
             approvalId = (Long) params.get("approvalId");
@@ -77,7 +77,7 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         Long taskId = (Long) params.get("taskId");
 //        OutputStream outputStream = null;
         OutputStream outputStream = generalApprovalService.getGeneralApprovalExportStream(cmd, taskId);
-        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 

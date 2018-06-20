@@ -3,11 +3,28 @@ package com.everhomes.varField;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.varField.*;
-import com.everhomes.util.RequireAuthentication;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.FieldStatisticDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ListFieldStatisticsCommand;
+import com.everhomes.rest.varField.ListScopeFieldItemCommand;
+import com.everhomes.rest.varField.ListSystemFieldCommand;
+import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
+import com.everhomes.rest.varField.ListSystemFieldItemCommand;
+import com.everhomes.rest.varField.SystemFieldDTO;
+import com.everhomes.rest.varField.SystemFieldGroupDTO;
+import com.everhomes.rest.varField.SystemFieldItemDTO;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -81,8 +98,6 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFields")
     @RestReturn(value=String.class)
     public RestResponse updateFields(@Valid UpdateFieldsCommand cmd) {
-        
-        //cmd.setCategoryId(78L);
     	fieldService.updateFields(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -91,16 +106,13 @@ public class FieldController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /varField/listFields</b>
+     * <b>URL: /varField/listFields(增加default)</b>
      * <p>获取域空间模块字段</p>
      * @return {@link FieldDTO}
      */
     @RequestMapping("listFields")
     @RestReturn(value=FieldDTO.class, collection = true)
     public RestResponse listFields(@Valid ListFieldCommand cmd) {
-    	
-    	//cmd.setCategoryId(78L);
-    	
         List<FieldDTO> fields = fieldService.listFields(cmd);
         RestResponse res = new RestResponse(fields);
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -116,9 +128,6 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldGroups")
     @RestReturn(value=String.class)
     public RestResponse updateFieldGroups(@Valid UpdateFieldGroupsCommand cmd) {
-    	
-    	//cmd.setCategoryId(78L);
-    	
         fieldService.updateFieldGroups(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -127,16 +136,13 @@ public class FieldController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /varField/listFieldGroups</b>
+     * <b>URL: /varField/listFieldGroups(增加default)</b>
      * <p>获取域空间模块字段组</p>
      * @return {@link FieldGroupDTO}
      */
     @RequestMapping("listFieldGroups")
     @RestReturn(value=FieldGroupDTO.class, collection = true)
     public RestResponse listFieldGroups(@Valid ListFieldGroupCommand cmd) {
-    	
-    	//cmd.setCategoryId(78L);
-    	
         List<FieldGroupDTO> groups = fieldService.listFieldGroups(cmd);
         RestResponse res = new RestResponse(groups);
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -152,9 +158,6 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldItems")
     @RestReturn(value=String.class)
     public RestResponse updateFieldItems(@Valid UpdateFieldItemsCommand cmd) {
-    	
-    	//cmd.setCategoryId(78L);
-    	
         fieldService.updateFieldItems(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -164,15 +167,12 @@ public class FieldController extends ControllerBase {
 
     /**
      * <b>URL: /varField/listFieldItems</b>
-     * <p>获取域空间模块字段选择项</p>
+     * <p>获取域空间模块字段选择项(增加default)</p>
      * @return {@link FieldItemDTO}
      */
     @RequestMapping("listFieldItems")
     @RestReturn(value=FieldItemDTO.class, collection = true)
     public RestResponse listFieldItems(@Valid ListFieldItemCommand cmd) {
-    	
-    	//cmd.setCategoryId(78L);
-    	
         List<FieldItemDTO> items = fieldService.listFieldItems(cmd);
         RestResponse res = new RestResponse(items);
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -207,82 +207,6 @@ public class FieldController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-
-
-    // 数据导入导出
-    /**
-     * <p>模板的导出</p>
-     * <b>URL: /varField/exportExcelTemplate</b>
-     */
-//    @RequestMapping("exportExcelTemplate")
-//    public void exportExcelTemplate(@Valid ListFieldGroupCommand cmd,HttpServletResponse response){
-//        fieldService.exportExcelTemplate(cmd,response);
-//
-//    }
-//
-//    /**
-//     * <p>excel数据的导出</p>
-//     * <b>URL: /varField/exportFieldsExcel</b>
-//     */
-//    @RequestMapping("exportFieldsExcel")
-//    public void exportFieldsExcel(@Valid ExportFieldsExcelCommand cmd, HttpServletResponse response){
-//        fieldService.exportFieldsExcel(cmd,response);
-//    }
-//
-//    /**
-//     * <p>excel数据导入</p>
-//     * <b>URL: /varField/importFieldsExcel</b>
-//     */
-//    @RequestMapping("importFieldsExcel")
-//    @RestReturn(ImportFieldsExcelResponse.class)
-//    public RestResponse importFieldsExcel(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
-//
-//        ImportFieldsExcelResponse response = fieldService.importFieldsExcel(cmd,file);
-//
-//        RestResponse restResponse = new RestResponse(response);
-//        restResponse.setErrorCode(200);
-//        restResponse.setErrorDescription("OK");
-//        return restResponse;
-//    }
-
-//    // 数据导入导出 重构
-//    /**
-//     * <p>模板的导出</p>
-//     * <b>URL: /varField/exportExcelTemplateRe</b>
-//     */
-//    @RequireAuthentication(false)
-//    @RequestMapping("exportExcelTemplateRe")
-//    public void exportExcelTemplateRe(@Valid ListFieldGroupCommand cmd,HttpServletResponse response){
-//        fieldService.exportDynamicExcelTemplate(cmd,response);
-//
-//    }
-//
-//    /**
-//     * <p>excel数据的导出</p>
-//     * <b>URL: /varField/exportFieldsExcelRe</b>
-//     */
-//    @RequireAuthentication(false)
-//    @RequestMapping("exportFieldsExcelRe")
-//    public void exportFieldsExcelRe(@Valid ExportFieldsExcelCommand cmd, HttpServletResponse response){
-//        fieldService.exportDynamicExcel(cmd,response);
-//    }
-//
-//    /**
-//     * <p>excel数据导入</p>
-//     * <b>URL: /varField/importFieldsExcelRe</b>
-//     */
-//    @RequireAuthentication(false)
-//    @RequestMapping("importFieldsExcelRe")
-//    @RestReturn(ImportFieldsExcelResponse.class)
-//    public RestResponse importFieldsExcelRe(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
-//        ImportFieldsExcelResponse response = fieldService.importDynamicExcel(cmd,file);
-//        RestResponse restResponse = new RestResponse(response);
-//        restResponse.setErrorCode(200);
-//        restResponse.setErrorDescription("OK");
-//        return restResponse;
-//    }
-
 
     // 数据导入导出 重构
     /**

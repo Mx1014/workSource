@@ -24,5 +24,6 @@ public interface ServiceModuleConstants {
     long ORGANIZATION_MODULE = 33000L;
     long LEASE_PROJECT_MODULE = 40100L;
     long PARKING_MODULE = 40800L;
+    long ASSET_MODULE = 20400L;
 
 }

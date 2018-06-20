@@ -259,6 +259,7 @@ public interface PrivilegeConstants {
     long ENTERPRISE_CUSTOMER_CREATE = 21101L;//客户的增加
     long ENTERPRISE_CUSTOMER_UPDATE = 21102L;//客户的修改
     long ENTERPRISE_CUSTOMER_IMPORT = 21103L;//客户的导入
+    long ENTERPRISE_CUSTOMER_EXPORT = 21114L;//客户的导出
     long ENTERPRISE_CUSTOMER_SYNC = 21104L;//客户的同步
     long ENTERPRISE_CUSTOMER_DELETE = 21105L;//客户的删
     long ENTERPRISE_CUSTOMER_LIST = 21106L;//客户的查
@@ -269,6 +270,9 @@ public interface PrivilegeConstants {
     long ENTERPRISE_CUSTOMER_MANAGE_IMPORT = 21111L;//管理的导入
     long ENTERPRISE_CUSTOMER_MANAGE_EXPORT = 21112L;//管理的导出
     long ENTERPRISE_CUSTOMER_STAT = 21113L;//客户的统计分析查看
+
+
+    long ENTERPRISE_CUSTOMER_MANNAGER_SET = 21115L;// 查看企业管理员
 
     long CONTRACT_CREATE = 21201L;//新增合同
     long CONTRACT_LAUNCH = 21202L;//签约 发起审批

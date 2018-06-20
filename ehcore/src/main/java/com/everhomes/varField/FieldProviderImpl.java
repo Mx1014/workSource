@@ -1,19 +1,28 @@
 package com.everhomes.varField;
 
-import com.everhomes.customer.CustomerTalent;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-
-import com.everhomes.server.schema.tables.*;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
+import com.everhomes.server.schema.tables.daos.EhVarFieldGroupScopesDao;
+import com.everhomes.server.schema.tables.daos.EhVarFieldGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
+import com.everhomes.server.schema.tables.daos.EhVarFieldItemsDao;
+import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
@@ -23,16 +32,11 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
-
-import com.everhomes.server.schema.tables.daos.EhVarFieldGroupScopesDao;
-import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
-import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldGroupScopes;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldItemScopes;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldItems;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldScopes;
 import com.everhomes.server.schema.tables.records.EhVarFieldGroupScopesRecord;
-
 import com.everhomes.server.schema.tables.records.EhVarFieldItemScopesRecord;
 import com.everhomes.server.schema.tables.records.EhVarFieldScopesRecord;
 import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
@@ -276,6 +280,31 @@ public class FieldProviderImpl implements FieldProvider {
             query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.CATEGORY_ID.isNull());
         }
         
+        if(communityId != null) {
+            query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.eq(communityId));
+        }
+
+        if(communityId == null) {
+            query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.isNull());
+        }
+        query.fetch().map((r) -> {
+            groups.put(r.getId(), ConvertHelper.convert(r, ScopeFieldGroup.class));
+            return null;
+        });
+
+        return groups;
+    }
+
+    @Override
+    public Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        Map<Long, ScopeFieldGroup> groups = new HashMap<>();
+        SelectQuery<EhVarFieldGroupScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_GROUP_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.MODULE_NAME.eq(moduleName));
+        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
         if(communityId != null) {
             query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.eq(communityId));
         }
@@ -595,6 +624,18 @@ public class FieldProviderImpl implements FieldProvider {
                 });
 
         return fields;
+    }
+
+    @Override
+    public List<Field> listMandatoryFields(String moduleName, Long groupId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+       return context.select().from(Tables.EH_VAR_FIELDS)
+                .where(Tables.EH_VAR_FIELDS.MODULE_NAME.eq(moduleName))
+                .and(Tables.EH_VAR_FIELDS.GROUP_ID.eq(groupId))
+                .and(Tables.EH_VAR_FIELDS.MANDATORY_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()))
+                .fetchInto(Field.class);
+
     }
 
     @Override

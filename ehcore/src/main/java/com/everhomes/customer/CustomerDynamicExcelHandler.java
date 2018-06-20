@@ -1,31 +1,70 @@
 package com.everhomes.customer;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.dynamicExcel.*;
+import com.everhomes.db.DbProvider;
+import com.everhomes.dynamicExcel.DynamicColumnDTO;
+import com.everhomes.dynamicExcel.DynamicExcelHandler;
+import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.dynamicExcel.DynamicField;
+import com.everhomes.dynamicExcel.DynamicRowDTO;
+import com.everhomes.dynamicExcel.DynamicSheet;
+import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.customer.*;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationAttachment;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.customer.CustomerDynamicSheetClass;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.search.ContractSearcher;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import com.everhomes.varField.*;
+import com.everhomes.varField.FieldGroup;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeField;
+import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -33,14 +72,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.everhomes.organization.OrganizationSearcherImpl.isContainChinese;
 
 /**
  * Created by ying.xiong on 2018/1/12.
@@ -79,12 +123,56 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
     @Autowired
     private CommunityProvider communityProvider;
 
+    @Autowired
+    private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+
+    @Autowired
+    private OrganizationSearcher organizationSearcher;
+
+    @Autowired
+    private ContractProvider contractProvider;
+
+    @Autowired
+    private ContractSearcher contractSearcher;
+
+    @Autowired
+    private DbProvider dbProvider;
+
+
     @Override
-    public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport) {
-        FieldGroup group = fieldProvider.findGroupByGroupDisplayName(sheetName);
+    public List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport, boolean withData) {
+        FieldGroup group = new FieldGroup();
+        //用名字搜会有问题
+        if (isContainChinese(sheetName)) {
+            group = fieldProvider.findGroupByGroupDisplayName(sheetName);
+        } else {
+            group = fieldProvider.findFieldGroup(Long.parseLong(sheetName));
+        }
+        ListFieldGroupCommand groupCommand = ConvertHelper.convert(params, ListFieldGroupCommand.class);
+        List<FieldGroupDTO> groups = fieldService.listFieldGroups(groupCommand);
+        String groupDisplayName = "";
+        if (groups != null && groups.size() > 0) {
+            Long groupId = group.getId();
+            List<FieldGroupDTO> scopeGroups = groups.stream().filter((r) -> Objects.equals(r.getGroupId(), groupId)).collect(Collectors.toList());
+            if (scopeGroups != null && scopeGroups.size() > 0) {
+                groupDisplayName = scopeGroups.get(0).getGroupDisplayName();
+            } else {
+                groupDisplayName = group.getTitle();
+            }
+        }
+        List<DynamicField> sortedFields = new ArrayList<>();
         DynamicSheet ds = new DynamicSheet();
         ds.setClassName(group.getName());
-        ds.setDisplayName(group.getTitle());
+        ds.setDisplayName(groupDisplayName);
         ds.setGroupId(group.getId());
 
         List<DynamicField> dynamicFields = new ArrayList<>();
@@ -93,6 +181,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         List<FieldDTO> fields = fieldService.listFields(command);
         LOGGER.debug("getDynamicSheet: headers: {}", StringHelper.toJsonString(headers));
         if(fields != null && fields.size() > 0) {
+//            //去除普通人员的跟进人cell
+//            ListFieldGroupCommand groupCommand = ConvertHelper.convert(params, ListFieldGroupCommand.class);
+//            fields = fields.stream()
+//                    .filter((r) -> !groupCommand.getIsAdmin() && "trackingUid".equals(r.getFieldName()))
+//                    .collect(Collectors.toList());
             fields.forEach(fieldDTO -> {
                 LOGGER.debug("getDynamicSheet: fieldDTO: {}", fieldDTO.getFieldDisplayName());
                 if(isImport) {
@@ -115,32 +208,75 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         dynamicFields.add(df);
                     }
                 } else {
-                    if(!fieldDTO.getFieldParam().contains("image")) {//导出时 非图片字段可导出 fix 26791
-                        DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
-                        df.setDisplayName(fieldDTO.getFieldDisplayName());
-                        if("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
-                            df.setDateFormat("yyyy-MM-dd HH:mm");
+                    if (!fieldDTO.getFieldParam().contains("image")) {//导出时 非图片字段可导出 fix 26791
+                        if (withData && fieldDTO.getFieldParam().contains("richText")) {
+                            LOGGER.info("remove richText cell whern export data!");
+                        } else {
+                            DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
+                            df.setDisplayName(fieldDTO.getFieldDisplayName());
+                            if ("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
+                                df.setDateFormat("yyyy-MM-dd HH:mm");
+                            }
+                            //boolean isMandatory 数据库是0和1 默认false
+                            if (fieldDTO.getMandatoryFlag() == 1) {
+                                df.setMandatory(true);
+                            }
+                            if (fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
+                                List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
+                                    return item.getItemDisplayName();
+                                }).collect(Collectors.toList());
+                                df.setAllowedValued(allowedValued);
+                            }
+                            df.setGroupId(fieldDTO.getGroupId());
+                            dynamicFields.add(df);
                         }
-                        //boolean isMandatory 数据库是0和1 默认false
-                        if(fieldDTO.getMandatoryFlag() == 1) {
-                            df.setMandatory(true);
-                        }
-                        if(fieldDTO.getItems() != null && fieldDTO.getItems().size() > 0) {
-                            List<String> allowedValued = fieldDTO.getItems().stream().map(item -> {
-                                return item.getItemDisplayName();
-                            }).collect(Collectors.toList());
-                            df.setAllowedValued(allowedValued);
-                        }
-                        dynamicFields.add(df);
+                    }
+                }
+            });
+            sortedFields = sortDynamicFields(ds, dynamicFields);
+        }
+
+        ds.setDynamicFields(sortedFields);
+        List<DynamicSheet> sheets = new ArrayList<>();
+        sheets.add(ds);
+        return sheets;
+    }
+
+    private List<DynamicField> sortDynamicFields(DynamicSheet ds,List<DynamicField> dynamicFields) {
+        List<DynamicField> fields = new ArrayList<>();
+        if(dynamicFields!=null && dynamicFields.size()>0){
+            //按照groupId 分类
+            Map<Long, List<DynamicField>> fieldMap = new HashMap<>();
+            for (DynamicField field : dynamicFields) {
+                if (fieldMap.get(field.getGroupId()) == null) {
+                    List<DynamicField> fieldList = new ArrayList<>();
+                    fieldList.add(field);
+                    fieldMap.put(field.getGroupId(), fieldList);
+                } else {
+                    fieldMap.get(field.getGroupId()).add(field);
+                }
+            }
+            fieldMap.forEach((k, v) -> {
+                fields.addAll(v);
+                // 基本信息 groupId 10
+                if (k == 10L) {
+                    //产品要求 企业管理员和楼栋门牌放在excel的前面
+                    if (CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))) {
+                        DynamicField df = new DynamicField();
+                        df.setFieldName("enterpriseAdmins");
+                        df.setDisplayName("企业管理员");
+                        df.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
+                        fields.add(df);
+                        DynamicField df1 = new DynamicField();
+                        df1.setFieldName("entryInfos");
+                        df1.setDisplayName("楼栋门牌");
+                        df1.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
+                        fields.add(df1);
                     }
                 }
             });
         }
-
-        ds.setDynamicFields(dynamicFields);
-        List<DynamicSheet> sheets = new ArrayList<>();
-        sheets.add(ds);
-        return sheets;
+        return fields;
     }
 
     @Override
@@ -152,6 +288,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         Long communityId = customerInfo.getCommunityId();
         String moduleName = customerInfo.getModuleName();
         Long uid = UserContext.currentUserId();
+        Long ownerId = customerInfo.getOwnerId();
+        String ownerType = customerInfo.getOwnerType();
         if(rowDatas != null && rowDatas.size() > 0) {
             CustomerDynamicSheetClass sheet = CustomerDynamicSheetClass.fromStatus(ds.getClassName());
             if(sheet == null) {
@@ -171,7 +309,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         EnterpriseCustomer enterpriseCustomer = new EnterpriseCustomer();
                         enterpriseCustomer.setNamespaceId(namespaceId);
                         enterpriseCustomer.setCommunityId(communityId);
+                        enterpriseCustomer.setOwnerId(ownerId);
+                        enterpriseCustomer.setOwnerType(ownerType);
                         enterpriseCustomer.setCreatorUid(uid);
+                        String customerAdminString = "";
+                        String customerAddressString = "";
 
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
@@ -191,19 +333,47 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     }
                                 }
 
-                                if("trackingUid".equals(column.getFieldName())) {
-                                    enterpriseCustomer.setTrackingName(column.getValue());
-                                    List<User> users = userProvider.listUserByKeyword(column.getValue(), namespaceId, new CrossShardListingLocator(), 2);
-                                    if(users != null && users.size() > 0) {
-                                        column.setValue(users.get(0).getId().toString());
+                                if ("trackingUid".equals(column.getFieldName())) {
+                                    Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());
+                                    if (isAdmin) {
+                                        //产品要求改成 姓名（phone）
+                                        String username = "";
+                                        String contactPhone = "";
+                                        if(StringUtils.isNotEmpty(column.getValue())){
+                                            username =  column.getValue().split("\\(")[0];
+                                            contactPhone = column.getValue().substring(column.getValue().indexOf("(") + 1, column.getValue().indexOf(")"));
+                                        }
+                                        enterpriseCustomer.setTrackingName(username);
+                                        List<User> users = null;
+                                        if (StringUtils.isNotEmpty(column.getValue())) {
+                                            users = userProvider.listUserByKeyword(contactPhone, namespaceId, new CrossShardListingLocator(), 2);
+                                        }
+                                        if (users != null && users.size() > 0) {
+                                            column.setValue(users.get(0).getId().toString());
+                                        } else {
+                                            column.setValue(null);
+                                        }
                                     } else {
-                                        column.setValue("-1");
+                                        column.setValue(String.valueOf(UserContext.currentUserId()));
+//                                        enterpriseCustomer.setTrackingUid(UserContext.currentUserId());
+                                        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByUId(UserContext.currentUserId());
+                                        if (organizationMembers != null && organizationMembers.size() > 0) {
+                                            enterpriseCustomer.setTrackingName(organizationMembers.get(0).getContactName());
+                                        }
+
                                     }
                                 }
                                 try {
-                                    setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
+                                    if(!"enterpriseAdmins".equals(column.getFieldName())&&!"entryInfos".equals(column.getFieldName())){
+                                        setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
+                                    }else {
+                                        if("enterpriseAdmins".equals(column.getFieldName()))
+                                           customerAdminString = column.getValue();
+                                        if("entryInfos".equals(column.getFieldName()))
+                                            customerAddressString = column.getValue();
+                                    }
                                 } catch(Exception e){
-                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed");
+                                    LOGGER.warn("one row invoke set method for EnterpriseCustomer failed:{}",e);
                                     failedNumber ++;
                                     flag = false;
                                     break;
@@ -213,22 +383,30 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             }
                         }
 
-                        if(StringUtils.isNotBlank(enterpriseCustomer.getCustomerNumber())) {
-                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, enterpriseCustomer.getCustomerNumber());
-                            if(customers != null && customers.size() > 0) {
-                                LOGGER.error("customerNumber {} in namespace {} already exist!", enterpriseCustomer.getCustomerNumber(), namespaceId);
-                                failedNumber ++;
-                                flag = false;
-                                break;
-                            }
-                        }
+//                        if(StringUtils.isNotBlank(enterpriseCustomer.getCustomerNumber())) {
+//                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, enterpriseCustomer.getCustomerNumber());
+//                            if(customers != null && customers.size() > 0) {
+////                                LOGGER.error("customerNumber {} in namespace {} already exist!", enterpriseCustomer.getCustomerNumber(), namespaceId);
+////                                failedNumber ++;
+////                                flag = false;
+////                                break;
+//                                customers.forEach((c)-> {
+//                                    customerSearcher.deleteById(c.getId());
+//                                    customerProvider.deleteEnterpriseCustomer(c);
+//                                });
+//                            }
+//                        }
                         if(StringUtils.isNotBlank(enterpriseCustomer.getName())) {
                             List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, enterpriseCustomer.getName());
                             if(customers != null && customers.size() > 0) {
-                                LOGGER.error("customerName {} in namespace {} already exist!", enterpriseCustomer.getName(), namespaceId);
-                                failedNumber ++;
-                                flag = false;
-                                break;
+//                                LOGGER.error("customerName {} in namespace {} already exist!", enterpriseCustomer.getName(), namespaceId);
+//                                failedNumber ++;
+//                                flag = false;
+//                                break;
+                                for (EnterpriseCustomer customer : customers) {
+                                    updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
+                                }
+                                continue;
                             }
                         }
 
@@ -240,13 +418,16 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             customerProvider.createEnterpriseCustomer(enterpriseCustomer);
 
                             //企业客户新增成功,保存客户事件
-                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null);
-
-                            OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
-                            enterpriseCustomer.setOrganizationId(organizationDTO.getId());
-
+                            customerService.saveCustomerEvent( 1  ,enterpriseCustomer ,null,(byte)0);
+                            if (StringUtils.isNotEmpty(customerAddressString)) {
+                                OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                                enterpriseCustomer.setOrganizationId(organizationDTO.getId());
+                            }
                             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
                             customerSearcher.feedDoc(enterpriseCustomer);
+                            //这里还需要增加企业管理员的record和role  & address buildings 呵
+                            createEnterpriseCustomerAdmin(enterpriseCustomer,customerAdminString);
+                            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
                         }
                         break;
                     case CUSTOMER_TAX:
@@ -718,6 +899,219 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
             response.setFailedRowNumber(response.getFailedRowNumber() + failedNumber);
         }
+    }
+
+    private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
+        if (exist != null && enterpriseCustomer != null) {
+            try {
+                createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
+            } catch (Exception e) {
+                //todo:接口过时 没有批量删除
+                LOGGER.error("create enterprise admin error :{}", e);
+            }
+            enterpriseCustomer.setId(exist.getId());
+            enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
+            if ((exist.getOrganizationId() == null || exist.getOrganizationId() == 0) && StringUtils.isNotBlank(customerAddressString)) {
+                syncCustomerInfoIntoOrganization(exist);
+            }
+            customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+            customerSearcher.feedDoc(enterpriseCustomer);
+            //修改了客户名称则要同步修改合同里面的客户名称
+            if (!exist.getName().equals(enterpriseCustomer.getName())) {
+                List<Contract> contracts = contractProvider.listContractByCustomerId(exist.getCommunityId(), exist.getId(), CustomerType.ENTERPRISE.getCode());
+                if (contracts != null && contracts.size() > 0) {
+                    for (Contract contract : contracts) {
+                        contract.setCustomerName(enterpriseCustomer.getName());
+                        contractProvider.updateContract(contract);
+                        contractSearcher.feedDoc(contract);
+                    }
+                }
+            }
+            customerService.saveCustomerEvent(3, enterpriseCustomer, exist, (byte) 0);
+
+            customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
+            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+//            if (StringUtils.isEmpty(customerAddressString)) {
+//                organizationProvider.deleteOrganizationById(exist.getOrganizationId());
+//                Organization organization = organizationProvider.findOrganizationById(exist.getOrganizationId());
+//                if (organization != null){
+//                    organizationSearcher.feedDoc(organization);
+//                }
+//                enterpriseCustomer.setOrganizationId(0L);
+//                //there is no need to feedDoc
+//                customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+//            }
+        }
+    }
+
+    private void syncCustomerInfoIntoOrganization(EnterpriseCustomer exist) {
+        //这里增加入驻信息后自动同步到企业管理
+        OrganizationDTO organizationDTO = customerService.createOrganization(exist);
+        exist.setOrganizationId(organizationDTO.getId());
+        dbProvider.execute((TransactionStatus status) -> {
+            List<CustomerAdminRecord> untrackAdmins = customerProvider.listEnterpriseCustomerAdminRecords(exist.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
+            if (untrackAdmins != null && untrackAdmins.size() > 0) {
+                untrackAdmins.forEach((r)->{
+                    CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+                    cmd.setContactName(r.getContactName());
+                    cmd.setContactToken(r.getContactToken());
+                    cmd.setOrganizationId(exist.getOrganizationId());
+                    rolePrivilegeService.createOrganizationAdmin(cmd);
+                });
+                customerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(exist.getId(), exist.getNamespaceId());
+                exist.setAdminFlag(com.everhomes.rest.approval.TrueOrFalseFlag.TRUE.getCode());
+            }
+            return null;
+        });
+
+        List<EnterpriseAttachment> attachments = customerProvider.listEnterpriseCustomerPostUri(exist.getId());
+        if (attachments != null && attachments.size() > 0) {
+            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
+            attachments.forEach((a) -> {
+                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
+                bannerUrl.setContentType(a.getContentType());
+                bannerUrl.setContentUri(a.getContentUri());
+                bannerUrls.add(bannerUrl);
+            });
+            addAttachments(exist.getOrganizationId(), bannerUrls, UserContext.currentUserId());
+            Organization createOrganization = organizationProvider.findOrganizationById(exist.getOrganizationId());
+            organizationSearcher.feedDoc(createOrganization);
+        }
+    }
+
+    private void addAttachments(Long id, List<AttachmentDescriptor> attachments, Long userId) {
+        this.organizationProvider.deleteOrganizationAttachmentsByOrganizationId(id);
+        if (attachments != null && attachments.size() > 0) {
+            for (AttachmentDescriptor attachmentDescriptor : attachments) {
+                OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
+                attachment.setCreatorUid(userId);
+                attachment.setOrganizationId(id);
+                attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                this.organizationProvider.createOrganizationAttachment(attachment);
+            }
+        }
+    }
+
+    private void createEnterpriseCustomerEntryInfo(EnterpriseCustomer enterpriseCustomer, String customerAddressString) {
+        if (StringUtils.isEmpty(customerAddressString)) {
+            return;
+        }
+        customerAddressString = customerAddressString.replaceAll("\n", "");
+        customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
+        organizationProvider.deleteAllOrganizationAddressById(enterpriseCustomer.getOrganizationId());
+        String buildingNames[] = customerAddressString.split(",");
+        if(buildingNames.length>0){
+            for (String buildingNameString : buildingNames) {
+                String buildingName = buildingNameString.split("/")[0];
+                String apartmentName = buildingNameString.split("/")[1];
+                Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
+                Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
+                CustomerEntryInfo entryInfo = new CustomerEntryInfo();
+                entryInfo.setAddress(address.getAddress());
+                entryInfo.setAddressId(address.getId());
+                entryInfo.setArea(address.getAreaName());
+                entryInfo.setAreaSize(new BigDecimal(address.getAreaSize() == null ? 0 : address.getAreaSize()));
+                entryInfo.setBuildingId(building.getId());
+                entryInfo.setCustomerId(enterpriseCustomer.getId());
+                entryInfo.setCustomerName(enterpriseCustomer.getName());
+                entryInfo.setNamespaceId(enterpriseCustomer.getNamespaceId());
+                customerProvider.createCustomerEntryInfo(entryInfo);
+                customerSearcher.feedDoc(enterpriseCustomer);
+                OrganizationAddress organizationAddress = new OrganizationAddress();
+                Address addr = this.addressProvider.findAddressById(address.getId());
+                if (addr != null) {
+                    address.setBuildingName(addr.getBuildingName());
+                }
+                organizationAddress.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                organizationAddress.setAddressId(address.getId());
+                organizationAddress.setBuildingId(building.getId());
+                organizationAddress.setCreatorUid(UserContext.currentUserId());
+                organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+
+                this.organizationProvider.createOrganizationAddress(organizationAddress);
+                Organization organization = organizationProvider.findOrganizationById(enterpriseCustomer.getOrganizationId());
+                if (organization != null)
+                    organizationSearcher.feedDoc(organization);
+            }
+        }
+    }
+
+    private void createEnterpriseCustomerAdmin(EnterpriseCustomer enterpriseCustomer, String customerAdminString) {
+        List<CreateOrganizationAdminCommand> cmds = new ArrayList<>();
+        if (StringUtils.isNotEmpty(customerAdminString)) {
+            customerAdminString = customerAdminString.replaceAll("\n", "");
+            customerProvider.deleteAllEnterpriseCustomerAdminRecord(enterpriseCustomer.getId());
+
+            List<CustomerAdminRecord> records = customerProvider.listEnterpriseCustomerAdminRecords(enterpriseCustomer.getId(), null);
+            if(records!=null && records.size()>0){
+                for (CustomerAdminRecord record: records) {
+                    DeleteOrganizationAdminCommand command = new DeleteOrganizationAdminCommand();
+                    command.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                    command.setCommunityId(enterpriseCustomer.getCommunityId());
+                    command.setOwnerId(enterpriseCustomer.getOwnerId());
+                    command.setOwnerType(enterpriseCustomer.getOwnerType());
+                    command.setContactToken(record.getContactToken());
+                    rolePrivilegeService.deleteOrganizationAdministrators(command);
+                }
+            }
+            String[] adminStrings = customerAdminString.split(",");
+            if (adminStrings.length > 0) {
+                for (int i = 0; i < adminStrings.length; i++) {
+                    String[] adminInfo = adminStrings[i].split("\\(");
+                    String contactName = adminInfo[0];
+                    String contactToken = adminStrings[i].substring(adminStrings[i].indexOf("(")+1,adminStrings[i].indexOf(")"));
+                    CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
+                    createOrganizationAdminCommand.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                    createOrganizationAdminCommand.setContactName(contactName);
+                    createOrganizationAdminCommand.setContactToken(contactToken);
+                    createOrganizationAdminCommand.setNamespaceId(enterpriseCustomer.getNamespaceId());
+                    cmds.add(createOrganizationAdminCommand);
+                }
+                //修改企业是否设置管理员
+                EnterpriseCustomer customer = customerProvider.findById(enterpriseCustomer.getId());
+                customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+                customerProvider.updateEnterpriseCustomer(customer);
+                customerSearcher.feedDoc(customer);
+            }
+        }
+        if (cmds.size() > 0) {
+            cmds.forEach((c) -> {
+               try {
+                   //增加record
+                   UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), c.getContactToken());
+                   String contactType = null;
+                   if (null != userIdentifier) {
+                       contactType = OrganizationMemberTargetType.USER.getCode();
+                   } else {
+                       contactType = OrganizationMemberTargetType.UNTRACK.getCode();
+                   }
+                   customerProvider.createEnterpriseCustomerAdminRecord(enterpriseCustomer.getId(), c.getContactName(), contactType,c.getContactToken(),c.getNamespaceId());
+                   if(c.getOrganizationId()!=null && c.getOrganizationId()!=0){
+                       rolePrivilegeService.createOrganizationAdmin(c);
+                   }
+               }catch (Exception e ){
+                   LOGGER.error("create organization admin erro :{}", e);
+               }
+            });
+        }
+    }
+
+    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+        checkModuleManageCommand.setModuleId(QualityConstant.CUSTOMER_MODULE);
+        checkModuleManageCommand.setOrganizationId(ownerId);
+        checkModuleManageCommand.setOwnerType(ownerType);
+        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+        }
+        return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
     }
 
     private String setToObj(String fieldName, Object dto,Object value, SimpleDateFormat sdf) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {

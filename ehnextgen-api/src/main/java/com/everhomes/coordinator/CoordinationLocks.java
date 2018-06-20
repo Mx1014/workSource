@@ -20,34 +20,35 @@ public enum CoordinationLocks {
     SCHEDULE_QUALITY_STAT("quality.task.stat"),
     CREATE_QUALITY_TASK("quality.task.create"),
     PAYMENT_CARD("payment.card"),
-	UPDATE_NEWS("news.update"),
-	SCHEDULE_EQUIPMENT_TASK("equipment.task.schedule"),
+    UPDATE_NEWS("news.update"),
+    SCHEDULE_EQUIPMENT_TASK("equipment.task.schedule"),
     CREATE_EQUIPMENT_TASK("equipment.task.create"),
-	WANKE_LOGIN("wanke.login"),
-    
+    WANKE_LOGIN("wanke.login"),
+
     UPDATE_ACTIVITY("activity.update"),
     UPDATE_ACTIVITY_ROSTER("activity.update.roster"),
     CREATE_NEW_ORG("org.create"),
-	UPDATE_APPROVAL_CATEGORY("update_approval_category"),
-	UPDATE_APPROVAL_RULE("update_approval_rule"),
-	UPDATE_APPROVAL_FLOW("update_approval_flow"),
-	UPDATE_APPROVAL_REQUEST("update_approval_request"),
+    UPDATE_APPROVAL_CATEGORY("update_approval_category"),
+    UPDATE_APPROVAL_RULE("update_approval_rule"),
+    UPDATE_APPROVAL_FLOW("update_approval_flow"),
+    UPDATE_APPROVAL_REQUEST("update_approval_request"),
 
-	UPDATE_APPROVAL_TARGET_RULE("update_approval_target_rule"),
+    UPDATE_APPROVAL_TARGET_RULE("update_approval_target_rule"),
     STAT_SETTLEMENT("stat.settlement"),
     STAT_TERMINAL("stat.terminal"),
 
     UPDATE_ORGANIZATION_OWNER("organization.owner.update"),
     UPDATE_ORGANIZATION_OWNER_CAR("organization.owner.car.update"),
-    
+
     WARNING_ACTIVITY_SCHEDULE("warning.activity.schedule"),
     CONTRACT_SCHEDULE("contract.schedule"),
 
     PMTASK_STATISTICS("pmtask.statistics"),
     PMTASK_TARGET_STATISTICS("pmtask.target.statistics"),
-    
+
     PARKING_STATISTICS("parking.statistics"),
     PARKING_UPDATE_ORDER_STATUS("parking.update.order.status"),
+    PARKING_GENERATE_ORDER_NO("parking.generate.order.no"),
 
     PARKING_CLEARANCE_LOG("parking.clearance.log"),
     PARKING_CLEARANCE_LOG_STATISTICS("parking.clearance.log.statistics"),
@@ -62,14 +63,14 @@ public enum CoordinationLocks {
     UPDATE_ASSET_BILL_TEMPLATE("assetBillTemplate.update"),
 
     UPDATE_QUESTIONNAIRE("update.questionnaire"),
-	UPDATE_QUESTIONNAIRE_OPTION("update.questionnaire.option"),
+    UPDATE_QUESTIONNAIRE_OPTION("update.questionnaire.option"),
 
     WARNING_EQUIPMENT_TASK("warning.equipment.task"),
     WARNING_QUALITY_TASK("warning.quality.task"),
 
     OS_OBJECT("os.object"),
     ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),
- 
+
     UPDATE_EXPRESS_ORDER("update.express.order"),
 
     USER_NOTIFICATION_SETTING("user.notification.setting"),
@@ -88,8 +89,8 @@ public enum CoordinationLocks {
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
-	SALARY_GROUP_LOCK("salary.group"), 
-	SALARY_NEWMONTH_LOCK("salary.newmonth"), 
+    SALARY_GROUP_LOCK("salary.group"),
+    SALARY_NEWMONTH_LOCK("salary.newmonth"),
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
@@ -97,9 +98,11 @@ public enum CoordinationLocks {
 
     BILL_STATUS_UPDATE("bill.status.update"),
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
+    SYNC_THIRD_CONTRACT("sync.third.contract"),
+    SYNC_THIRD_CUSTOMER("sync.third.customer"),
 
     TRACKING_PLAN_WARNING_SCHEDULE("tracking.plan.warning.schedule"),
- 
+
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
     ORGANIZATION_ORDER_LOCK("organization.order.lock"),
 
@@ -110,11 +113,11 @@ public enum CoordinationLocks {
     CREATE_ENERGY_TASK("energy.task.create"),
     SCHEDULE_ENERGY_TASK("energy.task.schedule"),
 
-	ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
+    ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
 
-	POINT_UPDATE_RULE_CATEGORY_SERVER_ID("point.update.ruleCategory.serverId"),
-	POINT_UPDATE_POINT_SCORE("point.update.pointScore"),
-	POINT_CATEGORY_SCHEDULE("point.category.schedule"),
+    POINT_UPDATE_RULE_CATEGORY_SERVER_ID("point.update.ruleCategory.serverId"),
+    POINT_UPDATE_POINT_SCORE("point.update.pointScore"),
+    POINT_CATEGORY_SCHEDULE("point.category.schedule"),
 
     SYNC_CONTRACT("sync.contract"),
     FORUM_SETTING("forum.setting"),
@@ -128,18 +131,22 @@ public enum CoordinationLocks {
     REMIND_DEMO_ADD("remind_demo_add"),
     REMIND_CATEGORY_SORTING("remind_category_sorting"),
     REMIND_SORTING("remind_sorting"),
-    REMIND_SCHEDULED("remind_scheduled");
+    REMIND_SCHEDULED("remind_scheduled"),
+
+    ARCHIVES_CONFIGURATION("archives_configuration"),
+    ARCHIVES_NOTIFICATION("archives_notification");
+
 
     private String code;
 
     CoordinationLocks(String code) {
         this.code = code;
     }
-    
+
     public String getCode() {
         return this.code;
     }
-    
+
     public static CoordinationLocks fromCode(String code) {
         for(CoordinationLocks coordinationLock:CoordinationLocks.values()){
             if(coordinationLock.code.equalsIgnoreCase(code)){

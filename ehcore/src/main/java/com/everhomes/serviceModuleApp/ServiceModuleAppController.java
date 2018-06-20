@@ -4,7 +4,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
 import com.everhomes.rest.servicehotline.*;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
 import com.everhomes.techpark.servicehotline.HotlineService;
@@ -36,6 +38,36 @@ public class ServiceModuleAppController extends ControllerBase {
 	public RestResponse listServiceModuleAppsForBanner(ListServiceModuleAppsForBannerCommand cmd) {
 		ListServiceModuleAppsForBannerResponse res = serviceModuleAppService.listServiceModuleAppsForBanner(cmd);
 		RestResponse response =  new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * to map an application to another. The relation is mutual, and for one of the two applications,
+	 * it can only have one mate from the same module to prevent a bigamy
+	 * @param cmd
+	 * @return OK
+	 */
+	@RequestMapping("createAnAppMapping")
+	@RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
+	public RestResponse createAnAppMapping(CreateAnAppMappingCommand cmd) {
+		serviceModuleAppService.createAnAppMapping(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * forcely update a mapping relation to be allocated again
+	 * @param cmd
+	 * @return OK
+	 */
+	@RequestMapping("updateAnAppMapping")
+	@RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
+	public RestResponse updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
+		serviceModuleAppService.updateAnAppMapping(cmd);
+		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

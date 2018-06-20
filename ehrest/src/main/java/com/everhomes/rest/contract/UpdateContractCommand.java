@@ -59,6 +59,7 @@ import java.util.List;
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
  *     <li>categoryId: 合同类型多入口</li>
+ *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/5.
  */
@@ -111,8 +112,17 @@ public class UpdateContractCommand {
     private String layout;
     private String settled;
     private Long categoryId;
+    private Byte contractApplicationScene = 0;
 
-    @ItemType(BuildingApartmentDTO.class)
+    public Byte getContractApplicationScene() {
+		return contractApplicationScene;
+	}
+
+	public void setContractApplicationScene(Byte contractApplicationScene) {
+		this.contractApplicationScene = contractApplicationScene;
+	}
+
+	@ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
 
     @ItemType(ContractChargingItemDTO.class)

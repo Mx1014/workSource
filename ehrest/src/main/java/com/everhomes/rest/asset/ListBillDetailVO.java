@@ -3,25 +3,75 @@ package com.everhomes.rest.asset;
 
 import com.everhomes.discover.ItemType;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * Created by Wentian Wang on 2017/8/18.
  */
-
+/**
+ *<ul>
+ * <li>billId:账单id</li>
+ * <li>dateStr:账期</li>
+ * <li>dateStrBegin:账单开始时间，参与排序</li>
+ * <li>dateStrEnd:账单结束时间，参与排序</li>
+ * <li>contractNum:合同编号</li>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>apartmentName: 门牌名称</li>
+ * <li>addresses:组装的多个楼栋门牌，如：金融基地/1205,金融基地/1206</li>
+ * <li>noticeTel:催缴电话</li>
+ * <li>customerTel:客户手机号</li>
+ * <li>targetName:客户名称</li>
+ * <li>targetId:客户id</li>
+ * <li>targetType:客户type</li>
+ * <li>amountReceivable:应收(元)</li>
+ * <li>amountReceived:实收(元)</li>
+ * <li>amoutExemption:减免(元)</li>
+ * <li>amountSupplement:增收(元)</li>
+ * <li>billGroupDTO:账单组，包括减免项和收费项目的集合，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
+ * <li>billGroupName:账单组名称</li>
+ *</ul>
+ */
 public class ListBillDetailVO {
     private Long billId;
     private Long billGroupId;
+    private String billGroupName;
     private String dateStr;
+    private String dateStrBegin;
+    private String dateStrEnd;
     private String noticeTel;
+    private String customerTel;
     private String targetName;
     private String targetType;
     private String buildingName;
     private String apartmentName;
+    private String addresses;
     private Long targetId;
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
     private String contractNum;
+    private String invoiceNum;
+    private Byte billStatus;
+    
+    public Byte getBillStatus() {
+		return billStatus;
+	}
+
+	public void setBillStatus(Byte billStatus) {
+		this.billStatus = billStatus;
+	}
+
+    private BigDecimal amountReceivable;
+    private BigDecimal amountReceived;
+    private BigDecimal amoutExemption;
+    private BigDecimal amountSupplement;
+    
+    public String getInvoiceNum() {
+        return invoiceNum;
+    }
+
+    public void setInvoiceNum(String invoiceNum) {
+        this.invoiceNum = invoiceNum;
+    }
 
     public String getDateStr() {
         return dateStr;
@@ -112,4 +162,76 @@ public class ListBillDetailVO {
     public void setBillGroupDTO(BillGroupDTO billGroupDTO) {
         this.billGroupDTO = billGroupDTO;
     }
+
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+
+	public BigDecimal getAmountReceivable() {
+		return amountReceivable;
+	}
+
+	public void setAmountReceivable(BigDecimal amountReceivable) {
+		this.amountReceivable = amountReceivable;
+	}
+
+	public BigDecimal getAmountReceived() {
+		return amountReceived;
+	}
+
+	public void setAmountReceived(BigDecimal amountReceived) {
+		this.amountReceived = amountReceived;
+	}
+
+	public BigDecimal getAmoutExemption() {
+		return amoutExemption;
+	}
+
+	public void setAmoutExemption(BigDecimal amoutExemption) {
+		this.amoutExemption = amoutExemption;
+	}
+
+	public BigDecimal getAmountSupplement() {
+		return amountSupplement;
+	}
+
+	public void setAmountSupplement(BigDecimal amountSupplement) {
+		this.amountSupplement = amountSupplement;
+	}
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
+	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
+	}
+
+	public String getCustomerTel() {
+		return customerTel;
+	}
+
+	public void setCustomerTel(String customerTel) {
+		this.customerTel = customerTel;
+	}
 }

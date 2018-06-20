@@ -114,7 +114,7 @@ public class ParkingController extends ControllerBase {
         
     	ParkingTempFeeDTO dto = parkingService.getParkingTempFee(cmd);
         RestResponse response = new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorCode(ErrorCodes.SUCCESS);  
         response.setErrorDescription("OK");
         return response;
     }
@@ -871,6 +871,7 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("raiseParkingSpaceLockForWeb")
     @RestReturn(value=String.class)
+    @RequireAuthentication(false)
     public RestResponse raiseParkingSpaceLockForWeb(RaiseParkingSpaceLockCommand cmd) {
 
         parkingService.raiseParkingSpaceLockForWeb(cmd);
@@ -886,6 +887,7 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("downParkingSpaceLockForWeb")
     @RestReturn(value=String.class)
+    @RequireAuthentication(false)
     public RestResponse downParkingSpaceLockForWeb(DownParkingSpaceLockCommand cmd) {
 
         parkingService.downParkingSpaceLockForWeb(cmd);

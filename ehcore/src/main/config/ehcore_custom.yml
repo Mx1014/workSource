@@ -5,8 +5,8 @@ logging.path: ./
 logging.file: ehcore.log
 logging.level.: INFO
 
-spring.view.prefix: /WEB-INF/jsp/
-spring.view.suffix: .jsp
+#spring.view.prefix: /WEB-INF/jsp/
+#spring.view.suffix: .jsp
 
 #
 # Server configuration
@@ -16,7 +16,7 @@ spring.view.suffix: .jsp
 #server.port:
 #server.sessionTimeout:
 
-#server.port: 8443
+#server.port: 8080
 #server.ssl.key-store:keystore.p12
 #server.ssl.key-store-password: password
 #server.ssl.keyStoreType: PKCS12
@@ -100,7 +100,7 @@ db.driver: com.mysql.jdbc.Driver
 db.master: jdbc:mysql://ehcore:ehcore@db-master:13311/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
-db.jta: true
+db.jta: false
 db.tx.timeout: 600
         
 #
@@ -139,3 +139,10 @@ ems.sys.account: A1234567890Z
 ems.sys.password: e10adc3949ba59abbe56e057f20f883e
 
 schedule.running.flag: 1
+
+
+# current core id
+core.server.id: 1
+# core server list
+core.server.list: 1,2
+

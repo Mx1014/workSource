@@ -15,6 +15,11 @@ import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractChargingChange;
 import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
+
+import com.everhomes.contract.ContractCategory;
+
+import com.everhomes.asset.AssetErrorCodes;
+
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.customer.CustomerEvent;
@@ -37,6 +42,7 @@ import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.EhContractCategoriesDao;
@@ -370,7 +376,7 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status) {
+	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId));
@@ -383,6 +389,9 @@ public class ContractProviderImpl implements ContractProvider {
 			query.addConditions(Tables.EH_CONTRACTS.STATUS.eq(status));
 		} else {
 			query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
+		}
+		if(categoryId != null) {
+			query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
 		}
 
 		List<Contract> result = new ArrayList<>();
@@ -402,8 +411,12 @@ public class ContractProviderImpl implements ContractProvider {
 				ContractStatus.ACTIVE.getCode(), ContractStatus.EXPIRING.getCode(), ContractStatus.APPROVE_QUALITIED.getCode()));
 
 		Map<Long, List<Contract>> result = new HashMap<>();
-		query.fetch().map((r) -> {
-			List<Contract> contracts = result.get(r.getCommunityId());
+		query.fetch().forEach((r) -> {
+            Long communityId = r.getCommunityId();
+            if(communityId == null){
+                return;
+            }
+            List<Contract> contracts = result.get(communityId);
 			if(contracts == null) {
 				contracts = new ArrayList<>();
 				contracts.add(ConvertHelper.convert(r, Contract.class));
@@ -412,7 +425,6 @@ public class ContractProviderImpl implements ContractProvider {
 				contracts.add(ConvertHelper.convert(r, Contract.class));
 				result.put(r.getCommunityId(), contracts);
 			}
-			return null;
 		});
 
 		return result;
@@ -710,7 +722,7 @@ public class ContractProviderImpl implements ContractProvider {
 
 		return result;
 	}
-	
+
 	@Override
 	public void createContractCategory(ContractCategory contractCategory) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractCategories.class));
@@ -1049,6 +1061,26 @@ public class ContractProviderImpl implements ContractProvider {
 		return buffer.toString().length() > 0 ? buffer.toString().substring(0,buffer.toString().length() -1) : buffer.toString();
 	}
 	
+
+	@Override
+	public boolean isNormal(Long cid) {
+		List<Byte> cids = getReadOnlyContext().select(Tables.EH_CONTRACTS.STATUS)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.ID.eq(cid))
+				.fetch(Tables.EH_CONTRACTS.STATUS);
+		if(cids == null || cids.size() < 1){
+			return false;
+		}
+		if(cids.size() == 1){
+            Byte aByte = cids.get(0);
+            if(aByte != 7 && aByte != 8 && aByte != 9 && aByte != 10){
+                return true;
+            }
+        }
+		return false;
+	}
+
+
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -5,11 +5,76 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.energy.*;
-import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
+import com.everhomes.rest.energy.BatchReadEnergyMeterCommand;
+import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
+import com.everhomes.rest.energy.CalculateTaskFeeByTaskIdCommand;
+import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterDefaultSettingCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.CreateEnergyTaskCommand;
+import com.everhomes.rest.energy.DelelteEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterFormulaCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
+import com.everhomes.rest.energy.DeleteEnergyPlanCommand;
+import com.everhomes.rest.energy.EnergyCommunityYoyStatDTO;
+import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
+import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
+import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
+import com.everhomes.rest.energy.EnergyMeterDTO;
+import com.everhomes.rest.energy.EnergyMeterDefaultSettingDTO;
+import com.everhomes.rest.energy.EnergyMeterDefaultSettingTemplateDTO;
+import com.everhomes.rest.energy.EnergyMeterFormulaDTO;
+import com.everhomes.rest.energy.EnergyMeterPriceConfigDTO;
+import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
+import com.everhomes.rest.energy.EnergyMeterSettingLogDTO;
+import com.everhomes.rest.energy.EnergyPlanDTO;
+import com.everhomes.rest.energy.EnergyStatByYearDTO;
+import com.everhomes.rest.energy.EnergyStatCommand;
+import com.everhomes.rest.energy.EnergyStatDTO;
+import com.everhomes.rest.energy.ExportEnergyMeterQRCodeCommand;
+import com.everhomes.rest.energy.FindEnergyMeterByQRCodeCommand;
+import com.everhomes.rest.energy.FindEnergyPlanDetailsCommand;
+import com.everhomes.rest.energy.GetEnergyMeterCommand;
+import com.everhomes.rest.energy.GetEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.GetEnergyMeterQRCodeCommand;
+import com.everhomes.rest.energy.ImportEnergyMeterCommand;
+import com.everhomes.rest.energy.ImportTasksByEnergyPlanCommand;
+import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
+import com.everhomes.rest.energy.ListEnergyMeterCategoriesCommand;
+import com.everhomes.rest.energy.ListEnergyMeterChangeLogsCommand;
+import com.everhomes.rest.energy.ListEnergyMeterFormulasCommand;
+import com.everhomes.rest.energy.ListEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.ListEnergyMeterSettingLogsCommand;
+import com.everhomes.rest.energy.ListEnergyPlanMetersCommand;
+import com.everhomes.rest.energy.ListEnergyPlanMetersResponse;
+import com.everhomes.rest.energy.ListUserEnergyPlanTasksCommand;
+import com.everhomes.rest.energy.ListUserEnergyPlanTasksResponse;
+import com.everhomes.rest.energy.ReadEnergyMeterCommand;
+import com.everhomes.rest.energy.ReadTaskMeterCommand;
+import com.everhomes.rest.energy.ReadTaskMeterOfflineCommand;
+import com.everhomes.rest.energy.ReadTaskMeterOfflineResponse;
+import com.everhomes.rest.energy.SearchEnergyMeterCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
+import com.everhomes.rest.energy.SearchEnergyMeterResponse;
+import com.everhomes.rest.energy.SearchEnergyPlansCommand;
+import com.everhomes.rest.energy.SearchEnergyPlansResponse;
+import com.everhomes.rest.energy.SearchTasksByEnergyPlanCommand;
+import com.everhomes.rest.energy.SearchTasksByEnergyPlanResponse;
+import com.everhomes.rest.energy.SetEnergyPlanMeterOrderCommand;
+import com.everhomes.rest.energy.SyncOfflineDataCommand;
+import com.everhomes.rest.energy.SyncOfflineDataResponse;
+import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
+import com.everhomes.rest.energy.UpdateEnergyPlanCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.search.EnergyMeterTaskSearcher;
@@ -51,19 +116,6 @@ public class EnergyConsumptionController extends ControllerBase {
     @Autowired
     private EnergyTaskScheduleJob energyTaskScheduleJob;
 
-    /**
-     * <b>URL: /energy/listAuthorizationCommunityByUser</b>
-     * <p>授权人员 管理小区列表</p>
-     */
-//    @RequestMapping("listAuthorizationCommunityByUser")
-//    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
-//    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-//        ListAuthorizationCommunityByUserResponse resp = energyConsumptionService.listAuthorizationCommunityByUser(cmd);
-//        RestResponse response = new RestResponse(resp);
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
 
     /**
      * <p>新建表记(水表, 电表等)</p>
@@ -755,6 +807,24 @@ public class EnergyConsumptionController extends ControllerBase {
         return response(energyConsumptionService.syncOfflineData(cmd));
     }
 
-
-
+    /**
+     * <p>测试远程读数</p>
+     * <b>URL: /energy/simulatingAutoReadMeters</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("simulatingAutoReadMeters")
+    public RestResponse simulatingAutoReadMeters() {
+        energyConsumptionService.meterAutoReading(true);
+        return success();
+    }
+    /**
+     * <p>表记补充到月底时间差工单</p>
+     * <b>URL: /energy/addMeterPeriodTaskById</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("addMeterPeriodTaskById")
+    public RestResponse addMeterPeriodTaskById(UpdateEnergyMeterCommand cmd) {
+        energyConsumptionService.addMeterPeriodTaskById(cmd.getMeterId());
+        return success();
+    }
 }

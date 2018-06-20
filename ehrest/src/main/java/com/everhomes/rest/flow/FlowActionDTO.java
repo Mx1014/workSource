@@ -1,24 +1,48 @@
 package com.everhomes.rest.flow;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.util.List;
 import java.sql.Timestamp;
+import java.util.List;
 
-import com.everhomes.discover.ItemType;
-
+/**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>status: status</li>
+ *     <li>renderText: renderText</li>
+ *     <li>flowMainId: flowMainId</li>
+ *     <li>stepType: stepType</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>actionType: actionType</li>
+ *     <li>createTime: createTime</li>
+ *     <li>flowVersion: flowVersion</li>
+ *     <li>belongTo: belongTo</li>
+ *     <li>belongEntity: belongEntity</li>
+ *     <li>reminderAfterMinute: reminderAfterMinute</li>
+ *     <li>reminderTickMinute: reminderTickMinute</li>
+ *     <li>trackerProcessor: trackerProcessor</li>
+ *     <li>trackerApplier: trackerApplier</li>
+ *     <li>allowTimeoutAction: allowTimeoutAction</li>
+ *     <li>templateId: templateId</li>
+ *     <li>enabled: 开关 {@link com.everhomes.rest.flow.FlowActionStatus}</li>
+ *     <li>processors: processors {@link com.everhomes.rest.flow.FlowUserSelectionDTO}</li>
+ *     <li>script: 脚本 {@link com.everhomes.rest.flow.FlowScriptDTO}</li>
+ * </ul>
+ */
 public class FlowActionDTO {
-	private Long     id;
-    private Byte     status;
-    private String     renderText;
-    private Long     flowMainId;
-    private String     stepType;
-    private Integer     namespaceId;
-    private String     actionType;
-    private Timestamp     createTime;
-    private Integer     flowVersion;
-    private Long     belongTo;
-    private String     belongEntity;
+
+    private Long id;
+    private Byte status;
+    private String renderText;
+    private Long flowMainId;
+    private String stepType;
+    private Integer namespaceId;
+    private String actionType;
+    private Timestamp createTime;
+    private Integer flowVersion;
+    private Long belongTo;
+    private String belongEntity;
     private Long reminderAfterMinute;
     private Long reminderTickMinute;
     private Long trackerProcessor;
@@ -26,163 +50,191 @@ public class FlowActionDTO {
     private Long allowTimeoutAction;
     private Long templateId;
     private Byte enabled;
-    
-	@ItemType(FlowUserSelectionDTO.class)
-	List<FlowUserSelectionDTO> processors;
+    private Long scriptId;
+    private String scriptType;
+
+    @ItemType(FlowUserSelectionDTO.class)
+    private List<FlowUserSelectionDTO> processors;
+
+    private FlowScriptDTO script;
 
     public Byte getStatus() {
-		return status;
-	}
+        return status;
+    }
 
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
-	public String getRenderText() {
-		return renderText;
-	}
+    public String getRenderText() {
+        return renderText;
+    }
 
-	public void setRenderText(String renderText) {
-		this.renderText = renderText;
-	}
+    public void setRenderText(String renderText) {
+        this.renderText = renderText;
+    }
 
-	public Long getFlowMainId() {
-		return flowMainId;
-	}
+    public Long getFlowMainId() {
+        return flowMainId;
+    }
 
-	public void setFlowMainId(Long flowMainId) {
-		this.flowMainId = flowMainId;
-	}
+    public void setFlowMainId(Long flowMainId) {
+        this.flowMainId = flowMainId;
+    }
 
-	public String getStepType() {
-		return stepType;
-	}
+    public String getStepType() {
+        return stepType;
+    }
 
-	public void setStepType(String stepType) {
-		this.stepType = stepType;
-	}
+    public void setStepType(String stepType) {
+        this.stepType = stepType;
+    }
 
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
-	public String getActionType() {
-		return actionType;
-	}
+    public String getActionType() {
+        return actionType;
+    }
 
-	public void setActionType(String actionType) {
-		this.actionType = actionType;
-	}
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
 
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
 
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
 
-	public Integer getFlowVersion() {
-		return flowVersion;
-	}
+    public Integer getFlowVersion() {
+        return flowVersion;
+    }
 
-	public void setFlowVersion(Integer flowVersion) {
-		this.flowVersion = flowVersion;
-	}
+    public void setFlowVersion(Integer flowVersion) {
+        this.flowVersion = flowVersion;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Long getBelongTo() {
-		return belongTo;
-	}
+    public Long getBelongTo() {
+        return belongTo;
+    }
 
-	public void setBelongTo(Long belongTo) {
-		this.belongTo = belongTo;
-	}
+    public void setBelongTo(Long belongTo) {
+        this.belongTo = belongTo;
+    }
 
-	public String getBelongEntity() {
-		return belongEntity;
-	}
+    public String getBelongEntity() {
+        return belongEntity;
+    }
 
-	public void setBelongEntity(String belongEntity) {
-		this.belongEntity = belongEntity;
-	}
+    public void setBelongEntity(String belongEntity) {
+        this.belongEntity = belongEntity;
+    }
 
-	public Long getReminderAfterMinute() {
-		return reminderAfterMinute;
-	}
+    public Long getReminderAfterMinute() {
+        return reminderAfterMinute;
+    }
 
-	public void setReminderAfterMinute(Long reminderAfterMinute) {
-		this.reminderAfterMinute = reminderAfterMinute;
-	}
+    public void setReminderAfterMinute(Long reminderAfterMinute) {
+        this.reminderAfterMinute = reminderAfterMinute;
+    }
 
-	public Long getReminderTickMinute() {
-		return reminderTickMinute;
-	}
+    public Long getReminderTickMinute() {
+        return reminderTickMinute;
+    }
 
-	public void setReminderTickMinute(Long reminderTickMinute) {
-		this.reminderTickMinute = reminderTickMinute;
-	}
+    public void setReminderTickMinute(Long reminderTickMinute) {
+        this.reminderTickMinute = reminderTickMinute;
+    }
 
-	public Long getTrackerProcessor() {
-		return trackerProcessor;
-	}
+    public Long getTrackerProcessor() {
+        return trackerProcessor;
+    }
 
-	public void setTrackerProcessor(Long trackerProcessor) {
-		this.trackerProcessor = trackerProcessor;
-	}
+    public void setTrackerProcessor(Long trackerProcessor) {
+        this.trackerProcessor = trackerProcessor;
+    }
 
-	public Long getTrackerApplier() {
-		return trackerApplier;
-	}
+    public Long getTrackerApplier() {
+        return trackerApplier;
+    }
 
-	public void setTrackerApplier(Long trackerApplier) {
-		this.trackerApplier = trackerApplier;
-	}
+    public void setTrackerApplier(Long trackerApplier) {
+        this.trackerApplier = trackerApplier;
+    }
 
-	public List<FlowUserSelectionDTO> getProcessors() {
-		return processors;
-	}
+    public List<FlowUserSelectionDTO> getProcessors() {
+        return processors;
+    }
 
-	public void setProcessors(List<FlowUserSelectionDTO> processors) {
-		this.processors = processors;
-	}
+    public void setProcessors(List<FlowUserSelectionDTO> processors) {
+        this.processors = processors;
+    }
 
-	public Long getAllowTimeoutAction() {
-		return allowTimeoutAction;
-	}
+    public Long getAllowTimeoutAction() {
+        return allowTimeoutAction;
+    }
 
-	public void setAllowTimeoutAction(Long allowTimeoutAction) {
-		this.allowTimeoutAction = allowTimeoutAction;
-	}
+    public void setAllowTimeoutAction(Long allowTimeoutAction) {
+        this.allowTimeoutAction = allowTimeoutAction;
+    }
 
-	public Byte getEnabled() {
-		return enabled;
-	}
+    public Byte getEnabled() {
+        return enabled;
+    }
 
-	public void setEnabled(Byte enabled) {
-		this.enabled = enabled;
-	}
+    public void setEnabled(Byte enabled) {
+        this.enabled = enabled;
+    }
 
-	public Long getTemplateId() {
-		return templateId;
-	}
+    public Long getTemplateId() {
+        return templateId;
+    }
 
-	public void setTemplateId(Long templateId) {
-		this.templateId = templateId;
-	}
+    public void setTemplateId(Long templateId) {
+        this.templateId = templateId;
+    }
 
-	@Override
+    public FlowScriptDTO getScript() {
+        return script;
+    }
+
+    public void setScript(FlowScriptDTO script) {
+        this.script = script;
+    }
+
+    public Long getScriptId() {
+        return scriptId;
+    }
+
+    public void setScriptId(Long scriptId) {
+        this.scriptId = scriptId;
+    }
+
+    public String getScriptType() {
+        return scriptType;
+    }
+
+    public void setScriptType(String scriptType) {
+        this.scriptType = scriptType;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
