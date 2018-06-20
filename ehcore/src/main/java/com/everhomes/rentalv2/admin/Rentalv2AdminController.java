@@ -950,4 +950,20 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/admin/getHolidayCloseDates</b>
+	 * <p>
+	 * 获取双休日和节假日关闭日期
+	 * </p>
+	 */
+	@RequestMapping("queryRentalStatistics")
+	@RestReturn(value = Long.class,collection = true)
+	public RestResponse getHolidayCloseDates( GetHolidayCloseDatesCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getHolidayCloseDates(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

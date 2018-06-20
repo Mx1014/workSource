@@ -2489,4 +2489,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return step.fetch().map((r) -> ConvertHelper.convert(r, RentalOrder.class));
 	}
+
+	@Override
+	public String getHolidayCloseDate(Byte holidayType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_HOLIDAY);
+		Condition condition = Tables.EH_RENTALV2_HOLIDAY.HOLIDAY_TYPE.eq(holidayType);
+		Record record = step.where(condition).fetchOne();
+		if (record == null)
+			return  null;
+		return (String)record.map(r -> r.getValue("closeDate"));
+	}
 }

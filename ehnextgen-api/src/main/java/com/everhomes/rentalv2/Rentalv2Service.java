@@ -292,6 +292,8 @@ public interface Rentalv2Service {
 
 	QueryOrgRentalStatisticsResponse queryOrgRentalStatistics (QueryRentalStatisticsCommand cmd);
 
+	List<Long> getHolidayCloseDates(GetHolidayCloseDatesCommand cmd);
+
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
 	void test();

@@ -216,7 +216,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 				"user", RentalNotificationTemplateCode.locale, ""));
 		User user = this.userProvider.findUserById(order.getRentalUid());
-		if (null != user)
+		if (order.getUserName() != null)
+			e.setValue(order.getUserName());
+		else if (null != user)
 			e.setValue(user.getNickName());
 		else {
 			LOGGER.debug("user is null...userId = " + order.getRentalUid());
@@ -237,20 +239,19 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 		entities.add(e);
 
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
-				"organization", RentalNotificationTemplateCode.locale, ""));
-
 		Long orgId = order.getUserEnterpriseId();
-		e.setValue("无");
 		if (null != orgId) {
-			Organization org = organizationProvider.findOrganizationById(orgId);
-			if (org!=null)
-				e.setValue(org.getName());
-		}
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"organization", RentalNotificationTemplateCode.locale, ""));
 
-		entities.add(e);
+			e.setValue("无");
+			Organization org = organizationProvider.findOrganizationById(orgId);
+			if (org != null)
+				e.setValue(org.getName());
+			entities.add(e);
+		}
 
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -300,7 +301,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 					"count", RentalNotificationTemplateCode.locale, ""));
-			e.setValue(order.getRentalCount() + "");
+			e.setValue(order.getRentalCount().intValue() + "");
 			entities.add(e);
 //		}
 
@@ -308,7 +309,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 				"price", RentalNotificationTemplateCode.locale, ""));
-		e.setValue(order.getPayTotalMoney().toString());
+		e.setValue(order.getPayTotalMoney().toString()+"元");
 		entities.add(e);
 
 		List<RentalConfigAttachment> recommendUsers = rentalv2Provider

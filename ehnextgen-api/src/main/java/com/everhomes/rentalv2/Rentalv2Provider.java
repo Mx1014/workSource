@@ -231,5 +231,5 @@ public interface Rentalv2Provider {
 
 	List<RentalStatisticsDTO> listRentalBillValidTimeByOrgId(String resourceType, Long resourceTypeId,Long communityId,
 															 Long startTime, Long endTime,Integer order);
-
+	String getHolidayCloseDate (Byte holidayType);
 }

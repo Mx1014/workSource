@@ -156,6 +156,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private ThreadLocal<SimpleDateFormat> dateSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd"));
 	private ThreadLocal<SimpleDateFormat> datetimeSF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
+	//双休日和法定假日的关闭日期集合
+	private List<Long> normalWeekend = new ArrayList<>();
+	private List<Long> legalHoliday = new ArrayList<>();
+
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = ThreadLocal.withInitial(ArrayList::new);
 	/**seqNum : 计数-申请id用 */
@@ -262,7 +266,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	//@PostConstruct
 	public void setup() {
 		workerPoolFactory.getWorkerPool().addQueue(queueName);
-
+		String closeDays = rentalv2Provider.getHolidayCloseDate(RentalHolidayType.NORMAL_WEEKEND.getCode());
+		if (closeDays != null){
+			String [] day = closeDays.split(",");
+			normalWeekend = Arrays.stream(day).map(r->Long.valueOf(r)).collect(Collectors.toList());
+		}
+		closeDays = rentalv2Provider.getHolidayCloseDate(RentalHolidayType.LEGAL_HOLIDAY.getCode());
+		if (closeDays != null){
+			String [] day = closeDays.split(",");
+			legalHoliday = Arrays.stream(day).map(r->Long.valueOf(r)).collect(Collectors.toList());
+		}
 	}
 	
     @Override
@@ -8750,5 +8763,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					cmd.getEndDate(),null,r.getEnterpriseId()));
 			r.setUsedTime(r.getUsedTime()==null?0L:r.getUsedTime());
 		});
+	}
+
+	@Override
+	public List<Long> getHolidayCloseDates(GetHolidayCloseDatesCommand cmd) {
+		if (cmd.getHolidayType().equals(RentalHolidayType.NORMAL_WEEKEND.getCode()))
+			return normalWeekend;
+		else
+			return legalHoliday;
 	}
 }
