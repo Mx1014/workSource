@@ -1733,7 +1733,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		setRentalOrderReminderTime(cmd.getRules(), rs, rentalBill);
 		//设置预约单元格数量
 		rentalBill.setRentalCount(cmd.getRules().stream().filter(r -> null != r.getRentalCount())
-				.mapToDouble(RentalBillRuleDTO::getRentalCount).sum());
+				.mapToDouble(RentalBillRuleDTO::getRentalCount).findFirst().getAsDouble());
 
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 		rentalBill.setOrderNo(String.valueOf(orderNo));
@@ -8327,7 +8327,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			BigDecimal totalAmount = bill.getPayTotalMoney().add(response.getAmount());//计算价格
 			//bill.setResourceTotalMoney(totalAmount);
 			bill.setPayTotalMoney(totalAmount);
-			bill.setRentalCount(cmd.getCellCount());
 		}else{
 			RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
 			processCells(rs, bill.getRentalType());
@@ -8401,7 +8400,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		List<RentalBillRuleDTO> totalRules = getBillRules(bill);
-
+		
 		totalRules.addAll(rules);
 		//设置只用详情
 		setUseDetailStr(totalRules, rs, bill);
@@ -8409,8 +8408,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		bill.setOldEndTime(bill.getEndTime());
 		setRentalOrderReminderTime(totalRules, rs, bill);
 		//设置预约单元格数量
-		bill.setRentalCount(totalRules.stream().filter(r -> null != r.getRentalCount())
-				.mapToDouble(RentalBillRuleDTO::getRentalCount).sum());
+//		bill.setRentalCount(totalRules.stream().filter(r -> null != r.getRentalCount())
+//				.mapToDouble(RentalBillRuleDTO::getRentalCount).sum());
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -8583,8 +8582,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	//停车缴费续费但没支付的订单 恢复原样
 	private void restoreRentalBill(RentalOrder order){
 		order.setPayTotalMoney(order.getResourceTotalMoney());
-		List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(order.getId());
-		order.setRentalCount(resourceOrders.size()+0.0);
 		rentalv2Provider.updateRentalBill(order);
 	}
 	@Override
