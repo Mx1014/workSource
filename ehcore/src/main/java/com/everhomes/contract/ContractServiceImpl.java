@@ -1112,7 +1112,7 @@ public class ContractServiceImpl implements ContractService {
 					map.remove(item.getId());
 					//add by tangcen
 					if (!compareContractChargingItem(contractChargingItem,exist)) {
-						contractProvider.saveContractEventAboutChargingItem(ContractTrackingTemplateCode.CHARGING_ITEM_UPDATE,contract,contractChargingItem);
+						contractProvider.saveContractEventAboutChargingItem(ContractTrackingTemplateCode.CHARGING_ITEM_UPDATE,contract,exist);
 					}
 				}
 			});
@@ -2347,7 +2347,7 @@ public class ContractServiceImpl implements ContractService {
 	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
 		List<ContractEvents> contractEventsList = contractProvider.listContractEvents(cmd.getContractId());
 		//把操作时间（OpearteTime）相同的日志记录内容（Content）都合起来，传给前端展示
-		HashMap<Timestamp, ContractEventDTO> map = new HashMap<>();
+		LinkedHashMap<Timestamp, ContractEventDTO> map = new LinkedHashMap<>();
 		for (ContractEvents contractEvents : contractEventsList) {
 			if (map.containsKey(contractEvents.getOpearteTime())) {
 				ContractEventDTO contractEventDTO = map.get(contractEvents.getOpearteTime());

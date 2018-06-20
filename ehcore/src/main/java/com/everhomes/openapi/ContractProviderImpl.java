@@ -52,7 +52,9 @@ import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import com.everhomes.util.RuntimeErrorException;
@@ -115,6 +117,9 @@ public class ContractProviderImpl implements ContractProvider {
 	
 	@Autowired
 	private AssetProvider assetProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
 	
 	@Override
 	public void createContract(Contract contract) {
@@ -737,6 +742,7 @@ public class ContractProviderImpl implements ContractProvider {
         context.select()
         	   .from(Tables.EH_CONTRACT_EVENTS)
         	   .where(Tables.EH_CONTRACT_EVENTS.CONTRACT_ID.eq(contractId))
+        	   .orderBy(Tables.EH_CONTRACT_EVENTS.OPEARTE_TIME.desc())
         	   .fetch()
         	   .map(r->{
         		   ContractEvents contractEvents = ConvertHelper.convert(r, ContractEvents.class);
@@ -994,6 +1000,18 @@ public class ContractProviderImpl implements ContractProvider {
 							if(fieldItemsOld != null) {
 					        	oldData = fieldItemsOld.getDisplayName();
 					        }
+						}
+						//处理 退约经办人 字段
+						if("denunciationUid".equals(field.getFieldName())){
+							//用户可能不在组织架构中 所以用nickname
+				            User userNew = userProvider.findUserById((Long)objNew);
+				            if(userNew != null) {
+				            	newData = userNew.getNickName();
+				            }
+				            User userOld = userProvider.findUserById((Long)objOld);
+				            if(userOld != null) {
+				            	oldData = userOld.getNickName();
+				            }
 						}
 						
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);

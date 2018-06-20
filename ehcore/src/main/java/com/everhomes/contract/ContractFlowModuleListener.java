@@ -12,6 +12,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
@@ -131,12 +132,15 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         }
         FlowCase flowCase = ctx.getFlowCase();
         Contract contract = contractProvider.findContractById(flowCase.getReferId());
+        Contract exist = contractProvider.findContractById(flowCase.getReferId());
         //因为异常终止也会进FlowCaseEnd，所以需要再判断一下是不是正常结束 by xiongying20170908
         if(FlowStepType.APPROVE_STEP.equals(ctx.getStepType()) || FlowStepType.END_STEP.equals(ctx.getStepType())) {
             if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                 contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
                 contractProvider.updateContract(contract);
                 contractSearcher.feedDoc(contract);
+                //记录合同事件日志，by tangcen
+        		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
             } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
             }
