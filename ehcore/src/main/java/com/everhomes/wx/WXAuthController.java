@@ -328,7 +328,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
             LOGGER.info("Process weixin auth request(callback), requestUrl={}, params={}", requestUrl, params);
         }
 
-        String namespaceInReq = params.get(KEY_NAMESPACE);
+        String namespaceInReq = params.get("namespaceId");
         Integer namespaceId = parseNamespace(namespaceInReq);
 
         LoginToken loginToken = userService.getLoginToken(request);
@@ -340,7 +340,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         }
 
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
-        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = checkRedirectUserIdentifierV2(namespaceId,params);
+        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = checkRedirectUserIdentifierV2();
 
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
@@ -389,14 +389,9 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
 
     }
 
-    private CheckWxAuthIsBindPhoneResponse checkRedirectUserIdentifierV2(Integer namespaceId, Map<String, String> params){
+    private CheckWxAuthIsBindPhoneResponse checkRedirectUserIdentifierV2(){
         LOGGER.info("checkUserIdentifier start");
         CheckWxAuthIsBindPhoneResponse response = new CheckWxAuthIsBindPhoneResponse();
-        String bandphone = params.get(BINDPHONE);
-        if(bandphone == null || Byte.valueOf(bandphone).byteValue() == 0){
-            LOGGER.info("checkUserIdentifier do not need checkout bindphone");
-            return null;
-        }
 
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
         User user = UserContext.current().getUser();
