@@ -153,9 +153,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setContactName(cmd.getContactName());
         addCommand.setGender(cmd.getGender());
         addCommand.setContactToken(cmd.getContactToken());
-        addCommand.setDepartmentIds(new ArrayList<>(cmd.getDepartmentIds()));
-        addCommand.setJobPositionIds(new ArrayList<>(cmd.getJobPositionIds()));
-        addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
+        if (cmd.getDepartmentIds() != null)
+            addCommand.setDepartmentIds(new ArrayList<>(cmd.getDepartmentIds()));
+        if (cmd.getJobPositionIds() != null)
+            addCommand.setJobPositionIds(new ArrayList<>(cmd.getJobPositionIds()));
+        if (cmd.getJobLevelIds() != null)
+            addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
         //  1.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
@@ -777,9 +780,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setOrganizationId(cmd.getOrganizationId());
         addCommand.setContactName(cmd.getContactName());
         addCommand.setGender(cmd.getGender());
-        addCommand.setDepartmentIds(new ArrayList<>(cmd.getDepartmentIds()));
-        addCommand.setJobPositionIds(new ArrayList<>(cmd.getJobPositionIds()));
-        addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
+        if (cmd.getDepartmentIds() != null)
+            addCommand.setDepartmentIds(new ArrayList<>(cmd.getDepartmentIds()));
+        if (cmd.getJobPositionIds() != null)
+            addCommand.setJobPositionIds(new ArrayList<>(cmd.getJobPositionIds()));
+        if (cmd.getJobLevelIds() != null)
+            addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
         addCommand.setContactToken(cmd.getContactToken());
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
         //  1.添加人员到组织架构
