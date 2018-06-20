@@ -3142,6 +3142,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
         dto.setContentImgUriList(uriList);
         dto.setContentImgUrlList(urlList);
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(tracking.getTrackingUid());
+        if(members!=null && members.size()>0){
+            dto.setTrackingUidName(members.get(0).getContactName());
+        }else {
+            User user = userProvider.findUserById(tracking.getTrackingUid());
+            if(user!=null){
+                dto.setTrackingUidName(user.getNickName());
+            }
+        }
         return dto;
     }
 
