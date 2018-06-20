@@ -1,5 +1,9 @@
 package com.everhomes.rest.wx;
 
+/**
+ * BIND: 微信已绑定手机号
+ * NOT_BIND: 微信未绑定手机号
+ */
 public enum WxAuthBindPhoneType {
 
     BIND((byte) 1), NOT_BIND((byte) 0);

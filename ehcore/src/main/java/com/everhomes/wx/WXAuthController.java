@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
@@ -20,9 +21,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.everhomes.border.Border;
+import com.everhomes.border.BorderProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.user.LogonCommandResponse;
 import com.everhomes.rest.wx.CheckAuthCommand;
 import com.everhomes.rest.wx.CheckAuthResponse;
 import com.everhomes.rest.wx.CheckWxAuthIsBindPhoneResponse;
@@ -126,7 +130,10 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
 
     @Autowired
     private ContentServerService contentServerService;
-    
+
+
+    @Autowired
+    private BorderProvider borderProvider;
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
@@ -331,14 +338,23 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         String namespaceInReq = params.get("namespaceId");
         Integer namespaceId = parseNamespace(namespaceInReq);
 
-        LoginToken loginToken = userService.getLoginToken(request);
-
-        // 因为公众号有一对多的情况，需要增加检查域空间checkUserNamespaceId方法，当域空间不一致时用户登出。   add by yanjun 20170620
-        if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
-            // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
-            processUserInfo(namespaceId, request, response);
+        UserLogin userLogin = processUserInfo(namespaceId, request, response);
+        LogonCommandResponse logonCommandResponse = null;
+        if (userLogin != null) {
+            LoginToken token = new LoginToken(userLogin.getUserId(), userLogin.getLoginId(), userLogin.getLoginInstanceNumber(), userLogin.getImpersonationId());
+            String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+            WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response);
+            logonCommandResponse = new LogonCommandResponse(userLogin.getUserId(), tokenString);
+            // 当从园区版登录时，有指定的namespaceId，需要对这些用户进行特殊处理
+            Integer ns = UserContext.getCurrentNamespaceId(namespaceId);
+            if(ns != null) {
+                WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(ns), request, response);
+                userService.setDefaultCommunity(userLogin.getUserId(), ns);
+            }
+            LogonCommandResponse cmdResponse = new LogonCommandResponse(userLogin.getUserId(), tokenString);
+            cmdResponse.setAccessPoints(listAllBorderAccessPoints());
+            cmdResponse.setContentServer(contentServerService.getContentServer());
         }
-
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
         CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = checkRedirectUserIdentifierV2();
 
@@ -346,12 +362,18 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(callback calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
+        checkWxAuthIsBindPhoneResponse.setLogonCommandResponse(logonCommandResponse);
         RestResponse res = new RestResponse(checkWxAuthIsBindPhoneResponse);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
     }
-
+    private List<String> listAllBorderAccessPoints() {
+        List<Border> borders = this.borderProvider.listAllBorders();
+        return borders.stream().map((Border border) -> {
+            return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+        }).collect(Collectors.toList());
+    }
 	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId, Map<String, String> params){
         LOGGER.info("checkUserIdentifier start");
 
@@ -547,7 +569,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         return namespaceId;
     }
     
-    private void processUserInfo(Integer namespaceId, HttpServletRequest request, HttpServletResponse response) {
+    private UserLogin processUserInfo(Integer namespaceId, HttpServletRequest request, HttpServletResponse response) {
         long startTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(userinfo calculate), startTime={}", startTime);
@@ -629,6 +651,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(userinfo calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
+        return userLogin;
     }
     
     private String httpGet(String url, String safeUrl) {
