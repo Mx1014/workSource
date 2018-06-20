@@ -15,3 +15,7 @@ CREATE TABLE `eh_relocation_configs` (
   `operate_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 物品放行 1.1 增加新字段 用于小区场景
+-- by shiheng.ma 20180620
+alter table eh_relocation_requests add column org_owner_type_id BIGINT(20) DEFAULT NULL COMMENT '客户类型（小区场景）';
