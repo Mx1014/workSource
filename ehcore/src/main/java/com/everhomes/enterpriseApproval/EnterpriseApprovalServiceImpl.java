@@ -448,8 +448,10 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         List<FlowEntitySel> transferOut = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
         for (Long flowCaseId : cmd.getFlowCaseIds()) {
             FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
-            if (flowCase == null)
+            if (flowCase == null) {
+                LOGGER.error("Can not find the flowCase which should be transferred");
                 continue;
+            }
             FlowAutoStepTransferDTO stepDTO = new FlowAutoStepTransferDTO();
             stepDTO.setFlowCaseId(flowCase.getId());
             stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
@@ -457,8 +459,10 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             stepDTO.setAutoStepType(FlowStepType.TRANSFER_STEP.getCode());
             stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
             List<OrganizationMemberDTO> processors = listApprovalProcessors(new ApprovalFlowIdCommand(flowCaseId));
-            if (processors == null || processors.size() == 0)
+            if (processors == null || processors.size() == 0) {
+                LOGGER.error("Can not find old processors");
                 continue;
+            }
             stepDTO.setTransferIn(processors.stream().map(r -> new FlowEntitySel(r.getTargetId(), FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList()));
             stepDTO.setTransferOut(transferOut);
             flowService.processAutoStep(stepDTO);
