@@ -107,7 +107,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         ListApprovalFlowRecordsResponse res = new ListApprovalFlowRecordsResponse();
         List<EnterpriseApprovalRecordDTO> results = new ArrayList<>();
         ListingLocator locator = new ListingLocator();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         SearchFlowCaseCommand command = new SearchFlowCaseCommand();
         command.setStartTime(cmd.getStartTime());
         command.setEndTime(cmd.getEndTime());
