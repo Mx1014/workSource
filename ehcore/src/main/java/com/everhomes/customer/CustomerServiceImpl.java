@@ -4145,4 +4145,18 @@ public class CustomerServiceImpl implements CustomerService {
         }
         return response;
     }
+
+    @Override
+    public EnterpriseCustomerDTO getCustomerBasicInfoByOrgId(GetEnterpriseCustomerCommand cmd) {
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getOrgId());
+        if (customer == null) {
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST, "customer is not exist");
+        }
+//        return ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        EnterpriseCustomerDTO dto = new EnterpriseCustomerDTO();
+        dto.setCommunityId(customer.getCommunityId());
+        dto.setId(customer.getId());
+        dto.setOrganizationId(customer.getOrganizationId());
+        return dto;
+    }
 }

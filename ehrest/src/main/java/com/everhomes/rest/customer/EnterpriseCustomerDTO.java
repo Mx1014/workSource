@@ -88,6 +88,7 @@ import java.util.List;
 public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>{
     private Long id;
     private Long organizationId;
+    private Long communityId;
     private String customerNumber;
     private String name;
     private String nickName;
@@ -982,6 +983,14 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setSignedUpCount(Integer signedUpCount) {
         this.signedUpCount = signedUpCount;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override

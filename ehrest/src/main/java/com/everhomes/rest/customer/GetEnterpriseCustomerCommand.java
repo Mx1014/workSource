@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>id: 客户id</li>
  *     <li>communityId: 客户所属园区id</li>
+ *     <li>orgId: 企业id(用于从organizationId获取customer基础信息)</li>
  * </ul>
  * Created by ying.xiong on 2017/8/15.
  */
@@ -13,6 +14,8 @@ public class GetEnterpriseCustomerCommand {
     private Long id;
 
     private Long communityId;
+
+    private Long orgId;
 
     public Long getId() {
         return id;
@@ -28,6 +31,14 @@ public class GetEnterpriseCustomerCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     @Override
