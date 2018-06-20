@@ -12,6 +12,8 @@ import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.OrganizationOwnerType;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -86,6 +88,8 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private PortalService portalService;
+	@Autowired
+    private PropertyMgrProvider propertyMgrProvider;
 	
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -144,19 +148,20 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	@Override
 	public RelocationRequestDTO getRelocationRequestDetail(GetRelocationRequestDetailCommand cmd) {
 
-		RelocationRequest request = relocationProvider.findRelocationRequestById(cmd.getId());
-
-		if (null == request) {
-			LOGGER.error("RelocationRequest not found.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"RelocationRequest not found.");
-		}
-
-		RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
-
-		populateRequestDTO(request, dto);
-
-		return dto;
+        RelocationRequest request = relocationProvider.findRelocationRequestById(cmd.getId());
+        if (null == request) {
+            LOGGER.error("RelocationRequest not found.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "RelocationRequest not found.");
+        }
+        RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
+        populateRequestDTO(request, dto);
+//      小区场景查询客户类型
+        if (null != request.getOrgOwnerTypeId()) {
+            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(request.getOrgOwnerTypeId());
+            dto.setOrgOwnerType(ownerType.getDisplayName());
+        }
+        return dto;
 	}
 
 	private void populateRequestDTO(RelocationRequest request, RelocationRequestDTO dto) {
@@ -244,15 +249,22 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		RelocationRequest request = ConvertHelper.convert(cmd, RelocationRequest.class);
 		request.setRelocationDate(new Timestamp(cmd.getRelocationDate()));
 
-		OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
-		if (null == orgRequest) {
-			LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"OrganizationCommunityRequest not found.");
-		}
+		if(null != cmd.getOrgOwnerType()){
+//		    小区场景
+            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(cmd.getOrgOwnerType());
+            request.setOrgOwnerTypeId(ownerType.getId());
+        } else {
+//		    企业场景
+            OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
+            if (null == orgRequest) {
+                LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "OrganizationCommunityRequest not found.");
+            }
+            request.setOwnerId(orgRequest.getCommunityId());
+            request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
+        }
 
-		request.setOwnerId(orgRequest.getCommunityId());
-		request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
