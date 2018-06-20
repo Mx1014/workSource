@@ -1,7 +1,7 @@
 -- 能耗升级离线包版本 by  jiarui 20180619
-UPDATE eh_version_urls SET download_url = replace(download_url,'1-0-3','1-0-4'),
-  info_url = replace(info_url,'1-0-3','1-0-4'),
-  target_version = '1.0.3' WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement');
+UPDATE eh_version_urls SET download_url = replace(download_url,'1-0-3','1-0-4') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
+UPDATE eh_version_urls SET  info_url = replace(info_url,'1-0-3','1-0-4') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
+UPDATE eh_version_urls SET  target_version = '1.0.3' WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
 
 -- 通用脚本
 -- by 刘一麟 20180619
