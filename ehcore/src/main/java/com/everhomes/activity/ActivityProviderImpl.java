@@ -98,11 +98,12 @@ public class ActivityProviderImpl implements ActivityProivider {
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
         //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天  add by yanjun
-    	if(activity.getOfficialFlag() == OfficialFlag.YES.getCode() && null != activity.getStartTime()){
-        	if(activity.getStartTime().before(DateHelper.currentGMTTime())){
-        		activity.setCreateTime(new Timestamp(activity.getStartTime().getTime() - 24*60*60*1000));
-        	}
-    	}
+        //去除创建时间为开始时间之前一天这个设置 add by yanlong.liang 20180614
+//    	if(activity.getOfficialFlag() == OfficialFlag.YES.getCode() && null != activity.getStartTime()){
+//        	if(activity.getStartTime().before(DateHelper.currentGMTTime())){
+//        		activity.setCreateTime(new Timestamp(activity.getStartTime().getTime() - 24*60*60*1000));
+//        	}
+//    	}
         
         activity.setUpdateTime(activity.getCreateTime());
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
@@ -248,7 +249,9 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public void createActivityRoster(ActivityRoster createRoster) {
-        Long id = shardingProvider.allocShardableContentId(EhActivityRoster.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        Long id = this.dbProvider.allocPojoRecordId(EhActivityRoster.class);
+        //Long id = shardingProvider.allocShardableContentId(EhActivityRoster.class).second();
         if(createRoster.getUuid() == null) {
             createRoster.setUuid(UUID.randomUUID().toString());
         }

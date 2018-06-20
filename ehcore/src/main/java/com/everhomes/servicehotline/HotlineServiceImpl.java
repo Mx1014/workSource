@@ -927,6 +927,9 @@ public class HotlineServiceImpl implements HotlineService {
 		} else {
 			// 去除系统用户 坑啊!
 			sendByCustomer = sendByCustomer.and(records.SENDER_UID.greaterThan(User.MAX_SYSTEM_USER_ID));
+			
+			// 有可能是群信息 缺陷 #31090
+			sendByServicer = sendByServicer.and(records.DST_CHANNEL_TYPE.eq(TYPE_USER));
 		}
 
 		// 条件3 固定条件: status = 'CORE_HANDLE', sender_tag = 'ROUTE MESSAGE'
@@ -1415,7 +1418,9 @@ public class HotlineServiceImpl implements HotlineService {
 				content.add("[语音]");
 			}
 			else {
-				content.add(dto.getMessage());
+				//这里做表情过滤功能
+				String filterMsg = HotlineUtils.filterEmoji(dto.getMessage(), "[表情]"); 
+				content.add(filterMsg);
 			}
 			content.add("\n");
 		}

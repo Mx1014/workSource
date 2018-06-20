@@ -170,6 +170,12 @@ public interface ConfigConstants {
 	public static final String ASSET_ZHUZONG_QUERYCOSTBYHOUSELIST_URL = "asset.zhuzong.QueryCostByHouseList.url";
 	public static final String ASSET_ZHUZONG_QUERYCOSTDETAILBYID_URL = "asset.zhuzong.QueryCostDetailByID.url";
 	public static final String ASSET_ZHUZONG_ACCOUNTCODE = "asset.zhuzong.AccountCode";
-	
+
+    public static final String MEETING_ROOM_OPEN_BEGIN_TIME = "meeting.room.open.begin.time";
+    public static final String MEETING_ROOM_OPEN_END_TIME = "meeting.room.open.end.time";
+    public static final String MEETING_ROOM_OPEN_TIME_SPLIT_COUNT = "meeting.room.open.time.split.count";
+    public static final String MEETING_ROOM_OPEN_TIME_SPLIT_MINUTE_COUNT = "meeting.room.open.time.split.minute.count";
+    public static final String MEETING_RECORD_WORD_LIMIT = "meeting.record.word.limit";
+	public static final String ASSET_DINGFENGHUI_APPSHOWPAY = "asset.dingfenghui.appshowpay";
 	public static final String OPENAPI_LUFU_KEY = "openapi.lufu.key";
 }

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -21,92 +22,19 @@ import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.organization.EmployeeStatus;
-import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
-import com.everhomes.rest.organization.OrganizationCommunityRequestType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationJobPositionStatus;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationTaskStatus;
-import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.UserOrganizationStatus;
-import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUserOrganizations;
-import com.everhomes.server.schema.tables.daos.EhCommunityOrganizationDetailDisplayDao;
-import com.everhomes.server.schema.tables.daos.EhImportFileTasksDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunityRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationDetailsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionMapsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMemberDetailsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMemberLogsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.daos.EhUserOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhCommunityOrganizationDetailDisplay;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionMapsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMemberDetailsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMemberLogsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.userOrganization.UserOrganizations;
@@ -115,19 +43,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.InsertQuery;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.TableLike;
-import org.jooq.UpdateQuery;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
@@ -139,14 +55,10 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.Access;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -241,12 +153,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, id);
     }
 
+    /**
+     * 根据组织id来查询eh_organizations表信息
+     * @param id
+     * @return
+     */
     //	@Cacheable(value="OrganizationById", key="#id")
     @Override
     public Organization findOrganizationById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), Organization.class);
+    }
+
+    /**
+     * 根据组织Id和手机号来查询Eh_organization_members表中的信息，来判断该用户是否已经加入到该公司
+     * @param organizationId
+     * @param contactToken
+     * @return
+     */
+    @Override
+    public OrganizationMember findOrganizationMemberByContactTokenAndOrgId(Long organizationId,String contactToken){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+         OrganizationMember organizationMember =  context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
     }
 
     @Override
@@ -560,27 +494,35 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType) {
-        return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null);
+        return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null, -1, new ListingLocator());
+    }
+
+    @Override
+    public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Integer pageSize, ListingLocator locator) {
+        return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null, pageSize, locator);
     }
 
     @Override
     public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId) {
-        return listOrganizationMembersByOrganizationIdAndMemberGroup(null, memberGroup, targetType, targetId);
+        return listOrganizationMembersByOrganizationIdAndMemberGroup(null, memberGroup, targetType, targetId, -1, new ListingLocator());
     }
 
 
     @Override
-    public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId) {
+    public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(
+            Long organizationId, String memberGroup, String targetType, Long targetId,
+            int pageSize, ListingLocator locator) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 
         if (null != organizationId) {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
 
         }
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup));
+        if (null != memberGroup){
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup));
+        }
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
         if (null != OrganizationMemberTargetType.fromCode(targetType)) {
@@ -592,15 +534,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
 
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+
+        if (locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.le(locator.getAnchor()));
+        }
+
+        if (pageSize > 0 ) {
+            query.addLimit(pageSize + 1);
+        }
         //:todo 解决重复
         // updated by Janson 20171018 错误的公司成员会覆盖正确的公司成员 #17284
 //		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-        query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, OrganizationMember.class));
-            return null;
-        });
-        return result;
+
+        List<OrganizationMember> list = query.fetchInto(OrganizationMember.class);
+        if (list.size() > pageSize && pageSize > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
     }
 
     @Override
@@ -5178,7 +5132,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return results.get(0);
     }
 
-    @Override
+    @Override 
     public OrganizationMemberDetails findOrganizationMemberDetailsByTargetIdAndOrgId(Long targetId, Long orgId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
@@ -5189,6 +5143,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return null;
         return results.get(0);
     }
+ 
+    public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId)
+                		.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId)))
+ 
+                .fetchInto(OrganizationMemberDetails.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results.get(0);
+    }  
+  
     @Override
     public List<Organization> listHeadEnterprises() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -5853,5 +5820,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         context.delete(Tables.EH_ORGANIZATION_ADDRESSES)
                 .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
                 .execute();
+    }
+    @Override
+    public Integer getUserOrgAmount(Long targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMembers.class));
+        SelectConditionStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"));
+        return step.fetchOneInto(Integer.class);
     }
 }

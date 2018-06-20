@@ -354,6 +354,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
@@ -1666,9 +1667,18 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
-            if(customer.getTrackingUid() == null) {
-                customer.setTrackingUid(-1L);
-            }
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpOpAddress(enterprise.getAddress());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount() == null ? null : enterprise.getMemberCount().intValue());
+            customer.setPostUri(enterprise.getPostUri());
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
+//            if(customer.getTrackingUid() == null) {
+//                customer.setTrackingUid(-1L);
+//            }
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -1686,7 +1696,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
-            customer.setTrackingUid(-1L);
+            customer.setCorpEntryDate(enterprise.getCheckinDate());
+            customer.setCorpDescription(enterprise.getDescription());
+            customer.setCorpEmployeeAmount(enterprise.getMemberCount() == null ? null : enterprise.getMemberCount().intValue());
+            customer.setPostUri(enterprise.getPostUri());
+            customer.setNickName(enterprise.getDisplayName());
+            customer.setHotline(enterprise.getContact());
+            customer.setCorpEmail(enterprise.getEmailDomain());
+            customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
+//            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
@@ -1844,7 +1862,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                 customer.setCorpLogoUri(cmd.getAvatar());
                 customer.setPostUri(cmd.getPostUri());
                 customer.setHotline(cmd.getContactsPhone());
+                customer.setCorpDescription(cmd.getDescription());
+                Date date = DateUtil.parseDate(cmd.getCheckinDate());
+                if (date != null) {
+                    customer.setCorpEntryDate(new Timestamp(date.getTime()));
+                }
                 customer.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
+                customer.setCorpEmail(cmd.getEmailDomain());
+                customer.setCorpEmployeeAmount(cmd.getMemberCount() == null ? null : cmd.getMemberCount().intValue());
 
                 enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
                 enterpriseCustomerSearcher.feedDoc(customer);
@@ -1979,6 +2004,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 DeleteEnterpriseCustomerCommand command = new DeleteEnterpriseCustomerCommand();
                 command.setId(customer.getId());
                 command.setCommunityId(customer.getCommunityId());
+                command.setNamespaceId(customer.getNamespaceId());
                 customerService.deleteEnterpriseCustomer(command, false);
             }
 
@@ -5780,7 +5806,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             /**创建企业级的member/detail/user_organiztion记录**/
             OrganizationMember tempMember = createOrganiztionMemberWithDetailAndUserOrganization(member, cmd.getOrganizationId());
             member.setId(tempMember.getId());
-
+            //增加customer admin record 状态
+            try {
+                customerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(), member.getNamespaceId());
+            } catch (Exception e) {
+                LOGGER.error("update enterprise customer admins status error:{}", e);
+            }
             return member;
         });
 
@@ -7769,7 +7800,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
                     //修改企业客户管理中的状态 by jiarui
                     try {
-                        enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken());
+                        enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(),member.getNamespaceId());
                     }catch (Exception e){
                         LOGGER.error("update enterprise customer admin record erro:{}",e);
                     }
@@ -8176,6 +8207,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             } else {
                 UpdateEnterpriseCommand updateEnterpriseCommand = ConvertHelper.convert(enterpriseCommand, UpdateEnterpriseCommand.class);
                 updateEnterpriseCommand.setId(org.getId());
+                List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByOrganizationId(org.getId());
+                List<OrganizationAddressDTO> addressDTOS = new ArrayList<>();
+                if (addresses != null && addresses.size() > 0) {
+                    addressDTOS = addresses.stream().map((r) -> ConvertHelper.convert(r, OrganizationAddressDTO.class)).collect(Collectors.toList());
+                }
+                updateEnterpriseCommand.setAddressDTOs(addressDTOS);
                 updateEnterprise(updateEnterpriseCommand, false);
             }
 
@@ -8716,6 +8753,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (OrganizationDTO dto : orgs) {
             addPathOrganizationId(dto.getPath(), orgnaizationIds);
         }
+        
+        //Added by janson，这个接口原本的意思是拿用户所有的公司，但是在 getOrganizationMemberGroups 是拿用户自己关联的子公司，所以这里把本公司加上
+        orgnaizationIds.add(organizationId);
+        
         return orgnaizationIds;
     }
 
@@ -8768,6 +8809,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(orgPath, groupTypes, token);
         for (OrganizationMember member : members) {
             Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
+            //comment by janson, 这段代码看不懂，为何只留下非顶级公司的组？
             if (null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE && group.getParentId() != 0L) {
                 groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
             }
@@ -9164,7 +9206,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationManagerDTO managerDTO = ConvertHelper.convert(member, OrganizationManagerDTO.class);
                 managerDTO.setMemberId(member.getId());
                 managerDTO.setDetailId(member.getDetailId());
-                managerDTO.setContactName(organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId()).getContactName());
+                OrganizationMemberDetails memberDetails = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+                if (memberDetails != null) {
+                    managerDTO.setContactName(memberDetails.getContactName());
+                }
                 dtos.add(managerDTO);
             }
         }
@@ -12838,6 +12883,29 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
         return null;
+    }
+
+    @Override
+    public void updateCustomerEntryInfo(EnterpriseCustomer customer, OrganizationAddress address) {
+        LOGGER.debug("updateCustomerEntryInfo customer id: {}, address: {}", customer.getId(), address);
+        if (address != null) {
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
+            List<Long> addressIds = new ArrayList<>();
+            if (entryInfos != null && entryInfos.size() > 0) {
+                addressIds = entryInfos.stream().map(EhCustomerEntryInfos::getAddressId).collect(Collectors.toList());
+            }
+
+            if (!addressIds.contains(address.getAddressId())) {
+                CustomerEntryInfo info = new CustomerEntryInfo();
+                info.setNamespaceId(customer.getNamespaceId());
+                info.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                info.setCustomerId(customer.getId());
+                info.setCustomerName(customer.getName());
+                info.setAddressId(address.getAddressId());
+                info.setBuildingId(address.getBuildingId());
+                enterpriseCustomerProvider.createCustomerEntryInfo(info);
+            }
+        }
     }
 }
 

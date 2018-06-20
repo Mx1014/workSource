@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.community.Community;
 import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -11,13 +12,8 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.rest.organization.*;
+
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
@@ -448,7 +444,9 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 
-	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId);
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId, int pageSize, ListingLocator locator);
+
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Integer pageSize, ListingLocator locator);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId);
 
@@ -506,6 +504,16 @@ public interface OrganizationProvider {
     void deleteAllOrganizationAddressById(Long organizationId);
 
 	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
+ 
 	OrganizationMemberDetails findOrganizationMemberDetailsByTargetIdAndOrgId(Long targetId,
 			Long orgId);
+ 
+
+	Integer getUserOrgAmount(Long targetId);
+
+    OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
+            Long targetId, Long organizationId);
+    OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
+            Long organizationId, String contactToken);
+ 
 }

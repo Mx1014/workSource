@@ -176,7 +176,7 @@ public class StatTerminalFileDownloadTaskHandler implements FileDownloadTaskHand
         ExcelUtils utils = new ExcelUtils(fileName, "DEFAULT");
         utils.setNeedSequenceColumn(false);
         OutputStream outputStream = utils.getOutputStream(propertyNames, titleName, columnSizes, activeUserRows);
-         return fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+         return fileDownloadTaskService.uploadToContenServer(fileName, outputStream, null);
     }
 
     private CsFileLocationDTO exportTerminalHourLineChartCumulativeUser(TerminalStatisticsChartCommand cmd) {
@@ -306,7 +306,7 @@ public class StatTerminalFileDownloadTaskHandler implements FileDownloadTaskHand
         ExcelUtils utils = new ExcelUtils(fileName, "sheet");
         utils.setNeedSequenceColumn(false);
         OutputStream outputStream = utils.getOutputStream(propertyNames, titleName, columnSizes, rows);
-        return fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        return fileDownloadTaskService.uploadToContenServer(fileName, outputStream, null);
     }
 
     private CsFileLocationDTO exportTerminalAppVersionPieChart(String fileName, ListTerminalStatisticsByDayCommand cmd) {
@@ -327,7 +327,7 @@ public class StatTerminalFileDownloadTaskHandler implements FileDownloadTaskHand
         ExcelUtils utils = new ExcelUtils(fileName, "DEFAULT");
         utils.setNeedSequenceColumn(false);
         OutputStream outputStream = utils.getOutputStream(propertyNames, titleName, columnSizes, rows);
-        return fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        return fileDownloadTaskService.uploadToContenServer(fileName, outputStream, null);
     }
 
     private List<RowResult> buildTerminalAppVersionPieChartRowResult(List<TerminalAppVersionStatisticsDTO> dtoList) {

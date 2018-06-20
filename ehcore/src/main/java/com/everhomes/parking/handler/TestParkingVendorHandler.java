@@ -134,7 +134,8 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-		return true;
+		boolean notifyresult = configProvider.getBooleanValue("parking.test.notifyresult", true);
+		return notifyresult;
 
 	}
 

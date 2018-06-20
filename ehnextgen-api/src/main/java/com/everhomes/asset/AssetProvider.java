@@ -80,7 +80,7 @@ public interface AssetProvider {
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
 
     void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum);
+            ,String targetName, String invoiceNum, String noticeTel);
 
     List<ListBillExemptionItemsDTO> listBillExemptionItems(String billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
 
@@ -166,14 +166,15 @@ public interface AssetProvider {
 
     PaymentAccount findPaymentAccount();
 
-    void changeBillStatusOnPaiedOff(List<Long> billIds);
+    //void changeBillStatusOnPaiedOff(List<Long> billIds);
 
 
     void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId,List<Long> communityIds);
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
-    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId);
+    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId
+            , Byte useUnitPrice);
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
@@ -291,7 +292,7 @@ public interface AssetProvider {
 
     List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId);
 
-    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId);
+    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId, boolean isInsert);
 
     PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName);
 
@@ -307,13 +308,28 @@ public interface AssetProvider {
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
-    void modifySettledBill(Long billId, String invoiceNum);
+    void modifySettledBill(Long billId, String invoiceNum, String noticeTel);
 
     boolean checkBillExistById(Long billId);
 
     String getAddressByBillId(Long id);
 
+    //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
+    
+	void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds, Integer paymentType);
+	
+	List<PaymentBillCertificate> listUploadCertificates(Long billId);
+	
+	String getCertificateNote(Long billId);
+	
+	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
+
     List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
+	void setRent(Long contractId, BigDecimal rent);
+    
+    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+
+    PaymentLateFine findLastedFine(Long id);
 }

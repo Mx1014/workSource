@@ -4,3 +4,4 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 
 -- added by wh 薪酬的模块对应action_type 改为74(工资条)
 UPDATE eh_service_modules SET action_type = 74 WHERE id = 51400;
+UPDATE eh_service_module_apps SET action_type = 74 WHERE module_id = 51400;

@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerId: 业务实体的类型，可为空</li>
  *     <li>ownerType: ownerType</li>
  *     <li>keyword: 搜索关键字</li>
+ *     <li>appId: 应用Id</li>
  *     <li>serviceType: 业务类别</li>
  *     <li>pageSize: pageSize</li>
  *     <li>pageAnchor: pageAnchor</li>
@@ -32,6 +33,7 @@ public class SearchFlowCaseCommand {
     private Long ownerId;
     private String ownerType;
     private String keyword;
+    private Long appId;
     private String serviceType;
     private Integer pageSize;
     private Long pageAnchor;
@@ -47,6 +49,14 @@ public class SearchFlowCaseCommand {
 
     public void setFlowCaseStatus(Byte flowCaseStatus) {
         this.flowCaseStatus = flowCaseStatus;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     public Long getUserId() {
