@@ -12,3 +12,11 @@ INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUE
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'customer', '10029', 'zh_CN', '数字格式错误');
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'customer', '10030', 'zh_CN', '日期格式错误');
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'customer', '10031', 'zh_CN', '手机号系统中不存在');
+
+
+-- 跟进信息增加字段  by jiarui
+
+set @fId = (SELECT  max(id) from eh_var_fields);
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@fId:=@fId+1), 'enterprise_customer', 'visitTimeLength', '跟进时长(小时)', 'BigDecimal', '19', '/19/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"BigDecimal\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@fId:=@fId+1), 'enterprise_customer', 'visitPersonName', '访问人姓名', 'String', '19', '/19/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@fId:=@fId+1), 'enterprise_customer', 'contactPhone', '联系人', 'String', '19', '/19/', '0', NULL, '2', '1',now(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
