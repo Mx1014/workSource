@@ -53,6 +53,10 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
                 response.setDtos(list.stream().map(r -> {
                     SensitiveFilterRecordAdminDTO sensitiveFilterRecordAdminDTO = ConvertHelper.convert(r, SensitiveFilterRecordAdminDTO.class);
                     sensitiveFilterRecordAdminDTO.setPublishTime(r.getPublishTime().toString());
+                    ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(r.getModuleId());
+                    if (serviceModule != null) {
+                        sensitiveFilterRecordAdminDTO.setModuleName(serviceModule.getName());
+                    }
                     return  sensitiveFilterRecordAdminDTO;
                 }).collect(Collectors.toList()));
             }
