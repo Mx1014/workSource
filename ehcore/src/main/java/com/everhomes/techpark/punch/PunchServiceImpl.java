@@ -9923,10 +9923,8 @@ public class PunchServiceImpl implements PunchService {
 //        listingLocator.setAnchor(anchor);
         List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
             //月底之后离职或者未离职
-//            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.isNull()
-//                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.greaterOrEqual(socialSecurityService.getTheLastDate(punchMonth))));
-        	//issues-31001:根据现有的人事管理的设计，离职时间只是员工的一个预计离职时间，故查询本月所有人员（包含离职人员时）去掉isnull的条件
-        	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.greaterOrEqual(socialSecurityService.getTheLastDate(punchMonth)));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()) 
+                    .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.greaterOrEqual(socialSecurityService.getTheLastDate(punchMonth))));
             //月底之前入职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lessOrEqual(socialSecurityService.getTheLastDate(punchMonth)));
 
