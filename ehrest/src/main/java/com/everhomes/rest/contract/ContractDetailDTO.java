@@ -149,8 +149,27 @@ public class ContractDetailDTO {
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
+    //add by tangcen
+    private Long communityId;
+    private Integer namespaceId;
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
 
-    public List<ContractChargingChangeDTO> getAdjusts() {
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;
     }
 

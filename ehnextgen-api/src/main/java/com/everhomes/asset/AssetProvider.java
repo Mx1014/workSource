@@ -303,4 +303,6 @@ public interface AssetProvider {
     PaymentBills findPaymentBillById(Long billId);
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
+    //add by tangcen
+	String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long chargingItemId);
 }

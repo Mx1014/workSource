@@ -1868,6 +1868,10 @@ public class ContractServiceImpl implements ContractService {
 //		}
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
+		//add by tangcen
+		dto.setCommunityId(cmd.getCommunityId());
+		dto.setNamespaceId(cmd.getNamespaceId());
+		
 		if(dto.getCreateUid() != null) {
 			User creator = userProvider.findUserById(dto.getCreateUid());
 			if(creator != null) {
@@ -2157,8 +2161,11 @@ public class ContractServiceImpl implements ContractService {
 				if(item.getChargingExpiredTime() != null) {
 					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
 				}
-				String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
-				itemDto.setChargingItemName(itemName);
+				//add by tangcen 显示客户自定义的收费项名称
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),itemDto.getChargingItemId());
+				itemDto.setChargingItemName(projectChargingItemName);
+				//String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
+				//itemDto.setChargingItemName(itemName);
 				String standardName = assetProvider.getStandardNameById(itemDto.getChargingStandardId());
 				itemDto.setChargingStandardName(standardName);
 				String lateFeeStandardName = assetProvider.getStandardNameById(itemDto.getLateFeeStandardId());

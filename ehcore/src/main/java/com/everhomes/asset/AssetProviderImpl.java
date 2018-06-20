@@ -4096,5 +4096,26 @@ public class AssetProviderImpl implements AssetProvider {
     private static EhPaymentChargingItemScopes itemScope = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("itemScope");
     private static EhPaymentBillGroupsRules groupRule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("groupRule");
 
+    //add by tangcen 
+	@Override
+	public String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long chargingItemId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        String projectChargingItemName = null;
+        projectChargingItemName =context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
+                				.from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                				.where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
+                				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+                				.fetchOne(0,String.class);
+        if (org.springframework.util.StringUtils.isEmpty(projectChargingItemName)) {
+        	projectChargingItemName =context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
+    				.from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+    				.where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
+    				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq((long)namespaceId))
+    				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+    				.fetchOne(0,String.class);
+		}
+        return projectChargingItemName;
+	}
 
 }
