@@ -1,0 +1,57 @@
+package com.everhomes.rest.meeting;
+
+import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
+/**
+ * <ul>
+ * <li>organizationId: 总公司Id，必填</li>
+ * <li>meetingReservationId: 会议预约ID，必填</li>
+ * <li>meetingRecordShareDTOS: 会议纪要抄送人列表,参考{@link com.everhomes.rest.meeting.MeetingInvitationDTO}</li>
+ * <li>content: 纪要内容，必填</li>
+ * </ul>
+ */
+public class CreateMeetingRecordCommand {
+    private Long organizationId;
+    private Long meetingReservationId;
+    private List<MeetingInvitationDTO> meetingRecordShareDTOS;
+    private String content;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getMeetingReservationId() {
+        return meetingReservationId;
+    }
+
+    public void setMeetingReservationId(Long meetingReservationId) {
+        this.meetingReservationId = meetingReservationId;
+    }
+
+    public List<MeetingInvitationDTO> getMeetingRecordShareDTOS() {
+        return meetingRecordShareDTOS;
+    }
+
+    public void setMeetingRecordShareDTOS(List<MeetingInvitationDTO> meetingRecordShareDTOS) {
+        this.meetingRecordShareDTOS = meetingRecordShareDTOS;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

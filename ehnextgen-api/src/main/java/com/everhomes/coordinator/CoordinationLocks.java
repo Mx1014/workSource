@@ -132,6 +132,11 @@ public enum CoordinationLocks {
     REMIND_CATEGORY_SORTING("remind_category_sorting"),
     REMIND_SORTING("remind_sorting"),
     REMIND_SCHEDULED("remind_scheduled"),
+    MEETING_ROOM_DEFAULT_INIT("meeting_room_default_init"),
+    MEETING_ROOM_TIME_LOCK("meeting_room_time_lock"),
+    MEETING_ROOM_RESOURCE_RECOVERY("meeting_room_resource_recovery"),
+    MEETING_REMIND("meeting_remind"),
+
     ARCHIVES_CONFIGURATION("archives_configuration"),
     ARCHIVES_NOTIFICATION("archives_notification"),
     VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no"),
