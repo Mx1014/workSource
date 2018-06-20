@@ -142,7 +142,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             if (cmd.getCreatorDepartmentId() != null)
                 query.addConditions(EnterpriseApprovalFlowCaseCustomField.CREATOR_DEPARTMENT_ID.getField().eq(cmd.getCreatorDepartmentId()));
             //  activeFlag
-            if (TrueOrFalseFlag.TRUE.getCode().equals(cmd.getActiveFlag()))
+            if (TrueOrFalseFlag.fromCode(cmd.getActiveFlag()) == TrueOrFalseFlag.TRUE)
                 query.addConditions(Tables.EH_FLOW_CASES.STATUS.notIn(FlowCaseStatus.ABSORTED.getCode(), FlowCaseStatus.FINISHED.getCode()));
             return query;
         });

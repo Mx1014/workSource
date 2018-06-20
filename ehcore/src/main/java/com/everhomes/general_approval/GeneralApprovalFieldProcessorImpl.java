@@ -137,8 +137,10 @@ public class GeneralApprovalFieldProcessorImpl implements GeneralApprovalFieldPr
                     break;
                 case IMAGE:
                     processImageField(entities, e, subVal.getFieldValue());
+                    break;
                 case FILE:
                     processFileField(entities, e, subVal.getFieldValue());
+                    break;
                 case INTEGER_TEXT:
                     processIntegerTextField(entities, e, subVal.getFieldValue());
                     break;

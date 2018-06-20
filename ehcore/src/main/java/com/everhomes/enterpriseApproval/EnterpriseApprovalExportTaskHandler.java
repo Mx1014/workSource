@@ -50,7 +50,7 @@ public class EnterpriseApprovalExportTaskHandler implements FileDownloadTaskHand
             approvalStatus = Byte.valueOf(String.valueOf(params.get("approvalStatus")));
         ApprovalFilter filter = null;
         if (params.get("filter") != null)
-            filter = (ApprovalFilter) StringHelper.fromJsonString((String) params.get("approvalId"), ApprovalFilter.class);
+            filter = (ApprovalFilter) StringHelper.fromJsonString((String) params.get("filter"), ApprovalFilter.class);
         Long creatorDepartmentId = null;
         if (params.get("creatorDepartmentId") != null)
             creatorDepartmentId = (Long) params.get("creatorDepartmentId");

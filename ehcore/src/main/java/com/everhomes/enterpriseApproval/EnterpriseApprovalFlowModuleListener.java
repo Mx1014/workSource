@@ -108,7 +108,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
     public void onFlowCaseCreating(FlowCase flowCase) {
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
         StringBuilder content = new StringBuilder(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.APPLIER, "zh_CN", "Name") + " : " + flowCase.getApplierName() + "\n");
-        List<FlowCaseEntity> entities = processEntities(cmd.getValues());
+        List<FlowCaseEntity> entities = processCreatingEntities(cmd.getValues());
         for (int i = 0; i < entities.size(); i++) {
             if (i == 3)
                 break;
@@ -121,7 +121,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         flowCase.setContent(content.toString());
     }
 
-    private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {
+    private List<FlowCaseEntity> processCreatingEntities(List<PostApprovalFormItem> values) {
         List<FlowCaseEntity> entities = new ArrayList<>();
         for (PostApprovalFormItem value : values) {
             FlowCaseEntity e = new FlowCaseEntity();
