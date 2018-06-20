@@ -250,8 +250,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             String mainTitle, String subTitle, List<String> titles, List<EnterpriseApprovalRecordDTO> data, Long taskId) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("审批记录");
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
-        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 8));
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 9));
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 9));
         //  1. Write titles
         createGeneralApprovalRecordsFileTitle(workbook, sheet, mainTitle, subTitle, titles);
         taskService.updateTaskProcess(taskId, 30);
@@ -268,22 +268,22 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     private void createGeneralApprovalRecordsFileTitle(XSSFWorkbook workbook, Sheet sheet, String mainTitle, String subTitle, List<String> list) {
 
-        //  1.Set the style(center)
+        //  1-1.Set the style(center)
         Row mainTitleRow = sheet.createRow(0);
         XSSFCellStyle mainTitleStyle = workbook.createCellStyle();
         mainTitleStyle.setAlignment(HorizontalAlignment.CENTER);
 
-        //  1.Set the value of the main title
+        //  1-2.Set the value of the main title
         Cell mainTitleCell = mainTitleRow.createCell(0);
         mainTitleCell.setCellStyle(mainTitleStyle);
         mainTitleCell.setCellValue(mainTitle);
 
-        //  2.Set the style(center)
+        //  2-1.Set the style(center)
         Row subTitleRow = sheet.createRow(1);
         XSSFCellStyle subTitleStyle = workbook.createCellStyle();
         subTitleStyle.setAlignment(HorizontalAlignment.CENTER);
 
-        //  2.Set the value of the subtitle
+        //  2-2.Set the value of the subtitle
         Cell subTitleCell = subTitleRow.createCell(0);
         subTitleCell.setCellStyle(subTitleStyle);
         subTitleCell.setCellValue(subTitle);
@@ -292,7 +292,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         Row titleRow = sheet.createRow(2);
         for (int i = 0; i < list.size(); i++) {
             sheet.setColumnWidth(i, 18 * 256);
-            if (i == 4 || i == 6)
+            if (i == 5 || i == 7)
                 sheet.setColumnWidth(i, 30 * 256);
             Cell cell = titleRow.createCell(i);
             cell.setCellValue(list.get(i));
@@ -307,8 +307,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         //  1. basic data from flowCases
         Cell approvalNoCell = dataRow.createCell(0);
         approvalNoCell.setCellValue(data.getApprovalNo() != null ? data.getApprovalNo().toString() : "");
-        dataRow.createCell(1).setCellValue(data.getCreateTime());
-        dataRow.createCell(2).setCellValue(data.getApprovalType());
+        dataRow.createCell(1).setCellValue(data.getApprovalType());
+        dataRow.createCell(2).setCellValue(data.getCreateTime());
         dataRow.createCell(3).setCellValue(data.getCreatorName());
         dataRow.createCell(4).setCellValue(data.getCreatorDepartment());
 
