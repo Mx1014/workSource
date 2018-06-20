@@ -8400,7 +8400,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		List<RentalBillRuleDTO> totalRules = getBillRules(bill);
-		
+
 		totalRules.addAll(rules);
 		//设置只用详情
 		setUseDetailStr(totalRules, rs, bill);
