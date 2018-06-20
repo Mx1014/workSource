@@ -36,6 +36,11 @@ public class CreateCustomerEntryInfoCommand {
     private String remark;
     private Long orgId;
     private Long communityId;
+    private BigDecimal visitTimeLength;
+    private  Long visitPersonUid;
+    private  String visitPersonName;
+    private String contactPhone;
+
 
     public Long getCommunityId() {
         return communityId;
@@ -147,6 +152,38 @@ public class CreateCustomerEntryInfoCommand {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public BigDecimal getVisitTimeLength() {
+        return visitTimeLength;
+    }
+
+    public void setVisitTimeLength(BigDecimal visitTimeLength) {
+        this.visitTimeLength = visitTimeLength;
+    }
+
+    public Long getVisitPersonUid() {
+        return visitPersonUid;
+    }
+
+    public void setVisitPersonUid(Long visitPersonUid) {
+        this.visitPersonUid = visitPersonUid;
+    }
+
+    public String getVisitPersonName() {
+        return visitPersonName;
+    }
+
+    public void setVisitPersonName(String visitPersonName) {
+        this.visitPersonName = visitPersonName;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 
     @Override
