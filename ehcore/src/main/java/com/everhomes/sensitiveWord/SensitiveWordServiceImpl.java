@@ -87,7 +87,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             return;
         }
         cmd.setCreatorUid(UserContext.currentUserId());
-        cmd.setNamespaceId(Long.valueOf(UserContext.getCurrentNamespaceId()));
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         cmd.setPublishTime(sdf.format(new Date()));
         List<String> wordList = new ArrayList<>();

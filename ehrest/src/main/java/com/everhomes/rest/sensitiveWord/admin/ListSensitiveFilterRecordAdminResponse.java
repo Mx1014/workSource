@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>nextAnchor: 下一页锚点</li>
+ *     <li>nextPageAnchor: 下一页锚点</li>
  *     <li>dtos: 敏感词过滤日志列表{@link com.everhomes.rest.sensitiveWord.admin.SensitiveFilterRecordAdminDTO}</li>
  * </ul>
  */
