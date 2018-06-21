@@ -629,7 +629,7 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			if(maxDefaultOrder >= 10000){
-				maxDefaultOrder = 9000;
+				maxDefaultOrder = 9998;
 			}
 			portalItem.setDefaultOrder(maxDefaultOrder + 1);
 
@@ -1966,7 +1966,7 @@ public class PortalServiceImpl implements PortalService {
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
 						item.setDefaultOrder(10000);
 					}else if(item.getDefaultOrder() != null && item.getDefaultOrder().intValue() >= 10000){
-						item.setDefaultOrder(9000);
+						item.setDefaultOrder(9999);
 					}
 
 					if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
