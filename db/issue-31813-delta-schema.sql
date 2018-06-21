@@ -1,217 +1,133 @@
-﻿-- 访客管理1.0start
--- 访客管理预约/访客表 , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_visitors`;
-CREATE TABLE `eh_visitor_sys_visitors` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT '父id,没有则为0，有则为父预约id，一般用于园区访客下访问公司预约',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
-  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `enterprise_id` BIGINT COMMENT '到访公司id',
-  `enterprise_name` VARCHAR(256)  COMMENT '到访公司名称,园区则无',
--- 以下字段必须出现在展示和搜索中，所以必须提出来作为字段
-  `visitor_name` VARCHAR(256) COMMENT '访客姓名',
-  `visitor_phone` VARCHAR(32) COMMENT '访客电话',
-  `visitor_type` TINYINT COMMENT '访客类型,0,临时访客；1,预约访客',
-  `visitor_sign_uri` VARCHAR(1024) COMMENT '访客签名图片uri（ipad签名）',
-  `visitor_sign_character` VARCHAR(1024) COMMENT '访客签名字符（客户端使用），也是自助签名姓名',
-  `visitor_pic_uri` VARCHAR(1024) COMMENT '访客头像图片uri（ipad上传访客照片）',
-  `door_guard_id` VARCHAR(1024) COMMENT '门禁二维码对应门禁id',
-  `door_guard_qrcode` VARCHAR(1024) COMMENT '门禁二维码字符串',
-  `door_guard_end_time` DATETIME COMMENT '门禁二维码失效时间',
-  `inviter_id` BIGINT COMMENT '邀请者的用户id',
-  `inviter_name` VARCHAR(256) COMMENT '邀请者的用户姓名',
-  `planned_visit_time` DATETIME COMMENT '计划到访时间',
-  `visit_time` DATETIME COMMENT '实际到访时间',
-  `visit_status` TINYINT COMMENT '访客状态，0，已删除; 1，未到访;2，等待确认; 3，已到访; 4，已拒绝; ',
-  `booking_status` TINYINT COMMENT '预约状态，0，已删除; 1，未到访;2，等待确认; 3，已到访;',
-  `send_message_inviter_flag` TINYINT COMMENT '确认到访时是否发送消息给邀请人，0，不发送; 1，发送',
-  `send_sms_Flag` TINYINT COMMENT '是否发送访客邀请函给邀请人，0，不发送; 1，发送',
-  `office_location_id` BIGINT COMMENT '办公地点ID',
-  `office_location_name` VARCHAR(512) COMMENT '办公地点名称',
-  `visit_reason_id` BIGINT COMMENT '到访是由Id',
-  `visit_reason` VARCHAR(512) COMMENT '到访是由',
-  `follow_up_numbers` BIGINT COMMENT '随访人员数量',
-  `invitation_no` VARCHAR(32) COMMENT '预约编号RG201804280001',
--- 以下字段属于表单自定义字段，不好控制，所以放在json中存储
-  `invalid_time` VARCHAR(32) COMMENT '访邀有效时长',
-  `plate_no` VARCHAR(32) COMMENT '车牌号码',
-  `id_number` VARCHAR(64) COMMENT '证件号码',
-  `visit_floor` VARCHAR(128) COMMENT '到访楼层',
-  `visit_addresses` VARCHAR(1024) COMMENT '到访门牌',
-  `form_json_value` TEXT COMMENT '表单提交的json',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
+﻿-- Designer: zhiwei zhang
+-- Description: ISSUE#28363 会议管理V1.0
 
+CREATE TABLE `eh_meeting_rooms` (
+    `id` BIGINT NOT NULL COMMENT '主键',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间ID',
+    `organization_id` BIGINT NOT NULL COMMENT '总公司ID',
+    `owner_type` VARCHAR(64) NOT NULL COMMENT '默认EhOrganizations，表示会议室归属的企业',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner_type对应的ID  会议室归属的分公司',
+    `name` VARCHAR(128) NOT NULL COMMENT '会议室名称',
+    `seat_count` INTEGER NOT NULL COMMENT '可容纳座位数',
+    `description` VARCHAR(512) COMMENT '描述',
+    `open_begin_time` TIME NOT NULL COMMENT '会议室可预订的起始时间',
+    `open_end_time` TIME NOT NULL COMMENT '会议室可预订的结束时间',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态:  0: DELETED 删除  1:CLOSED 不可用  2 : OPENING 可用',
+    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+    `operate_time` DATETIME NULL COMMENT '记录更新时间',
+    `operator_uid` BIGINT NULL COMMENT '记录更新人userId',
+    `operator_name` VARCHAR(64) NULL COMMENT '操作人姓名',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `u_eh_namespace_owner_name` (`namespace_id` , `organization_id`, `owner_type` , `owner_id` , `name`)
+)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='会议室资源管理表';
+
+
+CREATE TABLE `eh_meeting_reservations` (
+    `id` BIGINT NOT NULL COMMENT '主键',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间ID',
+    `organization_id` BIGINT NOT NULL COMMENT '总公司ID',
+    `subject` VARCHAR(256)  COMMENT '会议主题',
+    `content` VARCHAR(1024) COMMENT '会议详细内容',
+    `meeting_room_name` VARCHAR(128) NULL COMMENT '会议室名称，预约会议室后保存会议室名称，后期该值不随着会议室编辑而改变',
+    `meeting_room_seat_count` INTEGER NULL COMMENT '可容纳座位数，预约会议室后保存会议室名称，后期该值不随着会议室编辑而改变',
+    `meeting_room_id` BIGINT NULL COMMENT '会议室id,id of eh_meeting_rooms',
+    `meeting_sponsor_user_id` BIGINT NOT NULL DEFAULT 0 COMMENT '会议发起人的user_id',
+    `meeting_sponsor_detail_id` BIGINT NOT NULL COMMENT '会议发起人的detail_id',
+    `meeting_sponsor_name` VARCHAR(64) NOT NULL COMMENT '会议发起人的姓名',
+    `meeting_recorder_user_id` BIGINT NULL COMMENT '会议纪要人user_id',
+    `meeting_recorder_detail_id` BIGINT NULL COMMENT '会议纪要人detail_id',
+    `meeting_recorder_name` VARCHAR(64) NULL COMMENT '会议纪要人的姓名',
+    `invitation_user_count` INT COMMENT '会议受邀人数',
+    `meeting_date` DATE NOT NULL COMMENT '会议预定日期',
+    `expect_begin_time` DATETIME NOT NULL COMMENT '预计开始时间（预订会议室的时间）',
+    `expect_end_time` DATETIME NOT NULL COMMENT '预计结束时间（预订会议室的时间）',
+    `lock_begin_time` DATETIME NOT NULL COMMENT '实际锁定开始时间',
+    `lock_end_time` DATETIME NOT NULL COMMENT '实际锁定结束时间',
+    `act_begin_time` DATETIME NULL COMMENT '实际开始时间，只有用户操作了开始会议才有值',
+    `act_end_time` DATETIME NULL COMMENT '实际结束时间，只有用户操作了结束会议才有值',
+    `system_message_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启系统消息通知：0-关闭消息通知 1-开启消息通知',
+    `email_message_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启邮件通知：0-关闭邮件通知 1-开启邮件通知',
+    `act_remind_time` DATETIME NULL COMMENT '实际发出提醒的时间',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：0:DELETED 删除，1:时间锁定， 2:CANCELED 取消,3:NORMAL 正常状态',
+    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+    `operate_time` DATETIME NULL COMMENT '记录更新时间',
+    `operator_uid` BIGINT NULL COMMENT '记录更新人userId',
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_namespace_organization_id` (`namespace_id`,`organization_id`),
+    INDEX `i_eh_meeting_date`(`meeting_date`),
+    INDEX `i_eh_meeting_room_id` (`meeting_room_id`),
+    INDEX `i_eh_meeting_sponsor_detail_id` (`meeting_sponsor_detail_id`),
+    INDEX `i_eh_meeting_recorder_detail_id` (`meeting_recorder_detail_id`)
+)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='会议室预约表';
+
+
+CREATE TABLE `eh_meeting_invitations` (
+    `id` BIGINT NOT NULL,
+    `meeting_reservation_id` BIGINT NOT NULL COMMENT '会议预约eh_meeting_reservations的id',
+    `source_type` VARCHAR(45) NOT NULL COMMENT '机构或者个人：ORGANIZATION OR MEMBER_DETAIL',
+    `source_id` BIGINT NOT NULL COMMENT '机构id或员工detail_id',
+    `source_name` VARCHAR(64) NOT NULL COMMENT '机构名称或者员工的姓名',
+    `role_type` VARCHAR(16) NOT NULL COMMENT '参会人或抄送人',
+    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+    `operate_time` DATETIME NULL COMMENT '记录更新时间',
+    `operator_uid` BIGINT NULL COMMENT '记录更新人userId',
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_meeting_reservation_id` (`meeting_reservation_id`),
+    INDEX `i_eh_source_id`(`source_type`,`source_id`)
+)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='会议邀请清单，即参会人和抄送人清单';
+
+
+CREATE TABLE `eh_meeting_records` (
+    `id` BIGINT NOT NULL COMMENT '主键',
+    `meeting_reservation_id` BIGINT NOT NULL COMMENT '会议预约ID，id of eh_meeting_reservations',
+    `meeting_subject` VARCHAR(256)  COMMENT '会议主题，冗余字段，用于纪要列表展示主题名称',
+    `content` TEXT COMMENT '会议纪要详细内容',
+    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+    `operate_time` DATETIME NULL COMMENT '记录更新时间',
+    `operator_uid` BIGINT NULL COMMENT '记录更新人userId',
+    `operator_name` VARCHAR(64) NULL COMMENT '操作人姓名',
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_meeting_reservation_id` (`meeting_reservation_id`)
+)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='会议纪要表';
+
+
+-- End by: zhiwei zhang
+
+-- Designer: wuhan
+-- Description:  考勤4.2
+
+
+-- 考勤月报表
+CREATE TABLE `eh_punch_month_reports` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `punch_month` VARCHAR (8) DEFAULT NULL COMMENT 'yyyymm',
+  `owner_type` VARCHAR (128) DEFAULT NULL COMMENT 'owner resource(user/organization) type',
+  `owner_id` BIGINT DEFAULT NULL COMMENT 'owner resource(user/organization) id',
+  `process` INT COMMENT '进度百分比',
+  `error_info` VARCHAR (200) COMMENT '错误信息(如果归档错误)',
+  `status` TINYINT COMMENT '状态:0-创建更新中 1-创建完成 2-已归档',
+  `creator_uid` BIGINT DEFAULT NULL COMMENT '创建者',
+  `create_time` DATETIME DEFAULT NULL,
+  `punch_member_number` INT COMMENT '考勤人数',
+  `filer_uid` BIGINT DEFAULT NULL COMMENT '创建者',
+  `file_time` DATETIME DEFAULT NULL,
+  `update_time` DATETIME DEFAULT NULL,
+  `creator_Name` VARCHAR (128) DEFAULT NULL COMMENT '创建者姓名',
+  `filer_Name` VARCHAR (128) DEFAULT NULL COMMENT '归档者姓名',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理访客表 ';
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '考勤月报表' ;
 
--- 访客管理预约事件表 , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_actions`;
-CREATE TABLE `eh_visitor_sys_actions` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `visitor_id` BIGINT NOT NULL COMMENT '访客表id',
-	`action_type` TINYINT NOT NULL COMMENT '1,园区自助登记，2,园区到访确认，3,园区拒绝到访  4,企业自助登记，5,企业到访确认，6,企业拒绝到访',
-	`creator_name` VARCHAR(256) COMMENT '事件操作者',
-  `creator_uid` BIGINT COMMENT '创建者id，可以为空',
-  `create_time` DATETIME COMMENT '事件发生时间',
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
+ALTER TABLE `eh_punch_statistics` CHANGE status_list status_list TEXT COMMENT '校正后状态列表(月初到月末)';
+-- ALTER TABLE `eh_punch_statistics` ADD COLUMN month_report_id BIGINT COMMENT 'eh_punch_month_reports id';
+-- ALTER TABLE `eh_punch_statistics` ADD INDEX i_eh_report_id(`month_report_id`)  ;
+-- end by wuhan
 
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理预约编码表';
-
--- 访客管理预约编码表 , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_owner_code`;
-CREATE TABLE `eh_visitor_sys_owner_code` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
-  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-	`random_code` VARCHAR(16) NOT NULL UNIQUE COMMENT '随机码',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理预约编码表';
-
--- 访客管理预约流水码表 , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_coding`;
-CREATE TABLE `eh_visitor_sys_coding` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
-  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `day_mark` VARCHAR(16) COMMENT 'yyyymmdd 形式的字符串,日标识',
-	`serial_code` INTEGER NOT NULL DEFAULT 0 COMMENT '流水码',
-  `status` TINYINT  DEFAULT 2 COMMENT '0:未使用状态,2:使用状态',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理预约流水码表';
-
--- 访客管理设备表(ipad,printer) , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_devices`;
-CREATE TABLE `eh_visitor_sys_devices` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
-  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `device_type` VARCHAR(256)  COMMENT '设备类型，ipad or printer',
-  `device_type_name` VARCHAR(256)  COMMENT '设备类型名称，如ipad mini,printer,ipad pro',
-  `device_id` VARCHAR(256)  COMMENT '设备id',
-  `device_version` VARCHAR(128)  COMMENT '设备版本',
-  `device_name` VARCHAR(128) COMMENT '设备名称',
-  `app_version` VARCHAR(128) COMMENT 'app版本',
-  `device_pic_uri` VARCHAR(1024) COMMENT '设备图片uri',
-  `pairing_code` VARCHAR(32) COMMENT '配对成功时候使用的配对码',
-  `app_key` VARCHAR(256) COMMENT '设备后台请求接口appkey',
-  `secret_key` VARCHAR(256) COMMENT '设备后台请求接口secretkey',
-  `status` TINYINT  DEFAULT 2 COMMENT '0:被删除状态,2:正常状态',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理设备表 ';
-
--- 访客管理办公地点表 , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_office_locations`;
-CREATE TABLE `eh_visitor_sys_office_locations` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
-  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `office_location_name` VARCHAR(256)  COMMENT '办公地点名称',
-  `addresses` VARCHAR(512) COMMENT '办公地点地址',
-  `longitude` double DEFAULT NULL COMMENT '办公地点经度',
-  `latitude` double DEFAULT NULL COMMENT '办公地点维度',
-  `geohash` varchar(32) DEFAULT NULL COMMENT '办公地点经纬度hash值',
-  `map_addresses` varchar(512) DEFAULT NULL COMMENT '办公地点地图选点地址',
-  `status` TINYINT  DEFAULT 2 COMMENT '0:被删除状态,2:正常状态',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理办公地点表 ';
-
--- 访客管理配置表 , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_configurations`;
-CREATE TABLE `eh_visitor_sys_configurations` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
-  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `config_version` BIGINT COMMENT '配置版本',
-  `guide_info` varchar(2048) COMMENT '指引信息',
-  `owner_token` VARCHAR(32) NOT NULL UNIQUE COMMENT '自助登记二维码ownerToken地址',
-  `logo_uri` VARCHAR(1024) COMMENT '客户端封面图uri地址',
-  `welcome_pic_uri` VARCHAR(1024) COMMENT '客户端欢迎页面uri地址',
-  `ipad_theme_rgb` VARCHAR(32) COMMENT '客户端主题rgb',
-  `secrecy_agreement` TEXT COMMENT '保密协议',
-  `welcome_pages` TEXT COMMENT '欢迎页面',
-  `welcome_show_type` VARCHAR(32) COMMENT '欢迎页面类型，image显示图片，text显示富文本',
-  `config_json` TEXT   COMMENT '是否配置项的json配置,访客二维码，访客信息，交通指引，手机扫码自助登记，ipad启动欢迎页面，签署保密协议,允许拍照，允许跳过拍照，输入随访人数，是否启用门禁,门禁id',
-  `config_form_json` TEXT   COMMENT '表单内容是否显示的配置项，有效期，车牌号码，证件号码，来访备注，到访楼层，到访门牌',
-  `config_pass_card_json` TEXT   COMMENT '通行证配置，品牌形象，左侧图像，自定义字段，自定义字段，备注信息',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理配置表 ';
-
--- 访客管理黑名单表 , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_black_list`;
-CREATE TABLE `eh_visitor_sys_black_list` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community or organization',
-  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `visitor_name` VARCHAR(256) COMMENT '黑名单访客姓名',
-  `visitor_phone` VARCHAR(32) COMMENT '黑名单访客电话',
-  `reason` TEXT COMMENT '上黑名单原因',
-  `status` TINYINT  DEFAULT 2 COMMENT '0:被删除状态,2:正常状态',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理黑名单表 ';
-
--- 访客管理到访是由表 , add by dengs, 20180425
--- DROP TABLE IF EXISTS `eh_visitor_sys_visit_reason`;
-CREATE TABLE `eh_visitor_sys_visit_reason` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) COMMENT 'community or organization',
-  `owner_id` BIGINT COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
-  `visit_reason` VARCHAR(256) COMMENT '事由描述',
-  `status` TINYINT DEFAULT 2 COMMENT '0:被删除状态,2:正常状态',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `operator_uid` BIGINT,
-  `operate_time` DATETIME,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '访客管理到访是由表 ';
-
--- 访客管理1.0end
-
--- issue-31813 门禁2.9.7客户端支持自定义门禁授权方式 by liuyilin 20180615
+-- Designer: liuyilin
+-- Description:   issue-31813门禁2.9.7客户端支持自定义门禁授权方式 20180615
 ALTER TABLE `eh_door_access` ADD `max_duration` INTEGER COMMENT '有效时间最大值(天)';
 ALTER TABLE `eh_door_access` ADD `max_count` INTEGER COMMENT '按次授权最大次数';
 ALTER TABLE `eh_door_access` ADD `defualt_invalid_duration` INTEGER COMMENT '按次授权默认有效期(天)';
