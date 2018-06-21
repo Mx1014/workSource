@@ -124,8 +124,16 @@ public class Utils {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
-    static Long getLongByAddNatureMonth(Long source, int month) {
-
+    /**
+     * 计算从soucre之后month个月的月底
+     * @param source 时间戳
+     * @param month 月数量
+     * @param isIgnoreLastDay
+     *          是否忽略最后一天，true:如果是最后一天,不会忽略，如source是5月31日，month是2个月，那么计算的结果是6月30日
+     *                          false:如果是最后一天,忽略，如source是5月31日，month是2个月，那么计算的结果是7月31日
+     * @return
+     */
+    static Long getLongByAddNatureMonth(Long source, int month, boolean isIgnoreLastDay) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(source);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
@@ -134,7 +142,7 @@ public class Utils {
         //精确到秒,毫秒记为0，mysql不能存储毫秒，会自动转成秒，999ms 会转成 1S
         calendar.set(Calendar.MILLISECOND, 0);
 
-        if(isLastDayOfMonth(calendar)){
+        if(isLastDayOfMonth(calendar) && !isIgnoreLastDay){
             calendar.add(Calendar.MONTH, month);
             int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             calendar.set(Calendar.DAY_OF_MONTH, d);
@@ -145,6 +153,17 @@ public class Utils {
         }
 
         return calendar.getTimeInMillis();
+    }
+
+    /**
+     * 计算从soucre之后month个月的月底
+     * @param source 时间戳
+     * @param month 月数量
+     *              如果是最后一天,忽略，如source是5月31日，month是2个月，那么计算的结果是7月31日
+     * @return
+     */
+    static Long getLongByAddNatureMonth(Long source, int month) {
+        return getLongByAddNatureMonth(source,month,false);
     }
 
     static Long getFirstDayOfMonth(Long time) {
@@ -235,6 +254,29 @@ public class Utils {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    /**
+     * 中天停车场，要求月卡时间计算为30天
+     * @param source
+     * @param month
+     * @return
+     */
+    static Timestamp getTimestampByAddThirtyDays(long source, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source+1000);
+        calendar.add(Calendar.DAY_OF_MONTH,30*month-1);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+
+    public static Boolean isLastDayOfMonth(long now) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(now);
+        return isLastDayOfMonth(calendar);
     }
 
     /**
@@ -589,4 +631,9 @@ public class Utils {
 
         return result;
     }
+
+//    public static void main(String[] args) {
+//        Timestamp timestampByAddThirtyDays = Utils.getTimestampByAddThirtyDays(1517469829000L, 1);
+//        System.out.println(timestampByAddThirtyDays);
+//    }
 }
