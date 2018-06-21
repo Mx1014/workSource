@@ -2,8 +2,8 @@
 -- ADD BY 梁燕龙
 -- issue-26754 敏感词日志记录
 CREATE TABLE `eh_sensitive_filter_record` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-  `namespace_id` BIGINT NOT NULL COMMENT '域空间ID',
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL COMMENT '域空间ID',
   `sensitive_words` VARCHAR(128) COMMENT '敏感词',
   `module_id` BIGINT COMMENT '模块ID',
   `community_id` BIGINT COMMENT '项目ID',

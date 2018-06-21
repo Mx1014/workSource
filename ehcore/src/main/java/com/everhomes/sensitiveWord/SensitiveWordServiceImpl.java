@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.sensitiveWord;
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -34,7 +35,6 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
 
     private static AhoCorasickDoubleArrayTrie<String> acdat = null;
 
-    private final String fliePath = "C:/Users/Administrator/Desktop/";
     @Autowired
     private SensitiveFilterRecordProvider sensitiveFilterRecordProvider;
     @Autowired
@@ -44,9 +44,9 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
 
     @Override
     public void initSensitiveWords(InitSensitiveWordTrieCommand cmd) {
-        if (cmd.getUrl() != null && !StringUtils.isBlank(cmd.getUrl())) {
-            configurationProvider.setValue("sensitiveword.url",cmd.getUrl());
-            configurationProvider.setValue("sensitiveword.fileName",cmd.getFileName());
+        if (StringUtils.isNotBlank(cmd.getUrl())) {
+            configurationProvider.setValue(ConfigConstants.SENSITIVE_URL,cmd.getUrl());
+            configurationProvider.setValue(ConfigConstants.SENSITIVE_FILENAME,cmd.getFileName());
             init(cmd);
         }
     }
@@ -67,9 +67,15 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             while((s = in.readLine())!=null){//使用readLine方法，一次读一行
                 map.put(s.trim().toUpperCase(), s.trim().toUpperCase());
             }
-            in.close();
         }catch(Exception e){
             e.printStackTrace();
+        }finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
         acdat.build(map);
     }
@@ -118,14 +124,15 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
     public File downloadSensitiveWords() {
         BufferedReader in = null;
         BufferedWriter out = null;
-        String fileName = configurationProvider.getValue(0, "sensitiveword.fileName", "");
+        String fileName = configurationProvider.getValue(0, ConfigConstants.SENSITIVE_FILENAME, "");
+        String filePath = configurationProvider.getValue(0, ConfigConstants.SENSITIVE_FILEPATH, "");
         if (fileName == null || StringUtils.isBlank(fileName)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "file not exists.");
         }
-        File file = new File(fliePath+fileName+".txt");
+        File file = new File(filePath+fileName+".txt");
         try{
-            String url = configurationProvider.getValue(0, "sensitiveword.url", "");
+            String url = configurationProvider.getValue(0, ConfigConstants.SENSITIVE_URL, "");
             URL realUrl = new URL(url);
             String s = null;
             if (!file.exists()) {
@@ -139,17 +146,23 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
                 out.newLine();
             }
             out.flush();
-            in.close();
-            out.close();
+
         }catch(Exception e){
             e.printStackTrace();
+        }finally {
+            try {
+                in.close();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return file;
     }
 
     private void createSentiveRecord(FilterWordsCommand cmd, List<String> wordList) {
         SensitiveFilterRecord sensitiveFilterRecord = new SensitiveFilterRecord();
-        sensitiveFilterRecord.setNamespaceId(cmd.getNamespaceId());
+        sensitiveFilterRecord.setNamespaceId(cmd.getNamespaceId().intValue());
         sensitiveFilterRecord.setSensitiveWords(wordList.toString().substring(1,wordList.toString().length() - 1));
         sensitiveFilterRecord.setModuleId(ForumModuleType.fromCode(cmd.getModuleType()).getModuleId());
         if (cmd.getCommunityId() != null) {
@@ -190,7 +203,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         if (contextRefreshedEvent.getApplicationContext().getParent() == null) {
-            String url = configurationProvider.getValue(0, "sensitiveword.url", "");
+            String url = configurationProvider.getValue(0, ConfigConstants.SENSITIVE_URL, "");
             if (url != null && !StringUtils.isBlank(url)) {
                 InitSensitiveWordTrieCommand cmd = new InitSensitiveWordTrieCommand();
                 cmd.setUrl(url);

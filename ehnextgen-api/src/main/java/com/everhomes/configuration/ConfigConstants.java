@@ -178,4 +178,7 @@ public interface ConfigConstants {
     public static final String MEETING_RECORD_WORD_LIMIT = "meeting.record.word.limit";
 	public static final String ASSET_DINGFENGHUI_APPSHOWPAY = "asset.dingfenghui.appshowpay";
 	public static final String OPENAPI_LUFU_KEY = "openapi.lufu.key";
+	public static final String SENSITIVE_URL = "sensitiveword.url";
+    public static final String SENSITIVE_FILENAME = "sensitiveword.fileName";
+    public static final String SENSITIVE_FILEPATH = "sensitiveword.filePath";
 }
