@@ -20,6 +20,7 @@ import com.everhomes.oauthapi.OAuth2ApiService;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
 
@@ -258,14 +259,14 @@ public class MybayOpenApiBatchPersonnelDocking {
 			 ae.setEmployeeID(userID);
 			 ae.setName(user.getNickName());
 			 //因为对方接口会核验手机号邮箱，如为非法或不合格式的会校验不通过，但我们测试的用户有些手机号并非真的，所以自己测试时把这两个字段的值注掉，上线记得开回来
-			/* UserIdentifier uIdentifier = userProvider.findUserIdentifiersOfUser(userId,user.getNamespaceId());
+			 UserIdentifier uIdentifier = userProvider.findUserIdentifiersOfUser(userId,user.getNamespaceId());
 			 if(uIdentifier !=null){
 				 if(0 == uIdentifier.getIdentifierType()){
 					 ae.setMobilePhone(uIdentifier.getIdentifierToken());
 				 }else if(1 == uIdentifier.getIdentifierType()){
 					 ae.setEmail(uIdentifier.getIdentifierToken()); 
 				 }				 				 				 
-			 }	*/
+			 }	
 			//游客：Shenzhenwan_游客;认证用户：Shenzhenwan
 			 ae.setSubAccountName("Shenzhenwan");
 			 List<OrganizationMemberDTO> orgList =  oAuth2ApiService.getAuthenticationInfo(userId);
