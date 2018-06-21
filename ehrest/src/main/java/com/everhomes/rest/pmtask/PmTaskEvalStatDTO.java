@@ -87,4 +87,14 @@ public class PmTaskEvalStatDTO {
     public void setEvalAvg(String evalAvg) {
         this.evalAvg = evalAvg;
     }
+
+    public PmTaskEvalStatDTO() {
+        super();
+        this.amount5 = 0;
+        this.amount4 = 0;
+        this.amount3 = 0;
+        this.amount2 = 0;
+        this.amount1 = 0;
+        this.totalAmount = 0;
+    }
 }

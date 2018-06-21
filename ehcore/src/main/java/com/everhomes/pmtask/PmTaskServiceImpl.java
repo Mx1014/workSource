@@ -3002,7 +3002,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd) {
 		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,cmd.getModuleType(),cmd.getOwnerId(),cmd.getOwnerType());
-	 	List<FlowEvaluate> evals =  flowEvaluateProvider.findEvaluatesByFlowMainId(flow.getId(),flow.getFlowVersion());
+	 	List<FlowEvaluate> evals =  flowEvaluateProvider.findEvaluatesByFlowMainId(flow.getFlowMainId(),flow.getFlowVersion());
 	 	Map<Long,List<FlowEvaluate>> evalgroups = evals.stream().collect(Collectors.groupingBy(FlowEvaluate::getEvaluateItemId));
 	 	List<PmTaskEvalStatDTO> dtos = new ArrayList<>();
 	 	evalgroups.entrySet().forEach(e ->{
@@ -3021,7 +3021,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			});
 	 		stat.setTotalAmount(total);
 			totalstar = BigDecimal.valueOf(stat.getAmount1() + stat.getAmount2() * 2 + stat.getAmount3() * 3 + stat.getAmount4() * 4 + stat.getAmount5() * 5);
-			stat.setEvalAvg(totalstar.divide(BigDecimal.valueOf(total)).setScale(1).toString());
+			stat.setEvalAvg(totalstar.divide(BigDecimal.valueOf(total),1,BigDecimal.ROUND_HALF_UP).toString());
 			FlowEvaluateItem evalItem = this.flowEvaluateItemProvider.getFlowEvaluateItemById(e.getKey());
 			if(null != evalItem)
 				stat.setEvalName(evalItem.getName());
