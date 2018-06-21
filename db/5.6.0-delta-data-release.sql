@@ -200,14 +200,6 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 -- 审批3.0 end by ryan.
 
--- 人事2.7 数据同步 start by ryan.
-
--- 执行 /archives/syncArchivesConfigAndLogs 接口
-
--- 人事2.7 数据同步 end by ryan.
-
-
-
 -- 通用脚本
 -- ADD BY 梁燕龙
 -- issue-26754 敏感词过滤功能
