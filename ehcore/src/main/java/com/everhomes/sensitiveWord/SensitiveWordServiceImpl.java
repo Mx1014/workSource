@@ -18,6 +18,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -32,7 +34,7 @@ import java.util.*;
 
 @Component
 public class SensitiveWordServiceImpl implements SensitiveWordService, ApplicationListener<ContextRefreshedEvent>{
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SensitiveWordServiceImpl.class);
     private static AhoCorasickDoubleArrayTrie<String> acdat = null;
 
     @Autowired
@@ -148,12 +150,14 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             out.flush();
 
         }catch(Exception e){
+            LOGGER.error("msg",e);
             e.printStackTrace();
         }finally {
             try {
                 in.close();
                 out.close();
             } catch (IOException e) {
+                LOGGER.error("msg",e);
                 e.printStackTrace();
             }
         }
@@ -195,6 +199,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             // 建立实际的连接
             connection.connect();
         } catch (IOException e) {
+            LOGGER.error("msg",e);
             e.printStackTrace();
         }
         return connection;
