@@ -684,14 +684,27 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void exportBuildingByCommunityId(ListBuildingCommand cmd, HttpServletResponse response) {
 		cmd.setPageSize(10000);
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        if (community == null) {
+            LOGGER.error("Community is not exist.");
+            throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+                    "Community is not exist.");
+        }
 		List<BuildingDTO> buildings = listBuildings(cmd).getBuildings();
 		if (buildings != null && buildings.size() > 0) {
-			String fileName = String.format("楼栋信息_%s", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+			String fileName = String.format("楼栋信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
 
 			List<BuildingExportDetailDTO> data = buildings.stream().map(this::convertToExportDetail).collect(Collectors.toList());
+			excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
+                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
+                    "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
+                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                    "4、带有星号（*）的红色字段为必填项。\n" +
+                    "5、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
+                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
 			String[] propertyNames = {"name", "buildingNumber", "aliasName", "address", "latitudeLongitude", "trafficDescription", "managerName", "contact", "areaSize", "description"};
-			String[] titleNames = {"楼栋名称", "楼栋编号", "简称", "地址", "经纬度", "交通说明", "联系人", "联系电话","面积（平米）", "楼栋介绍"};
+			String[] titleNames = {"*楼栋名称", "楼栋编号", "简称", "*地址", "经纬度", "交通说明", "*联系人", "*联系电话","面积（平米）", "楼栋介绍"};
 			
 			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
