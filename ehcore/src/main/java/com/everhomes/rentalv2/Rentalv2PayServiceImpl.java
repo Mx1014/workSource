@@ -182,7 +182,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (accounts !=null && accounts.size()>0){//检测通用账户
             List<Rentalv2PayAccount> collect = accounts.stream().filter(r -> r.getAccountId().equals(cmd.getAccountId())).collect(Collectors.toList());
             if (collect!=null && collect.size()>0)
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
                         "此收款账户为通用收款账户，请重新选择");
         }
         if (cmd.getId() != null){//更新
@@ -191,7 +191,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                 accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
                         null, RuleSourceType.RESOURCE.getCode(), cmd.getResourceId(), null, null);
                 if (accounts!=null && accounts.size()>0)
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
                             cmd.getResourceName()+"已设置非通用收款账户，不可重复添加");
             }
             account.setAccountId(cmd.getAccountId());
