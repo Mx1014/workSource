@@ -1101,12 +1101,23 @@ public class AssetServiceImpl implements AssetService {
                 Byte billingCycle = standard.getBillingCycle();
                 //获得groupRule的时间设置, this time stands for the timing of charging items to be generated
                 /**
-                 * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在
+                 * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在, 而且所属的billgroup必须等于应用的categoryId
                  */
-                PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId()
+                PaymentBillGroupRule groupRule = null;
+                PaymentBillGroup group = null;
+                List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(rule.getChargingItemId()
                         ,rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
                 //获得group on which bill will be generted. Group defined billing cycle, bills day etc.
-                PaymentBillGroup group = assetProvider.getBillGroupById(groupRule.getBillGroupId());
+                for(PaymentBillGroupRule pgr : groupRules){
+                    group = assetProvider.getBillGroupById(pgr.getBillGroupId());
+                    if(group.getCategoryId() != null && group.getCategoryId().longValue() == categoryId.longValue()){
+                        groupRule = pgr;
+                        break;
+                    }
+                }
+                if(group == null || groupRule == null){
+                    throw new RuntimeException("bill group or grouprule is null");
+                }
                 Byte balanceDateType = group.getBalanceDateType();
                 //开始循环地址包裹
                 for(int j = 0; j < var1.size(); j ++){
