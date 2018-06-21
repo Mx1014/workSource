@@ -593,7 +593,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return num;
 	}*/
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
+		/*生成合同编号不用校验权限，下面这个是校验参数的权限，权限也是不对的*/
+		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
 		if(communityExist == null && cmd.getCommunityId() != null && cmd.getCategoryId() !=null) {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(), cmd.getCategoryId());
@@ -1652,7 +1653,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public void setContractParam(SetContractParamCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+		//查看获得参数接口，不做权限校验。
+		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
 		String contractNumberRulejson = StringHelper.toJsonString(cmd.getGenerateContractNumberRule());
 		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
 		param.setContractNumberRulejson(contractNumberRulejson);
@@ -1717,7 +1719,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
+		/*
+		 * 在实现合同多入口时，“合同基础参数配置”页面被产品移到了“管理”按钮里面，当功能属于“管理”里面的功能时，按产品的定义， 权限列表也不应该出现对应的权限（管理里只应用管理员才有权限、不需要通过权限列表来分配）；
+		 * 当把权限从权限列表去掉时（从eh_service_modules表里删除了对应的三级module），会导致原来的“合同基础参数配置” 页面所用的接口权限校验报错，原因是找不到对应的module_id了，参考了“管理”里的公共平台实现的“权限列表”、“工作流”界面，
+		 * 里面都没有进行权限校验（猜测其是通过控制“管理”按钮显示来实现权限控制的），所以“合同基础参数配置”所用的接口也相应地注释掉权限校验（ 该方式属于临时方式，等公共平台出台统一的规则后再按对应的规则修改）； 
+		 * 产品需求: 系统管理员和应用管理员的概念不一样，应用管理员是有这个应用的全部权限，系统管理员是拥有这个系统的全部权限， 所以应用管理员和系统管理员都有权限设置管理里面的所有功能包括合同基础参数设置。
+		 * 我们此处获得参数设置也是不需要进行权限校验的，所以在这里以及设置参数那边，我们把权限的校验规则给放开，不做权限校验。
+		 */
+		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
 		//查询在某一个入口，某一个小区，某个收付款合同类型，最低规则
 		if(communityExist != null) {
