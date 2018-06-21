@@ -1,3 +1,6 @@
+-- 通用脚本
+-- ADD BY 梁燕龙
+-- issue-26754 敏感词日志记录
 CREATE TABLE `eh_sensitive_filter_record` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `namespace_id` BIGINT NOT NULL COMMENT '域空间ID',
@@ -11,3 +14,4 @@ CREATE TABLE `eh_sensitive_filter_record` (
   `text` TEXT COMMENT '文本内容',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT = '敏感词过滤日志表';
+-- END
