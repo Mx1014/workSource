@@ -50,6 +50,8 @@ public interface ParkingErrorCode {
     int ERROR_INVITE_FAILD = 12000; //  发起访邀失败
     int ERROR_GENERATE_ORDER_NO= 13000; //  生成订单编号失败
 
+    int ERROR_SELF_DEFINE= 99999; //  自定义异常
+
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";
 
