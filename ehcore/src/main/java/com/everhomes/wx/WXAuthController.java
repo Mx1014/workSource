@@ -575,8 +575,8 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
             LOGGER.info("Process weixin auth request(userinfo calculate), startTime={}", startTime);
         }
         
-        String appId = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "");
-        String secret = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_SECRET, "");
+        String appId = request.getParameter("appId");
+        String secret = request.getParameter("secret");
 
         // 微信提供的临时code
         String code = request.getParameter("code");

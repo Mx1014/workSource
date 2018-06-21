@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>code: 微信传过来的code</li>
  *     <li>namespaceId: 域空间id</li>
+ *     <li>appId: 应用唯一标识，在微信开放平台提交应用审核通过后获得</li>
+ *     <li>secret: 应用密钥AppSecret</li>
  * </ul>
  */
 public class WxAuthCallBackCommand {
@@ -18,6 +20,26 @@ public class WxAuthCallBackCommand {
 
     @NotNull
     private Integer namespaceId;
+
+    private String appId;
+
+    private String secret;
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
 
     public String getCode() {
         return code;
