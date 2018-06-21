@@ -62,10 +62,10 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	public String build(String redirectUrl, Map<String, String[]> parameterMap) {
 		
 			//1.检验用户是否为“深圳湾科技发展有限公司”这个园区管理方所管理的公司的员工（检验其或空间ID是否为999987）
-			Integer namespace  = UserContext.getCurrentNamespaceId();
+			/*Integer namespace  = UserContext.getCurrentNamespaceId();
 			if(namespace.intValue() != MYBAY_NAMESPACE_ID){
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because the currentNamespaceId form UserContext is not eq MYBAY_NAMESPACE_ID 999987");
-			}
+			}*/
 			//2.先对接用户信息
 			Map<String,String> dockingMap = mybayOpenApiBatchPersonnelDocking.batchDocking();
 			if(dockingMap != null ){
@@ -284,7 +284,7 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 		map.remove("limitNamespaceId");
 		map.remove(APPKEY);
 		//存放form表单的JSP的名称
-		map.put("viewName", "mybay-redirect");
+		map.put("viewName", "mybay/mybay-redirect");
 		//检查必填字段
 		if(StringUtils.isBlank(map.get(ACCESSUSERID))){
 			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  {} is null",ACCESSUSERID);

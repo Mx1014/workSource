@@ -16,9 +16,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.oauthapi.OAuth2ApiService;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
 
@@ -48,6 +49,9 @@ public class MybayOpenApiBatchPersonnelDocking {
     private ConfigurationProvider configurationProvider;
 	@Autowired
     private UserProvider userProvider;
+	@Autowired
+	private OAuth2ApiService oAuth2ApiService;
+	
 	
 	/**
 	 * 人事信息对接总方法
@@ -264,6 +268,11 @@ public class MybayOpenApiBatchPersonnelDocking {
 			 }	*/
 			//游客：Shenzhenwan_游客;认证用户：Shenzhenwan
 			 ae.setSubAccountName("Shenzhenwan");
+			 List<OrganizationMemberDTO> orgList =  oAuth2ApiService.getAuthenticationInfo(userId);
+			 if(orgList!=null && orgList.size()>0){
+				 OrganizationMemberDTO dto = orgList.get(0);
+				 ae.setDept1(dto.getOrganizationName());
+			 }
 			 /*ae.setValid(valid);
 			 ae.setDept1(dept1);
 			 ae.setDept2(dept2);			 
