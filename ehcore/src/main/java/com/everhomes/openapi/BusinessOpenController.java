@@ -210,7 +210,6 @@ public class BusinessOpenController extends ControllerBase {
     public RestResponse listBizCategories() {
 
         Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
-        ;
         @SuppressWarnings("unchecked")
         //        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
                 //                CategoryAdminStatus.ACTIVE, orderBy);

@@ -6,25 +6,14 @@
 <html>
 <head>
 	 <script type="text/javascript">
-	 function autoSubmit(){
-		 document.getElementById('submitForm').submit();
-	 }
 	// alert("到底有没有提交表单啊");
-	 $(function(){ 
-	    // $("#submitForm").submit();
-	      $("#submit").bind("click",function(){
-	    	  $("#submitForm").submit();
-	      });
-	      autoSubmit();
-	      $("#submitForm").click();
-	      setTimeout( autoSubmit(),1000)
-	 });
-	 
+	window.onload = function() {
+		document.getElementById('submitForm').submit();
+	}	 
 	 </script>
 </head>
 <body>
-<p>我进入到这个方法了，为啥不跳</p>
-	<form name="submitForm" id="submitForm" action="${signInfoURL}" method="post">
+	<form id="submitForm" name="submitForm" action="${signInfoURL}" method="post">
 	<input type="hidden" name="AccessUserId" value="${AccessUserId}"/>
 	<input type="hidden" name="AppSecurity" value="${AppSecurity}"/>
 	<input type="hidden" name="Appid" value="${Appid}"/>
@@ -37,7 +26,7 @@
 	<input type="hidden" name="EmployeeID" value="${EmployeeID}"/>
 	<input type="hidden" name="Token" value="${Token}"/>
 	<input type="hidden" name="Signature" value="${Signature}"/>
-	<button name="按钮" id="submit"></button>
+	<div style="display:none;"><input type="submit" /></div>
 	</form>
 </body>
 
