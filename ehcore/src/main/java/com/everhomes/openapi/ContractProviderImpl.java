@@ -497,13 +497,15 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public String findContractIdByThirdPartyId(String contractId, String code) {
 		DSLContext context = getReadOnlyContext();
-		Long zuolinContractId = context.select(Tables.EH_CONTRACTS.ID)
+		List<Long> zuolinContractId = context.select(Tables.EH_CONTRACTS.ID)
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(contractId))
 				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(code))
-				.fetchOne(Tables.EH_CONTRACTS.ID);
-		if(zuolinContractId == null) return null;
-		return String.valueOf(zuolinContractId);
+				.fetch(Tables.EH_CONTRACTS.ID);
+		if(zuolinContractId.size() > 0) {
+			return String.valueOf(zuolinContractId.get(0));
+		}
+		return null;
 	}
 
 	@Override
