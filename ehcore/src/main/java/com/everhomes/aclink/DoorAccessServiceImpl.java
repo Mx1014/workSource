@@ -998,9 +998,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                             || doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
                         doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());
-                    } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
-                    		doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
-                    }else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
+                    } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_UCLBRT_DOOR.getCode())) {
+                		doorAuth.setDriver(DoorAccessDriverType.UCLBRT.getCode());
+	                } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
+	            		doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
+	                }else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
                         doorAuth.setDriver(DoorAccessDriverType.WANG_LONG.getCode());
                     } else {
                         doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
@@ -2556,7 +2558,33 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         qrKeys.add(qr);
     }
-    
+
+    /**
+     * 锁管家的app请求参数拼接
+     * @auther wh
+     * */ 
+    private void doUclbrtQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+        DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
+        qr.setCreateTimeMs(auth.getCreateTime().getTime());
+        qr.setCreatorUid(auth.getApproveUserId());
+        qr.setDoorGroupId(doorAccess.getId());
+        qr.setDoorName(doorAccess.getName());
+        qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
+        qr.setExpireTimeMs(auth.getKeyValidTime());
+        qr.setId(auth.getId());
+        qr.setQrDriver(DoorAccessDriverType.UCLBRT.getCode());
+        qr.setDoorOwnerId(doorAccess.getOwnerId());
+        qr.setDoorOwnerType(doorAccess.getOwnerType());
+        Aclink ca = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
+        if(null !=ca){
+        	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
+        	qr.setUclbrtParams(paramsDTO);
+        	qrKeys.add(qr);
+        }
+        
+        
+       
+    }
     //do huarun qr
     private void doHuarunQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
@@ -2627,6 +2655,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 //这个时间才是有效的二维码超时时间， dto 里面的时间是为了兼容过去的 app 版本。
             	resp.setQrTimeout(this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60));
                 doLinglingQRKey(user, doorAccess, auth, qrKeys);
+            } else if(DoorAccessDriverType.UCLBRT == DoorAccessDriverType.fromCode(auth.getDriver())){
+            	//锁管家是由app远程请求获取二维码的,这里给他组装存在aclinks表里的参数就行
+            	//added by wh
+                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
+                    continue;
+                }
+                
+                doUclbrtQRKey(user, doorAccess, auth, qrKeys);
             } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
             	//Forever + true of rightOpen
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
