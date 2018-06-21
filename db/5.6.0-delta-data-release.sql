@@ -86,3 +86,18 @@ INSERT INTO eh_punch_month_reports(id, punch_month,owner_type,owner_id, STATUS,P
   SELECT   (@id :=@id +1) id, punch_month,owner_type,owner_id, 1 STATUS,100 PROCESS,creator_uid,create_time,create_time ,COUNT(1) punch_member_number FROM eh_punch_statistics
 GROUP BY punch_month,owner_type,owner_id ORDER BY punch_month DESC   ;
 -- 考勤4.2  end
+
+
+-- 通用脚本  
+-- ADD BY huangmingbo
+-- ISSUE-31190 31378 
+SET @ns_id = 0;
+SET @jump_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_jump_module`), 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '停车缴费', 40800, 'zl://parking/query?displayName=停车缴费', NULL, 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '物业报修', 20100, NULL, '{"taskCategoryId":6,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '物品放行', 49200, NULL, '{"prefix":"/goods-move/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '园区入驻', 40100, NULL, '{"skipRoute":"zl://park-service/settle"}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '投诉建议', 20100, NULL, '{"taskCategoryId":9,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`, `parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '电商', 0, 'BIZS', NULL, 0, 1);
+
+-- END 
