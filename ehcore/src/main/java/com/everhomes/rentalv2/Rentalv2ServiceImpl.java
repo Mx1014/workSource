@@ -1725,7 +1725,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//设置当前场景公司id
 		rentalBill.setUserEnterpriseId(orgId);
 		rentalBill.setResourceName(rs.getResourceName());
-		rentalBill.setAddress(null);
+		//rentalBill.setAddress(null);
 		rentalBill.setNamespaceId(rsType.getNamespaceId());
 		rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 		rentalBill.setRentalUid(userId);
@@ -1774,7 +1774,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		RentalBillDTO billDTO = ConvertHelper.convert(rentalBill, RentalBillDTO.class);
 		mappingRentalBillDTO(billDTO, rentalBill, rs);
+
 		billDTO.setConfirmationPrompt(rs.getConfirmationPrompt());
+		billDTO.setHolidayOpenFlag(rule.getHolidayOpenFlag());
+		billDTO.setHolidayType(rule.getHolidayType());
+		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalBill.getResourceType(),
+				EhRentalv2Resources.class.getSimpleName(), rentalBill.getRentalResourceId());
+		List<Long> defaultDate = rule.getHolidayType().equals(RentalHolidayType.NORMAL_WEEKEND.getCode())?normalWeekend:legalHoliday;
+		List<Long> settingDate = closeDates == null || closeDates.size() == 0 ?new ArrayList<>():
+				closeDates.stream().map(r->r.getCloseDate().getTime()).collect(Collectors.toList());
+		Set<Long> defaultDateSet = new HashSet<>(defaultDate);
+		Set<Long> settingDateSet = new HashSet<>(settingDate);
+		defaultDateSet.removeAll(settingDateSet);
+		billDTO.setSpecialCloseDate(new ArrayList<>(defaultDateSet));
+		defaultDateSet = new HashSet<>(defaultDate);
+		settingDateSet.removeAll(defaultDateSet);
+		billDTO.setSpecialOpenDate(new ArrayList<>(settingDateSet));
 		return billDTO;
 	}
 
@@ -2830,7 +2845,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			dto.setUserName("用户不在系统中");
 		}
 		dto.setSiteName(bill.getResourceName());
-		dto.setAddress(bill.getAddress());
+		dto.setResourceAddress(bill.getAddress());
 		dto.setContactPhonenum(bill.getContactPhonenum());
 		
 		dto.setSpec(bill.getSpec());

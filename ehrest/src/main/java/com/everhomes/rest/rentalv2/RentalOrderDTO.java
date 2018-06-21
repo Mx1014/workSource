@@ -17,7 +17,8 @@ import java.util.Date;
  * <li>userPhone: 预约人手机号</li>
  * <li>userName: 预约人名称</li>
  * <li>addressId: 预约人门牌id</li>
- * <li>address: 门牌地址</li>
+ * <li>address: 公司门牌地址</li>
+ * <li>resourceAddress: 资源地址</li>
  * <li>vendorType: 支付方式, 10001-支付宝，10002-微信 {@link com.everhomes.rest.organization.VendorType}</li>
  * <li>startTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
@@ -53,6 +54,7 @@ public class RentalOrderDTO {
 	private String userName;
 	private Long addressId;
 	private String address;
+
 
 	private String vendorType;
 
@@ -316,4 +318,5 @@ public class RentalOrderDTO {
 	public void setPayMode(Byte payMode) {
 		this.payMode = payMode;
 	}
+
 }
