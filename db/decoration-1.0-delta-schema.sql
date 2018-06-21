@@ -34,7 +34,7 @@ CREATE TABLE `eh_decoration_workers` (
 `name`  varchar(64) NULL ,
 `phone`  varchar(64) NULL ,
 `image`  varchar(255) NULL ,
-`qrid`  varchar(64) NULL COMMENT '二维码id' ,
+`qrid`  varchar(255) NULL COMMENT '二维码id' ,
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
