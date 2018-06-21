@@ -1772,7 +1772,7 @@ public class PortalServiceImpl implements PortalService {
 			item.setItemName(portalItem.getName());
 			if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
 				setItemLayoutActionData(item, portalItem.getActionData());
-				item.setAccessControlType(AccessControlType.All.getCode());
+				item.setAccessControlType(AccessControlType.ALL.getCode());
 			}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
 				setItemModuleAppActionData(item, portalItem.getActionData());
 			}
@@ -1841,7 +1841,7 @@ public class PortalServiceImpl implements PortalService {
 			UrlActionData data = new UrlActionData();
 			data.setUrl(instanceConfig.getBizUrl());
 			item.setActionData(StringHelper.toJsonString(data));
-			item.setAccessControlType(AccessControlType.All.getCode());
+			item.setAccessControlType(AccessControlType.ALL.getCode());
 		}else if(instanceConfig.getModuleAppId() == null){
 			return;
 		}else{
@@ -1932,17 +1932,17 @@ public class PortalServiceImpl implements PortalService {
 					item.setScopeId(scope.getScopeId());
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
 						setItemLayoutActionData(item, portalItem.getActionData());
-						item.setAccessControlType(AccessControlType.All.getCode());
+						item.setAccessControlType(AccessControlType.ALL.getCode());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.MODULEAPP){
 						setItemModuleAppActionData(item, portalItem.getActionData());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ZUOLINURL){
 						item.setActionType(ActionType.OFFICIAL_URL.getCode());
 						item.setActionData(portalItem.getActionData());
-						item.setAccessControlType(AccessControlType.All.getCode());
+						item.setAccessControlType(AccessControlType.ALL.getCode());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.THIRDURL){
 						item.setActionType(ActionType.THIRDPART_URL.getCode());
 						item.setActionData(portalItem.getActionData());
-						item.setAccessControlType(AccessControlType.All.getCode());
+						item.setAccessControlType(AccessControlType.ALL.getCode());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
 						AllOrMoreActionData data = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 						if(AllOrMoreType.fromCode(data.getType()) == AllOrMoreType.ALL){
@@ -1956,7 +1956,7 @@ public class PortalServiceImpl implements PortalService {
 						item.setActionData(StringHelper.toJsonString(actionData));
 						item.setDefaultOrder(10000);
 						item.setDeleteFlag(DeleteFlagType.NO.getCode());
-						item.setAccessControlType(AccessControlType.All.getCode());
+						item.setAccessControlType(AccessControlType.ALL.getCode());
 					}
 
 					if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
