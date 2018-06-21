@@ -627,6 +627,10 @@ public class PortalServiceImpl implements PortalService {
 			if(maxDefaultOrder == null){
 				maxDefaultOrder = 0;
 			}
+
+			if(maxDefaultOrder >= 10000){
+				maxDefaultOrder = 9000;
+			}
 			portalItem.setDefaultOrder(maxDefaultOrder + 1);
 
 
@@ -1954,9 +1958,15 @@ public class PortalServiceImpl implements PortalService {
 						actionData.setItemLocation(portalItem.getItemLocation());
 						actionData.setItemGroup(portalItem.getGroupName());
 						item.setActionData(StringHelper.toJsonString(actionData));
-						item.setDefaultOrder(10000);
 						item.setDeleteFlag(DeleteFlagType.NO.getCode());
 						item.setAccessControlType(AccessControlType.ALL.getCode());
+					}
+
+					//全部更多在后面
+					if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
+						item.setDefaultOrder(10000);
+					}else if(item.getDefaultOrder() != null && item.getDefaultOrder().intValue() >= 10000){
+						item.setDefaultOrder(9000);
 					}
 
 					if(PortalPublishType.fromCode(publishType) == PortalPublishType.PREVIEW){
