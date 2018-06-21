@@ -1652,9 +1652,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addJoin(o);
 
 //        query.addJoin(o);
-        if(settledBillIds!=null&& settledBillIds.size()>0){
-            query.addConditions(o.BILL_ID.in(settledBillIds));
-        }
+        query.addConditions(o.BILL_ID.in(settledBillIds));
+
         query.addConditions(o.OWNER_TYPE.eq(ownerType));
         query.addConditions(o.OWNER_ID.eq(ownerId));
         query.addConditions(o.CHARGING_ITEMS_ID.eq(t.ID));
