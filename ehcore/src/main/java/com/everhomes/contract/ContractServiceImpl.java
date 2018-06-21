@@ -1371,18 +1371,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		contractProvider.updateContract(contract);
 		
-		//对变更合同  by tangcen
+		//add by tangcen
 		//将父合同中关联的未出账单记为无效账单
 		//前端传过来的CostGenerationMethod字段实际上是对父合同未出账单的处理方式，因此把CostGenerationMethod的值存在父合同中，而非子合同中
-//		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))&&
-//				!ContractStatus.DRAFT.equals(ContractStatus.fromStatus(cmd.getStatus()))) {
-//			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getCreateTime());
-//			contract.setCostGenerationMethod(null);
-//			Contract parentContract = checkContract(contract.getParentId());
-//			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
-//			contractProvider.updateContract(parentContract);
-//		}
-		
 		if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))){
 			contract.setCostGenerationMethod(null);
 			Contract parentContract = checkContract(contract.getParentId());
@@ -1964,9 +1955,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				ContractChargingItem chargingItem = chargingItems.get(0);
 				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
 			}
-			PaymentBills bill = assetProvider.getFirstUnsettledBill(parentContract.getId());
-			dto.setEndTimeByPeriod(bill.getDateStrEnd());
-			dto.setEndTimeByDay(yyyyMMdd.format(contract.getCreateTime()));
+			String endTimeStr = yyyyMMdd.format(contract.getCreateTime());
+			dto.setEndTimeByDay(endTimeStr);
+			
+			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,contract.getId());
+			dto.setEndTimeByPeriod(endTimeByPeriod);
 		}
 		
 		if (ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
@@ -1979,9 +1972,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 			String endTimeStr = yyyyMMdd.format(contract.getDenunciationTime());
 			dto.setEndTimeByDay(endTimeStr);
-			List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(contract.getId(),endTimeStr);
-			PaymentBills bill = bills.get(bills.size()-1);
-			dto.setEndTimeByPeriod(bill.getDateStrEnd());
+//			List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(contract.getId(),endTimeStr);
+//			PaymentBills bill = bills.get(bills.size()-1);
+//			dto.setEndTimeByPeriod(bill.getDateStrEnd());
+			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,contract.getId());
+			dto.setEndTimeByPeriod(endTimeByPeriod);
 		}
 		
 		processContractApartments(dto);
@@ -2435,6 +2430,33 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return false;
 	}
 
+//	@Override
+//	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+//		DurationParamDTO dto = new DurationParamDTO();
+//		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+//		List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(cmd.getContractId());
+//		if (chargingItems!=null && chargingItems.size()>0) {
+//			ContractChargingItem chargingItem = chargingItems.get(0);
+//			dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
+//		}
+//		if (cmd.getEndTimeByDay()!=null) {
+//			dto.setEndTimeByDay(yyyyMMdd.format(new Timestamp(cmd.getEndTimeByDay())));
+//		}
+////		PaymentBills bill = assetProvider.getFirstUnsettledBill(cmd.getContractId());
+//		String endTimeStr = yyyyMMdd.format(cmd.getEndTimeByDay());
+//		List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(cmd.getContractId(),endTimeStr);
+//		try {
+//			PaymentBills bill = bills.get(bills.size()-1);
+//			dto.setEndTimeByPeriod(bill.getDateStrEnd());
+//		} catch (Exception e) {
+//			dto.setEndTimeByPeriod(null);
+//			LOGGER.info("the bills size is : " + bills.size());
+//			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_BILL_NOT_EXIST,
+//					"the bills size for the contract is zero");
+//		}
+//		return dto;
+//	}
+	
 	@Override
 	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
 		DurationParamDTO dto = new DurationParamDTO();
@@ -2447,18 +2469,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (cmd.getEndTimeByDay()!=null) {
 			dto.setEndTimeByDay(yyyyMMdd.format(new Timestamp(cmd.getEndTimeByDay())));
 		}
-//		PaymentBills bill = assetProvider.getFirstUnsettledBill(cmd.getContractId());
 		String endTimeStr = yyyyMMdd.format(cmd.getEndTimeByDay());
-		List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(cmd.getContractId(),endTimeStr);
-		try {
-			PaymentBills bill = bills.get(bills.size()-1);
-			dto.setEndTimeByPeriod(bill.getDateStrEnd());
-		} catch (Exception e) {
-			dto.setEndTimeByPeriod(null);
-			LOGGER.info("the bills size is : " + bills.size());
-			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_BILL_NOT_EXIST,
-					"the bills size for the contract is zero");
-		}
+		String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,cmd.getContractId());
+		dto.setEndTimeByPeriod(endTimeByPeriod);
+		
 		return dto;
 	}
 }

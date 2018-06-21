@@ -58,10 +58,6 @@ import com.google.gson.Gson;
 import com.mysql.fabric.xmlrpc.base.Array;
 
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.jooq.Table;
 import org.jooq.*;
 import org.jooq.Field;
 import org.jooq.exception.DataAccessException;
@@ -4727,31 +4723,6 @@ public class AssetProviderImpl implements AssetProvider {
 		
 	}
 	
-/*	//add by tangcen 2018年6月12日16:18:51
-	//@Override
-	public void deleteUnsettledBillsOnContractId(Long contractId,List<Long> nextBillIds) {
-	    EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
-        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
-            this.dbProvider.execute((TransactionStatus status) -> {
-                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-                List<Long> billIds = context.select(t.ID)
-                        .from(t)
-                        .where(t.CONTRACT_ID.eq(contractId))
-                        .and(t.SWITCH.eq((byte) 0))
-                        .fetch(t.ID);
-                //删除时保存最近的一条未出账单信息
-                billIds.remove(nextBillIds);
-                context.update(t)
-                		.set(t.STATUS, (byte)3)
-                		.where(t.ID.in(billIds))
-                		.execute();
-                return null;
-            });
-            return null;
-        });
-	}*/
-	
 	//add by tangcen 2018年6月12日16:18:51
 	@Override
 	public PaymentBills getFirstUnsettledBill(Long contractId) {
@@ -4810,4 +4781,68 @@ public class AssetProviderImpl implements AssetProvider {
 	            });
 		return result;         
 	}
+
+	@Override
+	public void deleteUnsettledBills(Long contractId, String endTimeStr) {
+		//SELECT bill_id 
+		//FROM eh_payment_bill_items 
+		//WHERE date_str_begin<"2018-09-10" 
+		//AND contract_id=7322 
+		//GROUP BY bill_id
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
+        EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");
+        //获取要删除的账单的id
+        List<Long> billIds =context.select(billItems.BILL_ID)
+					        		.from(billItems)
+					        		.where(billItems.CONTRACT_ID.eq(contractId))
+					        		.and(billItems.DATE_STR_BEGIN.ge(endTimeStr))
+					        		.groupBy(billItems.BILL_ID)
+					        		.fetch(billItems.BILL_ID);
+        //删除无效的billItems
+        context.delete(billItems)
+        		.where(billItems.CONTRACT_ID.eq(contractId))
+        		.and(billItems.DATE_STR_BEGIN.ge(endTimeStr))
+        		.execute();
+        //删除无效的账单
+        context.delete(bills)
+        		.where(bills.ID.in(billIds))
+        		.execute();
+	}
+
+	@Override
+	public PaymentBills findLastBill(Long contractId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
+		List<PaymentBills> list = context.select()
+										.from(bills)
+										.where(bills.CONTRACT_ID.eq(contractId))
+										.orderBy(bills.DATE_STR_BEGIN.desc())
+										.limit(0,1)
+										.fetchInto(PaymentBills.class);
+		return list.get(0);		
+	}
+
+	@Override
+	public String findEndTimeByPeriod(String endTimeStr, Long contractId) {
+		//SELECT date_str_end FROM eh_payment_bill_items 
+		//WHERE date_str_begin<"2018-09-10" 
+		//AND contract_id=7322 
+		//GROUP BY date_str_end 
+		//ORDER BY date_str_end DESC 
+		//LIMIT 0,1
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");
+		String endTimeByPeriod = context.select(billItems.DATE_STR_END)	
+										.from(billItems)
+						        		.where(billItems.CONTRACT_ID.eq(contractId))
+						        		.and(billItems.DATE_STR_BEGIN.le(endTimeStr))
+						        		.groupBy(billItems.DATE_STR_END)
+						        		.orderBy(billItems.DATE_STR_END.desc())
+						        		.limit(0, 1)
+						        		.fetchOne(0,String.class);
+        
+        return endTimeByPeriod;	
+	}
+	
 }

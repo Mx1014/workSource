@@ -4638,56 +4638,86 @@ public class AssetServiceImpl implements AssetService {
 	 * contractId:要处理的合同id
 	 * endTime:合同实际结束时间
 	 */
+//	@Override
+//	public void deleteUnsettledBillsOnContractId(Byte costGenerationMethod,Long contractId,Timestamp endTime) {
+//		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+//		String endTimeStr = yyyyMMdd.format(endTime);
+//		//得到距离当前时间最近的一条未出账单的相关信息
+//		//PaymentBills bill = assetProvider.getFirstUnsettledBill(contractId);
+//		List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(contractId,endTimeStr);
+//		List<Long> billIds = new ArrayList<>();
+//		for (PaymentBills bill : bills) {
+//			billIds.add(bill.getId());
+//		}
+//		if (costGenerationMethod == (byte)0) {
+//			assetProvider.deleteUnsettledBillsOnContractId(contractId,billIds);
+//		}else if (costGenerationMethod == (byte)1) {
+//			PaymentBills bill = bills.get(bills.size()-1);
+//			List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+//			dealFirstUnsettledBill(bill,endTime);
+//			dealFirstUnsettledBillItems(billItems,endTime);
+//			assetProvider.updatePaymentBills(bill);
+//			assetProvider.deleteUnsettledBillsOnContractId(contractId,billIds);
+//			for (PaymentBillItems paymentBillItems : billItems) {
+//				assetProvider.updatePaymentItem(paymentBillItems);
+//			}
+//		}
+//		
+//	}
+	//add by tangcen 2018年6月21日17:02:54
+	/**
+	 * costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数
+	 * contractId:要处理的合同id
+	 * endTime:合同实际结束时间
+	 */
 	@Override
 	public void deleteUnsettledBillsOnContractId(Byte costGenerationMethod,Long contractId,Timestamp endTime) {
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 		String endTimeStr = yyyyMMdd.format(endTime);
-		//得到距离当前时间最近的一条未出账单的相关信息
-		//PaymentBills bill = assetProvider.getFirstUnsettledBill(contractId);
-		List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(contractId,endTimeStr);
-		List<Long> billIds = new ArrayList<>();
-		for (PaymentBills bill : bills) {
-			billIds.add(bill.getId());
-		}
+		
 		if (costGenerationMethod == (byte)0) {
-			assetProvider.deleteUnsettledBillsOnContractId(contractId,billIds);
+			assetProvider.deleteUnsettledBills(contractId,endTimeStr);
 		}else if (costGenerationMethod == (byte)1) {
-			PaymentBills bill = bills.get(bills.size()-1);
+			assetProvider.deleteUnsettledBills(contractId,endTimeStr);
+			PaymentBills bill = assetProvider.findLastBill(contractId);
 			List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
-			dealFirstUnsettledBill(bill,endTime);
-			dealFirstUnsettledBillItems(billItems,endTime);
-			assetProvider.updatePaymentBills(bill);
-			assetProvider.deleteUnsettledBillsOnContractId(contractId,billIds);
-			for (PaymentBillItems paymentBillItems : billItems) {
-				assetProvider.updatePaymentItem(paymentBillItems);
+			dealUnsettledBillItems(billItems,endTime);
+			bill.setAmountReceivable(new BigDecimal(0));
+			bill.setAmountReceived(new BigDecimal(0));
+			bill.setAmountOwed(new BigDecimal(0));
+			for (PaymentBillItems billItem : billItems) {
+				bill.setAmountReceivable(bill.getAmountReceivable().add(billItem.getAmountReceivable()));
+				bill.setAmountReceived(bill.getAmountReceived().add(billItem.getAmountReceived()));
+				bill.setAmountOwed(bill.getAmountOwed().add(billItem.getAmountOwed()));
+				assetProvider.updatePaymentItem(billItem);
 			}
+			assetProvider.updatePaymentBills(bill);
 		}
-		
 	}
-	//计算截断后最近的一条未出账单 add by tangcen 2018年6月12日
-	private void dealFirstUnsettledBill(PaymentBills bill,Timestamp endTime){
-		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-		try {
-			Date dateBegin = yyyyMMdd.parse(bill.getDateStrBegin());
-			Date dateEnd = yyyyMMdd.parse(bill.getDateStrEnd());
-			int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
-			int actualPeriod = daysBetween_date(dateBegin,endTime);
-			bill.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceivable()));
-			bill.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceived()));
-			bill.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,bill.getAmountOwed()));
-			String actualDateStrEnd = yyyyMMdd.format(endTime);
-			bill.setDateStrEnd(actualDateStrEnd);
-		} catch (ParseException e) {
-			if(LOGGER.isDebugEnabled()) {
-	            LOGGER.error("parse date error!");
-	        }
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "parse date error once");
-		}
-		
-	}
+//	//计算截断后最近的一条未出账单 add by tangcen 2018年6月12日
+//	private void dealFirstUnsettledBill(PaymentBills bill,Timestamp endTime){
+//		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+//		try {
+//			Date dateBegin = yyyyMMdd.parse(bill.getDateStrBegin());
+//			Date dateEnd = yyyyMMdd.parse(bill.getDateStrEnd());
+//			int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
+//			int actualPeriod = daysBetween_date(dateBegin,endTime);
+//			bill.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceivable()));
+//			bill.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceived()));
+//			bill.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,bill.getAmountOwed()));
+//			String actualDateStrEnd = yyyyMMdd.format(endTime);
+//			bill.setDateStrEnd(actualDateStrEnd);
+//		} catch (ParseException e) {
+//			if(LOGGER.isDebugEnabled()) {
+//	            LOGGER.error("parse date error!");
+//	        }
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//                    "parse date error once");
+//		}
+//	}
+	
 	//计算截断后最近的一条未出账单明细  add by tangcen 2018年6月12日
-	private void dealFirstUnsettledBillItems(List<PaymentBillItems> billItems,Timestamp endTime){
+	private void dealUnsettledBillItems(List<PaymentBillItems> billItems,Timestamp endTime){
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 		for (PaymentBillItems billItem : billItems) {
 			try {

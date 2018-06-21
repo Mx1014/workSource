@@ -348,5 +348,8 @@ public interface AssetProvider {
 	List<PaymentBillItems> findBillItemsByBillId(Long billId);
 	void updatePaymentBills(PaymentBills bill);
 	List<PaymentBills> getUnsettledBillBeforeEndtime(Long contractId, String endTimeStr);
+	void deleteUnsettledBills(Long contractId, String endTimeStr);
+	PaymentBills findLastBill(Long contractId);
+	String findEndTimeByPeriod(String endTimeStr, Long contractId);
 
 }
