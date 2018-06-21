@@ -76,6 +76,10 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
 
     @Override
     public void filterWords(FilterWordsCommand cmd) {
+        String settingFlag = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "sensitiveword.settings", "");
+        if (StringUtils.isBlank(settingFlag) || "false".equals(settingFlag)) {
+            return;
+        }
         cmd.setCreatorUid(UserContext.currentUserId());
         cmd.setNamespaceId(Long.valueOf(UserContext.getCurrentNamespaceId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
