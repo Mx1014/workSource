@@ -129,7 +129,6 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
     public void setup() {
-        // 现网是集群部署，这个判断是为了防止定时任务在多台机器执行
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             String triggerName = CalendarRemindScheduleJob.CALENDAR_REMIND_SCHEDULE + System.currentTimeMillis();
             String jobName = triggerName;

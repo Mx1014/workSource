@@ -70,3 +70,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('vis
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1411','zh_CN','配对码错误，请重新输入');
 
 -- ISSUE-21443 访客管理1.0 END
+
+-- begin janson template for super admin
+update eh_locale_templates set `text` = '${userName}（${contactToken}）已成为${organizationName}企业超级管理员。' where code = 20 and scope = 'organization.notification' and namespace_id = 0;
+-- end by janson 20180614

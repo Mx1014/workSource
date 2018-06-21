@@ -504,6 +504,10 @@ public interface OrganizationProvider {
     void deleteAllOrganizationAddressById(Long organizationId);
 
 	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
+ 
+	OrganizationMemberDetails findOrganizationMemberDetailsByTargetIdAndOrgId(Long targetId,
+			Long orgId);
+ 
 
 	Integer getUserOrgAmount(Long targetId);
 
@@ -511,4 +515,5 @@ public interface OrganizationProvider {
             Long targetId, Long organizationId);
     OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
             Long organizationId, String contactToken);
+ 
 }

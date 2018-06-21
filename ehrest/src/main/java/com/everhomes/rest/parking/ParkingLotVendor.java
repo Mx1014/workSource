@@ -33,7 +33,8 @@ public enum ParkingLotVendor {
     GUANG_DA_WE_GU("GUANG_DA_WE_GU"),
     KEXIN_XIAOMAO("KEXIN_XIAOMAO"),
     YINXINGZHIJIE_XIAOMAO("YINXINGZHIJIE_XIAOMAO"),
-    ELIVE_JIESHUN("ELIVE_JIESHUN");
+    ELIVE_JIESHUN("ELIVE_JIESHUN"),
+    BEE_ZHONGTIAN("BEE_ZHONGTIAN");
 
     private String code;
     private ParkingLotVendor(String code) {

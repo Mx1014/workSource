@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>month: 查询月份,比如201608</li> 
  * <li>startDay: 查询开始时间</li>
  * <li>endDay：查询结束时间</li>
+ * <li>monthReportId: 月报id</li>
  * <li>exceptionStatus：异常状态搜索,全部则不传 0-正常 1-异常{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li> 
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
@@ -37,6 +38,8 @@ public class ListPunchCountCommand {
 
 	private Long pageAnchor;
 	private Integer pageSize;
+
+	private Long monthReportId;
 	
 	public ListPunchCountCommand() {
     } 
@@ -103,6 +106,12 @@ public class ListPunchCountCommand {
 	}
 	public void setEndDay(Long endDay) {
 		this.endDay = endDay;
+	}
+	public Long getMonthReportId() {
+		return monthReportId;
+	}
+	public void setMonthReportId(Long monthReportId) {
+		this.monthReportId = monthReportId;
 	}  
 	
 	

@@ -275,7 +275,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		if(ADD_DISTANCE_MONTH.equals(monthCardTimeArithmetic)) {
 			tempEnd = Utils.getTimestampByAddDistanceMonth(expireTime,order.getMonthCount().intValue());
 		}else{
-			tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
+			tempEnd = new Timestamp(Utils.getLongByAddNatureMonth(expireTime, order.getMonthCount().intValue(),true));
 
 		}
 		String validStart = sdf1.format(tempStart);
@@ -478,7 +478,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 			dto.setPlateNumber(cmd.getPlateNumber());
 			long now = System.currentTimeMillis();
 			dto.setOpenDate(now);
-			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
 			if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
 				dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
 			}else {

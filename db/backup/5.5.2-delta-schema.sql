@@ -211,9 +211,8 @@ CREATE TABLE `eh_visitor_sys_visit_reason` (
 
 -- 访客管理1.0end
 
--- issue-31813门禁2.9.7客户端支持自定义门禁授权方式 by liuyilin 20180615
-ALTER TABLE `eh_door_access` ADD `max_duration` INTEGER COMMENT '有效时间最大值(天)';
-ALTER TABLE `eh_door_access` ADD `max_count` INTEGER COMMENT '按次授权最大次数';
-ALTER TABLE `eh_door_access` ADD `defualt_invalid_duration` INTEGER COMMENT '按次授权默认有效期(天)';
-ALTER TABLE `eh_door_access` ADD `enable_duration` TINYINT DEFAULT '1' COMMENT '是否支持按有效期开门';
--- issue-31813 END
+-- janson 升级链接长度
+ALTER TABLE `ehcore`.`eh_version_urls` CHANGE COLUMN `download_url` `download_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'example configuration: http://serviceurl/download/client-packages/${locale}/andriod-${major}-${minor}-${revision}.apk';
+ALTER TABLE `ehcore`.`eh_version_urls` CHANGE COLUMN `info_url` `info_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html';
+--end
+

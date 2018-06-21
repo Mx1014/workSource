@@ -770,7 +770,7 @@ public class FieldServiceImpl implements FieldService {
                     if(StringUtils.isNotEmpty(exportcmd.getTrackingUids())){
 //                        Long[] trackingUids = (Long[]) StringHelper.fromJsonString(exportcmd.getTrackingUids(), Long[].class);
 //                        cmd0.setTrackingUids(Arrays.asList(trackingUids));
-                        cmd0.setTrackingUid(Long.valueOf(exportcmd.getTrackingUids()));
+                        cmd0.setTrackingUids(Collections.singletonList(Long.valueOf(exportcmd.getTrackingUids())));
                     }
                     Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
                     SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
