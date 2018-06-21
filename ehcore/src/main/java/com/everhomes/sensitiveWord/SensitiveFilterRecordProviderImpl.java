@@ -41,7 +41,7 @@ public class SensitiveFilterRecordProviderImpl implements SensitiveFilterRecordP
     }
 
     @Override
-    public List<SensitiveFilterRecord> listSensitiveFilterRecord(Long namespaceId, Long communityId, Long pageAnchor, Integer pageSize) {
+    public List<SensitiveFilterRecord> listSensitiveFilterRecord(Integer namespaceId, Long communityId, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhSensitiveFilterRecord.class));
         SelectQuery<EhSensitiveFilterRecordRecord> query = context.selectQuery(Tables.EH_SENSITIVE_FILTER_RECORD);
 

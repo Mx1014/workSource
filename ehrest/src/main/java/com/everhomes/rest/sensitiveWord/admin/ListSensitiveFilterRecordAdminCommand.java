@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 public class ListSensitiveFilterRecordAdminCommand {
 
     @NotNull
-    private Long namespaceId;
+    private Integer namespaceId;
 
     private Long communityId;
 
@@ -24,11 +24,11 @@ public class ListSensitiveFilterRecordAdminCommand {
 
     private Integer pageSize;
 
-    public Long getNamespaceId() {
+    public Integer getNamespaceId() {
         return namespaceId;
     }
 
-    public void setNamespaceId(Long namespaceId) {
+    public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
 
