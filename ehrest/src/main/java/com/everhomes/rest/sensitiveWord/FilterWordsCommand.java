@@ -17,18 +17,18 @@ import java.util.List;
  */
 public class FilterWordsCommand {
 
-    private Long namespaceId;
+    private Integer namespaceId;
     private Byte moduleType;
     private Long communityId;
     private Long creatorUid;
     private String publishTime;
     private List<String> textList;
 
-    public Long getNamespaceId() {
+    public Integer getNamespaceId() {
         return namespaceId;
     }
 
-    public void setNamespaceId(Long namespaceId) {
+    public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
 

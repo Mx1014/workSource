@@ -18,6 +18,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -32,7 +34,7 @@ import java.util.*;
 
 @Component
 public class SensitiveWordServiceImpl implements SensitiveWordService, ApplicationListener<ContextRefreshedEvent>{
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SensitiveWordServiceImpl.class);
     private static AhoCorasickDoubleArrayTrie<String> acdat = null;
 
     @Autowired
@@ -82,12 +84,12 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
 
     @Override
     public void filterWords(FilterWordsCommand cmd) {
-        String settingFlag = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "sensitiveword.settings", "");
+        String settingFlag = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SENSITIVE_SETTING, "");
         if (StringUtils.isBlank(settingFlag) || "false".equals(settingFlag)) {
             return;
         }
         cmd.setCreatorUid(UserContext.currentUserId());
-        cmd.setNamespaceId(Long.valueOf(UserContext.getCurrentNamespaceId()));
+        cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         cmd.setPublishTime(sdf.format(new Date()));
         List<String> wordList = new ArrayList<>();
@@ -148,12 +150,14 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             out.flush();
 
         }catch(Exception e){
+            LOGGER.error("msg",e);
             e.printStackTrace();
         }finally {
             try {
                 in.close();
                 out.close();
             } catch (IOException e) {
+                LOGGER.error("msg",e);
                 e.printStackTrace();
             }
         }
@@ -195,6 +199,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
             // 建立实际的连接
             connection.connect();
         } catch (IOException e) {
+            LOGGER.error("msg",e);
             e.printStackTrace();
         }
         return connection;
