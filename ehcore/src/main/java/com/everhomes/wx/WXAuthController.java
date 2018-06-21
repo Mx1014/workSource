@@ -20,6 +20,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderProvider;
@@ -27,10 +28,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.user.LogonCommandResponse;
-import com.everhomes.rest.wx.CheckAuthCommand;
-import com.everhomes.rest.wx.CheckAuthResponse;
-import com.everhomes.rest.wx.CheckWxAuthIsBindPhoneResponse;
-import com.everhomes.rest.wx.WxAuthBindPhoneType;
+import com.everhomes.rest.wx.*;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import org.apache.http.*;
@@ -323,7 +321,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
     @RequestMapping("authCallbackByApp")
     @RestReturn(CheckWxAuthIsBindPhoneResponse.class)
     @RequireAuthentication(false)
-    public RestResponse authCallbackByApp(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public RestResponse authCallbackByApp(WxAuthCallBackCommand cmd, HttpServletRequest request, HttpServletResponse response) throws Exception {
         long startTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(callback calculate), startTime={}", startTime);

@@ -1400,6 +1400,28 @@ public class UserController extends ControllerBase {
 		resp.setErrorDescription("OK");
 		return resp;
 	}
+
+    /**
+     * <b>URL: /user/bindPhoneByApp</b>
+     * <p>微信APP验证并登录</p>
+     * @return
+     */
+    @RequestMapping("bindPhoneByApp")
+    @RestReturn(String.class)
+    public RestResponse bindPhoneByApp(@Valid BindPhoneCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        UserLogin login = this.userService.bindPhone(cmd);
+        String tokenString = "";
+        if(login != null){
+
+            LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+            tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+
+        }
+        RestResponse resp = new RestResponse(tokenString);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 	/**
 	 * <b>URL: /user/checkVerifyCodeAndResetPassword</b>
 	 * <p>校验验证码并重置密码</p>

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.wx;
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.user.LogonCommandResponse;
 import com.everhomes.util.StringHelper;
 
@@ -10,7 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>LogonCommandResponse: 登录参数，请参考{@link com.everhomes.rest.user.LogonCommandResponse}</li>
  * </ul>
  */
-public class CheckWxAuthIsBindPhoneResponse {
+public class CheckWxAuthIsBindPhoneResponse extends RestResponse{
 
     private Byte bindType;
 
