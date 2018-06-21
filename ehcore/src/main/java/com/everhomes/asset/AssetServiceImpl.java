@@ -1115,6 +1115,9 @@ public class AssetServiceImpl implements AssetService {
                         break;
                     }
                 }
+                if(group == null || groupRule == null){
+                    throw new RuntimeException("bill group or grouprule is null");
+                }
                 Byte balanceDateType = group.getBalanceDateType();
                 //开始循环地址包裹
                 for(int j = 0; j < var1.size(); j ++){
