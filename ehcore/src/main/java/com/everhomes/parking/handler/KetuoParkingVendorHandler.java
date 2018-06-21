@@ -158,7 +158,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
         return payTempCardFee(order);
     }
     
-    private void checkExpireDateIsNull(String expireDate,String plateNo) {
+    public void checkExpireDateIsNull(String expireDate,String plateNo) {
 		if(StringUtils.isBlank(expireDate)){
 			LOGGER.error("ExpireDate is null, plateNo={}", plateNo);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -323,6 +323,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		String iv = sdf2.format(new Date());
         String data = null;
 		try {
+			LOGGER.info("The request info, url={}, not encrypt param={}", url, JSONObject.toJSONString(param));
 			data = EncryptUtil.getEncString(param, key, iv);
 		} catch (Exception e) {
 			LOGGER.error("Parking encrypt param error, param={}, key={}, iv={}", param, key, iv, e);
