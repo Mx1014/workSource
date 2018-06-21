@@ -9,11 +9,8 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.decoration.DecorationAttachmentDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhDecorationApprovalValsDao;
-import com.everhomes.server.schema.tables.daos.EhDecorationRequestsDao;
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.daos.EhDecorationSettingDao;
-import com.everhomes.server.schema.tables.daos.EhDecorationWorkersDao;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -262,7 +259,7 @@ public class DecorationProviderImpl implements  DecorationProvider {
         if (pageSize!=null)
             step.limit(pageSize);
         step.where(condition);
-        return step.fetch().map(r->ConvertHelper.convert(r,DecorationWorker.class));
+        return step.orderBy(Tables.EH_DECORATION_WORKERS.ID.desc()).fetch().map(r->ConvertHelper.convert(r,DecorationWorker.class));
     }
 
     @Override
@@ -478,5 +475,15 @@ public class DecorationProviderImpl implements  DecorationProvider {
         query.setRecord(record);
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhDecorationCompanyChiefs.class, null);
+    }
+
+    @Override
+    public void updateCompanyChief(DecorationCompanyChief chief) {
+        assert (chief.getId() == null);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDecorationCompanyChiefsDao dao = new EhDecorationCompanyChiefsDao(context.configuration());
+        dao.update(chief);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDecorationApprovalVals.class,
+                chief.getId());
     }
 }

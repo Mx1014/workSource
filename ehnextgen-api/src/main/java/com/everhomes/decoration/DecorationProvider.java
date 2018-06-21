@@ -72,4 +72,6 @@ public interface DecorationProvider {
 
     void createCompanyChief(DecorationCompanyChief chief);
 
+    void updateCompanyChief(DecorationCompanyChief chief);
+
 }

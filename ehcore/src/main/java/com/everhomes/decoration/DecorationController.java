@@ -92,7 +92,7 @@ public class DecorationController extends ControllerBase {
     @RestReturn(DecorationRequestDTO.class)
     public RestResponse createRequest(@Valid CreateRequestCommand cmd) {
         DecorationRequestDTO dto = this.decorationService.createRequest(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -317,7 +317,7 @@ public class DecorationController extends ControllerBase {
      * </p>
      */
     @RequestMapping("completeDecoration")
-    @RestReturn(String.class)
+    @RestReturn(DecorationFlowCaseDTO.class)
     public RestResponse completeDecoration(@Valid RequestIdCommand cmd) {
         this.decorationService.completeDecoration(cmd);
         RestResponse response = new RestResponse();

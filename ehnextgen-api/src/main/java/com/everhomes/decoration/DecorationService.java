@@ -52,7 +52,7 @@ public interface DecorationService {
 
     void DecorationCheckSuccess(Long requestId);
 
-    void completeDecoration(RequestIdCommand cmd);
+    DecorationFlowCaseDTO completeDecoration(RequestIdCommand cmd);
 
     List<DecorationCompanyDTO> listDecorationCompanies (ListDecorationCompaniesCommand cmd);
 

@@ -30,6 +30,7 @@ public class DecorationIllustrationDTO {
     private Long ownerId;
     private List<DecorationAttachmentDTO> attachments;
     private BigDecimal refundAmount;
+    private String refoundComment;
 
 
     public Long getId() {
@@ -118,5 +119,13 @@ public class DecorationIllustrationDTO {
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
+    }
+
+    public String getRefoundComment() {
+        return refoundComment;
+    }
+
+    public void setRefoundComment(String refoundComment) {
+        this.refoundComment = refoundComment;
     }
 }

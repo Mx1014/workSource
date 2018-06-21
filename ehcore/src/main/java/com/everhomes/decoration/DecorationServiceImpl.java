@@ -137,6 +137,7 @@ public class DecorationServiceImpl implements  DecorationService {
         DecorationIllustrationDTO dto = this.getIllustration(cmd2);
         if (dto != null) {
             dto.setRefundAmount(request.getRefoundAmount());
+            dto.setRefoundComment(request.getRefoundComment());
         }
         return dto;
     }
@@ -380,7 +381,6 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd2.setContent(content.toString());
             cmd2.setFlowMainId(flow.getFlowMainId());
             cmd2.setFlowVersion(flow.getFlowVersion());
-            flowService.createFlowCase(cmd2);
            return null;
         });
 
@@ -874,6 +874,11 @@ public class DecorationServiceImpl implements  DecorationService {
                 chief.setPhone(request.getDecoratorPhone());
                 chief.setUid(request.getDecoratorUid());
                 this.decorationProvider.createCompanyChief(chief);
+            }else{
+                chiefs = chiefs.stream().filter(r-> r.getPhone().equals(request.getDecoratorPhone())).collect(Collectors.toList());
+                DecorationCompanyChief chief = chiefs.get(0);
+                chief.setName(request.getDecoratorName());
+                this.decorationProvider.updateCompanyChief(chief);
             }
             //工作流
             Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),request.getCommunityId(),
@@ -940,7 +945,7 @@ public class DecorationServiceImpl implements  DecorationService {
     }
 
     @Override
-    public void completeDecoration(RequestIdCommand cmd) {
+    public DecorationFlowCaseDTO completeDecoration(RequestIdCommand cmd) {
         DecorationRequest request = this.decorationProvider.getRequestById(cmd.getRequestId());
         if (DecorationRequestStatus.CONSTRACT.getCode() != request.getStatus())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -970,10 +975,13 @@ public class DecorationServiceImpl implements  DecorationService {
         cmd2.setContent(content.toString());
         cmd2.setFlowMainId(flow.getFlowMainId());
         cmd2.setFlowVersion(flow.getFlowVersion());
-        flowService.createFlowCase(cmd2);
+        FlowCase flowCase = flowService.createFlowCase(cmd2);
 
         request.setStatus(DecorationRequestStatus.CHECK.getCode());
         this.decorationProvider.updateDecorationRequest(request);
+        DecorationFlowCaseDTO dto = new DecorationFlowCaseDTO();
+        dto.setFlowCaseId(flowCase.getId());
+        return dto;
     }
 
     @Override
