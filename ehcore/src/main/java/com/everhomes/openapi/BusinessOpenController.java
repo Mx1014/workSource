@@ -150,6 +150,7 @@ import com.everhomes.util.WebTokenGenerator;
 public class BusinessOpenController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessOpenController.class);
     private static final String DEFAULT_SORT = "default_order";
+    private  static final String ERROR = "error";
     @Autowired
     private UserService userService;
 
@@ -1111,14 +1112,25 @@ public class BusinessOpenController extends ControllerBase {
     @RequestMapping(value = "postRedirect", method = RequestMethod.GET)
     public Object postRedirect(RedirectCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         OpenApiRedirectHandler handler = PlatformContext.getComponent(OpenApiRedirectHandler.PREFIX + cmd.getHandler());
+        RestResponse restResponse = new RestResponse(ErrorCodes.SCOPE_GENERAL);
         if (handler != null) { 
                 String str = handler.build(cmd.getUrl(), request.getParameterMap());
+                if(str == null ){
+                	
+                    restResponse.setErrorDescription("return null from handler by "+ cmd.getHandler());
+                    return restResponse;
+                }else if(str.startsWith(ERROR)){
+                	restResponse.setErrorDescription(str);
+                    return restResponse;
+                }
                 @SuppressWarnings("unchecked")
 				Map<String ,String> formParamsMap = (Map<String, String>) JSONObject.parse(str);
                 ModelAndView mv = new ModelAndView();
                 String viewName = formParamsMap.get("viewName");
                 if(StringUtils.isBlank(viewName)){
-                	viewName = "oauth2-redirect";
+                	
+                    restResponse.setErrorDescription("viewName is blank of handler by "+ cmd.getHandler());
+                    return restResponse;
                 }
                 //mv.setViewName("mybay-redirect");
                 mv.setViewName(viewName);
@@ -1126,7 +1138,6 @@ public class BusinessOpenController extends ControllerBase {
                 return mv;
            
         } else {
-        	RestResponse restResponse = new RestResponse(ErrorCodes.SCOPE_GENERAL);
             restResponse.setErrorDescription("Can not find handler by "+ cmd.getHandler());
             return restResponse;
         }

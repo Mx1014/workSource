@@ -50,7 +50,9 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	private  static final String APPID = "Appid";
 	private  static final String INITPAGE = "InitPage";
 	private  static final String CALLBACK = "Callback";
+	private  static final String ERROR = "error";
 	private  static final String ONERROR = "OnError";
+
 	@Autowired
     private ConfigurationProvider configurationProvider;
 	@Autowired
@@ -59,36 +61,60 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	private MybayOpenApiBatchPersonnelDocking mybayOpenApiBatchPersonnelDocking;
 
 	@Override
-	public String build(String redirectUrl, Map<String, String[]> parameterMap) {
+	public String build(String redirectUrl, Map<String, String[]> parameterMap){
 		
 			//1.检验用户是否为“深圳湾科技发展有限公司”这个园区管理方所管理的公司的员工（检验其或空间ID是否为999987）
 			/*Integer namespace  = UserContext.getCurrentNamespaceId();
 			if(namespace.intValue() != MYBAY_NAMESPACE_ID){
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because the currentNamespaceId form UserContext is not eq MYBAY_NAMESPACE_ID 999987");
-			}*/
+			}*/		   
 			//2.先对接用户信息
-			Map<String,String> dockingMap = mybayOpenApiBatchPersonnelDocking.batchDocking();
+			Map<String, String> dockingMap;
+			try {
+				dockingMap = mybayOpenApiBatchPersonnelDocking.batchDocking();
+				 //先判断用户是否开卡完成（针对第一次）
+			    boolean IsOpened = mybayOpenApiBatchPersonnelDocking.isFinishDocking();
+			    //当开卡未完成时，想办法等他一下
+			    while(!IsOpened){
+			    		try {
+							Thread.sleep(2000);
+							IsOpened = mybayOpenApiBatchPersonnelDocking.isFinishDocking();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+			    }
+			} catch (IOException e) {
+				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because " +e);	
+				return ERROR+":"+e;
+			}
 			if(dockingMap != null ){
 				String result = dockingMap.get("result");
 				//对接失败打印失败信息
 				if(!SUCCESS.equals(result)){
 					LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, errorMsg:"+dockingMap.get("errorMsg"));
+					 return ERROR+":"+dockingMap.get("errorMsg");
 				}
 			}
 			//3.获取所有该对接的配置信息
 			Map<String ,String> configurations = getConfigurations(MYBAY_NAMESPACE_ID);
 			//4.获取Ticket
 			//String Token = getTicket(configurations.get("AppKey") , configurations.get("AppSecurity")  , configurations.get("getTicketURL"));
-			String Token = getTicket(configurations.get(APPKEY) , configurations.get(APPSECURITY)  , configurations.get(GETTICKETURL));
+			String Token;
+			try {
+				Token = getTicket(configurations.get(APPKEY) , configurations.get(APPSECURITY)  , configurations.get(GETTICKETURL));
+			} catch (Exception e) {
+				return ERROR+":"+e;
+			}
 			if(Token == null || StringUtils.isBlank(Token)){
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because Token is null");
+				return ERROR+":can not get Token";
 			}
 			configurations.put(TOKEN, Token);
 			//5.获取员工编号
 			Long userId = UserContext.currentUserId();
 			if(userId == null ){
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because userId is null" );
-				return null;
+				return ERROR+":userId is null ";
 			}
 			String EmployeeID= String.valueOf(userId);
 			configurations.put(EMPLOYEEID, EmployeeID);
@@ -96,7 +122,7 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 			//请求URL为空是没法做下去的
 			if(StringUtils.isBlank(signInfoURL)){
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because {} is null",SIGNINFOURL );
-				return null;
+				return ERROR+":signInfoURL is null ";
 			}
 			//6.md5加密 Signature
 			String Signature = encodeMD5Signature(configurations);
@@ -114,7 +140,7 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	 * @param paramsMap
 	 * @return 返回空或空字符串则说明获取失败，不过这得在方法调用处判断，这里只管获取
 	 */
-	private String  getTicket(String AppKey , String AppSecurity , String URL ){
+	private String  getTicket(String AppKey , String AppSecurity , String URL ) throws Exception {
 		//必要参数一个都不能少，否则无法获取所要的信息
 		if(StringUtils.isBlank(AppKey)){
 			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because {} is null or blank ",APPKEY);
@@ -135,7 +161,8 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 			 response = HttpUtils.post(URL, paramsMap, 600, false);
 		} catch (IOException e) {
 			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because " +e);
-			return null;
+			throw e ;
+			
 		}
 		//返回信息不为空，则认为是其约定的JSON字符串：{"Token":"5514eea9c3d1b72148000001","Message":"","Code":0,"Success":true}
 		if(response != null ){
@@ -154,7 +181,8 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 					return (String) map.get(TOKEN);
 				}else {
 					LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because Code=" +Code+",Message="+map.get("Message"));
-					return null;
+					throw new Exception(map.get("Message")==null?"":map.get("Message").toString());
+	
 				}
 			}			
 		}

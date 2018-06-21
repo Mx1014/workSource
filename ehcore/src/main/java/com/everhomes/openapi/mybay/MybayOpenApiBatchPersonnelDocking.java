@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.protocol.HTTP;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +40,14 @@ public class MybayOpenApiBatchPersonnelDocking {
 	//下面字段串为对方提供的参数名，如有修改，直接修改此处即可，代码中不用管
 	private  static final String BATCH_PRO_URL = "batch_pro_URL";
 	private  static final String RES_PRO_URL = "res_pro_URL";
+	private  static final String ISOPENEDCARDURL = "IsOpenedCardURL";
 	private  static final String EMPLOYEEID = "EmployeeId";
 	private  static final String APPKEY = "appKey";
 	private  static final String APPSECURITY = "appSecurity";
 	private  static final String TICKET = "Ticket";
 	private  static final String APPID = "Appid";
 	private  static final String LOGONAPPID = "LogonAppid";
+	private  static final String CORPID = "CorpID";
 	
 	@Autowired
     private ConfigurationProvider configurationProvider;
@@ -58,7 +61,7 @@ public class MybayOpenApiBatchPersonnelDocking {
 	 * 人事信息对接总方法
 	 * @return 
 	 */
-	public Map<String,String> batchDocking(){
+	public Map<String,String> batchDocking() throws IOException{
 		//1.获取所有该对接的配置信息
 		Map<String ,String> configurations = getConfigurations(MYBAY_NAMESPACE_ID);
 		String getTiketURL = configurations.get(BATCH_PRO_URL);
@@ -85,15 +88,46 @@ public class MybayOpenApiBatchPersonnelDocking {
 		//4.创建post 请求
 		String requestString = StringHelper.toJsonString(requestObj);
 		try {
-			String  response = HttpUtils.postJson(batchURL, requestString, 600);
+			String  response = HttpUtils.postJson(batchURL, requestString, 600,HTTP.UTF_8);
 			 Map<String,String> resultMap = handleResponse(response);
 			 return resultMap ;
 		} catch (IOException e) {
 			LOGGER.error("MybayOpenApiBatchPersonnelDocking bulid is failed, because " +e);
-			return null;
+			throw e;
+		}
+		
+	}
+	public boolean isFinishDocking(){
+		//1.获取所有该对接的配置信息
+		Map<String ,String> configurations = getConfigurations(MYBAY_NAMESPACE_ID);
+		String getTiketURL = configurations.get(BATCH_PRO_URL);
+		String IsOpenedCardURL = configurations.get(ISOPENEDCARDURL);
+		Long userId = UserContext.currentUserId();
+		if(userId == null ){
+			LOGGER.error("MybayOpenApiBatchPersonnelDocking bulid is failed, because userId is null" );
+			return false;
+		}
+		String EmployeeId= String.valueOf(userId);
+		configurations.put(EMPLOYEEID, EmployeeId);
+		//2.获取Ticket
+		String Ticket = getTicket(configurations.get(APPKEY) , configurations.get(APPSECURITY)  , getTiketURL);
+		if(Ticket == null || StringUtils.isBlank(Ticket)){
+		   LOGGER.error("MybayOpenApiBatchPersonnelDocking bulid is failed, because Ticket is null");
+		}		
+		//3.判断是否开卡
+		Map<String ,String> paramsMap = new HashMap<String ,String>();
+		paramsMap.put(TICKET, Ticket);
+		paramsMap.put(CORPID, configurations.get(APPID));
+		paramsMap.put(EMPLOYEEID, EmployeeId);
+		String response = null ;
+		try {
+			 response = HttpUtils.post(IsOpenedCardURL, paramsMap, 600, false);
+			 return handleIsDockingResponse(response);
+		} catch (IOException e) {
+			LOGGER.error("MybayOpenApiBatchPersonnelDocking bulid is failed, because " +e);
+			return false;
 		}
 	}
-	
 	/**
 	 * 获取Ticket
 	 * 拿着对方提供的URL 及 接入账号和密码去获取令牌
@@ -174,6 +208,7 @@ public class MybayOpenApiBatchPersonnelDocking {
 		String soap_pro_URL = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_SOAP_PRODUCTION_BATCHURL,"");
 		String res_test_URL = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_RESTFUL_TEST_BATCHURL,"");
 		String soap_test_URL = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_SOAP_TEST_BATCHURL,"");
+		String IsOpenedCardURL = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_ISOPENEDCARDURL,"");
 
 		
 		paramsMap.put(APPKEY, AppKey);		
@@ -187,6 +222,7 @@ public class MybayOpenApiBatchPersonnelDocking {
 		paramsMap.put("soap_pro_URL", soap_pro_URL);
 		paramsMap.put("res_test_URL", res_test_URL);
 		paramsMap.put("soap_test_URL", soap_test_URL);
+		paramsMap.put(ISOPENEDCARDURL, IsOpenedCardURL);
 
 		return paramsMap ;
 	}
@@ -262,7 +298,7 @@ public class MybayOpenApiBatchPersonnelDocking {
 			 UserIdentifier uIdentifier = userProvider.findUserIdentifiersOfUser(userId,user.getNamespaceId());
 			 if(uIdentifier !=null){
 				 if(0 == uIdentifier.getIdentifierType()){
-					 ae.setMobilePhone(uIdentifier.getIdentifierToken());
+					// ae.setMobilePhone(uIdentifier.getIdentifierToken());
 				 }else if(1 == uIdentifier.getIdentifierType()){
 					 ae.setEmail(uIdentifier.getIdentifierToken()); 
 				 }				 				 				 
@@ -325,5 +361,25 @@ public class MybayOpenApiBatchPersonnelDocking {
 			}
 		}		
 		return resultMap;
+	}
+	
+	/**
+	 * 处理是否开卡接口返回的参数
+	 * @param response
+	 * @return
+	 */
+	private boolean handleIsDockingResponse(String response){
+
+		if(StringUtils.isBlank(response)){
+			return false;
+		}
+		Map<String,String> resultMap = new HashMap<String,String>();
+		//先将JSON字符串转为mapN对象
+		Map<String ,Object> jsonmap  = JSONObject.parseObject(response);
+		if(jsonmap != null){
+			boolean result =  (boolean)jsonmap.get("IsOpened");
+			return result;
+		}	
+		return false ;
 	}
 }

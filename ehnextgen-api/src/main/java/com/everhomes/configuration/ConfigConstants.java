@@ -196,5 +196,6 @@ public interface ConfigConstants {
 	public static final String CT_SOAP_PRODUCTION_BATCHURL = "ct.soap.production.batchURL";
 	public static final String CT_RESTFUL_TEST_BATCHURL = "ct.restful.test.batchURL";
 	public static final String CT_SOAP_TEST_BATCHURL = "ct.soap.test.batchURL";
+	public static final String CT_ISOPENEDCARDURL = "ct.isOpenedCardURL";
 	//<!--深圳湾携程用户对接所用配置项 end   -->
 }
