@@ -6794,7 +6794,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 LOGGER.error("organization owner dateTime is not  exist  , data = {}", dto);
                 log.setData(dto);
                 log.setErrorLog("organization owner dateTime format error ");
-                log.setFieldName("迁入日期");
+                log.setFieldName("生日");
                 log.setCode(PropertyServiceErrorCode.ERROR_IMPORT_DATE_INVALIED_ERROR);
                 resultLogs.add(log);
                 continue;
