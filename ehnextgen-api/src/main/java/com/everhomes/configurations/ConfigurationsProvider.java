@@ -48,7 +48,7 @@ public interface ConfigurationsProvider {
 	 * 删除配置项信息，主键不能为空
 	 * @param id	主键ID
 	 */
-	void deleteConfiguration(Integer id);
+	void deleteConfiguration(Configurations bo);
 	
 
 }

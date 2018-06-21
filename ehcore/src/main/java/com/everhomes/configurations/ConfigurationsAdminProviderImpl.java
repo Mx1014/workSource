@@ -12,6 +12,8 @@ import org.jooq.SelectJoinStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -130,7 +132,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		return result;
 	}
 
-	@Override
+	@Override	
 	public Configurations getConfigurationById(Integer id, Integer namespaceId) {
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -144,6 +146,8 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	}
 
 	@Override
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+			          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
 	public void crteateConfiguration(Configurations bo) {
 		
 		//重复校验
@@ -165,6 +169,8 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	}
 
 	@Override
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+	          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
 	public void updateConfiguration(Configurations bo) {
 		
 		//修改前先查询出来
@@ -189,10 +195,10 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	}
 
 	@Override
-	public void deleteConfiguration(Integer id) {
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+	          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
+	public void deleteConfiguration(Configurations bo) {
 		
-		//删除前先查询出来
-		Configurations bo = getConfigurationById(id,null);
 		
 		//是否只读校验，只读数据不能删除
 		if(bo.getIsReadonly() !=null && READONLY == bo.getIsReadonly().intValue()){
@@ -200,10 +206,10 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		}
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhConfigurationsDao dao = new EhConfigurationsDao(context.configuration());
-		dao.deleteById(id);
+		dao.deleteById(bo.getId());
 		
 		//广播删除数据事件
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhConfigurations.class, id.longValue());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhConfigurations.class, bo.getId().longValue());
 		
 		//保存日志		
 		saveChageRecord(bo,null,DELETE);

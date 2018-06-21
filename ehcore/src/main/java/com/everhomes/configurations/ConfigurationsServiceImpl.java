@@ -132,8 +132,9 @@ public class ConfigurationsServiceImpl implements  ConfigurationsService{
 				String msg = "cmd or cmd.id cannot be null.";
 				throwSelfDefNullException(msg);
 		}
+		Configurations bo = configurationsProvider.getConfigurationById(cmd.getId(), null);
 		//调Provider 层进行
-		configurationsProvider.deleteConfiguration(cmd.getId());		
+		configurationsProvider.deleteConfiguration(bo);		
 	}
 
 	/**
