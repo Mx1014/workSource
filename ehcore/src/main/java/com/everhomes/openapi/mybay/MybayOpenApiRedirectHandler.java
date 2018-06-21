@@ -12,9 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigConstants;
@@ -33,14 +30,33 @@ import com.everhomes.util.StringHelper;
 public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(MybayOpenApiRedirectHandler.class);
-	//获取Ticket
-	//private  static final String GETTICKETURL = "https://ct.ctrip.com/corpservice/authorize/getticket";
+	
 	private  static final int SUCCESS_CODE = 0 ;
 	private  static final int MYBAY_NAMESPACE_ID = 999987;
+	private  static final String SUCCESS = "Success";
+	//下面字段串为对方提供的参数名，如有修改，直接修改此处即可，代码中不用管
+	private  static final String APPKEY = "AppKey";
+	private  static final String APPSECURITY = "AppSecurity";
+	private  static final String GETTICKETURL = "getTicketURL";
+	private  static final String TOKEN = "Token";
+	private  static final String EMPLOYEEID = "EmployeeID";
+	private  static final String SIGNINFOURL = "signInfoURL";
+	private  static final String SIGNATURE = "Signature";
+	private  static final String ACCESSUSERID = "AccessUserId";
+	private  static final String CORPPAYTYPE = "CorpPayType";
+	private  static final String COSTCENTER1 = "CostCenter1";
+	private  static final String COSTCENTER2 = "CostCenter2";
+	private  static final String COSTCENTER3 = "CostCenter3";
+	private  static final String APPID = "Appid";
+	private  static final String INITPAGE = "InitPage";
+	private  static final String CALLBACK = "Callback";
+	private  static final String ONERROR = "OnError";
 	@Autowired
     private ConfigurationProvider configurationProvider;
 	@Autowired
     private UserProvider userProvider;
+	@Autowired
+	private MybayOpenApiBatchPersonnelDocking mybayOpenApiBatchPersonnelDocking;
 
 	@Override
 	public String build(String redirectUrl, Map<String, String[]> parameterMap) {
@@ -49,64 +65,50 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 			Integer namespace  = UserContext.getCurrentNamespaceId();
 			if(namespace.intValue() != MYBAY_NAMESPACE_ID){
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because the currentNamespaceId form UserContext is not eq MYBAY_NAMESPACE_ID 999987");
-			}		
-			//2.获取所有该对接的配置信息
+			}
+			//2.先对接用户信息
+			Map<String,String> dockingMap = mybayOpenApiBatchPersonnelDocking.batchDocking();
+			if(dockingMap != null ){
+				String result = dockingMap.get("result");
+				//对接失败打印失败信息
+				if(!SUCCESS.equals(result)){
+					LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, errorMsg:"+dockingMap.get("errorMsg"));
+				}
+			}
+			//3.获取所有该对接的配置信息
 			Map<String ,String> configurations = getConfigurations(MYBAY_NAMESPACE_ID);
-			//3.获取Ticket
-			String Token = getTicket(configurations.get("AppKey") , configurations.get("AppSecurity")  , configurations.get("getTicketURL"));
+			//4.获取Ticket
+			//String Token = getTicket(configurations.get("AppKey") , configurations.get("AppSecurity")  , configurations.get("getTicketURL"));
+			String Token = getTicket(configurations.get(APPKEY) , configurations.get(APPSECURITY)  , configurations.get(GETTICKETURL));
 			if(Token == null || StringUtils.isBlank(Token)){
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because Token is null");
 			}
-			configurations.put("Token", Token);
-			//4.获取员工编号
+			configurations.put(TOKEN, Token);
+			//5.获取员工编号
 			Long userId = UserContext.currentUserId();
 			if(userId == null ){
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because userId is null" );
 				return null;
 			}
-			String EmployeeId= String.valueOf(userId);
-			configurations.put("EmployeeId", EmployeeId);
-			String signInfoURL = configurations.get("signInfoURL");
+			String EmployeeID= String.valueOf(userId);
+			configurations.put(EMPLOYEEID, EmployeeID);
+			String signInfoURL = configurations.get(SIGNINFOURL);
 			//请求URL为空是没法做下去的
 			if(StringUtils.isBlank(signInfoURL)){
-				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because signInfoURL is null" );
+				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because {} is null",SIGNINFOURL );
 				return null;
 			}
-			//5.md5加密 Signature
+			//6.md5加密 Signature
 			String Signature = encodeMD5Signature(configurations);
-			configurations.put("Signature", Signature);
-			//6.组装对接所需的纯净参数			
-			buildParams(configurations);								
-			//7.创建POST请求
-			String response = null ;
-
-			try {
-				 response = HttpUtils.post(signInfoURL, configurations, 600, false);
-				 /*response = UriComponentsBuilder.fromHttpUrl(signInfoURL)
-			                .queryParam("AccessUserId",configurations.get("AppKey") )			        		
-				 			.queryParam("AppSecurity", configurations.get("AppSecurity"))
-				 			.queryParam("AppID", configurations.get("Appid"))
-				 			.queryParam("CorpPayType", configurations.get("CorpPayType"))
-			        		.queryParam("InitPage", configurations.get("InitPage"))
-			        		.queryParam("Callback", configurations.get("Callback"))
-			        		.queryParam("CostCenter1", configurations.get("CostCenter1"))
-			        		.queryParam("CostCenter2", configurations.get("CostCenter2"))
-			        		.queryParam("CostCenter3", configurations.get("CostCenter3"))
-			        		.queryParam("EmployeeId", configurations.get("EmployeeId"))
-			        		.queryParam("Token", configurations.get("Token"))
-			        		.queryParam("Signature", configurations.get("Signature"))
-			                .build()
-			                .toUriString();*/
-				 return response ;
-			} catch (IOException e) {
-				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because " +e);
-				return null;
-			}
+			configurations.put(SIGNATURE, Signature);
+			//7.组装对接所需的纯净参数			
+			buildParams(configurations);	
+			return StringHelper.toJsonString(configurations);
 	}
 
 	/**
 	 * 获取Ticket
-	 * 拿关对方提供的URL 及 接入账号和密码去获取令牌
+	 * 拿着对方提供的URL 及 接入账号和密码去获取令牌
 	 * @param AppKey  接入账号
 	 * @param AppSecurity 接入密码
 	 * @param paramsMap
@@ -115,10 +117,10 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	private String  getTicket(String AppKey , String AppSecurity , String URL ){
 		//必要参数一个都不能少，否则无法获取所要的信息
 		if(StringUtils.isBlank(AppKey)){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because AppKey is null or blank ");
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because {} is null or blank ",APPKEY);
 			return null;
 		}else if(StringUtils.isBlank(AppSecurity)){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because AppSecurity is null or blank");
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because {} is null or blank",APPSECURITY);
 			return null;
 		}else if(StringUtils.isBlank(URL)){
 			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because URL of get ticket is null or blank " );
@@ -126,8 +128,8 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 		}
 		//创建返回值容器
 		Map<String ,String> paramsMap = new HashMap<String ,String>();
-		paramsMap.put("AppKey", AppKey);
-		paramsMap.put("AppSecurity", AppSecurity);
+		paramsMap.put(APPKEY, AppKey);
+		paramsMap.put(APPSECURITY, AppSecurity);
 		String response = null ;
 		try {
 			 response = HttpUtils.post(URL, paramsMap, 600, false);
@@ -145,11 +147,11 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 				//0 成功；1 参数验证失败；2 接口异常；
 				Integer Code =  (Integer)map.get("Code");
 				//True：调用成功 False：调用失败
-				boolean Success = (boolean)map.get("Success");
+				boolean Success = (boolean)map.get(SUCCESS);
 				//接口调用成功并且令牌获取成功
 				if(Success && Code.intValue() == SUCCESS_CODE){
 					//将返回信息
-					return (String) map.get("Token");
+					return (String) map.get(TOKEN);
 				}else {
 					LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because Code=" +Code+",Message="+map.get("Message"));
 					return null;
@@ -181,19 +183,19 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because the paramMap of encodeMD5Signature is null  ");
 			return null;
 		}
-		String AccessUserId = paramMap.get("AccessUserId");//单点登录接入账号（同AppKey）
-		String EmployeeID = paramMap.get("EmployeeID");//员工编号
-		String CorpPayType = paramMap.get("CorpPayType");//public（因公）/private（因私）
-		String CostCenter1 = paramMap.get("CostCenter1");//成本中心1
-		String CostCenter2 = paramMap.get("CostCenter2");//成本中心2
-		String CostCenter3 = paramMap.get("CostCenter3");//成本中心3
-		String AppSecurity = paramMap.get("AppSecurity");//接入密码（同AppSecurity）
+		String AccessUserId = paramMap.get(ACCESSUSERID);//单点登录接入账号（同AppKey）
+		String EmployeeID = paramMap.get(EMPLOYEEID);//员工编号
+		String CorpPayType = paramMap.get(CORPPAYTYPE);//public（因公）/private（因私）
+		String CostCenter1 = paramMap.get(COSTCENTER1);//成本中心1
+		String CostCenter2 = paramMap.get(COSTCENTER2);//成本中心2
+		String CostCenter3 = paramMap.get(COSTCENTER3);//成本中心3
+		String AppSecurity = paramMap.get(APPSECURITY);//接入密码（同AppSecurity）
 		//必要参数一个都不能少，否则无法获取所要的信息
 		if(StringUtils.isBlank(AccessUserId)){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because AppKey(AccessUserId) is null or blank ");
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because {}({}) is null or blank ",APPKEY,ACCESSUSERID);
 			return null;
 		}else if(StringUtils.isBlank(AppSecurity)){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because AppSecurity is null or blank");
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because {} is null or blank",APPSECURITY);
 			return null;
 		}
 		MessageDigest md5;
@@ -202,7 +204,7 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 			 try {
 				md5.update(AppSecurity.getBytes("utf-8"));
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because AppSecurity"+e);
+				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because {} ："+e,APPSECURITY);
 				
 			}
 			 String md5AppSecurity = StringHelper.toHexString(md5.digest()).toLowerCase();
@@ -248,21 +250,21 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 		String signInfoURL = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_SIGNINFOURL,"");
 		String OnError = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_ONERROR,"");
 		
-		paramsMap.put("AppKey", AppKey);
-		paramsMap.put("AccessUserId", AppKey);
+		paramsMap.put(APPKEY, AppKey);
+		paramsMap.put(ACCESSUSERID, AppKey);
 		
-		paramsMap.put("AppSecurity", AppSecurity);
-		paramsMap.put("Appid", Appid);
-		paramsMap.put("CorpPayType", CorpPayType);
-		paramsMap.put("InitPage", InitPage);
-		paramsMap.put("Callback", Callback);
-		paramsMap.put("CostCenter1", CostCenter1);
-		paramsMap.put("CostCenter2", CostCenter2);
-		paramsMap.put("CostCenter3", CostCenter3);
+		paramsMap.put(APPSECURITY, AppSecurity);
+		paramsMap.put(APPID, Appid);
+		paramsMap.put(CORPPAYTYPE, CorpPayType);
+		paramsMap.put(INITPAGE, InitPage);
+		paramsMap.put(CALLBACK, Callback);
+		paramsMap.put(COSTCENTER1, CostCenter1);
+		paramsMap.put(COSTCENTER2, CostCenter2);
+		paramsMap.put(COSTCENTER3, CostCenter3);
 		paramsMap.put("limitNamespaceId", limitNamespaceId);
-		paramsMap.put("getTicketURL", getTicketURL);
-		paramsMap.put("signInfoURL", signInfoURL);
-		paramsMap.put("OnError", OnError);
+		paramsMap.put(GETTICKETURL, getTicketURL);
+		paramsMap.put(SIGNINFOURL, signInfoURL);
+		paramsMap.put(ONERROR, OnError);
 		return paramsMap ;
 	}
 	
@@ -277,31 +279,33 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	 */
 	private void buildParams(Map<String ,String> map){
 		//将多余的去掉
-		map.remove("signInfoURL");
-		map.remove("getTicketURL");
+		//map.remove("signInfoURL");
+		map.remove(GETTICKETURL);
 		map.remove("limitNamespaceId");
-		map.remove("AppKey");
+		map.remove(APPKEY);
+		//存放form表单的JSP的名称
+		map.put("viewName", "mybay-redirect");
 		//检查必填字段
-		if(StringUtils.isBlank(map.get("AccessUserId"))){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  AccessUserId is null");
+		if(StringUtils.isBlank(map.get(ACCESSUSERID))){
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  {} is null",ACCESSUSERID);
 		}
-		if(StringUtils.isBlank(map.get("EmployeeId"))){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  EmployeeId is null");
+		if(StringUtils.isBlank(map.get(EMPLOYEEID))){
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  {} is null",EMPLOYEEID);
 		}
-		if(StringUtils.isBlank(map.get("Token"))){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  Token is null");
+		if(StringUtils.isBlank(map.get(TOKEN))){
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  {} is null",TOKEN);
 		}
-		if(StringUtils.isBlank(map.get("Appid"))){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  Appid is null");
+		if(StringUtils.isBlank(map.get(APPID))){
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  {} is null",APPID);
 		}		
-		if(StringUtils.isBlank(map.get("Signature"))){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  Signature is null");
+		if(StringUtils.isBlank(map.get(SIGNATURE))){
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  {} is null",SIGNATURE);
 		}
-		if(StringUtils.isBlank(map.get("InitPage"))){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  InitPage is null");
+		if(StringUtils.isBlank(map.get(INITPAGE))){
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  {} is null",INITPAGE);
 		}
-		if(StringUtils.isBlank(map.get("Callback"))){
-			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  Callback is null");
+		if(StringUtils.isBlank(map.get(CALLBACK))){
+			LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because  {} is null",CALLBACK);
 		}
 	}
 	

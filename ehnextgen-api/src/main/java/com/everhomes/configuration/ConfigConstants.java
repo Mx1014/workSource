@@ -188,5 +188,13 @@ public interface ConfigConstants {
 	public static final String CT_GETTICKETURL = "ct.getTicketURL";
 	public static final String CT_SIGNINFOURL = "ct.signInfoURL";
 	public static final String CT_ONERROR = "ct.OnError";
+	public static final String CT_BATCH_LOGON_APPID = "ct.batch.Logon_Appid";
+	
+	public static final String CT_BATCH_PRODUCTION_GETTICKETURL = "ct.batch.production.getTicketURL";
+	public static final String CT_BATCH_TEST_GETTICKETURL = "ct.batch.test.getTicketURL";
+	public static final String CT_RESTFUL_PRODUCTION_BATCHURL = "ct.restful.production.batchURL";
+	public static final String CT_SOAP_PRODUCTION_BATCHURL = "ct.soap.production.batchURL";
+	public static final String CT_RESTFUL_TEST_BATCHURL = "ct.restful.test.batchURL";
+	public static final String CT_SOAP_TEST_BATCHURL = "ct.soap.test.batchURL";
 	//<!--深圳湾携程用户对接所用配置项 end   -->
 }
