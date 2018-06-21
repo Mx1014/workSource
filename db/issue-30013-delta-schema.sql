@@ -27,4 +27,4 @@ CREATE TABLE `eh_configurations_record_change` (
 -- 配置项信息表新增一列（字段 ） is_readyonly
 ALTER  TABLE eh_configurations  ADD  is_readonly  INT(3)  COMMENT '是否只读：1，是 ；null 或其他值为 否';
 
--- 20180522-huangliangming
+-- 20180522-huangliangming  end
