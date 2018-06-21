@@ -420,6 +420,7 @@ public class NewTopicCommand {
         this.moduleCategoryId = moduleCategoryId;
     }
 
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
