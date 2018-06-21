@@ -1481,61 +1481,63 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public List<JumpModuleDTO> listJumpModules(ListJumpModulesCommand cmd) {
-		//没配的返回零域的，配了的返回自己域空间的
-		List<JumpModuleDTO> modules = yellowPageProvider.jumpModules(UserContext.getCurrentNamespaceId());
-		if(modules == null || modules.size() == 0) {
+
+		// 没配的返回零域的，配了的返回自己域空间的
+		List<JumpModuleDTO> modules = yellowPageProvider.jumpModules(0);
+		if (modules == null || modules.size() == 0) {
+
 			modules = yellowPageProvider.jumpModules(0);
 		}
 		
 		//过滤未配置的应用
 		modules = reAdjustModules(cmd.getNamespaceId(), cmd.getVersionId(), modules);
 
-		//TODO:从电商拿当前域空间店铺、
-		JumpModuleDTO bisModule = null;
-		for (JumpModuleDTO m: modules) {
-			if ("BIZS".equals(m.getModuleUrl())) {
-				bisModule = m;
-				break;
-			}
-		}
 
-		if (null != bisModule) {
-			Map<String,String> param = new HashMap<>();
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
-			param.put("namespaceId", String.valueOf(namespaceId));
-			List<JumpModuleDTO> bizModules = new ArrayList<>();
+		return createTree(modules);
+	}
+	
+	private List<JumpModuleDTO> getBizsModuleDto(JumpModuleDTO bisModuleDto) {
 
-			String json = post(createRequestParam(param), "/zl-ec/rest/openapi/shop/queryShopInfoByNamespace");
-			if (null != json) {
-				ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
-				if (null != entity) {
-					Object obj = entity.getBody();
-					if (null != obj) {
-						List<BizEntity> bizs = JSONObject.parseObject(obj.toString(), new TypeReference<List<BizEntity>>(){});;
-						for (BizEntity b: bizs) {
-							JumpModuleDTO d = new JumpModuleDTO();
-//				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
-//				d.setId(id);
-							d.setModuleName(b.getShopName());
-							try {
-								d.setModuleUrl(String.format("zl://browser/i?url=%s",URLEncoder.encode(b.getShopURL(), StandardCharsets.UTF_8.name())));
-							} catch (UnsupportedEncodingException e) {
-								e.printStackTrace();
-							}
-							d.setNamespaceId(namespaceId);
-							d.setParentId(bisModule.getId());
-							bizModules.add(d);
+		Map<String, String> param = new HashMap<>();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		param.put("namespaceId", String.valueOf(namespaceId));
+		List<JumpModuleDTO> bizModules = new ArrayList<>();
 
+
+		String json = post(createRequestParam(param), "/zl-ec/rest/openapi/shop/queryShopInfoByNamespace");
+		if (null != json) {
+			ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>() {
+			});
+			if (null != entity) {
+				Object obj = entity.getBody();
+				if (null != obj) {
+					List<BizEntity> bizs = JSONObject.parseObject(obj.toString(), new TypeReference<List<BizEntity>>() {
+					});
+					;
+					for (BizEntity b : bizs) {
+						JumpModuleDTO d = new JumpModuleDTO();
+						// long id =
+						// this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
+						// d.setId(id);
+						d.setModuleName(b.getShopName());
+						try {
+							d.setModuleUrl(String.format("zl://browser/i?url=%s",
+									URLEncoder.encode(b.getShopURL(), StandardCharsets.UTF_8.name())));
+						} catch (UnsupportedEncodingException e) {
+							LOGGER.error("encode failed getShopURL:" + b.getShopURL() + " name:" + StandardCharsets.UTF_8.name());
 						}
+						d.setNamespaceId(namespaceId);
+						d.setParentId(bisModuleDto.getId());
+						bizModules.add(d);
+
 					}
 				}
 			}
-			modules.addAll(bizModules);
 		}
 		
-		
 
-		return createTree(modules);
+		return bizModules;
+
 	}
 	
 	/**
@@ -1559,11 +1561,21 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 
 		// 3.对每个传入的模块进行处理
+		boolean hasDealBizs = false; 
 		List<JumpModuleDTO> reAdjustJumpDtos = new ArrayList<>();
 		for (JumpModuleDTO dto : dtos) {
-			// 3.1电商item以及模块id为0（旧的数据），不处理
-			if ("BIZS".equals(dto.getModuleUrl()) || 0 == dto.getModuleId()) {
-				reAdjustJumpDtos.add(dto);
+			// 3.1 电商item特殊处理
+			if ("BIZS".equals(dto.getModuleUrl())) {
+				if (hasDealBizs) {
+					//电商只处理一次
+					continue;
+				}
+				hasDealBizs = true;
+				List<JumpModuleDTO> bizMds = getBizsModuleDto(dto);
+				if (!CollectionUtils.isEmpty(bizMds)) {
+					reAdjustJumpDtos.addAll(bizMds);
+				}
+
 				continue;
 			}
 
@@ -3311,6 +3323,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
 		return query.fetchInto(ServiceAlliances.class);
 	}
+
 	
 	
 

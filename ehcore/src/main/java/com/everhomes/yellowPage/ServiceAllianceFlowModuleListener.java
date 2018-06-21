@@ -61,6 +61,10 @@ import com.everhomes.util.Tuple;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
+	
+	private final String ALLIANCE_TEMPLATE_TYPE = "flowCase";
+	private final String ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME = "workflowStatus";
+	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher serviceAllianceRequestInfoSearcher;
 	public static final long MODULE_ID = 40500;
@@ -234,7 +238,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setSecondCategoryId(sa.getCategoryId());
 		request.setWorkflowStatus(status);
 		request.setId(flowCase.getId());
-		request.setTemplateType("flowCase");
+		request.setTemplateType(ALLIANCE_TEMPLATE_TYPE);
 		ServiceAllianceApplicationRecord record = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
 		if(org!=null){
@@ -617,5 +621,53 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 		return json.toJSONString();
 	}
+	
+	@Override
+	public void onFlowCaseStateChanged(FlowCaseState ctx) {
+		
+		FlowCase flowCase = ctx.getFlowCase();
+		
+		reNewEsWorkFlowStatus(flowCase.getId(), flowCase.getStatus());
+		
+	}
+	
+	/**   
+	* @Function: ServiceAllianceFlowModuleListener.java
+	* @Description: 更新es服务器里服务的状态
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月20日 下午1:54:27 
+	*
+	*/
+	private void reNewEsWorkFlowStatus(Long flowCaseId, Byte flowCaseStatus) {
+
+		// 将工作流状态转成服务状态
+		ServiceAllianceWorkFlowStatus newStatus = ServiceAllianceWorkFlowStatus.getFromFlowCaseStatus(flowCaseStatus);
+
+		// 更新es存储的服务状态
+		serviceAllianceRequestInfoSearcher.updateDocByField(flowCaseId, ALLIANCE_TEMPLATE_TYPE,
+				ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME, newStatus.getCode());
+
+	}
+	
+	@Override
+	public void onFlowButtonFired(FlowCaseState ctx) {
+		
+		if (FlowStepType.SUSPEND_STEP != ctx.getStepType() && FlowStepType.ABORT_SUSPEND_STEP != ctx.getStepType()) {
+			return;
+		}
+
+		FlowCase flowCase = ctx.getFlowCase();
+		
+		byte newFlowCaseStatus = FlowCaseStatus.SUSPEND.getCode();
+		if (FlowStepType.ABORT_SUSPEND_STEP == ctx.getStepType()) {
+			newFlowCaseStatus = FlowCaseStatus.PROCESS.getCode();
+		} 
+		
+		//更新es状态 #31378
+		reNewEsWorkFlowStatus(flowCase.getId(), newFlowCaseStatus);
+	}
+
 	
 }
