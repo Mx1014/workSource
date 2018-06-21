@@ -19,7 +19,7 @@ public class CheckWxAuthIsBindPhoneResponse extends RestResponse{
 
     private String identifierToken;
 
-    private String regionCode;
+    private Integer regionCode;
 
     private LogonCommandResponse logonCommandResponse;
 
@@ -41,11 +41,11 @@ public class CheckWxAuthIsBindPhoneResponse extends RestResponse{
         this.identifierToken = identifierToken;
     }
 
-    public String getRegionCode() {
+    public Integer getRegionCode() {
         return regionCode;
     }
 
-    public void setRegionCode(String regionCode) {
+    public void setRegionCode(Integer regionCode) {
         this.regionCode = regionCode;
     }
 
