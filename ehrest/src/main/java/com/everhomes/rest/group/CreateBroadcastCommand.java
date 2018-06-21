@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>contentType: 内容类型</li>
  * <li>content: 内容</li>
  * <li>contentAbstract: 摘要，暂无</li>
+ * <li>communityId: 项目ID</li>
  * </ul>
  */
 public class CreateBroadcastCommand {
@@ -28,11 +29,13 @@ public class CreateBroadcastCommand {
 
 	private String contentAbstract;
 
+	private Long communityId;
+
 	public CreateBroadcastCommand() {
 
 	}
 
-	public CreateBroadcastCommand(String ownerType, Long ownerId, String title, String contentType, String content, String contentAbstract) {
+	public CreateBroadcastCommand(String ownerType, Long ownerId, String title, String contentType, String content, String contentAbstract, Long communityId) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
@@ -40,6 +43,7 @@ public class CreateBroadcastCommand {
 		this.contentType = contentType;
 		this.content = content;
 		this.contentAbstract = contentAbstract;
+		this.communityId = communityId;
 	}
 
 	public String getOwnerType() {
@@ -90,7 +94,15 @@ public class CreateBroadcastCommand {
 		this.contentAbstract = contentAbstract;
 	}
 
-	@Override
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
