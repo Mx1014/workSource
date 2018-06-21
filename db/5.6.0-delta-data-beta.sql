@@ -3,9 +3,21 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`) VALUES ('10034', 'community', '240111044332061061', '联科停车场', 'BEE_ZHONGTIAN', NULL, '2', '1', now(), '999944', NULL, '{\"tempfeeFlag\": 1, \"rateFlag\": 1, \"lockCarFlag\": 0, \"searchCarFlag\": 0, \"currentInfoType\": 0, \"contact\": \"0\",\"identityCardFlag\":0}', '034', '0');
 update eh_parking_lots SET vendor_name = 'BEE_ZHONGTIAN',`name`='联科停车场',config_json='{"tempfeeFlag": 1, "rateFlag": 1, "lockCarFlag": 1, "searchCarFlag": 0, "currentInfoType": 1, "contact": "13480106043","identityCardFlag":0}' WHERE id=10001;
 
+-- beta执行脚本
+-- ADD BY 梁燕龙
+-- issue-30013 初始化短信白名单配置项
+INSERT INTO `eh_configurations`(`name`,`value`,`description`,`namespace_id`)
+      VALUES('sms.whitelist.test','true','短信白名单',0);
+-- END BY 梁燕龙
+
+-- beta执行 服务联盟
+update eh_service_alliance_jump_module set namespace_id = 1 where  module_url = 'BIZS' and namespace_id = 0;
+
+
 -- 人事2.7 数据同步 start by ryan.
 
 -- 执行 /archives/syncArchivesConfigAndLogs 接口
 
 -- 人事2.7 数据同步 end by ryan.
+
 

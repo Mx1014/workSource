@@ -106,6 +106,7 @@ GROUP BY punch_month,owner_type,owner_id ORDER BY punch_month DESC   ;
 -- 考勤4.2  end
 
 
+
 -- 审批3.0初始数据, 需先执行schema后执行此sql start by ryan.
 UPDATE eh_general_form_templates SET id = 101 WHERE form_name = '日报';
 UPDATE eh_general_form_templates SET id = 102 WHERE form_name = '周报';
@@ -238,3 +239,26 @@ INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
 INSERT INTO eh_locale_strings ( `scope`, `code`, `locale`, `text`)
 	VALUES ('activity', 26, 'zh_CN', '活动被修改！！');
 -- END BY 梁燕龙
+
+-- 通用脚本
+-- ADD BY 黄良铭
+-- issue-30013 初始化短信白名单配置项
+-- 初始化配置项表“是否只读”字段为“是”，值为1
+UPDATE eh_configurations s SET s.is_readonly = 1 ;
+
+-- END BY 黄良铭
+
+-- 通用脚本  
+-- ADD BY huangmingbo
+-- ISSUE-31190 31378 
+SET @ns_id = 0;
+SET @jump_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_jump_module`), 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '停车缴费', 40800, 'zl://parking/query?displayName=停车缴费', NULL, 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '物业报修', 20100, NULL, '{"taskCategoryId":6,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '物品放行', 49200, NULL, '{"prefix":"/goods-move/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '园区入驻', 40100, NULL, '{"skipRoute":"zl://park-service/settle"}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '投诉建议', 20100, NULL, '{"taskCategoryId":9,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`, `parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '电商', 0, 'BIZS', NULL, 0, 1);
+
+-- END 
+
