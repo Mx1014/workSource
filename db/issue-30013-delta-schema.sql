@@ -1,3 +1,6 @@
+-- 通用脚本
+-- ADD BY 梁燕龙
+-- issue-30013 初始化短信白名单配置项
 -- 短信白名单 #30013
 CREATE TABLE `eh_phone_white_list` (
 	`id` BIGINT NOT NULL COMMENT '主键',
@@ -7,7 +10,11 @@ CREATE TABLE `eh_phone_white_list` (
 	`create_time` DATETIME COMMENT '记录创建时间',
 	PRIMARY KEY(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '短信白名单';
+-- END BY 梁燕龙
 
+-- 通用脚本
+-- ADD BY 黄良铭
+-- issue-30013 初始化短信白名单配置项
 -- 20180522-huangliangming-配置项管理-#30016
 -- 创建配置项信息变更记录表
 CREATE TABLE `eh_configurations_record_change` (
@@ -23,8 +30,6 @@ CREATE TABLE `eh_configurations_record_change` (
   PRIMARY KEY(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '配置项信息变更记录表';
 
-
 -- 配置项信息表新增一列（字段 ） is_readyonly
 ALTER  TABLE eh_configurations  ADD  is_readonly  INT(3)  COMMENT '是否只读：1，是 ；null 或其他值为 否';
-
--- 20180522-huangliangming  end
+-- END BY 黄良铭
