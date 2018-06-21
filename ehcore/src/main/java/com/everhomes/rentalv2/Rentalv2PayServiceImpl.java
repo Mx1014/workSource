@@ -202,7 +202,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
                     null, RuleSourceType.RESOURCE.getCode(), cmd.getResourceId(), null, null);
             if (accounts!=null && accounts.size()>0)
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
                         cmd.getResourceName()+"已设置非通用收款账户，不可重复添加");
             Rentalv2PayAccount account = new Rentalv2PayAccount();
             account.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -298,7 +298,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Stream.of(cmd.getBizPayeeId()).collect(Collectors.toList()));
         if (payUserDTOs == null || payUserDTOs.size() == 0){
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
                     "暂未绑定收款账户");
         }
 
