@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.sensitiveWord;
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.module.ServiceModule;
@@ -10,6 +11,7 @@ import com.everhomes.rest.sensitiveWord.admin.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,25 +43,23 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
         ListSensitiveFilterRecordAdminResponse response = new ListSensitiveFilterRecordAdminResponse();
         cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
         List<SensitiveFilterRecord> list = sensitiveFilterRecordProvider.listSensitiveFilterRecord(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), cmd.getPageSize());
-        if (list != null) {
+        if(!CollectionUtils.isEmpty(list)){
             int size = list.size();
-            if (size >0) {
-                if (size <= cmd.getPageSize()) {
-                    response.setNextPageAnchor(null);
-                }else {
-                    list.remove(size-1);
-                    response.setNextPageAnchor(list.get(list.size() - 1).getId());
-                }
-                response.setDtos(list.stream().map(r -> {
-                    SensitiveFilterRecordAdminDTO sensitiveFilterRecordAdminDTO = ConvertHelper.convert(r, SensitiveFilterRecordAdminDTO.class);
-                    sensitiveFilterRecordAdminDTO.setPublishTime(r.getPublishTime().toString());
-                    ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(r.getModuleId());
-                    if (serviceModule != null) {
-                        sensitiveFilterRecordAdminDTO.setModuleName(serviceModule.getName());
-                    }
-                    return  sensitiveFilterRecordAdminDTO;
-                }).collect(Collectors.toList()));
+            if (size <= cmd.getPageSize()) {
+                response.setNextPageAnchor(null);
+            }else {
+                list.remove(size-1);
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
             }
+            response.setDtos(list.stream().map(r -> {
+                SensitiveFilterRecordAdminDTO sensitiveFilterRecordAdminDTO = ConvertHelper.convert(r, SensitiveFilterRecordAdminDTO.class);
+                sensitiveFilterRecordAdminDTO.setPublishTime(r.getPublishTime().toString());
+                ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(r.getModuleId());
+                if (serviceModule != null) {
+                    sensitiveFilterRecordAdminDTO.setModuleName(serviceModule.getName());
+                }
+                return  sensitiveFilterRecordAdminDTO;
+            }).collect(Collectors.toList()));
         }
         return response;
     }
@@ -82,16 +82,12 @@ public class SensitiveFilterRecordServiceImpl implements SensitiveFilterRecordSe
 
     @Override
     public GetSensitiveWordUrlAdminResponse getSensitiveWordUrl() {
-        String url = configurationProvider.getValue(0, "sensitiveword.url", "");
-        String fileName = configurationProvider.getValue(0, "sensitiveword.fileName", "");
+        String url = configurationProvider.getValue(0, ConfigConstants.SENSITIVE_URL, "");
+        String fileName = configurationProvider.getValue(0, ConfigConstants.SENSITIVE_FILENAME, "");
         GetSensitiveWordUrlAdminResponse response = new GetSensitiveWordUrlAdminResponse();
-        if (url != null) {
-            response.setUrl(url);
-        }
         response.setUrl(url);
-        if (fileName != null) {
-            response.setFileName(fileName);
-        }
+        response.setUrl(url);
+        response.setFileName(fileName);
         return response;
     }
 }
