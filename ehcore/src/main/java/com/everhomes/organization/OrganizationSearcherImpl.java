@@ -381,6 +381,73 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     }
 
     @Override
+    public OrganizationQueryResult fuzzyQueryOrganizationByName(SearchOrganizationCommand cmd) {
+        GroupQueryFilter filter = new GroupQueryFilter();
+        int pageNum = 0;
+        if(cmd.getPageAnchor() != null) {
+            pageNum = cmd.getPageAnchor().intValue();
+        }
+        int pageSize = PaginationConfigHelper.getMaxPageSize(configProvider, cmd.getPageSize());
+
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+
+        QueryBuilder qb;
+
+        if(StringUtils.isEmpty(cmd.getKeyword())) {
+            qb = QueryBuilders.matchAllQuery();
+        }else {
+            // es中超过10个字无法搜索出来结果，这里把关键词截断处理
+            if (cmd.getKeyword().length() > 10) {
+                cmd.setKeyword(cmd.getKeyword().substring(cmd.getKeyword().length() - 10));
+            }
+            qb = QueryBuilders.boolQuery().must(QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("name"));
+        }
+
+        FilterBuilder fb = null;
+        if(null != cmd.getNamespaceId())
+            fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+
+        // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
+        if(cmd.getCommunityId() != null) {
+            if(null == fb)
+                fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+            else {
+                FilterBuilder cmntyFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+                fb = FilterBuilders.andFilter(fb, cmntyFilter);
+            }
+        }
+
+        qb = QueryBuilders.filteredQuery(qb, fb);
+
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+
+        builder.setFrom(pageNum * pageSize).setSize(pageSize+1);
+
+        builder.setQuery(qb);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Query organization, cmd={}, builder={}", cmd, builder);
+        }
+
+        SearchResponse rsp = builder.execute().actionGet();
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("result from elasticsearch {}", rsp);
+        }
+        OrganizationQueryResult result = new OrganizationQueryResult();
+
+        List<OrganizationDTO> dtos = this.getDTOs(rsp, cmd.getSimplifyFlag());
+
+        if(dtos.size() > pageSize){
+            result.setPageAnchor((long)(pageNum+1));
+            dtos.remove(dtos.size() - 1);
+        }
+
+        result.setDtos(dtos);
+
+        return result;
+    }
+
+    @Override
     public OrganizationQueryResult queryOrganization(SearchOrganizationCommand cmd) {
         GroupQueryFilter filter = new GroupQueryFilter();
         int pageNum = 0;

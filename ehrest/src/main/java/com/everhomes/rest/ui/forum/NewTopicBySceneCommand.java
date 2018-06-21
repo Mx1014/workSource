@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数），服务器端通过该标识填充下面3个参数（客户端不用填该3个参数）</li>
  *     <li>forumId: 论坛ID</li>
+ *     <li>oldId: 编辑的帖子的ID</li>
  *     <li>targetTag: 帖子接收者标签，该标签仍然需要客户端填写，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  *     <li>contentCategory: 内容类型ID，含类和子类</li>
  *     <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
@@ -41,6 +42,8 @@ import com.everhomes.util.StringHelper;
  */
 public class NewTopicBySceneCommand {
     private String sceneToken;
+
+    private Long oldId;
 
     @NotNull
     private Long forumId;
@@ -299,6 +302,14 @@ public class NewTopicBySceneCommand {
 
     public void setModuleCategoryId(Long moduleCategoryId) {
         this.moduleCategoryId = moduleCategoryId;
+    }
+
+    public Long getOldId() {
+        return oldId;
+    }
+
+    public void setOldId(Long oldId) {
+        this.oldId = oldId;
     }
 
     @Override

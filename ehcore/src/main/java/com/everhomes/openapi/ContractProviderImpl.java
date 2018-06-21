@@ -228,6 +228,21 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 	
 	@Override
+	public List<Contract> listContractByNamespaceId(Integer namespaceId) {
+		Result<Record> result = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+				.fetch();
+			
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		}
+		
+		return new ArrayList<Contract>();
+	}
+	
+	@Override
 	public List<Contract> listContractByOrganizationId(Long organizationId) {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
@@ -482,13 +497,15 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public String findContractIdByThirdPartyId(String contractId, String code) {
 		DSLContext context = getReadOnlyContext();
-		Long zuolinContractId = context.select(Tables.EH_CONTRACTS.ID)
+		List<Long> zuolinContractId = context.select(Tables.EH_CONTRACTS.ID)
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(contractId))
 				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(code))
-				.fetchOne(Tables.EH_CONTRACTS.ID);
-		if(zuolinContractId == null) return null;
-		return String.valueOf(zuolinContractId);
+				.fetch(Tables.EH_CONTRACTS.ID);
+		if(zuolinContractId.size() > 0) {
+			return String.valueOf(zuolinContractId.get(0));
+		}
+		return null;
 	}
 
 	@Override

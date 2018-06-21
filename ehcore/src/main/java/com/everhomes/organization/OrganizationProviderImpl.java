@@ -514,7 +514,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             int pageSize, ListingLocator locator) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 
         if (null != organizationId) {
@@ -5133,17 +5132,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return results.get(0);
     }
 
-    @Override
-    public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId) {
+    @Override 
+    public OrganizationMemberDetails findOrganizationMemberDetailsByTargetIdAndOrgId(Long targetId, Long orgId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId).and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId)))
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(orgId))
                 .fetchInto(OrganizationMemberDetails.class);
         if (null == results || results.size() == 0)
             return null;
         return results.get(0);
     }
-
+ 
+    public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId)
+                		.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId)))
+ 
+                .fetchInto(OrganizationMemberDetails.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results.get(0);
+    }  
+  
     @Override
     public List<Organization> listHeadEnterprises() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
