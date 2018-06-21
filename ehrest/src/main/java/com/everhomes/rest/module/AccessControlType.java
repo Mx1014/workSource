@@ -3,31 +3,31 @@ package com.everhomes.rest.module;
 
 /**
  * <ul>
- * <li>PARK: 园区模块</li>
- * <li>ORGANIZATION: 机构企业模块</li>
- * <li>MANAGER: 运营管理方模块</li>
+ *     <li>ALL((byte)0): 全部可见</li>
+ *     <li>LOGON((byte)1): 登录可见</li>
+ *     <li>AUTH((byte)2): 认证可见</li>
  * </ul>
  */
 public enum AccessControlType {
-    All((byte)0), logon((byte)1), auth((byte)2);
+    ALL((byte) 0), LOGON((byte) 1), AUTH((byte) 2);
 
     private byte code;
 
     private AccessControlType(byte code) {
         this.code = code;
     }
-    
+
     public byte getCode() {
         return this.code;
     }
-    
+
     public static AccessControlType fromCode(Byte code) {
-        if(code == null){
+        if (code == null) {
             return null;
         }
 
-        for (AccessControlType type: AccessControlType.values()){
-            if(type.getCode() == code.byteValue()){
+        for (AccessControlType type : AccessControlType.values()) {
+            if (type.getCode() == code.byteValue()) {
                 return type;
             }
         }
