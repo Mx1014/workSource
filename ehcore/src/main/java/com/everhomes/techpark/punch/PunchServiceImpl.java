@@ -8780,7 +8780,7 @@ public class PunchServiceImpl implements PunchService {
     private long getLeaveTime(PunchTimeRule ptr, PunchLog onDutyPunch) {
 
         long leaveTime = ptr.getStartEarlyTimeLong() + ptr.getWorkTimeLong();
-        if (null == onDutyPunch)
+        if (null == onDutyPunch || onDutyPunch.getPunchTime() == null)
             return leaveTime;
         if (ptr.getHommizationType().equals(HommizationType.LATEARRIVE.getCode())) {
 
