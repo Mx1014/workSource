@@ -4694,7 +4694,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     //add by tangcen 
 	@Override
-	public String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long chargingItemId) {
+	public String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long categoryId, Long chargingItemId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         String projectChargingItemName = null;
         projectChargingItemName =context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
@@ -4702,6 +4702,7 @@ public class AssetProviderImpl implements AssetProvider {
                 				.where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
                 				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
                 				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+                				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CATEGORY_ID.eq(categoryId))
                 				.fetchOne(0,String.class);
         if (org.springframework.util.StringUtils.isEmpty(projectChargingItemName)) {
         	projectChargingItemName =context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
@@ -4709,6 +4710,7 @@ public class AssetProviderImpl implements AssetProvider {
     				.where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
     				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq((long)namespaceId))
     				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+    				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CATEGORY_ID.eq(categoryId))
     				.fetchOne(0,String.class);
 		}
         return projectChargingItemName;

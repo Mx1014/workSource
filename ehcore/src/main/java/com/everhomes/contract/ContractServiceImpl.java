@@ -1565,6 +1565,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contractProvider.updateContract(contract);
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
+		
 		contractSearcher.feedDoc(contract);
 //		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
 //		assetService.deleteUnsettledBillsOnContractId(contract.getId());
@@ -2002,6 +2003,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		//add by tangcen
 		dto.setCommunityId(cmd.getCommunityId());
 		dto.setNamespaceId(cmd.getNamespaceId());
+		dto.setCategoryId(cmd.getCategoryId());
 		
 		if(dto.getCreateUid() != null) {
 			User creator = userProvider.findUserById(dto.getCreateUid());
@@ -2324,7 +2326,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
 				}
 				//add by tangcen 显示客户自定义的收费项名称
-				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),itemDto.getChargingItemId());
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),dto.getCategoryId(),itemDto.getChargingItemId());
 				itemDto.setChargingItemName(projectChargingItemName);
 				//String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
 				//itemDto.setChargingItemName(itemName);

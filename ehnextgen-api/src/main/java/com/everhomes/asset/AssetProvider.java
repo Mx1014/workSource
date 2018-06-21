@@ -313,7 +313,7 @@ public interface AssetProvider {
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
     //add by tangcen
-	String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long chargingItemId);
+	String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long categoryId, Long chargingItemId);
 
     void modifySettledBill(Long billId, String invoiceNum, String noticeTel);
 
