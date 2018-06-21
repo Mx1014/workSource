@@ -1311,7 +1311,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * modify cause member_detail by lei lv 7.224
      **/
     @Override
-    public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId) {
+    public OrganizationMember findOrganizationMemberByUIdAndOrgId(Long userId, Long organizationId) {
 
         Long enterpriseId = getTopOrganizationId(organizationId);
 
@@ -5687,6 +5687,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
         queryBuilderCallback.buildCondition(locator, query);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
+        LOGGER.info(query.getSQL(true));    //  print the sql to check
         List<OrganizationMemberDetails> results = query.fetchInto(OrganizationMemberDetails.class);
         if (null == results || results.size() == 0)
             return null;

@@ -32,7 +32,7 @@ public class ArchivesNotificationServiceImpl implements ArchivesNotificationServ
         String triggerName = ARCHIVES_NOTIFICATION + System.currentTimeMillis();
         String jobName = ARCHIVES_NOTIFICATION + System.currentTimeMillis();
         String cronExpression = "0 0 0/1 * * ?";
-        LOGGER.info("======================================== The first ArchivesNotificationJob has been prepared at " + LocalDateTime.now());
+        LOGGER.info("The first ArchivesNotificationJob has been prepared at " + LocalDateTime.now());
         scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ArchivesNotificationJob.class, new HashMap());
     }
 }

@@ -465,7 +465,7 @@ public class HotlineServiceImpl implements HotlineService {
 		info.setPhones(phones);
 
 		if (cmd.getOrgId() != null) {
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getId(),
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getId(),
 					cmd.getOrgId());
 			if (member != null)
 				info.setContractName(member.getContactName());

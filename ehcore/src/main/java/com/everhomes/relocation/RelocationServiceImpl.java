@@ -215,7 +215,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 			case ENTERPRISE_NOAUTH:
 				Long organizationId = sceneToken.getEntityId();
 				dto.setCurrOrgId(organizationId);
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
 				if (null != member) {
 					dto.setUserName(member.getContactName());
 					dto.setContactPhone(member.getContactToken());

@@ -1,11 +1,9 @@
 package com.everhomes.rest.techpark.punch.admin;
 
-import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.techpark.punch.PunchLogDTO;
 import com.everhomes.util.StringHelper;
 
@@ -25,7 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>statuString：状态文字</li>
  * <li>approvalStatuString：校正状态文字</li>
  * <li>punchLogs：打卡记录列表 参照{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
- * <li>approvalRecords：列表 参照{@link com.everhomes.rest.general_approval.GeneralApprovalRecordDTO}</li>
+ * <li>approvalRecords：列表 参照{@link EnterpriseApprovalRecordDTO}</li>
  * </ul>
  */
 public class PunchDayDetailDTO {
@@ -55,8 +53,8 @@ public class PunchDayDetailDTO {
     private String approvalStatuString;
 	@ItemType(PunchLogDTO.class)
 	private List<PunchLogDTO> punchLogs;
-	@ItemType(GeneralApprovalRecordDTO.class)
-	private List<GeneralApprovalRecordDTO> approvalRecords;
+	@ItemType(EnterpriseApprovalRecordDTO.class)
+	private List<EnterpriseApprovalRecordDTO> approvalRecords;
 	
 	public java.lang.Byte getMorningApprovalStatus() {
 		return morningApprovalStatus;
@@ -266,11 +264,11 @@ public class PunchDayDetailDTO {
 		this.approvalStatuString = approvalStatuString;
 	}
 
-	public List<GeneralApprovalRecordDTO> getApprovalRecords() {
+	public List<EnterpriseApprovalRecordDTO> getApprovalRecords() {
 		return approvalRecords;
 	}
 
-	public void setApprovalRecords(List<GeneralApprovalRecordDTO> approvalRecords) {
+	public void setApprovalRecords(List<EnterpriseApprovalRecordDTO> approvalRecords) {
 		this.approvalRecords = approvalRecords;
 	}
 }

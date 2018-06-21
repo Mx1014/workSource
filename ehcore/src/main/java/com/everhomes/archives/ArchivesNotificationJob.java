@@ -1,5 +1,7 @@
 package com.everhomes.archives;
 
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.flow.FlowServiceImpl;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -21,10 +23,13 @@ import java.util.HashMap;
 public class ArchivesNotificationJob extends QuartzJobBean {
 
     @Autowired
-    ArchivesService archivesService;
+    private ArchivesService archivesService;
 
     @Autowired
-    ScheduleProvider scheduleProvider;
+    private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     private static final String ARCHIVES_NOTIFICATION = "archives_notification";
 
@@ -35,11 +40,14 @@ public class ArchivesNotificationJob extends QuartzJobBean {
         try {
             if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
                 LocalDateTime nowDateTime = LocalDateTime.now();
-                archivesService.executeArchivesNotification(nowDateTime.getDayOfWeek().getValue(), nowDateTime.getHour(), nowDateTime);
-                LOGGER.info("======================================== ArchivesNotificationJob has been executed at " + nowDateTime);
+                coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_NOTIFICATION.getCode()).tryEnter(() -> {
+                    LOGGER.info("ArchivesNotificationJob has been started at " + nowDateTime);
+                    archivesService.executeArchivesNotification(nowDateTime.getDayOfWeek().getValue(), nowDateTime.getHour(), nowDateTime);
+                    LOGGER.info("ArchivesNotificationJob has been ended at " + nowDateTime);
+                });
             }
         } catch (Exception e) {
-            LOGGER.error("======================================== ArchivesNotificationJob Failed!", e);
+            LOGGER.error("ArchivesNotificationJob Failed!", e);
         }
     }
 }

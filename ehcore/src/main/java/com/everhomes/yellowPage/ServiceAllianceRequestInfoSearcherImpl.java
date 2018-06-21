@@ -64,7 +64,6 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;

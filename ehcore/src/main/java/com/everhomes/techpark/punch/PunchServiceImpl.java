@@ -17,7 +17,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.enterpriseApproval.EnterpriseApprovalService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.FlowCase;
@@ -50,11 +50,11 @@ import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
-import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -312,10 +312,6 @@ public class PunchServiceImpl implements PunchService {
     @Autowired
     private UserProvider userProvider;
     @Autowired
-    private ApprovalRangeStatisticProvider approvalRangeStatisticProvider;
-    @Autowired
-    private EnterpriseContactProvider enterpriseContactProvider;
-    @Autowired
     private DbProvider dbProvider;
 
     @Autowired
@@ -338,9 +334,6 @@ public class PunchServiceImpl implements PunchService {
 
     @Autowired
     private ApprovalRequestProvider approvalRequestProvider;
-
-    @Autowired
-    private ApprovalDayActualTimeProvider approvalDayActualTimeProvider;
 
     @Autowired
     private ApprovalCategoryProvider approvalCategoryProvider;
@@ -384,6 +377,9 @@ public class PunchServiceImpl implements PunchService {
 
     @Autowired
     private ApprovalOpRequestProvider approvalOpRequestProvider;
+
+    @Autowired
+    private EnterpriseApprovalService enterpriseApprovalService; // add by ryan for enterprise approval instead of general approval.
 
     @Override
     public void checkAppPrivilege(Long orgId, Long checkOrgId, Long privilege) {
@@ -1490,10 +1486,10 @@ public class PunchServiceImpl implements PunchService {
                     return;
                 }
                 //无论有没有成功校准都置为智能校准
-                if (offDutyLog.getId() != null) { 
+                if (offDutyLog.getId() != null) {
                 	offDutyLog.setSmartAlignment(NormalFlag.YES.getCode());
                     punchProvider.updatePunchLog(offDutyLog);
-                } 
+                }
 
             }
         }
@@ -1537,10 +1533,10 @@ public class PunchServiceImpl implements PunchService {
                     return;
                 }
                 //无论有没有成功校准都置为智能校准
-                if (onDutyLog.getId() != null) { 
+                if (onDutyLog.getId() != null) {
                 	onDutyLog.setSmartAlignment(NormalFlag.YES.getCode());
                     punchProvider.updatePunchLog(onDutyLog);
-                } 
+                }
             }
         }
 
@@ -2185,7 +2181,7 @@ public class PunchServiceImpl implements PunchService {
                 .map(r -> {
                     PunchExceptionRequestDTO dto = ConvertHelper.convert(r,
                             PunchExceptionRequestDTO.class);
-                    OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
+                    OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(dto.getUserId(), cmd.getEnterpriseId());
                     PunchExceptionApproval approval = punchProvider.getExceptionApproval(cmd.getUserId(), cmd.getEnterpriseId(), java.sql.Date.valueOf(cmd.getPunchDate()));
                     if (null != member) {
                         dto.setUserName(member.getContactName());
@@ -2194,7 +2190,7 @@ public class PunchServiceImpl implements PunchService {
                     if (null != dto.getOperatorUid()
                             && 0 != dto.getOperatorUid()) {
 
-                        member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
+                        member = organizationProvider.findOrganizationMemberByUIdAndOrgId(dto.getOperatorUid(), cmd.getEnterpriseId());
                         if (null == member) {
                             dto.setOperatorName("");
                         } else {
@@ -2370,7 +2366,7 @@ public class PunchServiceImpl implements PunchService {
                             PunchStatisticsDTO.class);
                     processPunchStatisticsDTOTime(dto, r);
                     if (dto != null) {
-                        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
+                        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(dto.getUserId(), cmd.getEnterpriseId());
                         if (null != member) {
                             Organization department = deptMap.get(member.getGroupId());
                             if (null != department) {
@@ -2389,7 +2385,7 @@ public class PunchServiceImpl implements PunchService {
                                         .getApprovalStatus());
                                 dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
                                 dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
-                                OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(approval.getOperatorUid(), cmd.getEnterpriseId());
+                                OrganizationMember operator = organizationProvider.findOrganizationMemberByUIdAndOrgId(approval.getOperatorUid(), cmd.getEnterpriseId());
                                 if (null != operator)
                                     dto.setOperatorName(operator.getContactName());
                             } else {
@@ -2588,7 +2584,7 @@ public class PunchServiceImpl implements PunchService {
             return null;
         } else {
             //查询当天那个人的班次
-            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, pr.getOwnerId());
+            OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, pr.getOwnerId());
             PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(pr.getOwnerId(), member.getDetailId(), date, pr.getId());
             if (null == punchScheduling || punchScheduling.getPunchRuleId() == null)
                 return null;
@@ -2667,7 +2663,7 @@ public class PunchServiceImpl implements PunchService {
         if (null == pr){
             this.punchProvider.createPunchStatistic(statistic);
             return;
-        } 
+        }
         try {
             Organization punchOrg = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
             if (null != punchOrg) {
@@ -2696,7 +2692,7 @@ public class PunchServiceImpl implements PunchService {
             List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
 
             //找到每一个打卡日期的异常申请修改审批后状态
-            //既然轮询了顺便就统计一下 设备异常次数  
+            //既然轮询了顺便就统计一下 设备异常次数
             int deviceChangeCounts = 0;
             List<DayStatusDTO> dayStatusDTOList = new ArrayList<>();
             for (PunchDayLog dayLog : dayLogList) {
@@ -2867,7 +2863,7 @@ public class PunchServiceImpl implements PunchService {
                     }
                 }
                 //countOneDayStatistic方法已经计算了打卡的出勤天数
-                //下面要看外出/出差等申请结果 
+                //下面要看外出/出差等申请结果
                 Timestamp dayStart = new Timestamp(pdl.getPunchDate().getTime() - (ptr.getBeginPunchTime() == null ? 14400000L : ptr.getBeginPunchTime()));
                 Timestamp dayEnd = new Timestamp(pdl.getPunchDate().getTime() + (ptr.getDaySplitTimeLong() == null ? 104400000L : ptr.getDaySplitTimeLong()));
 
@@ -4636,7 +4632,7 @@ public class PunchServiceImpl implements PunchService {
                 start.add(Calendar.MONTH, 1);
             }
         } else  if(null !=cmd.getMonth()){
-            months.add(cmd.getMonth()); 
+            months.add(cmd.getMonth());
         } else{
         }
         if (months.size() == 0) {
@@ -4647,7 +4643,7 @@ public class PunchServiceImpl implements PunchService {
         locator.setAnchor(cmd.getPageAnchor());
 
         //注释掉直接查询公司人员的部分,改为还是查询现有考勤月统计数据
-        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(), 
+        List<OrganizationMemberDetails> members = listMembers(organizationId, cmd.getOwnerId().equals(organizationId) ? null : cmd.getOwnerId(),
         		months.get(0), Integer.MAX_VALUE-1, cmd.getPageAnchor(),cmd.getUserName());
         if (members == null || members.size() == 0) {
             return response;
@@ -4815,7 +4811,7 @@ public class PunchServiceImpl implements PunchService {
 
         return response;
     }
- 
+
     public List<OrganizationMember> listDptOrganizationMembers(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
 
         List<OrganizationMember> organizationMembers = null;
@@ -4844,7 +4840,7 @@ public class PunchServiceImpl implements PunchService {
                     null, null, Integer.MAX_VALUE - 1);
         }
         return organizationMembers;
-    } 
+    }
     public List<Long> listDptDetailIds(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
     	List<OrganizationMember> organizationMembers =  listDptOrganizationMembers(org,ownerId,userName,includeSubDpt);
 
@@ -4859,7 +4855,7 @@ public class PunchServiceImpl implements PunchService {
         }
 
         LOGGER.debug("detailIds  : " + StringHelper.toJsonString(detailIds));
-        return detailIds; 
+        return detailIds;
     }
     @Override
     public List<Long> listDptUserIds(Organization org, Long ownerId, String userName, Byte includeSubDpt) {
@@ -5127,7 +5123,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
         if (null != dto.getApprovalRecords()) {
             StringBuilder sb = new StringBuilder();
-            for (GeneralApprovalRecordDTO record : dto.getApprovalRecords()) {
+            for (EnterpriseApprovalRecordDTO record : dto.getApprovalRecords()) {
                 sb.append(record.getApprovalNo());
             }
             row.createCell(++i).setCellValue(sb.toString());
@@ -5407,20 +5403,20 @@ public class PunchServiceImpl implements PunchService {
             if (exceptionRequests.size() > 0) {
                 dto.setApprovalRecords(new ArrayList<>());
                 for (PunchExceptionRequest request : exceptionRequests) {
-                	if(request.getUserId().equals(r.getUserId())){
+                if(request.getUserId().equals(r.getUserId())){
                 		//如果是begin和end time 的话,在开始时间在今天结束前,结束时间在今天开始前的统计
-                		if((request.getBeginTime()!=null && request.getEndTime() !=null 
+                		if((request.getBeginTime()!=null && request.getEndTime() !=null
                 				&& !request.getBeginTime().after(dayEnd) && !request.getEndTime().before(dayStart))
                 				//如果是punchdate的话
                 				||(request.getPunchDate()!=null && request.getPunchDate().equals(r.getPunchDate()))
-                				){
-		                    FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
-		                    if (null != flowCase) {
-		                        GeneralApprovalRecordDTO recordDTO = generalApprovalService.convertGeneralApprovalRecordDTO(flowCase);
-		                        dto.getApprovalRecords().add(recordDTO);
-		                    }
-                		}
-                	}
+                				){    FlowCase flowCase = flowCaseProvider.getFlowCaseById(request.getRequestId());
+
+                    if(null != flowCase){
+                    	EnterpriseApprovalRecordDTO recordDTO = enterpriseApprovalService.convertEnterpriseApprovalRecordDTO(flowCase);
+                    	dto.getApprovalRecords().add(recordDTO);
+                    }
+}
+}
                 }
             }
         }
@@ -5458,10 +5454,10 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private OrganizationMember findOrganizationMemberByUIdCache(Long userId, Long enterpriseId) {
-    	
+
     	 OrganizationMember member = organizationMemberByUIdCache.get().get(enterpriseId+"-"+userId);
          if (null == member) {
-        	 member =  organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, enterpriseId);
+        	 member =  organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, enterpriseId);
         	 organizationMemberByUIdCache.get().put(enterpriseId+"-"+userId, member);
          }
          return member;
@@ -5472,7 +5468,7 @@ public class PunchServiceImpl implements PunchService {
             return new HashMap<>();
         }
     };
-    
+
     @Override
     public OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus, String userName, String ownerType, Long ownerId, Long taskId
     		,Long monthReportId) {
@@ -5977,7 +5973,7 @@ public class PunchServiceImpl implements PunchService {
         startCalendar.setTime(punCalendar.getTime());
         startCalendar.set(Calendar.HOUR_OF_DAY, 0);
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-        try { 
+        try {
             OrganizationDTO dept = findUserDepartment(userId, ownerId);
             OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(userId, ownerId);
             refreshDayLogAndMonthStat(member, dept.getId(), punCalendar, startCalendar);
@@ -9541,7 +9537,7 @@ public class PunchServiceImpl implements PunchService {
                     }
                     saveImportVacation(resultList, cmd.getOrganizationId(), fileLog, response, userId);
                 } else {
-                    response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
+                    response.setFileLog(ImportFileErrorType.TITLE_ERROR.getCode());
                 }
                 return response;
             }
@@ -9719,22 +9715,22 @@ public class PunchServiceImpl implements PunchService {
     private String checkImportVacationTitle(Map<String, String> titleMap, Long organizationId) {
         if (!"手机".equals(titleMap.get("A"))) {
             LOGGER.error("第一列不是手机而是" + titleMap.get("A"));
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (!"姓名".equals(titleMap.get("B"))) {
             LOGGER.error("第2列不是姓名而是" + titleMap.get("B"));
 
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (!"年假余额".equals(titleMap.get("C"))) {
             LOGGER.error("第3列不是年假余额而是" + titleMap.get("C"));
 
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (!"调休余额".equals(titleMap.get("D"))) {
             LOGGER.error("第4列不是调休余额而是" + titleMap.get("D"));
 
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         return null;
     }
@@ -9772,7 +9768,7 @@ public class PunchServiceImpl implements PunchService {
     	Calendar calendar = Calendar.getInstance();
     	calendar.add(Calendar.DAY_OF_MONTH, -1);
     	refreshMonthReport(monthSF.get().format(calendar.getTime()));
-    } 
+    }
     /**
      * 每月1日早上1点50,新建当月的月报数据
      */
@@ -9893,7 +9889,7 @@ public class PunchServiceImpl implements PunchService {
             try {
                 List<OrganizationMemberDetails> members = listMembers(cmd.getOwnerId(), null, report.getPunchMonth(), Integer.MAX_VALUE -1 , null, null);
                 setMonthReportProcess(report, 5);
-                for (int i = 0; i < members.size(); i++) { 
+                for (int i = 0; i < members.size(); i++) {
                     try{
                     	addPunchStatistics(members.get(i), cmd.getOwnerId(), start, end);
                     }catch(Exception e){
@@ -9928,7 +9924,7 @@ public class PunchServiceImpl implements PunchService {
 //        listingLocator.setAnchor(anchor);
         List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, deptId, (locator, query) -> {
             //月底之后离职或者未离职
-            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()) 
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode())
                     .or(Tables.EH_ORGANIZATION_MEMBER_DETAILS.DISMISS_TIME.greaterOrEqual(socialSecurityService.getTheLastDate(punchMonth))));
             //月底之前入职
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.lessOrEqual(socialSecurityService.getTheLastDate(punchMonth)));
