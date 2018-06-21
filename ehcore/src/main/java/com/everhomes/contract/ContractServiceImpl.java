@@ -1957,7 +1957,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						command.setCommunityId(cmd.getCommunityId());
 						command.setStatus(cmd.getStatus());
 						command.setEnterpriseCustomerId(customer.getId());
-						command.setCategoryId(cmd.getCategoryId());
+						//command.setCategoryId(cmd.getCategoryId());
 						return listEnterpriseCustomerContracts(command);
 					}
 				}
@@ -1985,7 +1985,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						command.setCommunityId(cmd.getCommunityId());
 						command.setStatus(cmd.getStatus());
 						command.setIndividualCustomerId(owner.getId());
-						command.setCategoryId(cmd.getCategoryId());
+						//command.setCategoryId(cmd.getCategoryId());
 						List<ContractDTO> dtos = listIndividualCustomerContracts(command);
 						if(dtos != null && dtos.size() > 0) {
 							contracts.addAll(dtos);

@@ -343,9 +343,9 @@ public class ContractProviderImpl implements ContractProvider {
 		} else {
 			query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
 		}
-		if(categoryId != null) {
+		/*if(categoryId != null) {
 			query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
-		}
+		}*/
 
 		List<Contract> result = new ArrayList<>();
 		query.fetch().map((r) -> {
