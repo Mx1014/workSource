@@ -304,7 +304,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 Boolean flag = true;
                 switch (sheet) {
                     case CUSTOMER:
-                        failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns);
+                        failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns,ds.getDisplayName());
                         if(importLogs.getData()!=null)
                         resultLogs.add(importLogs);
                         break;
@@ -751,7 +751,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         }
     }
 
-    private int importCustomerInfo(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, int failedNumber, List<DynamicColumnDTO> columns) {
+    private int importCustomerInfo(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, int failedNumber, List<DynamicColumnDTO> columns, String sheetName) {
         if (customerInfo.getCustomerId() != 0) {
             //不为0时为管理里面导入的 直接break
             return failedNumber;
@@ -780,7 +780,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             });
           columnLoop:  for (DynamicColumnDTO column : columns) {
                 LOGGER.warn("CUSTOMER: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName());
-                if (dealDynamicItemsAndTrackingUidField(customerInfo, importLogs, originColumns, enterpriseCustomer, column)) {
+                if (dealDynamicItemsAndTrackingUidField(customerInfo, importLogs, originColumns, enterpriseCustomer, column,sheetName)) {
                     //如果发生异常 break 日志在校验函数中
                     flag = false;
                     break;
@@ -794,6 +794,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setErrorDescription("customer mandatory error ");
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_MANDATORY_ERROR);
                     importLogs.setFieldName(column.getHeaderDisplay());
+                    importLogs.setSheetName(sheetName);
                     flag = false;
                     break;
                 }
@@ -814,6 +815,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     importLogs.setErrorDescription("customer import data format error ");
                                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_NUM_FORMAT_ERROR);
                                     importLogs.setFieldName(column.getHeaderDisplay());
+                                    importLogs.setSheetName(sheetName);
                                     flag = false;
                                     break columnLoop;
                                 }
@@ -837,6 +839,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                         importLogs.setErrorDescription("customer import data timestamp format error ");
                                         importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_DATE_FORMAT_ERROR);
                                         importLogs.setFieldName(column.getHeaderDisplay());
+                                        importLogs.setSheetName(sheetName);
                                         flag = false;
                                         break columnLoop;
                                     }
@@ -862,7 +865,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             customerAddressString = column.getValue();
                         }
                         // 校验 admin address  异常日志在校验中
-                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, customerAdminString, importLogs, enterpriseCustomer, column, originColumns);
+                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, customerAdminString, importLogs, enterpriseCustomer, column, originColumns, sheetName);
                         if (dealResult) {
                             flag = false;
                             break;
@@ -876,6 +879,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setErrorDescription("unknow exceptions");
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_UNKNOW_ERROR);
                     importLogs.setFieldName(column.getHeaderDisplay());
+                    importLogs.setSheetName(sheetName);
                     break;
                 }
             }
@@ -912,7 +916,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         return failedNumber;
     }
 
-    private boolean dealCustomerAdminsAndAddress(String customerAddressString, String customerAdminString, ImportFileResultLog<Map<String, String>> importLogs, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column, List<DynamicColumnDTO> columns) {
+    private boolean dealCustomerAdminsAndAddress(String customerAddressString, String customerAdminString, ImportFileResultLog<Map<String, String>> importLogs, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column, List<DynamicColumnDTO> columns,String sheetName) {
         if (StringUtils.isNotBlank(customerAddressString)) {
             //todo:校验格式
             String[] buildingNames = null;
@@ -937,6 +941,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             importLogs.setErrorDescription("address and building not exist");
                             importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST_ERROR);
                             importLogs.setFieldName(column.getHeaderDisplay());
+                            importLogs.setSheetName(sheetName);
                             return true;
                         }
                     }
@@ -949,6 +954,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 importLogs.setErrorDescription("wrong building and address format");
                 importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR);
                 importLogs.setFieldName(column.getHeaderDisplay());
+                importLogs.setSheetName(sheetName);
                 return true;
             }
         }
@@ -966,13 +972,14 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 importLogs.setErrorDescription("customer enterprise admins format error");
                 importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADMIN_FORMAT_ERROR);
                 importLogs.setFieldName(column.getHeaderDisplay());
+                importLogs.setSheetName(sheetName);
                 return true;
             }
         }
         return false;
     }
 
-    private boolean dealDynamicItemsAndTrackingUidField(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, List<DynamicColumnDTO> columns, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column) {
+    private boolean dealDynamicItemsAndTrackingUidField(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, List<DynamicColumnDTO> columns, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column,String sheetName ) {
        if(StringUtils.isBlank(column.getValue())){
            return false;
        }
@@ -997,6 +1004,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 importLogs.setErrorDescription("can't find any scope items ");
                 importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ITEM_ERROR);
                 importLogs.setFieldName(column.getHeaderDisplay());
+                importLogs.setSheetName(sheetName);
                 return true;
             }
         }
@@ -1024,6 +1032,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setErrorDescription("wrong trackingUid and contacPhone format");
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
                     importLogs.setFieldName(column.getHeaderDisplay());
+                    importLogs.setSheetName(sheetName);
                     return true;
                 }
                 enterpriseCustomer.setTrackingName(username);
@@ -1041,6 +1050,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     importLogs.setErrorDescription("can not find tracking users");
                     importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_TRACKING_ERROR);
                     importLogs.setFieldName(column.getHeaderDisplay());
+                    importLogs.setSheetName(sheetName);
                     return true;
                 }
             } else {

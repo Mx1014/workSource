@@ -17,6 +17,8 @@ public class ImportFileResultLog<T> {
 
     private String fieldName;
 
+    private String sheetName;
+
     private String errorDescription;
 
     public T getData() {
@@ -69,6 +71,14 @@ public class ImportFileResultLog<T> {
 
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
+    }
+
+    public String getSheetName() {
+        return sheetName;
+    }
+
+    public void setSheetName(String sheetName) {
+        this.sheetName = sheetName;
     }
 
     @Override

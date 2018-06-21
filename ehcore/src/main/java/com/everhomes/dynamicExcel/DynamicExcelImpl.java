@@ -185,6 +185,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
                     Cell cell = headRow.getCell(j);
                     String headerDisplay = ExcelUtils.getCellValue(cell);
                     headers.add(headerDisplay);
+                    headers.removeIf((r) -> r.equals("错误原因"));
                 }
                 List<DynamicSheet> ds = excelHandler.getDynamicSheet(sheet.getSheetName(), params, headers, true, false);
                 if (ds.size() != 1) {
