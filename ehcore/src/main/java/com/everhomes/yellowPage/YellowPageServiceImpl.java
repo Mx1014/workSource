@@ -1524,7 +1524,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 							d.setModuleUrl(String.format("zl://browser/i?url=%s",
 									URLEncoder.encode(b.getShopURL(), StandardCharsets.UTF_8.name())));
 						} catch (UnsupportedEncodingException e) {
-							e.printStackTrace();
+							LOGGER.error("encode failed getShopURL:" + b.getShopURL() + " name:" + StandardCharsets.UTF_8.name());
 						}
 						d.setNamespaceId(namespaceId);
 						d.setParentId(bisModuleDto.getId());
