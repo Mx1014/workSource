@@ -1004,14 +1004,18 @@ public class ContractProviderImpl implements ContractProvider {
 						//处理 退约经办人 字段
 						if("denunciationUid".equals(field.getFieldName())){
 							//用户可能不在组织架构中 所以用nickname
-				            User userNew = userProvider.findUserById((Long)objNew);
-				            if(userNew != null) {
-				            	newData = userNew.getNickName();
-				            }
-				            User userOld = userProvider.findUserById((Long)objOld);
-				            if(userOld != null) {
-				            	oldData = userOld.getNickName();
-				            }
+				            if (objNew!=null) {
+				            	User userNew = userProvider.findUserById((Long)objNew);
+				            	if(userNew != null) {
+					            	newData = userNew.getNickName();
+					            }
+							}
+				            if (objOld!=null) {
+				            	User userOld = userProvider.findUserById((Long)objOld);
+					            if(userOld != null) {
+					            	oldData = userOld.getNickName();
+					            }
+							}
 						}
 						
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
