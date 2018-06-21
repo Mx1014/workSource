@@ -1,3 +1,6 @@
+-- 通用脚本
+-- ADD BY 梁燕龙
+-- issue-30635 活动V4.0 支持发布后修改
 INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
 	VALUES( 'activity.notification', 11, 'zh_CN', '活动发布后，修改标题', '您参加的活动“${postName}”的主题已被发起方改成“${newPostName}”。');
 INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
@@ -16,3 +19,4 @@ INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
 
 INSERT INTO eh_locale_strings ( `scope`, `code`, `locale`, `text`)
 	VALUES ('activity', 26, 'zh_CN', '活动被修改！！');
+-- END
