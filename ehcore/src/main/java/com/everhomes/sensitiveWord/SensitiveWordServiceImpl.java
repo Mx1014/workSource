@@ -82,7 +82,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
 
     @Override
     public void filterWords(FilterWordsCommand cmd) {
-        String settingFlag = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "sensitiveword.settings", "");
+        String settingFlag = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SENSITIVE_SETTING, "");
         if (StringUtils.isBlank(settingFlag) || "false".equals(settingFlag)) {
             return;
         }

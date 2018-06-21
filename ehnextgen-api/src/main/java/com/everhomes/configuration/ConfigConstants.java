@@ -176,4 +176,5 @@ public interface ConfigConstants {
 	public static final String SENSITIVE_URL = "sensitiveword.url";
     public static final String SENSITIVE_FILENAME = "sensitiveword.fileName";
     public static final String SENSITIVE_FILEPATH = "sensitiveword.filePath";
+    public static final String SENSITIVE_SETTING = "sensitiveword.settings";
 }
