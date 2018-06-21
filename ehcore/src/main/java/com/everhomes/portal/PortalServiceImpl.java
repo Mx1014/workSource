@@ -2063,6 +2063,24 @@ public class PortalServiceImpl implements PortalService {
 	public void publishItemCategory(Integer namespaceId, Long versionId, Byte publishType){
 		User user = UserContext.current().getUser();
 		List<PortalItem> allItems = getItemAllOrMore(namespaceId, null, AllOrMoreType.ALL, versionId);
+
+		List<PortalItemGroup> portalItemGroups = portalItemGroupProvider.listPortalItemGroupByWidgetAndStyle(namespaceId, versionId, Widget.NAVIGATOR.getCode(), Style.TAB.getCode());
+
+
+		//Tab类型没有全部更多，此处生成一个
+		for (PortalItemGroup portalItemGroup: portalItemGroups){
+			PortalLayout portalLayout = portalLayoutProvider.findPortalLayoutById(portalItemGroup.getLayoutId());
+			if(portalLayout == null){
+				continue;
+			}
+
+			PortalItem portalItem = new  PortalItem();
+			portalItem.setItemLocation(portalLayout.getLocation());
+			portalItem.setGroupName(portalItemGroup.getName());
+			portalItem.setItemGroupId(portalItemGroup.getId());
+			allItems.add(portalItem);
+		}
+
 		for (PortalItem item: allItems) {
 
 			//下面通过mapping的方式不靠谱，导致了很多的没有被删除，然后重复了。直接这个组的全干掉。
