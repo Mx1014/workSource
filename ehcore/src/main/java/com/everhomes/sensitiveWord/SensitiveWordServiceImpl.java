@@ -34,7 +34,6 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
 
     private static AhoCorasickDoubleArrayTrie<String> acdat = null;
 
-    private final String fliePath = "C:/Users/Administrator/Desktop/";
     @Autowired
     private SensitiveFilterRecordProvider sensitiveFilterRecordProvider;
     @Autowired
@@ -119,11 +118,12 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
         BufferedReader in = null;
         BufferedWriter out = null;
         String fileName = configurationProvider.getValue(0, "sensitiveword.fileName", "");
+        String filePath = configurationProvider.getValue(0, "sensitiveword.filePath", "");
         if (fileName == null || StringUtils.isBlank(fileName)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "file not exists.");
         }
-        File file = new File(fliePath+fileName+".txt");
+        File file = new File(filePath+fileName+".txt");
         try{
             String url = configurationProvider.getValue(0, "sensitiveword.url", "");
             URL realUrl = new URL(url);
