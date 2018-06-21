@@ -253,18 +253,16 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 //		    小区场景
             OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(cmd.getOrgOwnerType());
             request.setOrgOwnerTypeId(ownerType.getId());
-        } else {
-//		    企业场景
-            OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
-            if (null == orgRequest) {
-                LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "OrganizationCommunityRequest not found.");
-            }
-            request.setOwnerId(orgRequest.getCommunityId());
-            request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
         }
 
+		OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
+		if (null == orgRequest) {
+			LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"OrganizationCommunityRequest not found.");
+		}
+		request.setOwnerId(orgRequest.getCommunityId());
+		request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
