@@ -39,6 +39,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 import net.greghaines.jesque.Job;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -249,7 +250,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		RelocationRequest request = ConvertHelper.convert(cmd, RelocationRequest.class);
 		request.setRelocationDate(new Timestamp(cmd.getRelocationDate()));
 
-		if(null != cmd.getOrgOwnerType()){
+		if(StringUtils.isNotEmpty(cmd.getOrgOwnerType())){
 //		    小区场景
             OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(cmd.getOrgOwnerType());
             request.setOrgOwnerTypeId(ownerType.getId());
