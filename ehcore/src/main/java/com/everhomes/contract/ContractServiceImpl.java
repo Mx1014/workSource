@@ -2386,4 +2386,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		return false;
 	}
+
+    public Long findContractCategoryIdByContractId(Long contractId) {
+		return contractProvider.findContractCategoryIdByContractId(contractId);
+    }
 }

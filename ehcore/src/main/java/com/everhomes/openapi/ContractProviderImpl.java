@@ -717,6 +717,15 @@ public class ContractProviderImpl implements ContractProvider {
 		return false;
 	}
 
+	@Override
+	public Long findContractCategoryIdByContractId(Long contractId) {
+		DSLContext context = getReadOnlyContext();
+		return context.select(Tables.EH_CONTRACTS.CATEGORY_ID)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.ID.eq(contractId))
+                .fetchOne(Tables.EH_CONTRACTS.CATEGORY_ID);
+	}
+
 
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
