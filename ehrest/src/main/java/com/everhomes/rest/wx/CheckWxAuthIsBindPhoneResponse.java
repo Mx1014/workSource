@@ -9,11 +9,17 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>bindType: 微信是否绑定手机号，请参考{@link com.everhomes.rest.wx.WxAuthBindPhoneType}</li>
  *     <li>LogonCommandResponse: 登录参数，请参考{@link com.everhomes.rest.user.LogonCommandResponse}</li>
+ *     <li>identifierToken: 手机号</li>
+ *     <li>regionCode: 区号</li>
  * </ul>
  */
 public class CheckWxAuthIsBindPhoneResponse extends RestResponse{
 
     private Byte bindType;
+
+    private String identifierToken;
+
+    private String regionCode;
 
     private LogonCommandResponse logonCommandResponse;
 
@@ -25,6 +31,22 @@ public class CheckWxAuthIsBindPhoneResponse extends RestResponse{
 
     public void setLogonCommandResponse(LogonCommandResponse logonCommandResponse) {
         this.logonCommandResponse = logonCommandResponse;
+    }
+
+    public String getIdentifierToken() {
+        return identifierToken;
+    }
+
+    public void setIdentifierToken(String identifierToken) {
+        this.identifierToken = identifierToken;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
     }
 
     public Byte getBindType() {

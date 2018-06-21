@@ -426,6 +426,8 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         }else {
             LOGGER.info("checkUserIdentifier success");
             response.setBindType(WxAuthBindPhoneType.BIND.getCode());
+            response.setIdentifierToken(identifier.getIdentifierToken());
+            response.setRegionCode(identifier.getRegionCode().toString());
         }
         return response;
     }
