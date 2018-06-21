@@ -445,7 +445,7 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         if (cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
                     EnterpriseApprovalErrorCode.ERROR_NO_OUTERS, "no outers.");
-        List<FlowEntitySel> transferOut = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
+        List<FlowEntitySel> transferIn = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
         for (Long flowCaseId : cmd.getFlowCaseIds()) {
             FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
             if (flowCase == null) {
@@ -463,8 +463,8 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
                 LOGGER.error("Can not find old processors");
                 continue;
             }
-            stepDTO.setTransferIn(processors.stream().map(r -> new FlowEntitySel(r.getTargetId(), FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList()));
-            stepDTO.setTransferOut(transferOut);
+            stepDTO.setTransferIn(transferIn);
+            stepDTO.setTransferOut(processors.stream().map(r -> new FlowEntitySel(r.getTargetId(), FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList()));
             flowService.processAutoStep(stepDTO);
         }
     }
