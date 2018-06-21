@@ -1611,12 +1611,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	doorAccess.setEnableAmount(cmd.getEnableAmount());
         }
 
-		if(cmd.getServerId() != null && cmd.getServerId() != 0L){
-			if(aclinkServerService.findLocalServerById(cmd.getServerId()) != null){
-				doorAccess.setLocalServerId(cmd.getServerId());
+		if(cmd.getServerId() != null){
+			if(cmd.getServerId() != 0L){
+				if(aclinkServerService.findLocalServerById(cmd.getServerId()) != null){
+					doorAccess.setLocalServerId(cmd.getServerId());
+				}else{
+					throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "关联服务器不存在");
+				}
 			}else{
-				throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "关联服务器不存在");
+				doorAccess.setLocalServerId(0L);
 			}
+			
 		}
 
         doorAccess.setLatitude(cmd.getLatitude());
