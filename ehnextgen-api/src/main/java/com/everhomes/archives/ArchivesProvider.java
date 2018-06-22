@@ -43,6 +43,8 @@ public interface ArchivesProvider {
 
     void createOperationalConfiguration(ArchivesOperationalConfiguration config);
 
+    void deleteLastConfiguration(Integer namespaceId, List<Long> detailIds, Byte operationType);
+
     void updateOperationalConfiguration(ArchivesOperationalConfiguration config);
 
     ArchivesOperationalConfiguration findConfigurationByDetailId(Integer namespaceId, Long organizationId, Byte type, Long detailId);
