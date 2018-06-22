@@ -22,6 +22,10 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 更新企业管理客户级别其他--》历史客户
 UPDATE eh_var_field_items SET display_name='历史客户' WHERE module_name='enterprise_customer' and field_id=5 and display_name='其他';
+-- 界面显示历史客户
+SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_var_field_item_scopes`),0);
+INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`, `category_id`) VALUES 
+(@id:=@id+1, '0', 'enterprise_customer', '5', '7', '历史客户', '7', '2', '1', '2018-06-08 17:37:13', NULL, NULL, NULL, NULL, NULL);
 
 
 -- --合同基础参数配置 工作流配置 权限
