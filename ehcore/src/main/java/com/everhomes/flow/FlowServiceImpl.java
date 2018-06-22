@@ -30,6 +30,7 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -94,6 +95,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -255,6 +257,9 @@ public class FlowServiceImpl implements FlowService {
 
     @Autowired
     private NamespaceProvider namespaceProvider;
+
+    @Autowired
+    private GogsService gogsService;
 
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -1192,7 +1197,7 @@ public class FlowServiceImpl implements FlowService {
 
     private void validateScriptConfig(FlowScript script, List<FlowScriptConfigInfo> configs) {
         LinkedTransferQueue<List<FlowScriptConfigValidateResult>> transferQueue = new LinkedTransferQueue<>();
-        nashornEngineService.push(new NashornScriptConfigValidator(script, configs, transferQueue));
+        nashornEngineService.push(new NashornScriptConfigValidator(toRuntimeScript(script), configs, transferQueue));
 
         List<FlowScriptConfigValidateResult> result = null;
         try {
@@ -1215,7 +1220,7 @@ public class FlowServiceImpl implements FlowService {
 
     private void validateSyntax(FlowScript script) {
         LinkedTransferQueue<Boolean> transferQueue = new LinkedTransferQueue<>();
-        nashornEngineService.push(new NashornScriptValidator(script, transferQueue));
+        nashornEngineService.push(new NashornScriptValidator(toValidateScript(script), transferQueue));
 
         Boolean pass = null;
         try {
@@ -1235,7 +1240,7 @@ public class FlowServiceImpl implements FlowService {
 
     private List<FlowScriptConfigInfo> getScriptConfig(FlowScript script) {
         LinkedTransferQueue<List<FlowScriptConfigInfo>> transferQueue = new LinkedTransferQueue<>();
-        nashornEngineService.push(new NashornScriptConfigExtractor(script, transferQueue));
+        nashornEngineService.push(new NashornScriptConfigExtractor(toRuntimeScript(script), transferQueue));
 
         List<FlowScriptConfigInfo> configs = null;
         try {
@@ -5180,14 +5185,63 @@ public class FlowServiceImpl implements FlowService {
             validateSyntax(script);
         }
 
-        flowScriptProvider.createFlowScriptWithId(script);
+        GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+        GogsCommit commit = gogsCommitScript(repo, script.gogsPath(), "", cmd.getScript(), true);
+        script.setLastCommit(commit.getId());
 
         if (scriptType == FlowScriptType.JAVASCRIPT) {
             // 获取配置信息
             List<FlowScriptConfigInfo> scriptConfig = getScriptConfig(script);
             createFlowScriptConfig(script, scriptConfig);
         }
+
+        script.setScript(null);// not used, migrate to gogs repo
+        flowScriptProvider.createFlowScriptWithId(script);
         return toFlowScriptDTO(script, EhFlowScripts.class.getSimpleName(), script.getId());
+    }
+
+    private GogsCommit gogsCommitScript(GogsRepo repo, String path, String lastCommit, String content, boolean isNewFile) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setNewFile(isNewFile);
+        param.setContent(content);
+        param.setLastCommit(lastCommit);
+        return gogsService.commitFile(repo, path, param);
+    }
+
+    private GogsCommit gogsDeleteScript(GogsRepo repo, String path, String lastCommit) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setLastCommit(lastCommit);
+        return gogsService.deleteFile(repo, path, param);
+    }
+
+    private String gogsGetScript(GogsRepo repo, String path, String lastCommit) {
+        byte[] file = gogsService.getFile(repo, path, lastCommit);
+        return new String(file, Charset.forName("UTF-8"));
+    }
+
+    private String gogsCommitMessage() {
+        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.currentUserId());
+        return String.format(
+                "Author: %s\n UID: %s\n Identifier: %s", userInfo.getNickName(), userInfo.getId(), userInfo.getPhones());
+    }
+
+    private GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
+        GogsRepo repo = gogsService.getAnyRepo(namespaceId, moduleType, moduleId, ownerType, ownerId);
+        if (repo == null) {
+            repo = new GogsRepo();
+            repo.setName("flow");
+            repo.setNamespaceId(namespaceId);
+            repo.setModuleType(moduleType);
+            repo.setModuleId(moduleId);
+            repo.setOwnerType(ownerType);
+            repo.setOwnerId(ownerId);
+            repo.setRepoType(GogsRepoType.NORMAL.name());
+            repo = gogsService.createRepo(repo);
+        }
+        return repo;
     }
 
     private void createFlowScriptConfig(FlowScript script, List<FlowScriptConfigInfo> configInfo) {
@@ -5223,6 +5277,11 @@ public class FlowServiceImpl implements FlowService {
                 flowScript.setStatus(FlowCommonStatus.INACTIVE.getCode());
             }
             flowScriptProvider.updateFlowScripts(flowScripts);
+
+            GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                    script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+            // FIXME last commit should from cmd
+            gogsDeleteScript(repo, script.gogsPath(), script.getLastCommit());
         }
     }
 
@@ -5234,6 +5293,8 @@ public class FlowServiceImpl implements FlowService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "flow script not exist id=%s", cmd.getId());
         }
+        String oldPath = script.gogsPath();
+        String oldCommit = script.getLastCommit();
 
         script.setScript(cmd.getScript());
         script.setDescription(cmd.getDescription());
@@ -5247,6 +5308,22 @@ public class FlowServiceImpl implements FlowService {
             // 语法检查
             validateSyntax(script);
         }
+
+        // 向代码仓库提交
+        GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+
+        boolean isNewFile = !Objects.equals(oldPath, script.gogsPath());
+        // FIXME last commit should from cmd
+        GogsCommit commit = gogsCommitScript(repo, script.gogsPath(), script.getLastCommit(), cmd.getScript(), isNewFile);
+        script.setLastCommit(commit.getId());
+
+        // 目前来说，如果改了名称，在版本仓库里必须删掉原来的，在创建新的
+        if (isNewFile) {
+            gogsDeleteScript(repo, oldPath, oldCommit);
+        }
+
+        script.setScript(null);// not used, migrate to gogs repo
         flowScriptProvider.createFlowScriptWithId(script);
 
         if (scriptType == FlowScriptType.JAVASCRIPT) {
@@ -5274,6 +5351,7 @@ public class FlowServiceImpl implements FlowService {
         FlowScriptType scriptType = FlowScriptType.fromCode(cmd.getScriptType());
         switch (scriptType) {
             case JAVASCRIPT: {
+                // TODO get objects from gogs repo and need commit_id from request, so todo it
                 List<FlowScript> scriptList = flowScriptProvider.listFlowScripts(
                         flow.getNamespaceId(), EntityType.ORGANIZATIONS.getCode(), flow.getOrganizationId(),
                         flow.getModuleType(), flow.getModuleId(), cmd.getScriptType(), cmd.getKeyword(), pageSize, locator);
@@ -5351,22 +5429,22 @@ public class FlowServiceImpl implements FlowService {
     public DeferredResult<Object> flowScriptMappingCall(Byte mode, Long id1, Long id2, String functionName, HttpServletRequest request) {
         DeferredResult<Object> deferredResult = new DeferredResult<>(5 * 60 * 1000L);
 
-        FlowScript flowScript = null;
+        FlowScript script = null;
 
         FlowScriptMappingMode mappingMode = FlowScriptMappingMode.fromCode(mode);
         switch (mappingMode) {
             case SCRIPT_ID_VERSION:
-                flowScript = flowScriptProvider.findByMainIdAndVersion(id1, Integer.valueOf(id2 + ""));
+                script = flowScriptProvider.findByMainIdAndVersion(id1, Integer.valueOf(id2 + ""));
                 break;
             case ORGANIZATION_MODULE:
-                flowScript = flowScriptProvider.findNewestFlowScript(id1);
+                script = flowScriptProvider.findNewestFlowScript(id1);
                 break;
             default:
                 LOGGER.warn("unknown script mapping mode = {}, id1 = {}, id2 = {}", mode, id1, id2);
                 break;
         }
 
-        if (flowScript == null) {
+        if (script == null) {
             deferredResult.setResult("could not found function");
             return deferredResult;
         }
@@ -5382,12 +5460,35 @@ public class FlowServiceImpl implements FlowService {
         }
 
         Map<String, String[]> parameterMap = request.getParameterMap();
-        nashornEngineService.push(new NashornScriptMappingCall(flowScript, functionName, parameterMap, requestBody.toString(), deferredResult));
+
+        FlowRuntimeScript runtimeScript = toRuntimeScript(script);
+        nashornEngineService.push(new NashornScriptMappingCall(runtimeScript, functionName, parameterMap, requestBody.toString(), deferredResult));
         return deferredResult;
+    }
+
+    @Override
+    public FlowRuntimeScript toRuntimeScript(FlowScript script) {
+        FlowRuntimeScript runtimeScript = new FlowRuntimeScript(script.getScriptMainId(), script.getScriptVersion());
+        GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+        if (repo == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "repo not found for script: %s", script);
+        }
+        byte[] file = gogsService.getFile(repo, script.gogsPath(), script.getLastCommit());
+        runtimeScript.setScript(new String(file));
+        return runtimeScript;
+    }
+
+    private FlowValidateScript toValidateScript(FlowScript script) {
+        return new FlowValidateScript(script.getScriptMainId(), script.getScriptVersion(), script.getScript());
     }
 
     private FlowScriptDTO toFlowScriptDTO(FlowScript script, String ownerType, Long ownerId) {
         FlowScriptDTO dto = ConvertHelper.convert(script, FlowScriptDTO.class);
+        GogsRepo repo = gogsRepo(script.getNamespaceId(),
+                script.getModuleType(), script.getModuleId(), script.getOwnerType(), script.getOwnerId());
+        dto.setScript(gogsGetScript(repo, script.gogsPath(), script.getLastCommit()));
         dto.setConfigs(getFlowScriptConfigDTO(ownerType, ownerId));
         return dto;
     }
