@@ -1,6 +1,7 @@
 package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -72,7 +73,9 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
 	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
-
+    @Autowired
+    private AssetService assetService;
+    
 //    @Autowired
 //    private ContractService contractService;
 
@@ -157,14 +160,20 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
                 contractProvider.updateContract(contract);
                 contractSearcher.feedDoc(contract);
-            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
-                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
-              //查询企业客户信息，客户状态会由已成交客户变为历史客户
-        		if (contract.getCustomerType()==0) {
-        			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
-        			enterpriseCustomer.setLevelItemId(7L);
-        			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-        			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))){
+            	if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+	            	 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+	                 //查询企业客户信息，客户状态会由已成交客户变为历史客户
+	           		 if (contract.getCustomerType()==0) {
+	           			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+	           			enterpriseCustomer.setLevelItemId(7L);
+	           			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+	           			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+	           		 }
+				} 
+            	//add by tangcen 退约合同审批通过后，对该合同未出的账单进行处理
+        		if (contract.getCostGenerationMethod()!=null) {
+        			assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
         		}
             }
         }

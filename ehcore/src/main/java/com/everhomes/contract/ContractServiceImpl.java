@@ -1379,9 +1379,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			Contract parentContract = checkContract(contract.getParentId());
 			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 			contractProvider.updateContract(parentContract);
-			if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getStatus()))){
-				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
-			}
+//			if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getStatus()))){
+//				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+//			}
 		}
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
@@ -1441,9 +1441,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 		//将此合同关联的未出账单记为无效账单 by tangcen
-		if (cmd.getCostGenerationMethod()!=null) {
-			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
-		}
+//		if (cmd.getCostGenerationMethod()!=null) {
+//			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
+//		}
 		
 		if(cmd.getPaymentFlag() == 1) {
 			addToFlowCase(contract, flowcasePaymentContractOwnerType);
@@ -1562,10 +1562,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contractProvider.updateContract(contract);
 				contractSearcher.feedDoc(contract);
 				//add by tangcen 变更合同发起审批后，要对父合同的未出账单进行处理
-				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
-					Contract parentContract = checkContract(contract.getParentId());
-					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
-				}
+//				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
+//					Contract parentContract = checkContract(contract.getParentId());
+//					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+//				}
 				
 				if(cmd.getPaymentFlag() == 1) {
 					addToFlowCase(contract, flowcasePaymentContractOwnerType);
@@ -1626,7 +1626,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		
 		
-
 		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
@@ -1634,6 +1633,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				parentContract.setStatus(ContractStatus.HISTORY.getCode());
 				contractProvider.updateContract(parentContract);
 				contractSearcher.feedDoc(parentContract);
+				//add by tangcen 变更合同入场后，要对父合同的未出账单进行处理
+				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
+					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+				}
 
 				if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
 					List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
