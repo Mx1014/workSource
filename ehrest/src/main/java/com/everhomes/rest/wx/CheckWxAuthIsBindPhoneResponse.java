@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>regionCode: 区号</li>
  * </ul>
  */
-public class CheckWxAuthIsBindPhoneResponse extends RestResponse{
+public class CheckWxAuthIsBindPhoneResponse{
 
     private Byte bindType;
 

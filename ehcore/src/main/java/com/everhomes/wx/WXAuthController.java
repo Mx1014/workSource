@@ -319,7 +319,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
      * <p>微信授权后由APP调用，参数包含了code，通过code可换取access_token，通过access_token可获取用户信息。</p>
      */
     @RequestMapping("authCallbackByApp")
-    @RestReturn(CheckWxAuthIsBindPhoneResponse.class)
+    @RestReturn(CheckWxAuthIsBindPhoneRestResponse.class)
     @RequireAuthentication(false)
     public RestResponse authCallbackByApp(WxAuthCallBackCommand cmd, HttpServletRequest request, HttpServletResponse response) throws Exception {
         long startTime = System.currentTimeMillis();
@@ -361,7 +361,9 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
             LOGGER.info("Process weixin auth request(callback calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
         checkWxAuthIsBindPhoneResponse.setLogonCommandResponse(logonCommandResponse);
-        RestResponse res = new RestResponse(checkWxAuthIsBindPhoneResponse);
+        CheckWxAuthIsBindPhoneRestResponse checkWxAuthIsBindPhoneRestResponse = new CheckWxAuthIsBindPhoneRestResponse();
+        checkWxAuthIsBindPhoneRestResponse.setResponse(checkWxAuthIsBindPhoneResponse);
+        RestResponse res = new RestResponse(checkWxAuthIsBindPhoneRestResponse);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
