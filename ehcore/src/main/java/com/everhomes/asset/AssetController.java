@@ -1362,5 +1362,19 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    /**
+     * <p>批量减免费项</p>
+     * <b>URL: /asset/batchModifyNotSettledBill</b>
+     */
+    @RequestMapping("batchModifyNotSettledBill")
+    @RestReturn(value = String.class)
+    public RestResponse batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd) {
+        assetService.batchModifyNotSettledBill(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
 }
 

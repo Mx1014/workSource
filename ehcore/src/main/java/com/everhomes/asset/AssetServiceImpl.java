@@ -4565,4 +4565,8 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.showCreateBillSubItemList(cmd.getBillGroupId());
 	}
+
+	public void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd) {
+		assetProvider.batchModifyNotSettledBill(cmd);
+	}
 }

@@ -185,4 +185,6 @@ public interface AssetService {
 	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
 
 	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+
+	void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd);
 }

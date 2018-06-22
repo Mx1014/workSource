@@ -4693,4 +4693,8 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return response;
 	}
+
+	public void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd) {
+		
+	}
 }

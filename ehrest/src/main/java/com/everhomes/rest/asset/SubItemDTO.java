@@ -9,7 +9,7 @@ package com.everhomes.rest.asset;
  *<ul>
  * <li>subtractionType:减免费项类型，eh_payment_bill_items：费项（如：物业费），eh_payment_late_fine：减免滞纳金（如：物业费滞纳金）参考{com.everhomes.rest.asset.AssetSubtractionType}</li>
  * <li>chargingItemId:减免费项ID</li>
- * <li>chargingItemName:收费项目名称</li>
+ * <li>chargingItemName:减免费项名称</li>
  *</ul>
  */
 public class SubItemDTO {

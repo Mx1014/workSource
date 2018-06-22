@@ -334,4 +334,6 @@ public interface AssetProvider {
     PaymentLateFine findLastedFine(Long id);
     
 	ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId);
+	
+	void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd);
 }

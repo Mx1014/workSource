@@ -15,7 +15,7 @@ import java.util.List;
  *<ul>
  * <li>billGroupId:账单组Id</li>
  * <li>billGroupName:账单组名称</li>
- * <li>subItemDTOList:账单组收费项目的集合，参考{@link com.everhomes.rest.asset.SubItemDTO}</li>
+ * <li>subItemDTOList:减免费项的集合，参考{@link com.everhomes.rest.asset.SubItemDTO}</li>
  *</ul>
  */
 public class ShowCreateBillSubItemListDTO {
