@@ -5407,7 +5407,76 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
 	}
 
-	private void verificationCode(UserIdentifier userIdentifier, String code){
+    @Override
+    public UserLogin bindPhoneByApp(BindPhoneCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        if( cmd.getPhone() == null){
+            LOGGER.error("phoneNumber param error");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "phone param error");
+        }
+        if( cmd.getUserId() == null){
+            LOGGER.error("UserId is null");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "UserId is null");
+        }
+        User user = this.userProvider.findUserById(cmd.getUserId());
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+
+        UserLogin login = new UserLogin();
+        //查看该手机是否已经注册
+        verificationCode(userIdentifier, cmd.getVerificationCode());
+        if(userIdentifier != null){
+
+            //如果手机已经注册过，则校验验证码，更新微信信息(昵称、头像、性别)到该手机用户
+
+
+            User existUser = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if (StringUtils.isBlank(existUser.getAvatar())) {
+                existUser.setAvatar(user.getAvatar());
+            }
+            existUser.setGender(user.getGender());
+            existUser.setNamespaceUserToken(user.getNamespaceUserToken());
+            existUser.setNamespaceUserType(user.getNamespaceUserType());
+
+            userProvider.updateUser(existUser);
+
+            login = createLogin(namespaceId, existUser, null, null);
+            login.setStatus(UserLoginStatus.LOGGED_IN);
+
+        }else{
+
+            //发验证码的手机和绑定的的手机是否相等，检查手机是否被篡改
+            if(!cmd.getPhone().equals(userIdentifier.getIdentifierToken())){
+                LOGGER.error("phoneNumber param error");
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "phone param error");
+            }
+            userIdentifier.setOwnerUid(user.getId());
+            userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+            userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+            String salt=EncryptionUtils.createRandomSalt();
+            user.setSalt(salt);
+            try {
+                String randomCode = RandomGenerator.getRandomDigitalString(6);
+                if(cmd.getPassword() != null && cmd.getPassword().length() > 0){
+                    randomCode = cmd.getPassword();
+                }
+                user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",randomCode,salt)));
+            } catch (Exception e) {
+                LOGGER.error("encode password failed", e);
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+            }
+
+            userProvider.updateUser(user);
+            userProvider.updateIdentifier(userIdentifier);
+            login = createLogin(namespaceId, user, null, null);
+            login.setStatus(UserLoginStatus.LOGGED_IN);
+        }
+        return login;
+    }
+
+    private void verificationCode(UserIdentifier userIdentifier, String code){
 		if(userIdentifier == null || code == null || userIdentifier.getVerificationCode() == null || !userIdentifier.getVerificationCode().equals(code)){
 			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
 		}

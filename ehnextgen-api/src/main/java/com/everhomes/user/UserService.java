@@ -270,6 +270,8 @@ public interface UserService {
 
     UserLogin bindPhone(BindPhoneCommand cmd);
 
+    UserLogin bindPhoneByApp(BindPhoneCommand cmd);
+
     void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
 
     UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd);
