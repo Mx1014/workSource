@@ -274,3 +274,8 @@ CREATE TABLE `eh_configurations_record_change` (
 -- 配置项信息表新增一列（字段 ） is_readyonly
 ALTER  TABLE eh_configurations  ADD  is_readonly  INT(3)  COMMENT '是否只读：1，是 ；null 或其他值为 否';
 -- END BY 黄良铭
+
+-- 跟进信息增加字段 by jiarui 20180620
+ALTER TABLE `eh_customer_trackings`  ADD COLUMN `contact_phone`  varchar(255) NULL AFTER `content`;
+ALTER TABLE `eh_customer_trackings`  ADD COLUMN `visit_time_length`  decimal(10,2) NULL AFTER `contact_phone`;
+ALTER TABLE `eh_customer_trackings`  ADD COLUMN `visit_person_name`  varchar(64) NULL AFTER `contact_phone`;
