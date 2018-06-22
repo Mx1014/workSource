@@ -328,7 +328,7 @@ public interface AssetProvider {
     void insertAssetCategory(EhAssetAppCategories c);
 
     
-    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+    //ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
 
     boolean checkBillByCategory(Long billId, Long categoryId);
     //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);

@@ -1463,6 +1463,7 @@ public class AssetProviderImpl implements AssetProvider {
         return vo;
     }
     
+    @Override
     public ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd) {
     	if(cmd.getBillId() != null && !cmd.getBillId().equals(billId)) {
     		return null;
