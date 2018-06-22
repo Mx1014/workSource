@@ -70,7 +70,7 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
         param.put("name", name);
         param.put("description", description);
         param.put("private", false);
-        param.put("readme", "readme");
+        param.put("readme", "Default");
         param.put("auto_init", true);
 
         String api = String.format("/admin/users/%s/repos", gogsAdmin);

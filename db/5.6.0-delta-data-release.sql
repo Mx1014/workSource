@@ -262,23 +262,7 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '投诉建议', 20100, NULL, '{"taskCategoryId":9,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
 
 
--- END 
-
---
--- 通用脚本
--- ADD BY xq.tian  2018/06/15
--- #30750 代码仓库管理 v1.0
---
-SET @eh_configurations_id = (SELECT MAX(id) FROM eh_configurations);
-INSERT INTO ehcore.eh_configurations (id, name, value, description, namespace_id, display_name)
-  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.server.url', 'http://10.1.10.79:3000/api/v1', 'gogs server', 0, '');
-INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
-  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.admin.name', 'zuolin', 'gogs admin name', 0, '');
-INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
-  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.admin.token', '70d7a1d32c747249b061834adcf1412c8888d768', 'gogs admin token', 0, '');
-
--- #30750 END
-
+-- END
 
 -- 企业客户管理ERROR code  by jiarui
 SET @id = (SELECT MAX(id) from eh_locale_strings);
