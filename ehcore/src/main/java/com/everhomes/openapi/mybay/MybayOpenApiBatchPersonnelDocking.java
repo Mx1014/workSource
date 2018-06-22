@@ -97,6 +97,11 @@ public class MybayOpenApiBatchPersonnelDocking {
 		}
 		
 	}
+	
+	
+	/*
+	 * 判断是否开卡（也就是人员是否在对方那里创建成功，首次创建会有延迟，反面都是覆盖更新会比较快）
+	 */
 	public boolean isFinishDocking(){
 		//1.获取所有该对接的配置信息
 		Map<String ,String> configurations = getConfigurations(MYBAY_NAMESPACE_ID);
