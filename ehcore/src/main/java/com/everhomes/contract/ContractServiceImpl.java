@@ -1380,7 +1380,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			parentContract.setCostGenerationMethod(cmd.getCostGenerationMethod());
 			contractProvider.updateContract(parentContract);
 			if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getStatus()))){
-				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getCreateTime());
+				assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
 			}
 		}
 
@@ -1557,10 +1557,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					}
 
 				}
-
+				
 				contract.setStatus(cmd.getResult());
 				contractProvider.updateContract(contract);
 				contractSearcher.feedDoc(contract);
+				//add by tangcen 变更合同发起审批后，要对父合同的未出账单进行处理
+				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
+					Contract parentContract = checkContract(contract.getParentId());
+					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+				}
+				
 				if(cmd.getPaymentFlag() == 1) {
 					addToFlowCase(contract, flowcasePaymentContractOwnerType);
 				}else {
@@ -1950,15 +1956,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			dto.setCostGenerationMethod(parentContract.getCostGenerationMethod());
 			//向前端返回时间范围
 			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(contract.getId());
+			List<ContractChargingItem> chargingItems = contractChargingItemProvider.listByContractId(parentContract.getId());
 			if (chargingItems!=null && chargingItems.size()>0) {
 				ContractChargingItem chargingItem = chargingItems.get(0);
 				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
 			}
-			String endTimeStr = yyyyMMdd.format(contract.getCreateTime());
+			//String endTimeStr = yyyyMMdd.format(contract.getCreateTime());
+			String endTimeStr = yyyyMMdd.format(contract.getContractStartDate());
 			dto.setEndTimeByDay(endTimeStr);
 			
-			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,contract.getId());
+			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,parentContract.getId());
 			dto.setEndTimeByPeriod(endTimeByPeriod);
 		}
 		
