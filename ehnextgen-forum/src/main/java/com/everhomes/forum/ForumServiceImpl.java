@@ -5442,11 +5442,13 @@ public class ForumServiceImpl implements ForumService {
     public List<TopicFilterDTO> getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+
+        //标准版没有场景
+        //SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        //SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
         
       //检查游客是否能继续访问此场景 by xiongying 20161009
-        userService.checkUserScene(sceneType);
+        //userService.checkUserScene(sceneType);
 
         
         // 增加园区场景，由于很多代码是重复复制的，故把它们转移到Handler里进行构造，方便以后增加新场景只需要增加相应的handler即可 by lqs 20160510
@@ -5466,19 +5468,22 @@ public class ForumServiceImpl implements ForumService {
 //        } else {
 //            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
 //        }
+
+
+        AppContext appContext = UserContext.current().getAppContext();
         List<TopicFilterDTO> filterList = null;
         PostFilterType filterType = PostFilterType.fromCode(cmd.getFilterType());
         if(filterType == null) {
-            LOGGER.error("Unsupported post filter type, cmd={}, sceneToken={}", cmd, sceneToken);
+            LOGGER.error("Unsupported post filter type, cmd={}, appContext={}", cmd, appContext);
             return filterList;
         }
         
-        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + sceneToken.getScene();
+        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + "park_tourist";
         PostSceneHandler handler = PlatformContext.getComponent(handlerName);
         if(handler != null) {
-            filterList = handler.getTopicQueryFilters(user, sceneToken); 
+            filterList = handler.getTopicQueryFilters(user, null);
         } else {
-            LOGGER.error("No handler found for post quering filter, cmd={}, sceneToken={}, handlerName={}", cmd, sceneToken, handlerName);
+            LOGGER.error("No handler found for post quering filter, cmd={}, appContext={}, handlerName={}", cmd, appContext, handlerName);
         }
         
         return filterList;

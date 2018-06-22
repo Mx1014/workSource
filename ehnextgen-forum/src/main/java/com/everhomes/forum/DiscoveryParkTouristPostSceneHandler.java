@@ -65,17 +65,25 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
     public List<TopicFilterDTO> getTopicQueryFilters(User user, SceneTokenDTO sceneToken) {
         List<TopicFilterDTO> filterList = null;
         
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-        if(sceneType != SceneType.PARK_TOURIST) {
-            LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneToken);
+//        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+//        if(sceneType != SceneType.PARK_TOURIST) {
+//            LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneToken);
+//            return filterList;
+//        }
+
+        //标准版
+        AppContext appContext = UserContext.current().getAppContext();
+        if(appContext == null || appContext.getCommunityId() == null){
+            LOGGER.error("Unsupported scene for simple user, appContext={}", appContext);
             return filterList;
         }
 
-        Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
+
+        Community community = communityProvider.findCommunityById(appContext.getCommunityId());
         if(community != null) {
-            filterList = getTopicQueryFilters(user, sceneToken, community);
+            filterList = getTopicQueryFilters(user, null, community);
         } else {
-            LOGGER.error("Community not found, communityId={}, sceneToken={}", sceneToken.getEntityId(), sceneToken);
+            LOGGER.error("Community not found, communityId={}, appContext={}", appContext.getCommunityId(), appContext);
         }
         
         return filterList;
@@ -87,7 +95,9 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         String code = "";
         String actionUrl = null;
         String avatarUri = null;
-        Integer namespaceId = sceneToken.getNamespaceId();
+        //Integer namespaceId = sceneToken.getNamespaceId();
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
         if(community != null) {
             long menuId = 1;
