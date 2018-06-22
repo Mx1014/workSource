@@ -1,5 +1,7 @@
 package com.everhomes.customer;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -90,6 +92,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private AddressProvider addressProvider;
 
     @Override
     public String getIndexType() {
@@ -560,8 +565,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     private List<CustomerEntryInfoDTO> removeDuplicatedEntryInfo(List<CustomerEntryInfoDTO> entryInfos) {
         Map<Long, CustomerEntryInfoDTO> map = new HashMap<>();
         if (entryInfos != null && entryInfos.size() > 0) {
-            entryInfos.forEach((e) -> map.putIfAbsent(e.getAddressId(), e));
-            map.remove(null);
+            entryInfos.forEach((e) -> {
+                Address address = addressProvider.findAddressById(e.getAddressId());
+                if (address != null) {
+                    map.putIfAbsent(e.getAddressId(), e);
+                }
+            });
             return new ArrayList<>(map.values());
         }
         return null;
