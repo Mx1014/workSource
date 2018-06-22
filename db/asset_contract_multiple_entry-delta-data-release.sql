@@ -1,7 +1,6 @@
 UPDATE `eh_service_modules` SET `multiple_flag` = 1 WHERE `id` = 20400;
 UPDATE `eh_service_modules` SET `instance_config` = NULL WHERE `id` = 20400;
 
-
 -- from testByDingjianminThree
 -- 增加付款合同菜单
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES
