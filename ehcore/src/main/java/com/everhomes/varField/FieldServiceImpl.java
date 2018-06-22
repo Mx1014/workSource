@@ -1940,12 +1940,12 @@ public class FieldServiceImpl implements FieldService {
 ////                    }
 //                    if (globalGroupMap != null && globalGroupMap.size() > 0) {
 //=======
-                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
+                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, null, fieldItem.getModuleName());
                 if (fields != null && fields.size() > 0) {
                     fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
                 } else {
                     //global
-                    List<Long> groups = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
+                    List<Long> groups = fieldProvider.checkCustomerField(0, null, fieldItem.getModuleName());
                     if (groups != null && groups.size() > 0) {
 //>>>>>>> 5.6.0
                         fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
