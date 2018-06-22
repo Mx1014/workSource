@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -365,37 +366,6 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 EnterpriseCustomer customer = customers.get(id);
                 if(customer != null) {
                     EnterpriseCustomerDTO dto = convertToDTO(customer);
-//                ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
-//                    ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
-//                    if(categoryItem != null) {
-//                        dto.setCategoryItemName(categoryItem.getItemDisplayName());
-//                    }
-////                ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
-//                    ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
-//                    if(levelItem != null) {
-//                        dto.setLevelItemName(levelItem.getItemDisplayName());
-//                    }
-//                    if(null != dto.getCorpIndustryItemId()){
-//                        ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getCorpIndustryItemId());
-//                        if(null != corpIndustryItem){
-//                            dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
-//                        }
-//                    }
-//                    if(null != dto.getContactGenderItemId()){
-//                        ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getContactGenderItemId());
-//                        if(null != contactGenderItem){
-//                            dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
-//                        }
-//                    }
-//                    if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
-//                        dto.setTrackingName(dto.getTrackingName());
-//                    }
-//                    if(null != dto.getPropertyType()){
-//                        ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getPropertyType());
-//                        if(null != propertyTypeItem){
-//                            dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
-//                        }
-//                    }
                     dtos.add(dto);
                 }
             });
@@ -410,105 +380,145 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         Integer result = 0;
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
         ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
-        if(categoryItem != null) {
+        if (categoryItem != null) {
             dto.setCategoryItemName(categoryItem.getItemDisplayName());
-        }else {
+        } else {
             dto.setCategoryItemName(null);
         }
 //        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
         ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
-        if(levelItem != null) {
+        if (levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
-        }else {
+        } else {
             dto.setLevelItemName(null);
         }
-        if(null != dto.getCorpIndustryItemId()){
-            ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getCorpIndustryItemId());
-            if(null != corpIndustryItem){
+        if (null != dto.getCorpIndustryItemId()) {
+            ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpIndustryItemId());
+            if (null != corpIndustryItem) {
                 dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
-            }else {
+            } else {
                 dto.setCorpIndustryItemName(null);
             }
         }
-        if(null != dto.getContactGenderItemId()){
-            ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getContactGenderItemId());
-            if(null != contactGenderItem){
+        if (null != dto.getSourceItemId()) {
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSourceItemId());
+            if (null != item) {
+                dto.setSourceItemName(item.getItemDisplayName());
+            } else {
+                dto.setSourceItemName(null);
+            }
+        }
+        if (null != dto.getCorpPurposeItemId()) {
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpPurposeItemId());
+            if (null != item) {
+                dto.setCorpPurposeItemName(item.getItemDisplayName());
+            } else {
+                dto.setCorpPurposeItemName(null);
+            }
+        }
+        if (null != dto.getCorpNatureItemId()) {
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpNatureItemId());
+            if (null != item) {
+                dto.setCorpNatureItemName(item.getItemDisplayName());
+            } else {
+                dto.setCorpNatureItemName(null);
+            }
+        }
+        if (null != dto.getContactGenderItemId()) {
+            ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getContactGenderItemId());
+            if (null != contactGenderItem) {
                 dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
-            }else {
+            } else {
                 dto.setContactGenderItemName(null);
             }
         }
-        if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+        if (dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
             dto.setTrackingName(dto.getTrackingName());
         }
-        if(null != dto.getPropertyType()){
-            ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getPropertyType());
-            if(null != propertyTypeItem){
+        if (null != dto.getPropertyType()) {
+            ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getPropertyType());
+            if (null != propertyTypeItem) {
                 dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
-            }else {
+            } else {
                 dto.setPropertyTypeName(null);
             }
         }
+        if (null != dto.getCorpProductCategoryItemId()) {
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpProductCategoryItemId());
+            if (null != item) {
+                dto.setCorpProductCategoryItemName(item.getItemDisplayName());
+            } else {
+                dto.setCorpProductCategoryItemName(null);
+            }
+        }
+        if (null != dto.getCorpQualificationItemId()) {
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpQualificationItemId());
+            if (null != item) {
+                dto.setCorpQualificationItemName(item.getItemDisplayName());
+            } else {
+                dto.setCorpQualificationItemName(null);
+            }
+        }
 
-        if(null != dto.getRegistrationTypeId()){
-            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRegistrationTypeId());
-            if(null != registrationTypeItem){
+        if (null != dto.getRegistrationTypeId()) {
+            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRegistrationTypeId());
+            if (null != registrationTypeItem) {
                 dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
-            }else {
+            } else {
                 dto.setRegistrationTypeName(null);
             }
         }
 
-        if(null != dto.getTechnicalFieldId()){
-            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTechnicalFieldId());
-            if(null != technicalFieldItem){
+        if (null != dto.getTechnicalFieldId()) {
+            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTechnicalFieldId());
+            if (null != technicalFieldItem) {
                 dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
-            }else{
+            } else {
                 dto.setTechnicalFieldName(null);
             }
         }
 
-        if(null != dto.getTaxpayerTypeId()){
-            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getTaxpayerTypeId());
-            if(null != taxpayerTypeItem){
+        if (null != dto.getTaxpayerTypeId()) {
+            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTaxpayerTypeId());
+            if (null != taxpayerTypeItem) {
                 dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
-            }else{
+            } else {
                 dto.setTaxpayerTypeName(null);
             }
         }
 
-        if(null != dto.getRelationWillingId()){
-            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getRelationWillingId());
-            if(null != relationWillingItem){
+        if (null != dto.getRelationWillingId()) {
+            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRelationWillingId());
+            if (null != relationWillingItem) {
                 dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
-            }else{
+            } else {
                 dto.setRelationWillingName(null);
             }
         }
 
-        if(null != dto.getHighAndNewTechId()){
-            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getHighAndNewTechId());
-            if(null != highAndNewTechItem){
+        if (null != dto.getHighAndNewTechId()) {
+            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getHighAndNewTechId());
+            if (null != highAndNewTechItem) {
                 dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
-            }else{
+            } else {
                 dto.setHighAndNewTechName(null);
             }
         }
 
-        if(null != dto.getEntrepreneurialCharacteristicsId()){
-            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
-            if(null != entrepreneurialCharacteristicsItem){
+        if (null != dto.getEntrepreneurialCharacteristicsId()) {
+            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
+            if (null != entrepreneurialCharacteristicsItem) {
                 dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
-            }else{
+            } else {
                 dto.setEntrepreneurialCharacteristicsName(null);
             }
         }
 
-        if(null != dto.getSerialEntrepreneurId()){
-            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getSerialEntrepreneurId());
-            if(null != serialEntrepreneurItem){
+        if (null != dto.getSerialEntrepreneurId()) {
+            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSerialEntrepreneurId());
+            if (null != serialEntrepreneurItem) {
                 dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
-            }else {
+            } else {
                 dto.setSerialEntrepreneurName(null);
             }
         }
@@ -520,6 +530,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(customer.getTrackingUid());
         if (members != null && members.size()>0) {
             dto.setTrackingPhone(members.get(0).getContactToken());
+            dto.setTrackingName(dto.getTrackingName());
         }
         if (customer.getLastTrackingTime() != null) {
             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
@@ -537,20 +548,24 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command1.setCommunityId(customer.getCommunityId());
         command1.setCustomerId(customer.getId());
         List<CustomerEntryInfoDTO> entryInfos = customerService.listCustomerEntryInfosWithoutAuth(command1);
+        entryInfos = removeDuplicatedEntryInfo(entryInfos);
         if (entryInfos != null && entryInfos.size() > 0) {
 //            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getAddressName().replace("-", "/"))).collect(Collectors.toList());
-            entryInfos = entryInfos.stream().map((e) -> {
-                String addressName = e.getAddressName();
-                if (addressName != null) {
-                    e.setAddressName(addressName.replaceFirst("-", "/"));
-                }
-                return e;
-            }).collect(Collectors.toList());
+            entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
         return dto;
     }
-    
+
+    private List<CustomerEntryInfoDTO> removeDuplicatedEntryInfo(List<CustomerEntryInfoDTO> entryInfos) {
+        Map<Long, CustomerEntryInfoDTO> map = new HashMap<>();
+        if (entryInfos != null && entryInfos.size() > 0) {
+            entryInfos.forEach((e) -> map.putIfAbsent(e.getAddressId(), e));
+            return new ArrayList<>(map.values());
+        }
+        return null;
+    }
+
     private Long getTomorrowLastTimestamp(Integer lastTrackingTime) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());

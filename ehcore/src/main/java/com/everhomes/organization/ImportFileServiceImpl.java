@@ -93,7 +93,11 @@ public class ImportFileServiceImpl implements ImportFileService {
                 List<ImportFileResultLog> logs = response.getLogs();
                 if (logs != null) {
                     for (ImportFileResultLog log : logs) {
-                        log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        if(StringUtils.isNotBlank(log.getFieldName())){
+                            log.setErrorDescription(log.getFieldName() + localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        }else {
+                            log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        }
                     }
                 }
             }
@@ -131,6 +135,9 @@ public class ImportFileServiceImpl implements ImportFileService {
             XSSFWorkbook wb = new XSSFWorkbook();
             try {
                 String sheetName = "错误数据";
+                if(logs!=null && logs.size()>0 && StringUtils.isNotBlank(logs.get(0).getSheetName())){
+                    sheetName = logs.get(0).getSheetName();
+                }
                 XSSFSheet sheet = wb.createSheet(sheetName);
 
                 XSSFCellStyle style = wb.createCellStyle();// 样式对象

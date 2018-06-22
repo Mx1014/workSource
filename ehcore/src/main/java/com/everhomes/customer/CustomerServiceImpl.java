@@ -722,11 +722,18 @@ public class CustomerServiceImpl implements CustomerService {
         Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if (org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo   postUri  hotline bannerUri
+            org.setStringTag1(customer.getCorpEmail());
             org.setWebsite(customer.getCorpWebsite());
             org.setUnifiedSocialCreditCode(customer.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(org);
             OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
             if (detail != null) {
+                detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
+                detail.setStringTag1(customer.getCorpEmail());
+                detail.setDescription(customer.getCorpDescription());
+                detail.setCheckinDate(customer.getCorpEntryDate());
+                detail.setPostUri(customer.getPostUri());
+                detail.setDisplayName(customer.getNickName());
                 detail.setAvatar(customer.getCorpLogoUri());
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
@@ -736,12 +743,18 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
-                detail.setOrganizationId(org.getId());
+                detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
+                detail.setStringTag1(customer.getCorpEmail());
+                detail.setDescription(customer.getCorpDescription());
+                detail.setCheckinDate(customer.getCorpEntryDate());
+                detail.setPostUri(customer.getPostUri());
+                detail.setDisplayName(customer.getNickName());
+                detail.setAvatar(customer.getCorpLogoUri());
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
                 detail.setLongitude(customer.getLongitude());
-                detail.setAvatar(customer.getCorpLogoUri());
-                detail.setCreateTime(org.getCreateTime());
+                detail.setPostUri(customer.getPostUri());
+                detail.setContact(customer.getHotline());
                 organizationProvider.createOrganizationDetail(detail);
             }
             addAttachments(org.getId(),customer.getBanner(),UserContext.currentUserId());
@@ -2337,6 +2350,7 @@ public class CustomerServiceImpl implements CustomerService {
                 command.setId(organization.getId());
                 command.setManageOrganizationId(cmd.getOrgId());
                 command.setEnterpriseId(cmd.getOrgId());
+                command.setCheckAuth(TrueOrFalseFlag.FALSE.getCode());
                 organizationService.deleteOrganization(command);
                 if (customer != null) {
                     customer.setOrganizationId(0L);
@@ -2447,21 +2461,26 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
-        if (entryInfos != null && entryInfos.size() > 0) {
-            return entryInfos.stream().map(entryInfo -> {
-                return convertCustomerEntryInfoDTO(entryInfo);
-            }).collect(Collectors.toList());
+        entryInfos = removeDuplicatedEntryInfo(entryInfos);
+        if (entryInfos.size() > 0) {
+            return entryInfos.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
         }
         return null;
+    }
+
+    private List<CustomerEntryInfo> removeDuplicatedEntryInfo(List<CustomerEntryInfo> entryInfos) {
+        Map<Long, CustomerEntryInfo> map = new HashMap<>();
+        if(entryInfos!=null && entryInfos.size()>0){
+            entryInfos.forEach((e)-> map.putIfAbsent(e.getAddressId(), e));
+        }
+        return new ArrayList<>(map.values());
     }
 
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos != null && entryInfos.size() > 0) {
-            return entryInfos.stream().map(entryInfo -> {
-                return convertCustomerEntryInfoDTO(entryInfo);
-            }).collect(Collectors.toList());
+            return entryInfos.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
         }
         return null;
     }
@@ -3123,6 +3142,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
         dto.setContentImgUriList(uriList);
         dto.setContentImgUrlList(urlList);
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(tracking.getTrackingUid());
+        if(members!=null && members.size()>0){
+            dto.setTrackingUidName(members.get(0).getContactName());
+        }else {
+            User user = userProvider.findUserById(tracking.getTrackingUid());
+            if(user!=null){
+                dto.setTrackingUidName(user.getNickName());
+            }
+        }
         return dto;
     }
 
@@ -3153,6 +3181,18 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerTracking(tracking);
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if (customer != null) {
+            List<CustomerTracking> customerTrackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId());
+            if (customerTrackings != null && customerTrackings.size() > 0) {
+                customer.setLastTrackingTime(customerTrackings.get(0).getTrackingTime());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+//                enterpriseCustomerSearcher.feedDoc(customer);
+            }else {
+                customer.setLastTrackingTime(null);
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            }
+        }
     }
 
     @Override

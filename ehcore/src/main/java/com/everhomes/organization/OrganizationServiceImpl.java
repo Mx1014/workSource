@@ -2894,8 +2894,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         User user = UserContext.current().getUser();
 
         //权限校验
-        checkOrganizationpPivilege(cmd.getId(),PrivilegeConstants.DELETE_DEPARTMENT);
-
+        if (cmd.getCheckAuth() == null) {
+            checkOrganizationpPivilege(cmd.getId(), PrivilegeConstants.DELETE_DEPARTMENT);
+        }
         this.checkOrganizationIdIsNull(cmd.getId());
         Organization organization = this.checkOrganization(cmd.getId());
 
