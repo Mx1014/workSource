@@ -1556,14 +1556,16 @@ public class NewsServiceImpl implements NewsService {
 	public SearchContentsBySceneReponse searchNewsByScene(
 			SearchContentsBySceneCommand cmd) {
 		SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
-		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
+		//SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 		final Long userId = UserContext.current().getUser().getId();
-		Integer namespaceId = sceneTokenDto.getNamespaceId();;
+		//Integer namespaceId = sceneTokenDto.getNamespaceId();;
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		SearchTypes searchType = userService.getSearchTypes(namespaceId, SearchContentType.NEWS.getCode());
 		if (StringUtils.isEmpty(cmd.getKeyword())) {
 			ListNewsBySceneCommand command = new ListNewsBySceneCommand();
-			
-			command.setSceneToken(cmd.getSceneToken());
+			//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
+			command.setSceneToken(null);
 			command.setPageAnchor(cmd.getPageAnchor());
 			command.setPageSize(cmd.getPageSize());
 			ListNewsBySceneResponse news = listNewsByScene(command);

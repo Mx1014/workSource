@@ -6435,7 +6435,8 @@ public class ForumServiceImpl implements ForumService {
 		command.setPageAnchor(cmd.getPageAnchor());
 		command.setPageSize(cmd.getPageSize());
 		command.setQueryString(cmd.getKeyword());
-		command.setSceneToken(cmd.getSceneToken());
+        //TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
+		command.setSceneToken(null);
 		command.setSearchContentType(contentType.getCode());
 		//是否全局搜索未设定
 		SearchResponse rsp = postSearcher.searchByScene(command);

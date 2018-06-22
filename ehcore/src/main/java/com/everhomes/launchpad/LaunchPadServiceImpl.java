@@ -2683,10 +2683,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	public SearchContentsBySceneReponse searchLaunchPadItemByScene(SearchContentsBySceneCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
-		
-		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-		Integer namespaceId = sceneTokenDto.getNamespaceId();
-		String sceneType = sceneTokenDto.getScene();
+
+		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
+		AppContext appContext = UserContext.current().getAppContext();
+		//SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+//		Integer namespaceId = sceneTokenDto.getNamespaceId();
+//		String sceneType = sceneTokenDto.getScene();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		SearchTypes searchType = userService.getSearchTypes(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
 
@@ -2701,40 +2704,44 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		defaultScopeMap.put(ScopeType.ALL.getCode(), 0L);
 		defaultScopeMap.put(ScopeType.COMMUNITY.getCode(), 0L);
 		defaultScopeMap.put(ScopeType.RESIDENTIAL.getCode(), 0L);
-
-		if(SceneType.fromCode(sceneType) != null){
-			switch(SceneType.fromCode(sceneType)) {
-			case DEFAULT:
-			case PARK_TOURIST:
-				scopeMap.put(ScopeType.COMMUNITY.getCode(), sceneTokenDto.getEntityId());
-				break;
-			case FAMILY:
-				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
-				if(family != null) {
-					scopeMap.put(ScopeType.COMMUNITY.getCode(), family.getCommunityId());
-				}
-				break;
-			case PM_ADMIN:// 无小区ID
-			case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
-			case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
-				scopeMap.put(ScopeType.ORGANIZATION.getCode(), sceneTokenDto.getEntityId());
-				OrganizationDTO org = organizationService.getOrganizationById(sceneTokenDto.getEntityId());
-				if(org != null) {
-					scopeMap.put(ScopeType.COMMUNITY.getCode(), org.getCommunityId());
-				} 
-				break;
-			}
-		}
+//
+//		if(SceneType.fromCode(sceneType) != null){
+//			switch(SceneType.fromCode(sceneType)) {
+//			case DEFAULT:
+//			case PARK_TOURIST:
+		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
+				scopeMap.put(ScopeType.COMMUNITY.getCode(), appContext.getCommunityId());
+//				break;
+//			case FAMILY:
+//				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+//				if(family != null) {
+//					scopeMap.put(ScopeType.COMMUNITY.getCode(), family.getCommunityId());
+//				}
+//				break;
+//			case PM_ADMIN:// 无小区ID
+//			case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//			case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//				scopeMap.put(ScopeType.ORGANIZATION.getCode(), sceneTokenDto.getEntityId());
+//				OrganizationDTO org = organizationService.getOrganizationById(sceneTokenDto.getEntityId());
+//				if(org != null) {
+//					scopeMap.put(ScopeType.COMMUNITY.getCode(), org.getCommunityId());
+//				}
+//				break;
+//			}
+//		}
 		
 		//SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+
+		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
+		String sceneType = PARK_TOURIST.getCode();
 		SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(namespaceId, sceneType);
 		if(sceneInfo != null) {
 			sceneType = sceneInfo.getName();
 			if(LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneTokenDto, sceneInfo.getName());
+				LOGGER.debug("Scene type is changed, appContext={}, newScene={}", appContext, sceneInfo.getName());
 			}
 		} else {
-			LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneTokenDto);
+			LOGGER.error("Scene is not found, cmd={}, appContext={}", cmd, appContext);
 		}
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2742,8 +2749,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Integer offset = pageSize * Integer.valueOf(pageAnchor.intValue());
 		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
 
+		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
 		//如果没有PM_ADMIN定制的，同样的范围查询PARK_TOURIST
-		if((launchPadItems == null || launchPadItems.size() == 0) && SceneType.fromCode(sceneType) == PM_ADMIN){
+		//if((launchPadItems == null || launchPadItems.size() == 0) && SceneType.fromCode(sceneType) == PM_ADMIN){
+		if(launchPadItems == null || launchPadItems.size() == 0){
 			launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, PARK_TOURIST.getCode(), scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
 		}
 
