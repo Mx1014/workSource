@@ -398,6 +398,11 @@ public class FieldServiceImpl implements FieldService {
         return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
     }
 
+    @Override
+    public void createDynamicScopeItems(Integer namespaceId, String instanceConfig, String appName) {
+
+    }
+
     private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
     }

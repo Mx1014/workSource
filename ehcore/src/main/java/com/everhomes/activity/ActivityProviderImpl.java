@@ -2,25 +2,7 @@
 package com.everhomes.activity;
 
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import com.everhomes.rest.forum.NeedTemporaryType;
-import com.everhomes.server.schema.tables.daos.*;
-import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -33,15 +15,20 @@ import com.everhomes.rest.activity.ActivityChargeFlag;
 import com.everhomes.rest.activity.ActivityRosterPayFlag;
 import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
-import com.everhomes.rest.activity.StatisticsActivityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.forum.NeedTemporaryType;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
+import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhActivityCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhActivityGoodsDao;
+import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityAttachments;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
@@ -63,6 +50,24 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.mysql.jdbc.StringUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 public class ActivityProviderImpl implements ActivityProivider {
@@ -260,6 +265,8 @@ public class ActivityProviderImpl implements ActivityProivider {
         createRoster.setId(id);
         createRoster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.insert(createRoster);
+        //add by RuiJia for publishing create action 20180629
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhActivityRoster.class, id);
     }
 
     @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#roster.activityId,#roster.uid}"),@CacheEvict(value="findRosterById",key="#roster.id")})

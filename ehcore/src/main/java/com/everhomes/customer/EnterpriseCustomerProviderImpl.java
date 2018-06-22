@@ -2095,4 +2095,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
                 .execute();
     }
+
+    @Override
+    public CustomerConfiguration getSyncCustomerConfiguration(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_CUSTOMER_CONFIGUTATIONS)
+                .where(Tables.EH_CUSTOMER_CONFIGUTATIONS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_CUSTOMER_CONFIGUTATIONS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchAnyInto(CustomerConfiguration.class);
+    }
 }

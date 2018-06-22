@@ -186,4 +186,5 @@ public interface EnterpriseCustomerProvider {
 
     void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId,Integer namespaceId);
 
+    CustomerConfiguration getSyncCustomerConfiguration(Integer  namespaceId);
 }
