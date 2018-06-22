@@ -298,12 +298,12 @@ public class MybayOpenApiBatchPersonnelDocking {
 			 UserIdentifier uIdentifier = userProvider.findUserIdentifiersOfUser(userId,user.getNamespaceId());
 			 if(uIdentifier !=null){
 				 if(0 == uIdentifier.getIdentifierType()){
-					// ae.setMobilePhone(uIdentifier.getIdentifierToken());
+					 ae.setMobilePhone(uIdentifier.getIdentifierToken());
 				 }else if(1 == uIdentifier.getIdentifierType()){
 					 ae.setEmail(uIdentifier.getIdentifierToken()); 
 				 }				 				 				 
 			 }	
-			//游客：Shenzhenwan_游客;认证用户：Shenzhenwan
+			//游客：Shenzhenwan_游客;认证用户：Shenzhenwan,目前只有认证用户
 			 ae.setSubAccountName("Shenzhenwan");
 			 List<OrganizationMemberDTO> orgList =  oAuth2ApiService.getAuthenticationInfo(userId);
 			 if(orgList!=null && orgList.size()>0){

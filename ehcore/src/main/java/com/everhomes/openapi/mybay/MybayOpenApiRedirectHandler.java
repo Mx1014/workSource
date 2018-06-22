@@ -72,29 +72,44 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 			Map<String, String> dockingMap;
 			try {
 				dockingMap = mybayOpenApiBatchPersonnelDocking.batchDocking();
-				 //先判断用户是否开卡完成（针对第一次）
+				//结果不为空说明调了对方的接口方法
+				if(dockingMap != null ){
+					String result = dockingMap.get("result");
+					//对接失败打印失败信息
+					if(!SUCCESS.equals(result)){
+						LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, errorMsg:"+dockingMap.get("errorMsg"));
+						 return ERROR+":"+dockingMap.get("errorMsg");
+					}
+				}else{//为空说明参数不足而退回
+					return ERROR+":Some necessary information is lost";
+				}
+				 //先判断用户是否开卡完成（主要针对第一次）
 			    boolean IsOpened = mybayOpenApiBatchPersonnelDocking.isFinishDocking();
+			    //用于记录等待时间，不可能无限等，6秒后放弃等待
+			    int times=0;
 			    //当开卡未完成时，想办法等他一下
 			    while(!IsOpened){
 			    		try {
-							Thread.sleep(2000);
+			    			if(times>2){
+			    				times++;
+								break;
+							}
+							Thread.sleep(2000);//一次2秒
 							IsOpened = mybayOpenApiBatchPersonnelDocking.isFinishDocking();
+							times++;
+							
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
+			    }
+			    if(times>3){
+			    	return ERROR+": open card failure or timeout,you can try again";
 			    }
 			} catch (IOException e) {
 				LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, because " +e);	
 				return ERROR+":"+e;
 			}
-			if(dockingMap != null ){
-				String result = dockingMap.get("result");
-				//对接失败打印失败信息
-				if(!SUCCESS.equals(result)){
-					LOGGER.error("MybayOpenApiRedirectHandler bulid is failed, errorMsg:"+dockingMap.get("errorMsg"));
-					 return ERROR+":"+dockingMap.get("errorMsg");
-				}
-			}
+			
 			//3.获取所有该对接的配置信息
 			Map<String ,String> configurations = getConfigurations(MYBAY_NAMESPACE_ID);
 			//4.获取Ticket
@@ -270,9 +285,6 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 		String CorpPayType = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_CORPPAYTYPE,"");
 		String InitPage = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_INITPAGE,"");
 		String Callback = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_CALLBACK,"");
-		String CostCenter1 = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_COSTCENTER1,"");
-		String CostCenter2 = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_COSTCENTER2,"");
-		String CostCenter3 = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_COSTCENTER3,"");
 		String limitNamespaceId = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_LIMITNAMESPACEID,"");
 		String getTicketURL = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_GETTICKETURL,"");
 		String signInfoURL = configurationProvider.getValue(MYBAY_NAMESPACE_ID, ConfigConstants.CT_SIGNINFOURL,"");
@@ -286,9 +298,9 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 		paramsMap.put(CORPPAYTYPE, CorpPayType);
 		paramsMap.put(INITPAGE, InitPage);
 		paramsMap.put(CALLBACK, Callback);
-		paramsMap.put(COSTCENTER1, CostCenter1);
-		paramsMap.put(COSTCENTER2, CostCenter2);
-		paramsMap.put(COSTCENTER3, CostCenter3);
+		paramsMap.put(COSTCENTER1, "");
+		paramsMap.put(COSTCENTER2, "");
+		paramsMap.put(COSTCENTER3, "");
 		paramsMap.put("limitNamespaceId", limitNamespaceId);
 		paramsMap.put(GETTICKETURL, getTicketURL);
 		paramsMap.put(SIGNINFOURL, signInfoURL);

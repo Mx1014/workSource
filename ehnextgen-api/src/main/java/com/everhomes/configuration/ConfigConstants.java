@@ -181,9 +181,6 @@ public interface ConfigConstants {
 	public static final String CT_CORPPAYTYPE = "ct.CorpPayType";
 	public static final String CT_INITPAGE = "ct.InitPage";
 	public static final String CT_CALLBACK = "ct.Callback";
-	public static final String CT_COSTCENTER1 = "ct.CostCenter1";
-	public static final String CT_COSTCENTER2 = "ct.CostCenter2";
-	public static final String CT_COSTCENTER3 = "ct.CostCenter3";
 	public static final String CT_LIMITNAMESPACEID = "ct.limitNamespaceId";
 	public static final String CT_GETTICKETURL = "ct.getTicketURL";
 	public static final String CT_SIGNINFOURL = "ct.signInfoURL";
