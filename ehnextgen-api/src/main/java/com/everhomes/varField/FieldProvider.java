@@ -52,4 +52,6 @@ public interface FieldProvider {
     Field findField(String moduleName, String name, String groupPath);
 
     List<Field> listMandatoryFields(String moduleName, Long  groupId);
+
+    List <Long>checkCustomerField(Integer namespaceId, Long communityId, String moduleName);
 }
