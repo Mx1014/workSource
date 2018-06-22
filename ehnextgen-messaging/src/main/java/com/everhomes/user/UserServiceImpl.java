@@ -5338,6 +5338,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				user.setStatus(UserStatus.INACTIVE.getCode());
 				user.setNamespaceUserToken("");
 				user.setNamespaceUserType(null);
+                LOGGER.info("user={}",user);
 				userProvider.updateUser(user);
 			}
 //
