@@ -3,7 +3,6 @@ package com.everhomes.flow.nashornfunc;
 import com.everhomes.flow.*;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class NashornScriptMain implements NashornScript<Void> {
@@ -11,11 +10,9 @@ public class NashornScriptMain implements NashornScript<Void> {
     private final static String FUNCTION_NAME = "main";
 
     private FlowCaseStateBrief ctx;
-    private FlowScript script;
+    private FlowRuntimeScript script;
 
-    private AtomicBoolean finished = new AtomicBoolean(false);
-
-    public NashornScriptMain(FlowCaseState state, FlowScript script, FlowAction flowAction) {
+    public NashornScriptMain(FlowCaseState state, FlowRuntimeScript script, FlowAction flowAction) {
         this.ctx = new FlowCaseStateBrief();
 
         ifNotNull(state.getCurrentLane(), o -> ctx.setCurrentLane(o.getFlowLane()));

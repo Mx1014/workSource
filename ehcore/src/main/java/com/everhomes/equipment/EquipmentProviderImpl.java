@@ -124,12 +124,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -143,7 +140,7 @@ import java.util.stream.Collectors;
 
 @Component
 @DependsOn("platformContext")
-public class EquipmentProviderImpl implements EquipmentProvider, ApplicationListener<ContextRefreshedEvent> {
+public class EquipmentProviderImpl implements EquipmentProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentProviderImpl.class);
 
     @Value("${equipment.ip}")
@@ -191,13 +188,13 @@ public class EquipmentProviderImpl implements EquipmentProvider, ApplicationList
             }
         }
     }
-
-    @Override
+    // 因为@Cacheable会生成Spring cglib 代理导致多次执行   by jiarui 20180612
+    /*@Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
             init();
         }
-    }
+    }*/
     
     @Cacheable(value = "findEquipmentByIdAndOwner", key = "{#id, #ownerType, #ownerId}", unless = "#result == null")
     @Override

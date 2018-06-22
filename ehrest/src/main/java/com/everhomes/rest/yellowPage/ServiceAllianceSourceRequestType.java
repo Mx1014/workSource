@@ -4,14 +4,14 @@ package com.everhomes.rest.yellowPage;
 /**
  * 
  * <ul>
- * <li>CLIENT 0 : 客户端请求</li>
- * <li>CLIENT 1 : 浏览器请求</li>
+ * <li>CLIENT 0 : 客户端/浏览器请求</li>
+ * <li>ADMIN 1 : 后台请求</li>
  * </ul>
  *
  *  @author:dengs 2017年4月28日
  */
 public enum ServiceAllianceSourceRequestType {
-	CLIENT((byte)0), BROWSER((byte) 1);
+	CLIENT((byte)0), ADMIN((byte) 1);
 	
 	private byte code;
     private ServiceAllianceSourceRequestType(byte code) {
@@ -31,7 +31,7 @@ public enum ServiceAllianceSourceRequestType {
             return CLIENT;
             
         case 1 :
-            return BROWSER;
+            return ADMIN;
             
         default :
             break;

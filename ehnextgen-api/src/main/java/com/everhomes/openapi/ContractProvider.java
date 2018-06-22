@@ -74,6 +74,8 @@ public interface ContractProvider {
 	List<Long> SimpleFindContractByNumber(String header);
 
     List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
+    //add by steve
+	List<Contract> listContractByNamespaceId(Integer namespaceId);
 
     //多入口
     void createContractCategory(ContractCategory newsCategory);

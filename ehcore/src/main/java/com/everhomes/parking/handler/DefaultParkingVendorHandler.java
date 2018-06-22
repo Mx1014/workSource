@@ -15,6 +15,8 @@ import com.everhomes.rest.parking.*;
 import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.poi.ss.usermodel.Row;
@@ -61,6 +63,8 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
     FlowCaseProvider flowCaseProvider;
     @Autowired
     private DbProvider dbProvider;
+    @Autowired
+    UserService userService;
 
     void setCardStatus(ParkingLot parkingLot, long expireTime, ParkingCardDTO parkingCardDTO) {
         long now = System.currentTimeMillis();
@@ -282,7 +286,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             dto.setPlateNumber(cmd.getPlateNumber());
             long now = System.currentTimeMillis();
             dto.setOpenDate(now);
-            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
             if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
                 dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
             }else {
@@ -350,9 +354,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
             tempRow.createCell(5).setCellValue("");
             tempRow.createCell(6).setCellValue("");
-            if (    order.getOrderType()!=null &&
-                    order.getOrderType().byteValue()==ParkingOrderType.RECHARGE.getCode() &&
-                    order.getRechargeType()!=null &&
+            if (order.getRechargeType()!=null &&
                     order.getRechargeType().byteValue()==ParkingRechargeType.MONTHLY.getCode()) {
                 if(order.getStartPeriod()!=null) {
                     tempRow.createCell(5).setCellValue(datetimeSF.format(order.getStartPeriod()));
@@ -365,9 +367,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             tempRow.createCell(8).setCellValue("");
             tempRow.createCell(9).setCellValue("");
             tempRow.createCell(10).setCellValue("");
-            if (    order.getOrderType()!=null &&
-                    order.getOrderType().byteValue()==ParkingOrderType.RECHARGE.getCode() &&
-                    order.getRechargeType()!=null &&
+            if (order.getRechargeType()!=null &&
                     order.getRechargeType().byteValue()==ParkingRechargeType.TEMPORARY.getCode()) {
                 if(order.getStartPeriod()!=null) {
                     tempRow.createCell(8).setCellValue(datetimeSF.format(order.getStartPeriod()));

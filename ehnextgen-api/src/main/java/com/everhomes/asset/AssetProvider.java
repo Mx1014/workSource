@@ -296,7 +296,7 @@ public interface AssetProvider {
     List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId);
 
 
-    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId);
+    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId, boolean isInsert);
 
     PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName);
 
@@ -342,5 +342,8 @@ public interface AssetProvider {
 	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
 	void setRent(Long contractId, BigDecimal rent);
+    
+    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
 
+    PaymentLateFine findLastedFine(Long id);
 }

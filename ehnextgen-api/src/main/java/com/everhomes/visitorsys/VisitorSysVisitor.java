@@ -1,0 +1,72 @@
+// @formatter:off
+package com.everhomes.visitorsys;
+
+import com.everhomes.rest.visitorsys.VisitorsysApprovalFormItem;
+import com.everhomes.server.schema.tables.pojos.EhVisitorSysVisitors;
+import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
+public class VisitorSysVisitor extends EhVisitorSysVisitors {
+	
+	private static final long serialVersionUID = -1090547867158368768L;
+	private List<VisitorsysApprovalFormItem> communityFormValues;
+	private List<VisitorsysApprovalFormItem> enterpriseFormValues;
+	private String statsDate;
+	private Integer statsHour;
+	private Integer statsWeek;
+	private Long communityId;
+
+	public List<VisitorsysApprovalFormItem> getCommunityFormValues() {
+		return communityFormValues;
+	}
+
+	public void setCommunityFormValues(List<VisitorsysApprovalFormItem> communityFormValues) {
+		this.communityFormValues = communityFormValues;
+	}
+
+	public List<VisitorsysApprovalFormItem> getEnterpriseFormValues() {
+		return enterpriseFormValues;
+	}
+
+	public void setEnterpriseFormValues(List<VisitorsysApprovalFormItem> enterpriseFormValues) {
+		this.enterpriseFormValues = enterpriseFormValues;
+	}
+
+	public String getStatsDate() {
+		return statsDate;
+	}
+
+	public void setStatsDate(String statsDate) {
+		this.statsDate = statsDate;
+	}
+
+	public Integer getStatsHour() {
+		return statsHour;
+	}
+
+	public void setStatsHour(Integer statsHour) {
+		this.statsHour = statsHour;
+	}
+
+	public Integer getStatsWeek() {
+		return statsWeek;
+	}
+
+	public void setStatsWeek(Integer statsWeek) {
+		this.statsWeek = statsWeek;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+}

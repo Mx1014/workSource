@@ -215,7 +215,7 @@
             (A Java regular expression. Use the pipe to separate several expressions).
             Excludes match before includes -->
             <excludes>
-                eh_acls|eh_acl_privileges|eh_acl_roles|eh_acl_role_assignments|eh_apps|eh_app_profiles|eh_configurations|
+                eh_acls|eh_acl_privileges|eh_acl_roles|eh_acl_role_assignments|eh_apps|eh_app_profiles|
                 eh_content_shard_map|eh_messages|eh_message_boxs|eh_namespaces|eh_sequences|eh_servers|eh_server_shard_map|eh_shards
             </excludes>
         </database>

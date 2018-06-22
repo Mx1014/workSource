@@ -127,6 +127,7 @@ public class CreateLocalVistorCommand {
 	public void setHeadImgUri(String headImgUri) {
 		this.headImgUri = headImgUri;
 	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
