@@ -890,7 +890,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 		SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
 		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
 //		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));;
+		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
 
         LOGGER.debug("findBuildingByCommunityIdAndName, sql=" + query.getSQL());
         LOGGER.debug("findBuildingByCommunityIdAndName, bindValues=" + query.getBindValues());
