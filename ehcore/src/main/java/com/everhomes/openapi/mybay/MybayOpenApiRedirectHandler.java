@@ -32,7 +32,7 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 	private static final Logger LOGGER = LoggerFactory.getLogger(MybayOpenApiRedirectHandler.class);
 	
 	private  static final int SUCCESS_CODE = 0 ;
-	private  static final int MYBAY_NAMESPACE_ID = 999987;
+	private  static final int MYBAY_NAMESPACE_ID = 999966;
 	private  static final String SUCCESS = "Success";
 	//下面字段串为对方提供的参数名，如有修改，直接修改此处即可，代码中不用管
 	private  static final String APPKEY = "AppKey";

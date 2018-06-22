@@ -35,7 +35,7 @@ public class MybayOpenApiBatchPersonnelDocking {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(MybayOpenApiBatchPersonnelDocking.class);
 	private  static final int SUCCESS_CODE = 0 ;
-	private  static final int MYBAY_NAMESPACE_ID = 999987;
+	private  static final int MYBAY_NAMESPACE_ID = 999966;
 	private  static final String SUCCESS = "Success";
 	//下面字段串为对方提供的参数名，如有修改，直接修改此处即可，代码中不用管
 	private  static final String BATCH_PRO_URL = "batch_pro_URL";
