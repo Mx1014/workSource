@@ -447,7 +447,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		List<ServiceModuleApp> apps = null;
 		if(installFlag) {
-			apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType);
+			apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, null);
 		}else if(manageFlag){
 			apps = serviceModuleAppProvider.listManageServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType);
 		}

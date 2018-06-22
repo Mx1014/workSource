@@ -84,7 +84,7 @@ public class OPPushActivityHandler implements OPPushHandler {
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());
                 properties.add(dto.getSubject());
-                properties.add(dto.getStartTime());
+                properties.add(dto.getStartTime().substring(0, 10));
                 card.setProperties(properties);
                 listCards.add(card);
             }

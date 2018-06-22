@@ -24,9 +24,9 @@ import com.everhomes.rest.menu.*;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.oauth2.ModuleManagementType;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
-import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
+import com.everhomes.serviceModuleApp.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
@@ -87,6 +87,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Autowired
 	private ServiceModuleAppProvider serviceModuleAppProvider;
+
+	@Autowired
+	private OrganizationAppProvider organizationAppProvider;
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
@@ -161,7 +164,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		//OA类型的要查询安装的应用
 		//List<ServiceModuleApp> orgApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.ORG_CONTROL.getCode());
-		List<ServiceModuleApp> orgApps = serviceModuleAppProvider.listInstallServiceModuleApps(UserContext.getCurrentNamespaceId(), versionId, organizationId, null, null, null);
+		List<ServiceModuleApp> orgApps = serviceModuleAppProvider.listInstallServiceModuleApps(UserContext.getCurrentNamespaceId(), versionId, organizationId, null, ServiceModuleAppType.OA.getCode(), null, OrganizationAppStatus.ENABLE.getCode());
 
 		List<ServiceModuleApp> unlimitApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 		
@@ -246,7 +249,14 @@ public class WebMenuServiceImpl implements WebMenuService {
 	                authAppIdsWithoutZeroProjects.add(authAppId);       
 	            }
 		    } else {
-		        authAppIdsWithoutZeroProjects.add(authAppId);    
+
+		    	//因为授权的应用authAppIds里包含了禁用的oa应用，此处要过滤掉
+				OrganizationApp organizationApp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(authAppId, organizationId);
+				if(organizationApp == null || OrganizationStatus.fromCode(organizationApp.getStatus()) != OrganizationStatus.ACTIVE){
+					continue;
+				}
+
+				authAppIdsWithoutZeroProjects.add(authAppId);
 		    }
 		}
 

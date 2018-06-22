@@ -431,7 +431,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	}
 
 	@Override
-	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType) {
+	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
@@ -457,6 +457,9 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		//安装信息
 		query.addJoin(Tables.EH_ORGANIZATION_APPS, JoinType.JOIN, Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID.eq(Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID));
 		query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(orgId));
+		if(organizationAppStatus != null){
+			query.addConditions(Tables.EH_ORGANIZATION_APPS.STATUS.eq(organizationAppStatus));
+		}
 
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
 
