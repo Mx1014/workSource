@@ -183,4 +183,6 @@ public interface AssetService {
     void noticeTrigger(Integer namespaceId);
     //add by tangcen
 	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
+
+	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 }

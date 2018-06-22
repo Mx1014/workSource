@@ -4652,4 +4652,45 @@ public class AssetProviderImpl implements AssetProvider {
 	                .where(Tables.EH_CONTRACTS.ID.eq(contractId))
 	                .execute();
 	}
+
+	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroupsRules rule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("rule");
+        EhPaymentChargingItemScopes ci = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("ci");
+
+        ShowCreateBillSubItemListDTO response = new ShowCreateBillSubItemListDTO();
+        List<SubItemDTO> list = new ArrayList<>();
+
+        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID)
+                .from(rule,ci)
+                .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
+                .and(rule.OWNERID.eq(ci.OWNER_ID))
+                .and(rule.BILL_GROUP_ID.eq(billGroupId))
+                .fetch()
+                .map(r -> {
+                	//减免费项
+                    SubItemDTO dto = new SubItemDTO();
+                    dto.setSubtractionType(AssetSubtractionType.item.getCode());
+                    dto.setChargingItemId(r.getValue(rule.CHARGING_ITEM_ID));
+                    dto.setChargingItemName(r.getValue(ci.PROJECT_LEVEL_NAME));
+                    list.add(dto);
+                    //减免费项对应的滞纳金
+                    SubItemDTO dtoLateFine = new SubItemDTO();
+                    dtoLateFine.setSubtractionType(AssetSubtractionType.lateFine.getCode());
+                    dtoLateFine.setChargingItemId(r.getValue(rule.CHARGING_ITEM_ID));
+                    dtoLateFine.setChargingItemName(r.getValue(ci.PROJECT_LEVEL_NAME) + "滞纳金");
+                    list.add(dtoLateFine);
+                    return null;});
+        
+        response.setBillGroupId(billGroupId);
+        response.setSubItemDTOList(list);
+        List<String> fetch = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
+        if(fetch.size() > 0){
+            response.setBillGroupName(fetch.get(0));
+        }
+        return response;
+	}
 }

@@ -4558,4 +4558,11 @@ public class AssetServiceImpl implements AssetService {
 			}
 		}
 	}
+
+	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.showCreateBillSubItemList(cmd.getBillGroupId());
+	}
 }

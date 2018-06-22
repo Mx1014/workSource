@@ -193,4 +193,10 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
+
+	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId) {
+		LOGGER.error("Insufficient privilege, handler showCreateBillSubItemList");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
 }

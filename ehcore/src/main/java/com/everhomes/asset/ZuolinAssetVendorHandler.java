@@ -1652,5 +1652,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         cmd.setCommunityId(communityId);
         return contractService.listCustomerContracts(cmd);
     }
+    
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId) {
+    	return assetProvider.showCreateBillSubItemList(billGroupId);
+    }
 }
 

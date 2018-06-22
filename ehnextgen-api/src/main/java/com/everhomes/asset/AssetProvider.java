@@ -332,4 +332,6 @@ public interface AssetProvider {
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
 
     PaymentLateFine findLastedFine(Long id);
+    
+	ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId);
 }

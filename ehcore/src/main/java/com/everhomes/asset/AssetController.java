@@ -1348,5 +1348,19 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    /**
+     * <p>展示账单组对应的减免费项列表</p>
+     * <b>URL: /asset/showCreateBillSubItemList</b>
+     */
+    @RequestMapping("showCreateBillSubItemList")
+    @RestReturn(value = ShowCreateBillSubItemListDTO.class)
+    public RestResponse showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	ShowCreateBillSubItemListDTO dto = assetService.showCreateBillSubItemList(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
 }
 
