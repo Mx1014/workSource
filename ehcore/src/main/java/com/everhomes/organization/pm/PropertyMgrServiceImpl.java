@@ -6811,7 +6811,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 owner.setBirthday(date);
             }
 
-            contactTokenList.add(dto.getContactToken());
+
             // 检查手机号的唯一性
             CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
             if (exist != null) {
@@ -6823,7 +6823,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (!contactTokenList.contains(dto.getContactToken()) && exist!=null) {
                 propertyMgrProvider.deleteOrganizationOwnerAddressByOwnerId(namespaceId, exist.getId());
             }
-
+            contactTokenList.add(dto.getContactToken());
             owner.setNamespaceId(namespaceId);
             owner.setCreatorUid(UserContext.currentUserId());
             owner.setOrganizationId(organizationId);
