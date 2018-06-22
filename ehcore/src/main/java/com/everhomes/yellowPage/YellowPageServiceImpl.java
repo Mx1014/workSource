@@ -1482,16 +1482,23 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public List<JumpModuleDTO> listJumpModules(ListJumpModulesCommand cmd) {
 
-		// 没配的返回零域的，配了的返回自己域空间的
-		List<JumpModuleDTO> modules = yellowPageProvider.jumpModules(0);
-		if (modules == null || modules.size() == 0) {
+		List<JumpModuleDTO> modules = new ArrayList<>(10);
 
-			modules = yellowPageProvider.jumpModules(0);
+		// 获取电商模块
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		List<JumpModuleDTO> bizJumpModules = yellowPageProvider.jumpModules(namespaceId, "BIZS");
+		if (!CollectionUtils.isEmpty(bizJumpModules)) {
+			modules.addAll(bizJumpModules);
 		}
-		
-		//过滤未配置的应用
-		modules = reAdjustModules(cmd.getNamespaceId(), cmd.getVersionId(), modules);
 
+		// 获取非电商
+		List<JumpModuleDTO> otherModules = yellowPageProvider.jumpModules(0, null);
+		if (!CollectionUtils.isEmpty(otherModules)) {
+			modules.addAll(otherModules);
+		}
+
+		// 过滤未配置的应用
+		modules = reAdjustModules(namespaceId, cmd.getVersionId(), modules);
 
 		return createTree(modules);
 	}
