@@ -23,16 +23,6 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 VALUES (@c_id:= @c_id +1, 'ct.Callback', '','返回到客户页面的URL','999987','','');
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name` ,`is_readonly`) 
-VALUES (@c_id:= @c_id +1, 'ct.CostCenter1', '','成本中心1（对应我们这里的用户公司）','999987','','');
-
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name` ,`is_readonly`) 
-VALUES (@c_id:= @c_id +1, 'ct.CostCenter2', '','成本中心2（对应我们这里的用户公司）','999987','','');
-
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name` ,`is_readonly`) 
-VALUES (@c_id:= @c_id +1, 'ct.CostCenter3', '','成本中心3（对应我们这里的用户公司）','999987','','');
-
-
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name` ,`is_readonly`) 
 VALUES (@c_id:= @c_id +1, 'ct.getTicketURL', 'https://ct.ctrip.com/corpservice/authorize/getticket','获取Ticket的URL','999987','','');
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name` ,`is_readonly`) 
@@ -63,4 +53,8 @@ VALUES (@c_id:= @c_id +1, 'ct.restful.test.batchURL', 'https://cta.fat.ctripqa.c
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name` ,`is_readonly`) 
 VALUES (@c_id:= @c_id +1, 'ct.soap.test.batchURL', 'https://cta.fat.ctripqa.com/corpservice/CorpCustService.asmx','人事信息批量更新测试环境服务SOAP地址','999987','','');
+
+
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name` ,`is_readonly`) 
+VALUES (@c_id:= @c_id +1, 'ct.isOpenedCardURL', 'https://ct.ctrip.com/corpservice/OpenCard/IsOpenedCard?type=json','判断员工是否开卡','999987','','');
 -- END
