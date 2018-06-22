@@ -317,3 +317,24 @@ ALTER TABLE eh_flow_scripts ADD COLUMN last_commit VARCHAR(40) COMMENT 'reposito
 ALTER TABLE `eh_customer_trackings`  ADD COLUMN `contact_phone`  varchar(255) NULL AFTER `content`;
 ALTER TABLE `eh_customer_trackings`  ADD COLUMN `visit_time_length`  decimal(10,2) NULL AFTER `contact_phone`;
 ALTER TABLE `eh_customer_trackings`  ADD COLUMN `visit_person_name`  varchar(64) NULL AFTER `contact_phone`;
+
+
+-- bydeng,20180622
+CREATE TABLE `eh_parking_hubs` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `parking_lot_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_parking_lots',
+  `hub_name` varchar(64) NOT NULL COMMENT 'hub的名称',
+  `hub_mac` varchar(128) NOT NULL COMMENT 'hub的mac地址',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE eh_parking_spaces ADD COLUMN parking_hubs_id BIGINT;
