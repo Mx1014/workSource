@@ -70,8 +70,14 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 		params.put("trade_code", trade_code);
 		params.put("car_no", plateNumber);
 		params.put("signature", ZhongBaiChangSignatureUtil.getSign(params, secretKey));
-		String result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
-				StandardCharsets.UTF_8);
+		String result = "";
+		try {
+			result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
+					StandardCharsets.UTF_8);
+		}catch (Exception e){
+			LOGGER.error("The request error,", e);
+			return null;
+		}
 
 		ZhongBaiChangCardInfo<ZhongBaiChangData> entity = JSONObject.parseObject(result,
 				new TypeReference<ZhongBaiChangCardInfo<ZhongBaiChangData>>() {
