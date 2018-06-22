@@ -859,7 +859,7 @@ public class AssetServiceImpl implements AssetService {
 		            }
 		            detail.setBillItemListMsg(billItemListMsg);
 		            detail.setTargetName(dto.getTargetName());
-		            detail.setTargetType(dto.getTargetType() == "eh_user" ? "个人客户" : "企业客户");
+		            detail.setTargetType(dto.getTargetType().equals("eh_user") ? "个人客户" : "企业客户");
 		            //detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
 		            detail.setPaymentStatus("已完成");
 		            if(dto.getPaymentType() != null) {
