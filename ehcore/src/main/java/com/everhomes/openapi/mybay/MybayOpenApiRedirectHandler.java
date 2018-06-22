@@ -94,7 +94,7 @@ public class MybayOpenApiRedirectHandler implements OpenApiRedirectHandler{
 			    				times++;
 								break;
 							}
-							Thread.sleep(2000);//一次2秒
+							Thread.sleep(1000);//一次1秒
 							IsOpened = mybayOpenApiBatchPersonnelDocking.isFinishDocking();
 							times++;
 							
