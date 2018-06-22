@@ -5304,12 +5304,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	@Override
 	public UserLogin bindPhone(BindPhoneCommand cmd){
 		User user = UserContext.current().getUser();
-		if (cmd.getUserId() != null) {
-		    user = userProvider.findUserById(cmd.getUserId());
-        }
-        if (user == null) {
-            user = UserContext.current().getUser();
-        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 
