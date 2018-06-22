@@ -321,7 +321,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
     @RequestMapping("authCallbackByApp")
     @RestReturn(CheckWxAuthIsBindPhoneRestResponse.class)
     @RequireAuthentication(false)
-    public RestResponse authCallbackByApp(WxAuthCallBackCommand cmd, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public CheckWxAuthIsBindPhoneRestResponse authCallbackByApp(WxAuthCallBackCommand cmd, HttpServletRequest request, HttpServletResponse response) throws Exception {
         long startTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(callback calculate), startTime={}", startTime);
@@ -363,10 +363,9 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         checkWxAuthIsBindPhoneResponse.setLogonCommandResponse(logonCommandResponse);
         CheckWxAuthIsBindPhoneRestResponse checkWxAuthIsBindPhoneRestResponse = new CheckWxAuthIsBindPhoneRestResponse();
         checkWxAuthIsBindPhoneRestResponse.setResponse(checkWxAuthIsBindPhoneResponse);
-        RestResponse res = new RestResponse(checkWxAuthIsBindPhoneRestResponse);
-        res.setErrorCode(ErrorCodes.SUCCESS);
-        res.setErrorDescription("OK");
-        return res;
+        checkWxAuthIsBindPhoneRestResponse.setErrorCode(ErrorCodes.SUCCESS);
+        checkWxAuthIsBindPhoneRestResponse.setErrorDescription("OK");
+        return checkWxAuthIsBindPhoneRestResponse;
     }
     private List<String> listAllBorderAccessPoints() {
         List<Border> borders = this.borderProvider.listAllBorders();
