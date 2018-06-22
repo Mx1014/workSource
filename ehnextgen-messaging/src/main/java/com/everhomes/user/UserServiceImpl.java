@@ -5307,7 +5307,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		if (cmd.getUserId() != null) {
 		    user = userProvider.findUserById(cmd.getUserId());
         }
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (user == null) {
+            user = UserContext.current().getUser();
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 
 		if( cmd.getPhone() == null){
