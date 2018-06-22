@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.wx;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.user.LogonCommandResponse;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -21,16 +24,45 @@ public class CheckWxAuthIsBindPhoneResponse{
 
     private Integer regionCode;
 
-    private LogonCommandResponse logonCommandResponse;
+    private long uid;
+    private String loginToken;
+    private String contentServer;
+
+    @ItemType(String.class)
+    private List<String> accessPoints;
 
     public CheckWxAuthIsBindPhoneResponse(){}
 
-    public LogonCommandResponse getLogonCommandResponse() {
-        return logonCommandResponse;
+    public long getUid() {
+        return uid;
     }
 
-    public void setLogonCommandResponse(LogonCommandResponse logonCommandResponse) {
-        this.logonCommandResponse = logonCommandResponse;
+    public void setUid(long uid) {
+        this.uid = uid;
+    }
+
+    public String getLoginToken() {
+        return loginToken;
+    }
+
+    public void setLoginToken(String loginToken) {
+        this.loginToken = loginToken;
+    }
+
+    public String getContentServer() {
+        return contentServer;
+    }
+
+    public void setContentServer(String contentServer) {
+        this.contentServer = contentServer;
+    }
+
+    public List<String> getAccessPoints() {
+        return accessPoints;
+    }
+
+    public void setAccessPoints(List<String> accessPoints) {
+        this.accessPoints = accessPoints;
     }
 
     public String getIdentifierToken() {

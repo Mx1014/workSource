@@ -354,13 +354,13 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
             cmdResponse.setContentServer(contentServerService.getContentServer());
         }
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
-        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = checkRedirectUserIdentifierV2();
 
+        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = ConvertHelper.convert(logonCommandResponse,CheckWxAuthIsBindPhoneResponse.class);
+        checkRedirectUserIdentifierV2(checkWxAuthIsBindPhoneResponse);
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(callback calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
-        checkWxAuthIsBindPhoneResponse.setLogonCommandResponse(logonCommandResponse);
         CheckWxAuthIsBindPhoneRestResponse checkWxAuthIsBindPhoneRestResponse = new CheckWxAuthIsBindPhoneRestResponse();
         checkWxAuthIsBindPhoneRestResponse.setResponse(checkWxAuthIsBindPhoneResponse);
         checkWxAuthIsBindPhoneRestResponse.setErrorCode(ErrorCodes.SUCCESS);
@@ -410,9 +410,8 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
 
     }
 
-    private CheckWxAuthIsBindPhoneResponse checkRedirectUserIdentifierV2(){
+    private CheckWxAuthIsBindPhoneResponse checkRedirectUserIdentifierV2(CheckWxAuthIsBindPhoneResponse response){
         LOGGER.info("checkUserIdentifier start");
-        CheckWxAuthIsBindPhoneResponse response = new CheckWxAuthIsBindPhoneResponse();
 
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
         User user = UserContext.current().getUser();
