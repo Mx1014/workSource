@@ -119,7 +119,10 @@ public class UserProviderImpl implements UserProvider {
     
     public UserProviderImpl() {
     }
-    
+
+    @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
+            @CacheEvict(value="User-Account", key="#user.accountName"),
+            @CacheEvict(value="UserIdentifier-List", key="#user.id")})
     @Override
     public void createUser(User user) {
         // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
