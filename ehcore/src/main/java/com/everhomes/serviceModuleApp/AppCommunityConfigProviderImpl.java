@@ -69,6 +69,15 @@ public class AppCommunityConfigProviderImpl implements AppCommunityConfigProvide
     }
 
     @Override
+    public void deleteAppCommunityConfigByCommunityIdAndAppOriginId(Long communityId, Long AppOriginId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAppCommunityConfigs.class));
+        DeleteQuery<EhAppCommunityConfigsRecord> query = context.deleteQuery(Tables.EH_APP_COMMUNITY_CONFIGS);
+        query.addConditions(Tables.EH_APP_COMMUNITY_CONFIGS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_APP_COMMUNITY_CONFIGS.APP_ORIGIN_ID.eq(AppOriginId));
+        query.execute();
+    }
+
+    @Override
     public AppCommunityConfig getAppCommunityConfigById(Long id) {
         try {
         AppCommunityConfig[] result = new AppCommunityConfig[1];

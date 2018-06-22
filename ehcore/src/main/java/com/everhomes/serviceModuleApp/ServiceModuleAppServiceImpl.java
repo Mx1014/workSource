@@ -279,6 +279,20 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		//给自己添加自己园区的所有授权
 		serviceModuleAppAuthorizationService.addAllCommunityAppAuthorizations(serviceModuleApp.getNamespaceId(), cmd.getOrganizationId(), cmd.getOriginId());
 
+
+		//增加应用广场配置
+		List<OrganizationCommunity> orgcommunities = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
+		if(orgcommunities != null){
+			for (OrganizationCommunity organizationCommunity: orgcommunities) {
+				UpdateAppCommunityConfigCommand appCommunityConfigCommand = new UpdateAppCommunityConfigCommand();
+				appCommunityConfigCommand.setAppOriginId(cmd.getOriginId());
+				appCommunityConfigCommand.setCommunityId(organizationCommunity.getCommunityId());
+				appCommunityConfigCommand.setDisplayName(serviceModuleApp.getName());
+				appCommunityConfigCommand.setVisibilityFlag(TrueOrFalseFlag.TRUE.getCode());
+				updateAppCommunityConfig(appCommunityConfigCommand);
+			}
+		}
+
 		ServiceModuleAppDTO dto = ConvertHelper.convert(serviceModuleApp, ServiceModuleAppDTO.class);
 		dto.setStatus(orgapps.getStatus());
 		dto.setOrgAppId(id);
@@ -304,6 +318,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		//删除该公司的所有授权
 		serviceModuleAppAuthorizationService.removeAllCommunityAppAuthorizations(UserContext.getCurrentNamespaceId(), orgapp.getOrgId(), orgapp.getAppOriginId());
+
+		//删除应用广场配置
+		List<OrganizationCommunity> orgcommunities = organizationProvider.listOrganizationCommunities(orgapp.getOrgId());
+		if(orgcommunities != null){
+			for (OrganizationCommunity organizationCommunity: orgcommunities){
+				appCommunityConfigProvider.deleteAppCommunityConfigByCommunityIdAndAppOriginId(organizationCommunity.getCommunityId(), orgapp.getAppOriginId());
+			}
+
+		}
 
 	}
 
@@ -678,6 +701,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 					query.addConditions(Tables.EH_ORGANIZATION_APPS.ORG_ID.eq(cmd.getOrganizationId()));
+					query.addConditions(Tables.EH_ORGANIZATION_APPS.STATUS.eq(OrganizationAppStatus.ENABLE.getCode()));
 					query.addJoin(Tables.EH_SERVICE_MODULE_APPS, JoinType.JOIN, Tables.EH_ORGANIZATION_APPS.APP_ORIGIN_ID.eq(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID));
 					query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(ServiceModuleAppType.COMMUNITY.getCode()));
 					query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(releaseVersion.getId()));

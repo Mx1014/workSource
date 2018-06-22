@@ -15,6 +15,8 @@ public interface AppCommunityConfigProvider {
 
     void deleteAppCommunityConfigByCommunityId(Long communityId);
 
+    void deleteAppCommunityConfigByCommunityIdAndAppOriginId(Long communityId, Long AppOriginId);
+
     AppCommunityConfig getAppCommunityConfigById(Long id);
 
     AppCommunityConfig findAppCommunityConfigByCommunityIdAndAppOriginId(Long communityId, Long appOriginId);
