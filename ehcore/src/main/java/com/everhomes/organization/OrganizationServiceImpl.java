@@ -6134,8 +6134,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         }
 
-        if (cmd.getJobPositionIds() != null) {
-            //1. 删除通用岗位+detailIds所确认的部门岗位条目
+        //1. 删除通用岗位+detailIds所确认的部门岗位条目
 //            List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getCommonJobPositionId());
 //            if(jobPositionMaps!=null && jobPositionMaps.size() > 0){
 //                List<Long> organizationJobPositionIds = jobPositionMaps.stream().map(r->{
@@ -6143,10 +6142,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                }).collect(Collectors.toList());
 //                organizationProvider.deleteOrganizationPersonelByJobPositionIdsAndDetailIds(organizationJobPositionIds, cmd.getDetailIds());
 //            }
+
+        if (cmd.getJobPositionIds() != null) {
             //1.统一删除所有的部门岗位条目
-            //modify by yuanlei 20180521
-            //在这里需求是这样要求的，一个人可以同时在不同的部门岗位下，所以在这里我们不需要讲之前的部门岗位进行删除，所以将第6112行，进行注释掉
-//            this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_POSITION.getCode());
+            this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_POSITION.getCode());
             //2. 统一新增岗位
             detailIds.forEach(detailId -> {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
