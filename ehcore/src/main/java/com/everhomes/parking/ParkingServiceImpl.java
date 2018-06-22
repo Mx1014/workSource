@@ -136,6 +136,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private CoordinationProvider coordinationProvider;
 	@Autowired
 	public CommunityProvider communityProvider;
+	@Autowired
+	private ParkingHubProvider parkingHubProvider;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -2452,12 +2454,17 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ParkingSpaceDTO addParkingSpace(AddParkingSpaceCommand cmd) {
+		ParkingSpaceStatus status = ParkingSpaceStatus.fromCode(cmd.getStatus());
+		if(status==null){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEINFE,
+					"unknown status");
+		}
 
 		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
 
 		ParkingSpace parkingSpace = parkingProvider.findParkingSpaceBySpaceNo(cmd.getSpaceNo());
 
-		if (null != parkingSpace && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
+		if (null != parkingSpace && parkingSpace.getStatus()!=ParkingSpaceStatus.DELETED.getCode()) {
 			LOGGER.error("SpaceNo exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_SPACE_NO,
 					"SpaceNo exist.");
@@ -2465,22 +2472,25 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingSpace = parkingProvider.findParkingSpaceByLockId(cmd.getLockId());
 
-		if (null != parkingSpace  && parkingSpace.getStatus()!=ParkingSpaceStatus.CLOSE.getCode()) {
+		if (null != parkingSpace  && parkingSpace.getStatus()!=ParkingSpaceStatus.DELETED.getCode()) {
 			LOGGER.error("LockId exist, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REPEAT_LOCK_ID,
 					"LockId exist.");
 		}
-
-		if(!dingDingParkingLockHandler.connParkingSpace(cmd.getLockId())){
+		ParkingHub hub = parkingHubProvider.findParkingHubById(cmd.getParkingHubsId());
+		if(hub==null){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEINFE,
+					"无效的hub");
+		}
+		if(!dingDingParkingLockHandler.connParkingSpace(cmd.getLockId(),hub.getHubMac())){
 			LOGGER.error("LockId conn failed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_UNCONN_LOCK_ID,
-					"您输入的车锁ID无效，请重新输入");
+					"您输入车锁ID无效，请重新输入");
 		}
 
 		parkingSpace = ConvertHelper.convert(cmd, ParkingSpace.class);
 
 		parkingProvider.createParkingSpace(parkingSpace);
-
 		RentalResourceHandler handler = rentalCommonService.getRentalResourceHandler(RentalV2ResourceType.VIP_PARKING.getCode());
 
 		handler.updateRentalResource(JSONObject.toJSONString(parkingLot));
@@ -2505,10 +2515,15 @@ public class ParkingServiceImpl implements ParkingService {
 					"LockId exist.");
 		}
 
-		if(!dingDingParkingLockHandler.connParkingSpace(cmd.getLockId())){
+		ParkingHub hub = parkingHubProvider.findParkingHubById(cmd.getParkingHubsId());
+		if(hub==null){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEINFE,
+					"无效的hub");
+		}
+		if(!dingDingParkingLockHandler.connParkingSpace(cmd.getLockId(),hub.getHubMac())){
 			LOGGER.error("LockId conn failed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_UNCONN_LOCK_ID,
-					"您输入的车锁ID无效，请重新输入");
+					"您输入车锁ID无效，请重新输入");
 		}
 
 		parkingSpace.setSpaceAddress(cmd.getSpaceAddress());
@@ -2547,7 +2562,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (parkingSpace.getStatus() == ParkingSpaceStatus.IN_USING.getCode()) {
 			LOGGER.error("ParkingSpace in use, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SPACE_IN_USE,
 					"ParkingSpace in use.");
 		}
 
@@ -2557,16 +2572,16 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public SearchParkingSpacesResponse searchParkingSpaces(SearchParkingSpacesCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			//VIP车位管理权限
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040830L, cmd.getAppId(), null,cmd.getCurrentProjectId());
-		}
+//		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+//			//VIP车位管理权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040830L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+//		}
 		SearchParkingSpacesResponse response = new SearchParkingSpacesResponse();
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		List<ParkingSpace> spaces = parkingProvider.searchParkingSpaces(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getParkingLotId(), cmd.getKeyword(), cmd.getLockStatus(), cmd.getPageAnchor(), pageSize);
+				cmd.getParkingLotId(), cmd.getKeyword(), cmd.getLockStatus(), cmd.getParkingHubsId(),cmd.getPageAnchor(), pageSize);
 
 		int size = spaces.size();
 		if(size > 0){
@@ -2575,6 +2590,8 @@ public class ParkingServiceImpl implements ParkingService {
 				if (dto.getStatus() == ParkingSpaceStatus.IN_USING.getCode()) {
 					dto.setStatus(ParkingSpaceStatus.OPEN.getCode());
 				}
+				ParkingHub parkingHub = parkingHubProvider.findParkingHubById(r.getParkingHubsId());
+				dto.setHubName(parkingHub.getHubName());
 				return dto;
 			}).collect(Collectors.toList()));
 
@@ -2798,5 +2815,77 @@ public class ParkingServiceImpl implements ParkingService {
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 			handler.refreshToken();
 		}
+	}
+
+	@Override
+	public SearchParkingHubsResponse searchParkingHubs(SearchParkingHubsCommand cmd) {
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+		List<ParkingHub> parkingHubs = parkingHubProvider.listParkingHub(cmd.getNamespaceId(), cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPageAnchor(), cmd.getPageSize());
+		if(parkingHubs==null || parkingHubs.size()==0) {
+			return null;
+		}
+		SearchParkingHubsResponse response = new SearchParkingHubsResponse();
+		response.setHubList(parkingHubs.stream().map(r -> {
+			ParkingHubDTO convert = ConvertHelper.convert(r, ParkingHubDTO.class);
+			List<ParkingSpace> parkingSpaces = parkingProvider.listParkingSpaceByParkingHubsId(r.getNamespaceId(), r.getOwnerType(),
+					r.getOwnerId(), r.getParkingLotId(), r.getId());
+			if(parkingSpaces!=null && parkingSpaces.size()>0){
+				convert.setRelatedSpaceNos(parkingSpaces.stream().map(space->space.getSpaceNo()).collect(Collectors.toList()));
+			}
+			return convert;
+		}).collect(Collectors.toList()));
+		if(parkingHubs.size()==cmd.getPageSize()){
+			response.setNextPageAnchor(parkingHubs.get(cmd.getPageSize()-1).getId());
+		}
+		return response;
+	}
+
+	@Override
+	public ParkingHubDTO createOrUpdateParkingHub(CreateOrUpdateParkingHubCommand cmd) {
+		if(cmd.getId()==null){
+			ParkingHub oldHub = parkingHubProvider.findParkingHubByMac(cmd.getNamespaceId(),cmd.gethubMac());
+			if(oldHub!=null){
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_SELF_DEINFE,
+						"设备ID已存在，不可重复添加");
+			}
+			ParkingHub parkingHub = ConvertHelper.convert(cmd, ParkingHub.class);
+			parkingHub.setStatus((byte)2);
+			parkingHubProvider.createParkingHub(parkingHub);
+			return ConvertHelper.convert(parkingHub,ParkingHubDTO.class);
+		}else{
+			ParkingHub parkingHub = parkingHubProvider.findParkingHubById(cmd.getId());
+			if(parkingHub==null){
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_SELF_DEINFE,
+						"非法的hubId");
+			}
+			parkingHub.setHubName(cmd.getHubName());
+			parkingHubProvider.updateParkingHub(parkingHub);
+			return ConvertHelper.convert(parkingHub,ParkingHubDTO.class);
+		}
+	}
+
+	@Override
+	public void deleteParkingHub(DeleteParkingHubCommand cmd) {
+		ParkingHub parkingHub = parkingHubProvider.findParkingHubById(cmd.getId());
+		if(parkingHub!=null) {
+			List<ParkingSpace> parkingSpaces = parkingProvider.listParkingSpaceByParkingHubsId(parkingHub.getNamespaceId(), parkingHub.getOwnerType(),
+					parkingHub.getOwnerId(), parkingHub.getParkingLotId(), parkingHub.getId());
+			if(parkingSpaces!=null && parkingSpaces.size()>0){
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.ERROR_HUB_IN_USE,
+						"\n" +
+								"无法删除\n" +
+								"\n" +
+								"此HUB设备已关联车位，无法进行删除，你可以先前往 车位管理 删除相关车位");
+			}
+			parkingHub.setStatus((byte) 0);
+			parkingHubProvider.updateParkingHub(parkingHub);
+		}
+	}
+
+	@Override
+	public GetParkingSpaceLockFullStatusDTO getParkingSpaceLockFullStatus(DeleteParkingSpaceCommand cmd) {
+		GetParkingSpaceLockFullStatusDTO fullStatusDTO = dingDingParkingLockHandler.readParkingSpaceLock(cmd.getId());
+		return fullStatusDTO;
 	}
 }
