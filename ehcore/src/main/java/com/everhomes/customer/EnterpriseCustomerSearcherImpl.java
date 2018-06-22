@@ -561,6 +561,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         Map<Long, CustomerEntryInfoDTO> map = new HashMap<>();
         if (entryInfos != null && entryInfos.size() > 0) {
             entryInfos.forEach((e) -> map.putIfAbsent(e.getAddressId(), e));
+            map.remove(null);
             return new ArrayList<>(map.values());
         }
         return null;
