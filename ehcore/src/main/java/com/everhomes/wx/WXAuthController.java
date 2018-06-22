@@ -646,7 +646,9 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         	}
         	userService.updateUserCurrentCommunityToProfile(wxUser.getId(), Long.valueOf(communityId), wxUser.getNamespaceId());
         }
-        
+
+        LOGGER.info("UserContext user = {}", UserContext.current().getUser());
+
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(userinfo calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
