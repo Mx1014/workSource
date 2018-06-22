@@ -97,7 +97,7 @@ public interface YellowPageProvider {
 	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
 
 
-	List<JumpModuleDTO> jumpModules(Integer namespaceId);
+	List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString);
 	
 	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
 

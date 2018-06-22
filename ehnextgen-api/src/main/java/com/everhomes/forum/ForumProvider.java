@@ -310,4 +310,8 @@ public interface ForumProvider {
 
     //ForumCategory findForumCategory(Long forumId, Long entryId);
 
+    void updatePostAfterPublish(Post post);
+
+    void deleteAttachments(Long postId);
+
 }

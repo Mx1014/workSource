@@ -42,6 +42,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
@@ -64,7 +65,6 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
@@ -511,9 +511,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             requestInfo.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
-                LOGGER.info("reserve request id:" + request.getId() + "-" + request.getTemplateType());
+                LOGGER.info("reserve request id:" + getDocIdByTemplateType(request.getId(), request.getTemplateType()));
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
-                        .id(request.getId().toString() + "-" + request.getTemplateType()).source(source));
+                        .id(getDocIdByTemplateType(request.getId(), request.getTemplateType())).source(source));
             }
 
         }
@@ -525,7 +525,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public void feedDoc(ServiceAllianceRequestInfo request) {
 		XContentBuilder source = createDoc(request);
-        feedDoc(request.getId().toString() + "-" + request.getTemplateType(), source);
+        feedDoc(getDocIdByTemplateType(request.getId(), request.getTemplateType()), source);
 	}
 
 	@Override
@@ -1103,7 +1103,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create ServiceAllianceRequestInfo " + request.getId() + "-" + request.getTemplateType() + " error");
+            LOGGER.error("Create ServiceAllianceRequestInfo " + getDocIdByTemplateType(request.getId(), request.getTemplateType()) + " error");
             return null;
         }
     }
@@ -1171,5 +1171,23 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 			row.createCell(1).setCellValue(requestInfoDTO.getServiceOrganization());
 			row.createCell(2).setCellValue(requestInfoDTO.getCreateTime());
 		}
+	}
+	
+    
+	/**
+	 * 更新单个字段的值
+	 * 
+	 * @param id 记录id
+	 * @param field  字段名称 
+	 * @param reNewValue 字段值
+	 */
+	public void updateDocByField(Long flowCaseId, String templateType, String field, Object reNewValue) {
+		getClient().prepareUpdate().setIndex(getIndexName()).setType(getIndexType())
+				.setId(getDocIdByTemplateType(flowCaseId, templateType)).setDoc(field, reNewValue).execute()
+				.actionGet();
+	}
+	
+	private String getDocIdByTemplateType(Long Id, String templateType) {
+		return Id + "-" +templateType;
 	}
 }

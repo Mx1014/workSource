@@ -5,8 +5,8 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * <ul>
- * <li>DEFAULT("DEFAULT"): 默认字段组 </li>
- * <li>CUSTOMIZE("CUSTOMIZE"): 自定义</li>
+ * <li>DEFAULT("DEFAULT"): 系统字段 </li>
+ * <li>CUSTOMIZE("CUSTOMIZE"): 自定义字段</li>
  * </ul>
  */
 public enum GeneralFormFieldAttribute {

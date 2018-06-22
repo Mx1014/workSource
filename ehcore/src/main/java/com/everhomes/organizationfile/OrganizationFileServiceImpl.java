@@ -388,7 +388,7 @@ public class OrganizationFileServiceImpl implements OrganizationFileService {
                     "Invalid parameter organizationId [ null ]");
         }
         Long userId = currUserId();
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
         if (member == null) {
             LOGGER.error("User is not in the organization.");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
