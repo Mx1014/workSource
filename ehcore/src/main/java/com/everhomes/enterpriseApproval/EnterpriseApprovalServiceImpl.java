@@ -442,10 +442,10 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Override
     public void deliverApprovalFlows(DeliverApprovalFlowsCommand cmd) {
-        if (cmd.getOuterIds() == null || cmd.getOuterIds().size() == 0)
+        if (cmd.getInnerIds() == null || cmd.getInnerIds().size() == 0)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
                     EnterpriseApprovalErrorCode.ERROR_NO_OUTERS, "no outers.");
-        List<FlowEntitySel> transferIn = cmd.getOuterIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
+        List<FlowEntitySel> transferIn = cmd.getInnerIds().stream().map(r -> new FlowEntitySel(r, FlowEntityType.FLOW_USER.getCode())).collect(Collectors.toList());
         for (Long flowCaseId : cmd.getFlowCaseIds()) {
             FlowCase flowCase = flowService.getFlowCaseById(flowCaseId);
             if (flowCase == null) {
