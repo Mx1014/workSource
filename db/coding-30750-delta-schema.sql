@@ -1,5 +1,7 @@
 --
--- #30750 gogs 仓库表  add by xq.tian  2018/06/15
+-- 通用脚本
+-- ADD BY xq.tian  2018/06/15
+-- #30750 代码仓库管理 v1.0
 --
 CREATE TABLE `eh_gogs_repos` (
   `id` BIGINT,

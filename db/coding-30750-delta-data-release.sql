@@ -1,5 +1,7 @@
 --
--- #30750 gogs config  add by xq.tian  2018/06/15
+-- 通用脚本
+-- ADD BY xq.tian  2018/06/15
+-- #30750 代码仓库管理 v1.0
 --
 SET @eh_configurations_id = (SELECT MAX(id) FROM eh_configurations);
 INSERT INTO ehcore.eh_configurations (id, name, value, description, namespace_id, display_name)
