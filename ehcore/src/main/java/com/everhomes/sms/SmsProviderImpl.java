@@ -288,7 +288,7 @@ public class SmsProviderImpl implements SmsProvider {
                     whiteListPhones.add(phoneNumber);
                 }else {
                     SmsLog smsLog = new SmsLog();
-                    smsLog.setHandler(handleName);
+                    smsLog.setHandler("not_in_whitelist");
                     smsLog.setMobile(phoneNumber);
                     smsLog.setNamespaceId(namespaceId);
                     smsLog.setScope(templateScope);
