@@ -14,10 +14,7 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -237,6 +234,19 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         EhArchivesOperationalConfigurationsDao dao = new EhArchivesOperationalConfigurationsDao(context.configuration());
         dao.insert(config);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesOperationalConfigurations.class, null);
+    }
+
+    @Override
+    public void deleteLastConfiguration(Integer namespaceId, List<Long> detailIds, Byte operationType){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        UpdateQuery<EhArchivesOperationalConfigurationsRecord> query = context.updateQuery(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS);
+        query.addValue(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS, ArchivesOperationStatus.CANCEL.getCode());
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.DETAIL_ID.in(detailIds));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATION_TYPE.eq(operationType));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.OPERATION_DATE.gt(ArchivesUtil.currentDate()));
+        query.addConditions(Tables.EH_ARCHIVES_OPERATIONAL_CONFIGURATIONS.STATUS.eq(ArchivesOperationStatus.PENDING.getCode()));
+        query.execute();
     }
 
     @Override
