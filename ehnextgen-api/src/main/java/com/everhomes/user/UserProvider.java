@@ -176,4 +176,6 @@ public interface UserProvider {
 
     UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
             String identifierToken, Integer namespaceId);
+
+    String getNickNameByUid(Long creatorUid);
 }

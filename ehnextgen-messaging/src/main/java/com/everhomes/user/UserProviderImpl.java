@@ -480,6 +480,13 @@ public class UserProviderImpl implements UserProvider {
         return null;
     }
 
+    @Override
+    public String getNickNameByUid(Long creatorUid) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_USERS.NICK_NAME)
+                .from(Tables.EH_USERS).where(Tables.EH_USERS.ID.eq(creatorUid))
+                .fetchOne(Tables.EH_USERS.NICK_NAME);
+    }
+
 
     /**
      * 根据域空间id和注册的手机号来查询对应的注册信息

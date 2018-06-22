@@ -727,4 +727,44 @@ public class AddressProviderImpl implements AddressProvider {
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractBuildingMappings.class, contractBuildingMapping.getId());
 	}
+
+    @Override
+    public String getAddressNameById(Long addressId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ADDRESSES.ADDRESS)
+                .from(Tables.EH_ADDRESSES).where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .fetchOne(Tables.EH_ADDRESSES.ADDRESS);
+    }
+
+    @Override
+    public int changeAddressLivingStatus(Long addressId, Byte status) {
+//        return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ADDRESSES)
+//                .set(Tables.EH_ADDRESSES.LIVING_STATUS, status.getCode())
+//                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+//                .execute();
+        LOGGER.info("address living status xfesijfisejsj");
+        return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                .set(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS, status)
+                .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+                .execute();
+    }
+
+    @Override
+    public Byte getAddressLivingStatus(Long addressId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
+                .from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
+        if(aByte == null){
+            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
+                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
+        }
+        if(aByte == null){
+            aByte = 1;
+        }
+        return aByte;
+    }
+
 }
