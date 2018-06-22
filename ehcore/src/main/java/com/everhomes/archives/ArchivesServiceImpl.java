@@ -1179,7 +1179,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void addArchivesLog(AddArchivesLogCommand cmd){
+    public void addArchivesLog(AddArchivesLogCommand cmd) {
         ArchivesOperationalLog log = new ArchivesOperationalLog();
         log.setNamespaceId(cmd.getNamespaceId());
         log.setDetailId(cmd.getDetailId());
@@ -1482,16 +1482,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             //  判断日期决定是否立即执行
-            if (!ArchivesUtil.parseDate(cmd.getEmploymentTime()).after(ArchivesUtil.currentDate()))
+            if (!ArchivesUtil.parseDate(cmd.getEmploymentTime()).after(ArchivesUtil.currentDate())) {
+                //  1-1.删除可能存在的配置
+                archivesProvider.deleteLastConfiguration(namespaceId, cmd.getDetailIds(), ArchivesOperationType.EMPLOY.getCode());
+                //  1-2.执行操作
                 employArchivesEmployees(cmd);
-            else {
+            } else {
                 for (Long detailId : cmd.getDetailIds()) {
-                    //  更新档案中的转正时间
+                    //  2-1.更新档案中的转正时间
                     OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                     detail.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
                     organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
-                    //  添加定时配置
+                    //  2-2.添加定时配置
                     createArchivesOperation(
                             namespaceId,
                             cmd.getOrganizationId(),
@@ -1501,6 +1504,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                             StringHelper.toJsonString(cmd));
                 }
             }
+            //  3.添加文档
             if (TrueOrFalseFlag.fromCode(cmd.getLogFlag()) != TrueOrFalseFlag.FALSE)
                 addEmployLogs(cmd);
             return null;
@@ -1526,6 +1530,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  先生成记录后执行用以保存前部门
             addTransferLogs(cmd);
             if (cmd.getEffectiveTime().equals(ArchivesUtil.currentDate().toString())) {
+                archivesProvider.deleteLastConfiguration(namespaceId, cmd.getDetailIds(), ArchivesOperationType.TRANSFER.getCode());
                 transferArchivesEmployees(cmd);
             } else {
                 for (Long detailId : cmd.getDetailIds()) {
@@ -1553,10 +1558,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        dbProvider.execute((TransactionStatus status)->{
-            if (!ArchivesUtil.parseDate(cmd.getDismissTime()).after(ArchivesUtil.currentDate()))
+        dbProvider.execute((TransactionStatus status) -> {
+            if (!ArchivesUtil.parseDate(cmd.getDismissTime()).after(ArchivesUtil.currentDate())) {
+                archivesProvider.deleteLastConfiguration(namespaceId, cmd.getDetailIds(), ArchivesOperationType.DISMISS.getCode());
                 dismissArchivesEmployees(cmd);
-            else {
+            } else {
                 for (Long detailId : cmd.getDetailIds()) {
                     createArchivesOperation(
                             namespaceId,
@@ -1684,7 +1690,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (configurations.size() == 0)
             return;
         coordinationProvider.getNamedLock(CoordinationLocks.ARCHIVES_CONFIGURATION.getCode()).tryEnter(() -> {
-            for (ArchivesOperationalConfiguration configuration : configurations){
+            for (ArchivesOperationalConfiguration configuration : configurations) {
                 //  1.execute it
                 resolveArchivesConfiguration(configuration);
                 //  2.update its status
@@ -1753,10 +1759,10 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public ListDismissCategoriesResponse listArchivesDismissCategories(){
+    public ListDismissCategoriesResponse listArchivesDismissCategories() {
         ListDismissCategoriesResponse res = new ListDismissCategoriesResponse();
         List<String> results = new ArrayList<>();
-        for(ArchivesDismissReason reason : ArchivesDismissReason.values()){
+        for (ArchivesDismissReason reason : ArchivesDismissReason.values()) {
             results.add(reason.getType());
         }
         res.setReasons(results);
