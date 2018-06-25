@@ -754,7 +754,9 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		//保存支付方id
 		parkingRechargeOrder.setPayeeId(payerDto.getAccountId());
-		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
+		parkingRechargeOrder.setInvoiceStatus((byte)0);
+		parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
+
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
 		createOrderCommand.setExtendInfo(extendInfo);

@@ -14,8 +14,25 @@ import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.parking.*;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
+import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
+import com.everhomes.server.schema.tables.pojos.EhParkingCarVerifications;
+import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
+import com.everhomes.server.schema.tables.pojos.EhParkingCardTypes;
+import com.everhomes.server.schema.tables.pojos.EhParkingFlow;
+import com.everhomes.server.schema.tables.pojos.EhParkingInvoiceTypes;
+import com.everhomes.server.schema.tables.pojos.EhParkingLots;
+import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
+import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
+import com.everhomes.server.schema.tables.pojos.EhParkingSpaceLogs;
+import com.everhomes.server.schema.tables.pojos.EhParkingSpaces;
+import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
+import com.everhomes.server.schema.tables.pojos.EhParkingUserInvoices;
+import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
+import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -1272,26 +1289,28 @@ public class ParkingProviderImpl implements ParkingProvider {
 
 	@Override
 	public List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentOrderRecords.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select()
 				.from(Tables.EH_PARKING_RECHARGE_ORDERS)
 				.where(Tables.EH_PARKING_RECHARGE_ORDERS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_PARKING_RECHARGE_ORDERS.INVOICE_STATUS.eq((byte)0).or(Tables.EH_PARKING_RECHARGE_ORDERS.INVOICE_STATUS.isNull()))
 				.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.in(new ArrayList<>(
 						Arrays.asList(ParkingRechargeOrderStatus.PAID.getCode(),
-						ParkingRechargeOrderStatus.RECHARGED.getCode(),
-						ParkingRechargeOrderStatus.FAILED.getCode()))))
+								ParkingRechargeOrderStatus.RECHARGED.getCode(),
+								ParkingRechargeOrderStatus.FAILED.getCode()))))
 				.orderBy(Tables.EH_PARKING_RECHARGE_ORDERS.ID.desc())
 				.limit(pageSize)
-				.offset(Integer.valueOf(""+(pageAnchor*pageSize)))
+				.offset(Integer.valueOf("" + (pageAnchor * pageSize)))
 				.fetch().map(r->ConvertHelper.convert(r,ParkingRechargeOrder.class));
 	}
 
 	@Override
 	public Long ParkingRechargeOrdersByUserId(Long userId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentOrderRecords.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return Long.valueOf(context.selectCount()
 				.from(Tables.EH_PARKING_RECHARGE_ORDERS)
 				.where(Tables.EH_PARKING_RECHARGE_ORDERS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_PARKING_RECHARGE_ORDERS.INVOICE_STATUS.eq((byte)0).or(Tables.EH_PARKING_RECHARGE_ORDERS.INVOICE_STATUS.isNull()))
 				.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.in(new ArrayList<>(
 						Arrays.asList(ParkingRechargeOrderStatus.PAID.getCode(),
 								ParkingRechargeOrderStatus.RECHARGED.getCode(),

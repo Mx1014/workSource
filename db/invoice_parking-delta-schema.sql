@@ -580,9 +580,9 @@ alter table eh_service_module_apps add index origin_id_index(`origin_id`);
 
 
 
-ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `payee_id` BIGINT NOT NULL COMMENT '收款方id';
-ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_status` TINYINT NOT NULL COMMENT '0 =发票未开，2发票已开';
-ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_create_time` DATETIME NOT NULL COMMENT '发票开票时间';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `payee_id` BIGINT COMMENT '收款方id';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_status` TINYINT COMMENT '0 =发票未开，2发票已开';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_create_time` DATETIME COMMENT '发票开票时间';
 
 
 

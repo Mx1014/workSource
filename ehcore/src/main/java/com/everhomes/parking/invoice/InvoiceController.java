@@ -41,7 +41,7 @@ public class InvoiceController extends ControllerBase {
     public RestResponse listNotInvoicedOrders(ListNotInvoicedOrdersCommand cmd) {
 
         ListNotInvoicedOrdersResponse notInvoicedOrdersResponse = invoiceService.listNotInvoicedOrders(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(notInvoicedOrdersResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -72,7 +72,7 @@ public class InvoiceController extends ControllerBase {
     public RestResponse getPayeeIdByOrderNo(GetPayeeIdByOrderNoCommand cmd) {
 
         GetPayeeIdByOrderNoResponse baseResponse = invoiceService.getPayeeIdByOrderNo(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(baseResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
