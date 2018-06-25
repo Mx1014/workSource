@@ -1535,8 +1535,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
             			BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
             			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
+            			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
             			newBillItemDTOList.addAll(billItemDTOList);
+            			newExemptionItemDTOList.addAll(exemptionItemDTOList);
             			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
+            			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
             			createBillCommand.setBillGroupDTO(newBillGroupDTO);
             			cmds.set(m, createBillCommand);
             			continue bill;
