@@ -298,7 +298,8 @@ INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUE
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'pm', '18007', 'zh_CN', '客户类型字段内容系统不存在');
 -- end by jiarui
 
--- apartment owner  by dingjianmin
+-- Designer: dingjianmin
+-- Description:  资产管理V2.9
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'address', '20011', 'zh_CN', '门牌状态不能为空');
@@ -310,12 +311,13 @@ INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUE
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10015', 'zh_CN', '省市区不能为空');
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10016', 'zh_CN', '项目名称已存在');
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '20006', 'zh_CN', '面积格式错误');
+-- End by: dingjianmin 
 
--- 多入口 by dingjianmin start
+-- Designer: dingjianmin
+-- Description:  合同管理（多应用）V2.6
 UPDATE `eh_service_modules` SET `multiple_flag` = 1 WHERE `id` = 20400;
 UPDATE `eh_service_modules` SET `instance_config` = NULL WHERE `id` = 20400;
 
--- from testByDingjianminThree
 -- 增加付款合同菜单
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES
   ('16051300', '付款合同', '16050000', NULL, 'payment-contract', '1', '2', '/16000000/16050000/16051300', 'zuolin', '13', '21200', '3', 'system', 'module', NULL);
@@ -341,30 +343,30 @@ INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `fi
 (@id:=@id+1, '0', 'enterprise_customer', '5', '7', '历史客户', '7', '2', '1', '2018-06-08 17:37:13', NULL, NULL, NULL, NULL, NULL);
 
 
--- --合同基础参数配置 工作流配置 权限
+-- 合同基础参数配置 工作流配置 权限
 SELECT id from eh_service_modules WHERE path IN ('/110000/21200/21230','/110000/21200/21220');
 SELECT id from EH_SERVICE_MODULE_PRIVILEGES  WHERE module_id='21210' AND privilege_id=21213 AND privilege_type=0;
--- --对接第三方 权限
+-- 对接第三方 权限
 SELECT id from EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS  WHERE namespace_id IN(999971,1000000) AND module_id IN (21100,21200)AND function_id IN(98,99);
--- --免租期字段删除 权限
+-- 免租期字段删除 权限
 SELECT id from  EH_VAR_FIELDS WHERE module_name='contract' AND group_id=15 AND group_path='/13/15/' AND `name`='freeDays';
--- --客户管理 同步客户权限
+-- 客户管理 同步客户权限
 SELECT id from  EH_SERVICE_MODULE_PRIVILEGES WHERE module_id=21110 and privilege_id=21104;
 
--- --合同基础参数配置 工作流配置 权限
+-- 合同基础参数配置 工作流配置 权限
 DELETE FROM EH_SERVICE_MODULES WHERE id IN(SELECT id FROM (SELECT id from eh_service_modules WHERE path IN ('/110000/21200/21230','/110000/21200/21220')) sm);
 DELETE FROM EH_SERVICE_MODULE_PRIVILEGES WHERE id IN(SELECT id FROM (SELECT id from EH_SERVICE_MODULE_PRIVILEGES  WHERE module_id='21210' AND privilege_id=21213 AND privilege_type=0) smp);
--- --对接第三方 权限
+-- 对接第三方 权限
 DELETE FROM EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS WHERE id IN(SELECT id FROM (SELECT id from EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS  WHERE namespace_id IN(999971,1000000) AND module_id IN (21100,21200)AND function_id IN(98,99))smef);
--- --免租期字段删除 权限
+-- 免租期字段删除 权限
 DELETE FROM EH_VAR_FIELDS WHERE id IN(SELECT id FROM (SELECT id from  EH_VAR_FIELDS WHERE module_name='contract' AND group_id=15 AND group_path='/13/15/' AND `name`='freeDays')vf);
 -- --客户管理 同步客户权限
 DELETE FROM EH_SERVICE_MODULE_PRIVILEGES WHERE id IN(SELECT id FROM (SELECT id from  EH_SERVICE_MODULE_PRIVILEGES WHERE module_id=21110 and privilege_id=21104)smp);
 
--- ---更新合同列表为收款合同
+-- 更新合同列表为收款合同
 UPDATE EH_SERVICE_MODULES SET `name`='收款合同' WHERE `level`=3 and parent_id=21200 and path='/110000/21200/21210';
 
--- ---更新合同列表为付款合同 下的相关权限
+-- 更新合同列表为付款合同 下的相关权限
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '签约、修改' ,default_order=1 WHERE module_id = 21210 AND privilege_id = 21201;
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '发起审批' ,default_order=2 WHERE module_id = 21210 AND privilege_id = 21202;
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '删除' ,default_order=3 WHERE module_id = 21210 AND privilege_id = 21204;
@@ -375,7 +377,7 @@ UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '续约' ,default_order=6 WHERE
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '变更' ,default_order=7 WHERE module_id = 21210 AND privilege_id = 21209;
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '退约' ,default_order=8 WHERE module_id = 21210 AND privilege_id = 21214;
 
--- ---更新付款合同下的相关权限显示
+-- 更新付款合同下的相关权限显示
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '新增' ,default_order=5 WHERE module_id = 21215 AND privilege_id = 21215;
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '签约、发起审批',default_order=1 WHERE module_id = 21215 AND privilege_id = 21216;
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '修改' ,default_order=2 WHERE module_id = 21215 AND privilege_id = 21217;
@@ -386,4 +388,4 @@ UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '续约' ,default_order=6 WHERE
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '变更' ,default_order=7 WHERE module_id = 21215 AND privilege_id = 21222;
 UPDATE EH_SERVICE_MODULE_PRIVILEGES SET remark = '退约' ,default_order=8 WHERE module_id = 21215 AND privilege_id = 21223;
 
--- 多入口 end
+-- End by: dingjianmin 

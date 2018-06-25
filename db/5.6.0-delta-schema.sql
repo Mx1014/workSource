@@ -339,8 +339,8 @@ CREATE TABLE `eh_parking_hubs` (
 
 ALTER TABLE eh_parking_spaces ADD COLUMN parking_hubs_id BIGINT;
 
--- 多入口 by dingjianmin  start
--- from asset_multi
+-- Designer: dingjianmin
+-- Description:  合同管理（多应用）V2.6
 CREATE TABLE `eh_service_module_app_mappings`(
   `id` BIGINT NOT NULL ,
   `app_origin_id_male` BIGINT NOT NULL COMMENT 'the origin id of app',
@@ -384,15 +384,14 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `category_id` BIGINT NOT NULL DEF
 
 -- end of wentian's script
 
--- from testByDingjianminThree
--- --合同管理 基础设置合同规则
+-- 合同管理 基础设置合同规则
 ALTER TABLE `eh_contract_params` ADD COLUMN `payorreceive_contract_type` tinyint(2) DEFAULT '0' COMMENT '0 收款合同 1付款合同';
 ALTER TABLE `eh_contract_params` ADD COLUMN `contract_number_rulejson` text NULL COMMENT '合同规则';
 ALTER TABLE `eh_contract_params` ADD COLUMN `update_time` datetime NULL COMMENT '更新时间';
 ALTER TABLE `eh_contract_params` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'contract category id';
--- --合同管理 合同多入口设置
+-- 合同管理 合同多入口设置
 ALTER TABLE `eh_contracts` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'contract category id';
--- --合同管理，表单设置，动态字段
+-- 合同管理，表单设置，动态字段
 ALTER TABLE `eh_var_field_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
 ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
@@ -417,6 +416,6 @@ CREATE TABLE `eh_contract_categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 多入口 by dingjianmin end
+-- End by: dingjianmin 
 
 
