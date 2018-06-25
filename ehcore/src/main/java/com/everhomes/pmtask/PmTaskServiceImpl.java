@@ -1046,6 +1046,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 				PmTaskFlowStatus flowStatus = PmTaskFlowStatus.fromCode(task.getStatus());
 				cell9.setCellValue(null != flowStatus ? flowStatus.getDescription() : "");
 
+				Cell cell10 = tempRow.createCell(10);
+				cell10.setCellStyle(style);
+				cell10.setCellValue(null == task.getStar() ? "-" : task.getStar().toString());
 			}
 
 			Row tempRow4 = sheet.createRow(size + 4);
