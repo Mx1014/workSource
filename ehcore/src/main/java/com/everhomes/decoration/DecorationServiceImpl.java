@@ -381,6 +381,7 @@ public class DecorationServiceImpl implements  DecorationService {
             cmd2.setContent(content.toString());
             cmd2.setFlowMainId(flow.getFlowMainId());
             cmd2.setFlowVersion(flow.getFlowVersion());
+            flowService.createFlowCase(cmd2);
            return null;
         });
 
