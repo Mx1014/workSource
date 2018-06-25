@@ -346,4 +346,10 @@ public interface AssetProvider {
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
 
     PaymentLateFine findLastedFine(Long id);
+
+    Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+    void insertAppMapping(EhAssetModuleAppMappings relation);
+
+    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
 }

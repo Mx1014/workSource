@@ -203,29 +203,4 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return response;
 	}
 
-	@Override
-	public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
-		return serviceModuleAppProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId);
-	}
-
-	@Override
-	public void createAnAppMapping(CreateAnAppMappingCommand cmd) {
-		EhServiceModuleAppMappings relation = new ServiceModuleAppMapping();
-        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppMappings.class));
-        relation.setId(nextSequence);
-        relation.setAppModuleIdMale(cmd.getModuleIdRo());
-        relation.setAppOriginIdMale(cmd.getOriginIdRo());
-        relation.setAppModuleIdFemale(cmd.getModuleIdJu());
-        relation.setAppOriginIdFemale(cmd.getOriginIdJu());
-        relation.setCreateUid(UserContext.currentUserId());
-
-        // add relation
-        serviceModuleAppProvider.insertAppMapping(relation);
-
-    }
-
-	@Override
-	public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
-		serviceModuleAppProvider.updateAnAppMapping(cmd);
-	}
 }
