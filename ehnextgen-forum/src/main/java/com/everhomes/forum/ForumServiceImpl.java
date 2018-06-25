@@ -7394,7 +7394,7 @@ public class ForumServiceImpl implements ForumService {
             if (StringUtils.isEmpty(postDTO.getCreatorNickName())) {
                 postDTO.setCreatorNickName(user.getNickName());
             }
-            String url =  contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), 0L);
+            String url =  contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId());
             postDTO.setCreatorAvatarUrl(url);
             postDTO.setCreatorAvatar(user.getAvatar());
         }
