@@ -70,7 +70,6 @@ public class Rentalv2Controller extends ControllerBase {
 	@RestReturn(value = RentalSiteDTO.class)
 	@RequireAuthentication()
 	public RestResponse findRentalSiteById(@Valid FindRentalSiteByIdCommand cmd) {
-
 		RestResponse response = new RestResponse(rentalService.findRentalSiteById(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

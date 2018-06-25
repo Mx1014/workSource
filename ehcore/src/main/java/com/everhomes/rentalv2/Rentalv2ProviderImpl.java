@@ -2453,7 +2453,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	public List<String> listParkingNoInUsed(Integer namespaceId, Long resourceTypeId, String resourceType,
 											Long rentalSiteId,List<Long> cellIds){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record1<String>> query = context.selectDistinct(Tables.EH_RENTALV2_ORDERS.STRING_TAG1).from(Tables.EH_RENTALV2_ORDERS).
+		SelectJoinStep<Record1<String>> query = context.select(Tables.EH_RENTALV2_ORDERS.STRING_TAG1).from(Tables.EH_RENTALV2_ORDERS).
 				join(Tables.EH_RENTALV2_RESOURCE_ORDERS).on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID));
 		Condition condition = Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType);
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));

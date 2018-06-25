@@ -59,6 +59,7 @@ import com.everhomes.util.StringHelper;
  * <li>holidayType: 节假日类型 {@link com.everhomes.rest.rentalv2.admin.RentalHolidayType}</li>
  * <li>specialOpenDate: 特殊开放日期</li>
  * <li>specialCloseDate: 特殊关闭日期</li>
+ * <li>openTime: 开放时间</li>
  * </ul>
  */
 public class RentalBillDTO {
@@ -79,20 +80,16 @@ public class RentalBillDTO {
 	private Long startTime;
 	private Long endTime;
 	private Long reserveTime;
-	//	private Long payStartTime;
 	private Long payTime;
 	private Long cancelTime;
-	//	private Long payDeadLineTime;
 	private BigDecimal sitePrice;
 	private BigDecimal totalPrice;
-	//	private BigDecimal reservePrice;
 	private BigDecimal paidPrice;
 	private BigDecimal unPayPrice;
 	private Byte invoiceFlag;
 	private Byte status;
 	private Double rentalCount;
 	private Byte refundFlag;
-//	private Integer refundRatio;
 	private BigDecimal refundAmount;
 	private Byte cancelFlag;
 	private java.lang.String useDetail;
@@ -123,6 +120,8 @@ public class RentalBillDTO {
 	private Byte holidayType;
 	private List<Long> specialOpenDate;
 	private List<Long> specialCloseDate;
+	private String refundTip;
+	private String openTime;
 	private Long appId;
 
 	@Override
@@ -555,5 +554,21 @@ public class RentalBillDTO {
 
 	public void setSpecialCloseDate(List<Long> specialCloseDate) {
 		this.specialCloseDate = specialCloseDate;
+	}
+
+	public String getRefundTip() {
+		return refundTip;
+	}
+
+	public void setRefundTip(String refundTip) {
+		this.refundTip = refundTip;
+	}
+
+	public String getOpenTime() {
+		return openTime;
+	}
+
+	public void setOpenTime(String openTime) {
+		this.openTime = openTime;
 	}
 }
