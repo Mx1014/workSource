@@ -713,6 +713,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
                 checkWxAuthIsBindPhoneResponse.setContentServer(contentServerService.getContentServer());
             }
         }else {
+            LOGGER.info("wxUser={}",wxUser);
             checkWxAuthIsBindPhoneResponse.setUid(wxUser.getId());
         }
 
