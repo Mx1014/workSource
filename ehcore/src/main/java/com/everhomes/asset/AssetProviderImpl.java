@@ -5062,7 +5062,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchInto(PaymentChargingItemScope.class);
         if(scopes != null && scopes.size() != 0) {
         	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }
+        }else {
+			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+		}
         return response;
     }
 	
@@ -5078,7 +5080,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchInto(PaymentChargingStandardsScopes.class); 
         if(scopes != null && scopes.size() != 0) {
         	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        } 
+        }else {
+			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+		} 
        return response;
 	}
 	
