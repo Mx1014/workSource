@@ -700,6 +700,9 @@ public class ContractServiceImpl implements ContractService {
 		FindContractCommand command = new FindContractCommand();
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
+		//add by tangcen
+		command.setCommunityId(contract.getCommunityId());
+		command.setNamespaceId(contract.getNamespaceId());
 		ContractDetailDTO contractDetailDTO = findContract(command);
 		return contractDetailDTO;
 	}
