@@ -1295,7 +1295,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 	        .and(t.OWNER_ID.eq(command.getOwnerId()))//不可以跨园区/项目
 	        .and(t.SWITCH.eq(new Byte(command.getIsSettled())))//账单的状态，0:未出账单;1:已出账单
 	        .and(t.TARGET_TYPE.eq(AssetTargetType.ORGANIZATION.getCode()))//企业客户情况下
-	        .and(t.TARGET_ID.eq(command.getTargetId()))
+	        //.and(t.TARGET_ID.eq(command.getTargetId()))
+	        .and(t.TARGET_NAME.eq(command.getTargetName()))//修复缺陷 #32336
 	        .fetch()
 	    	.forEach(r ->{
 	    		Long billId = r.getValue(t.ID);
