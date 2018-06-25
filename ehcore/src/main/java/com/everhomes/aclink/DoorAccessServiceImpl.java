@@ -369,7 +369,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             userName = user.getAccountName();
         }
         map.put("userName", userName);
-        map.put("doorName", doorAcc.getName());
+        
+        //displayName不为空就拿displayName by liuyilin 20180625
+        map.put("doorName", doorAcc.getDisplayNameNotEmpty());
         
         String scope = AclinkNotificationTemplateCode.SCOPE;
         int code = AclinkNotificationTemplateCode.ACLINK_NEW_AUTH;
@@ -4115,6 +4117,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
             resp.getDtos().add(dto);
         }
+        resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
     
@@ -4821,6 +4824,47 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}else{
 				LOGGER.info("validate auth count failed");
 			}
+		}else if(cmdNumber == 0xf){
+//			AclinkLogCreateCommand cmds = new AclinkLogCreateCommand();
+//			List<AclinkLogItem> listLogItems = new ArrayList<AclinkLogItem>();
+			AclinkLogItem logItem = new AclinkLogItem();
+//			logItem.setAuthId(authId);
+//			logItem.setKeyId(keyId);
+//			logItem.setNamespaceId(namespaceId);
+			logItem.setDoorId(door.getId());
+			logItem.setUserId(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 10, 14)));
+			logItem.setLogTime(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 15, 19)));
+			switch (msgArr[14]){
+			case 0x1:
+				logItem.setEventType(3L);
+				break;
+			case 0x2:
+				logItem.setEventType(0L);
+				break;
+			case 0x3:
+				logItem.setEventType(1L);
+				break;
+			case 0x4:
+				logItem.setEventType(2L);
+				break;
+			default:
+				break;
+			}
+
+			AclinkLog aclinkLog = ConvertHelper.convert(logItem, AclinkLog.class);
+			UserInfo user = userService.getUserSnapshotInfo(logItem.getUserId());
+        	if(user.getPhones() != null && user.getPhones().size() > 0) {
+                   aclinkLog.setUserIdentifier(user.getPhones().get(0));    
+               }
+        	
+        	aclinkLog.setUserName(user.getNickName());
+        	aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
+            
+            aclinkLog.setHardwareId(door.getHardwareId());
+            aclinkLog.setOwnerId(door.getOwnerId());
+            aclinkLog.setOwnerType(door.getOwnerType());
+            aclinkLog.setDoorType(door.getDoorType());
+            aclinkLogProvider.createAclinkLog(aclinkLog);
 		}
 	}
 

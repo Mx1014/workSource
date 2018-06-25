@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.aclink.AclinkLogDTO;
+import com.everhomes.rest.aclink.AclinkLogEventType;
 import com.everhomes.rest.aclink.AclinkQueryLogResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
@@ -94,16 +95,22 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ACLINK_LOGS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_ACLINK_LOGS.ID.ge(locator.getAnchor()));
             }
-
-        query.addLimit(count);
+        
+        //暂过滤掉物理按键开门的日志, by liuyilin 20180625
+        query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.ne(AclinkLogEventType.BUTTON_OPEN.getCode()));
+        
+        if (count > 0){
+        	query.addLimit(count + 1);
+        }
         List<AclinkLog> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, AclinkLog.class);
         });
 
-        if(objs.size() >= count) {
+        if(count > 0 && objs.size() > count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
+            objs.remove(objs.size() - 1);
         } else {
             locator.setAnchor(null);
         }
@@ -121,16 +128,22 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
 
         query.addOrderBy(Tables.EH_ACLINK_LOGS.ID.desc());
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ACLINK_LOGS.ID.lt(locator.getAnchor()));
+            query.addConditions(Tables.EH_ACLINK_LOGS.ID.le(locator.getAnchor()));
             }
 
-        query.addLimit(count);
+        //暂过滤掉物理按键开门的日志, by liuyilin 20180625
+        query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.ne(AclinkLogEventType.BUTTON_OPEN.getCode()));
+        
+        if (count > 0){
+        	query.addLimit(count + 1);
+        }
         List<AclinkLog> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, AclinkLog.class);
         });
 
-        if(objs.size() >= count) {
+        if(count > 0 && objs.size() > count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
+            objs.remove(objs.size() - 1);
         } else {
             locator.setAnchor(null);
         }
