@@ -268,6 +268,8 @@ public interface UserService {
 
     VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
 
+    void verificationCodeForBindPhoneByApp(VerificationCodeForBindPhoneCommand cmd);
+
     UserLogin bindPhone(BindPhoneCommand cmd);
 
     UserLogin bindPhoneByApp(BindPhoneCommand cmd);

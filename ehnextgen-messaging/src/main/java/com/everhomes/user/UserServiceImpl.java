@@ -5302,6 +5302,47 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	}
 
 	@Override
+	public void verificationCodeForBindPhoneByApp(VerificationCodeForBindPhoneCommand cmd) {
+
+		verifySmsTimes("verificationCodeForWechat", cmd.getPhone(), "");
+		User user = this.userProvider.findUserById(cmd.getUserId());
+        if(user == null){
+            LOGGER.error("user is null, userId={}", cmd.getUserId());
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "user not exists, userId=" + cmd.getUserId());
+        }
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		String verificationCode = RandomGenerator.getRandomDigitalString(6);
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+
+
+		//查看该手机是否已经注册
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		if(userIdentifier != null){
+
+			//手机注册过的或者发过验证码的，更新验证码
+			userIdentifier.setVerificationCode(verificationCode);
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userProvider.updateIdentifier(userIdentifier);
+		}else {
+			//用户没发送过验证码的，新建一条验证状态的userIdentifier
+			userIdentifier = new UserIdentifier();
+			userIdentifier.setOwnerUid(user.getId());
+			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+			userIdentifier.setIdentifierToken(cmd.getPhone());
+			userIdentifier.setNamespaceId(namespaceId);
+
+			userIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+			userIdentifier.setVerificationCode(verificationCode);
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userIdentifier.setRegionCode(cmd.getRegionCode());
+			userProvider.createIdentifier(userIdentifier);
+		}
+		smsProvider.sendSms(namespaceId, cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VERIFICATION_CODE, user.getLocale(), variables);
+
+	}
+
+	@Override
 	public UserLogin bindPhone(BindPhoneCommand cmd){
 		User user = UserContext.current().getUser();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -5423,11 +5464,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
 
         UserLogin login = new UserLogin();
-        //查看该手机是否已经注册
         verificationCode(userIdentifier, cmd.getVerificationCode());
+        //查看该手机是否已经注册
         if(userIdentifier != null){
 
-            //如果手机已经注册过，则校验验证码，更新微信信息(昵称、头像、性别)到该手机用户
+            //如果手机已经注册过，则校验验证码，更新微信信息到该手机用户
 
 
             User existUser = userProvider.findUserById(userIdentifier.getOwnerUid());

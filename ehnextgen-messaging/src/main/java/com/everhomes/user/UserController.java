@@ -1401,6 +1401,20 @@ public class UserController extends ControllerBase {
 		return resp;
 	}
 
+    /**
+     * <b>URL: /user/verificationCodeForBindPhoneByApp</b>
+     * <p>微信APP绑定手机号发送验证码</p>
+     */
+    @RequestMapping("verificationCodeForBindPhoneByApp")
+    @RestReturn(value = String.class)
+    public RestResponse verificationCodeForBindPhoneByApp(@Valid VerificationCodeForBindPhoneCommand cmd) {
+        userService.verificationCodeForBindPhoneByApp(cmd);
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
 
 	/**
 	 * <b>URL: /user/bindPhoneByApp</b>
