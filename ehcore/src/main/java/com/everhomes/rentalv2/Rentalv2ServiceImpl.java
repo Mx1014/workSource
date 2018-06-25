@@ -2309,11 +2309,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		PreOrderDTO preOrderDTO = buildPreOrderDTO(order, cmd.getClientAppName(), cmd.getPaymentType());
 		//保存支付订单信息
 		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
-		if (record != null && order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode())){ //欠费订单保存
+		if (record != null){ //欠费订单保存
 			record.setOrderId(order.getId());
 			record.setStatus((byte)0);//未支付
 			record.setNamespaceId(UserContext.getCurrentNamespaceId());
-			record.setPaymentOrderType(OrderRecordType.OWNINGFEE.getCode());//欠费订单
+			if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))
+				record.setPaymentOrderType(OrderRecordType.OWNINGFEE.getCode());//欠费订单
+			else
+				record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
 			this.rentalv2AccountProvider.updateOrderRecord(record);
 		}
 		return preOrderDTO;
