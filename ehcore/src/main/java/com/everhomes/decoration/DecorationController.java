@@ -319,8 +319,8 @@ public class DecorationController extends ControllerBase {
     @RequestMapping("completeDecoration")
     @RestReturn(DecorationFlowCaseDTO.class)
     public RestResponse completeDecoration(@Valid RequestIdCommand cmd) {
-        this.decorationService.completeDecoration(cmd);
-        RestResponse response = new RestResponse();
+        DecorationFlowCaseDTO decorationFlowCaseDTO = this.decorationService.completeDecoration(cmd);
+        RestResponse response = new RestResponse(decorationFlowCaseDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
