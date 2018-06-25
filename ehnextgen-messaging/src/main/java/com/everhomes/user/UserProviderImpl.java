@@ -564,6 +564,34 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Override
+    public UserIdentifier findClaimingIdentifierByToken(Integer namespaceId, String identifierToken) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMING.getCode())
+                            .or(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.VERIFYING.getCode())))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+
+        if(result.size() == 1)
+            return result.get(0);
+        else if(result.size() > 1) {
+            LOGGER.warn(String.format("%s has been claimed by multiple users", identifierToken));
+            return result.get(0);
+        }
+
+        return null;
+    }
+
+    @Override
     public UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerUid));
         Record record = context.select().from(EH_USER_IDENTIFIERS)

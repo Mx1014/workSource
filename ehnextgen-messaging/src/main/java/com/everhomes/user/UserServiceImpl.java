@@ -5365,7 +5365,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
 
 		//查看该手机是否已经注册
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		UserIdentifier userIdentifier = userProvider.findClaimingIdentifierByToken(namespaceId, cmd.getPhone());
 		if(userIdentifier != null){
 
 			//手机注册过的或者发过验证码的，更新验证码
@@ -5545,7 +5545,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             userIdentifier.setOwnerUid(user.getId());
             userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
             userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+            userIdentifier.setRegionCode(cmd.getRegionCode());
             String salt=EncryptionUtils.createRandomSalt();
             user.setSalt(salt);
             try {
