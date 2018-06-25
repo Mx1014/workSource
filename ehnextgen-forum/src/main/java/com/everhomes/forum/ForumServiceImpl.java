@@ -7394,6 +7394,9 @@ public class ForumServiceImpl implements ForumService {
             if (StringUtils.isEmpty(postDTO.getCreatorNickName())) {
                 postDTO.setCreatorNickName(user.getNickName());
             }
+            String url =  contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), 0L);
+            postDTO.setCreatorAvatarUrl(url);
+            postDTO.setCreatorAvatar(user.getAvatar());
         }
         if (postDTO.getCreateTime() == null) {
             Timestamp timeStamp = new Timestamp(new Date().getTime());
