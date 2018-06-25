@@ -3020,25 +3020,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		统计运算
 	 	evalItems.forEach(item -> {
 			PmTaskEvalStatDTO stat = new PmTaskEvalStatDTO();
-			dtos.add(stat);
-			stat.setEvalName(item.getName());
 			List<FlowEvaluate> evalgroup = evalgroups.get(item.getId());
 			if(null != evalgroup){
 				int total = evalgroup.size();
-				BigDecimal totalstar;
-				Map<Byte,List<FlowEvaluate>> stargroups = evalgroup.stream().collect(Collectors.groupingBy(FlowEvaluate::getStar));
-				stargroups.entrySet().forEach(star -> {
-					switch (star.getKey()){
-						case (byte) 1 : stat.setAmount1(star.getValue().size()); break;
-						case (byte) 2 : stat.setAmount2(star.getValue().size()); break;
-						case (byte) 3 : stat.setAmount3(star.getValue().size()); break;
-						case (byte) 4 : stat.setAmount4(star.getValue().size()); break;
-						case (byte) 5 : stat.setAmount5(star.getValue().size()); break;
-					}
-				});
-				stat.setTotalAmount(total);
-				totalstar = BigDecimal.valueOf(stat.getAmount1() + stat.getAmount2() * 2 + stat.getAmount3() * 3 + stat.getAmount4() * 4 + stat.getAmount5() * 5);
-				stat.setEvalAvg(totalstar.divide(BigDecimal.valueOf(total),1,BigDecimal.ROUND_HALF_UP).toString());
+				if(total > 0){
+					stat.setEvalName(item.getName());
+					BigDecimal totalstar;
+					Map<Byte,List<FlowEvaluate>> stargroups = evalgroup.stream().collect(Collectors.groupingBy(FlowEvaluate::getStar));
+					stargroups.entrySet().forEach(star -> {
+						switch (star.getKey()){
+							case (byte) 1 : stat.setAmount1(star.getValue().size()); break;
+							case (byte) 2 : stat.setAmount2(star.getValue().size()); break;
+							case (byte) 3 : stat.setAmount3(star.getValue().size()); break;
+							case (byte) 4 : stat.setAmount4(star.getValue().size()); break;
+							case (byte) 5 : stat.setAmount5(star.getValue().size()); break;
+						}
+					});
+					stat.setTotalAmount(total);
+					totalstar = BigDecimal.valueOf(stat.getAmount1() + stat.getAmount2() * 2 + stat.getAmount3() * 3 + stat.getAmount4() * 4 + stat.getAmount5() * 5);
+					stat.setEvalAvg(totalstar.divide(BigDecimal.valueOf(total),1,BigDecimal.ROUND_HALF_UP).toString());
+					dtos.add(stat);
+				}
 			}
 		});
 		return dtos;
