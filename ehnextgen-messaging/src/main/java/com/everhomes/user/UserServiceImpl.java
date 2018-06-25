@@ -5517,7 +5517,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin login = new UserLogin();
         verificationCode(userIdentifier, cmd.getVerificationCode());
         //查看该手机是否已经注册
-        if(userIdentifier != null){
+        if(userIdentifier.getClaimStatus() == IdentifierClaimStatus.CLAIMED.getCode()){
 
             //如果手机已经注册过，则校验验证码，更新微信信息到该手机用户
 
