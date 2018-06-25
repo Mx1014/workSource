@@ -5528,7 +5528,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             existUser.setNamespaceUserType(user.getNamespaceUserType());
 
             userProvider.updateUser(existUser);
-
+            userProvider.deleteUser(user);
             login = createLogin(namespaceId, existUser, null, null);
             login.setStatus(UserLoginStatus.LOGGED_IN);
 
