@@ -227,11 +227,15 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 	return d;
                 }).collect(Collectors.toList()));
                 //客户额外手机号添加
+                List<String> contractExtraTels = new ArrayList<>();
+                contractExtraTels.add(dto.getContactToken());
                 try{
-                    dto.setCustomerExtraTels((List<String>)StringHelper.fromJsonString(r.getContactExtraTels(), ArrayList.class));
+                    List<String> extraTelsField = (List<String>)StringHelper.fromJsonString(r.getContactExtraTels());
+                    contractExtraTels.addAll(extraTelsField);
                 }catch (Exception e){
                     LOGGER.error("failed to convert contact extra tels json to list, pmowner id ={}", r.getId());
                 }
+                dto.setCustomerExtraTels(contractExtraTels);
                 return dto;
             }).collect(Collectors.toList()));
 
