@@ -1226,7 +1226,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				startTime += Double.valueOf(halfTimeIntervals.get(cmd.getStartTimeAmOrPm()).getBeginTime()*3600*1000).longValue();
 				endTime += Double.valueOf(halfTimeIntervals.get(cmd.getEndTimeAmOrPm()).getBeginTime()*3600*1000).longValue();
 			}
-			rentalv2Provider.listActiveBills()
+			//rentalv2Provider.listActiveBills()
+			return true;
 		}).collect(Collectors.toList());
 
 	}
