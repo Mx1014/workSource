@@ -46,6 +46,7 @@ import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
 
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.talent.Talent;
 import com.everhomes.user.UserContext;
@@ -1087,6 +1088,7 @@ public class AssetProviderImpl implements AssetProvider {
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            List<SubItemDTO> subItemDTOList = billGroupDTO.getSubItemDTOList();
             String apartmentName = null;
             String buildingName = null;
             if(list1!=null && list1.size() > 0){
@@ -1278,7 +1280,32 @@ public class AssetProviderImpl implements AssetProvider {
                 EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
                 billItemsDao.insert(billItemsList);
             }
-
+            
+            //增加减免费项 by yangcx
+            if(subItemDTOList != null) {
+            	List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItems = new ArrayList<>();
+            	for(int i = 0; i < subItemDTOList.size() ; i++) {
+                    long currentSubItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+                    if(currentSubItemSeq == 0){
+                        this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+                    }
+                    SubItemDTO dto = subItemDTOList.get(i);
+                    PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+                    subtractionItem.setId(currentSubItemSeq);
+                    subtractionItem.setBillId(nextBillId);
+                    subtractionItem.setBillGroupId(billGroupId);
+                    subtractionItem.setSubtractionType(dto.getSubtractionType());
+                    subtractionItem.setChargingItemId(dto.getChargingItemId());
+                    subtractionItem.setChargingItemName(dto.getChargingItemName());
+                    subtractionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    subtractionItem.setCreatorUid(UserContext.currentUserId());
+                    subtractionItems.add(subtractionItem);
+                    //amountReceivable = amountReceivable.add(var1);
+                    //amountOwed = amountOwed.add(var1);
+                }
+            	EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
+            	subtractionItemsDao.insert(subtractionItems);
+            }
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
