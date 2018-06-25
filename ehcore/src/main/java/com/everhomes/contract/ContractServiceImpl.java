@@ -2162,6 +2162,9 @@ public class ContractServiceImpl implements ContractService {
 					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
 				}
 				//add by tangcen 显示客户自定义的收费项名称
+				if(LOGGER.isDebugEnabled()) {
+		        	LOGGER.debug("!!!!!666 ownerId: {}; namespaceId: {}; chargingItemId: {}",dto.getCommunityId(),dto.getNamespaceId(),itemDto.getChargingItemId());
+		        }
 				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),itemDto.getChargingItemId());
 				itemDto.setChargingItemName(projectChargingItemName);
 				//String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
