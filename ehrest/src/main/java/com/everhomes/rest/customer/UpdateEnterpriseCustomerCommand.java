@@ -169,6 +169,9 @@ public class UpdateEnterpriseCustomerCommand {
     private List<AttachmentDescriptor> banner;
     private String hotline;
 
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
     private Byte checkAuthFlag;
 
     public Long getCommunityId() {
@@ -849,6 +852,14 @@ public class UpdateEnterpriseCustomerCommand {
 
     public void setCheckAuthFlag(Byte checkAuthFlag) {
         this.checkAuthFlag = checkAuthFlag;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
     }
 
     @Override

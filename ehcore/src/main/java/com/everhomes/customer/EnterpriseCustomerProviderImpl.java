@@ -35,6 +35,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCustomerAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerDepartureInfosDao;
@@ -55,6 +56,7 @@ import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
 import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
+import com.everhomes.server.schema.tables.pojos.EhCustomerAttachments;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
 import com.everhomes.server.schema.tables.pojos.EhCustomerDepartureInfos;
@@ -2094,5 +2096,36 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId))
                 .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
                 .execute();
+    }
+
+    @Override
+    public void createCustomerAttachements(CustomerAttachment attachment) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerAttachments.class));
+        attachment.setId(id);
+        attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
+        attachment.setStatus(CommonStatus.ACTIVE.getCode());
+        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        attachment.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerAttachmentsDao dao = new EhCustomerAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+    }
+
+    @Override
+    public void deleteAllCustomerAttachements(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_ATTACHMENTS)
+                .set(Tables.EH_CUSTOMER_ATTACHMENTS.STATUS, CommonStatus.INACTIVE.getCode())
+                .where(Tables.EH_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
+                .execute();
+    }
+
+    @Override
+    public List<CustomerAttachment> listCustomerAttachments(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return  context.selectFrom(Tables.EH_CUSTOMER_ATTACHMENTS)
+                .where(Tables.EH_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(id))
+                .and(Tables.EH_CUSTOMER_ATTACHMENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchInto(CustomerAttachment.class);
     }
 }

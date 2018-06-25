@@ -78,6 +78,7 @@ import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectStatus;
+import com.everhomes.rest.customer.CustomerAttachmentDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
@@ -567,6 +568,15 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
+        // 创建附件
+        if(cmd.getAttachments()!=null && cmd.getAttachments().size()>0){
+            cmd.getAttachments().forEach((c)->{
+                CustomerAttachment attachment = ConvertHelper.convert(c, CustomerAttachment.class);
+                attachment.setCustomerId(customer.getId());
+                attachment.setNamespaceId(customer.getNamespaceId());
+                enterpriseCustomerProvider.createCustomerAttachements(attachment);
+            });
+        }
 
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
@@ -908,7 +918,18 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             }
         }
+        // 修改附件
+        updateCustomerAttachments(cmd.getId(), cmd.getAttachments());
         return convertToDTO(updateCustomer);
+    }
+
+    private void updateCustomerAttachments(Long customerId, List<CustomerAttachmentDTO> attachments) {
+        enterpriseCustomerProvider.deleteAllCustomerAttachements(customerId);
+        attachments.forEach((a)->{
+            CustomerAttachment customerAttachment = ConvertHelper.convert(a, CustomerAttachment.class);
+            customerAttachment.setCustomerId(customerId);
+            enterpriseCustomerProvider.createCustomerAttachements(customerAttachment);
+        });
     }
 
     @Override
@@ -1230,6 +1251,17 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setBanner(bannerUrls);
         }
         dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
+        //此处为客户本身的附件  没有和企业的用一个表了
+        List<CustomerAttachment> customerAttachments = enterpriseCustomerProvider.listCustomerAttachments(dto.getId());
+        if(customerAttachments!=null && customerAttachments.size()>0){
+            List<CustomerAttachmentDTO> attachmentDTOS = new ArrayList<>();
+            customerAttachments.forEach((c)->{
+                CustomerAttachmentDTO dto1 = ConvertHelper.convert(c, CustomerAttachmentDTO.class);
+                dto1.setContentUrl(contentServerService.parserUri(c.getContentUri(),EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
+                attachmentDTOS.add(dto1);
+            });
+            dto.setAttachments(attachmentDTOS);
+        }
     }
 
     private EnterpriseCustomer checkEnterpriseCustomer(Long id) {

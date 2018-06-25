@@ -193,6 +193,9 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     @ItemType(CustomerEntryInfoDTO.class)
     private  List<CustomerEntryInfoDTO> entryInfos;
 
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;
     }
@@ -991,6 +994,14 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
     }
 
     @Override

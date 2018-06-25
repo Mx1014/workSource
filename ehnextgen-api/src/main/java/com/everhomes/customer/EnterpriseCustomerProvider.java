@@ -186,4 +186,9 @@ public interface EnterpriseCustomerProvider {
 
     void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId,Integer namespaceId);
 
+    void createCustomerAttachements(CustomerAttachment attachment);
+
+    void deleteAllCustomerAttachements(Long customerId);
+
+    List<CustomerAttachment> listCustomerAttachments(Long id);
 }
