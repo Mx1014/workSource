@@ -745,6 +745,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		FindContractCommand command = new FindContractCommand();
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
+		//add by tangcen
+		command.setCommunityId(contract.getCommunityId());
+		command.setNamespaceId(contract.getNamespaceId());
+		command.setCategoryId(contract.getCategoryId());
 		ContractDetailDTO contractDetailDTO = findContract(command);
 		// 签合同的customer 同步到organization
 		syncCustomerToOrganization(cmd.getCustomerId());
