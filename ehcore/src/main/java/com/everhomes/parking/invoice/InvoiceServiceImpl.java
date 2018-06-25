@@ -1,0 +1,73 @@
+// @formatter:off
+package com.everhomes.parking.invoice;
+
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.parking.ParkingLot;
+import com.everhomes.parking.ParkingProvider;
+import com.everhomes.parking.ParkingRechargeOrder;
+import com.everhomes.rest.parking.ParkingErrorCode;
+import com.everhomes.rest.parking.invoice.*;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.RuntimeErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * @Author dengs[shuang.deng@zuolin.com]
+ * @Date 2018/6/22 16:27
+ */
+
+@Component
+public class InvoiceServiceImpl implements InvoiceService{
+    @Autowired
+    public ParkingProvider parkingProvider;
+    @Autowired
+    private ConfigurationProvider configProvider;
+    @Override
+    public ListNotInvoicedOrdersResponse listNotInvoicedOrders(ListNotInvoicedOrdersCommand cmd) {
+        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long pageAnchor = cmd.getPageAnchor()==null?0:cmd.getPageAnchor();
+        List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrdersByUserId(cmd.getUserId(),pageSize,pageAnchor);
+        Map<String,ParkingLot> lotsMap = new HashMap<String,ParkingLot>();
+        ListNotInvoicedOrdersResponse response = new ListNotInvoicedOrdersResponse();
+        if(list !=null && list.size()>0 ){
+            response.setInvoicedOrderList(list.stream().map(r->{
+                InvoicedOrderDTO dto = new InvoicedOrderDTO();
+                dto.setAmount(r.getPrice());
+                dto.setCreateTime(r.getCreateTime());
+                dto.setOrderNo(r.getId());
+                if(lotsMap.get(""+r.getParkingLotId()) == null){
+                    ParkingLot lots = parkingProvider.findParkingLotById(r.getParkingLotId());
+                    lotsMap.put(""+r.getParkingLotId(),lots);
+                }
+                dto.setParkingName(lotsMap.get(""+r.getParkingLotId()).getName());
+                return dto;
+            }).collect(Collectors.toList()));
+            if(list.size()==pageSize){
+                response.setNextPageAnchor(pageAnchor+1);
+            }
+        }
+        response.setCount(parkingProvider.ParkingRechargeOrdersByUserId(cmd.getUserId()));
+        return response;
+    }
+
+    @Override
+    public void notifyOrderInvoiced(NotifyOrderInvoicedCommand cmd) {
+        ParkingRechargeOrder rechargeOrder = parkingProvider.findParkingRechargeOrderById(cmd.getOrderNo());
+        if(rechargeOrder==null){
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+                    "not find orderno");
+        }
+        rechargeOrder.setInvoi
+    }
+
+    @Override
+    public GetPayeeIdByOrderNoResponse getPayeeIdByOrderNo(GetPayeeIdByOrderNoCommand cmd) {
+        return null;
+    }
+}
