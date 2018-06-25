@@ -16,7 +16,7 @@ update eh_locale_templates t set t.description = '物品放行工作流申请人
  放行时间：${relocationDate}' where t.scope = 'relocation' and t.code = 2;
 
 update eh_locale_templates t set t.description = '物品放行工作流处理人显示内容' , t.text = '申请人：${requestorName}  企业名称：${requestorEnterpriseName}
- 放行物品：${items} 共${totalNum}件
+放行物品：${items} 共${totalNum}件
 放行时间：${relocationDate}' where t.scope = 'relocation' and t.code = 3;
 -- end
 
