@@ -73,7 +73,7 @@ public interface OrganizationProvider {
 	int countOrganizationCommunitys(Long organizationId);
 	List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(Long communityId);
 	OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,String organizationType);
-	OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
+	OrganizationMember findOrganizationMemberByUIdAndOrgId(Long userId, Long organizationId);
 	OrganizationMember findOrganizationMemberByUidAndOrgId(Long userId, Long organizationId);
 
 	List<OrganizationMember> findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId);
@@ -504,6 +504,10 @@ public interface OrganizationProvider {
     void deleteAllOrganizationAddressById(Long organizationId);
 
 	List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long noticeObjId, String ... targetType);
+ 
+	OrganizationMemberDetails findOrganizationMemberDetailsByTargetIdAndOrgId(Long targetId,
+			Long orgId);
+ 
 
 	Integer getUserOrgAmount(Long targetId);
 
@@ -511,4 +515,5 @@ public interface OrganizationProvider {
             Long targetId, Long organizationId);
     OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
             Long organizationId, String contactToken);
+ 
 }

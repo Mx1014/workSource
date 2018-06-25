@@ -132,7 +132,7 @@ public class SZWContractHandler implements ContractService{
 	}
 
 	@Override
-	public String generateContractNumber() {
+	public String generateContractNumber(GenerateContractNumberCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

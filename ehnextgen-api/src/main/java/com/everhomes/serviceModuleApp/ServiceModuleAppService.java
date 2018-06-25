@@ -1,8 +1,10 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
 
@@ -28,4 +30,10 @@ public interface ServiceModuleAppService {
 	ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId);
 
 	ListServiceModuleAppsForBannerResponse listServiceModuleAppsForBanner(ListServiceModuleAppsForBannerCommand cmd);
+
+	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+	void createAnAppMapping(CreateAnAppMappingCommand cmd);
+
+    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
 }

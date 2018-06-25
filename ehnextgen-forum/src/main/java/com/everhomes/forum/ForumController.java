@@ -583,5 +583,20 @@ public class ForumController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /forum/getPreviewTopic</b>
+     * <p>获取预览的帖子内容</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getPreviewTopic")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse getPreviewTopic(NewTopicCommand cmd) {
+        PostDTO postDto = this.forumService.getPreviewTopic(cmd);
+
+        RestResponse response = new RestResponse(postDto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

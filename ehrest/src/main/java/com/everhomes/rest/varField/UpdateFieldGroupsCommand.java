@@ -11,6 +11,7 @@ import java.util.List;
  *     <li>communityId: 项目id</li>
  *     <li>moduleName: 组所属的模块类型名</li>
  *     <li>groups: 字段组信息， 参考{@link com.everhomes.rest.varField.ScopeFieldGroupInfo}</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -24,6 +25,16 @@ public class UpdateFieldGroupsCommand {
     @ItemType(ScopeFieldGroupInfo.class)
     private List<ScopeFieldGroupInfo> groups;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+	
     public String getModuleName() {
         return moduleName;
     }

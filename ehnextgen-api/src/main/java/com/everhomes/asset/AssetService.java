@@ -181,6 +181,11 @@ public interface AssetService {
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
     void noticeTrigger(Integer namespaceId);
+
+    long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
+
+	void saveInstanceConfig(long categoryId, String ret);
+	
     //add by tangcen
 	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
 }

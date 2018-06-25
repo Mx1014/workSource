@@ -10,7 +10,7 @@ import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormOverTimeValue;
+import com.everhomes.rest.enterpriseApproval.ComponentOverTimeValue;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class FormFieldOverTimeProcessor implements FormFieldProcessor {
     @Override
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
 
-        PostApprovalFormOverTimeValue overTime = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormOverTimeValue.class);
+        ComponentOverTimeValue overTime = JSON.parseObject(fieldDTO.getFieldValue(), ComponentOverTimeValue.class);
         if ("开始时间".equals(variable)) {
             return new FlowConditionStringVariable(overTime.getStartTime());
         } else if ("结束时间".equals(variable)) {

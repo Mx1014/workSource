@@ -24,12 +24,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
@@ -42,10 +37,6 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalResourceType;
-import com.everhomes.rentalv2.Rentalv2Controller;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
@@ -55,7 +46,6 @@ import com.everhomes.rest.approval.ApprovalFlowOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogAndFlowOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
-import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalOwnerType;
 import com.everhomes.rest.approval.ApprovalQueryType;
@@ -142,10 +132,6 @@ import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -175,8 +161,6 @@ import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
-
-import freemarker.core.ReturnInstruction.Return;
 
 @Component
 public class ApprovalServiceImpl implements ApprovalService {
@@ -550,7 +534,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private OrganizationMember getOrganizationMember(Long userId, Long organizationId) {
-		return organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+		return organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
 	}
 
 	private boolean checkCurrentLevelExist(Long flowId, Byte level) {

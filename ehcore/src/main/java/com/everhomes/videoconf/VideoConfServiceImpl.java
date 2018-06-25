@@ -53,15 +53,10 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.activity.ActivityTimeResponse;
-import com.everhomes.rest.activity.GetActivityTimeCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -174,7 +169,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.mysql.jdbc.StringUtils;
 
 
@@ -1040,7 +1034,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			accountDto.setUserId(r.getOwnerId());
 			Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
 			if(org != null) {
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOwnerId(), org.getId());
+				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getOwnerId(), org.getId());
 				if (member != null) {
 					accountDto.setUserName(member.getContactName());
 					accountDto.setMobile(member.getContactToken());
