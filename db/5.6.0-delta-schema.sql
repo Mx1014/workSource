@@ -1,5 +1,6 @@
--- 物品放行 1.1 新增配置表
--- by shiheng.ma
+-- 通用脚本
+-- ADD BY shiheng.ma
+-- issue-26467 物品放行 1.1 新增配置表
 CREATE TABLE `eh_relocation_configs` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
@@ -15,11 +16,13 @@ CREATE TABLE `eh_relocation_configs` (
   `operate_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- end
 
--- 物品放行 1.1 增加新字段 用于小区场景
--- by shiheng.ma 20180620
+-- 通用脚本
+-- ADD BY shiheng.ma 20180620
+-- issue-26467 物品放行 1.1 增加新字段 用于小区场景
 alter table eh_relocation_requests add column org_owner_type_id BIGINT(20) DEFAULT NULL COMMENT '客户类型（小区场景）';
-
+-- end
 
 
 -- Designer: zhiwei zhang

@@ -1,12 +1,15 @@
--- 物品放行 1.1 修改模块名
--- by shiheng.ma
+-- 通用脚本
+-- ADD BY shiheng.ma
+-- issue-26467 物品放行 1.1 修改模块名
 update eh_service_modules set name = '物品放行' where id = 49200;
 update eh_service_module_apps set name = '物品放行' where module_id = 49200;
 update eh_web_menus set name = '物品放行' where module_id = 49200;
 update eh_acl_privileges set name = '物品放行 全部权限',description = '物品放行 全部权限' where id = 4920049200;
+-- end
 
--- 物品放行 1.1 修改工作流模板
--- by shiheng.ma
+-- 通用脚本
+-- ADD BY shiheng.ma
+-- issue-26467 物品放行 1.1 修改工作流模板
 update eh_locale_templates t set t.description = '物品放行' , t.text = '物品放行' where t.scope = 'relocation' and t.code = 1;
 
 update eh_locale_templates t set t.description = '物品放行工作流申请人显示内容' , t.text = '放行物品：${items} 共${totalNum}件
@@ -15,6 +18,7 @@ update eh_locale_templates t set t.description = '物品放行工作流申请人
 update eh_locale_templates t set t.description = '物品放行工作流处理人显示内容' , t.text = '申请人：${requestorName}  企业名称：${requestorEnterpriseName}
  放行物品：${items} 共${totalNum}件
 放行时间：${relocationDate}' where t.scope = 'relocation' and t.code = 3;
+-- end
 
 -- 能耗升级离线包版本 by  jiarui 20180619
 UPDATE eh_version_urls SET download_url = REPLACE(download_url,'1-0-3','1-0-4') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
