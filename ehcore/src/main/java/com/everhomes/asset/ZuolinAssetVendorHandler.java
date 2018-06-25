@@ -1539,7 +1539,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         				if(createBillCommand.getAddresses().equals(cmd.getAddresses())) {
         					cmds.set(m, cmd);
                 			continue bill;
-        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){
+        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){//未合并为一个账单之前的情况，如：456、457， 新的数据是456，是不同的数据，所以是新增。
         					//个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
         					BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
                 			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
