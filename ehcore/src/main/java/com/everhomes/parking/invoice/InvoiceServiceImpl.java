@@ -12,6 +12,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,11 +64,20 @@ public class InvoiceServiceImpl implements InvoiceService{
             throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
                     "not find orderno");
         }
-        rechargeOrder.setInvoi
+        rechargeOrder.setInvoiceStatus((byte)2);
+        rechargeOrder.setInvoiceCreateTime(new Timestamp(System.currentTimeMillis()));
+        parkingProvider.updateParkingRechargeOrder(rechargeOrder);
     }
 
     @Override
     public GetPayeeIdByOrderNoResponse getPayeeIdByOrderNo(GetPayeeIdByOrderNoCommand cmd) {
-        return null;
+        ParkingRechargeOrder rechargeOrder = parkingProvider.findParkingRechargeOrderById(cmd.getOrderNo());
+        if(rechargeOrder==null){
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+                    "not find orderno");
+        }
+        GetPayeeIdByOrderNoResponse response = new GetPayeeIdByOrderNoResponse();
+        response.setPayeeId(rechargeOrder.getPayeeId());
+        return response;
     }
 }

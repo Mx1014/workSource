@@ -4,6 +4,7 @@ package com.everhomes.parking;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -1267,5 +1268,34 @@ public class ParkingProviderImpl implements ParkingProvider {
 				.orderBy(Tables.EH_PAYMENT_ORDER_RECORDS.ID)
 				.limit(pageSize)
 				.fetch().map(r->ConvertHelper.convert(r,PaymentOrderRecord.class));
+	}
+
+	@Override
+	public List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentOrderRecords.class));
+		return context.select()
+				.from(Tables.EH_PARKING_RECHARGE_ORDERS)
+				.where(Tables.EH_PARKING_RECHARGE_ORDERS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.in(new ArrayList<>(
+						Arrays.asList(ParkingRechargeOrderStatus.PAID.getCode(),
+						ParkingRechargeOrderStatus.RECHARGED.getCode(),
+						ParkingRechargeOrderStatus.FAILED.getCode()))))
+				.orderBy(Tables.EH_PARKING_RECHARGE_ORDERS.ID.desc())
+				.limit(pageSize)
+				.offset(Integer.valueOf(""+(pageAnchor*pageSize)))
+				.fetch().map(r->ConvertHelper.convert(r,ParkingRechargeOrder.class));
+	}
+
+	@Override
+	public Long ParkingRechargeOrdersByUserId(Long userId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentOrderRecords.class));
+		return Long.valueOf(context.selectCount()
+				.from(Tables.EH_PARKING_RECHARGE_ORDERS)
+				.where(Tables.EH_PARKING_RECHARGE_ORDERS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.in(new ArrayList<>(
+						Arrays.asList(ParkingRechargeOrderStatus.PAID.getCode(),
+								ParkingRechargeOrderStatus.RECHARGED.getCode(),
+								ParkingRechargeOrderStatus.FAILED.getCode()))))
+				.fetchOneInto(Integer.class));
 	}
 }

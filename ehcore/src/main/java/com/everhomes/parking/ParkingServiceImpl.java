@@ -752,6 +752,9 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
 		createOrderCommand.setClientAppName(clientAppName);//todoed
 		createOrderCommand.setPayerUserId(payerDto.getAccountId());
+		//保存支付方id
+		parkingRechargeOrder.setPayeeId(payerDto.getAccountId());
+		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
 		createOrderCommand.setExtendInfo(extendInfo);

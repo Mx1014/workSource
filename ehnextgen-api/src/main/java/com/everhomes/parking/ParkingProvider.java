@@ -156,4 +156,8 @@ public interface ParkingProvider {
     ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String userId, String accountCode,String userIdenify, String tag1, String tag2, String tag3);
 
     List<PaymentOrderRecord> listParkingPaymentOrderRecords(Long pageAnchor, Integer pageSize);
+
+    List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor);
+
+    Long ParkingRechargeOrdersByUserId(Long userId);
 }

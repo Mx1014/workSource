@@ -52,6 +52,7 @@ public interface ParkingErrorCode {
     int ERROR_REPEATE_ACCOUNT= 14000; //  重复账号
     int ERROR_NO_PAYEE_ACCOUNT= 14001; //  未设置收款方账号
     int ERROR_CREATE_USER_ACCOUNT= 14002; //  创建个人付款账户失败
+    int ERROR_SELF_DEFINE= 99999; //  自定义异常
 
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";
