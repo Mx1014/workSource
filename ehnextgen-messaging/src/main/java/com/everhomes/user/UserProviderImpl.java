@@ -571,7 +571,7 @@ public class UserProviderImpl implements UserProvider {
             context.select().from(EH_USER_IDENTIFIERS)
                     .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
                     .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
-                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMING.getCode())
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())
                             .or(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.VERIFYING.getCode())))
                     .fetch().map((r) -> {
                 result.add(ConvertHelper.convert(r, UserIdentifier.class));
