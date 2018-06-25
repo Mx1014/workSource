@@ -97,11 +97,13 @@ redis.store.master.port: 6380
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
+#db.master: jdbc:mysql://wuyetest:wuyetest123@10.1.10.46:3306/ehcore?characterEncoding=UTF-8&encrypted=0
 db.master: jdbc:mysql://ehcore:ehcore@db-master:13311/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: true
 db.tx.timeout: 600
+
         
 #
 # ElasticSearch configuration

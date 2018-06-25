@@ -687,7 +687,7 @@ public class ContractServiceImpl implements ContractService {
 		Double totalSize = dealContractApartments(contract, cmd.getApartments());
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
-		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
+		dealContractChargingChanges(contract, cmd.getAdjusts(),cmd.getFrees());
 
 		contract.setRentSize(totalSize);
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
