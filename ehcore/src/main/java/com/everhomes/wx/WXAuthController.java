@@ -685,7 +685,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
             wxUser.setGender(gender.getCode());
         }
 
-        userService.signupByThirdparkUser(wxUser, request);
+        wxUser = userService.signupByThirdparkUserByApp(wxUser, request);
 
         //signupByThirdparkUser里面已经设置过一次了但是setDefaultCommunity有个问题，但是有一个问题setDefaultCommunity限定了对应的namespaceResource只能是1。
         //add by yanjun 201805091940

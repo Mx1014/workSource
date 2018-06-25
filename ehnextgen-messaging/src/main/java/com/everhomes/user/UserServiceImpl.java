@@ -3913,7 +3913,55 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		}
 	}
 
-	@Override
+    @Override
+    public User signupByThirdparkUserByApp(User user, HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+
+        String regIp = ip;
+        user.setRegIp(regIp);
+        user.setStatus(UserStatus.ACTIVE.getCode());
+
+        Integer namespaceId = user.getNamespaceId();
+        String namespaceUserType = user.getNamespaceUserType();
+        String namespaceUserToken = user.getNamespaceUserToken();
+        List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
+        if(userList == null || userList.size() == 0) {
+
+            //将微信头像下载下来
+            CsFileLocationDTO fileLocationDTO = contentServerService.uploadFileByUrl("avatar.jpg", user.getAvatar());
+            if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+                user.setAvatar(fileLocationDTO.getUri());
+            }
+
+            userProvider.createUser(user);
+
+            //设定默认园区  add by  yanjun 20170915
+            setDefaultCommunity(user.getId(), namespaceId);
+
+            return user;
+        } else {
+            LOGGER.warn("User already existed, namespaceId={}, userType={}, userToken={}", namespaceId, namespaceUserType, namespaceUserToken);
+            return userList.get(0);
+        }
+    }
+
+    @Override
 	public Boolean validateUserPass(ValidatePassCommand cmd) {
 		if(cmd.getUserId() == null) {
 			LOGGER.error("userId is null");

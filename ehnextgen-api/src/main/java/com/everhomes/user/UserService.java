@@ -139,6 +139,7 @@ public interface UserService {
      * @return 如果创建了新用户则返回true，否则返回false
      */
     boolean signupByThirdparkUser(User user, HttpServletRequest request);
+    User signupByThirdparkUserByApp(User user, HttpServletRequest request);
 	Boolean validateUserPass(ValidatePassCommand passCmd);
 
     List<SceneDTO> listTouristRelatedScenes();
