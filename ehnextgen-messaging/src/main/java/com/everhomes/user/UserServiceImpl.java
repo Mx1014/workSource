@@ -5509,8 +5509,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "UserId is null");
         }
         User user = this.userProvider.findUserById(cmd.getUserId());
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
-
+        List<UserIdentifier> userIdentifierList = userProvider.findClaimingIdentifierByToken(cmd.getPhone());
+        if (CollectionUtils.isEmpty(userIdentifierList)) {
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+        }
+        UserIdentifier userIdentifier = userIdentifierList.get(0);
         UserLogin login = new UserLogin();
         verificationCode(userIdentifier, cmd.getVerificationCode());
         //查看该手机是否已经注册
