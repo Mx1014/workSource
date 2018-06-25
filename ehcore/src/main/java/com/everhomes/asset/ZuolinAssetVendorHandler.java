@@ -1366,6 +1366,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             
             //楼栋门牌被依赖
             String address = data[addressIndex];
+            cmd.setAddresses(address);
         	if(targetType.equals(AssetTargetType.USER.getCode())){
         		if(StringUtils.isBlank(address)){
                     log.setErrorLog("个人客户情况下，楼栋门牌必填");
@@ -1534,16 +1535,24 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             		if(cmd.getTargetName().equals(createBillCommand.getTargetName()) 
         				&& cmd.getDateStrBegin().equals(createBillCommand.getDateStrBegin())
         				&& cmd.getDateStrEnd().equals(createBillCommand.getDateStrEnd())) {
-            			BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
-            			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
-            			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
-            			newBillItemDTOList.addAll(billItemDTOList);
-            			newExemptionItemDTOList.addAll(exemptionItemDTOList);
-            			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
-            			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
-            			createBillCommand.setBillGroupDTO(newBillGroupDTO);
-            			cmds.set(m, createBillCommand);
-            			continue bill;
+            			//个人客户时，以账单时间、账单组、楼栋门牌3条信息定位账单的唯一性。若再次导入同一账单，均认为覆盖原账单，而不是新增账单。除定位账单的字段外其余字段均覆盖。
+        				if(createBillCommand.getAddresses().equals(cmd.getAddresses())) {
+        					cmds.set(m, cmd);
+                			continue bill;
+        				}else if(!createBillCommand.getAddresses().contains(cmd.getAddresses())){
+        					//个人客户时，若一次导入同一客户的同一账单时间的不同门牌费项明细，需以客户维度将几条合为一个账单出到该客户。
+        					BillGroupDTO newBillGroupDTO = createBillCommand.getBillGroupDTO();
+                			List<BillItemDTO> newBillItemDTOList = newBillGroupDTO.getBillItemDTOList();
+                			List<ExemptionItemDTO> newExemptionItemDTOList = newBillGroupDTO.getExemptionItemDTOList();
+                			newBillItemDTOList.addAll(billItemDTOList);
+                			newExemptionItemDTOList.addAll(exemptionItemDTOList);
+                			newBillGroupDTO.setBillItemDTOList(newBillItemDTOList);
+                			newBillGroupDTO.setExemptionItemDTOList(newExemptionItemDTOList);
+                			createBillCommand.setBillGroupDTO(newBillGroupDTO);
+                			createBillCommand.setAddresses(cmd.getAddresses() + "," + createBillCommand.getAddresses());
+                			cmds.set(m, createBillCommand);
+                			continue bill;
+        				}
             		}
             	}
             }

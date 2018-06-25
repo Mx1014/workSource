@@ -54,6 +54,7 @@ public class CreateBillCommand {
     private String dateStrEnd;
     private Byte isOwed;
     private String customerTel;
+    private String addresses;
 
     public String getCustomerTel() {
         return customerTel;
@@ -183,5 +184,12 @@ public class CreateBillCommand {
         this.targetName = targetName;
     }
 
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
+	}
 
 }
