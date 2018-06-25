@@ -3014,7 +3014,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		取评价项目
 		List<FlowEvaluateItem> evalItems = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getFlowMainId(),flow.getFlowVersion());
 //		取工作流下所有评价
-		List<FlowEvaluate> evals =  flowEvaluateProvider.findEvaluatesByFlowMainId(flow.getFlowMainId(),flow.getFlowVersion());
+		List<FlowEvaluate> evals =  flowEvaluateProvider.findEvaluatesByFlowMainId(flow.getFlowMainId(),flow.getFlowVersion(),cmd.getBeginTime(),cmd.getEndTime());
 //		根据评价项目分组
 	 	Map<Long,List<FlowEvaluate>> evalgroups = evals.stream().collect(Collectors.groupingBy(FlowEvaluate::getEvaluateItemId));
 //		统计运算

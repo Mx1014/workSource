@@ -105,6 +105,8 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
     private OrganizationProvider organizationProvider;
     @Autowired
     private AddressProvider addressProvider;
+    @Autowired
+    private FlowEvaluateProvider flowEvaluateProvider;
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -800,6 +802,14 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
                 CategoryDTO taskCategory = createCategoryDTO();
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
+
+                if(null != t.getFlowCaseId()){
+                    List<FlowEvaluate> evals = flowEvaluateProvider.findEvaluatesByCaseId(t.getFlowCaseId());
+                    if(evals.size() > 0){
+                        Double star = evals.stream().collect(Collectors.averagingInt(FlowEvaluate::getStar));
+                        dto.setStar(star.byteValue());
+                    }
+                }
 
                 return dto;
             }).collect(Collectors.toList()));
