@@ -230,7 +230,7 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 List<String> contractExtraTels = new ArrayList<>();
                 contractExtraTels.add(dto.getContactToken());
                 try{
-                    List<String> extraTelsField = (List<String>)StringHelper.fromJsonString(r.getContactExtraTels());
+                    List<String> extraTelsField = (List<String>)StringHelper.fromJsonString(r.getContactExtraTels(), ArrayList.class);
                     contractExtraTels.addAll(extraTelsField);
                 }catch (Exception e){
                     LOGGER.error("failed to convert contact extra tels json to list, pmowner id ={}", r.getId());
