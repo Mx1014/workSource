@@ -6284,14 +6284,15 @@ public class ActivityServiceImpl implements ActivityService {
             for (PayUserDTO r : list) {
                 ActivityPayeeDTO activityPayeeDTO = new ActivityPayeeDTO();
                 activityPayeeDTO.setAccountId(r.getId());
-                activityPayeeDTO.setAccountName(r.getUserName());
+                activityPayeeDTO.setAccountName(r.getRemark());
                 Integer userType = r.getUserType();
                 if(userType != null && userType.equals(2)) {
                     activityPayeeDTO.setAccountType(OwnerType.ORGANIZATION.getCode());
+                    activityPayeeDTO.setAccountAliasName(r.getUserAliasName());
                 } else {
                     activityPayeeDTO.setAccountType(OwnerType.USER.getCode());
+                    activityPayeeDTO.setAccountAliasName(r.getUserName());
                 }
-                activityPayeeDTO.setAccountAliasName(r.getUserAliasName());
                 // 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
                 Integer registerStatus = r.getRegisterStatus();
                 if(registerStatus != null && registerStatus.intValue() == 1) {
