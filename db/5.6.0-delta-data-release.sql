@@ -1076,6 +1076,12 @@ update eh_payment_charging_standards_scopes set category_id=1001  where namespac
 update eh_payment_bill_groups set category_id=1001  where namespace_id=999966;
 -- 更新 eh_payment_bill_items 表的categoryid
 update eh_payment_bill_items set category_id=1001  where namespace_id=999966;
+-- 初始化缴费、合同之间的映射关系
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999966, 1001, 1001, NULL, 1, 2, NOW(), 1, NULL, NULL);
 -- END BY 杨崇鑫 
 
 
@@ -1100,6 +1106,12 @@ update eh_payment_charging_standards_scopes set category_id=1001  where namespac
 update eh_payment_bill_groups set category_id=1001  where namespace_id=999984;
 -- 更新 eh_payment_bill_items 表的categoryid
 update eh_payment_bill_items set category_id=1001  where namespace_id=999984;
+-- 初始化缴费、合同之间的映射关系
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999984, 1001, 1001, NULL, 1, 2, NOW(), 1, NULL, NULL);
 -- END BY 杨崇鑫 
 
 
@@ -1148,6 +1160,12 @@ update eh_payment_charging_standards_scopes set category_id=1001  where namespac
 update eh_payment_bill_groups set category_id=1001  where namespace_id=999949;
 -- 更新 eh_payment_bill_items 表的categoryid
 update eh_payment_bill_items set category_id=1001  where namespace_id=999949;
+-- 初始化缴费、合同之间的映射关系
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999949, 1001, 1001, NULL, 1, 2, NOW(), 1, NULL, NULL);
 -- END BY 杨崇鑫 
 
 
