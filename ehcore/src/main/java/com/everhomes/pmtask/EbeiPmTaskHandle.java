@@ -737,6 +737,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
         List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
+//      V3.6 过滤正中会办事的中间类型
+        if(childrens.size() == 1){
+            childrens = childrens.get(0).getChildrens();
+        }
 
         if(null == cmd.getParentId()) {
             CategoryDTO dto = createCategoryDTO();
