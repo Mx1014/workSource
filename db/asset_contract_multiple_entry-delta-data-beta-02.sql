@@ -543,6 +543,180 @@ update eh_payment_bill_items set category_id=1027  where namespace_id=999992;
 update eh_payment_bill_items set category_id=1028  where namespace_id=999993;
 update eh_payment_bill_items set category_id=1029  where namespace_id=999938;
 
+-- 初始化缴费、合同之间的映射关系
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 2, 1001, 1001, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 11, 1002, 1002, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999944, 1003, 1003, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999945, 1004, 1004, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999946, 1005, 1005, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999947, 1006, 1006, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999948, 1007, 1007, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999949, 1008, 1008, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999950, 1009, 1009, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999951, 1010, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999952, 1011, 1010, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999953, 1012, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999954, 1013, 1011, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999956, 1014, 1012, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999957, 1015, 1013, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999958, 1016, 1014, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999961, 1017, 1015, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999962, 1018, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999967, 1019, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999969, 1020, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999970, 1021, 1017, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999971, 1022, 1018, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999972, 1023, 1019, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999975, 1024, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999980, 1025, 1020, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999983, 1026, 1021, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999992, 1027, 1022, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999993, 1028, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
+
+set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
+INSERT INTO `eh_asset_module_app_mappings` 
+(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
+VALUES 
+(@id:=@id+1, 999938, 1029, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
 -- END BY 杨崇鑫
 
 
