@@ -24,8 +24,10 @@ public class CustomerEventDTO {
     private Long creatorUid;
     private String creatorName;
     private Timestamp createTime;
+    private String operateTime;
     private String content;
     private Byte deviceType;
+    private String sourceType;
 
 
     public Long getId() {
@@ -99,6 +101,22 @@ public class CustomerEventDTO {
 
 	public void setDeviceType(Byte deviceType) {
 		this.deviceType = deviceType;
+	}
+
+	public String getOperateTime() {
+		return operateTime;
+	}
+
+	public void setOperateTime(String operateTime) {
+		this.operateTime = operateTime;
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
 	}
 
 	@Override
