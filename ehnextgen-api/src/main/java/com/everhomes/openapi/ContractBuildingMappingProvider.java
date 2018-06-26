@@ -4,6 +4,7 @@ package com.everhomes.openapi;
 import java.util.List;
 
 import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.varField.FieldItem;
 
 public interface ContractBuildingMappingProvider {
 
@@ -32,4 +33,6 @@ public interface ContractBuildingMappingProvider {
 			String contractNumber);
 	List<ContractBuildingMapping> listByContract(Long contractId);
 	List<ContractBuildingMapping> listByAddress(Long addressId);
+
+	FieldItem listFieldItems(String moduleName, Long fieldId, Byte businessValue);
 }

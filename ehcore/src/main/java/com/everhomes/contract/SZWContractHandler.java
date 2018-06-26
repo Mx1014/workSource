@@ -213,7 +213,7 @@ public class SZWContractHandler implements ContractService{
 	}
 
 	@Override
-	public void exportContractListByCommunityCategoryId(ListContractsCommand cmd, HttpServletResponse response) {
+	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response) {
 		// TODO Auto-generated method stub
 		
 	}

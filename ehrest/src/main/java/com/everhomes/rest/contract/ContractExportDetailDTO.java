@@ -18,17 +18,32 @@ import java.sql.Timestamp;
  *  <li>trafficDescription:楼栋介绍</li>
  * </ul>
  * Created by ying.xiong on 2018/1/22.
+ * {"contractNumber","name","contractType","contractStartDate","contractEndDate","customerId","apartments","rent","status"};
  */
 public class ContractExportDetailDTO {
 	private String contractNumber;
 	private String name;
 	private Timestamp contractStartDate;
 	private Timestamp contractEndDate;
-	private Byte contractType;
+	private String contractType;
 	private String customerName;
+	private String customerId;
+	public String getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
+	}
+	public String getApartments() {
+		return apartments;
+	}
+	public void setApartments(String apartments) {
+		this.apartments = apartments;
+	}
 	private String buildings;
+	private String apartments;
 	private BigDecimal rent;
-	private Byte status;
+	private String status;
 	public String getContractNumber() {
 		return contractNumber;
 	}
@@ -53,10 +68,10 @@ public class ContractExportDetailDTO {
 	public void setContractEndDate(Timestamp contractEndDate) {
 		this.contractEndDate = contractEndDate;
 	}
-	public Byte getContractType() {
+	public String getContractType() {
 		return contractType;
 	}
-	public void setContractType(Byte contractType) {
+	public void setContractType(String contractType) {
 		this.contractType = contractType;
 	}
 	public String getCustomerName() {
@@ -77,10 +92,10 @@ public class ContractExportDetailDTO {
 	public void setRent(BigDecimal rent) {
 		this.rent = rent;
 	}
-	public Byte getStatus() {
+	public String getStatus() {
 		return status;
 	}
-	public void setStatus(Byte status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 	
