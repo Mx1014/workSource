@@ -33,12 +33,12 @@ public interface ParkingProvider {
     		String plateNumber, Long userId, Long pageAnchor, Integer pageSize);
     
     List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
-    		Byte rechargeType, String paidType, String cardNumber,  Byte status, Long pageAnchor, Integer pageSize);
+                                                           String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
+                                                           Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, Long pageAnchor, Integer pageSize);
     
     BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte rechargeType, String paidType);
+                                          String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
+                                          Byte rechargeType, String paidType, String paySource, String keyWords);
     
     void createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder);
     

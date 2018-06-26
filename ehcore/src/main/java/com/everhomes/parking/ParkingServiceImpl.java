@@ -39,7 +39,6 @@ import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -53,7 +52,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import kafka.utils.Json;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -708,11 +706,11 @@ public class ParkingServiceImpl implements ParkingService {
 		if (ActivityRosterPayVersionFlag.V1 == version) {
 			return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
 		}else {
-			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName(),parkingLot);
+			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName(),parkingLot,cmd.getPaymentType());
 		}
 	}
 
-	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName,ParkingLot parkingLot ) {
+	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName, ParkingLot parkingLot, Integer paymentType) {
 		Long amount = parkingRechargeOrder.getPrice().multiply(new BigDecimal(100)).longValue();
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
@@ -765,8 +763,28 @@ public class ParkingServiceImpl implements ParkingService {
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		createOrderCommand.setBackUrl(callbackurl);
+		//公众号支付
+		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			Map<String, String> flattenMap = new HashMap<>();
+			flattenMap.put("payType","no_credit");
+			flattenMap.put("acct",user.getNamespaceUserToken());
+			flattenMap.put("vspCusid",configProvider.getValue(UserContext.getCurrentNamespaceId(), "parking.order.tempVspCusid", ""));
+//			paymentParamsDTO.setPayType("no_credit");
+//			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+//			//TODO: 临时给越空间解决公众号支付
+//			String vspCusid = configProvider.getValue(UserContext.getCurrentNamespaceId(), "tempVspCusid", "");
+//			paymentParamsDTO.setVspCusid(vspCusid);
+			createOrderCommand.setPaymentParams(flattenMap);
+			createOrderCommand.setCommitFlag(1);
+		}
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
-		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+		CreateOrderRestResponse purchaseOrder = null;
+		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			purchaseOrder = sdkPayService.createCustomOrder(createOrderCommand);
+		}else {
+			purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+		}
 		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
 			LOGGER.info("purchaseOrder "+purchaseOrder);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -923,7 +941,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getStatus(), cmd.getPageAnchor(), pageSize);
+				cmd.getStatus(), cmd.getPaySource(),cmd.getKeyWords(),cmd.getPageAnchor(), pageSize);
 		int size = list.size();
 		if(size > 0){
 			response.setOrders(list.stream().map(r -> {
@@ -947,7 +965,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		BigDecimal totalAmount = parkingProvider.countParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType());
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(),cmd.getPaySource(),cmd.getKeyWords());
 		response.setTotalAmount(totalAmount);
 
 		return response;
@@ -1429,7 +1447,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getStatus(), cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getStatus(), cmd.getPaySource(), cmd.getKeyWords(), cmd.getPageAnchor(), cmd.getPageSize());
 		Workbook wb = new XSSFWorkbook();
 
 		Font font = wb.createFont();
@@ -1454,9 +1472,12 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(8).setCellValue("临时车进场时间");
 		row.createCell(9).setCellValue("临时车出场时间");
 		row.createCell(10).setCellValue("临时车停车时长(分钟)");
-		row.createCell(11).setCellValue("金额");
-		row.createCell(12).setCellValue("支付方式");
-		row.createCell(13).setCellValue("缴费类型");
+		row.createCell(11).setCellValue("应收金额");
+		row.createCell(12).setCellValue("实收金额");
+		row.createCell(13).setCellValue("支付方式");
+		row.createCell(14).setCellValue("缴费类型");
+		row.createCell(15).setCellValue("订单状态");
+		row.createCell(16).setCellValue("缴费来源");
 
 
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
@@ -1468,7 +1489,7 @@ public class ParkingServiceImpl implements ParkingService {
 			handler.setCellValues(list,sheet);
 		}
 
-		for (int i = 0; i < 14; i++) {
+		for (int i = 0; i < 17; i++) {
 			String stringCellValue = sheet.getRow(0).getCell(i).getStringCellValue();
 			sheet.setColumnWidth(i,stringCellValue.length() * 700);
 		}
