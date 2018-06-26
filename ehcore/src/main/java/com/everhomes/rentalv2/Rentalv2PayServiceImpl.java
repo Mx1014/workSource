@@ -49,10 +49,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -163,9 +160,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             dto.setId(r.getId());
             dto.setResourceName(r.getResourceName());
             dto.setResourceId(r.getSourceId());
-            PayUserDTO payUserDTO = payUserDTOS.stream().filter(t -> t.getId().equals(r.getAccountId())).findFirst().get();
-            dto.setAccount(convertAccount(payUserDTO));
-            response.getResourceAccounts().add(dto);
+            Optional<PayUserDTO> first = payUserDTOS.stream().filter(t -> t.getId().equals(r.getAccountId())).findFirst();
+            if (first != null && first.isPresent()) {
+                dto.setAccount(convertAccount(first.get()));
+                response.getResourceAccounts().add(dto);
+            }
         });
         return response;
     }
