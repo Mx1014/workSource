@@ -132,6 +132,7 @@ public interface UserService {
     boolean isValid(LoginToken token);
     LoginToken getLoginToken(HttpServletRequest request);
     UserLogin logonBythirdPartUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response);
+    UserLogin logonBythirdPartAppUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response);
     /**
      * 注册第三方用户
      * @param user

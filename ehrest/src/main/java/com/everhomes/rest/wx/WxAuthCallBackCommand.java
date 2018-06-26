@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
  *     <li>namespaceId: 域空间id</li>
  *     <li>appId: 应用唯一标识，在微信开放平台提交应用审核通过后获得</li>
  *     <li>secret: 应用密钥AppSecret</li>
+ *     <li>deviceIdentifier:设备标识</li>
  * </ul>
  */
 public class WxAuthCallBackCommand {
@@ -24,6 +25,26 @@ public class WxAuthCallBackCommand {
     private String appId;
 
     private String secret;
+
+    private String deviceIdentifier;
+
+    private String pusherIdentify;
+
+    public String getDeviceIdentifier() {
+        return deviceIdentifier;
+    }
+
+    public void setDeviceIdentifier(String deviceIdentifier) {
+        this.deviceIdentifier = deviceIdentifier;
+    }
+
+    public String getPusherIdentify() {
+        return pusherIdentify;
+    }
+
+    public void setPusherIdentify(String pusherIdentify) {
+        this.pusherIdentify = pusherIdentify;
+    }
 
     public String getAppId() {
         return appId;

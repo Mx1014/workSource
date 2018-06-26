@@ -29,7 +29,28 @@ public class BindPhoneCommand {
 
 	private Long userId;
 
-    public Long getUserId() {
+	private String deviceIdentifier;
+
+	private String pusherIdentify;
+
+	public String getPusherIdentify() {
+		return pusherIdentify;
+	}
+
+	public void setPusherIdentify(String pusherIdentify) {
+		this.pusherIdentify = pusherIdentify;
+	}
+
+	public String getDeviceIdentifier() {
+
+		return deviceIdentifier;
+	}
+
+	public void setDeviceIdentifier(String deviceIdentifier) {
+		this.deviceIdentifier = deviceIdentifier;
+	}
+
+	public Long getUserId() {
         return userId;
     }
 

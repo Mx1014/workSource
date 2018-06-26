@@ -3866,6 +3866,43 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	}
 
 	@Override
+    public UserLogin logonBythirdPartAppUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response) {
+        List<User> userList = this.userProvider.findThirdparkUserByTokenAndType(namespaceId, userType, userToken);
+        if(userList == null || userList.size() == 0) {
+            LOGGER.error("Unable to find the thridpark user, namespaceId={}, userType={}, userToken={}", namespaceId, userType, userToken);
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+        }
+
+        User user = userList.get(0);
+        if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED,
+                    "User account has not been activated yet");
+        }
+
+        UserLogin login = createLogin(namespaceId, user, request.getParameter("deviceIdentifier"), request.getParameter("pusherIdentify"));
+        login.setStatus(UserLoginStatus.LOGGED_IN);
+
+        //added by Janson, mark as disconnected
+        unregisterLoginConnection(login);
+
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("User logon succeed, namespaceId={}, userType={}, userToken={}, userLogin={}", namespaceId, userType, userToken, login);
+        }
+
+        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+
+        LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
+
+        //微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+        //防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+        WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+
+        WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(namespaceId), request, response);
+        return login;
+    }
+
+	@Override
 	public boolean signupByThirdparkUser(User user, HttpServletRequest request) {
 		String ip = request.getHeader("x-forwarded-for");
 
@@ -5529,7 +5566,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             userProvider.updateUser(existUser);
             userProvider.deleteUser(user);
-            login = createLogin(namespaceId, existUser, null, null);
+            login = createLogin(namespaceId, existUser, cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
             login.setStatus(UserLoginStatus.LOGGED_IN);
 
         }else{
@@ -5559,7 +5596,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             userProvider.updateUser(user);
             userProvider.updateIdentifier(userIdentifier);
-            login = createLogin(namespaceId, user, null, null);
+            login = createLogin(namespaceId, user, cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
             login.setStatus(UserLoginStatus.LOGGED_IN);
         }
         return login;

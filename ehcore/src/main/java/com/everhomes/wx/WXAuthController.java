@@ -336,7 +336,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         String namespaceInReq = params.get("namespaceId");
         Integer namespaceId = parseNamespace(namespaceInReq);
 
-        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = processUserInfoV2(namespaceId, request, response);
+        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = processUserInfoV2(namespaceId, request, response, cmd);
 
         CheckWxAuthIsBindPhoneRestResponse checkWxAuthIsBindPhoneRestResponse = new CheckWxAuthIsBindPhoneRestResponse();
         checkWxAuthIsBindPhoneRestResponse.setResponse(checkWxAuthIsBindPhoneResponse);
@@ -632,7 +632,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         return userLogin;
     }
 
-    private CheckWxAuthIsBindPhoneResponse processUserInfoV2(Integer namespaceId, HttpServletRequest request, HttpServletResponse response) {
+    private CheckWxAuthIsBindPhoneResponse processUserInfoV2(Integer namespaceId, HttpServletRequest request, HttpServletResponse response, WxAuthCallBackCommand cmd) {
         CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = new CheckWxAuthIsBindPhoneResponse();
         long startTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
@@ -692,7 +692,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         userService.setDefaultCommunityForWx(wxUser.getId(), namespaceId);
         checkRedirectUserIdentifierV2(checkWxAuthIsBindPhoneResponse,wxUser);
         if (checkWxAuthIsBindPhoneResponse.getBindType() == WxAuthBindPhoneType.BIND.getCode()) {
-            UserLogin userLogin = userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
+            UserLogin userLogin = userService.logonBythirdPartAppUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
 
             // 添加CurrentUser用于后期，检查identifi add by yanjun 20170926
             if(userLogin != null && userLogin.getUserId() != 0){
