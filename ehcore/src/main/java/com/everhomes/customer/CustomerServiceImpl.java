@@ -924,8 +924,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void updateCustomerAttachments(Long customerId, List<CustomerAttachmentDTO> attachments) {
-        if (attachments != null) {
-            enterpriseCustomerProvider.deleteAllCustomerAttachements(customerId);
+        enterpriseCustomerProvider.deleteAllCustomerAttachements(customerId);
+        if (attachments != null && attachments.size()>0) {
             attachments.forEach((a) -> {
                 CustomerAttachment customerAttachment = ConvertHelper.convert(a, CustomerAttachment.class);
                 customerAttachment.setCustomerId(customerId);
