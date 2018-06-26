@@ -41,6 +41,7 @@ import com.everhomes.organization.pm.DefaultChargingItemProvider;
 import com.everhomes.organization.pm.OrganizationOwnerAddress;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.ContractProperty;
 import com.everhomes.rest.asset.FeeRules;
@@ -432,7 +433,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 }
             }
         }
-
+        command.setModuleId(PrivilegeConstants.ENERGY_MODULE);
         LOGGER.debug("paymentExpectanciesCalculate command: {}", command);
         assetService.upodateBillStatusOnContractStatusChange(command.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
         assetService.paymentExpectanciesCalculate(command);
