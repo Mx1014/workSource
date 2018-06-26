@@ -269,9 +269,6 @@ public class ForumServiceImpl implements ForumService {
             ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
                     ActivityPostCommand.class);
             if (activityPostCommand != null) {
-                if (!StringUtils.isEmpty(activityPostCommand.getSubject())){
-                    textList.add(activityPostCommand.getSubject());
-                }
                 if (!StringUtils.isEmpty(activityPostCommand.getDescription())) {
                     textList.add(activityPostCommand.getDescription());
                 }

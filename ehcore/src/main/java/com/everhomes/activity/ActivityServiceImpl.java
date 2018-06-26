@@ -5403,7 +5403,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             command.setCommunityId(post.getCommunityId());
             command.setModuleType(post.getModuleType());
         }
-        if (!StringUtils.isEmpty(cmd.getAchievement())) {
+        if (!StringUtils.isEmpty(cmd.getAchievement()) && "link".equals(cmd.getAchievementType())) {
             List<String> list = new ArrayList<>();
             list.add(cmd.getAchievement());
             command.setTextList(list);
