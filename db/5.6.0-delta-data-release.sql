@@ -688,6 +688,65 @@ VALUES (1027, 1027, UTC_TIMESTAMP(), 1, 999992, '{\"categoryId\":1027}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1028, 1028, UTC_TIMESTAMP(), 1, 999993, '{\"categoryId\":1028}');
 
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='2';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1002}' 
+ WHERE module_id='20400' and namespace_id='11';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1003}' 
+ WHERE module_id='20400' and namespace_id='999944';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1004}' 
+ WHERE module_id='20400' and namespace_id='999945';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1005}' 
+ WHERE module_id='20400' and namespace_id='999946';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1006}' 
+ WHERE module_id='20400' and namespace_id='999947';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1007}' 
+ WHERE module_id='20400' and namespace_id='999948';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1008}' 
+ WHERE module_id='20400' and namespace_id='999949';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1009}' 
+ WHERE module_id='20400' and namespace_id='999950';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1010}' 
+ WHERE module_id='20400' and namespace_id='999951';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1011}' 
+ WHERE module_id='20400' and namespace_id='999952';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1012}' 
+ WHERE module_id='20400' and namespace_id='999953';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1013}' 
+ WHERE module_id='20400' and namespace_id='999954';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1014}' 
+ WHERE module_id='20400' and namespace_id='999956';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1015}' 
+ WHERE module_id='20400' and namespace_id='999957';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1016}' 
+ WHERE module_id='20400' and namespace_id='999958';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1017}' 
+ WHERE module_id='20400' and namespace_id='999961';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1018}' 
+ WHERE module_id='20400' and namespace_id='999962';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1019}' 
+ WHERE module_id='20400' and namespace_id='999967';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1020}' 
+ WHERE module_id='20400' and namespace_id='999969';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1021}' 
+ WHERE module_id='20400' and namespace_id='999970';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1022}' 
+ WHERE module_id='20400' and namespace_id='999971';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1023}' 
+ WHERE module_id='20400' and namespace_id='999972';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1024}' 
+ WHERE module_id='20400' and namespace_id='999975';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1025}' 
+ WHERE module_id='20400' and namespace_id='999980';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1026}' 
+ WHERE module_id='20400' and namespace_id='999983';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1027}' 
+ WHERE module_id='20400' and namespace_id='999992';
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1028}' 
+ WHERE module_id='20400' and namespace_id='999993';
 
 
-
+ 
+ 
+-- END BY 杨崇鑫
