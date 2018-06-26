@@ -569,8 +569,8 @@ public class CustomerServiceImpl implements CustomerService {
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
         // 创建附件
-        if(cmd.getAttachments()!=null && cmd.getAttachments().size()>0){
-            cmd.getAttachments().forEach((c)->{
+        if (cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
+            cmd.getAttachments().forEach((c) -> {
                 CustomerAttachment attachment = ConvertHelper.convert(c, CustomerAttachment.class);
                 attachment.setCustomerId(customer.getId());
                 attachment.setNamespaceId(customer.getNamespaceId());
@@ -924,12 +924,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void updateCustomerAttachments(Long customerId, List<CustomerAttachmentDTO> attachments) {
-        enterpriseCustomerProvider.deleteAllCustomerAttachements(customerId);
-        attachments.forEach((a)->{
-            CustomerAttachment customerAttachment = ConvertHelper.convert(a, CustomerAttachment.class);
-            customerAttachment.setCustomerId(customerId);
-            enterpriseCustomerProvider.createCustomerAttachements(customerAttachment);
-        });
+        if (attachments != null) {
+            enterpriseCustomerProvider.deleteAllCustomerAttachements(customerId);
+            attachments.forEach((a) -> {
+                CustomerAttachment customerAttachment = ConvertHelper.convert(a, CustomerAttachment.class);
+                customerAttachment.setCustomerId(customerId);
+                enterpriseCustomerProvider.createCustomerAttachements(customerAttachment);
+            });
+        }
     }
 
     @Override
