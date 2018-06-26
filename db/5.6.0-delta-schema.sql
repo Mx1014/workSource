@@ -176,7 +176,7 @@ ALTER TABLE `eh_general_approvals` ADD COLUMN `string_tag2` VARCHAR(128) AFTER `
 ALTER TABLE `eh_general_approvals` ADD COLUMN `string_tag3` VARCHAR(128) AFTER `string_tag2`;
 
 RENAME TABLE `eh_general_approval_templates` to `eh_enterprise_approval_templates`;
-ALTER TABLE `eh_enterprise_approval_templates` ADD COLUMN `group_id` BIGINT NOT NULL DEFAULT 5 COMMENT 'the enterprise group id' AFTER `approval_name`;
+ALTER TABLE `eh_enterprise_approval_templates` ADD COLUN `group_id` BIGINT NOT NULL DEFAULT 5 COMMENT 'the enterprise group id' AFTER `approval_name`;
 ALTER TABLE `eh_enterprise_approval_templates` ADD COLUMN `approval_remark` VARCHAR(256) COMMENT 'the remark of the approval' AFTER `approval_name`;
 -- 审批3.0 end by ryan.
 
@@ -417,6 +417,27 @@ CREATE TABLE `eh_contract_categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- END BY 丁建民 
+-- END BY 丁建民
+
+-- changed schema eh_service_module_app_mappings to eh_asset_module_app_mappings by wentian
+DROP TABLE IF EXISTS `eh_service_module_app_mappings`;
+CREATE TABLE `eh_asset_module_app_mappings`(
+  `id` BIGINT NOT NULL ,
+  `namespace_id` INTEGER NOT NULL ,
+  `asset_category_id` BIGINT DEFAULT NULL ,
+  `contract_category_id` BIGINT DEFAULT NULL ,
+  `energy_category_id` BIGINT DEFAULT NULL ,
+  `energy_flag` TINYINT COMMENT '在每个域空间，只有一个energy flag为1，0为不启用',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '2:active; 0:inactive',
+  `create_time` DATETIME NOT NULL DEFAULT now(),
+  `create_uid` BIGINT NOT NULL,
+  `update_time` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
+  UNIQUE KEY `u_asset_category_id`(`asset_category_id`),
+  UNIQUE KEY `u_contract_category_id`(`contract_category_id`),
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
+
+-- endl
 
 
