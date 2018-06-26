@@ -602,19 +602,7 @@ set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
 INSERT INTO `eh_asset_module_app_mappings` 
 (`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
 VALUES 
-(@id:=@id+1, 999951, 1010, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
-
-set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
-INSERT INTO `eh_asset_module_app_mappings` 
-(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
-VALUES 
 (@id:=@id+1, 999952, 1011, 1010, NULL, 1, 2, NOW(), 1, NULL, NULL);
-
-set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
-INSERT INTO `eh_asset_module_app_mappings` 
-(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
-VALUES 
-(@id:=@id+1, 999953, 1012, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
 
 set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
 INSERT INTO `eh_asset_module_app_mappings` 
@@ -650,19 +638,7 @@ set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
 INSERT INTO `eh_asset_module_app_mappings` 
 (`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
 VALUES 
-(@id:=@id+1, 999962, 1018, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
-
-set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
-INSERT INTO `eh_asset_module_app_mappings` 
-(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
-VALUES 
-(@id:=@id+1, 999967, 1019, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
-
-set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
-INSERT INTO `eh_asset_module_app_mappings` 
-(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
-VALUES 
-(@id:=@id+1, 999969, 1020, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
+(@id:=@id+1, 999969, 1020, 1016, NULL, 1, 2, NOW(), 1, NULL, NULL);
 
 set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
 INSERT INTO `eh_asset_module_app_mappings` 
@@ -686,12 +662,6 @@ set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
 INSERT INTO `eh_asset_module_app_mappings` 
 (`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
 VALUES 
-(@id:=@id+1, 999975, 1024, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
-
-set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
-INSERT INTO `eh_asset_module_app_mappings` 
-(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
-VALUES 
 (@id:=@id+1, 999980, 1025, 1020, NULL, 1, 2, NOW(), 1, NULL, NULL);
 
 set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
@@ -705,18 +675,6 @@ INSERT INTO `eh_asset_module_app_mappings`
 (`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
 VALUES 
 (@id:=@id+1, 999992, 1027, 1022, NULL, 1, 2, NOW(), 1, NULL, NULL);
-
-set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
-INSERT INTO `eh_asset_module_app_mappings` 
-(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
-VALUES 
-(@id:=@id+1, 999993, 1028, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
-
-set @id = IFNULL((select MAX(`id`) from `eh_asset_module_app_mappings`),0);
-INSERT INTO `eh_asset_module_app_mappings` 
-(`id`, `namespace_id`, `asset_category_id`, `contract_category_id`, `energy_category_id`, `energy_flag`, `status`, `create_time`, `create_uid`, `update_time`, `update_uid`) 
-VALUES 
-(@id:=@id+1, 999938, 1029, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
 -- END BY 杨崇鑫
 
 
