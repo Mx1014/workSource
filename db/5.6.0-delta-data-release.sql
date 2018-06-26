@@ -619,3 +619,75 @@ UPDATE `eh_flow_cases` SET `owner_id`='1021' WHERE module_id='21200' AND namespa
 
 
 -- END BY 丁建民 
+
+
+
+
+-- 通用脚本  
+-- ADD BY 杨崇鑫
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+
+-- 查询发布过包含物业缴费的域空间
+SELECT * from eh_service_module_apps where module_id='20400' group by namespace_id;
+
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1002, 1002, UTC_TIMESTAMP(), 1, 11, '{\"categoryId\":1002}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1003, 1003, UTC_TIMESTAMP(), 1, 999944, '{\"categoryId\":1003}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1004, 1004, UTC_TIMESTAMP(), 1, 999945, '{\"categoryId\":1004}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1005, 1005, UTC_TIMESTAMP(), 1, 999946, '{\"categoryId\":1005}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1006, 1006, UTC_TIMESTAMP(), 1, 999947, '{\"categoryId\":1006}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1007, 1007, UTC_TIMESTAMP(), 1, 999948, '{\"categoryId\":1007}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1008, 1008, UTC_TIMESTAMP(), 1, 999949, '{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1008}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1009, 1009, UTC_TIMESTAMP(), 1, 999950, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1009}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1010, 1010, UTC_TIMESTAMP(), 1, 999951, '{\"categoryId\":1010}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1011, 1011, UTC_TIMESTAMP(), 1, 999952, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1011}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1012, 1012, UTC_TIMESTAMP(), 1, 999953, '{\"categoryId\":1012}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1013, 1013, UTC_TIMESTAMP(), 1, 999954, '{\"categoryId\":1013}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1014, 1014, UTC_TIMESTAMP(), 1, 999956, '{\"categoryId\":1014}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1015, 1015, UTC_TIMESTAMP(), 1, 999957, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1015}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1016, 1016, UTC_TIMESTAMP(), 1, 999958, '{\"categoryId\":1016}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1017, 1017, UTC_TIMESTAMP(), 1, 999961, '{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1017}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1018, 1018, UTC_TIMESTAMP(), 1, 999962, '{\"categoryId\":1018}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1019, 1019, UTC_TIMESTAMP(), 1, 999967, '{\"categoryId\":1019}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1020, 1020, UTC_TIMESTAMP(), 1, 999969, '{\"categoryId\":1020}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1021, 1021, UTC_TIMESTAMP(), 1, 999970, '{\"url\":\"https://core.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1021}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1022, 1022, UTC_TIMESTAMP(), 1, 999971, '{\"url\":\"https://core.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1022}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1023, 1023, UTC_TIMESTAMP(), 1, 999972, '{\"categoryId\":1023}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1024, 1024, UTC_TIMESTAMP(), 1, 999975, '{\"categoryId\":1024}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1025, 1025, UTC_TIMESTAMP(), 1, 999980, '{\"categoryId\":1025}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1026, 1026, UTC_TIMESTAMP(), 1, 999983, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1026}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1027, 1027, UTC_TIMESTAMP(), 1, 999992, '{\"categoryId\":1027}');
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+VALUES (1028, 1028, UTC_TIMESTAMP(), 1, 999993, '{\"categoryId\":1028}');
+
+
+
+
