@@ -1096,3 +1096,100 @@ VALUES
 (@id:=@id+1, 999993, 1028, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
 
 -- END BY 杨崇鑫
+
+
+-- 深圳湾适用脚本[999966]  
+-- ADD BY 杨崇鑫 
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+ VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='999966';
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=999966;
+-- END BY 杨崇鑫 
+
+
+-- 清华信息港适用脚本[999984]  
+-- ADD BY 杨崇鑫 
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+ VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"categoryId\":1001}');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='999984';
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=999984;
+-- END BY 杨崇鑫 
+
+
+-- 光大we谷适用脚本[999979]  
+-- ADD BY 杨崇鑫 
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+ VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"categoryId\":1001}');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='999979';
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=999979;
+-- END BY 杨崇鑫 
+
+
+-- 安邦物业适用脚本[999949]  
+-- ADD BY 杨崇鑫 
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+ VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='999949';
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=999949;
+-- END BY 杨崇鑫 
+

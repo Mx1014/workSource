@@ -239,7 +239,7 @@ SELECT * from eh_service_module_apps where module_id='20400' group by namespace_
 
 -- 生成categoryid
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
-VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}');
+VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1002, 1002, UTC_TIMESTAMP(), 1, 11, '{\"categoryId\":1002}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
@@ -255,11 +255,11 @@ VALUES (1007, 1007, UTC_TIMESTAMP(), 1, 999948, '{\"categoryId\":1007}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1008, 1008, UTC_TIMESTAMP(), 1, 999949, '{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1008}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
-VALUES (1009, 1009, UTC_TIMESTAMP(), 1, 999950, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1009}');
+VALUES (1009, 1009, UTC_TIMESTAMP(), 1, 999950, '{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1009}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1010, 1010, UTC_TIMESTAMP(), 1, 999951, '{\"categoryId\":1010}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
-VALUES (1011, 1011, UTC_TIMESTAMP(), 1, 999952, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1011}');
+VALUES (1011, 1011, UTC_TIMESTAMP(), 1, 999952, '{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1011}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1012, 1012, UTC_TIMESTAMP(), 1, 999953, '{\"categoryId\":1012}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
@@ -267,7 +267,7 @@ VALUES (1013, 1013, UTC_TIMESTAMP(), 1, 999954, '{\"categoryId\":1013}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1014, 1014, UTC_TIMESTAMP(), 1, 999956, '{\"categoryId\":1014}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
-VALUES (1015, 1015, UTC_TIMESTAMP(), 1, 999957, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1015}');
+VALUES (1015, 1015, UTC_TIMESTAMP(), 1, 999957, '{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1015}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1016, 1016, UTC_TIMESTAMP(), 1, 999958, '{\"categoryId\":1016}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
@@ -279,9 +279,9 @@ VALUES (1019, 1019, UTC_TIMESTAMP(), 1, 999967, '{\"categoryId\":1019}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1020, 1020, UTC_TIMESTAMP(), 1, 999969, '{\"categoryId\":1020}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
-VALUES (1021, 1021, UTC_TIMESTAMP(), 1, 999970, '{\"url\":\"https://core.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1021}');
+VALUES (1021, 1021, UTC_TIMESTAMP(), 1, 999970, '{\"url\":\"https://beta.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1021}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
-VALUES (1022, 1022, UTC_TIMESTAMP(), 1, 999971, '{\"url\":\"https://core.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1022}');
+VALUES (1022, 1022, UTC_TIMESTAMP(), 1, 999971, '{\"url\":\"https://beta.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1022}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1023, 1023, UTC_TIMESTAMP(), 1, 999972, '{\"categoryId\":1023}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
@@ -289,7 +289,7 @@ VALUES (1024, 1024, UTC_TIMESTAMP(), 1, 999975, '{\"categoryId\":1024}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1025, 1025, UTC_TIMESTAMP(), 1, 999980, '{\"categoryId\":1025}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
-VALUES (1026, 1026, UTC_TIMESTAMP(), 1, 999983, '{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1026}');
+VALUES (1026, 1026, UTC_TIMESTAMP(), 1, 999983, '{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1026}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
 VALUES (1027, 1027, UTC_TIMESTAMP(), 1, 999992, '{\"categoryId\":1027}');
 INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
@@ -298,7 +298,7 @@ INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `creat
  VALUES (1029, 1029, UTC_TIMESTAMP(), 1, 999938, '{\"categoryId\":1029}');
 
 -- 更新eh_service_module_apps表的instance_config
-UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}' 
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}' 
  WHERE module_id='20400' and namespace_id='2';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1002}' 
  WHERE module_id='20400' and namespace_id='11';
@@ -314,11 +314,11 @@ UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1007}'
  WHERE module_id='20400' and namespace_id='999948';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1008}' 
  WHERE module_id='20400' and namespace_id='999949';
-UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1009}' 
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1009}' 
  WHERE module_id='20400' and namespace_id='999950';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1010}' 
  WHERE module_id='20400' and namespace_id='999951';
-UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1011}' 
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1011}' 
  WHERE module_id='20400' and namespace_id='999952';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1012}' 
  WHERE module_id='20400' and namespace_id='999953';
@@ -326,9 +326,9 @@ UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1013}'
  WHERE module_id='20400' and namespace_id='999954';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1014}' 
  WHERE module_id='20400' and namespace_id='999956';
-UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1015}' 
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1015}' 
  WHERE module_id='20400' and namespace_id='999957';
-UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1016}' 
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1016}' 
  WHERE module_id='20400' and namespace_id='999958';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1017}' 
  WHERE module_id='20400' and namespace_id='999961';
@@ -338,9 +338,9 @@ UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1019}'
  WHERE module_id='20400' and namespace_id='999967';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1020}' 
  WHERE module_id='20400' and namespace_id='999969';
-UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1021}' 
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1021}' 
  WHERE module_id='20400' and namespace_id='999970';
-UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1022}' 
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-management/build/index.html?hideNavigationBar\u003d1\u0026name\u003d1#/verify_account#sign_suffix\",\"categoryId\":1022}' 
  WHERE module_id='20400' and namespace_id='999971';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1023}' 
  WHERE module_id='20400' and namespace_id='999972';
@@ -348,7 +348,7 @@ UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1024}'
  WHERE module_id='20400' and namespace_id='999975';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1025}' 
  WHERE module_id='20400' and namespace_id='999980';
-UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://core.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1026}' 
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1026}' 
  WHERE module_id='20400' and namespace_id='999983';
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1027}' 
  WHERE module_id='20400' and namespace_id='999992';
@@ -719,6 +719,101 @@ VALUES
 (@id:=@id+1, 999938, 1029, NULL, NULL, 1, 2, NOW(), 1, NULL, NULL);
 -- END BY 杨崇鑫
 
+
+-- 深圳湾适用脚本[999966]  
+-- ADD BY 杨崇鑫 
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+ VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"${home.url}/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='999966';
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=999966;
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=999966;
+-- END BY 杨崇鑫 
+
+
+-- 清华信息港适用脚本[999984]  
+-- ADD BY 杨崇鑫 
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+ VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"categoryId\":1001}');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='999984';
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=999984;
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=999984;
+-- END BY 杨崇鑫 
+
+
+-- 光大we谷适用脚本[999979]  
+-- ADD BY 杨崇鑫 
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+ VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"categoryId\":1001}');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='999979';
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=999979;
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=999979;
+-- END BY 杨崇鑫 
+
+
+-- 安邦物业适用脚本[999949]  
+-- ADD BY 杨崇鑫 
+-- #28874 物业缴费（多应用） 产品功能  缴费旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_asset_app_categories`(`id`, `category_id`, `create_time`, `create_uid`, `namespace_id`, `instance_flag`) 
+ VALUES (1001, 1001, UTC_TIMESTAMP(), 1, 2, '{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET `instance_config`='{\"url\":\"https://beta.zuolin.com/property-payment/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0&name=1#/home_page#sign_suffix\",\"categoryId\":1001}' 
+ WHERE module_id='20400' and namespace_id='999949';
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=999949;
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=999949;
+-- END BY 杨崇鑫 
 
 
 
