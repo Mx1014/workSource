@@ -90,6 +90,8 @@ CREATE TABLE `eh_asset_module_app_mappings`(
   `create_uid` BIGINT NOT NULL,
   `update_time` DATETIME DEFAULT NULL,
   `update_uid` BIGINT DEFAULT NULL,
+  UNIQUE KEY `u_asset_category_id`(`asset_category_id`),
+  UNIQUE KEY `u_contract_category_id`(`contract_category_id`),
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
 

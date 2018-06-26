@@ -14,6 +14,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractCategory;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -66,7 +67,6 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.serviceModuleApp.ServiceModuleAppMapping;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -1025,7 +1025,7 @@ public class AssetServiceImpl implements AssetService {
     public void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd) {
         LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
         // 转categoryId
-        Long categoryId = assetProvider.getOriginIdFromMappingApp(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID);
+        Long categoryId = assetProvider.getOriginIdFromMappingApp(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID, cmd.getNamesapceId());
         if(categoryId == null){
             categoryId = 0l;
         }
@@ -4680,26 +4680,45 @@ public class AssetServiceImpl implements AssetService {
 		}
 	}
 
+    /**
+     * first checkout if
+     * @param cmd
+     */
     @Override
     public void createAnAppMapping(CreateAnAppMappingCommand cmd) {
-        EhServiceModuleAppMappings relation = new ServiceModuleAppMapping();
-        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppMappings.class));
-        relation.setId(nextSequence);
-        relation.setAppModuleIdMale(cmd.getModuleIdRo());
-        relation.setAppOriginIdMale(cmd.getOriginIdRo());
-        relation.setAppModuleIdFemale(cmd.getModuleIdJu());
-        relation.setAppOriginIdFemale(cmd.getOriginIdJu());
-        relation.setCreateUid(UserContext.currentUserId());
-
+        AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
+        mapping.setId(nextSequence);
+        if(cmd.getAssetCategoryId() == null || cmd.getContractCategoryId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "either assetCategoryId or contractCategory is null");
+        }
+        boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
+        boolean existContract = assetProvider.checkExistContract(cmd.getContractCategoryId());
+        if(existAsset || existContract){
+             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
+                    "asset category or contract category already exist in mapping schema");
+        }
+        Long mappingId = assetProvider.checkEnergyFlag(cmd.getNamespaceId());
+        mapping.setAssetCategoryId(cmd.getAssetCategoryId());
+        mapping.setContractCategoryId(cmd.getContractCategoryId());
+        mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        mapping.setCreateUid(UserContext.currentUserId());
+        mapping.setNamespaceId(cmd.getNamespaceId());
+        mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
+        mapping.setEnergyFlag(AppMappingEnergyFlag.fromCodeDefaultNO(cmd.getEnergyFlag()).getCode());
         // add relation
-        assetProvider.insertAppMapping(relation);
-
+        if(mappingId != null && AppMappingEnergyFlag.fromCodeDefaultNO(mapping.getEnergyFlag()) == AppMappingEnergyFlag.YES){
+            assetProvider.changeEnergyFlag(mappingId, AppMappingEnergyFlag.NO);
+        }
+        assetProvider.insertAppMapping(mapping);
     }
 
     @Override
     public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
         assetProvider.updateAnAppMapping(cmd);
     }
+
 
     @Override
     public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {

@@ -14,6 +14,7 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -41,13 +42,8 @@ import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
-import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
-import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.*;
 
-import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
-
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.talent.Talent;
 import com.everhomes.user.UserContext;
@@ -4730,69 +4726,157 @@ public class AssetProviderImpl implements AssetProvider {
 	}
 
     @Override
-    public Long getOriginIdFromMappingApp(final Long moduleId, final Long originId, long targetModuleId) {
+    public Long getOriginIdFromMappingApp(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+	    if(moduleId == PrivilegeConstants.ENERGY_MODULE && targetModuleId == PrivilegeConstants.ASSET_MODULE_ID){
+            List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG.eq(AppMappingEnergyFlag.YES.getCode()))
+                    .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
+            if(records.size() > 0) return records.get(0);
+            return null;
+        }
         if(originId == null) return null;
-        final Long[] ret = {null};
-        getContext(AccessSpec.readOnly()).select(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE
-                , Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE, Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE,
-                Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE)
-                .from(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(originId).and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE.eq(moduleId)))
-                .or(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(originId).and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE.eq(moduleId)))
-                .fetch()
-                .forEach(r ->{
-                    Long valueF = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE);
-                    Long moduleF = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE);
-                    Long valueM = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE);
-                    Long moduleM = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE);
-                    if(valueF != null && valueM != null){
-                        if(valueF.longValue() == originId.longValue() && moduleM.longValue() == targetModuleId){
-                            ret[0] = valueM;
-                        }else if(valueM.longValue() == originId.longValue() && moduleF.longValue() == targetModuleId){
-                            ret[0] = valueF;
-                        }
-                    }
-                });
-        return ret[0];
+        Long ret = null;
+
+        if(targetModuleId == PrivilegeConstants.ASSET_MODULE_ID && moduleId == PrivilegeConstants.CONTRACT_MODULE){
+            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(originId))
+                    .fetchOne(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
+        }else if(targetModuleId == PrivilegeConstants.CONTRACT_MODULE && moduleId == PrivilegeConstants.ASSET_MODULE_ID){
+            ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID)
+                    .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(originId))
+                    .fetchOne(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID);
+        }
+        return ret;
     }
 
     @Override
-    public void insertAppMapping(EhServiceModuleAppMappings relation) {
-        EhServiceModuleAppMappingsDao dao = new EhServiceModuleAppMappingsDao(getContext(AccessSpec.readWrite()).configuration());
-        dao.insert(relation);
+    public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
+        return getOriginIdFromMappingApp(moduleId, originId, targetModuleId, null);
     }
+
+    @Override
+    public void insertAppMapping(EhAssetModuleAppMappings relation) {
+        EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(getReadWriteContext().configuration());
+        dao.insert(relation);
+	}
+
 
     @Override
     public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
-        // 将罗密欧的对象改为新的朱丽叶 ps: 来两边，因为不知道罗密欧是男是女 是狗
-        getContext(AccessSpec.readWrite())
-                .update(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-                .set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE, cmd.getOriginIdJu())
-                .set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE, cmd.getModuleIdJu())
-                .where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(cmd.getOriginIdRo()))
-                .and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE.eq(cmd.getModuleIdRo()))
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        boolean existAsset = checkExistAsset(cmd.getAssetCategoryId());
+        boolean existContract = checkExistContract(cmd.getContractCategoryId());
+        if(existAsset && existContract){
+            Integer namespaceIdAsset = findNamespaceByAsset(cmd.getAssetCategoryId());
+            Integer namespaceIdContract = findNamespaceByContractId(cmd.getContractCategoryId());
+            if(namespaceIdAsset != namespaceIdContract){
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "asset app and contract app do not have the same namespaceId");
+            }
+            AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
+            mapping.setId(nextSequence);
+            mapping.setAssetCategoryId(cmd.getAssetCategoryId());
+            mapping.setContractCategoryId(cmd.getContractCategoryId());
+            mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            mapping.setCreateUid(UserContext.currentUserId());
+            mapping.setNamespaceId(namespaceIdAsset);
+            mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
+            mapping.setEnergyFlag(AppMappingEnergyFlag.NO.getCode());
+            this.dbProvider.execute((status) -> {
+                deleteByContractAndAsset(cmd.getContractCategoryId(), cmd.getAssetCategoryId());
+                insertAppMapping(mapping);
+                return null;
+            });
+        }else if(existAsset && !existContract){
+            dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID, cmd.getContractCategoryId())
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()));
+        }else if(!existAsset && existContract){
+            dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                    .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID, cmd.getAssetCategoryId())
+                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(cmd.getContractCategoryId()));
+        }else{
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "asset category id and contract id does not exist yes");
+        }
+    }
+
+    private void deleteByContractAndAsset(Long contractCategoryId, Long assetCategoryId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        dslContext.delete(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
+                .or(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
                 .execute();
-        getContext(AccessSpec.readWrite())
-                .update(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-                .set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE, cmd.getOriginIdJu())
-                .set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE, cmd.getModuleIdJu())
-                .where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(cmd.getOriginIdRo()))
-                .and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE.eq(cmd.getModuleIdRo()))
-                .execute();
-        // 将朱丽叶的对象改为新的罗密欧
-        getContext(AccessSpec.readWrite())
-                .update(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-                .set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE, cmd.getOriginIdRo())
-                .set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE, cmd.getModuleIdRo())
-                .where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(cmd.getOriginIdJu()))
-                .and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE.eq(cmd.getModuleIdJu()))
-                .execute();
-        getContext(AccessSpec.readWrite())
-                .update(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-                .set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE, cmd.getOriginIdRo())
-                .set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE, cmd.getModuleIdRo())
-                .where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(cmd.getOriginIdJu()))
-                .and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE.eq(cmd.getModuleIdJu()))
+    }
+
+    private Integer findNamespaceByContractId(Long contractCategoryId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Integer namespaceId = null;
+        List<Integer> fetch = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID)
+                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
+                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID);
+        if(fetch.size() > 0) return fetch.get(0);
+        return null;
+    }
+
+    private Integer findNamespaceByAsset(Long assetCategoryId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Integer namespaceId = null;
+        List<Integer> fetch = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID)
+                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID);
+        if(fetch.size() > 0) return fetch.get(0);
+        return null;
+    }
+
+    @Override
+    public boolean checkExistAsset(Long assetCategoryId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
+                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
+        return records.size() > 0;
+    }
+
+    @Override
+    public boolean checkExistContract(Long contractCategoryId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
+                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
+                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
+        return records.size() > 0;
+    }
+
+    @Override
+    public Long checkEnergyFlag(Integer namespaceID) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
+                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceID))
+                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG.eq(AppMappingEnergyFlag.YES.getCode()))
+                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
+	    if(records.size()>0){
+	        return records.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag flag) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG, flag.getCode())
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID.eq(mappingId))
                 .execute();
     }
 }
