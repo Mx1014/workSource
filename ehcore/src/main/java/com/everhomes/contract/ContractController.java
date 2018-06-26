@@ -344,7 +344,7 @@ public class ContractController extends ControllerBase {
 		
 		//TemplateDTO dto = contractService.updateBuilding(cmd);
 
-        RestResponse response =  new RestResponse(dto);
+        RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
