@@ -746,7 +746,184 @@ UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1027}'
 UPDATE `eh_service_module_apps` SET `instance_config`='{\"categoryId\":1028}' 
  WHERE module_id='20400' and namespace_id='999993';
 
+-- 更新eh_payment_bills表的categoryid
+update eh_payment_bills set category_id=1001  where namespace_id=2;
+update eh_payment_bills set category_id=1002  where namespace_id=11;
+update eh_payment_bills set category_id=1003  where namespace_id=999944;
+update eh_payment_bills set category_id=1004  where namespace_id=999945;
+update eh_payment_bills set category_id=1005  where namespace_id=999946;
+update eh_payment_bills set category_id=1006  where namespace_id=999947;
+update eh_payment_bills set category_id=1007  where namespace_id=999948;
+update eh_payment_bills set category_id=1008  where namespace_id=999949;
+update eh_payment_bills set category_id=1009  where namespace_id=999950;
+update eh_payment_bills set category_id=1010  where namespace_id=999951;
+update eh_payment_bills set category_id=1011  where namespace_id=999952;
+update eh_payment_bills set category_id=1012  where namespace_id=999953;
+update eh_payment_bills set category_id=1013  where namespace_id=999954;
+update eh_payment_bills set category_id=1014  where namespace_id=999956;
+update eh_payment_bills set category_id=1015  where namespace_id=999957;
+update eh_payment_bills set category_id=1016  where namespace_id=999958;
+update eh_payment_bills set category_id=1017  where namespace_id=999961;
+update eh_payment_bills set category_id=1018  where namespace_id=999962;
+update eh_payment_bills set category_id=1019  where namespace_id=999967;
+update eh_payment_bills set category_id=1020  where namespace_id=999969;
+update eh_payment_bills set category_id=1021  where namespace_id=999970;
+update eh_payment_bills set category_id=1022  where namespace_id=999971;
+update eh_payment_bills set category_id=1023  where namespace_id=999972;
+update eh_payment_bills set category_id=1024  where namespace_id=999975;
+update eh_payment_bills set category_id=1025  where namespace_id=999980;
+update eh_payment_bills set category_id=1026  where namespace_id=999983;
+update eh_payment_bills set category_id=1027  where namespace_id=999992;
+update eh_payment_bills set category_id=1028  where namespace_id=999993;
 
- 
- 
+-- 更新 eh_payment_notice_config 表的categoryid
+update eh_payment_notice_config set category_id=1001  where namespace_id=2;
+update eh_payment_notice_config set category_id=1002  where namespace_id=11;
+update eh_payment_notice_config set category_id=1003  where namespace_id=999944;
+update eh_payment_notice_config set category_id=1004  where namespace_id=999945;
+update eh_payment_notice_config set category_id=1005  where namespace_id=999946;
+update eh_payment_notice_config set category_id=1006  where namespace_id=999947;
+update eh_payment_notice_config set category_id=1007  where namespace_id=999948;
+update eh_payment_notice_config set category_id=1008  where namespace_id=999949;
+update eh_payment_notice_config set category_id=1009  where namespace_id=999950;
+update eh_payment_notice_config set category_id=1010  where namespace_id=999951;
+update eh_payment_notice_config set category_id=1011  where namespace_id=999952;
+update eh_payment_notice_config set category_id=1012  where namespace_id=999953;
+update eh_payment_notice_config set category_id=1013  where namespace_id=999954;
+update eh_payment_notice_config set category_id=1014  where namespace_id=999956;
+update eh_payment_notice_config set category_id=1015  where namespace_id=999957;
+update eh_payment_notice_config set category_id=1016  where namespace_id=999958;
+update eh_payment_notice_config set category_id=1017  where namespace_id=999961;
+update eh_payment_notice_config set category_id=1018  where namespace_id=999962;
+update eh_payment_notice_config set category_id=1019  where namespace_id=999967;
+update eh_payment_notice_config set category_id=1020  where namespace_id=999969;
+update eh_payment_notice_config set category_id=1021  where namespace_id=999970;
+update eh_payment_notice_config set category_id=1022  where namespace_id=999971;
+update eh_payment_notice_config set category_id=1023  where namespace_id=999972;
+update eh_payment_notice_config set category_id=1024  where namespace_id=999975;
+update eh_payment_notice_config set category_id=1025  where namespace_id=999980;
+update eh_payment_notice_config set category_id=1026  where namespace_id=999983;
+update eh_payment_notice_config set category_id=1027  where namespace_id=999992;
+update eh_payment_notice_config set category_id=1028  where namespace_id=999993;
+
+-- 更新 eh_payment_charging_item_scopes 表的categoryid
+update eh_payment_charging_item_scopes set category_id=1001  where namespace_id=2;
+update eh_payment_charging_item_scopes set category_id=1002  where namespace_id=11;
+update eh_payment_charging_item_scopes set category_id=1003  where namespace_id=999944;
+update eh_payment_charging_item_scopes set category_id=1004  where namespace_id=999945;
+update eh_payment_charging_item_scopes set category_id=1005  where namespace_id=999946;
+update eh_payment_charging_item_scopes set category_id=1006  where namespace_id=999947;
+update eh_payment_charging_item_scopes set category_id=1007  where namespace_id=999948;
+update eh_payment_charging_item_scopes set category_id=1008  where namespace_id=999949;
+update eh_payment_charging_item_scopes set category_id=1009  where namespace_id=999950;
+update eh_payment_charging_item_scopes set category_id=1010  where namespace_id=999951;
+update eh_payment_charging_item_scopes set category_id=1011  where namespace_id=999952;
+update eh_payment_charging_item_scopes set category_id=1012  where namespace_id=999953;
+update eh_payment_charging_item_scopes set category_id=1013  where namespace_id=999954;
+update eh_payment_charging_item_scopes set category_id=1014  where namespace_id=999956;
+update eh_payment_charging_item_scopes set category_id=1015  where namespace_id=999957;
+update eh_payment_charging_item_scopes set category_id=1016  where namespace_id=999958;
+update eh_payment_charging_item_scopes set category_id=1017  where namespace_id=999961;
+update eh_payment_charging_item_scopes set category_id=1018  where namespace_id=999962;
+update eh_payment_charging_item_scopes set category_id=1019  where namespace_id=999967;
+update eh_payment_charging_item_scopes set category_id=1020  where namespace_id=999969;
+update eh_payment_charging_item_scopes set category_id=1021  where namespace_id=999970;
+update eh_payment_charging_item_scopes set category_id=1022  where namespace_id=999971;
+update eh_payment_charging_item_scopes set category_id=1023  where namespace_id=999972;
+update eh_payment_charging_item_scopes set category_id=1024  where namespace_id=999975;
+update eh_payment_charging_item_scopes set category_id=1025  where namespace_id=999980;
+update eh_payment_charging_item_scopes set category_id=1026  where namespace_id=999983;
+update eh_payment_charging_item_scopes set category_id=1027  where namespace_id=999992;
+update eh_payment_charging_item_scopes set category_id=1028  where namespace_id=999993;
+
+-- 更新 eh_payment_charging_standards_scopes 表的categoryid
+update eh_payment_charging_standards_scopes set category_id=1001  where namespace_id=2;
+update eh_payment_charging_standards_scopes set category_id=1002  where namespace_id=11;
+update eh_payment_charging_standards_scopes set category_id=1003  where namespace_id=999944;
+update eh_payment_charging_standards_scopes set category_id=1004  where namespace_id=999945;
+update eh_payment_charging_standards_scopes set category_id=1005  where namespace_id=999946;
+update eh_payment_charging_standards_scopes set category_id=1006  where namespace_id=999947;
+update eh_payment_charging_standards_scopes set category_id=1007  where namespace_id=999948;
+update eh_payment_charging_standards_scopes set category_id=1008  where namespace_id=999949;
+update eh_payment_charging_standards_scopes set category_id=1009  where namespace_id=999950;
+update eh_payment_charging_standards_scopes set category_id=1010  where namespace_id=999951;
+update eh_payment_charging_standards_scopes set category_id=1011  where namespace_id=999952;
+update eh_payment_charging_standards_scopes set category_id=1012  where namespace_id=999953;
+update eh_payment_charging_standards_scopes set category_id=1013  where namespace_id=999954;
+update eh_payment_charging_standards_scopes set category_id=1014  where namespace_id=999956;
+update eh_payment_charging_standards_scopes set category_id=1015  where namespace_id=999957;
+update eh_payment_charging_standards_scopes set category_id=1016  where namespace_id=999958;
+update eh_payment_charging_standards_scopes set category_id=1017  where namespace_id=999961;
+update eh_payment_charging_standards_scopes set category_id=1018  where namespace_id=999962;
+update eh_payment_charging_standards_scopes set category_id=1019  where namespace_id=999967;
+update eh_payment_charging_standards_scopes set category_id=1020  where namespace_id=999969;
+update eh_payment_charging_standards_scopes set category_id=1021  where namespace_id=999970;
+update eh_payment_charging_standards_scopes set category_id=1022  where namespace_id=999971;
+update eh_payment_charging_standards_scopes set category_id=1023  where namespace_id=999972;
+update eh_payment_charging_standards_scopes set category_id=1024  where namespace_id=999975;
+update eh_payment_charging_standards_scopes set category_id=1025  where namespace_id=999980;
+update eh_payment_charging_standards_scopes set category_id=1026  where namespace_id=999983;
+update eh_payment_charging_standards_scopes set category_id=1027  where namespace_id=999992;
+update eh_payment_charging_standards_scopes set category_id=1028  where namespace_id=999993;
+
+-- 更新 eh_payment_bill_groups 表的categoryid
+update eh_payment_bill_groups set category_id=1001  where namespace_id=2;
+update eh_payment_bill_groups set category_id=1002  where namespace_id=11;
+update eh_payment_bill_groups set category_id=1003  where namespace_id=999944;
+update eh_payment_bill_groups set category_id=1004  where namespace_id=999945;
+update eh_payment_bill_groups set category_id=1005  where namespace_id=999946;
+update eh_payment_bill_groups set category_id=1006  where namespace_id=999947;
+update eh_payment_bill_groups set category_id=1007  where namespace_id=999948;
+update eh_payment_bill_groups set category_id=1008  where namespace_id=999949;
+update eh_payment_bill_groups set category_id=1009  where namespace_id=999950;
+update eh_payment_bill_groups set category_id=1010  where namespace_id=999951;
+update eh_payment_bill_groups set category_id=1011  where namespace_id=999952;
+update eh_payment_bill_groups set category_id=1012  where namespace_id=999953;
+update eh_payment_bill_groups set category_id=1013  where namespace_id=999954;
+update eh_payment_bill_groups set category_id=1014  where namespace_id=999956;
+update eh_payment_bill_groups set category_id=1015  where namespace_id=999957;
+update eh_payment_bill_groups set category_id=1016  where namespace_id=999958;
+update eh_payment_bill_groups set category_id=1017  where namespace_id=999961;
+update eh_payment_bill_groups set category_id=1018  where namespace_id=999962;
+update eh_payment_bill_groups set category_id=1019  where namespace_id=999967;
+update eh_payment_bill_groups set category_id=1020  where namespace_id=999969;
+update eh_payment_bill_groups set category_id=1021  where namespace_id=999970;
+update eh_payment_bill_groups set category_id=1022  where namespace_id=999971;
+update eh_payment_bill_groups set category_id=1023  where namespace_id=999972;
+update eh_payment_bill_groups set category_id=1024  where namespace_id=999975;
+update eh_payment_bill_groups set category_id=1025  where namespace_id=999980;
+update eh_payment_bill_groups set category_id=1026  where namespace_id=999983;
+update eh_payment_bill_groups set category_id=1027  where namespace_id=999992;
+update eh_payment_bill_groups set category_id=1028  where namespace_id=999993;
+
+-- 更新 eh_payment_bill_items 表的categoryid
+update eh_payment_bill_items set category_id=1001  where namespace_id=2;
+update eh_payment_bill_items set category_id=1002  where namespace_id=11;
+update eh_payment_bill_items set category_id=1003  where namespace_id=999944;
+update eh_payment_bill_items set category_id=1004  where namespace_id=999945;
+update eh_payment_bill_items set category_id=1005  where namespace_id=999946;
+update eh_payment_bill_items set category_id=1006  where namespace_id=999947;
+update eh_payment_bill_items set category_id=1007  where namespace_id=999948;
+update eh_payment_bill_items set category_id=1008  where namespace_id=999949;
+update eh_payment_bill_items set category_id=1009  where namespace_id=999950;
+update eh_payment_bill_items set category_id=1010  where namespace_id=999951;
+update eh_payment_bill_items set category_id=1011  where namespace_id=999952;
+update eh_payment_bill_items set category_id=1012  where namespace_id=999953;
+update eh_payment_bill_items set category_id=1013  where namespace_id=999954;
+update eh_payment_bill_items set category_id=1014  where namespace_id=999956;
+update eh_payment_bill_items set category_id=1015  where namespace_id=999957;
+update eh_payment_bill_items set category_id=1016  where namespace_id=999958;
+update eh_payment_bill_items set category_id=1017  where namespace_id=999961;
+update eh_payment_bill_items set category_id=1018  where namespace_id=999962;
+update eh_payment_bill_items set category_id=1019  where namespace_id=999967;
+update eh_payment_bill_items set category_id=1020  where namespace_id=999969;
+update eh_payment_bill_items set category_id=1021  where namespace_id=999970;
+update eh_payment_bill_items set category_id=1022  where namespace_id=999971;
+update eh_payment_bill_items set category_id=1023  where namespace_id=999972;
+update eh_payment_bill_items set category_id=1024  where namespace_id=999975;
+update eh_payment_bill_items set category_id=1025  where namespace_id=999980;
+update eh_payment_bill_items set category_id=1026  where namespace_id=999983;
+update eh_payment_bill_items set category_id=1027  where namespace_id=999992;
+update eh_payment_bill_items set category_id=1028  where namespace_id=999993;
+
 -- END BY 杨崇鑫
