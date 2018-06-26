@@ -94,4 +94,5 @@ public interface ContractProvider {
 	void saveContractEventAboutAttachment(int opearteType, Contract contract, ContractAttachment contractAttachment);
 	void saveContractEventAboutChargingChange(int adjustAdd, Contract contract,ContractChargingChange contractChargingChange);
 	List<ContractEvents> listContractEvents(Long contractId);
+	void saveContractEventAboutApartments(int opearteType, Contract contract, String oldApartmnets,String newApartmnets);
 }

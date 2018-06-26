@@ -629,7 +629,6 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractType.NEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		} else if(ContractType.RENEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
-			
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_RENEW, cmd.getOrgId(), cmd.getCommunityId());
 		} else if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))) {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CHANGE, cmd.getOrgId(), cmd.getCommunityId());
@@ -673,8 +672,16 @@ public class ContractServiceImpl implements ContractService {
 		contract.setUpdateTime(contract.getCreateTime());
 		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
-		//添加合同日志 by tangcen
+		//添加合同日志add by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_ADD,contract,null);
+		//如果是变更或续约合同，需在父合同添加日志
+		if(ContractType.RENEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_RENEW,parentContract,contract);
+		} else if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_CHANGE,parentContract,contract);
+		}
 		//调用计算明细
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -992,6 +999,9 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
+		//add by tangcen
+		List<String> oldApartments = new ArrayList<>();
+		List<String> newApartments = new ArrayList<>();
 		//没有id的，增加
 	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
@@ -999,6 +1009,8 @@ public class ContractServiceImpl implements ContractService {
 		if(existApartments != null && existApartments.size() > 0) {
 			existApartments.forEach(apartment -> {
 				map.put(apartment.getId(), apartment);
+				//add by tangcen
+				oldApartments.add(apartment.getApartmentName());
 			});
 		}
 
@@ -1021,6 +1033,9 @@ public class ContractServiceImpl implements ContractService {
 		Double totalSize = 0.0;
 		if(buildingApartments != null && buildingApartments.size() > 0) {
 			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
+				//add by tangcen
+				newApartments.add(buildingApartment.getApartmentName());
+				
 				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				totalSize = totalSize + size;
 				if(buildingApartment.getId() == null) {
@@ -1035,7 +1050,7 @@ public class ContractServiceImpl implements ContractService {
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
 					//记录合同日志 by tangcen
-					contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,mapping);
+					//contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,mapping);
 					
 					if(!parentAddressIds.contains(buildingApartment.getAddressId())) {
 						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
@@ -1059,7 +1074,7 @@ public class ContractServiceImpl implements ContractService {
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
 				//记录合同日志 by tangcen
-				contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_DELETE,contract,apartment);
+				//contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_DELETE,contract,apartment);
 				
 				if(!finalParents.contains(apartment.getAddressId())) {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
@@ -1072,7 +1087,19 @@ public class ContractServiceImpl implements ContractService {
 				}
 			});
 		}
-
+		//add by tangcen
+		if (oldApartments.size() == 0) {
+			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,null,newApartments.toString());
+		}else if (newApartments.size() < oldApartments.size()) {
+			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_UPDATE,contract,oldApartments.toString(),newApartments.toString());
+		}else if (newApartments.size() >= oldApartments.size()) {
+			for(String apartmentName : newApartments){
+				if (!oldApartments.contains(apartmentName)) {
+					contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_UPDATE,contract,oldApartments.toString(),newApartments.toString());
+					break;
+				}
+			}
+		}
 		return totalSize;
 	}
 
