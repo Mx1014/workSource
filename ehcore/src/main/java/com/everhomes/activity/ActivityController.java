@@ -540,9 +540,13 @@ public class ActivityController extends ControllerBase {
      * <p>获取活动收款方列表</p>
      */
     @RequestMapping("listActivityPayee")
-    @RestReturn(value=ListActivityPayeeResponse.class)
+    @RestReturn(value=ActivityPayeeDTO.class,collection = true)
     public RestResponse listActivityPayee(ListActivityPayeeCommand cmd){
-        return new RestResponse(activityService.listActivityPayee(cmd));
+        List<ActivityPayeeDTO> list = activityService.listActivityPayee(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     /**

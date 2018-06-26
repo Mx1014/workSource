@@ -6271,7 +6271,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public ListActivityPayeeResponse listActivityPayee(ListActivityPayeeCommand cmd) {
+    public List<ActivityPayeeDTO> listActivityPayee(ListActivityPayeeCommand cmd) {
         if (cmd.getOrganizationId() == null) {
             LOGGER.error("organizationId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -6302,9 +6302,7 @@ public class ActivityServiceImpl implements ActivityService {
                 dtoList.add(activityPayeeDTO);
             }
         }
-        ListActivityPayeeResponse response = new ListActivityPayeeResponse();
-        response.setDtos(dtoList);
-        return response;
+        return dtoList;
     }
 
     @Override

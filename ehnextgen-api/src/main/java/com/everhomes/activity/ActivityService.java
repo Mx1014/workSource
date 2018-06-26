@@ -213,7 +213,7 @@ public interface ActivityService {
 
     GetActivityPayeeDTO getActivityPayee(GetActivityPayeeCommand cmd);
 
-	ListActivityPayeeResponse listActivityPayee(ListActivityPayeeCommand cmd);
+	List<ActivityPayeeDTO> listActivityPayee(ListActivityPayeeCommand cmd);
 
 	void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd);
 
