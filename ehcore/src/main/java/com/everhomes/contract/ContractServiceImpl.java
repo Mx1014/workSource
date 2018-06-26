@@ -58,6 +58,10 @@ import com.everhomes.rest.asset.RentFree;
 import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.BuildingExportDetailDTO;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
@@ -70,9 +74,13 @@ import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
@@ -90,10 +98,14 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.*;
+import com.everhomes.varField.Field;
 import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeField;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -110,6 +122,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -120,6 +134,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
@@ -239,6 +255,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	//多入口相关
 	@Autowired
 	ServiceModuleAppService serviceModuleAppService;
+	
+	@Autowired
+    private FieldService fieldService;
 	
 	/*@Autowired
 	private ServiceModuleAppProvider serviceModuleAppProvider;*/
@@ -2399,4 +2418,238 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
     public Long findContractCategoryIdByContractId(Long contractId) {
 		return contractProvider.findContractCategoryIdByContractId(contractId);
     }
+    
+	@Override
+	public void exportContractListByCommunityCategoryId(ListContractsCommand cmd, HttpServletResponse response) {
+		cmd.setPageSize(10000);
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		if(namespaceId != 1000000) {
+			//checkContractAuth(namespaceId, PrivilegeConstants.CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
+		}
+		
+		List<Contract> contractList = null;
+		
+		//1. 有关键字
+		if (StringUtils.isNotBlank(cmd.getBuildingName()) || StringUtils.isNotBlank(cmd.getKeywords())) {
+			List<String> contractNumbers = contractBuildingMappingProvider.listContractByKeywords(namespaceId, cmd.getBuildingName(), cmd.getKeywords());
+			contractNumbers.sort((t1, t2)->{
+				if (t1.compareTo(t2) > 0) {
+					return 1;
+				}
+				return -1;
+			});
+			contractList = contractProvider.listContractByContractNumbers(namespaceId, contractNumbers, cmd.getCategoryId());
+		}else {
+			//2. 无关键字
+			contractList = contractProvider.listContractByNamespaceId(namespaceId, 0, cmd.getPageSize(), cmd.getCategoryId());
+		}
+		
+		if (contractList == null) {
+            LOGGER.error("Contract is not exist.");
+            throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_NOT_EXIST,
+                    "Contract is not exist.");
+        }
+		
+		
+		
+		//查询动态字段
+		String[] propertyNames = {"contractNumber","name","contractType","contractStartDate","contractEndDate","customerId","apartments","rent","status"};
+		
+		
+		//String[] titleNames = {"","","","","","","","","","",};
+		
+		//String[] fieldpropertyNames = {"","","","","","","","","","",};
+		
+		List<FieldDTO> dtos = listScopeFields(cmd);
+		//标题
+		String[] titleNames = new String[dtos.size()+1];
+		//属性字段
+		String[] fieldpropertyNames = new String[dtos.size()+1];
+		
+		for (int i = 0; i < dtos.size(); i++) {
+			fieldpropertyNames[i]=dtos.get(i).getFieldName();
+		}
+		
+		
+		
+        List propertyNamesList = Arrays.asList(propertyNames);   //将数组转化为list
+        List fieldpropertyNamesList = Arrays.asList(fieldpropertyNames);
+        
+        List list = (List) propertyNamesList.stream().filter(a -> fieldpropertyNamesList.contains(a)).collect(Collectors.toList());
+        
+        String[] ExcelPropertyNames = (String[])list.toArray(new String[list.size()]);     //转化为数组
+        
+        for (int i = 0; i < ExcelPropertyNames.length; i++) {
+        	for (int j = 0; j < dtos.size(); j++) {
+				if(ExcelPropertyNames[i].equals(dtos.get(j).getFieldName())){
+					titleNames[i]=dtos.get(j).getFieldDisplayName();
+				}
+			}
+		}
+        
+        int[] titleSizes = new int[ExcelPropertyNames.length];
+        for (int i = 0; i < ExcelPropertyNames.length; i++) {
+        	titleSizes[i]=30;
+		}
+        
+        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        if (community == null) {
+            LOGGER.error("Community is not exist.");
+            throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+                    "Community is not exist.");
+        }
+		//List<BuildingDTO> buildings = listBuildings(cmd).getBuildings();
+		
+		if (contractList != null && contractList.size() > 0) {
+			String fileName = String.format("合同信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "合同信息");
+			
+
+			List<ContractExportDetailDTO> data = contractList.stream().map(this::convertToExportDetail).collect(Collectors.toList());
+			
+			/*excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
+                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
+                    "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
+                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                    "4、带有星号（*）的红色字段为必填项。\n" +
+                    "5、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
+                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);*/
+			//String[] propertyNames = {"name", "buildingNumber", "aliasName", "address", "latitudeLongitude", "trafficDescription", "managerName", "contact", "areaSize", "description"};
+			//String[] titleNames = {"*楼栋名称", "楼栋编号", "简称", "*地址", "经纬度", "交通说明", "*联系人", "*联系电话","面积（平米）", "楼栋介绍"};
+			
+			//int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.writeExcel(ExcelPropertyNames, titleNames, titleSizes, data);
+		} else {
+			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+					"no data");
+		}
+	}
+	
+	private ContractExportDetailDTO convertToExportDetail(Contract dto) {
+		ContractExportDetailDTO exportDetailDTO = ConvertHelper.convert(dto, ContractExportDetailDTO.class);
+		try {
+			exportDetailDTO.setName(dto.getName());
+			exportDetailDTO.setStatus(dto.getStatus());
+			
+			//exportDetailDTO.setBuildings(dto.getap);
+			/*Community community = communityProvider.findCommunityById(dto.getCommunityId());
+			if(community != null) {
+				exportDetailDTO.setCommuntiyName(community.getName());
+			}*/
+
+			/*if(dto.getLatitude() != null && dto.getLongitude() != null) {
+				exportDetailDTO.setLatitudeLongitude(dto.getLongitude() + "," + dto.getLatitude());
+			}*/
+		} catch (Exception e) {
+			LOGGER.error("dto : {}", dto);
+			throw e;
+		}
+
+		return exportDetailDTO;
+	}
+	
+    private List<FieldDTO> listScopeFields(ListContractsCommand cmd) {
+        Map<Long, ScopeField> scopeFields = new HashMap<>();
+        Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
+        if(cmd.getCommunityId() != null) {
+            scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), "contract", null, cmd.getCategoryId());
+            //查询旧数据 多入口
+            if (scopeFields != null && scopeFields.size() < 1) {
+            	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), "contract", null, null);
+			}
+            if(scopeFields != null && scopeFields.size() > 0) {
+                namespaceFlag = false;
+                globalFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, "contract", null, cmd.getCategoryId());
+          //查询旧数据 多入口
+            if (scopeFields != null && scopeFields.size() < 1) {
+            	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, "contract", null, null);
+			}
+            if (scopeFields != null && scopeFields.size() > 0) {
+                globalFlag = false;
+            }
+            // don't read general configutations when choose all scope
+//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
+//                globalFlag = false;
+//            }
+        }
+        // add general scope fields version 3.5
+        if(globalFlag) {
+            scopeFields = fieldProvider.listScopeFields(0, null, "contract", null, cmd.getCategoryId());
+        }
+        if (scopeFields != null && scopeFields.size() < 1) {
+        	scopeFields = fieldProvider.listScopeFields(0, null, "contract", null, null);
+		}
+        
+        if(scopeFields != null && scopeFields.size() > 0) {
+            List<Long> fieldIds = new ArrayList<>();
+            Map<Long, FieldDTO> dtoMap = new HashMap<>();
+            scopeFields.forEach((id, field) -> {
+                fieldIds.add(field.getFieldId());
+                dtoMap.put(field.getFieldId(), ConvertHelper.convert(field, FieldDTO.class));
+            });
+
+            //一把取出scope field对应的所有系统的field 然后把对应信息塞进fielddto中
+            //一把取出所有的scope field对应的scope items信息
+            List<Field> fields = fieldProvider.listFields(fieldIds);
+
+            Map<Long, ScopeFieldItem> scopeItems = new HashMap<>();
+
+            if (globalFlag) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, cmd.getCategoryId());
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
+                }
+            } else if (namespaceFlag) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
+                }
+                
+                if (scopeItems != null && scopeItems.size() < 1) {
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+    			}
+                
+            } else {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
+                if (scopeItems != null && scopeItems.size() < 1) {
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
+    			}
+            }
+
+            Map<Long, ScopeFieldItem> fieldItems = scopeItems;
+            if(fields != null && fields.size() > 0) {
+                List<FieldDTO> dtos = new ArrayList<>();
+                fields.forEach(field -> {
+                    FieldDTO dto = dtoMap.get(field.getId());
+                    dto.setFieldType(field.getFieldType());
+                    dto.setFieldName(field.getName());
+                    if(fieldItems != null && fieldItems.size() > 0) {
+                        List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
+                        fieldItems.forEach((id, item) -> {
+                            if(field.getId().equals(item.getFieldId())) {
+                                FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
+                                items.add(fieldItem);
+                            }
+                        });
+                        //按default order排序
+                        items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
+                        dto.setItems(items);
+                    }
+                    dtos.add(dto);
+                });
+
+                //按default order排序
+                dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
+                return dtos;
+            }
+        }
+        return null;
+    }
+
 }

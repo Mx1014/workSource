@@ -16,6 +16,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -313,5 +314,21 @@ public class ContractController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+    /**
+     * <b>URL: /contract/exportContractListByCommunityCategoryId</b>
+     * <p>合同列表导出</p>
+     */
+    @RequestMapping("exportContractListByCommunityCategoryId")
+    @RestReturn(value = String.class)
+    public RestResponse exportContractListByCommunityCategoryId(@Valid ListContractsCommand cmd, HttpServletResponse httpServletResponse) {
+    	
+    	ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+    	contractService.exportContractListByCommunityCategoryId(cmd, httpServletResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

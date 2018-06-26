@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Created by 杨崇鑫  on 2018/4/18.
  */
@@ -210,6 +212,10 @@ public class SZWContractHandler implements ContractService{
 		return response;
 	}
 
-
+	@Override
+	public void exportContractListByCommunityCategoryId(ListContractsCommand cmd, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		
+	}
     
 }

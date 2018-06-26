@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Created by ying.xiong on 2017/8/14.
  */
@@ -711,4 +713,10 @@ public class ZJContractHandler implements ContractService{
         }
         return false;
     }
+
+	@Override
+	public void exportContractListByCommunityCategoryId(ListContractsCommand cmd, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		
+	}
 }
