@@ -842,7 +842,7 @@ public class ContractProviderImpl implements ContractProvider {
 			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
 			break;
 		case ContractTrackingTemplateCode.APARTMENT_UPDATE :
-			dataMap.put("oldApartmnets", oldApartmnets.substring(1,newApartmnets.length()-1));
+			dataMap.put("oldApartmnets", oldApartmnets.substring(1,oldApartmnets.length()-1));
 			dataMap.put("newApartmnets", newApartmnets.substring(1,newApartmnets.length()-1));
 			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
 			break;
