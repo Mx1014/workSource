@@ -42,6 +42,7 @@ public class SearchParkingRechargeOrdersCommand {
     private Byte rechargeType;
     private String cardNumber;
     private String keyWords;
+    private String paySource;
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
@@ -190,4 +191,19 @@ public class SearchParkingRechargeOrdersCommand {
 		this.paidType = paidType;
 	}
 
+    public String getKeyWords() {
+        return keyWords;
+    }
+
+    public void setKeyWords(String keyWords) {
+        this.keyWords = keyWords;
+    }
+
+    public String getPaySource() {
+        return paySource;
+    }
+
+    public void setPaySource(String paySource) {
+        this.paySource = paySource;
+    }
 }
