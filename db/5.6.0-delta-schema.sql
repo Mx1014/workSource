@@ -339,8 +339,9 @@ CREATE TABLE `eh_parking_hubs` (
 
 ALTER TABLE eh_parking_spaces ADD COLUMN parking_hubs_id BIGINT;
 
--- Designer: dingjianmin
--- Description:  合同管理（多应用）V2.6
+-- 通用脚本  
+-- ADD BY 丁建民 
+-- #28874 合同管理（多应用） 产品功能（不同的合同支持不同的部门可见，同时支持一个资源签多份合同）
 CREATE TABLE `eh_service_module_app_mappings`(
   `id` BIGINT NOT NULL ,
   `app_origin_id_male` BIGINT NOT NULL COMMENT 'the origin id of app',
@@ -416,6 +417,6 @@ CREATE TABLE `eh_contract_categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- End by: dingjianmin 
+-- END BY 丁建民 
 
 
