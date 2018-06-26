@@ -4,11 +4,14 @@ package com.everhomes.rest.organization;
  * <ul>
  * 	<li>支付宝 : 10001</li>
  *	<li>微信 : 10002</li>
+ *	<li>个人钱包 : 10003</li>
+ *	<li>企业钱包 : 10004</li>
  *</ul>
  *
  */
 public enum VendorType {
-	ZHI_FU_BAO("10001","alipay","支付宝支付"),WEI_XIN("10002","wechat","微信支付");
+	ZHI_FU_BAO("10001","alipay","支付宝支付"),WEI_XIN("10002","wechat","微信支付"),
+	PERSONAL_WALLET("10003","personal_wallet","个人钱包支付"),ENTERPRISE_WALLET("10004","enterprise_wallet","企业钱包支付");
 	
 
 	private String code;
