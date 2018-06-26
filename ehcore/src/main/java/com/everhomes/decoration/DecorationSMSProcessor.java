@@ -32,7 +32,7 @@ public class DecorationSMSProcessor {
         smsProvider.addToTupleList(variables, "applyPhone", request.getApplyPhone());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
         String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
-        smsProvider.addToTupleList(variables, "url", homeUrl+"/mobile/static/downloadLink/src/downLink.html?namespaceId="+request.getNamespaceId());
+        smsProvider.addToTupleList(variables, "url", homeUrl+"/decoration-management/build/download.html?ns="+request.getNamespaceId());
 
         int templateId = SmsTemplateCode.DECORATION_APPLY_SUCCESS;
 
@@ -207,7 +207,7 @@ public class DecorationSMSProcessor {
         smsProvider.addToTupleList(variables, "decoratorPhone", request.getDecoratorPhone());
         smsProvider.addToTupleList(variables, "applyCompamy", request.getApplyCompany());
         String homeUrl = configurationProvider.getValue("home.url","https://core.zuolin.com");
-        smsProvider.addToTupleList(variables, "url", homeUrl+"/mobile/static/downloadLink/src/downLink.html?namespaceId="+request.getNamespaceId());
+        smsProvider.addToTupleList(variables, "url", homeUrl+"/decoration-management/build/download.html?ns="+request.getNamespaceId());
         int templateId = SmsTemplateCode.DECORATION_CREATE_WORKER;
         String templateLocale = RentalNotificationTemplateCode.locale;
 
