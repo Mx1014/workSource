@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.community.BuildingDTO;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -331,6 +332,22 @@ public class ContractController extends ControllerBase {
         return response;
     }
     
-    
+	/**
+	 * <p>设置合同模板</p>
+	 * <b>URL: /contract/addContractTemplate</b>
+	 */
+	@RequestMapping("addContractTemplate")
+	@RestReturn(String.class)
+	public RestResponse addContractTemplate(AddContractTemplateCommand cmd) {
+		
+    	ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		
+		//TemplateDTO dto = contractService.updateBuilding(cmd);
+
+        RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
 
 }
