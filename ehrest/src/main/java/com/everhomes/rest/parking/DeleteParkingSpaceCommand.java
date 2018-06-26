@@ -1,8 +1,11 @@
 package com.everhomes.rest.parking;
 
 /**
- * @author sw on 2018/1/8.
- */
+  *<ul>
+  *<li>id : 车位id</li>
+  *</ul>
+  */
+
 public class DeleteParkingSpaceCommand {
     private Long id;
 

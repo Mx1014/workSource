@@ -391,7 +391,13 @@
             <version>1.4</version>
         </dependency>
         <!-- 深圳湾物业缴费对接所需依赖：axis 1.4 jar end -->
-        
+
+        <!-- 敏感词过滤依赖包 -->
+        <dependency>
+          <groupId>com.hankcs</groupId>
+          <artifactId>aho-corasick-double-array-trie</artifactId>
+          <version>${sensitive-word.version}</version>
+        </dependency>
 	</dependencies>
 
 	<build>

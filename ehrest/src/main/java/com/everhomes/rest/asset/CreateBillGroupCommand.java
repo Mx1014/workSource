@@ -38,6 +38,15 @@ public class CreateBillGroupCommand {
     private Integer dueDay;
     @NotNull
     private Byte dueDayType;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     @Override
     public String toString() {

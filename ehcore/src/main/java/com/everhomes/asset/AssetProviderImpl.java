@@ -1,6 +1,7 @@
 package com.everhomes.asset;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -40,6 +41,7 @@ import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 
@@ -53,7 +55,11 @@ import com.everhomes.util.*;
 
 import com.everhomes.varField.*;
 import com.google.gson.Gson;
-import com.mysql.jdbc.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.jooq.Table;
 import org.jooq.*;
 import org.jooq.Field;
 import org.jooq.exception.DataAccessException;
@@ -63,12 +69,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -465,7 +471,7 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_ASSET_BILLS.ADDRESS_ID.eq(addressId));
         }
 
-        if(!StringUtils.isNullOrEmpty(dateStr)) {
+        if(StringUtils.isNotBlank(dateStr)) {
             query.addConditions(Tables.EH_ASSET_BILLS.ACCOUNT_PERIOD.like(dateStr + "%"));
         }
 
@@ -491,43 +497,51 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
+            // 应用id，多入口区分账单 by wentian 2018/5/25
+        Long categoryId = cmd.getCategoryId();
+
         Integer paymentType = cmd.getPaymentType();
         Byte isUploadCertificate = cmd.getIsUploadCertificate();
         String buildingName = cmd.getBuildingName();//楼栋名称
         String apartmentName = cmd.getApartmentName();//门牌名称
         String customerTel = cmd.getCustomerTel();//客户手机号
+
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
-//        if(currentNamespaceId.intValue() != (int)0){
-//            query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
-//        }
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
+
+        if(categoryId != null){
+            query.addConditions(t.CATEGORY_ID.eq(categoryId));
+        }
+
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         if(!org.springframework.util.StringUtils.isEmpty(status)){
+
             query.addConditions(t.SWITCH.eq(status));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
+        if(billGroupId != null) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {
+        if(billStatus != null) {
             query.addConditions(t.STATUS.eq(billStatus));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(targetName)) {
+        if(org.apache.commons.lang.StringUtils.isNotBlank(targetName)) {
             query.addConditions(t.TARGET_NAME.like("%"+targetName+"%"));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(targetType)){
+        if(org.apache.commons.lang.StringUtils.isNotBlank(targetType)){
             query.addConditions(t.TARGET_TYPE.eq(targetType));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(contractNum)){
+        if(org.apache.commons.lang.StringUtils.isNotBlank(contractNum)){
             query.addConditions(t.CONTRACT_NUM.eq(contractNum));
         }
         if(status!=null && status == 1){
             query.addOrderBy(t.STATUS);
         }
+        // 改成了崇鑫的这种范围匹配方式
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
             query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
         }
@@ -552,7 +566,6 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(t.IS_UPLOAD_CERTIFICATE.eq(isUploadCertificate));
         }
         query.addOrderBy(t.DATE_STR.desc());
-//        query.addGroupBy(t.TARGET_NAME);
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
             ListBillsDTO dto = new ListBillsDTO();
@@ -944,7 +957,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType) {
+    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
@@ -952,6 +965,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.OWNER_ID.eq(ownerId))
                 .and(t.OWNER_TYPE.eq(ownerType))
+                .and(t.CATEGORY_ID.eq(categoryId))
                 .orderBy(t.DEFAULT_ORDER)
                 .fetch()
                 .map(r -> {
@@ -1082,6 +1096,7 @@ public class AssetProviderImpl implements AssetProvider {
             Byte isOwed = cmd.getIsOwed();
             String customerTel = cmd.getCustomerTel();
             String invoiceNum = cmd.getInvoiceNum();
+            Long categoryId = cmd.getCategoryId();
 
             //普通信息卸载
             Long billGroupId = billGroupDTO.getBillGroupId();
@@ -1255,6 +1270,8 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setOwnerId(ownerId);
                     item.setContractId(contractId);
                     item.setContractNum(contractNum);
+                    // item 也添加categoryId， 这样费用清单简单些
+                    item.setCategoryId(categoryId);
                     if(targetType!=null){
                         item.setTargetType(targetType);
                     }
@@ -1310,7 +1327,8 @@ public class AssetProviderImpl implements AssetProvider {
 
             newBill.setInvoiceNumber(invoiceNum);
 
-
+            // added category Id
+            newBill.setCategoryId(categoryId);
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
             newBill.setNoticetel(noticeTel);
@@ -1445,6 +1463,7 @@ public class AssetProviderImpl implements AssetProvider {
         return vo;
     }
     
+    @Override
     public ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd) {
     	if(cmd.getBillId() != null && !cmd.getBillId().equals(billId)) {
     		return null;
@@ -1587,6 +1606,18 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
+    public boolean checkBillByCategory(Long billId, Long categoryId) {
+        DSLContext context = getReadOnlyContext();
+        Long fetch = context.select(Tables.EH_PAYMENT_BILLS.CATEGORY_ID)
+                .from(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+                .fetchOne(Tables.EH_PAYMENT_BILLS.CATEGORY_ID);
+        if(fetch != null && fetch.longValue() == categoryId.longValue()){
+            return true;
+        }
+        return false;
+    }
+
     public PaymentLateFine findLastedFine(Long id) {
          List<PaymentLateFine> list = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_LATE_FINE)
                 .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(id))
@@ -1597,7 +1628,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType) {
+    public List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType, Long categoryId) {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1610,6 +1641,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(endLimit!=null) {
             query.addConditions(r.DATE_STR.lessOrEqual(endLimit));
         }
+        query.addConditions(r.CATEGORY_ID.eq(categoryId));
         query.addConditions(r.OWNER_ID.eq(ownerId));
         query.addConditions(r.OWNER_TYPE.eq(ownerType));
         query.addConditions(r.SWITCH.eq((byte)1));
@@ -1629,7 +1661,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit) {
+    public List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit, Long categoryId) {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
@@ -1638,6 +1670,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<Long> settledBillIds = context.select(t1.ID)
                 .from(t1)
                 .where(t1.SWITCH.eq((byte) 1))
+                .and(t1.CATEGORY_ID.eq(categoryId))
                 .fetch(t1.ID);
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),t.NAME,t.ID);
@@ -1646,9 +1679,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addJoin(o);
 
 //        query.addJoin(o);
-        if(settledBillIds!=null&& settledBillIds.size()>0){
-            query.addConditions(o.BILL_ID.in(settledBillIds));
-        }
+        query.addConditions(o.BILL_ID.in(settledBillIds));
+
         query.addConditions(o.OWNER_TYPE.eq(ownerType));
         query.addConditions(o.OWNER_ID.eq(ownerId));
         query.addConditions(o.CHARGING_ITEMS_ID.eq(t.ID));
@@ -1713,7 +1745,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId) {
+    public List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId, Long categoryId) {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhCommunities o = Tables.EH_COMMUNITIES.as("o");
@@ -1726,6 +1758,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(dateStrEnd!=null){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
+        query.addConditions(t.CATEGORY_ID.eq(categoryId));
         query.addConditions(t.SWITCH.eq((byte)1));
         Table<Record> r = query.asTable("r");
 
@@ -1774,7 +1807,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId) {
+    public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId) {
         List<ListChargingItemsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
@@ -1785,6 +1818,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
                 .where(t1.OWNER_ID.eq(ownerId))
                 .and(t1.OWNER_TYPE.eq(ownerType))
+                .and(t1.CATEGORY_ID.eq(categoryId))
                 .fetchInto(PaymentChargingItemScope.class);
 
         Byte isSelected = 0;
@@ -1809,7 +1843,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId) {
+    public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId) {
         List<ListChargingStandardsDTO> list = new ArrayList<>();
 
         EhPaymentChargingStandardsScopes standardScopeT = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScopeT");
@@ -1824,6 +1858,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(chargingItemId))
+                // add category id to filter the right billing cycle fix #32202
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(Tables.EH_PAYMENT_BILL_GROUPS.ID))
                 .fetch(Tables.EH_PAYMENT_BILL_GROUPS.BALANCE_DATE_TYPE);
        // limiteCycles
@@ -1833,6 +1869,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(standardScopeT.OWNER_ID.eq(ownerId))
                 .and(standardScopeT.OWNER_TYPE.eq(ownerType))
                 .and(standardT.CHARGING_ITEMS_ID.eq(chargingItemId))
+                // add category id constraint
+                .and(standardScopeT.CATEGORY_ID.eq(categoryId))
                 .and(standardT.BILLING_CYCLE.in(limitCyclses).or(standardT.BILLING_CYCLE.eq(BillingCycle.ONE_DEAL.getCode())))
                 .fetch()
                 .map(r -> {
@@ -1908,7 +1946,7 @@ public class AssetProviderImpl implements AssetProvider {
                     continue;
                 }
                 String varName = getNameByVariableIdenfitier(varIden);
-                if(StringUtils.isNullOrEmpty(varName)){
+                if(StringUtils.isBlank(varName)){
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"formula variable name does not exist in schema");
                 }
                 var.setVariableIdentifier(varIden);
@@ -2277,7 +2315,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId) {
+    public List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         List<PaymentBillGroupRule> rules = context.select()
@@ -2297,7 +2335,7 @@ public class AssetProviderImpl implements AssetProvider {
 //                    .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
 //            return rules2.get(0);
 //        }
-        return rules.get(0);
+        return rules;
     }
 
     @Override
@@ -2849,7 +2887,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds) {
+    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds, Long categoryId) {
         byte de_coupling = 1;
         if(communityIds!=null && communityIds.size() >1){
             for(int i = 0; i < communityIds.size(); i ++){
@@ -2857,25 +2895,26 @@ public class AssetProviderImpl implements AssetProvider {
 //                只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
                 Boolean coupled = true;
                 if(cid.longValue() != namespaceId.longValue()){
-                    coupled = checkCoupling(cid,ownerType);
+                    coupled = checkCoupling(cid,ownerType, categoryId);
                 }
                 if(coupled){
                     de_coupling = 0;
-                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling);
+                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
                 }
             }
         }else{
             //只有一个园区,不是list过来的
-            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, de_coupling);
+            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, de_coupling, categoryId);
         }
     }
 
-    private Boolean checkCoupling(Long communityId, String ownerType) {
+    private Boolean checkCoupling(Long communityId, String ownerType, Long categoryId) {
         DSLContext context = getReadOnlyContext();
         List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
                 .from(itemScope)
                 .where(itemScope.OWNER_TYPE.eq(ownerType))
                 .and(itemScope.OWNER_ID.eq(communityId))
+                .and(itemScope.CATEGORY_ID.eq(categoryId))
                 .fetch(itemScope.DECOUPLING_FLAG);
         for(int i = 0; i < flags.size(); i ++){
             if(flags.get(i).byteValue() == (byte)1){
@@ -2885,7 +2924,7 @@ public class AssetProviderImpl implements AssetProvider {
         return true;
     }
 
-    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag) {
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag, Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
@@ -2894,6 +2933,8 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(t)
                     .where(t.OWNER_TYPE.eq(ownerType))
                     .and(t.OWNER_ID.eq(communityId))
+                    // add categoryId constraint
+                    .and(t.CATEGORY_ID.eq(categoryId))
                     .execute();
             return;
         }
@@ -2906,6 +2947,7 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setNamespaceId(namespaceId);
             scope.setOwnerId(communityId);
             scope.setOwnerType(ownerType);
+            scope.setCategoryId(categoryId);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
             scope.setDecouplingFlag(decouplingFlag);
             scope.setDecouplingFlag(decouplingFlag);
@@ -2915,6 +2957,7 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(t)
                     .where(t.OWNER_TYPE.eq(ownerType))
                     .and(t.OWNER_ID.eq(communityId))
+                    .and(t.CATEGORY_ID.eq(categoryId))
                     .execute();
             if(list.size()>0){
                 dao.insert(list);
@@ -3107,6 +3150,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .set(t.BROTHER_GROUP_ID,nullId)
                     .where(t.OWNER_ID.eq(cmd.getOwnerId()))
                     .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .and(t.CATEGORY_ID.eq(cmd.getCategoryId()))
                     .execute();
             return nextGroupId;
         }else if(deCouplingFlag == (byte)0){
@@ -3132,6 +3176,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t.OWNER_ID.eq(cmd.getOwnerId()))
                 .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .fetchOne(0,Integer.class);
         group.setDefaultOrder(nextOrder==null?1:nextOrder+1);
         group.setDueDay(cmd.getDueDay());
@@ -3141,6 +3186,7 @@ public class AssetProviderImpl implements AssetProvider {
         group.setOwnerId(cmd.getOwnerId());
         group.setOwnerType(cmd.getOwnerType());
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        group.setCategoryId(cmd.getCategoryId());
         EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
         dao.insert(group);
     }
@@ -3192,6 +3238,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
         query.addConditions(t1.OWNER_ID.eq(cmd.getOwnerId()));
         query.addConditions(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
+        //add category constraint
+        query.addConditions(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
         query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize()+1);
         query.fetch().map(r -> {
             ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
@@ -3308,8 +3356,9 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(t4.OWNER_ID.eq(group.getOwnerId()))
                     .and(t4.OWNER_TYPE.eq(group.getOwnerType()))
                     .and(t4.NAMESPACE_ID.eq(group.getNamespaceId()))
+                    .and(t4.CATEGORY_ID.eq(group.getCategoryId()))
                     .fetchOne(t4.PROJECT_LEVEL_NAME);
-            if(StringUtils.isNullOrEmpty(ItemName)){
+            if(StringUtils.isBlank(ItemName)){
                 ItemName = context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
                         .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
                         .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(rule.getChargingItemId()))
@@ -3344,12 +3393,15 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext readOnlyContext = getReadOnlyContext();
         DSLContext writeContext = getReadWriteContext();
         EhPaymentBillGroupsRulesDao dao = new EhPaymentBillGroupsRulesDao(writeContext.configuration());
+        //先获得cateogryId
+        Long categoryId = readOnlyContext.select(group.CATEGORY_ID).from(group).where(group.ID.eq(cmd.getBillGroupId()))
+                .fetchOne(group.CATEGORY_ID);
         if(deCouplingFlag == (byte) 0){
             //耦合中
-            return insertOrUpdateBillGroupRule(cmd, brotherRuleId, t, readOnlyContext, dao,deCouplingFlag);
+            return insertOrUpdateBillGroupRule(cmd, brotherRuleId, t, readOnlyContext, dao,deCouplingFlag, categoryId);
         }else if(deCouplingFlag == (byte) 1){
             //解耦合
-            insertOrUpdateBillGroupRule(cmd, brotherRuleId, t, readOnlyContext, dao,deCouplingFlag);
+            insertOrUpdateBillGroupRule(cmd, brotherRuleId, t, readOnlyContext, dao,deCouplingFlag, categoryId);
             Long nullId = null;
             writeContext.update(t)
                     .set(t.BROTHER_RULE_ID,nullId)
@@ -3432,7 +3484,7 @@ public class AssetProviderImpl implements AssetProvider {
 //        return response;
     }
 
-    private Long insertOrUpdateBillGroupRule(AddOrModifyRuleForBillGroupCommand cmd, Long brotherRuleId, EhPaymentBillGroupsRules t, DSLContext readOnlyContext, EhPaymentBillGroupsRulesDao dao,byte deCouplingFlag) {
+    private Long insertOrUpdateBillGroupRule(AddOrModifyRuleForBillGroupCommand cmd, Long brotherRuleId, EhPaymentBillGroupsRules t, DSLContext readOnlyContext, EhPaymentBillGroupsRulesDao dao,byte deCouplingFlag, Long categoryId) {
         Long ruleId = cmd.getBillGroupRuleId();
 //        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
 //                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
@@ -3440,9 +3492,12 @@ public class AssetProviderImpl implements AssetProvider {
 //        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
 //                .and(t.OWNERTYPE.eq(group.getOwnerType()))
 //                .fetch(t.CHARGING_ITEM_ID);
-        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(cmd.getOwnerId()))
-            .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
-            .fetch(t.CHARGING_ITEM_ID);
+        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t, Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(t.OWNERID.eq(cmd.getOwnerId()))
+                .and(t.OWNERTYPE.eq(cmd.getOwnerType()))
+                .and(t.BILL_GROUP_ID.eq(Tables.EH_PAYMENT_BILL_GROUPS.ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId))
+                .fetch(t.CHARGING_ITEM_ID);
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
         if(ruleId == null){
             if(fetch.contains(cmd.getChargingItemId())){
@@ -3528,6 +3583,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentContractReceiver t = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t");
         EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
         //看是否关联了合同
+
         // 合同的状态需要限定 by wentian 2018/5/22
         List<Long> fetch1 = context.select(t.CONTRACT_ID)
                 .from(t)
@@ -3537,21 +3593,28 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
                 .fetch(t.CONTRACT_ID);
         if(fetch1.size()>0){
-            Long correlatedContractId = fetch1.get(0);
-            Byte contractStatus = contractProvider.findContractById(correlatedContractId).getStatus();
-            ContractStatus status = ContractStatus.fromStatus(contractStatus);
-            switch (status){
-                case INVALID:
-                   workFlag = false;
-                case INACTIVE:
-                    workFlag = false;
-                case DENUNCIATION:
-                    workFlag = false;
-                case EXPIRED:
-                    workFlag = false;
-                case HISTORY:
-                    workFlag = false;
+            for(Long cid : fetch1){
+                //合同是否为正常
+              if(contractProvider.isNormal(cid)){
+                 return true;
+              }
             }
+            // 和isNOrmal重复了
+//            Long correlatedContractId = fetch1.get(0);
+//            Byte contractStatus = contractProvider.findContractById(correlatedContractId).getStatus();
+//            ContractStatus status = ContractStatus.fromStatus(contractStatus);
+//            switch (status){
+//                case INVALID:
+//                   workFlag = false;
+//                case INACTIVE:
+//                    workFlag = false;
+//                case DENUNCIATION:
+//                    workFlag = false;
+//                case EXPIRED:
+//                    workFlag = false;
+//                case HISTORY:
+//                    workFlag = false;
+//            }
         }else{
             workFlag = false;
         }
@@ -3726,23 +3789,17 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListChargingItemsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
-//        List<Long> availableIds = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID)
-//                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
-//                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
-//                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
-//                .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
-//        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
-//                .where(t1.CHARGING_ITEM_ID.in(availableIds))
-//                .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
-//                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-//                .fetchInto(PaymentChargingItemScope.class);
         List<PaymentChargingItemScope> scopes = context.select(t1.fields())
-                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1, Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(t1.CHARGING_ITEM_ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
                 .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
                 .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                // add category filter by wentian sama
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .and(t1.CHARGING_ITEM_ID.notEqual(AssetPaymentConstants.LATE_FINE_ID))
                 .fetchInto(PaymentChargingItemScope.class);
         for(int j = 0; j < scopes.size(); j ++){
@@ -3752,7 +3809,6 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setChargingItemId(scope.getChargingItemId());
             list.add(dto);
         }
-
         return list;
     }
 
@@ -3930,12 +3986,14 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void deCoupledForChargingItem(Long ownerId, String ownerType) {
+    public void deCoupledForChargingItem(Long ownerId, String ownerType, Long categoryId) {
         DSLContext context = getReadWriteContext();
         context.update(itemScope)
                 .set(itemScope.DECOUPLING_FLAG,(byte)1)
                 .where(itemScope.OWNER_TYPE.eq(ownerType))
                 .and(itemScope.OWNER_ID.eq(ownerId))
+                //added categoryId constraint
+                .and(itemScope.CATEGORY_ID.eq(categoryId))
                 .execute();
     }
 
@@ -3963,12 +4021,13 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId) {
+    public List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, Long categoryId) {
         DSLContext context = getReadOnlyContext();
         return context.selectFrom(Tables.EH_PAYMENT_NOTICE_CONFIG)
                 .where(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_NOTICE_CONFIG.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_NOTICE_CONFIG.CATEGORY_ID.eq(categoryId))
                 .fetchInto(PaymentNoticeConfig.class);
     }
 
@@ -4390,7 +4449,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId) {
+    public List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId) {
         List<ListLateFineStandardsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingStandardsScopes scope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("scope");
@@ -4405,6 +4464,9 @@ public class AssetProviderImpl implements AssetProvider {
         }
         if(namespaceId!=null){
             query.addConditions(scope.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(categoryId != null){
+            query.addConditions(scope.CATEGORY_ID.eq(categoryId));
         }
         query.fetch()
                 .forEach(r -> {
@@ -4556,6 +4618,20 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_PAYMENT_NOTICE_CONFIG.NAMESPACE_ID.eq(namespaceId));
         }
         return query.fetchInto(PaymentNoticeConfig.class);
+    }
+
+    @Override
+    public Long findCategoryIdFromBillGroup(Long billGroupId) {
+        return getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID);
+    }
+
+    @Override
+    public void insertAssetCategory(EhAssetAppCategories c) {
+        EhAssetAppCategoriesDao dao = new EhAssetAppCategoriesDao(getReadWriteContext().configuration());
+        dao.insert(c);
     }
 
     private Map<Long,String> getGroupNames(ArrayList<Long> groupIds) {

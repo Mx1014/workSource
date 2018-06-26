@@ -55,7 +55,9 @@ public interface GeneralFormService {
 
 	void updateGeneralFormGroupByFormId(GeneralFormGroup group, GeneralForm form, List<GeneralFormGroupDTO> groupDTOS);
 
-	Long createGeneralFormByTemplate(Long templateId, CreateFormTemplatesCommand cmd);
+	GeneralFormDTO createGeneralFormByTemplate(Long templateId, CreateFormTemplatesCommand cmd);
 
 	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
+
+	GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd);
 }

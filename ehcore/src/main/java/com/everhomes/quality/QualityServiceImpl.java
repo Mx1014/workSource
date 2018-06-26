@@ -1374,7 +1374,7 @@ Long nextPageAnchor = null;
 			}
 
 			if(r.getExecutorId() != null && r.getExecutorId() != 0) {
-				OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getOwnerId());
+				OrganizationMember executor = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getExecutorId(), r.getOwnerId());
 	        	if(executor != null) {
 	        		dto.setExecutorName(executor.getContactName());
 	        	}
@@ -1382,7 +1382,7 @@ Long nextPageAnchor = null;
 
 
         	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
-        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), r.getOwnerId());
+        		OrganizationMember operator = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getOperatorId(), r.getOwnerId());
             	if(operator != null) {
             		dto.setOperatorName(operator.getContactName());
             	}
@@ -1500,7 +1500,7 @@ Long nextPageAnchor = null;
 				 && cmd.getEndTime() != null) {
 			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
 			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(user.getId());
-//			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+//			OrganizationMember operator = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), task.getOwnerId());
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operators.get(0).getContactName());
 		    map.put("taskName", task.getTaskName());
@@ -1513,7 +1513,7 @@ Long nextPageAnchor = null;
 
 			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
 			List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(cmd.getOperatorId());
-//			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
+//			OrganizationMember target = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getOperatorId(), task.getOwnerId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
 			msgMap.put("operator", operators.get(0).getContactName());
 			msgMap.put("target", targets.get(0).getContactName());
@@ -1571,7 +1571,7 @@ Long nextPageAnchor = null;
 			map.put("taskNumber", task.getTaskNumber());
 			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
-//			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+//			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), task.getOwnerId());
 			if(members != null) {
 				map.put("userName", members.get(0).getContactName());
 			} else {
@@ -1672,7 +1672,7 @@ Long nextPageAnchor = null;
 	private String getLocalRecordMessage(List<OrganizationMember> operators, String taskName, Long operatorId, Long endTime) {
 		//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
 		List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(operatorId);
-//			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
+//			OrganizationMember target = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getOperatorId(), task.getOwnerId());
 		Map<String, Object> msgMap = new HashMap<>();
 		if (operators != null && operators.size() > 0) {
 			msgMap.put("operator", operators.get(0).getContactName());
@@ -3791,7 +3791,7 @@ Long nextPageAnchor = null;
 
 	private SampleQualityInspectionDTO convertQualityInspectionSampleToDTO(QualityInspectionSamples sample) {
 		SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(sample.getCreatorUid(), sample.getOwnerId());
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(sample.getCreatorUid(), sample.getOwnerId());
 		if(member != null) {
 			dto.setCreatorName(member.getContactName());
 		}

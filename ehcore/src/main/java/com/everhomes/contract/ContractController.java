@@ -16,7 +16,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -89,10 +88,9 @@ public class ContractController extends ControllerBase {
 	 */
 	@RequestMapping("generateContractNumber")
 	@RestReturn(String.class)
-	public RestResponse generateContractNumber(){
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		ContractService contractService = getContractService(namespaceId);
-		return new RestResponse(contractService.generateContractNumber());
+	public RestResponse generateContractNumber(GenerateContractNumberCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		return new RestResponse(contractService.generateContractNumber(cmd));
 	}
 
 	/**

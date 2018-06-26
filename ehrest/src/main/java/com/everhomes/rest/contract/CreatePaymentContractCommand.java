@@ -123,7 +123,17 @@ public class CreatePaymentContractCommand {
     private String denunciationReason;
     private Long denunciationTime;
     private Long denunciationUid;
-    @ItemType(ContractAttachmentDTO.class)
+    
+    private Long categoryId;
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	@ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
     @ItemType(ContractPaymentPlanDTO.class)
     private List<ContractPaymentPlanDTO> plans;
