@@ -1193,3 +1193,63 @@ update eh_payment_bill_groups set category_id=1001  where namespace_id=999949;
 update eh_payment_bill_items set category_id=1001  where namespace_id=999949;
 -- END BY 杨崇鑫 
 
+
+-- 深圳湾适用脚本[999966]  
+-- ADD BY 丁建民 
+-- #28874  合同管理（多应用） 产品功能（不同的合同支持不同的部门可见，同时支持一个资源签多份合同） 合同旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_contract_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_uri`, `entry_id`, `contract_application_scene`) VALUES  (1001, '0', '0', '0', '合同管理', NULL, NULL, '2', '1', NOW(), '1', NULL, '999966', NULL, NULL, '0');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET  `instance_config`='{\"categoryId\":1001,\"contractApplicationScene\":0}', `action_type`='13',`custom_tag`='1001' WHERE module_id='21200' and namespace_id='999966';
+-- 更新旧合同的categoryid
+UPDATE `eh_contracts` SET `category_id`='1001' WHERE namespace_id='999966';
+-- 更新合同基础参数设置
+UPDATE `eh_contract_params` SET `category_id`='1001' WHERE namespace_id='999966';
+-- 更新表单 ，categoryid为空会用原来的表单，
+UPDATE `eh_var_field_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999966; 
+UPDATE `eh_var_field_item_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999966;
+UPDATE `eh_var_field_group_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999966;
+-- 更新工作流相关的表
+UPDATE `eh_flows` SET `owner_id`='1001' WHERE  module_id='21200' AND namespace_id=999966;
+UPDATE `eh_flow_cases` SET `owner_id`='1001' WHERE module_id='21200' AND namespace_id=999966;
+-- END BY 丁建民
+
+-- 清华信息港适用脚本[999984]  
+-- ADD BY 丁建民 
+-- #28874  合同管理（多应用） 产品功能（不同的合同支持不同的部门可见，同时支持一个资源签多份合同） 合同旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_contract_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_uri`, `entry_id`, `contract_application_scene`) VALUES  (1001, '0', '0', '0', '合同管理', NULL, NULL, '2', '1', NOW(), '1', NULL, '999984', NULL, NULL, '0');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET  `instance_config`='{\"categoryId\":1001,\"contractApplicationScene\":0}', `action_type`='13',`custom_tag`='1001' WHERE module_id='21200' and namespace_id='999984';
+-- 更新旧合同的categoryid
+UPDATE `eh_contracts` SET `category_id`='1001' WHERE namespace_id='999984';
+-- 更新合同基础参数设置
+UPDATE `eh_contract_params` SET `category_id`='1001' WHERE namespace_id='999984';
+-- 更新表单 ，categoryid为空会用原来的表单，
+UPDATE `eh_var_field_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999984; 
+UPDATE `eh_var_field_item_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999984;
+UPDATE `eh_var_field_group_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999984;
+-- 更新工作流相关的表
+UPDATE `eh_flows` SET `owner_id`='1001' WHERE  module_id='21200' AND namespace_id=999984;
+UPDATE `eh_flow_cases` SET `owner_id`='1001' WHERE module_id='21200' AND namespace_id=999984;
+-- END BY 丁建民
+
+-- 安邦物业适用脚本[999949]  
+-- ADD BY 丁建民 
+-- #28874  合同管理（多应用） 产品功能（不同的合同支持不同的部门可见，同时支持一个资源签多份合同） 合同旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_contract_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_uri`, `entry_id`, `contract_application_scene`) VALUES  (1001, '0', '0', '0', '合同管理', NULL, NULL, '2', '1', NOW(), '1', NULL, '999949', NULL, NULL, '0');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET  `instance_config`='{\"categoryId\":1001,\"contractApplicationScene\":0}', `action_type`='13',`custom_tag`='1001' WHERE module_id='21200' and namespace_id='999949';
+-- 更新旧合同的categoryid
+UPDATE `eh_contracts` SET `category_id`='1001' WHERE namespace_id='999949';
+-- 更新合同基础参数设置
+UPDATE `eh_contract_params` SET `category_id`='1001' WHERE namespace_id='999949';
+-- 更新表单 ，categoryid为空会用原来的表单，
+UPDATE `eh_var_field_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999949; 
+UPDATE `eh_var_field_item_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999949;
+UPDATE `eh_var_field_group_scopes` SET `category_id`='1001' WHERE module_name='contract' and namespace_id=999949;
+-- 更新工作流相关的表
+UPDATE `eh_flows` SET `owner_id`='1001' WHERE  module_id='21200' AND namespace_id=999949;
+UPDATE `eh_flow_cases` SET `owner_id`='1001' WHERE module_id='21200' AND namespace_id=999949;
+-- END BY 丁建民
