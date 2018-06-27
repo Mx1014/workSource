@@ -433,10 +433,15 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		List<ServiceModuleApp> apps = query.fetch().map((r) ->{
 		    ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
-		    String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
-		    if(!StringUtils.isEmpty(name)) {
-		        ap.setName(name);   
-		    }
+		    try {
+	          String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+	          if(!StringUtils.isEmpty(name)) {
+	                ap.setName(name);   
+	            }		        
+          } catch (IllegalArgumentException ex) {
+                //Ignore this exception
+            }
+
 		    return ap;
 		});
 		return apps;
@@ -448,7 +453,11 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	   Field<?> fieldArr[] = Tables.EH_SERVICE_MODULE_APPS.fields();
       List<Field<?>> fields = new ArrayList<Field<?>>();
       fields.addAll(Arrays.asList(fieldArr));
-      fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+      
+      if(locationType != null || sceneType != null){
+          fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+      }
+      
 		SelectQuery<Record> query = context.select(fields).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
@@ -483,10 +492,15 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		List<ServiceModuleApp> apps = query.fetch().map((r) -> {
 		    ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
-          String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
-            if(!StringUtils.isEmpty(name)) {
-                ap.setName(name);   
-            }
+
+		    try {
+		        String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+	            if(locationType != null || sceneType != null && !StringUtils.isEmpty(name)) {
+	                ap.setName(name);   
+	            }      
+		    } catch (IllegalArgumentException ex) {
+		        //Ignore this exception
+		    }          
             
          return ap;
 		});

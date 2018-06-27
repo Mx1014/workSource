@@ -2747,14 +2747,21 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		
 		if(topId != null) {
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
-			if(identifier != null){
-				response.setTopAdminToken(identifier.getIdentifierToken());
-			}
-			User user = userProvider.findUserById(topId);
-			if(user != null){
-				response.setTopAdminName(user.getNickName());
-			}			
+		    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUidAndOrgId(topId, cmd.getOrganizationId());
+           if(organizationMember != null){
+               response.setTopAdminToken(organizationMember.getContactToken());
+               response.setTopAdminName(organizationMember.getContactName());
+           } else {
+               UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
+               if(identifier != null){
+                   response.setTopAdminToken(identifier.getIdentifierToken());
+               }
+               User user = userProvider.findUserById(topId);
+               if(user != null){
+                   response.setTopAdminName(user.getNickName());
+               }      
+           }
+					
 		}
 
 
