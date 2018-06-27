@@ -2961,7 +2961,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider
 				.listParkingBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getParkingLotId());
 		if(accounts==null || accounts.size()==0){
-			return null;
+			return new ListBusinessPayeeAccountResponse();
 		}
 		List<PayUserDTO> payUserDTOS = sdkPayService.listPayUsersByIds(accounts.stream().map(r -> r.getPayeeId()).collect(Collectors.toList()));
 		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
