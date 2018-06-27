@@ -7379,6 +7379,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 		QueryDefaultRuleAdminCommand queryRuleCmd = ConvertHelper.convert(cmd,QueryDefaultRuleAdminCommand.class);
+		if (RuleSourceType.RESOURCE.getCode().equals(queryRuleCmd.getSourceType())){ //一个资源应该只有一条规则 忽略ownerType ownerId防止产生多条
+			queryRuleCmd.setOwnerId(null);
+			queryRuleCmd.setOwnerType(null);
+		}
 		QueryDefaultRuleAdminResponse queryRule = queryDefaultRule(queryRuleCmd);
 		return convertResourceTimeRuleDTO(queryRule, cmd.getSourceType());
 
