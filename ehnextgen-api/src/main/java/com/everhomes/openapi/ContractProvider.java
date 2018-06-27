@@ -99,4 +99,7 @@ public interface ContractProvider {
 
     boolean isNormal(Long cid);
 
+	void saveContractEventAboutApartments(int apartmentUpdate, Contract contract, String oldApartments, String newApartments);
+
+
 }

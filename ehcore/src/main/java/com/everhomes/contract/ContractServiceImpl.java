@@ -720,6 +720,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contractProvider.createContract(contract);
 		//添加合同日志 by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_ADD,contract,null);
+		//如果是变更或续约合同，需在父合同添加日志
+		if(ContractType.RENEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_RENEW,parentContract,contract);
+		} else if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_CHANGE,parentContract,contract);
+		}
 		//调用计算明细
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -1075,11 +1083,17 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	//没有id的，增加
     //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments, Byte contractApplicationScene) {
+		//add by tangcen
+		List<String> oldApartments = new ArrayList<>();
+		List<String> newApartments = new ArrayList<>();
+		
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
 			existApartments.forEach(apartment -> {
 				map.put(apartment.getId(), apartment);
+				//add by tangcen
+				oldApartments.add(apartment.getApartmentName());
 			});
 		}
 
@@ -1102,6 +1116,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		Double totalSize = 0.0;
 		if(buildingApartments != null && buildingApartments.size() > 0) {
 			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
+				//add by tangcen
+				newApartments.add(buildingApartment.getApartmentName());
 				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				totalSize = totalSize + size;
 				if(buildingApartment.getId() == null) {
@@ -1116,7 +1132,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
 					//记录合同日志 by tangcen
-					contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,mapping);
+					//contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,mapping);
 					//物业合同不修改资产状态
 					if(!parentAddressIds.contains(buildingApartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
@@ -1140,7 +1156,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
 				//记录合同日志 by tangcen
-				contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_DELETE,contract,apartment);
+				//contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_DELETE,contract,apartment);
 				if(!finalParents.contains(apartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
 					//26058  已售的状态不变
@@ -1152,7 +1168,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 			});
 		}
-
+		//add by tangcen
+		if (oldApartments.size() == 0) {
+			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,null,newApartments.toString());
+		}else if (newApartments.size() < oldApartments.size()) {
+			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_UPDATE,contract,oldApartments.toString(),newApartments.toString());
+		}else if (newApartments.size() >= oldApartments.size()) {
+			for(String apartmentName : newApartments){
+				if (!oldApartments.contains(apartmentName)) {
+					contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_UPDATE,contract,oldApartments.toString(),newApartments.toString());
+					break;
+				}
+			}
+		}
 		return totalSize;
 	}
 

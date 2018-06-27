@@ -766,22 +766,31 @@ public class ContractProviderImpl implements ContractProvider {
 	
 	//记录合同修改日志 by tangcen
 	@Override
-	public void saveContractEvent(int opearteType, Contract contract, Contract exist) {	
+	public void saveContractEvent(int opearteType, Contract contract, Contract comparedContract) {	
 		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY
 		String content = null;
+		Map<String,Object> map = new HashMap<String,Object>();
 		switch(opearteType){
-			case 1 : 
-				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
-				break;
-			case 2 :
-				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
-				break;
-			case 3 :
-				content = compareContract(contract,exist);
-				break;
-			default :
-				break;
-		}
+		case ContractTrackingTemplateCode.CONTRACT_ADD : 
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+			break;
+		case ContractTrackingTemplateCode.CONTRACT_DELETE :
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+			break;
+		case ContractTrackingTemplateCode.CONTRACT_UPDATE:
+			content = compareContract(contract,comparedContract);
+			break;
+		case ContractTrackingTemplateCode.CONTRACT_RENEW:
+			map.put("contractName", comparedContract.getName());
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_RENEW , UserContext.current().getUser().getLocale(), map, "");
+			break;
+		case ContractTrackingTemplateCode.CONTRACT_CHANGE:
+			map.put("contractName", comparedContract.getName());
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_CHANGE , UserContext.current().getUser().getLocale(), map, "");
+			break;
+		default :
+			break;
+	}
 		if(!StringUtils.isEmpty(content)){
 			ContractEvents event = new ContractEvents(); 
 			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
@@ -790,7 +799,13 @@ public class ContractProviderImpl implements ContractProvider {
 			event.setNamespaceId(UserContext.getCurrentNamespaceId());
 			event.setContractId(contract.getId());	
 			event.setOperatorUid(UserContext.currentUserId());
-			event.setOpearteTime(contract.getUpdateTime());
+			if (opearteType==ContractTrackingTemplateCode.CONTRACT_RENEW||opearteType==ContractTrackingTemplateCode.CONTRACT_CHANGE) {
+				event.setOpearteTime(comparedContract.getUpdateTime());
+				//如果是续约合同或者是变更合同，则归为合同修改操作
+				opearteType=ContractTrackingTemplateCode.CONTRACT_UPDATE;
+			}else {
+				event.setOpearteTime(contract.getUpdateTime());
+			}
 			event.setOpearteType((byte)opearteType);
 	        LOGGER.info("saveContractEventWithInsert: " + event);
 	        insertContractEvents(event);
@@ -829,6 +844,41 @@ public class ContractProviderImpl implements ContractProvider {
 	        insertContractEvents(event);
 		}
 	}
+	
+	@Override
+	public void saveContractEventAboutApartments(int opearteType, Contract contract, String oldApartmnets,String newApartmnets) {
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE
+		String content = null;
+		HashMap<String, String> dataMap = new HashMap<>();
+		switch(opearteType){
+		case ContractTrackingTemplateCode.APARTMENT_ADD : 
+			dataMap.put("apartmentName", newApartmnets.substring(1,newApartmnets.length()-1));
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_ADD , UserContext.current().getUser().getLocale(), dataMap, "");
+			break;
+		case ContractTrackingTemplateCode.APARTMENT_UPDATE :
+			dataMap.put("oldApartmnets", oldApartmnets.substring(1,oldApartmnets.length()-1));
+			dataMap.put("newApartmnets", newApartmnets.substring(1,newApartmnets.length()-1));
+			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.APARTMENT_UPDATE , UserContext.current().getUser().getLocale(), dataMap, "");
+			break;
+		default :
+			break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			ContractEvents event = new ContractEvents(); 
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
+			event.setId(id);
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setContractId(contract.getId());	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOpearteTime(contract.getUpdateTime());
+			//因为关联资产的新增或删除是基于合同的修改，因此日志类型归为合同修改类型
+			event.setOpearteType((byte)ContractTrackingTemplateCode.CONTRACT_UPDATE);
+	        LOGGER.info("saveContractEventWithInsert: " + event);
+	        insertContractEvents(event);
+		}
+	}
+	
 	
 	@Override
 	public void saveContractEventAboutChargingItem(int opearteType, Contract contract,ContractChargingItem contractChargingItem) {
