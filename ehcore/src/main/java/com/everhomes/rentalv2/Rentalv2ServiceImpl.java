@@ -1226,7 +1226,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				startTime += Double.valueOf(halfTimeIntervals.get(cmd.getStartTimeAmOrPm()).getBeginTime()*3600*1000).longValue();
 				endTime += Double.valueOf(halfTimeIntervals.get(cmd.getEndTimeAmOrPm()).getBeginTime()*3600*1000).longValue();
 			}
-			//rentalv2Provider.listActiveBills()
+			List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(r, startTime, endTime);
+			if (rentalOrders != null && rentalOrders.size()>0)
+				return false;
 			return true;
 		}).collect(Collectors.toList());
 
@@ -1328,16 +1330,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				rSiteDTO.getOwners().add(dto);
 			}
 		}
-//		List<RentalItem> items = rentalv2Provider.findRentalSiteItems(rentalSite.getId());
-//		if (null != items){
-//			rSiteDTO.setSiteItems(new ArrayList<>());
-//			for (RentalItem item : items) {
-//				SiteItemDTO siteItemDTO =convertItem2DTO(item);
-//				rSiteDTO.getSiteItems().add(siteItemDTO);
-//			}
-//		}
-//		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
-//		rSiteDTO.setAttachments(convertAttachments(attachments));
 
 		if (setShowPriceFlag) {
 			//计算显示价格

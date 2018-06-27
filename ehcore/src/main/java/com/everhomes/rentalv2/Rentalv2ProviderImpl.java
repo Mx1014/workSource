@@ -922,6 +922,30 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public List<RentalOrder> listActiveBillsByInterval(Long rentalSiteId, Long startTime, Long endTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.SUCCESS.getCode(),
+				SiteBillStatus.IN_USING.getCode());
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
+		if (null != startTime && null != endTime) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME.le(new Timestamp(startTime)).
+					or(Tables.EH_RENTALV2_ORDERS.START_TIME.lt(new Timestamp(endTime))));
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME.gt(new Timestamp(startTime)).
+					or(Tables.EH_RENTALV2_ORDERS.END_TIME.ge(new Timestamp(endTime))));
+
+		}
+		step.where(condition);
+
+		List<RentalOrder> result = step
+				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalOrder.class);
+				});
+
+		return result;
+	}
+
+	@Override
 	public List<RentalOrder> searchRentalOrders(Long resourceTypeId, String resourceType, Long rentalSiteId, Byte billStatus,
 												Long startTime, Long endTime, String tag1, String tag2,String keyword, Long pageAnchor ,
 												Integer pageSize){
