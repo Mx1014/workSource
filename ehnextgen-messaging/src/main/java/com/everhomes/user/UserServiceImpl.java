@@ -6156,18 +6156,15 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		//传入数组为空或数据小于2（即没数据或数据只有一条时），是没必要排序的，直接返回。
 		if(sceneDTOList ==null || sceneDTOList.size()<2)return sceneDTOList ;
 		//排序
-		sceneDTOList.sort(new Comparator(){
+		sceneDTOList.sort(new Comparator<SceneDTO>(){
 			@Override
-			public int compare(Object o1, Object o2) {
+			public int compare(SceneDTO o1, SceneDTO o2) {
 				SceneDTO s1=(SceneDTO)o1;
 				SceneDTO s2=(SceneDTO)o2;
 				if(s1.getCommunityId()==null || s2.getCommunityId()==null){
 					return 0;
 				}
-		        if(s1.getCommunityId().longValue() != s2.getCommunityId().longValue())
-		            return s1.getCommunityId().longValue() > s2.getCommunityId().longValue() ? 1 :-1;
-		        else
-		        	return 0;
+		        return s1.getCommunityId().compareTo(s2.getCommunityId());
 			}			
 		});
 		return sceneDTOList ;
