@@ -20,6 +20,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
 
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -402,7 +404,11 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 	@Override
 	public List<ServiceModuleApp> listManageServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+		Field<?> fieldArr[] = Tables.EH_SERVICE_MODULE_APPS.fields();
+		List<Field<?>> fields = new ArrayList<Field<?>>();
+		fields.addAll(Arrays.asList(fieldArr));
+		fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+		SelectQuery<Record> query = context.select(fields).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.APP_TYPE.eq(appType));
@@ -425,15 +431,25 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_SERVICE_MODULE_ENTRIES.DEFAULT_ORDER.asc());
 
-
-		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
+		List<ServiceModuleApp> apps = query.fetch().map((r) ->{
+		    ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
+		    String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+		    if(!StringUtils.isEmpty(name)) {
+		        ap.setName(name);   
+		    }
+		    return ap;
+		});
 		return apps;
 	}
 
 	@Override
 	public List<ServiceModuleApp> listInstallServiceModuleApps(Integer namespaceId, Long versionId, Long orgId, Byte locationType, Byte appType, Byte sceneType, Byte organizationAppStatus) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APPS.fields()).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
+	   Field<?> fieldArr[] = Tables.EH_SERVICE_MODULE_APPS.fields();
+      List<Field<?>> fields = new ArrayList<Field<?>>();
+      fields.addAll(Arrays.asList(fieldArr));
+      fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+		SelectQuery<Record> query = context.select(fields).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
 
@@ -465,7 +481,15 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		query.addGroupBy(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID);
 
-		List<ServiceModuleApp> apps = query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleApp.class));
+		List<ServiceModuleApp> apps = query.fetch().map((r) -> {
+		    ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
+          String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+            if(!StringUtils.isEmpty(name)) {
+                ap.setName(name);   
+            }
+            
+         return ap;
+		});
 		return apps;
 	}
 
