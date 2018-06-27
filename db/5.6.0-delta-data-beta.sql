@@ -33,6 +33,10 @@ INSERT INTO eh_configurations (id, name, value, description, namespace_id, displ
   VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.admin.name', 'zuolin-project', 'gogs admin name', 0, '');
 INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
   VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.admin.token', 'afe3b2a0165958086f7cceed7843190c15197c08', 'gogs admin token', 0, '');
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
+  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.backup.hookapi', 'http://10.1.10.61:8899/hooked', 'gogs backup server hook api', 0, '');
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
+  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.backup.secret', 'zuolin', 'gogs backup server hook api', 0, '');
 
 -- #30750 END
 
@@ -42,3 +46,5 @@ INSERT INTO `eh_service_module_app_mappings` (`id`, `app_origin_id_male`, `app_m
 
 
 -- 请执行在es上执行db/search/contract.sh add by 丁建民
+
+-- 5.6.0 上线时需要部署 Gogs 程序, 部署文档：http://s.a.com/docs/faq/baseline-21529636264
