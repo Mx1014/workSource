@@ -327,6 +327,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
         //  set the route
         EnterpriseNoticeDetailActionData actionData = new EnterpriseNoticeDetailActionData();
+        actionData.setOrganizationId(notice.getOwnerId());
         actionData.setBulletinId(notice.getId());
         actionData.setBulletinTitle(notice.getTitle());
         actionData.setShowType(EnterpriseNoticeShowType.SHOW.getCode());
