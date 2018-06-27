@@ -4,6 +4,7 @@ package com.everhomes.asset;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,7 +67,7 @@ public interface AssetService {
 
 	void OneKeyNotice(OneKeyNoticeCommand cmd);
 
-	ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
+	ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd);
 
 	List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
 
@@ -185,4 +186,13 @@ public interface AssetService {
     long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
 
 	void saveInstanceConfig(long categoryId, String ret);
+	
+    //add by tangcen
+	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
+
+	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+	void createAnAppMapping(CreateAnAppMappingCommand cmd);
+
+	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
 }

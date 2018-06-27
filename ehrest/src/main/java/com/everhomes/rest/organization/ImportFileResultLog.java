@@ -1,7 +1,6 @@
 package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
-import org.omg.CORBA.StringHolder;
 
 /**
  * Created by sfyan on 2017/4/19.
@@ -16,9 +15,11 @@ public class ImportFileResultLog<T> {
 
     private Integer code;
 
+    private String fieldName;
+
+    private String sheetName;
+
     private String errorDescription;
-
-
 
     public T getData() {
         return data;
@@ -62,6 +63,22 @@ public class ImportFileResultLog<T> {
 
     public void setErrorDescription(String errorDescription) {
         this.errorDescription = errorDescription;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public String getSheetName() {
+        return sheetName;
+    }
+
+    public void setSheetName(String sheetName) {
+        this.sheetName = sheetName;
     }
 
     @Override

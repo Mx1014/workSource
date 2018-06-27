@@ -108,7 +108,7 @@ public interface AssetProvider {
 
     List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId, Long chargingItemId,String ownerType, Long ownerId);
 
-    PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
+    List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
 
     void saveBillItems(List<EhPaymentBillItems> billItemsList);
 
@@ -295,8 +295,7 @@ public interface AssetProvider {
 
     List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId);
 
-
-    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId);
+    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId, boolean isInsert);
 
     PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName);
 
@@ -330,7 +329,10 @@ public interface AssetProvider {
 
     void insertAssetCategory(EhAssetAppCategories c);
 
+
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+ 
+    //ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
 
     boolean checkBillByCategory(Long billId, Long categoryId);
     //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
@@ -345,4 +347,21 @@ public interface AssetProvider {
 
 	void setRent(Long contractId, BigDecimal rent);
 
+    PaymentLateFine findLastedFine(Long id);
+
+    Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
+
+    Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+    void insertAppMapping(EhAssetModuleAppMappings relation);
+
+    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
+
+    boolean checkExistAsset(Long assetCategoryId);
+
+    boolean checkExistContract(Long contractCategoryId);
+
+    Long checkEnergyFlag(Integer namespaceID);
+
+    void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
 }

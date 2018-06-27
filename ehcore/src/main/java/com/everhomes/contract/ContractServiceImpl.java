@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,11 +23,11 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
-import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -74,6 +75,51 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ChangeType;
+import com.everhomes.rest.contract.ChargingVariablesDTO;
+import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractApplicationScene;
+import com.everhomes.rest.contract.ContractAttachmentDTO;
+import com.everhomes.rest.contract.ContractChargingChangeDTO;
+import com.everhomes.rest.contract.ContractChargingItemDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractLogDTO;
+import com.everhomes.rest.contract.ContractNumberDataType;
+import com.everhomes.rest.contract.ContractParamDTO;
+import com.everhomes.rest.contract.ContractParamGroupMapDTO;
+import com.everhomes.rest.contract.ContractParamGroupType;
+import com.everhomes.rest.contract.ContractPaymentPlanDTO;
+import com.everhomes.rest.contract.ContractPaymentType;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractType;
+import com.everhomes.rest.contract.CreateContractCommand;
+import com.everhomes.rest.contract.CreatePaymentContractCommand;
+import com.everhomes.rest.contract.DeleteContractCommand;
+import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EntryContractCommand;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.GenerateContractNumberCommand;
+import com.everhomes.rest.contract.GenerateContractNumberRule;
+import com.everhomes.rest.contract.GetContractParamCommand;
+import com.everhomes.rest.contract.GetUserGroupsCommand;
+import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
+import com.everhomes.rest.contract.ListContractsBySupplierCommand;
+import com.everhomes.rest.contract.ListContractsBySupplierResponse;
+import com.everhomes.rest.contract.ListContractsCommand;
+import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
+import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
+import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.contract.ReviewContractCommand;
+import com.everhomes.rest.contract.SetContractParamCommand;
+import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
+import com.everhomes.rest.contract.UpdateContractCommand;
+import com.everhomes.rest.contract.UpdatePaymentContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -92,6 +138,8 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.OSType;
@@ -104,19 +152,17 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppService;
-import com.everhomes.util.*;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -128,12 +174,18 @@ import org.springframework.transaction.TransactionStatus;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
@@ -268,6 +320,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	private BigCollectionProvider bigCollectionProvider;
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+	@Value("${equipment.ip}")
+	private String equipmentIp;
 
 	private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
@@ -608,7 +663,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return num;
 	}*/
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
+		/*生成合同编号不用校验权限，下面这个是校验参数的权限，权限也是不对的*/
+		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
 		if(communityExist == null && cmd.getCommunityId() != null && cmd.getCategoryId() !=null) {
 			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(), cmd.getCategoryId());
@@ -1081,7 +1137,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 		
-	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
+	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments,Byte contractApplicationScene) {
 		//add by tangcen
 		List<String> oldApartments = new ArrayList<>();
 		List<String> newApartments = new ArrayList<>();
@@ -1829,7 +1885,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public void setContractParam(SetContractParamCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+		//查看获得参数接口，不做权限校验。
+		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
 		String contractNumberRulejson = StringHelper.toJsonString(cmd.getGenerateContractNumberRule());
 		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
 		param.setContractNumberRulejson(contractNumberRulejson);
@@ -1894,7 +1951,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
-		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
+		/*
+		 * 在实现合同多入口时，“合同基础参数配置”页面被产品移到了“管理”按钮里面，当功能属于“管理”里面的功能时，按产品的定义， 权限列表也不应该出现对应的权限（管理里只应用管理员才有权限、不需要通过权限列表来分配）；
+		 * 当把权限从权限列表去掉时（从eh_service_modules表里删除了对应的三级module），会导致原来的“合同基础参数配置” 页面所用的接口权限校验报错，原因是找不到对应的module_id了，参考了“管理”里的公共平台实现的“权限列表”、“工作流”界面，
+		 * 里面都没有进行权限校验（猜测其是通过控制“管理”按钮显示来实现权限控制的），所以“合同基础参数配置”所用的接口也相应地注释掉权限校验（ 该方式属于临时方式，等公共平台出台统一的规则后再按对应的规则修改）； 
+		 * 产品需求: 系统管理员和应用管理员的概念不一样，应用管理员是有这个应用的全部权限，系统管理员是拥有这个系统的全部权限， 所以应用管理员和系统管理员都有权限设置管理里面的所有功能包括合同基础参数设置。
+		 * 我们此处获得参数设置也是不需要进行权限校验的，所以在这里以及设置参数那边，我们把权限的校验规则给放开，不做权限校验。
+		 */
+		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
 		//查询在某一个入口，某一个小区，某个收付款合同类型，最低规则
 		if(communityExist != null) {
@@ -2139,7 +2203,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						command.setCommunityId(cmd.getCommunityId());
 						command.setStatus(cmd.getStatus());
 						command.setEnterpriseCustomerId(customer.getId());
-						command.setCategoryId(cmd.getCategoryId());
+						//command.setCategoryId(cmd.getCategoryId());
 						return listEnterpriseCustomerContracts(command);
 					}
 				}
@@ -2167,7 +2231,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						command.setCommunityId(cmd.getCommunityId());
 						command.setStatus(cmd.getStatus());
 						command.setIndividualCustomerId(owner.getId());
-						command.setCategoryId(cmd.getCategoryId());
+						//command.setCategoryId(cmd.getCategoryId());
 						List<ContractDTO> dtos = listIndividualCustomerContracts(command);
 						if(dtos != null && dtos.size() > 0) {
 							contracts.addAll(dtos);
@@ -2446,16 +2510,18 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	 * */
 	@Scheduled(cron = "1 50 4 * * ?")
 	public void contractAutoSync() {
-		Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode() + System.currentTimeMillis(), "");
-		RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-		Map<String,String> runningMap  =new HashMap<>();
-		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()).tryEnter(() -> {
-			String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
-			runningMap.put(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), runningFlag);
-			if(StringUtils.isBlank(runningFlag))
-			redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), "executing", 5, TimeUnit.HOURS);
-		});
-		if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()))) {
+//		Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode() + System.currentTimeMillis(), "");
+//		RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+//		Map<String,String> runningMap  =new HashMap<>();
+//		this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()).tryEnter(() -> {
+//			String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CONTRACT.getCode());
+//			runningMap.put(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), runningFlag);
+//			if(StringUtils.isBlank(runningFlag))
+//			redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode(), "executing", 5, TimeUnit.HOURS);
+//		});
+//		if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CONTRACT.getCode()))) {
+		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+		if (taskServer.equals(equipmentIp)) {
 			List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
 			if (communities != null) {
 				for (Community community : communities) {
@@ -2603,4 +2669,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		return result;
 	}
+
+    public Long findContractCategoryIdByContractId(Long contractId) {
+		return contractProvider.findContractCategoryIdByContractId(contractId);
+    }
+
 }

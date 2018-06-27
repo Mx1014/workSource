@@ -1,5 +1,11 @@
 package com.everhomes.oauth2api;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.everhomes.oauthapi.OAuth2ApiService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
@@ -12,11 +18,6 @@ import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInfoDTO;
 import com.everhomes.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by xq.tian on 2018/4/13.

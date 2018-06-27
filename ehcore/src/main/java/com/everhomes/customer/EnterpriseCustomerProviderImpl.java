@@ -121,6 +121,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -150,6 +151,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     
     @Autowired
     private FieldProvider fieldProvider;
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Override
     public void createEnterpriseCustomer(EnterpriseCustomer customer) {
@@ -1496,7 +1499,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 //        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
-        query.addOrderBy(Tables.EH_CUSTOMER_TRACKINGS.CREATE_TIME.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME.desc());
         List<CustomerTracking> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerTracking.class));
@@ -1638,9 +1641,9 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 				Object objNew = null;
 				Object objOld = null;
 				try {
-					if(null != methodNew && null != exist){
-						objNew = methodNew.invoke(customer, new Object[] {});
-						objOld = methodOld.invoke(exist, new Object[] {});
+					if(null != methodNew){
+						objNew = methodNew.invoke(customer);
+						objOld = methodOld.invoke(exist);
 					}
 				} catch (Exception e) {
 					throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
@@ -1697,6 +1700,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();
+                            }
+                        }
+                        if (fieldType.equals("Date")) {
+                            if (objOld != null) {
+                                Timestamp old = (Timestamp) objOld;
+                                oldData = old.toLocalDateTime().format(formatter);
+                            }
+                            if (objNew != null) {
+                                Timestamp newTime = (Timestamp) objNew;
+                                newData = newTime.toLocalDateTime().format(formatter);
                             }
                         }
                         Map<String,Object> map = new HashMap<String,Object>();

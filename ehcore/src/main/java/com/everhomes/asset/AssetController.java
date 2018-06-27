@@ -10,6 +10,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
@@ -647,7 +649,7 @@ public RestResponse listNotSettledBill(ListBillsCommand cmd) {
  */
 @RequestMapping("listNotSettledBillDetail")
 @RestReturn(value = ListBillDetailResponse.class)
-public RestResponse listNotSettledBillDetail(ListBillDetailCommand cmd) {
+public RestResponse listNotSettledBillDetail(ListBillDetailCommandStr cmd) {
     ListBillDetailResponse res = assetService.listBillDetail(cmd);
     RestResponse response = new RestResponse(res);
     response.setErrorDescription("OK");
@@ -1335,6 +1337,49 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         return null;
+    }
+    
+    /**
+     * <p>计算天企汇历史合同的租赁总额字段接口</p>
+     * <b>URL: /asset/calculateRentForContract</b>
+     */
+    @RequestMapping("calculateRentForContract")
+    public RestResponse calculateRentForContract(CalculateRentCommand cmd) {
+        assetService.calculateRentForContract(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    /**
+     * to map an application to another. The relation is mutual, and for one of the two applications,
+     * it can only have one mate from the same module to prevent a bigamy
+     * @param cmd
+     * @return OK
+     */
+    @RequestMapping("createAnAppMapping")
+    @RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
+    public RestResponse createAnAppMapping(CreateAnAppMappingCommand cmd) {
+        assetService.createAnAppMapping(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * forcely update a mapping relation to be allocated again
+     * @param cmd
+     * @return OK
+     */
+    @RequestMapping("updateAnAppMapping")
+    @RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
+    public RestResponse updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
+        assetService.updateAnAppMapping(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }
 

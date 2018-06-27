@@ -79,6 +79,8 @@ public interface ContractProvider {
 	List<Long> SimpleFindContractByNumber(String header);
 
     List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
+    //add by steve
+	List<Contract> listContractByNamespaceId(Integer namespaceId);
 
     //多入口
     void createContractCategory(ContractCategory newsCategory);
@@ -97,5 +99,9 @@ public interface ContractProvider {
 	List<ContractEvents> listContractEvents(Long contractId);
 
     boolean isNormal(Long cid);
+
 	void saveContractEventAboutApartments(int opearteType, Contract contract, String oldApartmnets,String newApartmnets);
+
+    Long findContractCategoryIdByContractId(Long contractId);
+
 }

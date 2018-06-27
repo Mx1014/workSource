@@ -14,9 +14,9 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractCategory;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.customer.CustomerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -26,14 +26,13 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.module.ServiceModuleScope;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.ImportFileService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
@@ -43,7 +42,6 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -58,6 +56,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserNotificationTemplateCode;
@@ -68,7 +67,6 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -177,27 +175,19 @@ public class AssetServiceImpl implements AssetService {
     private UserPrivilegeMgr userPrivilegeMgr;
 
     @Autowired
-    private CustomerService customerService;
-
-    @Autowired
     private NamespaceResourceService namespaceResourceService;
 
     @Autowired
     private LocaleTemplateProvider localeTemplateProvider;
-
-    @Autowired
-    private ServiceModuleAppService serviceModuleAppService;
-
-
-    private ImportFileService importFileService;
-
-    @Autowired
-    private PortalService portalService;
     
     @Autowired
     private ContentServerService contentServerService;
+    
     @Autowired
     private PaymentService paymentService;
+    
+    @Autowired
+    private ContractProvider contractProvider;
 
 
     @Override
@@ -303,6 +293,37 @@ public class AssetServiceImpl implements AssetService {
 
     private void NoticeWithTextAndMessage(String ownerType,Long ownerId,List<BillIdAndType> billIdAndTypes, List<NoticeInfo> noticeInfos) {
         List<Long> uids = new ArrayList<>();
+                //客户在系统内，把需要推送的uid放在list中
+        List<NoticeInfo> infos = new ArrayList<>();
+        for (int i = 0; i < noticeInfos.size(); i++) {
+            NoticeInfo noticeInfo = noticeInfos.get(i);
+            Long targetId = noticeInfo.getTargetId();
+            if (targetId != null && targetId != 0l) {
+                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                    uids.add(noticeInfo.getTargetId());
+                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
+                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
+//                    tempCmd.setOwnerId(cmd.getOwnerId());
+//                    tempCmd.setOwnerType(cmd.getOwnerType());
+                    tempCmd.setOwnerId(ownerId);
+                    tempCmd.setOwnerType(ownerType);
+                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
+                    //企业超管是1005？不是1001
+                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
+                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
+                        uids.add(organizationContactDTOS.get(j).getTargetId());
+                        //新增一个noticeInfo
+                        NoticeInfo n = ConvertHelper.convert(noticeInfo, NoticeInfo.class);
+                        //只更改电话信息为企业联系人的contact token
+                        n.setPhoneNums(organizationContactDTOS.get(j).getContactToken());
+                        infos.add(n);
+                    }
+                    LOGGER.info("notice uids found = {}"+uids.size());
+                }
+            }
+        }
+        noticeInfos.addAll(infos);
+
         try {
             for (int i = 0; i < noticeInfos.size(); i++) {
                 NoticeInfo noticeInfo = noticeInfos.get(i);
@@ -329,29 +350,6 @@ public class AssetServiceImpl implements AssetService {
             LOGGER.error("YZX MAIL SEND FAILED");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "YZX MAIL SEND FAILED");
-        }
-        //客户在系统内，把需要推送的uid放在list中
-        for (int i = 0; i < noticeInfos.size(); i++) {
-            NoticeInfo noticeInfo = noticeInfos.get(i);
-            Long targetId = noticeInfo.getTargetId();
-            if (targetId != null && targetId != 0l) {
-                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
-                    uids.add(noticeInfo.getTargetId());
-                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
-                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
-//                    tempCmd.setOwnerId(cmd.getOwnerId());
-//                    tempCmd.setOwnerType(cmd.getOwnerType());
-                    tempCmd.setOwnerId(ownerId);
-                    tempCmd.setOwnerType(ownerType);
-                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
-                    //企业超管是1005？不是1001
-                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
-                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
-                        uids.add(organizationContactDTOS.get(j).getTargetId());
-                    }
-                    LOGGER.info("notice uids found = {}"+uids.size());
-                }
-            }
         }
 
         for (int k = 0; k < uids.size(); k++) {
@@ -402,6 +400,44 @@ public class AssetServiceImpl implements AssetService {
 
     private void NoticeWithTextAndMessage(List<Long> billIds, List<NoticeInfo> noticeInfos) {
         List<AssetAppNoticePak> uids = new ArrayList<>();
+                //客户在系统内，把需要推送的uid放在list中
+        List<NoticeInfo> extraInfos = new ArrayList<>();
+        for (int i = 0; i < noticeInfos.size(); i++) {
+            NoticeInfo noticeInfo = noticeInfos.get(i);
+            Long targetId = noticeInfo.getTargetId();
+            if (targetId != null && targetId != 0l) {
+                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                    AssetAppNoticePak pak = createAssetAppNoticePak(noticeInfo);
+                    pak.setUid(noticeInfo.getTargetId());
+                    uids.add(pak);
+                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
+//                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
+//                    tempCmd.setOwnerId(noticeInfo.getOwnerId());
+//                    tempCmd.setOwnerType(noticeInfo.getOwnerType());
+//                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
+//                    //企业超管是1005？不是1001
+//                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
+                    ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+                    cmd1.setOrganizationId(noticeInfo.getTargetId());
+                    cmd1.setActivationFlag((byte)1);
+                    cmd1.setOwnerType("EhOrganizations");
+                    cmd1.setOwnerId(null);
+                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
+                        AssetAppNoticePak pak = createAssetAppNoticePak(noticeInfo);
+                        pak.setUid(organizationContactDTOS.get(j).getTargetId());
+                        // 新增一个通知对象，电话改下
+                        NoticeInfo info = ConvertHelper.convert(noticeInfo, NoticeInfo.class);
+                        info.setPhoneNums(organizationContactDTOS.get(j).getContactToken());
+
+                        extraInfos.add(info);
+                        uids.add(pak);
+                    }
+                    LOGGER.info("notice paks assembled = {}"+uids);
+                }
+            }
+        }
+        noticeInfos.addAll(extraInfos);
         try {
             for (int i = 0; i < noticeInfos.size(); i++) {
                 NoticeInfo noticeInfo = noticeInfos.get(i);
@@ -437,37 +473,7 @@ public class AssetServiceImpl implements AssetService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "sms notice failed once");
         }
-        //客户在系统内，把需要推送的uid放在list中
-        for (int i = 0; i < noticeInfos.size(); i++) {
-            NoticeInfo noticeInfo = noticeInfos.get(i);
-            Long targetId = noticeInfo.getTargetId();
-            if (targetId != null && targetId != 0l) {
-                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
-                    AssetAppNoticePak pak = createAssetAppNoticePak(noticeInfo);
-                    pak.setUid(noticeInfo.getTargetId());
-                    uids.add(pak);
-                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
-//                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
-//                    tempCmd.setOwnerId(noticeInfo.getOwnerId());
-//                    tempCmd.setOwnerType(noticeInfo.getOwnerType());
-//                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
-//                    //企业超管是1005？不是1001
-//                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
-                    ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
-                    cmd1.setOrganizationId(noticeInfo.getTargetId());
-                    cmd1.setActivationFlag((byte)1);
-                    cmd1.setOwnerType("EhOrganizations");
-                    cmd1.setOwnerId(null);
-                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
-                    for (int j = 0; j < organizationContactDTOS.size(); j++) {
-                        AssetAppNoticePak pak = createAssetAppNoticePak(noticeInfo);
-                        pak.setUid(organizationContactDTOS.get(j).getTargetId());
-                        uids.add(pak);
-                    }
-                    LOGGER.info("notice paks assembled = {}"+uids);
-                }
-            }
-        }
+
         for (int k = 0; k < uids.size(); k++) {
             try {
                 AssetAppNoticePak pak = uids.get(k);
@@ -724,11 +730,17 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+    public ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        return handler.listBillDetail(cmd);
+        ListBillDetailCommand ncmd = new ListBillDetailCommand();
+        try{
+            ncmd.setBillId(Long.valueOf(cmd.getBillId()));
+        }catch (Exception e){
+            //todo
+        }
+        return handler.listBillDetail(ncmd);
     }
 
     @Override
@@ -944,7 +956,7 @@ public class AssetServiceImpl implements AssetService {
         }
         if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
             // 转换
-             Long assetCategoryId = serviceModuleAppService.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+             Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
              cmd.setCategoryId(assetCategoryId);
          }
         return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId()
@@ -1013,7 +1025,7 @@ public class AssetServiceImpl implements AssetService {
     public void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd) {
         LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
         // 转categoryId
-        Long categoryId = serviceModuleAppService.getOriginIdFromMappingApp(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID);
+        Long categoryId = assetProvider.getOriginIdFromMappingApp(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID, cmd.getNamesapceId());
         if(categoryId == null){
             categoryId = 0l;
         }
@@ -1101,12 +1113,23 @@ public class AssetServiceImpl implements AssetService {
                 Byte billingCycle = standard.getBillingCycle();
                 //获得groupRule的时间设置, this time stands for the timing of charging items to be generated
                 /**
-                 * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在
+                 * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在, 而且所属的billgroup必须等于应用的categoryId
                  */
-                PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId()
+                PaymentBillGroupRule groupRule = null;
+                PaymentBillGroup group = null;
+                List<PaymentBillGroupRule> groupRules = assetProvider.getBillGroupRule(rule.getChargingItemId()
                         ,rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
                 //获得group on which bill will be generted. Group defined billing cycle, bills day etc.
-                PaymentBillGroup group = assetProvider.getBillGroupById(groupRule.getBillGroupId());
+                for(PaymentBillGroupRule pgr : groupRules){
+                    group = assetProvider.getBillGroupById(pgr.getBillGroupId());
+                    if(group.getCategoryId() != null && group.getCategoryId().longValue() == categoryId.longValue()){
+                        groupRule = pgr;
+                        break;
+                    }
+                }
+                if(group == null || groupRule == null){
+                    throw new RuntimeException("bill group or grouprule is null");
+                }
                 Byte balanceDateType = group.getBalanceDateType();
                 //开始循环地址包裹
                 for(int j = 0; j < var1.size(); j ++){
@@ -1474,8 +1497,11 @@ public class AssetServiceImpl implements AssetService {
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                     dWithoutLimit.setTime(d.getTime());
                  }else{
+                    // #32243  check if the next day is beyond the maximum day of the next month
+                    int prevDay = d.get(Calendar.DAY_OF_MONTH);
                     d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
-                    if(d.getActualMaximum(Calendar.DAY_OF_MONTH) != d.get(Calendar.DAY_OF_MONTH)){
+                    int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    if(prevDay <= maximumDay){
                         d.add(Calendar.DAY_OF_MONTH, -1);
                     }
                     dWithoutLimit.setTime(d.getTime());
@@ -1804,8 +1830,11 @@ public class AssetServiceImpl implements AssetService {
                     d.add(Calendar.MONTH,cycle.getMonthOffset());
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                 }else{
+                    // #32243  check if the next day is beyond the maximum day of the next month
+                    int prevDay = d.get(Calendar.DAY_OF_MONTH);
                     d.add(Calendar.MONTH, cycle.getMonthOffset()+1);
-                    if(d.getActualMaximum(Calendar.DAY_OF_MONTH) != d.get(Calendar.DAY_OF_MONTH)){
+                    int maximumDay = d.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    if(prevDay <= maximumDay){
                         d.add(Calendar.DAY_OF_MONTH, -1);
                     }
                 }
@@ -2723,22 +2752,28 @@ public class AssetServiceImpl implements AssetService {
                     formulaJson = formulaJson.replace("qf",amountOwed.toString());
                     BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
                     //开始构造一条滞纳金记录
-                    PaymentLateFine fine = new PaymentLateFine();
-                    long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
-                    fine.setId(nextSequence);
-                    fine.setName(item.getChargingItemName() + "滞纳金");
-                    fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    //查看item是否已经有滞纳金产生了
+                    PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+                    boolean isInsert = false;
+                    if(fine == null){
+                        isInsert = true;
+                        fine = new PaymentLateFine();
+                        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+                        fine.setId(nextSequence);
+                        fine.setName(item.getChargingItemName() + "滞纳金");
+                        fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        fine.setBillId(item.getBillId());
+                        fine.setBillItemId(item.getId());
+                        fine.setCommunityId(item.getOwnerId());
+                        fine.setNamespaceId(item.getNamespaceId());
+                        fine.setCustomerId(item.getTargetId());
+                        fine.setCustomerType(item.getTargetType());
+                    }
                     fine.setAmount(fineAmount);
-                    fine.setBillId(item.getBillId());
-                    fine.setBillItemId(item.getId());
-                    fine.setCommunityId(item.getOwnerId());
-                    fine.setNamespaceId(item.getNamespaceId());
-                    fine.setCustomerId(item.getTargetId());
-                    fine.setCustomerType(item.getTargetType());
                     fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId());
+                    assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
                     // 重新计算下账单
-                    assetProvider.reCalBillById(item.getBillId());
+//                    assetProvider.reCalBillById(item.getBillId());
                 }
             }
         });
@@ -3318,7 +3353,7 @@ public class AssetServiceImpl implements AssetService {
         }
         if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
            // 转换
-            Long assetCategoryId = serviceModuleAppService.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
             cmd.setCategoryId(assetCategoryId);
         }
         return assetProvider.listAvailableChargingItems(cmd);
@@ -4630,4 +4665,63 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return judgeAppShowPayResponse;
 	}
+	
+	//issue 31594,计算天企汇历史合同的租赁总额字段
+	@Override
+	public void calculateRentForContract(CalculateRentCommand cmd){
+		List<Contract> contractList = contractProvider.listContractByNamespaceId(cmd.getNamespaceId());
+		if (contractList!=null && contractList.size()>0) {
+			for (Contract contract : contractList) {
+				if (contract.getRent()==null) {
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId());
+			        assetProvider.setRent(contract.getId(),totalAmount);
+				}
+			}
+		}
+	}
+
+    /**
+     * first checkout if
+     * @param cmd
+     */
+    @Override
+    public void createAnAppMapping(CreateAnAppMappingCommand cmd) {
+        AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
+        mapping.setId(nextSequence);
+        if(cmd.getAssetCategoryId() == null || cmd.getContractCategoryId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "either assetCategoryId or contractCategory is null");
+        }
+        boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
+        boolean existContract = assetProvider.checkExistContract(cmd.getContractCategoryId());
+        if(existAsset || existContract){
+             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
+                    "asset category or contract category already exist in mapping schema");
+        }
+        Long mappingId = assetProvider.checkEnergyFlag(cmd.getNamespaceId());
+        mapping.setAssetCategoryId(cmd.getAssetCategoryId());
+        mapping.setContractCategoryId(cmd.getContractCategoryId());
+        mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        mapping.setCreateUid(UserContext.currentUserId());
+        mapping.setNamespaceId(cmd.getNamespaceId());
+        mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
+        mapping.setEnergyFlag(AppMappingEnergyFlag.fromCodeDefaultNO(cmd.getEnergyFlag()).getCode());
+        // add relation
+        if(mappingId != null && AppMappingEnergyFlag.fromCodeDefaultNO(mapping.getEnergyFlag()) == AppMappingEnergyFlag.YES){
+            assetProvider.changeEnergyFlag(mappingId, AppMappingEnergyFlag.NO);
+        }
+        assetProvider.insertAppMapping(mapping);
+    }
+
+    @Override
+    public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
+        assetProvider.updateAnAppMapping(cmd);
+    }
+
+
+    @Override
+    public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
+        return assetProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId);
+    }
 }

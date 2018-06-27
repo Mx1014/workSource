@@ -25,5 +25,6 @@ public interface ServiceAllianceRequestInfoSearcher {
     SearchRequestInfoResponse searchOneselfRequestInfo(SearchOneselfRequestInfoCommand cmd);
     SearchRequestInfoResponse searchOrgRequestInfo(SearchOrgRequestInfoCommand cmd);
     public List<ServiceAllianceRequestInfo> generateUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details);
+    public void updateDocByField(Long flowCaseId, String templateType, String field, Object reNewValue);
 
 }
