@@ -339,24 +339,9 @@ CREATE TABLE `eh_parking_hubs` (
 
 ALTER TABLE eh_parking_spaces ADD COLUMN parking_hubs_id BIGINT;
 
--- 多入口 by dingjianmin  start
--- from asset_multi
-CREATE TABLE `eh_service_module_app_mappings`(
-  `id` BIGINT NOT NULL ,
-  `app_origin_id_male` BIGINT NOT NULL COMMENT 'the origin id of app',
-  `app_module_id_male` BIGINT NOT NULL COMMENT 'the module id of app',
-  `app_origin_id_female` BIGINT NOT NULL COMMENT 'the origin id of app',
-  `app_module_id_female` BIGINT NOT NULL COMMENT 'the module id of app',
-  `create_time` DATETIME NOT NULL DEFAULT now(),
-  `create_uid` BIGINT NOT NULL,
-  `update_time` DATETIME NOT NULL DEFAULT now(),
-  `update_uid` BIGINT DEFAULT NULL,
-  UNIQUE KEY `origin_id_mapping` (`app_origin_id_male`, `app_origin_id_female`),
-  UNIQUE KEY `i_origin_module` (`app_origin_id_male`, `app_module_id_male`),
-  UNIQUE KEY `i_origin_module_reverse` (`app_origin_id_female`, `app_module_id_male`),
-  PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
-
+-- 通用脚本  
+-- ADD BY 丁建民 
+-- #28874 合同管理（多应用） 产品功能（不同的合同支持不同的部门可见，同时支持一个资源签多份合同）
 -- multiple entry category id for asset module by wentian
 CREATE TABLE `eh_asset_app_categories`(
   `id` BIGINT NOT NULL,
@@ -384,15 +369,14 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `category_id` BIGINT NOT NULL DEF
 
 -- end of wentian's script
 
--- from testByDingjianminThree
--- --合同管理 基础设置合同规则
+-- 合同管理 基础设置合同规则
 ALTER TABLE `eh_contract_params` ADD COLUMN `payorreceive_contract_type` tinyint(2) DEFAULT '0' COMMENT '0 收款合同 1付款合同';
 ALTER TABLE `eh_contract_params` ADD COLUMN `contract_number_rulejson` text NULL COMMENT '合同规则';
 ALTER TABLE `eh_contract_params` ADD COLUMN `update_time` datetime NULL COMMENT '更新时间';
 ALTER TABLE `eh_contract_params` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'contract category id';
--- --合同管理 合同多入口设置
+-- 合同管理 合同多入口设置
 ALTER TABLE `eh_contracts` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'contract category id';
--- --合同管理，表单设置，动态字段
+-- 合同管理，表单设置，动态字段
 ALTER TABLE `eh_var_field_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
 ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `category_id` bigint(20) NULL COMMENT 'category id';
@@ -417,6 +401,28 @@ CREATE TABLE `eh_contract_categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 多入口 by dingjianmin end
+-- END BY 丁建民
+
+-- changed schema eh_service_module_app_mappings to eh_asset_module_app_mappings by wentian 
+-- 在beta上已经新建了eh_service_module_app_mappings，现在修改这表名，需要把原来的无用表进行删除
+DROP TABLE IF EXISTS `eh_service_module_app_mappings`;
+CREATE TABLE `eh_asset_module_app_mappings`(
+  `id` BIGINT NOT NULL ,
+  `namespace_id` INTEGER NOT NULL ,
+  `asset_category_id` BIGINT DEFAULT NULL ,
+  `contract_category_id` BIGINT DEFAULT NULL ,
+  `energy_category_id` BIGINT DEFAULT NULL ,
+  `energy_flag` TINYINT COMMENT '在每个域空间，只有一个energy flag为1，0为不启用',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '2:active; 0:inactive',
+  `create_time` DATETIME NOT NULL DEFAULT now(),
+  `create_uid` BIGINT NOT NULL,
+  `update_time` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
+  UNIQUE KEY `u_asset_category_id`(`asset_category_id`),
+  UNIQUE KEY `u_contract_category_id`(`contract_category_id`),
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
+
+-- endl
 
 
