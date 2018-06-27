@@ -419,7 +419,8 @@ CREATE TABLE `eh_contract_categories` (
 
 -- END BY 丁建民
 
--- changed schema eh_service_module_app_mappings to eh_asset_module_app_mappings by wentian
+-- changed schema eh_service_module_app_mappings to eh_asset_module_app_mappings by wentian 
+-- 在beta上已经新建了eh_service_module_app_mappings，现在修改这表名，需要把原来的无用表进行删除
 DROP TABLE IF EXISTS `eh_service_module_app_mappings`;
 CREATE TABLE `eh_asset_module_app_mappings`(
   `id` BIGINT NOT NULL ,

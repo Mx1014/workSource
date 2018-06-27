@@ -2591,7 +2591,9 @@ public class ParkingServiceImpl implements ParkingService {
 					dto.setStatus(ParkingSpaceStatus.OPEN.getCode());
 				}
 				ParkingHub parkingHub = parkingHubProvider.findParkingHubById(r.getParkingHubsId());
-				dto.setHubName(parkingHub.getHubName());
+				if(parkingHub!=null){
+					dto.setHubName(parkingHub.getHubName());
+				}
 				return dto;
 			}).collect(Collectors.toList()));
 
