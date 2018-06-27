@@ -6161,6 +6161,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 			public int compare(Object o1, Object o2) {
 				SceneDTO s1=(SceneDTO)o1;
 				SceneDTO s2=(SceneDTO)o2;
+				if(s1.getCommunityId()==null || s2.getCommunityId()==null){
+					return 0;
+				}
 		        if(s1.getCommunityId().longValue() != s2.getCommunityId().longValue())
 		            return s1.getCommunityId().longValue() > s2.getCommunityId().longValue() ? 1 :-1;
 		        else
