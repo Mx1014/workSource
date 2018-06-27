@@ -36,6 +36,28 @@ public class DownloadUtils {
         return response;
     }
 
+    public static HttpServletResponse download(ByteArrayOutputStream out, HttpServletResponse response, String fileName) {
+        try {
+            // 清空response
+            //response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("gbk"), "iso8859-1")+".xlsx");
+            //response.addHeader("Content-Length", "" + out.);
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(out.toByteArray());
+            toClient.flush();
+            toClient.close();
+
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    ex.getLocalizedMessage());
+        }
+        return response;
+    }
+
     public static String writeZip(List<String> files, String zipName) {
         try {
             OutputStream os = new BufferedOutputStream( new FileOutputStream(zipName) );
