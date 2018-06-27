@@ -263,12 +263,12 @@ public class FieldServiceImpl implements FieldService {
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }
             if(ModuleName.ENTERPRISE_CUSTOMER.getName().equals(cmd.getModuleName())) {
-                sheetNames.remove("基本信息");
-                sheetNames.remove("企业情况");
-                sheetNames.remove("员工情况");
-                sheetNames.remove("客户合同");
-                sheetNames.remove("资源预定");
-                sheetNames.remove("企业服务");
+                sheetNames.remove("10");
+                sheetNames.remove("11");
+                sheetNames.remove("12");
+                sheetNames.remove("27");
+                sheetNames.remove("35");
+                sheetNames.remove("36");
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
