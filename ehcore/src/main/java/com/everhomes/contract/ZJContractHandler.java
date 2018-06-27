@@ -539,7 +539,7 @@ public class ZJContractHandler implements ContractService{
     }
 
     @Override
-    public String generateContractNumber() {
+    public String generateContractNumber(GenerateContractNumberCommand cmd) {
         return null;
     }
 

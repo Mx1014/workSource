@@ -249,7 +249,13 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
 //        params.put("mebtypename",null);
 //        params.put("mebremark",null);
         params.put("paymode","1");
-        BeeResponse response = post(ADD_CARD, params);
+        BeeResponse response=null;
+        try {
+        	response = post(ADD_CARD, params);
+        }catch (Exception e){
+            LOGGER.error("ADD_CARD exception", e);
+            return false;
+        }
         order.setErrorDescriptionJson(response.toString());
         if(isChargeSuccess(response)){
             List<OpenCardInfo> entities= JSONObject.parseObject(response.getOutList().toString(), new TypeReference<List<OpenCardInfo>>(){});
@@ -288,8 +294,13 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         params.put("time","0");
         params.put("payAmount",order.getPrice());
 
-        BeeResponse beeResponse = post(PAY_ORDER, params);
-
+        BeeResponse beeResponse;
+        try {
+        	beeResponse = post(PAY_ORDER, params);
+        }catch (Exception e){
+            LOGGER.error("PAY_ORDER exception", e);
+            return false;
+        }
         order.setErrorDescriptionJson(beeResponse.toString());
         order.setErrorDescription(beeResponse.getMessage());
         return isChargeSuccess(beeResponse);
@@ -316,7 +327,13 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
 
         order.setStartPeriod(new Timestamp(newStart));
         order.setEndPeriod(timestampEnd);
-        BeeResponse beeResponse = post(ADD_CARD_ORDER_LIST, params);
+        BeeResponse beeResponse;
+        try{
+        	beeResponse = post(ADD_CARD_ORDER_LIST,params);
+        }catch (Exception e){
+            LOGGER.error("ADD_CARD_ORDER_LIST exception", e);
+            return false;
+        }
         //将充值信息存入订单
         order.setErrorDescriptionJson(beeResponse.toString());
         order.setErrorDescription(beeResponse.getMessage());
@@ -330,8 +347,13 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         processJSONParams(params);
         params.put("typestatus",1);
         params.put("pageSize",50);
-        BeeResponse result = post(GET_CARD_TYPE_LIST, params);
-
+        BeeResponse result;
+        try{
+        	result = post(GET_CARD_TYPE_LIST,params);
+        }catch (Exception e){
+            LOGGER.error("GET_CARD_TYPE_LIST exception", e);
+            return ret;
+        }
         List<OutListEntity> entities= JSONObject.parseObject(result.getOutList().toString(), new TypeReference<List<OutListEntity>>(){});
         if(entities!=null && entities.size()>0) {
             OutListEntity outListEntity = entities.get(0);
@@ -359,7 +381,13 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         params.put("carnumber", plateNumber);
         params.put("amount", "0");//优惠金额（元）曹丹，这里必须穿
         params.put("time", "0");//优惠时间（毫秒）曹丹，这里必须穿
-        BeeResponse response = post(GET_ORDER, params);
+        BeeResponse response;
+        try{
+        	response = post(GET_ORDER,params);
+        }catch (Exception e){
+            LOGGER.error("GET_ORDER exception", e);
+            return null;
+        }
 
         List<TempCardInfo> tempCardInfos= JSONObject.parseObject(response.getOutList().toString(), new TypeReference<List<TempCardInfo>>(){});
         if(tempCardInfos!=null && tempCardInfos.size()>0) {
@@ -398,7 +426,13 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
         params.put("carnumber",plateNumber);
         params.put("query","all");
         params.put("pageSize",50);
-        BeeResponse result = post(GET_CARD_LIST_BY_CAR_NUMBER,params);
+        BeeResponse result;
+        try{
+        	result = post(GET_CARD_LIST_BY_CAR_NUMBER,params);
+        }catch (Exception e){
+            LOGGER.error("GET_CARD_LIST_BY_CAR_NUMBER exception", e);
+            return null;
+        }
         List<OutListEntity> entities= JSONObject.parseObject(result.getOutList().toString(), new TypeReference<List<OutListEntity>>(){});
         if(entities!=null && entities.size()>0) {
             OutListEntity outListEntity = entities.get(0);
