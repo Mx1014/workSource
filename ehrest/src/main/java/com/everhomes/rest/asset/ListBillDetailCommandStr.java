@@ -13,6 +13,7 @@ public class ListBillDetailCommandStr {
     }
 
     public void setBillId(String billId) {
-       this.billId = billId;
+
+        this.billId = billId;
     }
 }

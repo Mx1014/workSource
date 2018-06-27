@@ -2004,6 +2004,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 DeleteEnterpriseCustomerCommand command = new DeleteEnterpriseCustomerCommand();
                 command.setId(customer.getId());
                 command.setCommunityId(customer.getCommunityId());
+                command.setNamespaceId(customer.getNamespaceId());
                 customerService.deleteEnterpriseCustomer(command, false);
             }
 
@@ -8206,6 +8207,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             } else {
                 UpdateEnterpriseCommand updateEnterpriseCommand = ConvertHelper.convert(enterpriseCommand, UpdateEnterpriseCommand.class);
                 updateEnterpriseCommand.setId(org.getId());
+                List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByOrganizationId(org.getId());
+                List<OrganizationAddressDTO> addressDTOS = new ArrayList<>();
+                if (addresses != null && addresses.size() > 0) {
+                    addressDTOS = addresses.stream().map((r) -> ConvertHelper.convert(r, OrganizationAddressDTO.class)).collect(Collectors.toList());
+                }
+                updateEnterpriseCommand.setAddressDTOs(addressDTOS);
                 updateEnterprise(updateEnterpriseCommand, false);
             }
 
