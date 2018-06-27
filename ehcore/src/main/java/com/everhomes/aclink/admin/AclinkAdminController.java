@@ -287,6 +287,22 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/updateAccessType</b>
+     * <p>门禁类型转变 </p>
+     * @return
+     */
+    @RequestMapping("updateAccessType")
+    @RestReturn(value=String.class)
+    public RestResponse updateAccessType(UpdateAccessTypeCommand cmd) {
+    	RestResponse response = new RestResponse();
+    	doorAccessService.updateAccessType(cmd.getDoorId(), cmd.getDoorType());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * 

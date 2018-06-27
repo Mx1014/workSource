@@ -573,7 +573,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 //			standardDto.setTemplateName(template.getName());
 //		}
 
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(standard.getOperatorUid(),
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(standard.getOperatorUid(),
 				standard.getOwnerId());
 		if (null != member) {
 			standardDto.setOperatorName(member.getContactName());
@@ -909,7 +909,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (communityIds != null && communityIds.size() > 0) {
 				communityIds.forEach((c) -> {
 					EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
-					Community community = communityProvider.findCommunityById(standard.getTargetId());
+					Community community = communityProvider.findCommunityById(c);
 					if (community != null) {
 						standardCommunity.setCommunityId(community.getId());
 						standardCommunity.setCommunityName(community.getName());
@@ -917,6 +917,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 					communities.add(standardCommunity);
 				});
 			}
+			standard.setCommunities(communities);
+		}
+		//add communities for operating in all scope
+		if (standard.getTargetId() != 0 && standard.getTargetId() != null) {
+			List<EquipmentStandardCommunity> communities = new ArrayList<>();
+			EquipmentStandardCommunity standardCommunity = new EquipmentStandardCommunity();
+			Community community = communityProvider.findCommunityById(standard.getTargetId());
+			if (community != null) {
+				standardCommunity.setCommunityId(community.getId());
+				standardCommunity.setCommunityName(community.getName());
+			}
+			communities.add(standardCommunity);
 			standard.setCommunities(communities);
 		}
 		return converStandardToDto(standard);
@@ -1938,7 +1950,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (task.getExecutorId() != null && task.getExecutorId() != 0) {
 			//总公司分公司 by xiongying20170328
 			List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
-//            	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getOwnerId());
+//            	OrganizationMember executor = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getExecutorId(), task.getOwnerId());
 			if (executors != null && executors.size() > 0) {
 				dto.setExecutorName(executors.get(0).getContactName());
 			}
@@ -2134,8 +2146,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 //		if(!StringUtils.isEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 //				 && cmd.getEndTime() != null) {
-////			OrganizationMember reviewer = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getReviewerId(), task.getOwnerId());
-////			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getOperatorId(), task.getExecutiveGroupId());
+////			OrganizationMember reviewer = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getReviewerId(), task.getOwnerId());
+////			OrganizationMember operator = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getOperatorId(), task.getExecutiveGroupId());
 //			List<OrganizationMember> reviewers = organizationProvider.listOrganizationMembersByUId(task.getReviewerId());
 //			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(task.getOperatorId());
 //			Map<String, Object> map = new HashMap<String, Object>();
@@ -2819,20 +2831,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentInspectionEquipments equipment = new EquipmentInspectionEquipments();
 		if (itemResults != null && itemResults.size() > 0) {
 			results = itemResults.stream()
-					.map(result -> ConvertHelper.convert(result, InspectionItemResult.class))
-					.collect(Collectors.toList());
-//            //兼容上一版 只有在result表中才有equipmentId
-//
-//            if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
-//                equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());
-//            } else {
-//                equipment = equipmentProvider.findEquipmentById(itemResults.get(0).getEquipmentId());
-//            }
-//            if (equipment != null){
-//                dto.setEquipmentName(equipment.getName());
-//                dto.setLocation(equipment.getLocation());
-//                dto.setEquipmentId(equipment.getId());
-//            }
+					.map(result -> {
+						InspectionItemResult itemResult = ConvertHelper.convert(result, InspectionItemResult.class);
+						EquipmentInspectionItems itemDetail = equipmentProvider.findEquipmentInspectionItem(itemResult.getItemId());
+						if (itemDetail != null) {
+							itemResult.setValueJason(itemDetail.getValueJason());
+						}
+						return itemResult;
+					}).collect(Collectors.toList());
+
 		}
 		if (log.getEquipmentId() != null && log.getEquipmentId() != 0) {
 			equipment = equipmentProvider.findEquipmentById(log.getEquipmentId());

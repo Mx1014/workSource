@@ -1,9 +1,9 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
 import java.util.List;
+
 
 public interface ServiceModuleAppProvider {
 

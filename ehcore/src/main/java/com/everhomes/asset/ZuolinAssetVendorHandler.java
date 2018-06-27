@@ -568,15 +568,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
-//        if(!cmd.getOwnerType().equals("community")){
-//            throw new RuntimeException("保存账单不在一个园区");
-//        }
-//        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
-//        if(targetDto!=null){
-//            cmd.setContractId(targetDto.getContractId());
-//            cmd.setTargetId(targetDto.getTargetId());
-//        }
-//        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
         return assetProvider.creatPropertyBill(cmd);
     }
 
@@ -620,11 +611,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         List<BillStaticsDTO> list = new ArrayList<>();
         Byte dimension = cmd.getDimension();
         if(dimension==1){
-            list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType());
+            list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
         }else if(dimension==2){
-            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginLimit(),cmd.getEndLimit());
+            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getCategoryId());
         }else if(dimension==3){
-            list = assetProvider.listBillStaticsByCommunities(cmd.getBeginLimit(),cmd.getEndLimit(),UserContext.getCurrentNamespaceId());
+            list = assetProvider.listBillStaticsByCommunities(cmd.getBeginLimit(),cmd.getEndLimit(),UserContext.getCurrentNamespaceId(),cmd.getCategoryId());
         }
         return list;
     }
@@ -912,6 +903,16 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     }else{
                         dto.setAddressStr("");
                     }
+                    try{
+                        //获得contract的categoryId
+                        if(!StringUtils.isBlank(dto.getContractId())){
+                            Long categoryId = contractService.findContractCategoryIdByContractId(Long.valueOf(dto.getContractId()));
+                            dto.setCategoryId(categoryId);
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("failed to get category id, contractId is={}",dto.getContractId(), e);
+                    }
+
                     tabBills.add(dto);
                 }
             }
@@ -1028,6 +1029,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE
                     , "file illegal");
         }
+        // get categoryid
+        Long categoryId =assetProvider.findCategoryIdFromBillGroup(cmd.getBillGroupId());
 
         //准备任务
         ImportFileTask task = new ImportFileTask();
@@ -1046,6 +1049,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 datas = entry.getValue();
             }
             for(CreateBillCommand command : createBillCommands){
+                command.setCategoryId(categoryId);
                 createBill(command);
             }
             //设置导出报错的结果excel的标

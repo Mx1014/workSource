@@ -16,4 +16,12 @@ public class PaginationConfigHelper {
         
         return requestedPageSize.intValue();
     }
+
+    public static int getMaxPageSize(ConfigurationProvider configProvider, Integer requestedPageSize) {
+        if(requestedPageSize == null) {
+            int maxSize = configProvider.getIntValue("pagination.max.size", AppConstants.PAGINATION_MAX_SIZE);
+            return maxSize;
+        }
+        return requestedPageSize;
+    }
 }
