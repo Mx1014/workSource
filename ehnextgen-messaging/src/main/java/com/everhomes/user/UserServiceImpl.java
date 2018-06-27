@@ -2944,6 +2944,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				}
 			}
 		}
+		//在返回前排个序
+		sortSceneDTO(sceneList);
 		return sceneList;
 	}
 
@@ -6142,5 +6144,29 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		User user = UserContext.current().getUser();
 		int amount = this.organizationProvider.getUserOrgAmount(user.getId());
 		return amount > 0 ? (byte) 1 : (byte) 0;
+	}
+	
+	/**
+	 * 返回的认证场景排序
+	 * 排序规则为：communityId 顺序排列
+	 * @param sceneDTO
+	 * @return
+	 */
+	private List<SceneDTO> sortSceneDTO(List<SceneDTO> sceneDTOList){
+		//传入数组为空或数据小于2（即没数据或数据只有一条时），是没必要排序的，直接返回。
+		if(sceneDTOList ==null || sceneDTOList.size()<2)return sceneDTOList ;
+		//排序
+		sceneDTOList.sort(new Comparator(){
+			@Override
+			public int compare(Object o1, Object o2) {
+				SceneDTO s1=(SceneDTO)o1;
+				SceneDTO s2=(SceneDTO)o2;
+		        if(s1.getCommunityId().longValue() != s2.getCommunityId().longValue())
+		            return s1.getCommunityId().longValue() > s2.getCommunityId().longValue() ? 1 :-1;
+		        else
+		        	return 0;
+			}			
+		});
+		return sceneDTOList ;
 	}
 }
