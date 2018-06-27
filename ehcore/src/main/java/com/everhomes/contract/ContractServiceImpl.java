@@ -2423,7 +2423,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
 				}
 				//add by tangcen 显示客户自定义的收费项名称
-				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),itemDto.getChargingItemId());
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),dto.getCategoryId(),itemDto.getChargingItemId());
 
 				itemDto.setChargingItemName(projectChargingItemName);
 				//String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
