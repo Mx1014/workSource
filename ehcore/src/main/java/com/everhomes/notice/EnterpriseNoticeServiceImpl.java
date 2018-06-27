@@ -416,7 +416,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         }
         ListEnterpriseNoticeResponse response = new ListEnterpriseNoticeResponse();
 
-        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(), namespaceId, offset, pageSize);
+        List<EnterpriseNotice> enterpriseNotices = enterpriseNoticeProvider.listEnterpriseNoticesByOwnerId(parseCurrentReceivers(cmd.getOrganizationId()), namespaceId, offset, pageSize);
 
         if (enterpriseNotices != null && enterpriseNotices.size() > 0) {
             List<EnterpriseNoticeDTO> enterpriseNoticeDTOS = new ArrayList<>(enterpriseNotices.size());
@@ -435,8 +435,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     /**
      * 发给自己的、发给本部门的或者发给上级部门的公告本人均可见
      */
-    private List<EnterpriseNoticeReceiver> parseCurrentReceivers() {
-        OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId());
+    private List<EnterpriseNoticeReceiver> parseCurrentReceivers(Long organizationId) {
+        OrganizationMemberDetails details = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId(), organizationId);
         if (details == null || details.getId() == null) {
             return Collections.emptyList();
         }
@@ -504,8 +504,8 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     }
 
     @Override
-    public boolean isNoticeSendToCurrentUser(Long enterpriseNoticeId) {
-        List<EnterpriseNoticeReceiver> currentReceivers = parseCurrentReceivers();
+    public boolean isNoticeSendToCurrentUser(Long organizationId, Long enterpriseNoticeId) {
+        List<EnterpriseNoticeReceiver> currentReceivers = parseCurrentReceivers(organizationId);
         if (CollectionUtils.isEmpty(currentReceivers)) {
             return false;
         }
