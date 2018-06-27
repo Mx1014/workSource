@@ -318,7 +318,6 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
 
 
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
-
         if (backupList == null || backupList.isEmpty()) {
             LOGGER.debug("syncDataToDb backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
             return ;
@@ -388,10 +387,8 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
             return true;
         });
 
-        if(mergeContractList != null && mergeContractList.size() > 0) {
-            List<String> ownerIdList = mergeContractList.stream().map(contract -> {
-                return contract.getOwnerId();
-            }).collect(Collectors.toList());
+        if(mergeContractList.size() > 0) {
+            List<String> ownerIdList = mergeContractList.stream().map(EbeiContract::getOwnerId).collect(Collectors.toList());
             String ownerIds = ownerIdList.toString().substring(1, ownerIdList.toString().length()-1);
             getOwnerStatus(communityIdentifier, ownerIds);
         }
