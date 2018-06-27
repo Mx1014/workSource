@@ -108,7 +108,7 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
             dto.setCardTypeId(temp.getTypeId());
             dto.setCardType(temp.getTypeName());
             dto.setRateToken(r.getId().toString());
-            dto.setVendorName(ParkingLotVendor.BEE_ZHONGTIAN.getCode());
+            dto.setVendorName(getParkingVendorName());
         }
     }
     @Override
@@ -514,4 +514,5 @@ public abstract class BeeVendorHandler extends DefaultParkingVendorHandler {
     public abstract String getParkingSysPrivatekey();
     public abstract String getParkingSysHost();
     public abstract String getParkingPloid();
+    public abstract String getParkingVendorName();
 }
