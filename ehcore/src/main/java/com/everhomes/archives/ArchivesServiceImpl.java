@@ -2861,9 +2861,6 @@ public class ArchivesServiceImpl implements ArchivesService, ApplicationListener
     @Override
     public boolean checkDismiss(Long userId, Long orgId) {
         OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, orgId);
-        if (null == member) {
-            return true;
-        }
         return checkDismiss(member);
 
     }
@@ -2879,6 +2876,9 @@ public class ArchivesServiceImpl implements ArchivesService, ApplicationListener
 //                return true;
 //            }
 //        }
+        if (null == member) {
+            return true;
+        }
         if (EmployeeStatus.fromCode(member.getEmployeeStatus()) == EmployeeStatus.DISMISSAL) {
             return true;
         }

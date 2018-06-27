@@ -15,6 +15,8 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.socialSecurity.NormalFlag;
@@ -54,6 +56,8 @@ public class WelfareServiceImpl implements WelfareService {
     @Autowired
     private LocaleTemplateService localeTemplateService;
 
+    @Autowired
+    private OrganizationProvider organizationProvider;
     @Override
     public ListWelfaresResponse listWelfares(ListWelfaresCommand cmd) {
         ListWelfaresResponse response = new ListWelfaresResponse();
@@ -183,14 +187,21 @@ public class WelfareServiceImpl implements WelfareService {
             Welfare welfare = saveWelfare(cmd.getWelfare());
             response.setCheckStatus(NormalFlag.NO.getCode());
             response.setDismissReceivers(new ArrayList<>());
-            if (archivesService.checkDismiss(cmd.getWelfare().getSenderUid(), cmd.getWelfare().getOwnerId())) {
+            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getWelfare().getSenderDetailId());
+            if (null != member) {
+                cmd.getWelfare().setSenderUid(member.getTargetId());
+            }
+            if (archivesService.checkDismiss(member)) {
                 response.setCheckStatus(NormalFlag.YES.getCode());
                 response.setDismissSenderDetailId(cmd.getWelfare().getSenderDetailId());
                 response.setDismissSenderUid(cmd.getWelfare().getSenderUid());
             }
                 //校验所有人是否离职
             for(WelfareReceiverDTO receiverDTO :cmd.getWelfare().getReceivers()){
-                if(archivesService.checkDismiss(receiverDTO.getReceiverUid(), cmd.getWelfare().getOwnerId())){
+
+                OrganizationMemberDetails receiverDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(receiverDTO.getReceiverDetailId());
+                receiverDTO.setReceiverUid(member.getTargetId());
+                if (archivesService.checkDismiss(receiverDetail)) {
                     response.setCheckStatus(NormalFlag.YES.getCode());
                     response.getDismissReceivers().add(receiverDTO);
                 }

@@ -5,10 +5,10 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul> 
- * <li>id: id</li> 
- * <li>creatorName: 接收者</li>
- * <li>receiverUid: 接收者uId</li>
- * <li>receiverDetailId: 接收者detail id</li> 
+ * <li>id: id 有就填没有不填 </li>
+ * <li>receiverName: 接收者姓名 必填 </li>
+ * <li>receiverUid: 接收者uId 可不填</li>
+ * <li>receiverDetailId: 接收者detail id 必填</li>
  * </ul>
  */
 public class WelfareReceiverDTO {

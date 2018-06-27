@@ -8,25 +8,25 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>id: 福利Id</li>
- * <li>ownerType: 所属类型,填organization</li>
- * <li>ownerId: 公司id</li>
- * <li>subject:  主题名称</li>
- * <li>content: 祝福语</li>
- * <li>senderName:发放者姓名</li>
- * <li>senderUid:发放者userId</li>
- * <li>senderDetailId: 发放者detailId</li>
- * <li>senderName: 发放者姓名</li>
- * <li>imgUri: 图片uri</li>
- * <li>imgUrl: 图片url</li>
- * <li>status: 状态:0-草稿 1-已发送 </li>
- * <li>sendTime: 发送时间</li>
- * <li>creatorName: 创建者</li>
- * <li>creatorUid: 创建者uId</li>
- * <li>createTime: 创建时间</li>
- * <li>operatorName: 操作者</li>
- * <li>operatorUid: 操作者uId</li>
- * <li>updateTime: 操作时间</li>
+ * <li>id: 福利Id 有就填没有不填</li>
+ * <li>ownerType: 所属类型,填organization 必填</li>
+ * <li>ownerId: 公司id 必填</li>
+ * <li>subject:  主题名称 必填</li>
+ * <li>content: 祝福语 必填</li>
+ * <li>senderName:发放者姓名 必填</li>
+ * <li>senderUid:发放者userId 可不填</li>
+ * <li>senderDetailId: 发放者detailId 必填</li>
+ * <li>senderName: 发放者姓名 必填</li>
+ * <li>imgUri: 图片uri 必填</li>
+ * <li>imgUrl: 图片url 只读项展示用</li>
+ * <li>status: 状态:0-草稿 1-已发送 只读项</li>
+ * <li>sendTime: 发送时间 只读项</li>
+ * <li>creatorName: 创建者 只读项</li>
+ * <li>creatorUid: 创建者uId 只读项</li>
+ * <li>createTime: 创建时间 只读项</li>
+ * <li>operatorName: 操作者 只读项</li>
+ * <li>operatorUid: 操作者uId 只读项</li>
+ * <li>updateTime: 操作时间 只读项</li>
  * <li>receivers: 接收人列表 参考{@link com.everhomes.rest.welfare.WelfareReceiverDTO}</li>
  * <li>items: 福利项列表 参考{@link com.everhomes.rest.welfare.WelfareItemDTO}</li>
  * </ul>
