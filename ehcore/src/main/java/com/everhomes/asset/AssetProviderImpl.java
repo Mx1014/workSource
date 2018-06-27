@@ -51,6 +51,7 @@ import com.everhomes.util.*;
 
 import com.everhomes.varField.*;
 import com.google.gson.Gson;
+import com.sun.javaws.exceptions.ErrorCodeResponseException;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -4769,6 +4770,10 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        boolean alreadyPaired = isAlreadyPaired(cmd.getAssetCategoryId(), cmd.getContractCategoryId());
+        if(alreadyPaired){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.SUCCESS, "already paired, no need pair again");
+        }
         boolean existAsset = checkExistAsset(cmd.getAssetCategoryId());
         boolean existContract = checkExistContract(cmd.getContractCategoryId());
         if(existAsset && existContract){
@@ -4805,6 +4810,15 @@ public class AssetProviderImpl implements AssetProvider {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "asset category id and contract id does not exist yes");
         }
+    }
+
+    private boolean isAlreadyPaired(Long assetCategoryId, Long contractCategoryId) {
+        List<Long> fetch = this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
+                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
+                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
+        return fetch.size() > 0;
     }
 
     private void deleteByContractAndAsset(Long contractCategoryId, Long assetCategoryId) {
