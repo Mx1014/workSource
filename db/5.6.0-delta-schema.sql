@@ -342,22 +342,6 @@ ALTER TABLE eh_parking_spaces ADD COLUMN parking_hubs_id BIGINT;
 -- 通用脚本  
 -- ADD BY 丁建民 
 -- #28874 合同管理（多应用） 产品功能（不同的合同支持不同的部门可见，同时支持一个资源签多份合同）
-CREATE TABLE `eh_service_module_app_mappings`(
-  `id` BIGINT NOT NULL ,
-  `app_origin_id_male` BIGINT NOT NULL COMMENT 'the origin id of app',
-  `app_module_id_male` BIGINT NOT NULL COMMENT 'the module id of app',
-  `app_origin_id_female` BIGINT NOT NULL COMMENT 'the origin id of app',
-  `app_module_id_female` BIGINT NOT NULL COMMENT 'the module id of app',
-  `create_time` DATETIME NOT NULL DEFAULT now(),
-  `create_uid` BIGINT NOT NULL,
-  `update_time` DATETIME NOT NULL DEFAULT now(),
-  `update_uid` BIGINT DEFAULT NULL,
-  UNIQUE KEY `origin_id_mapping` (`app_origin_id_male`, `app_origin_id_female`),
-  UNIQUE KEY `i_origin_module` (`app_origin_id_male`, `app_module_id_male`),
-  UNIQUE KEY `i_origin_module_reverse` (`app_origin_id_female`, `app_module_id_male`),
-  PRIMARY KEY (`id`)
-)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
-
 -- multiple entry category id for asset module by wentian
 CREATE TABLE `eh_asset_app_categories`(
   `id` BIGINT NOT NULL,
