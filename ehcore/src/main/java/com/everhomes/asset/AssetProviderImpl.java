@@ -51,7 +51,6 @@ import com.everhomes.util.*;
 
 import com.everhomes.varField.*;
 import com.google.gson.Gson;
-import com.sun.javaws.exceptions.ErrorCodeResponseException;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
