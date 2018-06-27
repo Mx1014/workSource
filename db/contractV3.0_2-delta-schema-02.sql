@@ -339,22 +339,25 @@ CREATE TABLE `eh_parking_hubs` (
 
 ALTER TABLE eh_parking_spaces ADD COLUMN parking_hubs_id BIGINT;
 
--- from asset_multi
-CREATE TABLE `eh_service_module_app_mappings`(
+-- modify table eh_service_module_app_mappings
+DROP TABLE IF EXISTS `eh_service_module_app_mappings`;
+CREATE TABLE `eh_asset_module_app_mappings`(
   `id` BIGINT NOT NULL ,
-  `app_origin_id_male` BIGINT NOT NULL COMMENT 'the origin id of app',
-  `app_module_id_male` BIGINT NOT NULL COMMENT 'the module id of app',
-  `app_origin_id_female` BIGINT NOT NULL COMMENT 'the origin id of app',
-  `app_module_id_female` BIGINT NOT NULL COMMENT 'the module id of app',
+  `namespace_id` INTEGER NOT NULL ,
+  `asset_category_id` BIGINT DEFAULT NULL ,
+  `contract_category_id` BIGINT DEFAULT NULL ,
+  `energy_category_id` BIGINT DEFAULT NULL ,
+  `energy_flag` TINYINT COMMENT '在每个域空间，只有一个energy flag为1，0为不启用',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '2:active; 0:inactive',
   `create_time` DATETIME NOT NULL DEFAULT now(),
   `create_uid` BIGINT NOT NULL,
-  `update_time` DATETIME NOT NULL DEFAULT now(),
+  `update_time` DATETIME DEFAULT NULL,
   `update_uid` BIGINT DEFAULT NULL,
-  UNIQUE KEY `origin_id_mapping` (`app_origin_id_male`, `app_origin_id_female`),
-  UNIQUE KEY `i_origin_module` (`app_origin_id_male`, `app_module_id_male`),
-  UNIQUE KEY `i_origin_module_reverse` (`app_origin_id_female`, `app_module_id_male`),
+  UNIQUE KEY `u_asset_category_id`(`asset_category_id`),
+  UNIQUE KEY `u_contract_category_id`(`contract_category_id`),
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
+
 
 -- multiple entry category id for asset module by wentian
 CREATE TABLE `eh_asset_app_categories`(

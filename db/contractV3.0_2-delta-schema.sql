@@ -23,3 +23,4 @@ CREATE TABLE `eh_contract_template` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- END by 丁建民
