@@ -5060,7 +5060,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))
                 .fetchInto(PaymentChargingItemScope.class);
-        if(scopes != null && scopes.size() == 0) {
+        if(scopes != null && scopes.size() != 0) {
         	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         }else {
 			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
@@ -5070,47 +5070,43 @@ public class AssetProviderImpl implements AssetProvider {
 	
 	public IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = getReadOnlyContext();
         EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
         List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
         		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
                 .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                .and(t1.BROTHER_STANDARD_ID.isNotNull())//用于判断是否是使用默认配置，还是处于解耦状态
-                .fetchInto(PaymentChargingStandardsScopes.class); 
-        if(scopes != null && scopes.size() == 0) {
-        	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }else {
-			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-		} 
-       return response;
+                .fetchInto(PaymentChargingStandardsScopes.class);
+        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        }else {//说明该域空间下已经有数据了
+        	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
+        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        	}else {
+        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        	}
+        }
+        return response;
 	}
 	
 	public IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
-    	List<ListBillGroupsDTO> list = new ArrayList<>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-        context.select()
-                .from(t)
-                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
-                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
-                .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                .and(t.BROTHER_GROUP_ID.isNotNull())
-                .fetch()
-                .map(r -> {
-                    ListBillGroupsDTO dto = new ListBillGroupsDTO();
-                    dto.setBillGroupId(r.getValue(t.ID));
-                    dto.setBillGroupName(r.getValue(t.NAME));
-                    dto.setBrotherGroupId(r.getValue(t.BROTHER_GROUP_ID));//用于判断是否是使用默认配置，还是处于解耦状态
-                    list.add(dto);
-                    return null;
-                });
-        if(list != null && list.size() == 0) {
-			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-		}else {
-			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-		}
+		DSLContext context = getReadOnlyContext();
+        EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
+        List<PaymentBillGroup> scopes = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .fetchInto(PaymentBillGroup.class);
+        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        }else {//说明该域空间下已经有数据了
+        	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
+        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        	}else {
+        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        	}
+        }
        return response;
 	}
 	

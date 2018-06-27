@@ -1,7 +1,7 @@
 //@formatter:off
 package com.everhomes.asset;
 
-import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
 
 /**
  * @author created by ycx
