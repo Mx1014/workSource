@@ -76,5 +76,30 @@ CREATE TABLE `eh_contract_categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- modify table eh_service_module_app_mappings
+DROP TABLE IF EXISTS `eh_service_module_app_mappings`;
+CREATE TABLE `eh_asset_module_app_mappings`(
+  `id` BIGINT NOT NULL ,
+  `namespace_id` INTEGER NOT NULL ,
+  `asset_category_id` BIGINT DEFAULT NULL ,
+  `contract_category_id` BIGINT DEFAULT NULL ,
+  `energy_category_id` BIGINT DEFAULT NULL ,
+  `energy_flag` TINYINT COMMENT '在每个域空间，只有一个energy flag为1，0为不启用',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '2:active; 0:inactive',
+  `create_time` DATETIME NOT NULL DEFAULT now(),
+  `create_uid` BIGINT NOT NULL,
+  `update_time` DATETIME DEFAULT NULL,
+  `update_uid` BIGINT DEFAULT NULL,
+  UNIQUE KEY `u_asset_category_id`(`asset_category_id`),
+  UNIQUE KEY `u_contract_category_id`(`contract_category_id`),
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'relation mappings among applications';
+
+
+
+
+
+
+
 
 

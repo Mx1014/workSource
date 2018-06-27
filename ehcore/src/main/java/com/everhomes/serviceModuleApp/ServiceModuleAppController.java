@@ -42,34 +42,4 @@ public class ServiceModuleAppController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-	/**
-	 * to map an application to another. The relation is mutual, and for one of the two applications,
-	 * it can only have one mate from the same module to prevent a bigamy
-	 * @param cmd
-	 * @return OK
-	 */
-	@RequestMapping("createAnAppMapping")
-	@RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
-	public RestResponse createAnAppMapping(CreateAnAppMappingCommand cmd) {
-		serviceModuleAppService.createAnAppMapping(cmd);
-		RestResponse response =  new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * forcely update a mapping relation to be allocated again
-	 * @param cmd
-	 * @return OK
-	 */
-	@RequestMapping("updateAnAppMapping")
-	@RestReturn(value=ListServiceModuleAppsForBannerResponse.class)
-	public RestResponse updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
-		serviceModuleAppService.updateAnAppMapping(cmd);
-		RestResponse response =  new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
 }
