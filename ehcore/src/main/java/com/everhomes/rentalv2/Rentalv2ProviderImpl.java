@@ -910,7 +910,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		if(null!=locator && locator.getAnchor() != null)
 			condition=condition.and(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.lt(new Timestamp(locator.getAnchor())));
-		step.orderBy(Tables.EH_RENTALV2_ORDERS.RESERVE_TIME.desc());
+		step.orderBy(Tables.EH_RENTALV2_ORDERS.START_TIME);
 		step.limit(pageSize);
 		step.where(condition);
 		List<RentalOrder> result = step

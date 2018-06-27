@@ -625,6 +625,21 @@ public class Rentalv2Controller extends ControllerBase {
 
 	/**
 	 *
+	 * <b>URL: /rental/getResourceUsingInfo<b>
+	 * <p>获取资源当前使用状态</p>
+	 */
+	@RequireAuthentication(value = false)
+	@RequestMapping("getResourceUsingInfo")
+	@RestReturn(GetResourceUsingInfoResponse.class)
+	public RestResponse getResourceUsingInfo(@Valid FindRentalSiteByIdCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getResourceUsingInfo(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
 	 * <b>URL: /rental/test<b>
 	 * <p>test</p>
 	 */

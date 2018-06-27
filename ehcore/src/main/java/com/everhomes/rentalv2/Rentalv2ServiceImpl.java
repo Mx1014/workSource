@@ -136,6 +136,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener<ContextRefreshedEvent> {
@@ -2155,71 +2156,82 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			List<RentalCell> collect = rentalCells.stream().filter(r -> StringUtils.isBlank(resourceNumber) || resourceNumber.equals(r.getResourceNumber()))
 					.collect(Collectors.toList());
 			Collections.sort(collect,(q,p)->q.getId().compareTo(p.getId()));
-			if(rentalBill.getRentalType() == RentalType.HOUR.getCode()){
-				//按小时模式，拼接预约时间
-				int size = collect.size();
-				RentalCell firstRsr = collect.get(0);
-				RentalCell lastRsr = collect.get(size - 1);
-				if (null != firstRsr && null != lastRsr) {
-					useDetailSB.append(beginTimeSF.format(firstRsr.getBeginTime()));
-					useDetailSB.append("-");
-					useDetailSB.append(endTimeSF.format(lastRsr.getEndTime()));
-
-				}
-			} else if (rentalBill.getRentalType() == RentalType.HALFDAY.getCode() ||
-					rentalBill.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
-				int size = collect.size();
-				RentalCell firstRsr = collect.get(0);
-				RentalCell lastRsr = collect.get(size - 1);
-
-				Function<RentalCell,String>  f =r->{
-					StringBuilder tmp = new StringBuilder();
-					if (r.getAmorpm().equals(AmorpmFlag.AM.getCode())) {
-						tmp.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								String.valueOf(AmorpmFlag.AM.getCode()), RentalNotificationTemplateCode.locale, "morning"));
-					} else if (r.getAmorpm().equals(AmorpmFlag.PM.getCode())) {
-						tmp.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								String.valueOf(AmorpmFlag.PM.getCode()), RentalNotificationTemplateCode.locale, "afternoon"));
-					} else if (r.getAmorpm().equals(AmorpmFlag.NIGHT.getCode())) {
-						tmp.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								String.valueOf(AmorpmFlag.NIGHT.getCode()), RentalNotificationTemplateCode.locale, "night"));
-					}
-					return tmp.toString();
-				};
-				if (null != firstRsr && null != lastRsr) {
-					useDetailSB.append(beginDateSF.format(firstRsr.getResourceRentalDate())).append(" ");
-					useDetailSB.append(f.apply(firstRsr));
-					if (!firstRsr.getId().equals(lastRsr.getId())){
-						useDetailSB.append("至");
-						useDetailSB.append(f.apply(lastRsr));
-					}
-				}
-			} else{
-				int size = collect.size();
-				RentalCell firstRsr = collect.get(0);
-				RentalCell lastRsr = collect.get(size - 1);
-				if (null != firstRsr && null != lastRsr) {
-					useDetailSB.append(beginDateSF.format(firstRsr.getResourceRentalDate()));
-					useDetailSB.append("至");
-					Calendar calendar = Calendar.getInstance();
-					if (rentalBill.getRentalType() == RentalType.MONTH.getCode()) {
-						calendar.setTime(lastRsr.getResourceRentalDate());
-						calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-						useDetailSB.append(beginDateSF.format(calendar.getTime()));
-					}else if (rentalBill.getRentalType() == RentalType.WEEK.getCode()){
-						calendar.setTime(lastRsr.getResourceRentalDate());
-						calendar.set(Calendar.DAY_OF_WEEK,7);
-						calendar.add(Calendar.DATE,1);
-						useDetailSB.append(beginDateSF.format(calendar.getTime()));
-					}else if (rentalBill.getRentalType() == RentalType.DAY.getCode()){
-						useDetailSB.append(beginDateSF.format(lastRsr.getResourceRentalDate()));
-					}
-				}
-			}
+			useDetailSB.append(getSingleNumberUseDetail(rentalBill.getRentalType(),collect,beginTimeSF,endTimeSF,beginDateSF,beginDateSF));
 			useDetailSB.append("\n");
 		}
 		useDetailSB.deleteCharAt(useDetailSB.length()-1);
 		rentalBill.setUseDetail(useDetailSB.toString());
+	}
+
+	//如果还有更多时间格式再逐步增加。。。
+	private String getSingleNumberUseDetail(Byte rentalType,List<RentalCell> collect,SimpleDateFormat beginTimeSF,
+											SimpleDateFormat endTimeSF,SimpleDateFormat beginDateSF,SimpleDateFormat beginMonthSF){
+		StringBuilder useDetailSB = new StringBuilder();
+		if(rentalType == RentalType.HOUR.getCode()){
+			//按小时模式，拼接预约时间
+			int size = collect.size();
+			RentalCell firstRsr = collect.get(0);
+			RentalCell lastRsr = collect.get(size - 1);
+			if (null != firstRsr && null != lastRsr) {
+				useDetailSB.append(beginTimeSF.format(firstRsr.getBeginTime()));
+				useDetailSB.append("-");
+				useDetailSB.append(endTimeSF.format(lastRsr.getEndTime()));
+
+			}
+		} else if (rentalType == RentalType.HALFDAY.getCode() ||
+				rentalType == RentalType.THREETIMEADAY.getCode()) {
+			int size = collect.size();
+			RentalCell firstRsr = collect.get(0);
+			RentalCell lastRsr = collect.get(size - 1);
+
+			Function<RentalCell,String>  f =r->{
+				StringBuilder tmp = new StringBuilder();
+				if (r.getAmorpm().equals(AmorpmFlag.AM.getCode())) {
+					tmp.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+							String.valueOf(AmorpmFlag.AM.getCode()), RentalNotificationTemplateCode.locale, "morning"));
+				} else if (r.getAmorpm().equals(AmorpmFlag.PM.getCode())) {
+					tmp.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+							String.valueOf(AmorpmFlag.PM.getCode()), RentalNotificationTemplateCode.locale, "afternoon"));
+				} else if (r.getAmorpm().equals(AmorpmFlag.NIGHT.getCode())) {
+					tmp.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+							String.valueOf(AmorpmFlag.NIGHT.getCode()), RentalNotificationTemplateCode.locale, "night"));
+				}
+				return tmp.toString();
+			};
+			if (null != firstRsr && null != lastRsr) {
+				useDetailSB.append(beginDateSF.format(firstRsr.getResourceRentalDate())).append(" ");
+				useDetailSB.append(f.apply(firstRsr));
+				if (!firstRsr.getId().equals(lastRsr.getId())){
+					useDetailSB.append("至");
+					useDetailSB.append(f.apply(lastRsr));
+				}
+			}
+		} else{
+			int size = collect.size();
+			RentalCell firstRsr = collect.get(0);
+			RentalCell lastRsr = collect.get(size - 1);
+			if (null != firstRsr && null != lastRsr) {
+				Calendar calendar = Calendar.getInstance();
+				if (rentalType == RentalType.MONTH.getCode()) {
+					useDetailSB.append(beginMonthSF.format(firstRsr.getResourceRentalDate()));
+					useDetailSB.append("至");
+					calendar.setTime(lastRsr.getResourceRentalDate());
+					calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+					useDetailSB.append(beginMonthSF.format(calendar.getTime()));
+				}else if (rentalType == RentalType.WEEK.getCode()){
+					useDetailSB.append(beginDateSF.format(firstRsr.getResourceRentalDate()));
+					useDetailSB.append("至");
+					calendar.setTime(lastRsr.getResourceRentalDate());
+					calendar.set(Calendar.DAY_OF_WEEK,7);
+					calendar.add(Calendar.DATE,1);
+					useDetailSB.append(beginDateSF.format(calendar.getTime()));
+				}else if (rentalType == RentalType.DAY.getCode()){
+					useDetailSB.append(beginDateSF.format(firstRsr.getResourceRentalDate()));
+					useDetailSB.append("至");
+					useDetailSB.append(beginDateSF.format(lastRsr.getResourceRentalDate()));
+				}
+			}
+		}
 	}
 
 
@@ -8812,5 +8824,84 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			return normalWeekend;
 		else
 			return legalHoliday;
+	}
+
+	@Override
+	public GetResourceUsingInfoResponse getResourceUsingInfo(FindRentalSiteByIdCommand cmd) {
+		RentalResource rentalSite = this.rentalv2Provider.getRentalSiteById(cmd.getId());
+		if (rentalSite == null || rentalSite.getStatus().equals(-1))
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					1001, "资源不存在");
+		GetResourceUsingInfoResponse response = new GetResourceUsingInfoResponse();
+
+		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalSite.getResourceType(),
+				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+		LocalDate today = LocalDate.now();
+		Long startTime = LocalDateTime.of(today.getYear(),today.getMonth(),today.getDayOfMonth(),0,0).atZone(ZoneId.systemDefault())
+				.toInstant().toEpochMilli();
+		//如果今天被关闭 显示空闲
+		if (closeDates != null &&
+		closeDates.stream().anyMatch(r-> startTime == r.getCloseDate().getTime()))
+			return response;
+		//每日开放时间
+		List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(rentalSite.getResourceType(),
+				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(),null);
+		if (dayopenTimes!=null){
+			response.setOpenTimes(dayopenTimes.stream().map(r->{
+				RentalOpenTimeDTO dto = new RentalOpenTimeDTO();
+				dto.setRentalType(r.getRentalType());
+				dto.setDayOpenTime(r.getOpenTime());
+				dto.setDayCloseTime(r.getCloseTime());
+				return dto;
+			}).collect(Collectors.toList()));
+		}
+		//今天(包含)的订单
+		today = today.plusDays(1);
+		Long endTime = LocalDateTime.of(today.getYear(),today.getMonth(),today.getDayOfMonth(),0,0).atZone(ZoneId.systemDefault())
+				.toInstant().toEpochMilli();
+		List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(rentalSite.getId(), startTime, endTime);
+		if (rentalOrders == null || rentalOrders.size()==0)
+			return response;
+		rentalOrders.stream().flatMap(r->{
+			List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(r.getId());
+			if (rentalSite.getResourceCounts()>1.0 && NormalFlag.NEED.getCode() == rentalSite.getAutoAssign()){
+
+
+			}
+			UsingInfoDTO dto = new UsingInfoDTO();
+			dto.setResourceName(r.getRentalCount() > 1.0?r.getResourceName()+"*"+r.getRentalCount().intValue():r.getResourceName());
+			dto.setStartTime(r.getStartTime().getTime());
+			dto.setEndTime(r.getEndTime().getTime());
+			String userName = userProvider.findUserById(r.getRentalUid()).getNickName();
+			if (userName.length()>1)
+				userName = userName.substring(0,userName.length()-2)+"*"+userName.substring(userName.length()-1,userName.length());
+			dto.setUserName(userName);
+			if (null!=r.getUserEnterpriseId()) {
+				Organization org = this.organizationProvider.findOrganizationById(r.getUserEnterpriseId());
+				if (org != null) {
+					dto.setUserName(org.getName());
+				}
+			}
+			dto.setUsingDetail(parseUsingInfoDetail(resourceOrders,null));
+			return Stream.of(dto);
+		}).collect(Collectors.toList());
+		return null;
+	}
+
+	private String parseUsingInfoDetail(List<RentalResourceOrder> resourceOrders,String number){
+		List<RentalCell> collect = resourceOrders.stream().filter(r -> number == null || number.equals(r.getResourceNumber())).map(r -> {
+			RentalCell cell = new RentalCell();
+			cell.setId(r.getRentalResourceRuleId());
+			cell.setBeginTime(r.getBeginTime());
+			cell.setEndTime(r.getEndTime());
+			cell.setResourceRentalDate(r.getResourceRentalDate());
+			return cell;
+		}).collect(Collectors.toList());
+		if (collect.size() == 0)
+			return "";
+		SimpleDateFormat beginTimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		SimpleDateFormat beginDateSF = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat endTimeSF = new SimpleDateFormat("HH:mm");
+		getSingleNumberUseDetail()
 	}
 }
