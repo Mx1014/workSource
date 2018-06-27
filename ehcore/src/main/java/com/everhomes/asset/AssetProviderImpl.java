@@ -1,7 +1,6 @@
 package com.everhomes.asset;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -9,17 +8,16 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
@@ -42,22 +40,14 @@ import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-
+import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
+import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.talent.Talent;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
-
-import com.everhomes.varField.*;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.jooq.Table;
 import org.jooq.*;
-import org.jooq.Field;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -2731,11 +2721,11 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAssetPaymentOrderBills.class),bills.size());
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills.class),bills.size());
         long nextSequence = nextBlockSequence - bills.size()+1;
-        List<EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
+        List<com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
         for(int i = 0; i < bills.size(); i ++){
-            EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
+            com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills orderBill  = new com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills();
             BillIdAndAmount billIdAndAmount = bills.get(i);
             orderBill.setId(nextSequence++);
             orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
@@ -2962,7 +2952,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f) {
+    public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<com.everhomes.server.schema.tables.pojos.EhPaymentFormula> f) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 //        if(c!=null){
             EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
@@ -3918,7 +3908,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchInto(PaymentChargingStandards.class);
         //公式和scope都要存一份
         List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes> scopes = new ArrayList<>();
-        List<EhPaymentFormula> formulas = new ArrayList<>();
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentFormula> formulas = new ArrayList<>();
         for(int i = 0; i < standards.size(); i ++){
             com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards origin = standards.get(i);
             //如果是需要修改的那个standard，修改之
@@ -3927,7 +3917,7 @@ public class AssetProviderImpl implements AssetProvider {
                 origin.setInstruction(instruction);
             }
             //standard的公式
-            EhPaymentFormula formula = context.selectFrom(formulaSchema)
+            com.everhomes.server.schema.tables.pojos.EhPaymentFormula formula = context.selectFrom(formulaSchema)
                     .where(formulaSchema.CHARGING_STANDARD_ID.eq(origin.getId()))
                     .fetchOneInto(PaymentFormula.class);
             //standard的scope
@@ -4624,7 +4614,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void insertAssetCategory(EhAssetAppCategories c) {
+    public void insertAssetCategory(com.everhomes.server.schema.tables.pojos.EhAssetAppCategories c) {
         EhAssetAppCategoriesDao dao = new EhAssetAppCategoriesDao(getReadWriteContext().configuration());
         dao.insert(c);
     }
@@ -4759,7 +4749,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void insertAppMapping(EhAssetModuleAppMappings relation) {
+    public void insertAppMapping(com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings relation) {
         EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(getReadWriteContext().configuration());
         dao.insert(relation);
 	}

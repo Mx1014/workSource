@@ -343,6 +343,7 @@ ALTER TABLE eh_parking_spaces ADD COLUMN parking_hubs_id BIGINT;
 -- ADD BY 丁建民 
 -- #28874 合同管理（多应用） 产品功能（不同的合同支持不同的部门可见，同时支持一个资源签多份合同）
 
+
 -- multiple entry category id for asset module by wentian
 CREATE TABLE `eh_asset_app_categories`(
   `id` BIGINT NOT NULL,
