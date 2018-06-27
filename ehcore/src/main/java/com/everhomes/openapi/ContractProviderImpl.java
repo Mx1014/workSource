@@ -754,7 +754,7 @@ public class ContractProviderImpl implements ContractProvider {
 	
 	//记录合同修改日志 by tangcen
 	@Override
-	public void saveContractEvent(int opearteType, Contract contract, Contract exist) {	
+	public void saveContractEvent(int opearteType, Contract contract, Contract comparedContract) {	
 		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY
 		String content = null;
 		Map<String,Object> map = new HashMap<String,Object>();
@@ -766,14 +766,14 @@ public class ContractProviderImpl implements ContractProvider {
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
 				break;
 			case ContractTrackingTemplateCode.CONTRACT_UPDATE:
-				content = compareContract(contract,exist);
+				content = compareContract(contract,comparedContract);
 				break;
 			case ContractTrackingTemplateCode.CONTRACT_RENEW:
-				map.put("contractName", exist.getName());
+				map.put("contractName", comparedContract.getName());
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_RENEW , UserContext.current().getUser().getLocale(), map, "");
 				break;
 			case ContractTrackingTemplateCode.CONTRACT_CHANGE:
-				map.put("contractName", exist.getName());
+				map.put("contractName", comparedContract.getName());
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_CHANGE , UserContext.current().getUser().getLocale(), map, "");
 				break;
 			default :
@@ -787,10 +787,12 @@ public class ContractProviderImpl implements ContractProvider {
 			event.setNamespaceId(UserContext.getCurrentNamespaceId());
 			event.setContractId(contract.getId());	
 			event.setOperatorUid(UserContext.currentUserId());
-			event.setOpearteTime(contract.getUpdateTime());
-			//如果是续约合同或者是变更合同，则归为合同修改操作
-			if (opearteType==ContractTrackingTemplateCode.CONTRACT_RENEW || opearteType==ContractTrackingTemplateCode.CONTRACT_CHANGE) {
+			if (opearteType==ContractTrackingTemplateCode.CONTRACT_RENEW||opearteType==ContractTrackingTemplateCode.CONTRACT_CHANGE) {
+				event.setOpearteTime(comparedContract.getUpdateTime());
+				//如果是续约合同或者是变更合同，则归为合同修改操作
 				opearteType=ContractTrackingTemplateCode.CONTRACT_UPDATE;
+			}else {
+				event.setOpearteTime(contract.getUpdateTime());
 			}
 			event.setOpearteType((byte)opearteType);
 	        LOGGER.info("saveContractEventWithInsert: " + event);
