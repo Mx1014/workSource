@@ -7668,8 +7668,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		QueryDefaultRuleAdminCommand queryRuleCmd = ConvertHelper.convert(cmd,QueryDefaultRuleAdminCommand.class);
 		if (RuleSourceType.RESOURCE.getCode().equals(queryRuleCmd.getSourceType())){ //一个资源应该只有一条规则 忽略ownerType ownerId防止产生多条
-		    cmd.setOwnerId(null);
-		    cmd.setOwnerType(null);
+			queryRuleCmd.setOwnerId(null);
+			queryRuleCmd.setOwnerType(null);
         }
 		QueryDefaultRuleAdminResponse queryRule = queryDefaultRule(queryRuleCmd);
 		return convertResourceTimeRuleDTO(queryRule, cmd.getSourceType());
@@ -8899,9 +8899,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}).collect(Collectors.toList());
 		if (collect.size() == 0)
 			return "";
-		SimpleDateFormat beginTimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		SimpleDateFormat beginDateSF = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat endTimeSF = new SimpleDateFormat("HH:mm");
-		getSingleNumberUseDetail()
+		SimpleDateFormat beginTimeSF = new SimpleDateFormat("HH:mm");
+		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
+		SimpleDateFormat beginMonthSF = new SimpleDateFormat("yyyy-MM-dd");
+		return getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
 	}
 }
