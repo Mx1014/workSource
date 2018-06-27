@@ -16,12 +16,32 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
+import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
+import com.everhomes.server.schema.tables.EhCommunities;
+import com.everhomes.server.schema.tables.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhPaymentAccounts;
+import com.everhomes.server.schema.tables.EhPaymentBillCertificate;
+import com.everhomes.server.schema.tables.EhPaymentBillGroups;
+import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
+import com.everhomes.server.schema.tables.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.EhPaymentBills;
+import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
+import com.everhomes.server.schema.tables.EhPaymentChargingItems;
+import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.EhPaymentLateFine;
+import com.everhomes.server.schema.tables.EhPaymentNoticeConfig;
+import com.everhomes.server.schema.tables.EhPaymentUsers;
+import com.everhomes.server.schema.tables.EhPaymentVariables;
+import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
@@ -35,7 +55,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -2703,11 +2722,11 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAssetPaymentOrderBills.class),bills.size());
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills.class),bills.size());
         long nextSequence = nextBlockSequence - bills.size()+1;
-        List<EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
+        List<com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
         for(int i = 0; i < bills.size(); i ++){
-            EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
+            com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills orderBill  = new com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills();
             BillIdAndAmount billIdAndAmount = bills.get(i);
             orderBill.setId(nextSequence++);
             orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
@@ -2934,7 +2953,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f) {
+    public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<com.everhomes.server.schema.tables.pojos.EhPaymentFormula> f) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 //        if(c!=null){
             EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
@@ -3890,7 +3909,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchInto(PaymentChargingStandards.class);
         //公式和scope都要存一份
         List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes> scopes = new ArrayList<>();
-        List<EhPaymentFormula> formulas = new ArrayList<>();
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentFormula> formulas = new ArrayList<>();
         for(int i = 0; i < standards.size(); i ++){
             com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards origin = standards.get(i);
             //如果是需要修改的那个standard，修改之
@@ -3899,7 +3918,7 @@ public class AssetProviderImpl implements AssetProvider {
                 origin.setInstruction(instruction);
             }
             //standard的公式
-            EhPaymentFormula formula = context.selectFrom(formulaSchema)
+            com.everhomes.server.schema.tables.pojos.EhPaymentFormula formula = context.selectFrom(formulaSchema)
                     .where(formulaSchema.CHARGING_STANDARD_ID.eq(origin.getId()))
                     .fetchOneInto(PaymentFormula.class);
             //standard的scope
@@ -4596,7 +4615,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void insertAssetCategory(EhAssetAppCategories c) {
+    public void insertAssetCategory(com.everhomes.server.schema.tables.pojos.EhAssetAppCategories c) {
         EhAssetAppCategoriesDao dao = new EhAssetAppCategoriesDao(getReadWriteContext().configuration());
         dao.insert(c);
     }
@@ -4731,7 +4750,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void insertAppMapping(EhAssetModuleAppMappings relation) {
+    public void insertAppMapping(com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings relation) {
         EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(getReadWriteContext().configuration());
         dao.insert(relation);
 	}
