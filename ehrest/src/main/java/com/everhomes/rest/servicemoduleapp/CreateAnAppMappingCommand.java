@@ -6,40 +6,41 @@ package com.everhomes.rest.servicemoduleapp;
  */
 
 public class CreateAnAppMappingCommand {
-    private Long moduleIdRo;
-    private Long originIdRo;
-    private Long moduleIdJu;
-    private Long originIdJu;
 
-    public Long getModuleIdRo() {
-        return moduleIdRo;
+    private Long assetCategoryId;
+    private Long contractCategoryId;
+    private Byte energyFlag;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setModuleIdRo(Long moduleIdRo) {
-        this.moduleIdRo = moduleIdRo;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
-    public Long getOriginIdRo() {
-        return originIdRo;
+    public Long getAssetCategoryId() {
+        return assetCategoryId;
     }
 
-    public void setOriginIdRo(Long originIdRo) {
-        this.originIdRo = originIdRo;
+    public void setAssetCategoryId(Long assetCategoryId) {
+        this.assetCategoryId = assetCategoryId;
     }
 
-    public Long getModuleIdJu() {
-        return moduleIdJu;
+    public Long getContractCategoryId() {
+        return contractCategoryId;
     }
 
-    public void setModuleIdJu(Long moduleIdJu) {
-        this.moduleIdJu = moduleIdJu;
+    public void setContractCategoryId(Long contractCategoryId) {
+        this.contractCategoryId = contractCategoryId;
     }
 
-    public Long getOriginIdJu() {
-        return originIdJu;
+    public Byte getEnergyFlag() {
+        return energyFlag;
     }
 
-    public void setOriginIdJu(Long originIdJu) {
-        this.originIdJu = originIdJu;
+    public void setEnergyFlag(Byte energyFlag) {
+        this.energyFlag = energyFlag;
     }
 }

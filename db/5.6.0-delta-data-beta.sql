@@ -33,9 +33,18 @@ INSERT INTO eh_configurations (id, name, value, description, namespace_id, displ
   VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.admin.name', 'zuolin-project', 'gogs admin name', 0, '');
 INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
   VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.admin.token', 'afe3b2a0165958086f7cceed7843190c15197c08', 'gogs admin token', 0, '');
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
+  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.backup.hookapi', 'http://10.1.10.61:8899/hooked', 'gogs backup server hook api', 0, '');
+INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name)
+  VALUES ((@eh_configurations_id := @eh_configurations_id + 1), 'gogs.backup.secret', 'zuolin', 'gogs backup server hook api', 0, '');
 
 -- #30750 END
 
 -- 多入口 映射 闻天
 set @id = ifnull((select max(`id`) from `eh_service_module_app_mappings`), 0);
 INSERT INTO `eh_service_module_app_mappings` (`id`, `app_origin_id_male`, `app_module_id_male`, `app_origin_id_female`, `app_module_id_female`, `create_time`, `create_uid`, `update_time`, `update_uid`) VALUES (@id:=@id+1, '0', '20400', '0', '21200', now(), '1', now(), NULL);
+
+
+-- 请执行在es上执行db/search/contract.sh add by 丁建民
+
+-- 5.6.0 上线时需要部署 Gogs 程序, 部署文档：http://s.a.com/docs/faq/baseline-21529636264

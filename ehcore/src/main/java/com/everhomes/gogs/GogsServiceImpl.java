@@ -1,15 +1,20 @@
 package com.everhomes.gogs;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GogsServiceImpl implements GogsService {
@@ -25,6 +30,9 @@ public class GogsServiceImpl implements GogsService {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
     @Override
     public GogsRepo createRepo(GogsRepo repo) {
         dbProvider.execute(status -> {
@@ -36,7 +44,31 @@ public class GogsServiceImpl implements GogsService {
             repo.setFullName(fullName);
             gogsRepoProvider.createRepo(repo);
 
-            gogsProvider.createRepo(fullName, repo.getDescription(), GogsRawRepo.class);
+            CreateGogsRepoParam param = new CreateGogsRepoParam();
+            param.setName(fullName);
+            param.setAutoInit(true);
+            param.setPrivateFlag(true);
+            param.setDescription(repo.getDescription());
+            param.setReadme("Default");
+
+            gogsProvider.createRepo(param, GogsRawRepo.class);
+
+            String hookAPI = configurationProvider.getValue("gogs.backup.hookapi", "");
+            if (StringUtils.isNotEmpty(hookAPI)) {
+                CreateGogsHookParam hook = new CreateGogsHookParam();
+                hook.setActive(true);
+                hook.setType("gogs");
+                hook.setEvents(Arrays.asList("create", "delete", "fork",
+                        "push", "issues", "issue_comment", "pull_request", "release"));
+
+                String secret = configurationProvider.getValue("gogs.backup.secret", "zuolin");
+                Map<String, Object> config = new HashMap<>();
+                config.put("url", hookAPI);
+                config.put("content_type", "json");
+                config.put("secret", secret);
+                hook.setConfig(config);
+                gogsProvider.createHook(fullName, hook, GogsHook.class);
+            }
             return true;
         });
         return repo;
