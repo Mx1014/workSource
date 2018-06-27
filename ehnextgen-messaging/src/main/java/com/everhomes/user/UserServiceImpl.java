@@ -6159,10 +6159,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		sceneDTOList.sort(new Comparator<SceneDTO>(){
 			@Override
 			public int compare(SceneDTO o1, SceneDTO o2) {
-				if(o1.getCommunityId()==null || o1.getCommunityId()==null){
+				if(o1.getCommunityId()==null || o2.getCommunityId()==null){
 					return 0;
 				}
-		        return o1.getCommunityId().compareTo(o1.getCommunityId());
+		        return o1.getCommunityId().compareTo(o2.getCommunityId());
 			}			
 		});
 		return sceneDTOList ;
