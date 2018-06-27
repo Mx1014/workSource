@@ -93,7 +93,6 @@ public class AssetProviderImpl implements AssetProvider {
     @Autowired
     private ContractProvider contractProvider;
 
-
     @Override
     public void creatAssetBill(AssetBill bill) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetBills.class));
