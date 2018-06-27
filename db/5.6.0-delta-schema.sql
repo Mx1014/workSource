@@ -176,7 +176,7 @@ ALTER TABLE `eh_general_approvals` ADD COLUMN `string_tag2` VARCHAR(128) AFTER `
 ALTER TABLE `eh_general_approvals` ADD COLUMN `string_tag3` VARCHAR(128) AFTER `string_tag2`;
 
 RENAME TABLE `eh_general_approval_templates` to `eh_enterprise_approval_templates`;
-ALTER TABLE `eh_enterprise_approval_templates` ADD COLUN `group_id` BIGINT NOT NULL DEFAULT 5 COMMENT 'the enterprise group id' AFTER `approval_name`;
+ALTER TABLE `eh_enterprise_approval_templates` ADD COLUMN `group_id` BIGINT NOT NULL DEFAULT 5 COMMENT 'the enterprise group id' AFTER `approval_name`;
 ALTER TABLE `eh_enterprise_approval_templates` ADD COLUMN `approval_remark` VARCHAR(256) COMMENT 'the remark of the approval' AFTER `approval_name`;
 -- 审批3.0 end by ryan.
 
