@@ -81,7 +81,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 
 		ParkingLot parkingLot = ConvertHelper.convert(dao.findById(id), ParkingLot.class);
 
-		populateParkingConfigInfo(parkingLot);
+		if(parkingLot!=null) {
+			populateParkingConfigInfo(parkingLot);
+		}
 
         return parkingLot;
     }

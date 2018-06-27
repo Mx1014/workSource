@@ -36,6 +36,36 @@ public class ParkingController extends ControllerBase {
     private ParkingService parkingService;
 
     /**
+     * <b>URL: /parking/getParkingLotByToken</b>
+     * <p>根据token查询停车场</p>
+     */
+    @RequestMapping("getParkingLotByToken")
+    @RestReturn(value=ParkingLotDTO.class)
+    public RestResponse getParkingLotByToken(GetParkingLotByTokenCommand cmd) {
+
+        ParkingLotDTO parkingLot = parkingService.getParkingLotByToken(cmd);
+        RestResponse response = new RestResponse(parkingLot);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/transformToken</b>
+     * <p>停车场id转token</p>
+     */
+    @RequestMapping("transformToken")
+    @RestReturn(value=String.class, collection=true)
+    public RestResponse transformToken(TransformTokenCommand cmd) {
+
+        String token = parkingService.transformToken(cmd);
+        RestResponse response = new RestResponse(token);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /parking/listParkingLots</b>
      * <p>查询指定园区/小区的停车场列表</p>
      */

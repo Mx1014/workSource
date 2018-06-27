@@ -3185,4 +3185,62 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 	}
+
+	@Override
+	public ParkingLotDTO getParkingLotByToken(GetParkingLotByTokenCommand cmd) {
+		Long aLong = null;
+		try {
+			aLong = WebTokenGenerator.getInstance().fromWebToken(cmd.getParkingLotToken(), Long.class);
+		}catch (Exception e){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+					"非法parkingLotToken");
+		}
+		ParkingLot r = parkingProvider.findParkingLotById(aLong);
+		User user = UserContext.current().getUser();
+		ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
+
+		if (r.getVipParkingFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+			String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
+			String detailUrl = configProvider.getValue(ConfigConstants.RENTAL_ORDER_DETAIL_URL, "");
+
+			RentalResourceType type = rentalv2Provider.findRentalResourceTypes(UserContext.getCurrentNamespaceId(),
+					RentalV2ResourceType.VIP_PARKING.getCode());
+
+			detailUrl = String.format(detailUrl, RentalV2ResourceType.VIP_PARKING.getCode(), type.getId(),
+					RuleSourceType.RESOURCE.getCode(), dto.getId());
+			dto.setVipParkingUrl(homeUrl + detailUrl);
+		}
+
+		Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
+		//当没有设置工作流的时候，表示是禁用模式
+		if(null == flow) {
+			dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+
+		}else {
+
+			String tag1 = flow.getStringTag1();
+			Integer flowMode = Integer.valueOf(tag1);
+			dto.setFlowMode(flowMode);
+
+			LOGGER.info("parking enabled flow, flow={}", flow);
+			Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
+			LOGGER.info("parking main flow, flow={}", mainFlow);
+			//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
+			if (null != mainFlow) {
+				if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+					dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+				}
+			}
+		}
+		dto.setId(null);
+		return dto;
+
+	}
+
+	@Override
+	public String transformToken(TransformTokenCommand cmd) {
+		String token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
+		return token;
+	}
 }

@@ -152,4 +152,8 @@ public interface ParkingService {
     void initPayeeAccount(MultipartFile[] files);
 
     void rechargeOrderMigration();
+
+    ParkingLotDTO getParkingLotByToken(GetParkingLotByTokenCommand cmd);
+
+    String transformToken(TransformTokenCommand cmd);
 }
