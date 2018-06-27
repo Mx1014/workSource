@@ -186,10 +186,13 @@ public class GroupServiceImpl implements GroupService {
 
     //敏感词检测  --add by yanlong.liang 20180614
     private void filter(CreateGroupCommand cmd) {
+        if (cmd == null) {
+            return;
+        }
         List<String> textList = new ArrayList<>();
         FilterWordsCommand command = new FilterWordsCommand();
         Byte moduleType = (byte)4;
-        if (cmd.getClubType() ==ClubType.GUILD.getCode()) {
+        if (cmd.getClubType() != null && cmd.getClubType() ==ClubType.GUILD.getCode()) {
             moduleType = (byte)5;
         }
         command.setModuleType(moduleType);
@@ -567,6 +570,8 @@ public class GroupServiceImpl implements GroupService {
     
     @Override
     public GroupDTO updateGroup(UpdateGroupCommand cmd) {
+        CreateGroupCommand createGroupCommand = ConvertHelper.convert(cmd, CreateGroupCommand.class);
+        filter(createGroupCommand);
         User operator = UserContext.current().getUser();
         long operatorUid = operator.getId();
         
