@@ -97,6 +97,7 @@ import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
 import com.everhomes.rest.asset.ListUploadCertificatesCommand;
 import com.everhomes.rest.asset.PaymentExpectanciesResponse;
 import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.asset.PlaceAnAssetOrderCommand;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowBillForClientDTO;
@@ -1187,6 +1188,15 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 //不恰当的使用了组织架构的scope，潜在可能造成拆分障碍 by wentian
                 throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
                         "File content is empty");
+            }else {
+            	//修复ISSUE-32519 : 已经填写了内容，右键删除后，导入总是提示有一行失败，且失败原因“账单开始时间格式错误,请参考说明进行填写”
+            	Iterator iterator = resultList.iterator();
+            	while(iterator.hasNext()){
+            		RowResult currentRow = (RowResult) iterator.next();
+                    if(currentRow != null && currentRow.toString().equals("RowResult: [{}]")) {
+                    	iterator.remove();
+                    }
+                }
             }
         }catch (IOException exception){
             LOGGER.error("file resolve failed in batchImportBills", exception);
