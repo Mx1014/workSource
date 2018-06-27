@@ -217,5 +217,17 @@ public class SZWContractHandler implements ContractService{
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
 }

@@ -1,21 +1,28 @@
 package com.everhomes.rest.contract;
 
-import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 /**
  * <ul>
- * 参数:
+ * <li>id: id</li>
  * <li>namespaceId: 域空间id</li>
- * <li>communityId: 园区id</li>
+ * <li>categoryId: 合同类型多入口</li>
+ * <li>ownerId: 所有者id</li>
+ * <li>ownerType: 所有者类型，通用配置为空</li>
+ * <li>name: 模板名称</li>
+ * <li>contracttemplateType: 0 收款合同模板 1付款合同模板</li>
+ * <li>status: 0: inactive, 1: confirming, 2: active</li>
+ * <li>contents: 模板内容</li>
+ * <li>parentId: 复制于哪个合同模板</li>
+ * <li>version: 版本记录</li>
+ * <li>creatorUid: 创建者uid</li>
+ * <li>createTime: 创建时间</li>
  * </ul>
- * Created by ying.xiong on 2017/8/17.
+ * Created by jm.ding on 2018/6/27.
  */
-public class AddContractTemplateCommand {
-
+public class ContractTemplateDTO {
 	private Long id;
-	@NotNull
 	private Integer namespaceId;
-	@NotNull
 	private Long categoryId;
 	private Long ownerId;
 	private String ownerType;
@@ -25,8 +32,8 @@ public class AddContractTemplateCommand {
 	private String contents;
 	private Long parentId;
 	private Integer version;
-	@NotNull
-	private Long orgId;
+	private Timestamp createTime;
+	private Long creatorUid;
 	public Long getId() {
 		return id;
 	}
@@ -93,12 +100,17 @@ public class AddContractTemplateCommand {
 	public void setVersion(Integer version) {
 		this.version = version;
 	}
-	public Long getOrgId() {
-		return orgId;
+	public Timestamp getCreateTime() {
+		return createTime;
 	}
-	public void setOrgId(Long orgId) {
-		this.orgId = orgId;
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+	public Long getCreatorUid() {
+		return creatorUid;
+	}
+	public void setCreatorUid(Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
-	
 }

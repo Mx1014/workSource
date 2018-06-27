@@ -63,51 +63,6 @@ import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.contract.*;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
-import com.everhomes.rest.contract.ChangeType;
-import com.everhomes.rest.contract.ChargingVariablesDTO;
-import com.everhomes.rest.contract.CheckAdminCommand;
-import com.everhomes.rest.contract.ContractApplicationScene;
-import com.everhomes.rest.contract.ContractAttachmentDTO;
-import com.everhomes.rest.contract.ContractChargingChangeDTO;
-import com.everhomes.rest.contract.ContractChargingItemDTO;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractErrorCode;
-import com.everhomes.rest.contract.ContractLogDTO;
-import com.everhomes.rest.contract.ContractNumberDataType;
-import com.everhomes.rest.contract.ContractParamDTO;
-import com.everhomes.rest.contract.ContractParamGroupMapDTO;
-import com.everhomes.rest.contract.ContractParamGroupType;
-import com.everhomes.rest.contract.ContractPaymentPlanDTO;
-import com.everhomes.rest.contract.ContractPaymentType;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.contract.ContractType;
-import com.everhomes.rest.contract.CreateContractCommand;
-import com.everhomes.rest.contract.CreatePaymentContractCommand;
-import com.everhomes.rest.contract.DeleteContractCommand;
-import com.everhomes.rest.contract.DenunciationContractCommand;
-import com.everhomes.rest.contract.EntryContractCommand;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.GenerateContractNumberCommand;
-import com.everhomes.rest.contract.GenerateContractNumberRule;
-import com.everhomes.rest.contract.GetContractParamCommand;
-import com.everhomes.rest.contract.GetUserGroupsCommand;
-import com.everhomes.rest.contract.ListApartmentContractsCommand;
-import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierCommand;
-import com.everhomes.rest.contract.ListContractsBySupplierResponse;
-import com.everhomes.rest.contract.ListContractsCommand;
-import com.everhomes.rest.contract.ListContractsResponse;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
-import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
-import com.everhomes.rest.contract.PeriodUnit;
-import com.everhomes.rest.contract.ReviewContractCommand;
-import com.everhomes.rest.contract.SetContractParamCommand;
-import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
-import com.everhomes.rest.contract.UpdateContractCommand;
-import com.everhomes.rest.contract.UpdatePaymentContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -2568,5 +2523,17 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			throw e;
 		}
 		return exportDetailDTO;
+	}
+
+	@Override
+	public ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

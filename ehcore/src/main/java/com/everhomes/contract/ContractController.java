@@ -333,21 +333,18 @@ public class ContractController extends ControllerBase {
     }
     
 	/**
-	 * <p>设置合同模板</p>
+	 * <p>设置合同模板,新增模板</p>
 	 * <b>URL: /contract/addContractTemplate</b>
 	 */
 	@RequestMapping("addContractTemplate")
 	@RestReturn(String.class)
 	public RestResponse addContractTemplate(AddContractTemplateCommand cmd) {
 		
-    	ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		
-		//TemplateDTO dto = contractService.updateBuilding(cmd);
-
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+		return new RestResponse(contractService.addContractTemplate(cmd));
+		
 	}
 
 }

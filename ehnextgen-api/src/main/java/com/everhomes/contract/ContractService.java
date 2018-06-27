@@ -53,4 +53,9 @@ public interface ContractService {
     ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
     
 	void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response);
+
+	ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd);
+	
+	ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd);
+	
 }

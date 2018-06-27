@@ -2,7 +2,7 @@
 -- ADD BY 丁建民 
 -- # 合同管理 合同模板及打印
 
-CREATE TABLE `eh_contract_template` (
+CREATE TABLE `eh_contract_templates` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0' COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `category_id` bigint(20) DEFAULT NULL COMMENT 'contract category id 用于多入口',

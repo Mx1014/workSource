@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
  * </ul>
  * Created by ying.xiong on 2017/8/17.
  */
-public class AddContractTemplateCommand {
+public class UpdateContractTemplateCommand {
 
 	private Long id;
 	@NotNull
