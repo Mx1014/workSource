@@ -771,26 +771,26 @@ public class ContractProviderImpl implements ContractProvider {
 		String content = null;
 		Map<String,Object> map = new HashMap<String,Object>();
 		switch(opearteType){
-		case ContractTrackingTemplateCode.CONTRACT_ADD : 
-			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
-			break;
-		case ContractTrackingTemplateCode.CONTRACT_DELETE :
-			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
-			break;
-		case ContractTrackingTemplateCode.CONTRACT_UPDATE:
-			content = compareContract(contract,comparedContract);
-			break;
-		case ContractTrackingTemplateCode.CONTRACT_RENEW:
-			map.put("contractName", comparedContract.getName());
-			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_RENEW , UserContext.current().getUser().getLocale(), map, "");
-			break;
-		case ContractTrackingTemplateCode.CONTRACT_CHANGE:
-			map.put("contractName", comparedContract.getName());
-			content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_CHANGE , UserContext.current().getUser().getLocale(), map, "");
-			break;
-		default :
-			break;
-	}
+			case ContractTrackingTemplateCode.CONTRACT_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_UPDATE:
+				content = compareContract(contract,comparedContract);
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_RENEW:
+				map.put("contractName", comparedContract.getName());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_RENEW , UserContext.current().getUser().getLocale(), map, "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_CHANGE:
+				map.put("contractName", comparedContract.getName());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_CHANGE , UserContext.current().getUser().getLocale(), map, "");
+				break;
+			default :
+				break;
+		}
 		if(!StringUtils.isEmpty(content)){
 			ContractEvents event = new ContractEvents(); 
 			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractEvents.class));
@@ -879,7 +879,7 @@ public class ContractProviderImpl implements ContractProvider {
 		}
 	}
 	
-	
+
 	@Override
 	public void saveContractEventAboutChargingItem(int opearteType, Contract contract,ContractChargingItem contractChargingItem) {
 		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:UPDATE

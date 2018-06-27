@@ -25,8 +25,6 @@ public interface ContractTrackingTemplateCode {
     
     int CONTRACT_RENEW = 17;//合同续约
 	int CONTRACT_CHANGE = 18;//合同变更
-	int APARTMENT_UPDATE = 19;//资产更改事件
-
-	 
+	int APARTMENT_UPDATE = 19;//资产更改事件 
 
 }

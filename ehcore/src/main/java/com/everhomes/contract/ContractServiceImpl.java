@@ -674,7 +674,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(ContractType.NEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		} else if(ContractType.RENEW.equals(ContractType.fromStatus(cmd.getContractType()))) {
-			
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_RENEW, cmd.getOrgId(), cmd.getCommunityId());
 		} else if(ContractType.CHANGE.equals(ContractType.fromStatus(cmd.getContractType()))) {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CHANGE, cmd.getOrgId(), cmd.getCommunityId());
@@ -718,7 +717,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setUpdateTime(contract.getCreateTime());
 		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
-		//添加合同日志 by tangcen
+		//添加合同日志add by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_ADD,contract,null);
 		//如果是变更或续约合同，需在父合同添加日志
 		if(ContractType.RENEW.equals(ContractType.fromStatus(contract.getContractType()))) {
@@ -740,7 +739,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		Double totalSize = dealContractApartments(contract, cmd.getApartments(), cmd.getContractApplicationScene());
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
-		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
+		dealContractChargingChanges(contract, cmd.getAdjusts(),cmd.getFrees());
 
 		contract.setRentSize(totalSize);
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -757,6 +756,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		command.setCommunityId(contract.getCommunityId());
 		command.setNamespaceId(contract.getNamespaceId());
 		command.setCategoryId(contract.getCategoryId());
+
 		ContractDetailDTO contractDetailDTO = findContract(command);
 		// 签合同的customer 同步到organization
 		syncCustomerToOrganization(cmd.getCustomerId());
@@ -1080,13 +1080,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		flowService.createFlowCase(createFlowCaseCommand);
 	}
 
-	//没有id的，增加
-    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
-	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments, Byte contractApplicationScene) {
+		
+	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
 		//add by tangcen
 		List<String> oldApartments = new ArrayList<>();
 		List<String> newApartments = new ArrayList<>();
-		
+		//没有id的，增加
+	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
@@ -1157,6 +1157,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
 				//记录合同日志 by tangcen
 				//contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_DELETE,contract,apartment);
+
 				if(!finalParents.contains(apartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
 					//26058  已售的状态不变
@@ -2358,7 +2359,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
 				}
 				//add by tangcen 显示客户自定义的收费项名称
-				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),dto.getCategoryId(),itemDto.getChargingItemId());
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),itemDto.getChargingItemId());
+
 				itemDto.setChargingItemName(projectChargingItemName);
 				//String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
 				//itemDto.setChargingItemName(itemName);

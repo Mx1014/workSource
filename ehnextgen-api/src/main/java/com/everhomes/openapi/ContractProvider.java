@@ -96,10 +96,6 @@ public interface ContractProvider {
 	void saveContractEventAboutChargingChange(int adjustAdd, Contract contract,ContractChargingChange contractChargingChange);
 	List<ContractEvents> listContractEvents(Long contractId);
 
-
     boolean isNormal(Long cid);
-
-	void saveContractEventAboutApartments(int apartmentUpdate, Contract contract, String oldApartments, String newApartments);
-
-
+	void saveContractEventAboutApartments(int opearteType, Contract contract, String oldApartmnets,String newApartmnets);
 }
