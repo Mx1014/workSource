@@ -5060,7 +5060,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))
                 .fetchInto(PaymentChargingItemScope.class);
-        if(scopes != null && scopes.size() != 0) {
+        if(scopes != null && scopes.size() == 0) {
         	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         }else {
 			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
@@ -5078,7 +5078,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .and(t1.BROTHER_STANDARD_ID.isNotNull())//用于判断是否是使用默认配置，还是处于解耦状态
                 .fetchInto(PaymentChargingStandardsScopes.class); 
-        if(scopes != null && scopes.size() != 0) {
+        if(scopes != null && scopes.size() == 0) {
         	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         }else {
 			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
@@ -5106,7 +5106,7 @@ public class AssetProviderImpl implements AssetProvider {
                     list.add(dto);
                     return null;
                 });
-        if(list != null && list.size() != 0) {
+        if(list != null && list.size() == 0) {
 			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
 		}else {
 			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
