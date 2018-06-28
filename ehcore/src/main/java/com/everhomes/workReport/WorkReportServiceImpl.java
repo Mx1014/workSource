@@ -558,6 +558,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                         receiverId,
                         reportVal.getReportId(),
                         reportVal.getId(),
+                        cmd.getOrganizationId(),
                         user);
             }
             return null;
