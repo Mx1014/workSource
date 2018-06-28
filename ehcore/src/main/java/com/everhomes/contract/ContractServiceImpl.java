@@ -1866,6 +1866,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(cmd.getPaymentFlag() == 1) {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
 		} else {
+			// sync from ebei api has checkAuth flag
+			if (cmd.getCheckAuth() == null || cmd.getCheckAuth())
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
 		}
 
