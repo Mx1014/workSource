@@ -737,11 +737,6 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public Long findContractCategoryIdByContractId(Long contractId) {
 		DSLContext context = getReadOnlyContext();
-        String sql = context.select(Tables.EH_CONTRACTS.CATEGORY_ID)
-                .from(Tables.EH_CONTRACTS)
-                .where(Tables.EH_CONTRACTS.ID.eq(contractId))
-                .getSQL();
-        LOGGER.error("issue32639 sql={}",sql);
         return context.select(Tables.EH_CONTRACTS.CATEGORY_ID)
                 .from(Tables.EH_CONTRACTS)
                 .where(Tables.EH_CONTRACTS.ID.eq(contractId))
