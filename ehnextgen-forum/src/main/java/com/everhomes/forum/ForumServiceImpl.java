@@ -252,7 +252,7 @@ public class ForumServiceImpl implements ForumService {
         if (!StringUtils.isEmpty(cmd.getContent())) {
             textList.add(cmd.getContent());
         }
-        if (cmd.getEmbeddedAppId().equals(AppConstants.APPID_POLL)) {
+        if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_POLL)) {
             PollPostCommand pollPostCommand = (PollPostCommand)StringHelper.fromJsonString(cmd.getEmbeddedJson(),
                     PollPostCommand.class);
             if (pollPostCommand != null) {
