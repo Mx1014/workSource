@@ -1920,6 +1920,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 //		}
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
+		// just in case
+		dto.setCategoryId(contract.getCategoryId());
 		if(dto.getCreateUid() != null) {
 			User creator = userProvider.findUserById(dto.getCreateUid());
 			if(creator != null) {
