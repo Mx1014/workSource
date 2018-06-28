@@ -1007,6 +1007,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.error("!!!666 buildingApartments : {}",buildingApartments);
+		}
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
@@ -1050,6 +1053,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 					if(!parentAddressIds.contains(buildingApartment.getAddressId())) {
 						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
+						if(LOGGER.isDebugEnabled()){
+							LOGGER.error("!!!777 addressMapping : {}",addressMapping);
+						}
 						//26058  已售的状态不变
 						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
 							addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
