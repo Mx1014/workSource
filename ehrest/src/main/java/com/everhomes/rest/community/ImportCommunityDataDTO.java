@@ -55,7 +55,24 @@ public class ImportCommunityDataDTO {
 	private String address;
 	private String areaSize;
 	private String rentArea;
+	private Long cityId;
+    private Long areaId;
 
+	public Long getCityId() {
+		return cityId;
+	}
+
+	public void setCityId(Long cityId) {
+		this.cityId = cityId;
+	}
+
+	public Long getAreaId() {
+		return areaId;
+	}
+
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
+	}
 
 	public String getProvinceName() {
 		return provinceName;

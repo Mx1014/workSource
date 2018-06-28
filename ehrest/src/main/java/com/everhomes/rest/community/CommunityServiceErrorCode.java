@@ -20,6 +20,10 @@ public interface CommunityServiceErrorCode {
     static final int ERROR_PROVINCECITYAREA_EMPTY = 10015; //省市区不能为空
     static final int ERROR_COMMUNITY_NAME_EXIST = 10016; //项目名称已存在
     
+    static final int ERROR_PROVINCE_NAME = 10017; //省填写格式错误
+    static final int ERROR_CITY_NAME = 10018; //市填写格式错误
+    static final int ERROR_AREA_NAME = 10019; //区填写格式错误
+    
     int ERROR_BUILDING_NAME_EMPTY = 20001;
     int ERROR_ADDRESS_EMPTY = 20002;
     int ERROR_CONTACTOR_EMPTY = 20003;

@@ -22,3 +22,7 @@ INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUE
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10016', 'zh_CN', '项目名称已存在');
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '20006', 'zh_CN', '面积格式错误');
 
+
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10017', 'zh_CN', '省填写格式错误');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10018', 'zh_CN', '市填写格式错误');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10019', 'zh_CN', '区填写格式错误');

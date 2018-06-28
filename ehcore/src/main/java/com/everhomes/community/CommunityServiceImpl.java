@@ -243,7 +243,7 @@ public class CommunityServiceImpl implements CommunityService {
 //		}
 		//校验名字不能重复
 		Community communityName = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), cmd.getName());
-		if(communityName != null){
+		if(communityName != null && !communityName.getId().equals(cmd.getId())){
 			LOGGER.error("CommunityName is exist communityId=" + cmd.getCommunityId());
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NAME_EXIST, 
 					"CommunityName is exist.");
@@ -4176,9 +4176,7 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	private List<ImportFileResultLog<ImportCommunityDataDTO>> importCommunityDataAdmin(List<ImportCommunityDataDTO> datas,
 			Long userId, ImportCommunityCommand cmd) {
-		
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
-		//Community community = communityProvider.findCommunityById(communityId);
 		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
 		
 		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
@@ -4190,7 +4188,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<ImportFileResultLog<ImportCommunityDataDTO>> list = new ArrayList<>();
 		for (ImportCommunityDataDTO data : datas) {
-			ImportFileResultLog<ImportCommunityDataDTO> log = checkCommunityData(data, cmd.getNamespaceId());
+			ImportFileResultLog<ImportCommunityDataDTO> log = checkCommunityData(data, cmd.getNamespaceId(), userId);
 			if (log != null) {
 				list.add(log);
 				continue;
@@ -4211,12 +4209,6 @@ public class CommunityServiceImpl implements CommunityService {
 				if (StringUtils.isNotBlank(data.getRentArea())) {
 					community.setRentArea(Double.valueOf(data.getRentArea()));
 				}
-				
-				//查询省，市，区 插入region
-				Long provinceId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName()), 0L);  //创建省
-				Long cityId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName(), data.getCityName()), provinceId);  //创建市
-				Long areaId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName(), data.getCityName(), data.getAreaName()), cityId);  //创建区县
-				
 				//设置默认的forumId，要使用原有的项目里的forumId
 				ListingLocator locator = new ListingLocator();
 				List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
@@ -4227,8 +4219,8 @@ public class CommunityServiceImpl implements CommunityService {
 					community.setDefaultForumId(1L);
 					community.setFeedbackForumId(2L);
 				}
-				community.setCityId(cityId);
-				community.setAreaId(areaId);
+				community.setCityId(data.getCityId());
+				community.setAreaId(data.getAreaId());
 				community.setCommunityType((byte)1);
 				community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				community.setAptCount(0);
@@ -4243,12 +4235,10 @@ public class CommunityServiceImpl implements CommunityService {
 				organizationCommunity.setOrganizationId(cmd.getOrganizationId());
 				organizationProvider.createOrganizationCommunity(organizationCommunity);
 				
-				
 				//园区和域空间关联
 				createNamespaceResource(cmd.getNamespaceId(), community.getId());
 				communitySearcher.feedDoc(community);
 			}else {
-				
 				community.setName(data.getName());
 				if (StringUtils.isNotBlank(data.getCommunityNumber())) {
 					community.setCommunityNumber(data.getCommunityNumber());
@@ -4271,14 +4261,8 @@ public class CommunityServiceImpl implements CommunityService {
 				if (StringUtils.isNotBlank(data.getRentArea())) {
 					community.setRentArea(Double.valueOf(data.getRentArea()));
 				}
-				
-				//查询省，市，区 插入region
-				Long provinceId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName()), 0L);  //创建省
-				Long cityId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName(), data.getCityName()), provinceId);  //创建市
-				Long areaId = createRegion(userId, cmd.getNamespaceId(), getPath(data.getProvinceName(), data.getCityName(), data.getAreaName()), cityId);  //创建区县
-				
-				community.setCityId(cityId);
-				community.setAreaId(areaId);
+				community.setCityId(data.getCityId());
+				community.setAreaId(data.getAreaId());
 				
 				communityProvider.updateCommunity(community);
 				communitySearcher.feedDoc(community);
@@ -4294,7 +4278,7 @@ public class CommunityServiceImpl implements CommunityService {
 		return community;
 	}
 	
-	private ImportFileResultLog<ImportCommunityDataDTO> checkCommunityData(ImportCommunityDataDTO data, Integer namespaceId) {
+	private ImportFileResultLog<ImportCommunityDataDTO> checkCommunityData(ImportCommunityDataDTO data, Integer namespaceId, Long userId) {
 		ImportFileResultLog<ImportCommunityDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
 		
 		if (StringUtils.isEmpty(data.getName())) {
@@ -4313,6 +4297,17 @@ public class CommunityServiceImpl implements CommunityService {
 				return log;
 			}
 		}*/
+		//正则校验数字
+		if (StringUtils.isNotEmpty(data.getAreaSize()) || StringUtils.isNotEmpty(data.getRentArea())) {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getAreaSize()).find() || !Pattern.compile(reg).matcher(data.getRentArea()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_AREASIZE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("AreaSize format is error");
+				return log;
+			}
+		}
+		
 		if (StringUtils.isEmpty(data.getAddress()) && (data.getAddress()).length()>50) {
 			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_LENGTH);
 			log.setData(data);
@@ -4324,6 +4319,36 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setData(data);
 			log.setErrorLog("provinceCityArea name cannot be empty");
 			return log;
+		} else {
+			Long provinceId = null;
+			Long cityId = null;
+			Long areaId = null;
+			try {
+				provinceId = createRegion(userId, namespaceId, getPath(data.getProvinceName()), 0L); // 创建省
+			} catch (Exception e) {
+				log.setCode(CommunityServiceErrorCode.ERROR_PROVINCE_NAME);
+				log.setData(data);
+				log.setErrorLog("province name error");
+				return log;
+			}
+			try {
+				cityId = createRegion(userId, namespaceId, getPath(data.getProvinceName(), data.getCityName()), provinceId); // 创建市
+			} catch (Exception e) {
+				log.setCode(CommunityServiceErrorCode.ERROR_CITY_NAME);
+				log.setData(data);
+				log.setErrorLog("city name errory");
+				return log;
+			}
+			try {
+				areaId = createRegion(userId, namespaceId, getPath(data.getProvinceName(), data.getCityName(), data.getAreaName()), cityId); // 创建区县
+			} catch (Exception e) {
+				log.setCode(CommunityServiceErrorCode.ERROR_AREA_NAME);
+				log.setData(data);
+				log.setErrorLog("area name errory");
+				return log;
+			}
+			data.setCityId(cityId);
+			data.setAreaId(areaId);
 		}
 		
 		return null;
