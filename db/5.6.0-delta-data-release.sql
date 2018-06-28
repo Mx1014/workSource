@@ -1296,7 +1296,7 @@ UPDATE `eh_flow_cases` SET `owner_id`='1001' WHERE module_id='21200' AND namespa
 
 -- 通用脚本  
 -- ADD BY 丁建民 
--- #30490 资产管理V2.9（产品功能）
+-- issue32579 合同管理2.6
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10008', 'zh_CN', '合同查询参数错误');
