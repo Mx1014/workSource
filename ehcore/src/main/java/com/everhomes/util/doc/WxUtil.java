@@ -3,6 +3,8 @@ package com.everhomes.util.doc;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.jasper.tagplugins.jstl.core.Url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class WxUtil {
 
@@ -44,29 +43,38 @@ public class WxUtil {
                 // token未过期，直接从缓存获取返回
                 return ACCESS_TOKEN;
             }
-        } else {
-            Map<String,String> TokenParams = new HashMap<>();
-            TokenParams.put("corpid",CORP_ID);
-            TokenParams.put("corpsecret",CORP_SECRET);
-            String result = HttpUtils.get(URL_TOKEN,TokenParams);
-            if(result.contains("access_token")) {
-                JSONObject resultObj = JSON.parseObject(result);
-                resultObj.get("access_token");
-                resultObj.get("expires_in");
-            }
         }
-        return null;
+        Map<String,String> TokenParams = new HashMap<>();
+        TokenParams.put("corpid",CORP_ID);
+        TokenParams.put("corpsecret",CORP_SECRET);
+        String result = HttpUtils.get(URL_TOKEN,TokenParams);
+        if(result.contains("access_token")) {
+            JSONObject resultObj = JSON.parseObject(result);
+            ACCESS_TOKEN.put("access_token",resultObj.get("access_token"));
+            ACCESS_TOKEN.put("expires_in",resultObj.get("expires_in"));
+            ACCESS_TOKEN.put("recevie_time",new Date());
+        }
+        return ACCESS_TOKEN;
     }
 
-    public File DownloadImage(String corpId, String corpSecret, String mediaId){
+    public File DownloadImage(String mediaId) throws Exception {
 
-
-
+        if(StringUtils.isEmpty(mediaId)){
+            LOGGER.info("invild media_id");
+            return null;
+        }
+        try {
+            this.getAccessToken();
+        } catch (IOException e) {
+            LOGGER.error("Error occur while getting access_token");
+            e.printStackTrace();
+            throw new IOException("");
+        }
 
         Map<String,String> ImgParams = new HashMap<>();
-//        ImgParams.put("access_token","");
+        ImgParams.put("access_token",(String) ACCESS_TOKEN.get("access_token"));
         ImgParams.put("media_id",mediaId);
-
+        String result = HttpUtils.get(URL_IMG_DOWN,ImgParams);
 
 //        ResponseData result = ResponseData.success(ResponseCode.SUCCESS_PHOTO_CREATE);
 
