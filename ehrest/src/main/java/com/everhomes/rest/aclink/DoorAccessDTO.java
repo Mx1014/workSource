@@ -34,7 +34,7 @@ import com.everhomes.discover.ItemType;
  * <li>groupId:分组id</li>
  * <li>groupNmae:分组名称</li>
  * <li>enableAmount:门禁是否允许授权按次开门，1是0否{@link com.everhomes.rest.aclink.DoorAuthEnableAmount}</li>
- * <li>enableDuration:门禁是否允许授权按次开门，1是0否</li>
+ * <li>enableDuration:门禁是否允许授权按时间开门，1是0否</li>
  * <li>server：门禁关联服务器{@link com.everhomes.rest.aclink.AclinkServerDTO}</li>
  * <li>hasQr:门禁是否支持二维码0否1是</li>
  * <li>maxDuration:访客授权最长有效期</li>
