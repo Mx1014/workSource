@@ -5776,7 +5776,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationDTO.setFeedbackForumId(community.getFeedbackForumId());
                 organizationDTO.setCommunityType(community.getCommunityType());
             }
-
+            organizationDTO.setManagerList(getAdmins(cmd.getOrganizationId()));
             return organizationDTO;
         }
 
@@ -5844,7 +5844,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationDTO.setFeedbackForumId(community.getFeedbackForumId());
                 organizationDTO.setCommunityType(community.getCommunityType());
             }
-
+            organizationDTO.setManagerList(getAdmins(cmd.getOrganizationId()));
             return organizationDTO;
         }
     }

@@ -46,6 +46,7 @@ import java.util.List;
  * <li>order:排序</li>
  * <li>errorCode:错误码</li>
  * <li>managerFlag: 地址列表需要的默认是否是这个公司的管理员字段</li>
+ * <li>managerList: 管理员列表,参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
  * </ul>
  */
 public class OrganizationDTO {
@@ -113,6 +114,16 @@ public class OrganizationDTO {
 
     private Integer errorCode;
 
+	@ItemType(OrganizationContactDTO.class)
+	private List<OrganizationContactDTO> managerList;
+
+    public List<OrganizationContactDTO> getManagerList() {
+        return managerList;
+    }
+
+    public void setManagerList(List<OrganizationContactDTO> managerList) {
+        this.managerList = managerList;
+    }
 
     //地址列表需要的默认是否是这个公司的管理员字段
 	private Byte managerFlag;
