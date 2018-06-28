@@ -477,6 +477,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                         receiverId,
                         reportVal.getReportId(),
                         valId,
+                        cmd.getOrganizationId(),
                         user);
             }
             return valId;
@@ -570,7 +571,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     private void sendMessageAfterEditWorkReportVal(
-            String messageType, String applierName, String reportName, Long receiverId, Long reportId, Long reportValId, User user) {
+            String messageType, String applierName, String reportName, Long receiverId, Long reportId, Long reportValId, Long organizationId, User user) {
 
         String locale = Locale.SIMPLIFIED_CHINESE.toString();
         if (user != null) {
@@ -611,6 +612,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         WorkReportDetailsActionData actionData = new WorkReportDetailsActionData();
         actionData.setReportId(reportId);
         actionData.setReportValId(reportValId);
+        actionData.setOrganizationId(organizationId);
         String url = RouterBuilder.build(Router.WORK_REPORT_DETAILS, actionData);
         RouterMetaObject metaObject = new RouterMetaObject();
         metaObject.setUrl(url);
