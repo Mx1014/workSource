@@ -3,16 +3,16 @@
 -- issue-26467 物品放行 1.1 新增配置表
 CREATE TABLE `eh_relocation_configs` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `namespace_id` int(11) NOT NULL DEFAULT 0,
   `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
-	`agreement_flag` tinyint(4) DEFAULT 0 COMMENT '0: inactive, 1: active',
-	`agreement_content` text COMMENT '协议内容',
-	`tips_flag` tinyint(4) DEFAULT 0 COMMENT '0: inactive, 1: active',
-	`tips_content` varchar(100) DEFAULT NULL COMMENT '提示内容',
-  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'owner id',
+  `agreement_flag` tinyint(4) DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `agreement_content` text COMMENT '协议内容',
+  `tips_flag` tinyint(4) DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `tips_content` varchar(100) DEFAULT NULL COMMENT '提示内容',
+  `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-	`operator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `operator_uid` bigint(20) DEFAULT NULL,
   `operate_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -18,6 +18,7 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
@@ -129,7 +130,30 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
+//      获取flowcase
+        FlowCase flowCase = ctx.getFlowCase();
+        FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+        flowCase = tree.getLeafNodes().get(0).getFlowCase();
+//      获取操作类型
+        String stepType = ctx.getStepType().getCode();
 
+        if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
+//          终止操作更新任务表状态
+            RelocationRequest bean = relocationProvider.findRelocationRequestById(flowCase.getReferId());
+            FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+            stepDTO.setFlowCaseId(flowCase.getId());
+            stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+            stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+            FlowSubject subject = ctx.getCurrentEvent().getSubject();
+            if (subject != null) {
+                stepDTO.setSubjectId(subject.getId());
+            }
+            flowService.processAutoStep(stepDTO);
+            ctx.setContinueFlag(false);
+
+            bean.setStatus(FlowCaseStatus.ABSORTED.getCode());
+            relocationProvider.updateRelocationRequest(bean);
+        }
     }
 
     @Override
