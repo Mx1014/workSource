@@ -4,25 +4,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>INACTIVE: 0</li>
- *     <li>WAITING_FOR_LAUNCH: 1 待发起</li>
- *     <li>ACTIVE: ２　正常合同</li>
- *     <li>WAITING_FOR_APPROVAL: 3 审批中</li>
- *     <li>APPROVE_QUALITIED: 4 审批通过</li>
- *     <li>APPROVE_NOT_QUALITIED: 5 审批不通过</li>
- *     <li>EXPIRING: 6 即将到期</li>
- *     <li>EXPIRED: 7 已过期</li>
- *     <li>HISTORY: 8 历史合同</li>
- *     <li>INVALID: 9 作废合同</li>
- *     <li>DENUNCIATION: 10 退约合同</li>
- *     <li>DRAFT: 11 草稿</li>
+ *     <li>INACTIVE: 0 未激活状态</li>
+ *     <li>ACTIVE: ２　激活状态</li>
  * </ul>
- * Created by ying.xiong on 2017/8/2.
+ * Created by jm.ding on 2018/6/28.
  */
 public enum ContractTemplateStatus {
-    INACTIVE((byte)0), WAITING_FOR_LAUNCH((byte)1), ACTIVE((byte)2), WAITING_FOR_APPROVAL((byte)3),
-    APPROVE_QUALITIED((byte)4), APPROVE_NOT_QUALITIED((byte)5), EXPIRING((byte)6),
-    EXPIRED((byte)7), HISTORY((byte)8), INVALID((byte)9), DENUNCIATION((byte)10), DRAFT((byte)11);
+    INACTIVE((byte)0),  ACTIVE((byte)2);
 
     private byte code;
 
