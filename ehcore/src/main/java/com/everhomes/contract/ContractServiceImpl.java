@@ -1008,7 +1008,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments) {
 		if(LOGGER.isDebugEnabled()){
-			LOGGER.error("!!!666 buildingApartments : {}",buildingApartments);
+			LOGGER.error("!!!666 buildingApartments : {}; contract : {}",buildingApartments);
 		}
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
@@ -1059,6 +1059,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						//26058  已售的状态不变
 						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
 							addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+							if(LOGGER.isDebugEnabled()){
+								LOGGER.error("!!!888 addressMapping : {}",addressMapping);
+							}
 							propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
 						}
 
