@@ -140,17 +140,6 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
         if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
 //          终止操作更新任务表状态
             RelocationRequest bean = relocationProvider.findRelocationRequestById(flowCase.getReferId());
-            FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
-            stepDTO.setFlowCaseId(flowCase.getId());
-            stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-            stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
-            FlowSubject subject = ctx.getCurrentEvent().getSubject();
-            if (subject != null) {
-                stepDTO.setSubjectId(subject.getId());
-            }
-            flowService.processAutoStep(stepDTO);
-            ctx.setContinueFlag(false);
-
             bean.setStatus(FlowCaseStatus.ABSORTED.getCode());
             relocationProvider.updateRelocationRequest(bean);
         }
