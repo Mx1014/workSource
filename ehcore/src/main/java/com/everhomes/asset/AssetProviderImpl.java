@@ -5073,13 +5073,16 @@ public class AssetProviderImpl implements AssetProvider {
 		DSLContext context = getReadOnlyContext();
         EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
         List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
-        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .fetchInto(PaymentChargingStandardsScopes.class);
         if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
         	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         }else {//说明该域空间下已经有数据了
+        	scopes = context.selectFrom(t1)
+            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .fetchInto(PaymentChargingStandardsScopes.class);
         	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
         		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         	}else {
@@ -5094,13 +5097,16 @@ public class AssetProviderImpl implements AssetProvider {
 		DSLContext context = getReadOnlyContext();
         EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
         List<PaymentBillGroup> scopes = context.selectFrom(t1)
-        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .fetchInto(PaymentBillGroup.class);
         if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
         	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         }else {//说明该域空间下已经有数据了
+        	scopes = context.selectFrom(t1)
+            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .fetchInto(PaymentBillGroup.class);
         	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
         		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         	}else {
