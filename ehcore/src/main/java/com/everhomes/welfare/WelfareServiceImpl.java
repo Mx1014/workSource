@@ -87,6 +87,9 @@ public class WelfareServiceImpl implements WelfareService {
     private WelfaresDTO processWelfaresDTO(Welfare r) {
         WelfaresDTO dto = ConvertHelper.convert(r, WelfaresDTO.class);
         dto.setUpdateTime(r.getUpdateTime().getTime());
+        if (null != r.getSendTime()) {
+            dto.setSendTime(r.getSendTime().getTime());
+        }
         if (null != r.getImgUri()) {
             dto.setImgUrl(contentServerService.parserUri(r.getImgUri(),
                     EntityType.USER.getCode(), UserContext.currentUserId()));
@@ -290,10 +293,13 @@ public class WelfareServiceImpl implements WelfareService {
             return null;
         }
         GetUserWelfareResponse response = ConvertHelper.convert(welfare, GetUserWelfareResponse.class);
-
+        if (null != welfare.getSendTime()) {
+            response.setSendTime(welfare.getSendTime().getTime());
+        }
         if (null != welfare.getImgUri()) {
             response.setImgUrl(contentServerService.parserUri(welfare.getImgUri(),
                     EntityType.USER.getCode(), UserContext.currentUserId()));
+            ContentServerResource resource = contentServerService.findResourceByUri(welfare.getImgUri());
         }
         response.setSendTime(welfare.getSendTime().getTime());
         return response;
