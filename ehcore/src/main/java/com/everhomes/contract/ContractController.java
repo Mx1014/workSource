@@ -346,5 +346,20 @@ public class ContractController extends ControllerBase {
 		return new RestResponse(contractService.addContractTemplate(cmd));
 		
 	}
+	
+	/**
+	 * <p>设置合同模板,修改模板，删除模板</p>
+	 * <b>URL: /contract/updateContractTemplate</b>
+	 */
+	@RequestMapping("updateContractTemplate")
+	@RestReturn(String.class)
+	public RestResponse updateContractTemplate(UpdateContractTemplateCommand cmd) {
+		
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		
+		return new RestResponse(contractService.updateContractTemplate(cmd));
+		
+	}
 
 }

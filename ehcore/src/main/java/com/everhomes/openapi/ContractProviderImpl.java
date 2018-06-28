@@ -10,15 +10,17 @@ import java.util.stream.Collectors;
 import com.everhomes.contract.ContractCategory;
 
 import com.everhomes.asset.AssetErrorCodes;
-
+import com.everhomes.community.Building;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhContractAttachments;
+import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
@@ -26,10 +28,15 @@ import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.daos.EhBuildingsDao;
+import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhContractCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
+import com.everhomes.server.schema.tables.daos.EhContractTemplatesDao;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhBuildings;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
@@ -38,6 +45,7 @@ import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import com.everhomes.util.RuntimeErrorException;
@@ -766,6 +774,39 @@ public class ContractProviderImpl implements ContractProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public void createContractTemplate(ContractTemplate contractTemplate) {
+        long id = this.dbProvider.allocPojoRecordId(EhContractTemplates.class);
+        contractTemplate.setId(id);
+        contractTemplate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        contractTemplate.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+        contractTemplate.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, id));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        dao.insert(contractTemplate);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractTemplates.class, null);
+	}
+
+	@Override
+	public ContractTemplate findContractTemplateById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractTemplates.class, id));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ContractTemplate.class);
+	}
+
+	@Override
+	public void updateContractTemplate(ContractTemplate contractTemplate) {
+		assert(contractTemplate.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, contractTemplate.getId()));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+
+        dao.update(contractTemplate);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTemplates.class, contractTemplate.getId());
 	}
 
 }

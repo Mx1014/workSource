@@ -87,4 +87,9 @@ public interface ContractProvider {
     boolean isNormal(Long cid);
 
     Long findContractCategoryIdByContractId(Long contractId);
+
+	void createContractTemplate(ContractTemplate contractTemplate);
+	void updateContractTemplate(ContractTemplate contractTemplate);
+
+	ContractTemplate findContractTemplateById(Long id);
 }
