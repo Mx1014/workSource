@@ -2301,7 +2301,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public OrganizationMember findOrganizationMemberByOrgIdAndToken(
             String contactPhone, Long organizationId) {
-    	return findOrganizationMemberByOrgIdAndToken(contactPhone, organizationId);
+    	return findOrganizationMemberByOrgIdAndToken(contactPhone, organizationId, null);
     }
 
     @Override
