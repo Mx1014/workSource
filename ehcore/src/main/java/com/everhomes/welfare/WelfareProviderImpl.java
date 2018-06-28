@@ -4,9 +4,11 @@ package com.everhomes.welfare;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,11 +62,16 @@ public class WelfareProviderImpl implements WelfareProvider {
 	}
 	
 	@Override
-	public List<Welfare> listWelfare(Long ownerId) {
-		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_WELFARES)
-				.where(Tables.EH_WELFARES.OWNER_ID.eq(ownerId))
-				.orderBy(Tables.EH_WELFARES.ID.asc())
-				.fetch();
+	public List<Welfare> listWelfare(Long ownerId, CrossShardListingLocator locator, Integer pageSize) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
+				.where(Tables.EH_WELFARES.OWNER_ID.eq(ownerId));
+		if (null != locator && locator.getAnchor() != null) {
+			step = step.and(Tables.EH_WELFARES.ID.lt(locator.getAnchor()));
+		}
+		if (null != pageSize) {
+			step.limit(pageSize);
+		}
+		Result<Record> records = step.orderBy(Tables.EH_WELFARES.ID.desc()).fetch();
 		if(null == records){
 			return null;
 		}

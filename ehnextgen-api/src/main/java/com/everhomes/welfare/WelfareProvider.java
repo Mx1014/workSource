@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.welfare;
 
+import com.everhomes.listing.CrossShardListingLocator;
+
 import java.util.List;
 
 public interface WelfareProvider {
@@ -11,7 +13,7 @@ public interface WelfareProvider {
 
 	Welfare findWelfareById(Long id);
 
-	List<Welfare> listWelfare(Long ownerId);
+	List<Welfare> listWelfare(Long ownerId, CrossShardListingLocator locator, Integer pageSize);
 
 	void deleteWelfare(Long welfareId);
 }

@@ -13,6 +13,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMemberDetails;
@@ -61,10 +62,23 @@ public class WelfareServiceImpl implements WelfareService {
     @Override
     public ListWelfaresResponse listWelfares(ListWelfaresCommand cmd) {
         ListWelfaresResponse response = new ListWelfaresResponse();
-        List<Welfare> results = welfareProvider.listWelfare(cmd.getOwnerId());
-        if (null == results) {
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        if (null != cmd.getPageAnchor()) {
+            locator.setAnchor(cmd.getPageAnchor());
+        }
+        int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+
+        List<Welfare> results = welfareProvider.listWelfare(cmd.getOwnerId(), locator, pageSize);
+        if (null == results || results.size() == 0) {
             return response;
         }
+        Long nextPageAnchor = null;
+        if (results.size() > pageSize) {
+            results.remove(results.size() - 1);
+            nextPageAnchor = results.get(results.size() - 1).getId();
+        }
+        response.setNextPageAnchor(nextPageAnchor);
         response.setWelfares(results.stream().map(r -> processWelfaresDTO(r)).collect(Collectors.toList()));
         return response;
     }

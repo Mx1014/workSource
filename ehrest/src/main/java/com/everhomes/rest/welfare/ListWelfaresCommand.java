@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型,填organization</li>
  * <li>ownerId: 公司id</li>
+ * <li>pageAnchor: 分页锚点</li>
+ * <li>pageSize: 每页条数</li>
  * </ul>
  */
 public class ListWelfaresCommand {
@@ -15,6 +17,10 @@ public class ListWelfaresCommand {
 	private String ownerType;
 
 	private Long ownerId;
+
+	private Long pageAnchor;
+
+	private Integer pageSize;
 
 	public ListWelfaresCommand() {
 
@@ -40,6 +46,22 @@ public class ListWelfaresCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	@Override
