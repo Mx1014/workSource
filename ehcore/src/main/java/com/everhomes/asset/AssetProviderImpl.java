@@ -2972,7 +2972,7 @@ public class AssetProviderImpl implements AssetProvider {
             List<Long> fetch = context.select(standardScope.CHARGING_STANDARD_ID)
                     .from(standardScope)
                     .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
-                    .or(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                    .or(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))//修复issue-29576 收费项计算规则-标准名称不能修改
                     .fetch(standardScope.CHARGING_STANDARD_ID);
             UpdateQuery<EhPaymentChargingStandardsRecord> query = context.updateQuery(t);
             query.addValue(t.NAME, chargingStandardName);
