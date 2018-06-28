@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.io.*;
 import java.net.URL;
@@ -86,6 +87,9 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
     public void filterWords(FilterWordsCommand cmd) {
         String settingFlag = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SENSITIVE_SETTING, "");
         if (StringUtils.isBlank(settingFlag) || "false".equals(settingFlag)) {
+            return;
+        }
+        if (cmd == null || CollectionUtils.isEmpty(cmd.getTextList())) {
             return;
         }
         cmd.setCreatorUid(UserContext.currentUserId());
