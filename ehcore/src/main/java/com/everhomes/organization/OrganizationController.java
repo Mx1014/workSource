@@ -19,6 +19,7 @@ import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
+import com.everhomes.rest.incubator.ApplyType;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -28,6 +29,7 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.FrequencyControl;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
@@ -866,6 +868,20 @@ public class OrganizationController extends ControllerBase {
     public RestResponse applyForEnterpriseContactByEmail(@Valid ApplyForEnterpriseContactByEmailCommand cmd) {
         organizationService.applyForEnterpriseContactByEmail(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/applyForEnterpriseContactNew</b>
+     * <p>新申请加入企业</p>
+     */
+    @RequestMapping("applyForEnterpriseContactNew")
+    @RestReturn(value = OrganizationDTO.class)
+    public RestResponse applyForEnterpriseContactNew(@Valid ApplyForEnterpriseContactNewCommand cmd) {
+        OrganizationDTO dto = organizationService.applyForEnterpriseContactNew(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
