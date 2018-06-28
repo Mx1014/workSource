@@ -5538,7 +5538,15 @@ public class ForumServiceImpl implements ForumService {
             topicCmd.setOwnerId(visibleRegionId);
         }
         topicCmd.setCurrentOrgId(currentOrgId);
-
+        topicCmd.setStatus((byte)2);
+        if (!StringUtils.isEmpty(topicCmd.getEmbeddedJson())) {
+            ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(topicCmd.getEmbeddedJson(),
+                    ActivityPostCommand.class);
+            if (tempCmd != null) {
+                tempCmd.setStatus((byte)2);
+                topicCmd.setEmbeddedJson(StringHelper.toJsonString(tempCmd));
+            }
+        }
         if(creatorTag != null) {
             topicCmd.setCreatorTag(creatorTag.getCode());
         }
