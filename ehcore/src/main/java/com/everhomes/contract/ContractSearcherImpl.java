@@ -240,6 +240,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Override
     public ListContractsResponse queryContracts(SearchContractCommand cmd) {
+    	if (cmd.getOrgId() == null || cmd.getCommunityId() == null) {
+    		throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+                    "OrgIdorCommunityId user privilege error");
+		}
         if(cmd.getPaymentFlag() == 1) {
             checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
         } else {
