@@ -5400,7 +5400,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         Post post = this.forumProvider.findPostById(activity.getPostId());
         FilterWordsCommand command = new FilterWordsCommand();
         if (post != null) {
-            command.setCommunityId(post.getCommunityId());
+            command.setCommunityId(post.getVisibleRegionId());
             command.setModuleType(post.getModuleType());
         }
         List<String> list = new ArrayList<>();
