@@ -588,3 +588,4 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_create_time` DATETI
 -- dengs
 
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN `pay_source` VARCHAR(16) DEFAULT 'app' COMMENT 'app:APP支付, qrcode:扫码支付';
+ALTER TABLE eh_parking_recharge_orders ADD COLUMN `id_hash` VARCHAR(128) COMMENT 'id_hash';
