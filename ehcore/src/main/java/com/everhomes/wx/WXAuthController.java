@@ -27,6 +27,7 @@ import com.everhomes.rest.wx.CheckAuthCommand;
 import com.everhomes.rest.wx.CheckAuthResponse;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+
 import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -52,6 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,7 +83,7 @@ import com.everhomes.rest.user.UserGender;
 @RestDoc(value = "WX Auth Controller", site = "core")
 @RestController
 @RequestMapping("/wxauth")
-public class WXAuthController {// extends ControllerBase
+public class WXAuthController implements ApplicationListener<ContextRefreshedEvent> {// extends ControllerBase
 	private static final Logger LOGGER = LoggerFactory.getLogger(WXAuthController.class);
     
     private final static String KEY_NAMESPACE = "ns";
@@ -127,8 +130,17 @@ public class WXAuthController {// extends ControllerBase
 
     @Autowired
     private ContentServerService contentServerService;
+    
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            openHttpClient();
+        }
+    }
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     private CloseableHttpClient openHttpClient() {
         if (isHttpClientOpen()) {
             return this.httpClient;

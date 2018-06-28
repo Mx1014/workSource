@@ -119,7 +119,9 @@ public class UserProviderImpl implements UserProvider {
     
     @Override
     public void createUser(User user) {
-        long id = this.shardingProvider.allocShardableContentId(EhUsers.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhUsers.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhUsers.class).second();
         user.setId(id);
         if(user.getAccountName() == null) {
             long accountSeq = this.sequenceProvider.getNextSequence("usr");

@@ -51,10 +51,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-redis</artifactId>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -355,98 +357,139 @@
             <artifactId>xmpush-server-api</artifactId>
             <version>0.0.9-20171017.103132-1</version>
         </dependency>
+        
+        <!-- 深圳湾物业缴费对接所需依赖：axis 1.4 jar start -->
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-discovery</groupId>
+            <artifactId>commons-discovery</artifactId>
+            <version>0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis-jaxrpc</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis-saaj</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <!-- 深圳湾物业缴费对接所需依赖：axis 1.4 jar end -->
+
+        <!-- 敏感词过滤依赖包 -->
+        <dependency>
+          <groupId>com.hankcs</groupId>
+          <artifactId>aho-corasick-double-array-trie</artifactId>
+          <version>${sensitive-word.version}</version>
+        </dependency>
 	</dependencies>
 
 	<build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <source>${java.source.version}</source>
-                    <target>${java.target.version}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${maven-antrun-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <echo>Copy configuration file(s) to target directory</echo>
-                                <copy todir="${basedir}/target">
-                                    <fileset dir="${basedir}/src/main/config">
-                                        <include name="*.*" />
-                                    </fileset>
-                                </copy>
-                                <exec executable="cp">
-                                    <arg
-                                        line="${basedir}/scripts/core-server ${basedir}/target/core-server" />
-                                </exec>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                  <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-            <!-- <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions> -->
-            </plugin>
-            <!-- explicitly define maven-deploy-plugin after other to force exec order -->
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>${properties-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>${basedir}/../pom.properties</file>
-                            </files>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+	        <plugins>
+	            <plugin>
+	                <artifactId>maven-compiler-plugin</artifactId>
+	                <version>${maven-compiler-plugin.version}</version>
+	                <configuration>
+	                    <source>${java.source.version}</source>
+	                    <target>${java.target.version}</target>
+	                </configuration>
+	            </plugin>
+	            <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-antrun-plugin</artifactId>
+	                <version>${maven-antrun-plugin.version}</version>
+	                <executions>
+	                    <execution>
+	                        <phase>process-resources</phase>
+	                        <goals>
+	                            <goal>run</goal>
+	                        </goals>
+	                        <configuration>
+	                            <tasks>
+	                                <echo>Copy configuration file(s) to target directory</echo>
+	                                <copy todir="${basedir}/target">
+	                                    <fileset dir="${basedir}/src/main/config">
+	                                        <include name="*.*" />
+	                                    </fileset>
+	                                </copy>
+	                                <exec executable="cp">
+	                                    <arg
+	                                        line="${basedir}/scripts/core-server ${basedir}/target/core-server" />
+	                                </exec>
+	                            </tasks>
+	                        </configuration>
+	                    </execution>
+	                </executions>
+	            </plugin>
+	            <plugin>
+	                <groupId>org.springframework.boot</groupId>
+	                <artifactId>spring-boot-maven-plugin</artifactId>
+	            </plugin>
+	            <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-javadoc-plugin</artifactId>
+	                <configuration>
+	                  <additionalparam>-Xdoclint:none</additionalparam>
+	                </configuration>
+	            <!-- <executions>
+	                    <execution>
+	                        <id>attach-javadocs</id>
+	                        <phase>deploy</phase>
+	                        <goals>
+	                            <goal>jar</goal>
+	                        </goals>
+	                    </execution>
+	                </executions> -->
+	            </plugin>
+	            <!-- explicitly define maven-deploy-plugin after other to force exec order -->
+	            <plugin>
+	                <artifactId>maven-deploy-plugin</artifactId>
+	                <executions>
+	                    <execution>
+	                        <id>deploy</id>
+	                        <phase>deploy</phase>
+	                        <goals>
+	                            <goal>deploy</goal>
+	                        </goals>
+	                    </execution>
+	                </executions>
+	            </plugin>
+	
+	            <plugin>
+	                <groupId>org.codehaus.mojo</groupId>
+	                <artifactId>properties-maven-plugin</artifactId>
+	                <version>${properties-maven-plugin.version}</version>
+	                <executions>
+	                    <execution>
+	                        <phase>initialize</phase>
+	                        <goals>
+	                            <goal>read-project-properties</goal>
+	                        </goals>
+	                        <configuration>
+	                            <files>
+	                                <file>${basedir}/../pom.properties</file>
+	                            </files>
+	                        </configuration>
+	                    </execution>
+	                </executions>
+	            </plugin>
+	        </plugins>
 	</build>
 
 	<profiles>

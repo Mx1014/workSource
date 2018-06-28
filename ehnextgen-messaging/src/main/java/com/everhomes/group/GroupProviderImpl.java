@@ -63,7 +63,9 @@ public class GroupProviderImpl implements GroupProvider {
     @Caching(evict={@CacheEvict(value="listGroupMessageMembers", allEntries=true)})
     @Override
     public void createGroup(Group group) {
-        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhGroups.class);
+        //long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         group.setId(id);
         group.setUuid(UUID.randomUUID().toString());
         group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -846,9 +848,9 @@ public class GroupProviderImpl implements GroupProvider {
     			groupMembers, (DSLContext context, Object reducingContext) -> {
     				SelectQuery<Record> query = context.select(Tables.EH_GROUP_MEMBERS.fields())
                             .from(Tables.EH_GROUP_MEMBERS).getQuery();
-    				 if(queryBuilderCallback != null) {
+    				/* if(queryBuilderCallback != null) {
     	                    queryBuilderCallback.buildCondition(locator, query);
-    	             }
+    	             }*/
     				 query.addConditions(Tables.EH_GROUP_MEMBERS.GROUP_ID.in(groupIds));
     				 if(null != pageSize){
     					 query.addLimit(count);
@@ -859,6 +861,10 @@ public class GroupProviderImpl implements GroupProvider {
                     query.addJoin(Tables.EH_GROUPS, JoinType.JOIN, Tables.EH_GROUPS.ID.eq(Tables.EH_GROUP_MEMBERS.GROUP_ID));
                     query.addJoin(Tables.EH_ADDRESSES, JoinType.JOIN, Tables.EH_ADDRESSES.ID.eq(Tables.EH_GROUPS.INTEGRAL_TAG1));
     				
+                    //update by huanglm ,解决 listCommunityWaitingApproveUserAddress 调用时造成的sql错误，
+                    if(queryBuilderCallback != null) {
+	                    queryBuilderCallback.buildCondition(locator, query);
+	                 }
     				 List<GroupMember> groupList = query.fetch().map((r) -> {
     					 return RecordHelper.convert(r, GroupMember.class);
     	             });
