@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  * <li>senderName: 发放者姓名 必填</li>
  * <li>imgUri: 图片uri 必填</li>
  * <li>imgUrl: 图片url 只读项展示用</li>
+ * <li>imgName: 图片名称 只读项展示用</li>
+ * <li>imgSize: 图片大小(字节) 只读项展示用</li>
  * <li>status: 状态:0-草稿 1-已发送 只读项</li>
  * <li>sendTime: 发送时间 只读项</li>
  * <li>creatorName: 创建者 只读项</li>
@@ -41,7 +43,9 @@ public class WelfaresDTO {
     private Long senderUid;
     private Long senderDetailId;
     private String imgUri;
-    private String imgUrl;
+	private String imgUrl;
+	private String imgName;
+	private Integer imgSize;
     private Byte status;
     private Long sendTime;
     private String creatorName;
@@ -217,5 +221,20 @@ public class WelfaresDTO {
 	public void setSenderName(String senderName) {
 		this.senderName = senderName;
 	}
-	
+
+	public String getImgName() {
+		return imgName;
+	}
+
+	public void setImgName(String imgName) {
+		this.imgName = imgName;
+	}
+
+	public Integer getImgSize() {
+		return imgSize;
+	}
+
+	public void setImgSize(Integer imgSize) {
+		this.imgSize = imgSize;
+	}
 }

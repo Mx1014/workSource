@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -89,6 +90,11 @@ public class WelfareServiceImpl implements WelfareService {
         if (null != r.getImgUri()) {
             dto.setImgUrl(contentServerService.parserUri(r.getImgUri(),
                     EntityType.USER.getCode(), UserContext.currentUserId()));
+            ContentServerResource resource = contentServerService.findResourceByUri(r.getImgUri());
+            if (null != resource) {
+                dto.setImgName(resource.getResourceName());
+                dto.setImgSize(resource.getResourceSize());
+            }
         }
         dto.setItems(new ArrayList<>());
         dto.setReceivers(new ArrayList<>());
