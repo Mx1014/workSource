@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>flowCaseIds: 流程id列表</li>
- * <li>outerIds: 移交目标ids</li>
+ * <li>innerIds: 转交给谁ids</li>
  * </ul>
  */
 public class DeliverApprovalFlowsCommand {
@@ -17,7 +17,7 @@ public class DeliverApprovalFlowsCommand {
     private List<Long> flowCaseIds;
 
     @ItemType(Long.class)
-    private List<Long> outerIds;
+    private List<Long> innerIds;
 
     public DeliverApprovalFlowsCommand() {
     }
@@ -30,12 +30,12 @@ public class DeliverApprovalFlowsCommand {
         this.flowCaseIds = flowCaseIds;
     }
 
-    public List<Long> getOuterIds() {
-        return outerIds;
+    public List<Long> getInnerIds() {
+        return innerIds;
     }
 
-    public void setOuterIds(List<Long> outerIds) {
-        this.outerIds = outerIds;
+    public void setInnerIds(List<Long> innerIds) {
+        this.innerIds = innerIds;
     }
 
     @Override

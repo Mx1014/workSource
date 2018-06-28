@@ -10,13 +10,13 @@ package com.everhomes.rest.archives;
  * <li>FIRE((byte) 5): 不胜任</li>
  * <li>ADJUSTMENT((byte) 6): 编制调整</li>
  * <li>BREAK_RULE((byte) 7): 违纪</li>
- * <li>OTHER((byte) 8): 其他</li>
  * <li>RETIRE((byte) 9): 退休</li>
+ * <li>OTHER((byte) 8): 其他</li>
  * </ul>
  */
 public enum ArchivesDismissReason {
     SALARY((byte) 0, "薪资"), CULTURE((byte) 1, "文化"), BALANCE((byte) 2, "生活平衡"), PERSONAL_REASON((byte) 3, "个人原因"), CAREER_DEVELOPMENT((byte) 4, "职业发展"),
-    FIRE((byte) 5, "不胜任"), ADJUSTMENT((byte) 6, "编制调整"), BREAK_RULE((byte) 7, "违纪"), OTHER((byte) 8, "其他"), RETIRE((byte) 9, "退休");
+    FIRE((byte) 5, "不胜任"), ADJUSTMENT((byte) 6, "编制调整"), BREAK_RULE((byte) 7, "违纪"),RETIRE((byte) 9, "退休"), OTHER((byte) 8, "其他");
 
     private Byte code;
     private String type;

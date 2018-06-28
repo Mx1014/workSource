@@ -9,6 +9,7 @@ import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.ParkingCardDTO;
+import com.everhomes.rest.parking.ParkingLotVendor;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -64,5 +65,10 @@ public class BeeKangLiVendorHandler extends BeeVendorHandler{
         protected void processJSONParams(JSONObject params) {
             String comid = configProvider.getValue("parking.beekangli.comid", "000000771");
             params.put("comid",comid);
+        }
+        
+        @Override
+        public String getParkingVendorName() {
+        	return ParkingLotVendor.BEE_KANGLI.getCode();
         }
 }

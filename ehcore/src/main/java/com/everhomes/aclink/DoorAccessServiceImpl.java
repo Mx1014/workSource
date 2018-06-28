@@ -369,7 +369,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             userName = user.getAccountName();
         }
         map.put("userName", userName);
-        map.put("doorName", doorAcc.getName());
+        
+        //displayName不为空就拿displayName by liuyilin 20180625
+        map.put("doorName", doorAcc.getDisplayNameNotEmpty());
         
         String scope = AclinkNotificationTemplateCode.SCOPE;
         int code = AclinkNotificationTemplateCode.ACLINK_NEW_AUTH;

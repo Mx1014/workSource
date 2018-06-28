@@ -13,7 +13,7 @@ package com.everhomes.rest.organization.pm;
  *
  */
 public enum AddressMappingStatus {
-    DEFAULT((byte)0, "其他"), LIVING((byte)1, "自用"), RENT((byte)2, "出租"), FREE((byte)3, "待租"), SALED((byte)4, "已售"), UNSALE((byte)5, "待售"),
+	ERRORSTATUS((byte)-1, "无效状态"),DEFAULT((byte)0, "其他"), LIVING((byte)1, "自用"), RENT((byte)2, "出租"), FREE((byte)3, "待租"), SALED((byte)4, "已售"), UNSALE((byte)5, "待售"),
     OCCUPIED((byte)6, "已占用");
     
     private byte code;
@@ -46,6 +46,6 @@ public enum AddressMappingStatus {
 				}
 			}
 		}
-    	return AddressMappingStatus.DEFAULT;
+    	return AddressMappingStatus.ERRORSTATUS;
     }
 }

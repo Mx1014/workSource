@@ -73,6 +73,8 @@ import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.poll.PollItemDTO;
+import com.everhomes.rest.poll.PollPostCommand;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -107,6 +109,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
@@ -249,20 +252,32 @@ public class ForumServiceImpl implements ForumService {
         if (!StringUtils.isEmpty(cmd.getContent())) {
             textList.add(cmd.getContent());
         }
-        ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
-                ActivityPostCommand.class);
-        if (activityPostCommand != null) {
-            if (!StringUtils.isEmpty(activityPostCommand.getSubject())){
-                textList.add(activityPostCommand.getSubject());
+        if (cmd.getEmbeddedAppId().equals(AppConstants.APPID_POLL)) {
+            PollPostCommand pollPostCommand = (PollPostCommand)StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                    PollPostCommand.class);
+            if (pollPostCommand != null) {
+                List<PollItemDTO> list = pollPostCommand.getItemList();
+                if (!CollectionUtils.isEmpty(list)) {
+                    for (PollItemDTO pollItemDTO : list) {
+                        if (!StringUtils.isEmpty(pollItemDTO.getSubject())) {
+                            textList.add(pollItemDTO.getSubject());
+                        }
+                    }
+                }
             }
-            if (!StringUtils.isEmpty(activityPostCommand.getDescription())) {
-                textList.add(activityPostCommand.getDescription());
-            }
-            if (!StringUtils.isEmpty(activityPostCommand.getContent())) {
-                textList.add(activityPostCommand.getContent());
-            }
-            if (!StringUtils.isEmpty(activityPostCommand.getLocation())) {
-                textList.add(activityPostCommand.getLocation());
+        }else{
+            ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                    ActivityPostCommand.class);
+            if (activityPostCommand != null) {
+                if (!StringUtils.isEmpty(activityPostCommand.getDescription())) {
+                    textList.add(activityPostCommand.getDescription());
+                }
+                if (!StringUtils.isEmpty(activityPostCommand.getContent())) {
+                    textList.add(activityPostCommand.getContent());
+                }
+                if (!StringUtils.isEmpty(activityPostCommand.getLocation())) {
+                    textList.add(activityPostCommand.getLocation());
+                }
             }
         }
         command.setTextList(textList);
@@ -284,7 +299,7 @@ public class ForumServiceImpl implements ForumService {
                 }
                 ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(temp.getEmbeddedJson(),
                         ActivityPostCommand.class);
-                if (tempCmd.getStatus() == (byte)2) {
+                if (tempCmd != null && tempCmd.getStatus() == (byte)2) {
                     PostDTO post = this.updateTopic(cmd);
                     return post;
                 }
@@ -7394,6 +7409,9 @@ public class ForumServiceImpl implements ForumService {
             if (StringUtils.isEmpty(postDTO.getCreatorNickName())) {
                 postDTO.setCreatorNickName(user.getNickName());
             }
+            String url =  contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId());
+            postDTO.setCreatorAvatarUrl(url);
+            postDTO.setCreatorAvatar(user.getAvatar());
         }
         if (postDTO.getCreateTime() == null) {
             Timestamp timeStamp = new Timestamp(new Date().getTime());

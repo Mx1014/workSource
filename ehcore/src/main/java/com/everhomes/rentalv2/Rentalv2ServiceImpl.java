@@ -8462,6 +8462,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		restoreRentalBill(order);
 
 		if (now > order.getEndTime().getTime()) {
+			rs.setResourceCounts(rs.getResourceCounts()+99999.0);//超时订单无视车锁数量
 			processCells(rs, order.getRentalType());
 			long overTimeStartTime = order.getEndTime().getTime();
 			long overTimeEndTime = now;
@@ -8497,7 +8498,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					if (interval % timeStep != 0) {
 						rentalCount = (int)rentalCount + 1;
 					}
-					rs.setResourceCounts(rs.getResourceCounts()+9999999.0);//超时订单无视车锁数量
+
 					BigDecimal amount = updateRentalOrder(rs, order, null, rentalCount, false);
 					order.setEndTime(order.getOldEndTime());
 					amount = rentalCommonService.calculateOverTimeFee(order,amount,now);

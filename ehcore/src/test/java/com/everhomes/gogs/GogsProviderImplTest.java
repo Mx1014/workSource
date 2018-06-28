@@ -26,14 +26,28 @@ public class GogsProviderImplTest {
     @Test
     public void createRepository() {
         String reponame = "repo-"+System.nanoTime();
-        GogsRawRepo repository = gogs.createRepo(reponame, "desc", GogsRawRepo.class);
+        CreateGogsRepoParam param = new CreateGogsRepoParam();
+        param.setReadme("Default");
+        param.setDescription("desc");
+        param.setPrivateFlag(true);
+        param.setName(reponame);
+        param.setAutoInit(true);
+
+        GogsRawRepo repository = gogs.createRepo(param, GogsRawRepo.class);
         assertNotNull(repository);
     }
 
     @Test
     public void listContents() {
-        String repoName = "repo-" + System.currentTimeMillis();
-        GogsRawRepo repository = gogs.createRepo(repoName, "desc", GogsRawRepo.class);
+        String repoName = "repo-"+System.nanoTime();
+        CreateGogsRepoParam repoparam = new CreateGogsRepoParam();
+        repoparam.setReadme("Default");
+        repoparam.setDescription("desc");
+        repoparam.setPrivateFlag(true);
+        repoparam.setName(repoName);
+        repoparam.setAutoInit(true);
+
+        GogsRawRepo repository = gogs.createRepo(repoparam, GogsRawRepo.class);
         assertNotNull(repository);
 
         String content = "content 1";
@@ -66,10 +80,16 @@ public class GogsProviderImplTest {
 
     @Test
     public void listCommits() {
-        String repoName = "repo-" + System.currentTimeMillis();
-        GogsRawRepo repository = gogs.createRepo(repoName, "desc", GogsRawRepo.class);
-        assertNotNull(repository);
+        String repoName = "repo-"+System.nanoTime();
+        CreateGogsRepoParam repoparam = new CreateGogsRepoParam();
+        repoparam.setReadme("Default");
+        repoparam.setDescription("desc");
+        repoparam.setPrivateFlag(true);
+        repoparam.setName(repoName);
+        repoparam.setAutoInit(true);
 
+        GogsRawRepo repository = gogs.createRepo(repoparam, GogsRawRepo.class);
+        assertNotNull(repository);
         String content = "content 1";
         String path = System.currentTimeMillis() + ".txt";
         String commitMessage = "first commit:" + System.nanoTime();
@@ -93,8 +113,15 @@ public class GogsProviderImplTest {
 
     @Test
     public void commitFile() {
-        String repoName = "repo-" + System.currentTimeMillis();
-        GogsRawRepo repository = gogs.createRepo(repoName, "desc", GogsRawRepo.class);
+        String repoName = "repo-"+System.nanoTime();
+        CreateGogsRepoParam repoparam = new CreateGogsRepoParam();
+        repoparam.setReadme("Default");
+        repoparam.setDescription("desc");
+        repoparam.setPrivateFlag(true);
+        repoparam.setName(repoName);
+        repoparam.setAutoInit(true);
+
+        GogsRawRepo repository = gogs.createRepo(repoparam, GogsRawRepo.class);
         assertNotNull(repository);
 
         String content = "aaadasdasdasdas:"+System.nanoTime();
@@ -116,8 +143,15 @@ public class GogsProviderImplTest {
 
     @Test
     public void deleteFile() {
-        String repoName = "repo-" + System.currentTimeMillis();
-        GogsRawRepo repository = gogs.createRepo(repoName, "desc", GogsRawRepo.class);
+        String repoName = "repo-"+System.nanoTime();
+        CreateGogsRepoParam repoparam = new CreateGogsRepoParam();
+        repoparam.setReadme("Default");
+        repoparam.setDescription("desc");
+        repoparam.setPrivateFlag(true);
+        repoparam.setName(repoName);
+        repoparam.setAutoInit(true);
+
+        GogsRawRepo repository = gogs.createRepo(repoparam, GogsRawRepo.class);
         assertNotNull(repository);
 
         String content = "content 1";
@@ -156,8 +190,15 @@ public class GogsProviderImplTest {
 
     @Test
     public void downloadArchive() {
-        String repoName = "repo-" + System.currentTimeMillis();
-        GogsRawRepo repository = gogs.createRepo(repoName, "desc", GogsRawRepo.class);
+        String repoName = "repo-"+System.nanoTime();
+        CreateGogsRepoParam repoparam = new CreateGogsRepoParam();
+        repoparam.setReadme("Default");
+        repoparam.setDescription("desc");
+        repoparam.setPrivateFlag(true);
+        repoparam.setName(repoName);
+        repoparam.setAutoInit(true);
+
+        GogsRawRepo repository = gogs.createRepo(repoparam, GogsRawRepo.class);
         assertNotNull(repository);
 
         String content = "aaadasdasdasdas:"+System.nanoTime();

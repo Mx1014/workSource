@@ -9,6 +9,7 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -269,6 +270,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -415,6 +417,9 @@ public class CustomerServiceImpl implements CustomerService {
     private BigCollectionProvider bigCollectionProvider;
 
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    @Value("${equipment.ip}")
+    private String equipmentIp;
 
 
     @Override
@@ -2872,20 +2877,22 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     /**
-     * 每天早上2点20,自动客户合同信息
+     * 每天早上2点20,自动同步客户信息
      */
     @Scheduled(cron = "1 20 2 * * ?")
     public void customerAutoSync() {
-        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode() + System.currentTimeMillis(), "");
-        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-        Map<String,String> runningMap  =new HashMap<>();
-        this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()).tryEnter(() -> {
-            String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
-            runningMap.put(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), runningFlag);
-            if(StringUtils.isBlank(runningFlag))
-            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), "executing", 5, TimeUnit.HOURS);
-        });
-        if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()))) {
+//        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode() + System.currentTimeMillis(), "");
+//        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+//        Map<String,String> runningMap  =new HashMap<>();
+//        this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()).tryEnter(() -> {
+//            String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
+//            runningMap.put(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), runningFlag);
+//            if(StringUtils.isBlank(runningFlag))
+//            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), "executing", 5, TimeUnit.HOURS);
+//        });
+        String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+        if (taskServer.equals(equipmentIp)) {
+//        if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()))) {
             List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
             if (communities != null) {
                 for (Community community : communities) {
@@ -2895,7 +2902,6 @@ public class CustomerServiceImpl implements CustomerService {
                     syncEnterpriseCustomers(command, false);
                     syncIndividualCustomers(command);
                 }
-
             }
         }
     }

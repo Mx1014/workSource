@@ -497,4 +497,6 @@ public interface PropertyMgrProvider {
 	List<CommunityAddressMapping> listCommunityAddressMappingByAddressIds(List<Long> addressIds);
 
 	List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId);
+
+	OrganizationOwnerBehavior findOrganizationOwnerBehaviorByOwnerAndAddressId(Long id, Long id1);
 }

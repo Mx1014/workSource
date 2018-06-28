@@ -8,8 +8,8 @@ import java.util.List;
 /**
  * <ul>
  * <li>flowCaseId: 工作流id</li>
- * <li>innerIds: 原审批人ids</li>
- * <li>outerIds: 移交目标ids</li>
+ * <li>innerIds: 转交给谁ids</li>
+ * <li>outerIds: 从谁那里转出ids</li>
  * </ul>
  */
 public class DeliverApprovalFlowCommand {
