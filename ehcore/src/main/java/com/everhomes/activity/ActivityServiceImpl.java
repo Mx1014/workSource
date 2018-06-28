@@ -5404,7 +5404,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             command.setModuleType(post.getModuleType());
         }
         List<String> list = new ArrayList<>();
-        if (!StringUtils.isEmpty(cmd.getAchievement()) && "link".equals(cmd.getAchievementType())) {
+        if (!StringUtils.isEmpty(cmd.getAchievement()) && !"link".equals(cmd.getAchievementType())) {
             list.add(cmd.getAchievement());
         }
         command.setTextList(list);

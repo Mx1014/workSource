@@ -299,7 +299,7 @@ public class ForumServiceImpl implements ForumService {
                 }
                 ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(temp.getEmbeddedJson(),
                         ActivityPostCommand.class);
-                if (tempCmd != null && tempCmd.getStatus() == (byte)2) {
+                if (tempCmd != null && tempCmd.getStatus()!= null && tempCmd.getStatus() == (byte)2) {
                     PostDTO post = this.updateTopic(cmd);
                     return post;
                 }
