@@ -69,7 +69,7 @@ public class WelfareServiceImpl implements WelfareService {
         }
         int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
 
-        List<Welfare> results = welfareProvider.listWelfare(cmd.getOwnerId(), locator, pageSize);
+        List<Welfare> results = welfareProvider.listWelfare(cmd.getOwnerId(), locator, pageSize + 1);
         if (null == results || results.size() == 0) {
             return response;
         }
