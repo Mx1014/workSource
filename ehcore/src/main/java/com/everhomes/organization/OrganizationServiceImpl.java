@@ -820,7 +820,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         //end
         dto.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
         dto.setWebsite(organization.getWebsite());
-        dto.setEmailDomain(org.getEmailDomain());
+        dto.setEmailDomain(organization.getEmailDomain());
+        if(dto.getEmailDomain() == null) {
+            //FIXME organizationDetail update both domain! 
+            dto.setEmailDomain(org.getEmailDomain());
+        }
         dto.setWebsite(organization.getWebsite());
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
