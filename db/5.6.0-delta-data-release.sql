@@ -1,3 +1,4 @@
+-- 通用脚本
 -- 物品放行 1.1 修改模块名
 -- by shiheng.ma
 update eh_service_modules set name = '物品放行' where id = 49200;
@@ -20,6 +21,8 @@ update eh_locale_templates t set t.description = '物品放行工作流处理人
 UPDATE eh_version_urls SET download_url = REPLACE(download_url,'1-0-3','1-0-4') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
 UPDATE eh_version_urls SET  info_url = REPLACE(info_url,'1-0-3','1-0-4') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
 UPDATE eh_version_urls SET  target_version = '1.0.4' WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
+-- END
+
 
 -- 通用脚本
 -- by 刘一麟 20180619
@@ -106,7 +109,7 @@ GROUP BY punch_month,owner_type,owner_id ORDER BY punch_month DESC   ;
 -- 考勤4.2  end
 
 
-
+-- 通用脚本
 -- 审批3.0初始数据, 需先执行schema后执行此sql start by ryan.
 UPDATE eh_general_form_templates SET id = 101 WHERE form_name = '日报';
 UPDATE eh_general_form_templates SET id = 102 WHERE form_name = '周报';
@@ -261,9 +264,9 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '园区入驻', 40100, NULL, '{"skipRoute":"zl://park-service/settle"}', 0, 1);
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '投诉建议', 20100, NULL, '{"taskCategoryId":9,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
 
-
 -- END
 
+-- 通用脚本
 -- 企业客户管理ERROR code  by jiarui
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 
