@@ -882,8 +882,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         	List<Long> addressIds = new ArrayList<>();
         	//获取到当前个人客户所有关联的楼栋门牌
         	for(SceneDTO sceneDTO : sceneDtoList) {
-        		FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
-        		addressIds.add(familyDTO.getAddressId());
+        		//修复issue-32510 个人客户场景，审核中的门牌，该门牌关联了账单，期望不可以看到账单
+        		if(sceneDTO != null && sceneDTO.getStatus() != null && sceneDTO.getStatus().equals((byte)3)) {//2:审核中，3：已认证
+        			FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
+            		addressIds.add(familyDTO.getAddressId());
+        		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
             EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
@@ -1062,8 +1065,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         	List<Long> addressIds = new ArrayList<>();
         	//获取到当前个人客户所有关联的楼栋门
         	for(SceneDTO sceneDTO : sceneDtoList) {
-        		FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
-        		addressIds.add(familyDTO.getAddressId());
+        		//修复issue-32510 个人客户场景，审核中的门牌，该门牌关联了账单，期望不可以看到账单
+        		if(sceneDTO != null && sceneDTO.getStatus() != null && sceneDTO.getStatus().equals((byte)3)) {//2:审核中，3：已认证
+        			FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
+            		addressIds.add(familyDTO.getAddressId());
+        		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
             EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");

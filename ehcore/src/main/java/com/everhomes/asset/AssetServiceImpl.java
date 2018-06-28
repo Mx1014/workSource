@@ -4691,8 +4691,11 @@ public class AssetServiceImpl implements AssetService {
         	List<Long> addressIds = new ArrayList<>();
         	//获取到个人客户所有关联的楼栋门牌
         	for(SceneDTO sceneDTO : sceneDtoList) {
-        		FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
-        		addressIds.add(familyDTO.getAddressId());
+        		//修复issue-32510 个人客户场景，审核中的门牌，该门牌关联了账单，期望不可以看到账单
+        		if(sceneDTO != null && sceneDTO.getStatus() != null && sceneDTO.getStatus().equals((byte)3)) {//2:审核中，3：已认证
+        			FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
+            		addressIds.add(familyDTO.getAddressId());
+        		}
         	}
         	//如果新建账单时，所有关联的楼栋门牌都被个人客户包含了，说明符合新增的规则
         	if(addressIds != null && cmd.getAddressIds() != null && addressIds.containsAll(cmd.getAddressIds())) {
