@@ -5403,11 +5403,11 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             command.setCommunityId(post.getCommunityId());
             command.setModuleType(post.getModuleType());
         }
+        List<String> list = new ArrayList<>();
         if (!StringUtils.isEmpty(cmd.getAchievement()) && "link".equals(cmd.getAchievementType())) {
-            List<String> list = new ArrayList<>();
             list.add(cmd.getAchievement());
-            command.setTextList(list);
         }
+        command.setTextList(list);
         this.sensitiveWordService.filterWords(command);
         // 敏感词过滤 end
         activity.setAchievement(cmd.getAchievement());
