@@ -39,6 +39,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
+import com.everhomes.rest.acl.ListRoleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
@@ -697,7 +698,7 @@ public class CustomerServiceImpl implements CustomerService {
         String originalTrackingName = customer.getTrackingName();
         Long currentTrackingUid = updateCustomer.getTrackingUid();
         String currentTrackingName = updateCustomer.getTrackingName();
-        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), customer.getNamespaceId(), false);
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), null, false);
 
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setCommunityId(customer.getCommunityId());
@@ -796,7 +797,12 @@ public class CustomerServiceImpl implements CustomerService {
                 routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_old_tracking
                 , map, namespaceId);
             } else if (currentTrackingUid == null) {
-                // only one message sent to original user
+                // only one message sent to admin
+                //todo
+//                ListRoleAdministratorsCommand cmd = new ListRoleAdministratorsCommand();
+//                cmd.setOwnerType("EhOrganizations");
+//                cmd.setOwnerId("");
+//                rolePrivilegeService.listRoleAdministrators()
                  routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_admin_no_candidate
                 , map, namespaceId);
             }
@@ -861,7 +867,7 @@ public class CustomerServiceImpl implements CustomerService {
             organizationService.deleteEnterpriseById(command, false);
         }
         routeMsgForTrackingChanged(null, null, null, null
-        , customer.getName(), customer.getNamespaceId(), true);
+        , customer.getName(), null, true);
 
     }
 
@@ -3156,7 +3162,7 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, orignalTrackingName, currentTrackingName,
-                customer.getName(), customer.getNamespaceId(), false);
+                customer.getName(), null, false);
     }
 
     @Override
@@ -3177,7 +3183,7 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, orignalTrackingName, currentTrackingName,
-        customer.getName(), customer.getNamespaceId(), false);
+        customer.getName(), null, false);
     }
 
     @Override
