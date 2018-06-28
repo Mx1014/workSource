@@ -960,12 +960,13 @@ public class AssetProviderImpl implements AssetProvider {
 
         ShowCreateBillDTO response = new ShowCreateBillDTO();
         List<BillItemDTO> list = new ArrayList<>();
-
+        Long categoryId = findCategoryIdFromBillGroup(billGroupId);
         context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID)
                 .from(rule,ci)
                 .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
                 .and(rule.OWNERID.eq(ci.OWNER_ID))
                 .and(rule.BILL_GROUP_ID.eq(billGroupId))
+                .and(ci.CATEGORY_ID.eq(categoryId))
                 .fetch()
                 .map(r -> {
                     BillItemDTO dto = new BillItemDTO();
