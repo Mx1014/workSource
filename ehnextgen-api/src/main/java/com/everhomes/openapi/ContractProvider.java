@@ -92,4 +92,7 @@ public interface ContractProvider {
 	void updateContractTemplate(ContractTemplate contractTemplate);
 
 	ContractTemplate findContractTemplateById(Long id);
+
+	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType, Long categoryId,
+			String name, Long pageAnchor, Integer pageSize);
 }

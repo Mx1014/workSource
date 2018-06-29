@@ -2,6 +2,8 @@ package com.everhomes.rest.contract;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>id: id</li>
@@ -20,7 +22,7 @@ import javax.validation.constraints.NotNull;
  * </ul>
  * Created by jm.ding on 2018/6/27.
  */
-public class AddContractTemplateCommand {
+public class listContractTemplateCommand {
 
 	private Long id;
 	@NotNull
@@ -37,6 +39,21 @@ public class AddContractTemplateCommand {
 	private Integer version;
 	@NotNull
 	private Long orgId;
+	private Long pageAnchor;
+	private Integer pageSize;
+	
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+	public Integer getPageSize() {
+		return pageSize;
+	}
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
 	public Long getId() {
 		return id;
 	}
@@ -110,5 +127,7 @@ public class AddContractTemplateCommand {
 		this.orgId = orgId;
 	}
 
-	
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

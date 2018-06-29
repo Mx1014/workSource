@@ -11,6 +11,7 @@ import com.everhomes.contract.ContractCategory;
 
 import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -50,10 +51,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import com.everhomes.util.RuntimeErrorException;
 
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 
@@ -70,6 +67,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsCategory;
+import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -800,13 +798,45 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public void updateContractTemplate(ContractTemplate contractTemplate) {
 		assert(contractTemplate.getId() != null);
-
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, contractTemplate.getId()));
         EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
-
         dao.update(contractTemplate);
-
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTemplates.class, contractTemplate.getId());
+	}
+
+	@Override
+	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,
+			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
+        SelectJoinStep<Record> query = context.select(Tables.EH_CONTRACT_TEMPLATES.fields()).from(Tables.EH_CONTRACT_TEMPLATES);
+        
+		Condition cond = Tables.EH_CONTRACT_TEMPLATES.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CONTRACT_TEMPLATE_TYPE.eq((byte) 0));
+		
+		if(null != pageAnchor && pageAnchor != 0){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID.gt(pageAnchor));
+		}
+		if(null != name){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.NAME.like('%'+name+'%'));
+		}
+		if(null != categoryId){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CATEGORY_ID.eq(categoryId));
+		}
+		//怎么取到最大的versionid
+		if(null != ownerId){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.isNull()));
+		}
+		
+		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.UPDATE_TIME.desc());
+		
+		if(null != pageSize)
+			query.limit(pageSize);
+		
+		List<ContractTemplate> contracttemplates = query.where(cond).fetch().
+				map(new DefaultRecordMapper(Tables.EH_CONTRACT_TEMPLATES.recordType(), ContractTemplate.class));
+
+		return contracttemplates;
 	}
 
 }

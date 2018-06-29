@@ -13,6 +13,8 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategory;
+import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -49,6 +51,7 @@ import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
@@ -65,6 +68,7 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
@@ -2530,26 +2534,18 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd) {
-		
 		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
 		//新增的模板需要进行判断，是属于新增的还是复制的，如果存在id则表示是复制模板来的，需要添加parentId
 		if(cmd.getId() != null) {
-			//ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
 			contractTemplate.setParentId(cmd.getId());
-			//contractTemplate.setVersion(contractTemplate.getVersion());
 		}
 		if(cmd.getId() == null) {
-			//contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
 			contractTemplate.setVersion(0);
 		}
-		
-		
 		if(cmd.getOwnerId() == null) {
 			contractTemplate.setOwnerType(cmd.getOwnerType());
 		}
-		
 		contractProvider.createContractTemplate(contractTemplate);
-		
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
 	}
 
@@ -2562,9 +2558,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		//根据id查询数据，
 		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);;
-		
 		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
-		
 		//通用模板更新
 		if (cmd.getOwnerType() == null) {
 			contractTemplate.setVersion(contractTemplateParent.getVersion() + 1);
@@ -2574,16 +2568,60 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (cmd.getOwnerType() != null) {
 			contractTemplate.setVersion(contractTemplateParent.getVersion());
 		}
-		
 		//传入status=0标识删除的
 		if (cmd.getStatus() == 0) {
 			contractTemplate.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			contractTemplate.setDeleteUid(UserContext.currentUserId());
 			contractTemplate.setStatus(ContractTemplateStatus.INACTIVE.getCode()); //无效的状态
 		}
-		
 		contractProvider.updateContractTemplate(contractTemplate);
-		
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
+	}
+
+	@Override
+	public ListContractTemplatesResponse listContractTemplates(listContractTemplateCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		
+		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
+				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize);
+		
+		ListContractTemplatesResponse response = new ListContractTemplatesResponse();
+		
+		if(list.size() > 0){
+			List<ContractTemplateDTO> resultList = list.stream().map((c) -> {
+				ContractTemplateDTO dto = ConvertHelper.convert(c, ContractTemplateDTO.class);
+				return dto;
+			}).collect(Collectors.toList());
+    		response.setRequests(resultList);
+    		if(list.size() != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        	}
+    	}
+		return response;
+	}
+
+	@Override
+	public ContractTemplateMappingsDTO contractTemplateMappings(ContractTemplateMappingsCommand cmd) {
+		/*ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
+		
+		
+		
+		//新增的模板需要进行判断，是属于新增的还是复制的，如果存在id则表示是复制模板来的，需要添加parentId
+		if(cmd.getId() != null) {
+			contractTemplate.setParentId(cmd.getId());
+		}
+		if(cmd.getId() == null) {
+			contractTemplate.setVersion(0);
+		}
+		if(cmd.getOwnerId() == null) {
+			contractTemplate.setOwnerType(cmd.getOwnerType());
+		}
+		contractProvider.createContractTemplate(contractTemplate);
+		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);*/
+		
+		return null;
 	}
 }

@@ -57,5 +57,9 @@ public interface ContractService {
 	ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd);
 	
 	ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd);
+
+	ListContractTemplatesResponse listContractTemplates(listContractTemplateCommand cmd);
+
+	ContractTemplateMappingsDTO contractTemplateMappings(ContractTemplateMappingsCommand cmd);
 	
 }

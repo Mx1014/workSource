@@ -16,6 +16,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
+import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -342,7 +344,6 @@ public class ContractController extends ControllerBase {
 		
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		
 		return new RestResponse(contractService.addContractTemplate(cmd));
 		
 	}
@@ -361,5 +362,30 @@ public class ContractController extends ControllerBase {
 		return new RestResponse(contractService.updateContractTemplate(cmd));
 		
 	}
-
+	
+	/**
+	 * <p>合同模板列表，关键字查询</p>
+	 * <b>URL: /contract/listContractTemplates</b>
+	 */
+	@RequestMapping("listContractTemplates")
+	@RestReturn(ListContractTemplatesResponse.class)
+	public RestResponse listContractTemplates(listContractTemplateCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		return new RestResponse(contractService.listContractTemplates(cmd));
+		
+	}
+	
+	/**
+	 * <p>合同关联模板，签约应用模板</p>
+	 * <b>URL: /contract/contractTemplateMappings</b>
+	 */
+	@RequestMapping("contractTemplateMappings")
+	@RestReturn(String.class)
+	public RestResponse contractTemplateMappings(ContractTemplateMappingsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		return new RestResponse(contractService.contractTemplateMappings(cmd));
+		
+	}
 }
