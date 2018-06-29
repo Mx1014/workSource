@@ -4392,6 +4392,8 @@ public class AssetProviderImpl implements AssetProvider {
                         amountOwed[0] = amountOwed[0].add(value);
                     }
                 });
+        //修复issue-32525 "导入一个账单，减免大于收费项，列表显示了负数"的bug
+        amountOwed[0] = DecimalUtils.negativeValueFilte(amountOwed[0]);
         //更改金额，但不更改状态
         getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE, amountReceivable[0])
