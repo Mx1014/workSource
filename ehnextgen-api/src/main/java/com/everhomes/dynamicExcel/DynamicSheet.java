@@ -9,7 +9,6 @@ import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 
 public class DynamicSheet {
@@ -27,6 +26,8 @@ public class DynamicSheet {
     private Long groupId;
 
     private List<DynamicField> dynamicFields;
+
+    private Long ownerId;
 
     public List<DynamicField> getDynamicFields() {
         return dynamicFields;
@@ -58,6 +59,14 @@ public class DynamicSheet {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

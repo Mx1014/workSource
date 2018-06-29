@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段类型枚举型，参考{@link com.everhomes.rest.varField.FieldParamType}</li>
  *     <li>mandatoryFlag: 是否必填 0: 否; 1: 是</li>
  *     <li>defaultOrder: 顺序</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -39,7 +40,17 @@ public class ScopeFieldInfo {
     private String groupPath;
 
     private Long groupId;
+    
+    private Long categoryId;
 
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
     public Long getGroupId() {
         return groupId;
     }

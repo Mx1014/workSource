@@ -158,7 +158,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
         return payTempCardFee(order);
     }
     
-    private void checkExpireDateIsNull(String expireDate,String plateNo) {
+    public void checkExpireDateIsNull(String expireDate,String plateNo) {
 		if(StringUtils.isBlank(expireDate)){
 			LOGGER.error("ExpireDate is null, plateNo={}", plateNo);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -275,7 +275,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		if(ADD_DISTANCE_MONTH.equals(monthCardTimeArithmetic)) {
 			tempEnd = Utils.getTimestampByAddDistanceMonth(expireTime,order.getMonthCount().intValue());
 		}else{
-			tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, order.getMonthCount().intValue());
+			tempEnd = new Timestamp(Utils.getLongByAddNatureMonth(expireTime, order.getMonthCount().intValue(),true));
 
 		}
 		String validStart = sdf1.format(tempStart);
@@ -323,6 +323,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		String iv = sdf2.format(new Date());
         String data = null;
 		try {
+			LOGGER.info("The request info, url={}, not encrypt param={}", url, JSONObject.toJSONString(param));
 			data = EncryptUtil.getEncString(param, key, iv);
 		} catch (Exception e) {
 			LOGGER.error("Parking encrypt param error, param={}, key={}, iv={}", param, key, iv, e);
@@ -478,7 +479,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 			dto.setPlateNumber(cmd.getPlateNumber());
 			long now = System.currentTimeMillis();
 			dto.setOpenDate(now);
-			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
 			if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
 				dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
 			}else {

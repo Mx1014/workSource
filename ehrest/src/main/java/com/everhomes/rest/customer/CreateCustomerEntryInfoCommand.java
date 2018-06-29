@@ -149,6 +149,7 @@ public class CreateCustomerEntryInfoCommand {
         this.remark = remark;
     }
 
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

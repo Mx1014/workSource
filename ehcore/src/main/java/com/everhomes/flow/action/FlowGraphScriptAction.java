@@ -1,8 +1,11 @@
 package com.everhomes.flow.action;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.*;
 import com.everhomes.flow.nashornfunc.NashornScriptMain;
+import com.everhomes.gogs.GogsRepo;
+import com.everhomes.gogs.GogsService;
 import com.everhomes.rest.flow.FlowScriptType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.util.RuntimeErrorException;
@@ -15,11 +18,13 @@ public class FlowGraphScriptAction extends FlowGraphAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowGraphScriptAction.class);
 
+    transient private FlowService flowService;
     transient private FlowScriptProvider flowScriptProvider;
     transient private NashornEngineService nashornEngineService;
     transient private FlowFunctionService flowFunctionService;
 
     public FlowGraphScriptAction() {
+        flowService = PlatformContext.getComponent(FlowService.class);
         flowScriptProvider = PlatformContext.getComponent(FlowScriptProvider.class);
         nashornEngineService = PlatformContext.getComponent(NashornEngineService.class);
         flowFunctionService = PlatformContext.getComponent(FlowFunctionService.class);
@@ -42,9 +47,9 @@ public class FlowGraphScriptAction extends FlowGraphAction {
                 }
                 break;
             case JAVASCRIPT:
-                FlowScript flowScript = flowScriptProvider.findByMainIdAndVersion(flowAction.getScriptMainId(), flowAction.getScriptVersion());
-                if (flowScript != null) {
-                    nashornEngineService.push(new NashornScriptMain(ctx, flowScript, flowAction));
+                FlowScript script = flowScriptProvider.findByMainIdAndVersion(flowAction.getScriptMainId(), flowAction.getScriptVersion());
+                if (script != null) {
+                    nashornEngineService.push(new NashornScriptMain(ctx, flowService.toRuntimeScript(script), flowAction));
                 } else {
                     LOGGER.warn("can not found script by scriptId = {}, action = {}",
                             flowAction.getScriptMainId(), flowAction);

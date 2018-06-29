@@ -13,6 +13,8 @@ import java.util.Map;
 
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.general_approval.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;

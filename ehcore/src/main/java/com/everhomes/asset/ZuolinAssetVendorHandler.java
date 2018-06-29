@@ -611,11 +611,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         List<BillStaticsDTO> list = new ArrayList<>();
         Byte dimension = cmd.getDimension();
         if(dimension==1){
-            list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType());
+            list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
         }else if(dimension==2){
-            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginLimit(),cmd.getEndLimit());
+            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getCategoryId());
         }else if(dimension==3){
-            list = assetProvider.listBillStaticsByCommunities(cmd.getBeginLimit(),cmd.getEndLimit(),UserContext.getCurrentNamespaceId());
+            list = assetProvider.listBillStaticsByCommunities(cmd.getBeginLimit(),cmd.getEndLimit(),UserContext.getCurrentNamespaceId(),cmd.getCategoryId());
         }
         return list;
     }
@@ -1019,6 +1019,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE
                     , "file illegal");
         }
+        // get categoryid
+        Long categoryId =assetProvider.findCategoryIdFromBillGroup(cmd.getBillGroupId());
 
         //准备任务
         ImportFileTask task = new ImportFileTask();
@@ -1037,6 +1039,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 datas = entry.getValue();
             }
             for(CreateBillCommand command : createBillCommands){
+                command.setCategoryId(categoryId);
                 createBill(command);
             }
             //设置导出报错的结果excel的标

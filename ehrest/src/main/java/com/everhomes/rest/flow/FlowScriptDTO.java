@@ -21,6 +21,7 @@ import java.util.List;
  *     <li>script: 脚本内容</li>
  *     <li>status: status</li>
  *     <li>configs: configs {@link com.everhomes.rest.flow.FlowScriptConfigDTO}</li>
+ *     <li>lastCommit: lastCommit</li>
  * </ul>
  */
 public class FlowScriptDTO {
@@ -39,6 +40,7 @@ public class FlowScriptDTO {
     private String description;
     private String script;
     private Byte status;
+    private String lastCommit;
 
     private List<FlowScriptConfigDTO> configs;
 
@@ -160,6 +162,14 @@ public class FlowScriptDTO {
 
     public void setScriptCategory(String scriptCategory) {
         this.scriptCategory = scriptCategory;
+    }
+
+    public String getLastCommit() {
+        return lastCommit;
+    }
+
+    public void setLastCommit(String lastCommit) {
+        this.lastCommit = lastCommit;
     }
 
     @Override

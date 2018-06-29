@@ -152,6 +152,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
             builder.field("paymentFlag", contract.getPaymentFlag());
+            builder.field("categoryId", contract.getCategoryId());
+            
             if(contract.getRent() != null) {
                 builder.field("rent", contract.getRent());
             } else {
@@ -238,6 +240,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Override
     public ListContractsResponse queryContracts(SearchContractCommand cmd) {
+    	if (cmd.getOrgId() == null || cmd.getCommunityId() == null) {
+    		throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+                    "OrgIdorCommunityId user privilege error");
+		}
         if(cmd.getPaymentFlag() == 1) {
             checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
         } else {
@@ -292,6 +298,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
+        
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
 
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
