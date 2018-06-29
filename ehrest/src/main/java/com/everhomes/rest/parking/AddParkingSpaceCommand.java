@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>spaceNo: 车位编号</li>
  * <li>spaceAddress: 车位地址</li>
  * <li>lockId: 锁id</li>
+ * <li>parkingHubsId: hub的id，searchParkingHubs接口中返回的id</li>
  * <li>status: 是否开放 1：开放，0：关闭 {@link com.everhomes.rest.parking.ParkingSpaceStatus}</li>
  * </ul>
  */
@@ -24,19 +25,12 @@ public class AddParkingSpaceCommand {
     private String spaceNo;
     private String spaceAddress;
     private String lockId;
+    private Long parkingHubsId;
     private Byte status;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-
-    public Long getParkingLotId() {
-        return parkingLotId;
-    }
-
-    public void setParkingLotId(Long parkingLotId) {
-        this.parkingLotId = parkingLotId;
     }
 
     public Integer getNamespaceId() {
@@ -63,6 +57,14 @@ public class AddParkingSpaceCommand {
         this.ownerId = ownerId;
     }
 
+    public Long getParkingLotId() {
+        return parkingLotId;
+    }
+
+    public void setParkingLotId(Long parkingLotId) {
+        this.parkingLotId = parkingLotId;
+    }
+
     public String getSpaceNo() {
         return spaceNo;
     }
@@ -85,6 +87,14 @@ public class AddParkingSpaceCommand {
 
     public void setLockId(String lockId) {
         this.lockId = lockId;
+    }
+
+    public Long getParkingHubsId() {
+        return parkingHubsId;
+    }
+
+    public void setParkingHubsId(Long parkingHubsId) {
+        this.parkingHubsId = parkingHubsId;
     }
 
     public Byte getStatus() {

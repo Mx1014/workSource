@@ -57,7 +57,8 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
-    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType);
+    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId);
+
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
 
@@ -67,17 +68,18 @@ public interface AssetProvider {
 
     ListBillDetailVO listBillDetail(Long billId);
 
-    List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType);
+    List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType, Long categoryId);
 
-    List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit);
+    List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit, Long categoryId);
 
-    List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId);
+    List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId, Long categoryId);
 
     void modifyBillStatus(Long billId);
 
-    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId);
+    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId);
 
-    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId);
+    List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId);
+
 
     void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
             ,String targetName, String invoiceNum, String noticeTel);
@@ -106,7 +108,7 @@ public interface AssetProvider {
 
     List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId, Long chargingItemId,String ownerType, Long ownerId);
 
-    PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
+    List<PaymentBillGroupRule> getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
 
     void saveBillItems(List<EhPaymentBillItems> billItemsList);
 
@@ -167,15 +169,14 @@ public interface AssetProvider {
 
     PaymentAccount findPaymentAccount();
 
-    //void changeBillStatusOnPaiedOff(List<Long> billIds);
-
-
-    void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId,List<Long> communityIds);
+    void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId,List<Long> communityIds, Long categoryId);
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
+
     void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId
             , Byte useUnitPrice);
+
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
@@ -231,13 +232,15 @@ public interface AssetProvider {
 
     boolean checkCoupledChargingStandard(Long cid);
 
-    void deCoupledForChargingItem(Long ownerId, String ownerType);
+    void deCoupledForChargingItem(Long ownerId, String ownerType, Long categoryId);
+
 
     List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunity(Long ownerId, String ownerType);
 
     PaymentChargingItemScope findChargingItemScope(Long chargingItemId, String ownerType, Long ownerId);
 
-    List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId);
+    List<PaymentNoticeConfig> listAutoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, Long categoryId);
+
 
     void autoNoticeConfig(Integer namespaceId, String ownerType, Long ownerId, List<EhPaymentNoticeConfig> toSaveConfigs);
 
@@ -291,9 +294,10 @@ public interface AssetProvider {
 
     void updateBillAmountOwedDueToFine(BigDecimal fineAmount, Long billId);
 
-    List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId);
+    List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId);
 
-    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId);
+
+    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId, boolean isInsert);
 
     PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName);
 
@@ -315,6 +319,19 @@ public interface AssetProvider {
 
     String getAddressByBillId(Long id);
 
+    List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
+
+    List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
+
+
+    Long findCategoryIdFromBillGroup(Long billGroupId);
+
+    void insertAssetCategory(EhAssetAppCategories c);
+
+    
+    //ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+
+    boolean checkBillByCategory(Long billId, Long categoryId);
     //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
     
 	void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds, Integer paymentType);
@@ -325,12 +342,10 @@ public interface AssetProvider {
 	
 	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
-    List<PaymentAppView> findAppViewsByNamespaceIdOrRemark(Integer namespaceId, Long communityId, String targetType, String ownerType, String billGroupName, String billGroupName1, Boolean[] remarkCheckList);
-
-    List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 	void setRent(Long contractId, BigDecimal rent);
     
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
     
@@ -341,4 +356,22 @@ public interface AssetProvider {
     IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
 	void transferOrderPaymentType();
+
+    PaymentLateFine findLastedFine(Long id);
+
+    Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
+
+    Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+    void insertAppMapping(EhAssetModuleAppMappings relation);
+
+    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
+
+    boolean checkExistAsset(Long assetCategoryId);
+
+    boolean checkExistContract(Long contractCategoryId);
+
+    Long checkEnergyFlag(Integer namespaceID);
+
+    void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
 }

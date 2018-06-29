@@ -23,8 +23,6 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.Enterprise;
-import com.everhomes.enterprise.EnterpriseService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowAutoStepDTO;
@@ -46,11 +44,9 @@ import com.everhomes.pay.order.PaymentType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rentalv2.job.RentalAutoCompleteJob;
 import com.everhomes.rentalv2.job.RentalCancelOrderJob;
 import com.everhomes.rentalv2.job.RentalMessageJob;
 import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
-import com.everhomes.rentalv2.order_action.CancelUnsuccessRentalOrderAction;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
@@ -66,10 +62,15 @@ import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingSpaceDTO;
 import com.everhomes.rest.parking.ParkingSpaceLockStatus;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.*;
@@ -100,10 +101,6 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -115,10 +112,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
@@ -1241,7 +1235,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//fix bug : charge uid null point 2016-10-9
 		if (null != rentalSite.getChargeUid()) {
 			User charger = this.userProvider.findUserById(rentalSite.getChargeUid());
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rentalSite.getChargeUid(), rentalSite.getOrganizationId());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(rentalSite.getChargeUid(), rentalSite.getOrganizationId());
 			if (member != null) {
 				rSiteDTO.setChargeName(member.getContactName());
 			} else if (null != charger) {
@@ -1249,9 +1243,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 		if (null != rentalSite.getOfflinePayeeUid()) {
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rSiteDTO.getOfflinePayeeUid(), rentalSite.getOrganizationId());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(rSiteDTO.getOfflinePayeeUid(), rentalSite.getOrganizationId());
 			if (null != member) {
-
 				rSiteDTO.setOfflinePayeeName(member.getContactName());
 			}
 		}
@@ -2602,8 +2595,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						Map<String, String> map = new HashMap<>();
 						map.put("resourceName", order.getResourceName());
 						Long uid = order.getCreatorUid();
-						if (order.getUserEnterpriseId() != null) {
-							OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, order.getUserEnterpriseId());
+						if (order.getUserEnterpriseId()!=null) {
+							OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(uid, order.getUserEnterpriseId());
 							map.put("requestorName", member.getContactName());
 							map.put("requestorPhone", member.getContactToken());
 						} else {
@@ -2803,10 +2796,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		//设置退款人姓名 联系方式
-		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(), bill.getRentalResourceId());
-		if (rs.getOfflinePayeeUid() != null) {
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
-			if (null != member) {
+
+		RentalResource rs = rentalCommonService.getRentalResource(bill.getResourceType(),bill.getRentalResourceId());
+		if (rs.getOfflinePayeeUid()!=null){
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(rs.getOfflinePayeeUid(), rs.getOrganizationId());
+			if(null!=member){
 				dto.setOfflinePayName(member.getContactName());
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(member.getTargetId(), IdentifierType.MOBILE.getCode());
 				if (userIdentifier != null)
@@ -4577,9 +4571,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				cmd2.setCustomTag(bill.getResourceTypeId().toString());
 				cmd2.setModuleId(Rentalv2Controller.moduleId);
 				ListServiceModuleAppsResponse rsp = portalService.listServiceModuleAppsWithConditon(cmd2);
-				if (rsp != null && rsp.getServiceModuleApps() != null) {
-					dto.setAppId(rsp.getServiceModuleApps().get(0).getId());
-					tagAppidMap.put(bill.getResourceTypeId(), rsp.getServiceModuleApps().get(0).getId());
+				if (rsp!=null && rsp.getServiceModuleApps()!=null) {
+					dto.setAppId(rsp.getServiceModuleApps().get(0).getOriginId());
+					tagAppidMap.put(bill.getResourceTypeId(),rsp.getServiceModuleApps().get(0).getOriginId());
 				}
 			} else
 				dto.setAppId(tagAppidMap.get(bill.getResourceTypeId()));
@@ -6396,19 +6390,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-		List<Long> siteIds = null;
-		if (null != cmd.getOwnerType()) {
-			siteIds = new ArrayList<>();
-			List<RentalSiteRange> siteOwners = this.rentalv2Provider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getResourceType(),
-					cmd.getOwnerType(), cmd.getOwnerId());
-			if (siteOwners != null)
-				for (RentalSiteRange siteOwner : siteOwners) {
-					siteIds.add(siteOwner.getRentalResourceId());
-				}
-		}
+
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
-				locator, pageSize + 1, null, siteIds, cmd.getCommunityId());
-		if (null == rentalSites)
+				locator, pageSize+1,null, null, cmd.getOwnerId());
+		if(null == rentalSites)
 			return response;
 
 		Long nextPageAnchor = null;
@@ -6577,19 +6562,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			//List<AddRentalSiteSingleSimpleRule> addSingleRules = createAddRuleParams(priceRule, rule, resource);
 //			seqNum.set(0L);
 //			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)));
-			//TODO 预留1000000个id 以适应自增的结束时间 以后改为唯一标识不用id
+			//TODO 预留100000个id 以适应自增的结束时间 以后改为唯一标识不用id
 			Long cellBeginId = sequenceProvider.getNextSequenceBlock(
-					NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), 1000000);
+					NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), 100000);
 			//创建一个单元格占位 防止同步id时被重置
 			RentalCell cell = new RentalCell();
-			cell.setId(cellBeginId + 999999);
+			cell.setId(cellBeginId + 99999);
 			this.rentalv2Provider.createRentalSiteRule(cell);
 //			for(AddRentalSiteSingleSimpleRule singleCmd: addSingleRules){
 //				//在这里统一处理
 //				addRentalSiteSingleSimpleRule(singleCmd);
 //			}
 			priceRule.setCellBeginId(cellBeginId);
-			priceRule.setCellEndId(cellBeginId + 999999);
+			priceRule.setCellEndId(cellBeginId + 99999);
 		}
 	}
 
@@ -8543,6 +8528,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		restoreRentalBill(order);
 
 		if (now > order.getEndTime().getTime()) {
+			rs.setResourceCounts(rs.getResourceCounts()+99999.0);//超时订单无视车锁数量
 			processCells(rs, order.getRentalType());
 			long overTimeStartTime = order.getEndTime().getTime();
 			long overTimeEndTime = now;
@@ -8578,7 +8564,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					if (interval % timeStep != 0) {
 						rentalCount = (int) rentalCount + 1;
 					}
-					rs.setResourceCounts(rs.getResourceCounts() + 9999999.0);//超时订单无视车锁数量
 					BigDecimal amount = updateRentalOrder(rs, order, null, rentalCount, false);
 					order.setEndTime(order.getOldEndTime());
 					amount = rentalCommonService.calculateOverTimeFee(order, amount, now);

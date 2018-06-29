@@ -13,6 +13,7 @@ import java.util.List;
  *     <li>groupId: 字段直属组id</li>
  *     <li>groupPath: 字段所属的组路径</li>
  *     <li>fields: 字段信息， 参考{@link ScopeFieldInfo}</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -30,6 +31,16 @@ public class UpdateFieldsCommand {
     @ItemType(ScopeFieldInfo.class)
     private List<ScopeFieldInfo> fields;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
     public Long getGroupId() {
         return groupId;
     }

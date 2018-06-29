@@ -1,6 +1,6 @@
 package com.everhomes.flow.nashornfunc;
 
-import com.everhomes.flow.FlowScript;
+import com.everhomes.flow.FlowRuntimeScript;
 import com.everhomes.flow.NashornEngineService;
 import com.everhomes.flow.NashornScript;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -11,11 +11,11 @@ public class NashornScriptMapping implements NashornScript<ScriptObjectMirror> {
 
     private final static String FUNCTION_NAME = "mapping";
 
-    private FlowScript flowScript;
+    private FlowRuntimeScript flowScript;
 
     private AtomicBoolean finished = new AtomicBoolean(false);
 
-    public NashornScriptMapping(FlowScript flowScript) {
+    public NashornScriptMapping(FlowRuntimeScript flowScript) {
         this.flowScript = flowScript;
     }
 

@@ -842,6 +842,63 @@ public class ParkingController extends ControllerBase {
     }
 
     /*------------------------车位管理-------------------------- */
+
+    /**
+     * <b>URL: /parking/searchParkingHubs</b>
+     * <p>搜索Hub</p>
+     */
+    @RequestMapping("searchParkingHubs")
+    @RestReturn(value=SearchParkingHubsResponse.class)
+    public RestResponse searchParkingHubs(SearchParkingHubsCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.searchParkingHubs(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/createOrUpdateParkingHub</b>
+     * <p>新增或者修改Hub</p>
+     */
+    @RequestMapping("createOrUpdateParkingHub")
+    @RestReturn(value=ParkingHubDTO.class)
+    public RestResponse createOrUpdateParkingHub(CreateOrUpdateParkingHubCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.createOrUpdateParkingHub(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/deleteParkingHub</b>
+     * <p>删除Hub</p>
+     */
+    @RequestMapping("deleteParkingHub")
+    @RestReturn(value=String.class)
+    public RestResponse deleteParkingHub(DeleteParkingHubCommand cmd) {
+        parkingService.deleteParkingHub(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getParkingSpaceLockFullStatus</b>
+     * <p>获取车位锁全部状态</p>
+     */
+    @RequestMapping("getParkingSpaceLockFullStatus")
+    @RestReturn(value=GetParkingSpaceLockFullStatusDTO.class)
+    public RestResponse getParkingSpaceLockFullStatus(DeleteParkingSpaceCommand cmd) {
+        GetParkingSpaceLockFullStatusDTO fullStatus = parkingService.getParkingSpaceLockFullStatus(cmd);
+        RestResponse response = new RestResponse(fullStatus);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /parking/searchParkingSpaces</b>
      * <p>搜索停车位</p>

@@ -7,6 +7,7 @@ package com.everhomes.rest.contract;
  *     <li>denunciationUid: 退约经办人</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>denunciationReason: 退约原因</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -29,6 +30,16 @@ public class DenunciationContractCommand {
 
     private Byte paymentFlag = 0;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+	
     public Long getDenunciationTime() {
         return denunciationTime;
     }

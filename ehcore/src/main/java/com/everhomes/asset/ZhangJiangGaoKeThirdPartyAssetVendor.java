@@ -883,7 +883,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
         if(pageSize == null){
             pageSize = 20;
         }
-        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType);
+        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType, cmd.getCategoryId());
         List<ListBillsDTO> list = new ArrayList<>();
         if(status!=1){
             LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");

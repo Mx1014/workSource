@@ -1062,19 +1062,26 @@ public class ParkingProviderImpl implements ParkingProvider {
 	@Override
 	public ParkingSpace findParkingSpaceBySpaceNo(String spaceNo) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
-
-		return ConvertHelper.convert(dao.fetchOne(Tables.EH_PARKING_SPACES.SPACE_NO, spaceNo), ParkingSpace.class);
+		List<ParkingSpace> fetch = context.select().from(Tables.EH_PARKING_SPACES)
+				.where(Tables.EH_PARKING_SPACES.SPACE_NO.eq(spaceNo))
+				.and(Tables.EH_PARKING_SPACES.STATUS.notEqual(ParkingSpaceStatus.DELETED.getCode()))
+				.fetch().map(r->ConvertHelper.convert(r, ParkingSpace.class));
+		if (fetch!=null && fetch.size()>0)
+			return fetch.get(0);
+		else
+			return null;
 
 	}
 
 	@Override
 	public ParkingSpace findParkingSpaceByLockId(String lockId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		EhParkingSpacesDao dao = new EhParkingSpacesDao(context.configuration());
-		List<EhParkingSpaces> fetch = dao.fetch(Tables.EH_PARKING_SPACES.LOCK_ID, lockId);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaces.class));
+		List<ParkingSpace> fetch = context.select().from(Tables.EH_PARKING_SPACES)
+				.where(Tables.EH_PARKING_SPACES.LOCK_ID.eq(lockId))
+				.and(Tables.EH_PARKING_SPACES.STATUS.notEqual(ParkingSpaceStatus.DELETED.getCode()))
+				.fetch().map(r->ConvertHelper.convert(r, ParkingSpace.class));
 		if (fetch!=null && fetch.size()>0)
-			return ConvertHelper.convert(fetch.get(0), ParkingSpace.class);
+			return fetch.get(0);
 		else
 			return null;
 
@@ -1195,7 +1202,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 
 	@Override
 	public List<ParkingSpace> searchParkingSpaces(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,
-												  String keyword, String lockStatus, Long pageAnchor, Integer pageSize) {
+												  String keyword, String lockStatus,Long parkingHubsId, Long pageAnchor, Integer pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaces.class));
 		SelectQuery<EhParkingSpacesRecord> query = context.selectQuery(Tables.EH_PARKING_SPACES);
 
@@ -1213,6 +1220,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 		}
 		if (StringUtils.isNotBlank(lockStatus)) {
 			query.addConditions(Tables.EH_PARKING_SPACES.LOCK_STATUS.eq(lockStatus));
+		}
+		if (parkingHubsId!=null) {
+			query.addConditions(Tables.EH_PARKING_SPACES.PARKING_HUBS_ID.eq(parkingHubsId));
 		}
 
 		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.ne(ParkingSpaceStatus.DELETED.getCode()));
@@ -1316,5 +1326,19 @@ public class ParkingProviderImpl implements ParkingProvider {
 								ParkingRechargeOrderStatus.RECHARGED.getCode(),
 								ParkingRechargeOrderStatus.FAILED.getCode()))))
 				.fetchOneInto(Integer.class));
+	}
+	public List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaces.class));
+		SelectQuery<EhParkingSpacesRecord> query = context.selectQuery(Tables.EH_PARKING_SPACES);
+
+		query.addConditions(Tables.EH_PARKING_SPACES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_SPACES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_SPACES.PARKING_LOT_ID.eq(parkingLotId));
+		query.addConditions(Tables.EH_PARKING_SPACES.STATUS.ne(ParkingSpaceStatus.DELETED.getCode()));
+		query.addConditions(Tables.EH_PARKING_SPACES.PARKING_HUBS_ID.eq(parkingHubsId));
+		query.addOrderBy(Tables.EH_PARKING_SPACES.ID.asc());
+		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingSpace.class));
+
 	}
 }

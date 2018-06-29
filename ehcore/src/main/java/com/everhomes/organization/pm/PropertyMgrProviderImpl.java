@@ -5,6 +5,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationOwner;
@@ -568,6 +569,31 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
 			return null;
 		});
+		return result;
+	}
+
+	@Override
+	public List<CommunityPmOwner> listCommunityPmOwnersWithLocator(CrossShardListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<CommunityPmOwner> result = new ArrayList<>();
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		if (locator.getAnchor() != null && locator.getAnchor() != 0L) {
+			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.lt(locator.getAnchor()));
+		}
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
+		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		query.addLimit(pageSize + 1);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+			return null;
+		});
+		if(result.size()>pageSize){
+			result.remove(result.size()-1);
+			locator.setAnchor(result.get(result.size()-1).getId());
+		}else {
+			locator.setAnchor(null);
+		}
 		return result;
 	}
 
@@ -1431,6 +1457,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwnerBehaviorsDao.class, id);
 		return id;
     }
+
+	@Override
+	public OrganizationOwnerBehavior findOrganizationOwnerBehaviorByOwnerAndAddressId(Long id, Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectFrom(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS)
+				.where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.OWNER_ID.eq(id))
+				.and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.ADDRESS_ID.eq(addressId))
+				.fetchAnyInto(OrganizationOwnerBehavior.class);
+	}
 
 	@Override
 	public OrganizationOwnerType findOrganizationOwnerTypeById(Long orgOwnerTypeId) {

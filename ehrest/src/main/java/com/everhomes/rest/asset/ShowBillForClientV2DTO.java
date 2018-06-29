@@ -28,12 +28,20 @@ public class ShowBillForClientV2DTO {
     @ItemType(BillForClientV2.class)
     List<BillForClientV2> bills;
     private String contractNum;
-    
     private String bizPayeeType;
     private Long bizPayeeId;
     private Byte registerStatus;
+    private Long categoryId;
 
-    public ShowBillForClientV2DTO() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public ShowBillForClientV2DTO() {
     }
 
     public ShowBillForClientV2DTO(Long billGroupId, String contractId) {

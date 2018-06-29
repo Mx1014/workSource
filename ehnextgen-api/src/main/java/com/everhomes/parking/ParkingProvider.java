@@ -137,7 +137,7 @@ public interface ParkingProvider {
     void createParkingSpace(ParkingSpace parkingSpace);
 
     List<ParkingSpace> searchParkingSpaces(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,
-                                           String keyword, String lockStatus, Long pageAnchor, Integer pageSize);
+                                           String keyword, String lockStatus, Long parkingHubsId,Long pageAnchor, Integer pageSize);
 
     List<ParkingSpaceLog> listParkingSpaceLogs(String spaceNo, Long startTime, Long endTime, Long pageAnchor, Integer pageSize);
 
@@ -160,4 +160,6 @@ public interface ParkingProvider {
     List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor);
 
     Long ParkingRechargeOrdersByUserId(Long userId);
+
+    List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId);
 }

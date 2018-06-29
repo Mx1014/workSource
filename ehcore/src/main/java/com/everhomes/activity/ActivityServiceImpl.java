@@ -72,6 +72,7 @@ import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
@@ -82,6 +83,7 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
@@ -261,6 +263,11 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Value("${server.contextPath:}")
     private String contextPath;
+
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     @PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
@@ -5612,7 +5619,20 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
-
+        //敏感词过滤 start add by yanlong.liang 20180626
+        Post post = this.forumProvider.findPostById(activity.getPostId());
+        FilterWordsCommand command = new FilterWordsCommand();
+        if (post != null) {
+            command.setCommunityId(post.getVisibleRegionId());
+            command.setModuleType(post.getModuleType());
+        }
+        List<String> list = new ArrayList<>();
+        if (!StringUtils.isEmpty(cmd.getAchievement()) && !"link".equals(cmd.getAchievementType())) {
+            list.add(cmd.getAchievement());
+        }
+        command.setTextList(list);
+        this.sensitiveWordService.filterWords(command);
+        // 敏感词过滤 end
         activity.setAchievement(cmd.getAchievement());
         activity.setAchievementType(cmd.getAchievementType());
         activity.setAchievementRichtextUrl(cmd.getAchievementRichtextUrl());
@@ -5703,10 +5723,39 @@ public class ActivityServiceImpl implements ActivityService {
         activityProvider.updateActivityAttachment(attachment);
     }
 
+
+    private void filterGoods(ActivityGoods goods) {
+        Activity activity = activityProvider.findActivityById(goods.getActivityId());
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", goods.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + goods.getActivityId());
+        }
+        //敏感词过滤 start add by yanlong.liang 20180626
+        Post post = this.forumProvider.findPostById(activity.getPostId());
+        FilterWordsCommand command = new FilterWordsCommand();
+        if (post != null) {
+            command.setCommunityId(post.getCommunityId());
+            command.setModuleType(post.getModuleType());
+        }
+        List<String> list = new ArrayList<>();
+        if (!StringUtils.isEmpty(goods.getName())) {
+            list.add(goods.getName());
+        }
+        if (!StringUtils.isEmpty(goods.getHandlers())) {
+            list.add(goods.getHandlers());
+        }
+        command.setTextList(list);
+        this.sensitiveWordService.filterWords(command);
+        // 敏感词过滤 end
+    }
     @Override
     public void createActivityGoods(CreateActivityGoodsCommand cmd) {
         ActivityGoods goods = ConvertHelper.convert(cmd, ActivityGoods.class);
         goods.setCreatorUid(UserContext.current().getUser().getId());
+
+        filterGoods(goods);
+
         activityProvider.createActivityGoods(goods);
     }
 
@@ -5724,6 +5773,8 @@ public class ActivityServiceImpl implements ActivityService {
         goods.setQuantity(cmd.getQuantity());
         goods.setTotalPrice(cmd.getTotalPrice());
         goods.setHandlers(cmd.getHandlers());
+
+        filterGoods(goods);
 
         activityProvider.updateActivityGoods(goods);
     }

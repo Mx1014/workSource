@@ -152,4 +152,12 @@ public interface ParkingService {
     void initPayeeAccount(MultipartFile[] files);
 
     void rechargeOrderMigration();
+    
+    SearchParkingHubsResponse searchParkingHubs(SearchParkingHubsCommand cmd);
+
+    ParkingHubDTO createOrUpdateParkingHub(CreateOrUpdateParkingHubCommand cmd);
+
+    void deleteParkingHub(DeleteParkingHubCommand cmd);
+
+    GetParkingSpaceLockFullStatusDTO getParkingSpaceLockFullStatus(DeleteParkingSpaceCommand cmd);
 }

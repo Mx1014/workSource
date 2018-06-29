@@ -18,8 +18,17 @@ public class ListIndividualCustomerContractsCommand {
 
     private Integer namespaceId;
     private Byte status;
+    private Long categoryId;
 
-    public Byte getStatus() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Byte getStatus() {
         return status;
     }
 
