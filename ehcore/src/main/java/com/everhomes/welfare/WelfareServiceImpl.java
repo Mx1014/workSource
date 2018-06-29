@@ -303,7 +303,9 @@ public class WelfareServiceImpl implements WelfareService {
                     EntityType.USER.getCode(), UserContext.currentUserId()));
             ContentServerResource resource = contentServerService.findResourceByUri(welfare.getImgUri());
         }
-        response.setSendTime(welfare.getSendTime().getTime());
+        if (welfare.getSendTime() != null) {
+            response.setSendTime(welfare.getSendTime().getTime());
+        }
         return response;
     }
 
