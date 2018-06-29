@@ -2522,6 +2522,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		Record record = step.where(condition).fetchOne();
 		if (record == null)
 			return  null;
-		return (String)record.map(r -> r.getValue("closeDate"));
+		return (String)record.getValue("closeDate");
 	}
 }

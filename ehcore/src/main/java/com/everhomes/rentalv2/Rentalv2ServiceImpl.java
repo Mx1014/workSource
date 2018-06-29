@@ -268,15 +268,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	//@PostConstruct
 	public void setup() {
 		workerPoolFactory.getWorkerPool().addQueue(queueName);
-		String closeDays = rentalv2Provider.getHolidayCloseDate(RentalHolidayType.NORMAL_WEEKEND.getCode());
-		if (closeDays != null){
-			String [] day = closeDays.split(",");
-			normalWeekend = Arrays.stream(day).map(r->Long.valueOf(r)).collect(Collectors.toList());
-		}
-		closeDays = rentalv2Provider.getHolidayCloseDate(RentalHolidayType.LEGAL_HOLIDAY.getCode());
-		if (closeDays != null){
-			String [] day = closeDays.split(",");
-			legalHoliday = Arrays.stream(day).map(r->Long.valueOf(r)).collect(Collectors.toList());
+		try {
+			String closeDays = rentalv2Provider.getHolidayCloseDate(RentalHolidayType.NORMAL_WEEKEND.getCode());
+			if (closeDays != null) {
+				String[] day = closeDays.split(",");
+				normalWeekend = Arrays.stream(day).map(r -> Long.valueOf(r)).collect(Collectors.toList());
+			}
+			closeDays = rentalv2Provider.getHolidayCloseDate(RentalHolidayType.LEGAL_HOLIDAY.getCode());
+			if (closeDays != null) {
+				String[] day = closeDays.split(",");
+				legalHoliday = Arrays.stream(day).map(r -> Long.valueOf(r)).collect(Collectors.toList());
+			}
+		}catch (Exception e){
+			LOGGER.error("inite HolidayCloseDate error");
 		}
 	}
 	
