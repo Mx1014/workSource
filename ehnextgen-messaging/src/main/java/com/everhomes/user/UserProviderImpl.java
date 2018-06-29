@@ -29,17 +29,8 @@ import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
-import com.everhomes.server.schema.tables.pojos.EhUserGroups;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
-import com.everhomes.server.schema.tables.pojos.EhUserLikes;
-import com.everhomes.server.schema.tables.pojos.EhUserNotificationSettings;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
@@ -50,7 +41,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.MapReduceCallback;
 import com.everhomes.util.RecordHelper;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -64,6 +54,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.everhomes.server.schema.Tables.*;
@@ -478,6 +469,62 @@ public class UserProviderImpl implements UserProvider {
         }
 
         return null;
+    }
+
+    @Override
+    public Integer countUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+        com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
+        final Integer[] count = {0};
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+                (DSLContext context, Object reducingContext)-> {
+                    SelectQuery<Record1<Integer>> query = context
+                            .selectCount().from(t)
+                            .where(t.NAMESPACE_ID.eq(namespaceId))
+                            .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                            .and(t.NAMESPACE_USER_TYPE.isNull())
+                            .getQuery();
+
+                    if (excludeUIDs != null && excludeUIDs.size() > 0) {
+                        query.addConditions(t.ID.notIn(excludeUIDs));
+                    }
+                    if (start != null) {
+                        query.addConditions(t.CREATE_TIME.ge(Timestamp.valueOf(start)));
+                    }
+                    if (end != null) {
+                        query.addConditions(t.CREATE_TIME.lt(Timestamp.valueOf(end)));
+                    }
+                    count[0] += query.fetchOneInto(Integer.class);
+                    return true;
+                });
+        return count[0];
+    }
+
+    @Override
+    public List<User> listUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+        com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
+        final List<User> users = new ArrayList<>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+                (DSLContext context, Object reducingContext)-> {
+                    SelectQuery<EhUsersRecord> query = context
+                            .selectFrom(t)
+                            .where(t.NAMESPACE_ID.eq(namespaceId))
+                            .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                            .and(t.NAMESPACE_USER_TYPE.isNull())
+                            .getQuery();
+
+                    if (excludeUIDs != null && excludeUIDs.size() > 0) {
+                        query.addConditions(t.ID.notIn(excludeUIDs));
+                    }
+                    if (start != null) {
+                        query.addConditions(t.CREATE_TIME.ge(Timestamp.valueOf(start)));
+                    }
+                    if (end != null) {
+                        query.addConditions(t.CREATE_TIME.lt(Timestamp.valueOf(end)));
+                    }
+                    users.addAll(query.fetchInto(User.class));
+                    return true;
+                });
+        return users;
     }
 
 

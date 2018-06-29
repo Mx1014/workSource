@@ -8,6 +8,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -1067,29 +1068,31 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 	}
 
     @Override
-    public List<UserActivity> listUserActivetys(Condition cond, Integer pageSize, CrossShardListingLocator locator) {
-        pageSize = pageSize + 1;
-        List<UserActivity> results = new ArrayList<>();
+    public List<UserActivity> listUserActivetys(ListingLocator locator, Integer count, ListingQueryBuilderCallback callback) {
+        com.everhomes.server.schema.tables.EhUserActivities t = Tables.EH_USER_ACTIVITIES;
+
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(Tables.EH_USER_ACTIVITIES);
-        if(null != cond){
-            query.addConditions(cond);
+        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(t);
+
+        if(null != callback) {
+            callback.buildCondition(locator, query);
         }
-        if(null != locator.getAnchor()){
-            query.addConditions(Tables.EH_USER_ACTIVITIES.ID.lt(locator.getAnchor()));
+        if(null != locator.getAnchor()) {
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
-        query.addOrderBy(Tables.EH_USER_ACTIVITIES.ID.desc());
-        query.addLimit(pageSize);
-        query.fetch().map((r) -> {
-            results.add(ConvertHelper.convert(r, UserActivity.class));
-            return null;
-        });
-        locator.setAnchor(null);
-        if(results.size() >= pageSize){
-            results.remove(results.size() - 1);
-            locator.setAnchor(results.get(results.size() - 1).getId());
+        if (count > 0) {
+            query.addLimit(count + 1);
         }
-        return results;
+        query.addOrderBy(t.ID.desc());
+
+        List<UserActivity> list = query.fetchInto(UserActivity.class);
+        if (list.size() > count && count > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
     }
 
     @Override
@@ -1134,5 +1137,17 @@ public class UserActivityProviderImpl implements UserActivityProvider {
                 .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull())
                 .and(Tables.EH_USERS.ID.notIn(uidCond))
                 .fetchInto(User.class);
+    }
+
+    @Override
+    public void addActivities(List<UserActivity> activityList) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = sequenceProvider.getNextSequenceBlock(
+                NameMapper.getSequenceDomainFromTablePojo(EhUserActivities.class), activityList.size());
+        for (UserActivity activity : activityList) {
+            activity.setId(id++);
+        }
+        EhUserActivitiesDao dao = new EhUserActivitiesDao(cxt.configuration());
+        dao.insert(activityList.toArray(new EhUserActivities[0]));
     }
 }

@@ -1,6 +1,7 @@
 package com.everhomes.rest.statistics.terminal;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -31,5 +32,10 @@ public class LineChart {
 
 	public void setyData(List<LineChartYData> yData) {
 		this.yData = yData;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }
