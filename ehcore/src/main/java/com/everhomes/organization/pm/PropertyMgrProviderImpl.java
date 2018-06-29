@@ -2108,11 +2108,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime, Long enterpriseCustomerId) {
+	public void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime, Long enterpriseCustomerId,Long addressId) {
 		this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_PM_RESOUCRE_RESERVATIONS)
 				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.ENTERPRISE_CUSTOMER_ID ,enterpriseCustomerId)
 				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.START_TIME, startTime)
 				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME, endTime)
+				.set(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID, addressId)
 				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ID.eq(reservationId))
 				.execute();
 	}

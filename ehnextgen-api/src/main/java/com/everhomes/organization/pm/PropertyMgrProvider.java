@@ -511,7 +511,7 @@ public interface PropertyMgrProvider {
 
     List<PmResourceReservation> findReservationByAddress(Long addressId, ReservationStatus status);
 
-	void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime,Long enterpriseCustomerId);
+	void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime,Long enterpriseCustomerId,Long addressId);
 
 	Long changeReservationStatus(Long reservationId, Byte newStatus);
 

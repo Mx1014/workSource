@@ -7171,7 +7171,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	public void updateReservation(UpdateReservationCommand cmd) {
     	Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
 		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
-    	propertyMgrProvider.updateReservation(cmd.getReservationId(), start, end, cmd.getEnterpriseCustomerId());
+    	propertyMgrProvider.updateReservation(cmd.getReservationId(), start, end, cmd.getEnterpriseCustomerId(),cmd.getAddressId());
 	}
 
 	/**
