@@ -7099,12 +7099,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		resourceReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
 		resourceReservation.setStatus((byte)2);
 		resourceReservation.setAddressId(cmd.getAddressId());
-        Byte livingStatus = addressProvider.getAddressLivingStatus(cmd.getAddressId());
+		//add by tangcen 解决EH_ORGANIZATION_ADDRESS_MAPPINGS表中，一个address_id会对应两条数据的问题，实际应该是脏数据导致的。
+		Address address = addressProvider.findAddressById(cmd.getAddressId());
+		Byte livingStatus = addressProvider.getAddressLivingStatus(address.getId(),address.getAddress());
+        //Byte livingStatus = addressProvider.getAddressLivingStatus(cmd.getAddressId());
         resourceReservation.setPreviousLivingStatus(livingStatus);
 //		this.dbProvider.execute((status) -> {
 
 			// living status的完整枚举记录在前端，后端和数据库没有
-			int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
+        	// add by tangcen 
+			//int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
+        	int effectedRow = addressProvider.changeAddressLivingStatus(address.getId(),address.getAddress(), AddressLivingStatus.OCCUPIED.getCode());
 			if(effectedRow != 1){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
 						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
