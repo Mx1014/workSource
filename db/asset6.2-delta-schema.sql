@@ -1,7 +1,11 @@
--- Designer: yang cx
--- Description: 物业缴费6.2
+-- 通用脚本  
+-- ADD BY 杨崇鑫
+-- 物业缴费6.2 增加减免费项
 CREATE TABLE `eh_payment_subtraction_items` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64),
   `bill_id` BIGINT NOT NULL DEFAULT 0,
   `bill_group_id` BIGINT,
   `subtraction_type` VARCHAR(255) COMMENT '减免费项类型，eh_payment_bill_items：费项（如：物业费），eh_payment_late_fine：减免滞纳金（如：物业费滞纳金）',
@@ -9,6 +13,7 @@ CREATE TABLE `eh_payment_subtraction_items` (
   `charging_item_name` VARCHAR(255) COMMENT '减免费项名称',
   `creator_uid` BIGINT COMMENT '创建者ID',
   `create_time` DATETIME,
-  PRIMARY KEY (`id`)
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='减免费项配置表';
--- End by: yang cx
+-- EＮＤ BY 杨崇鑫
