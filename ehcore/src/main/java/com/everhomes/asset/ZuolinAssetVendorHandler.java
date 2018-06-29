@@ -879,13 +879,15 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         	//个人客户所属家庭全员可以查看和支付（新增个人客户时会关联楼栋门牌，导入个人客户账单时，找到此门牌关联的所有个人客户，无论是任何身份，均可以查看和支付）
         	ListUserRelatedScenesCommand listUserRelatedScenesCommand = new ListUserRelatedScenesCommand();
         	List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(listUserRelatedScenesCommand);
-        	List<Long> addressIds = new ArrayList<>();
+        	//List<Long> addressIds = new ArrayList<>();
+        	List<String> addressList = new ArrayList<>();
         	//获取到当前个人客户所有关联的楼栋门牌
         	for(SceneDTO sceneDTO : sceneDtoList) {
         		//修复issue-32510 个人客户场景，审核中的门牌，该门牌关联了账单，期望不可以看到账单
         		if(sceneDTO != null && sceneDTO.getStatus() != null && sceneDTO.getStatus().equals((byte)3)) {//2:审核中，3：已认证
         			FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
-            		addressIds.add(familyDTO.getAddressId());
+            		//addressIds.add(familyDTO.getAddressId());
+        			addressList.add(familyDTO.getBuildingName() + "/" + familyDTO.getApartmentName());
         		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -902,18 +904,23 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         		PaymentBills paymentBillsDTO = iter.next();
         	   //个人客户可以关联多个楼栋门牌，账单也可以关联多个楼栋门牌，账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
         		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
-                List<Long> queryAddressIds = new ArrayList<>();
-            	context.selectDistinct(t2.ADDRESS_ID)
+                //List<Long> queryAddressIds = new ArrayList<>();
+        		List<String> queryAddressList = new ArrayList<>();
+            	context.selectDistinct(t2.ADDRESS_ID, t2.BUILDING_NAME , t2.APARTMENT_NAME)
             		.from(t2)
             		.where(t2.BILL_ID.eq(paymentBillsDTO.getId()))
             		.fetch()
                 	.forEach(r2 ->{
-                		queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
+                		//queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
+                		queryAddressList.add(r2.getValue(t2.BUILDING_NAME) + "/" + r2.getValue(t2.APARTMENT_NAME));//一个账单可能有多个楼栋门牌
                 });
             	//账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-            	if(!addressIds.containsAll(queryAddressIds)) {
+            	if(!addressList.containsAll(queryAddressList)) {
             		iter.remove();
             	}
+//            	if(!addressIds.containsAll(queryAddressIds)) {
+//            		iter.remove();
+//            	}
         	}
         }
         //进行分类，冗杂代码，用空间换时间， 字符串操作+类型转换  vs  新建对象; 对象隐式指定最大寿命
@@ -1062,13 +1069,15 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         	//个人客户所属家庭全员可以查看和支付（新增个人客户时会关联楼栋门牌，导入个人客户账单时，找到此门牌关联的所有个人客户，无论是任何身份，均可以查看和支付）
         	ListUserRelatedScenesCommand listUserRelatedScenesCommand = new ListUserRelatedScenesCommand();
         	List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(listUserRelatedScenesCommand);
-        	List<Long> addressIds = new ArrayList<>();
+        	//List<Long> addressIds = new ArrayList<>();
+        	List<String> addressList = new ArrayList<>();
         	//获取到当前个人客户所有关联的楼栋门
         	for(SceneDTO sceneDTO : sceneDtoList) {
         		//修复issue-32510 个人客户场景，审核中的门牌，该门牌关联了账单，期望不可以看到账单
         		if(sceneDTO != null && sceneDTO.getStatus() != null && sceneDTO.getStatus().equals((byte)3)) {//2:审核中，3：已认证
         			FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
-            		addressIds.add(familyDTO.getAddressId());
+            		//addressIds.add(familyDTO.getAddressId());
+        			addressList.add(familyDTO.getBuildingName() + "/" + familyDTO.getApartmentName());
         		}
         	}
         	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1080,18 +1089,23 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         		ListAllBillsForClientDTO ListAllBillsForClientDTO = iter.next();
         	    //个人客户可以关联多个楼栋门牌，账单也可以关联多个楼栋门牌，账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
         		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
-                List<Long> queryAddressIds = new ArrayList<>();
+        		//List<Long> queryAddressIds = new ArrayList<>();
+        		List<String> queryAddressList = new ArrayList<>();
             	context.selectDistinct(t2.ADDRESS_ID)
             		.from(t2)
             		.where(t2.BILL_ID.eq(Long.parseLong(ListAllBillsForClientDTO.getBillId())))
             		.fetch()
                 	.forEach(r2 ->{
-                		queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
+                		//queryAddressIds.add(r2.getValue(t2.ADDRESS_ID));//一个账单可能有多个楼栋门牌
+                		queryAddressList.add(r2.getValue(t2.BUILDING_NAME) + "/" + r2.getValue(t2.APARTMENT_NAME));//一个账单可能有多个楼栋门牌
                 });
             	//账单关联的所有楼栋门牌都被个人客户关联的多个楼栋门牌所包含，才有权限查看和支付（A、B和AB），（BC没有权限查看和支付）
-            	if(!addressIds.containsAll(queryAddressIds)) {
+            	if(!addressList.containsAll(queryAddressList)) {
             		iter.remove();
             	}
+//            	if(!addressIds.containsAll(queryAddressIds)) {
+//            		iter.remove();
+//            	}
         	}
             
         }
