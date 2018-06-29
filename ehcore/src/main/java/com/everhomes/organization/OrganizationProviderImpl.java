@@ -2282,16 +2282,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      **/
     @Override
     public OrganizationMember findOrganizationMemberByOrgIdAndToken(
-            String contactPhone, Long organizationId) {
+            String contactPhone, Long organizationId, String memberGroup) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactPhone));
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
         //added by wh 2016-10-13 把被拒绝的过滤掉
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+        if(memberGroup != null) {
+        	//added by janson, filter by member_group
+        	condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup));
+        }
         Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, OrganizationMember.class);
         return null;
+    }
+    
+    @Override
+    public OrganizationMember findOrganizationMemberByOrgIdAndToken(
+            String contactPhone, Long organizationId) {
+    	return findOrganizationMemberByOrgIdAndToken(contactPhone, organizationId, null);
     }
 
     @Override

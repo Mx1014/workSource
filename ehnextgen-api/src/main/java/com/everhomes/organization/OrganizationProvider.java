@@ -13,7 +13,6 @@ import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
-
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
@@ -515,5 +514,8 @@ public interface OrganizationProvider {
             Long targetId, Long organizationId);
     OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
             Long organizationId, String contactToken);
+    
+	OrganizationMember findOrganizationMemberByOrgIdAndToken(
+			String contactPhone, Long organizationId, String memberGroup);
  
 }

@@ -15,6 +15,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractCategory;
+import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -188,6 +189,9 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private ContractProvider contractProvider;
+
+    @Autowired
+    private ContractServiceImpl contractService;
 
 
     @Override
@@ -2949,7 +2953,20 @@ public class AssetServiceImpl implements AssetService {
 //        AssetVendor assetVendor = checkAssetVendor(999983);
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.showBillForClientV2(cmd);
+        List<ShowBillForClientV2DTO> ret = handler.showBillForClientV2(cmd);
+        for(ShowBillForClientV2DTO dto : ret){
+            try{
+                //获得contract的categoryId
+                if(!StringUtils.isBlank(dto.getContractId())){
+                    Long categoryId = contractService.findContractCategoryIdByContractId(Long.valueOf(dto.getContractId()));
+                    LOGGER.error("issue32639 categoryId={}",categoryId);
+                    dto.setCategoryId(categoryId);
+                }
+            }catch (Exception e){
+                LOGGER.error("issue32639 failed to get category id, contractId is={}",dto.getContractId(), e);
+            }
+        }
+        return ret;
     }
 
     /**
