@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageType: 样式</li>
  * <li>payMode: 支付模式 0 :线上支付 1 :线下支付 2 :审批线上支付/li>
  * <li>identify: 资源类型的分类 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
+ * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class RentalInstanceConfig {
@@ -21,6 +22,8 @@ public class RentalInstanceConfig {
 	private Byte payMode;
 
 	private String identify;
+
+	private Byte unauthVisible;
 
 	public Long getResourceTypeId() {
 		return resourceTypeId;
@@ -52,6 +55,14 @@ public class RentalInstanceConfig {
 
 	public void setIdentify(String identify) {
 		this.identify = identify;
+	}
+
+	public Byte getUnauthVisible() {
+		return unauthVisible;
+	}
+
+	public void setUnauthVisible(Byte unauthVisible) {
+		this.unauthVisible = unauthVisible;
 	}
 
 	@Override

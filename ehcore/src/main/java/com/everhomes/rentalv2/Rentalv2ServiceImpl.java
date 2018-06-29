@@ -4775,14 +4775,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
-
+		//每日开放时间
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
 		cellList.get().clear();
 		return response;
+	}
+
+	private List<RentalOpenTimeDTO> getResourceOpenTime(String resourceType, Long rentalSiteId,Byte rentalType){
+		List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(resourceType,
+				EhRentalv2Resources.class.getSimpleName(), rentalSiteId,rentalType);
+		if (dayopenTimes!=null)
+			return dayopenTimes.stream().map(r->{
+				RentalOpenTimeDTO dto = new RentalOpenTimeDTO();
+				dto.setRentalType(r.getRentalType());
+				dto.setDayOpenTime(r.getOpenTime());
+				dto.setDayCloseTime(r.getCloseTime());
+				return dto;
+			}).collect(Collectors.toList());
+
+		return null;
 	}
 
 	@Override
 	public FindRentalSiteMonthStatusByWeekCommandResponse findRentalSiteMonthStatusByWeek(FindRentalSiteMonthStatusByWeekCommand cmd) {
 //		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+
 
 		if (StringUtils.isBlank(cmd.getResourceType())) {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
@@ -4832,7 +4849,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
-
+		//每日开放时间
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
 		cellList.get().clear();
 		return response;
 	}
@@ -4893,7 +4911,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	 		Collections.sort(dayTimes);
 	 		response.setDayTimes(dayTimes);
  		}
-
+		//每日开放时间
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
 		cellList.get().clear();
 		return response;
 	}
@@ -5009,7 +5028,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setCutPrice(dto.getCutPrice());
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
-
+		//每日开放时间
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
 		cellList.get().clear();
 		return response;
 	}
@@ -5750,7 +5770,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 
 		}
-
+		//每日开放时间
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
 		cellList.get().clear();
 		return response;
 	}
@@ -5914,6 +5935,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				dayDto.getSiteNumbers().add(siteNumberRuleDTO);
 			}
 		}
+		//每日开放时间
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
 		cellList.get().clear();
 		return response;
 	}
@@ -6083,7 +6106,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 
 		}
-
+		//每日开放时间
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
 		cellList.get().clear();
 		return response;
 	}
@@ -6249,7 +6273,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 		Collections.sort(dayTimes);
  		response.setDayTimes(dayTimes);
-
+		//每日开放时间
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
 		cellList.get().clear();
 		return response;
 	}
