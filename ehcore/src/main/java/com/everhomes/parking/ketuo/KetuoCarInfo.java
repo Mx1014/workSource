@@ -53,7 +53,7 @@ public class KetuoCarInfo {
         this.parkingTime = parkingTime;
     }
 
-    public Long getlEntryTime(){
+    public Long getlEntryTime() throws Exception{
         if(entryTime==null)
             return null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
@@ -61,7 +61,7 @@ public class KetuoCarInfo {
         try {
             ts = sdf.parse(entryTime).getTime();
         } catch (ParseException e) {
-           return null;
+            throw  e;
         }
         return ts;
     }

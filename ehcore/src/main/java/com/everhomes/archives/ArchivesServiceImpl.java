@@ -634,7 +634,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (dto.getDepartments() != null && dto.getDepartments().size() > 0)
             dto.setDepartmentString(convertToOrgNames(dto.getDepartments().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
         //  岗位的导出
-        if (dto.getDepartments() != null && dto.getDepartments().size() > 0)
+        if (dto.getJobPositions() != null && dto.getJobPositions().size() > 0)
             dto.setJobPositionString(convertToOrgNames(dto.getJobPositions().stream().collect(Collectors.toMap(OrganizationDTO::getId, OrganizationDTO::getName))));
     }
 
@@ -766,7 +766,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                 if (org != null)
                     names.append(org.getName()).append(",");
             }
-            names = new StringBuilder(names.subSequence(0, names.length() - 1));
+            if (names.length() > 0)
+                names = new StringBuilder(names.subSequence(0, names.length() - 1));
         }
         return names.toString();
     }

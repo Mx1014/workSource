@@ -331,10 +331,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
 		//多入口相关，接口内部修改权限校验
-		List<ServiceModuleApp> serviceModuleApp = serviceModuleAppService.listReleaseServiceModuleApp(cmd.getNamespaceId(), 21200L, null, cmd.getCategoryId().toString(), null);
+	    // 科技园的合同是特殊对接的，是另外一个模块，后面的逻辑是特殊处理的，没有类型ID此时会报空指针，故需要先判断再使用 by lqs 20180629
+	    //String categoryId = (cmd.getCategoryId() == null) ? null : cmd.getCategoryId().toString();
+		//List<ServiceModuleApp> serviceModuleApp = serviceModuleAppService.listReleaseServiceModuleApp(cmd.getNamespaceId(), 21200L, null, categoryId, null);
 		//获取数组第一个对象，取其中的originId字段作为appId，再调用userPrivilegeMgr.checkUserPrivilege接口进行权限校验（当前管理公司ID由前端传过来）
-		Long appId = serviceModuleApp.get(0).getOriginId();
-		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), ServiceModuleConstants.CONTRACT_MODULE, appId, cmd.getOrgId(), cmd.getCommunityId());
+		//Long appId = serviceModuleApp.get(0).getOriginId();
+		//userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), ServiceModuleConstants.CONTRACT_MODULE, appId, cmd.getOrgId(), cmd.getCommunityId());
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		if(namespaceId != 1000000) {
@@ -1866,6 +1868,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(cmd.getPaymentFlag() == 1) {
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
 		} else {
+			// sync from ebei api has checkAuth flag
+			if (cmd.getCheckAuth() == null || cmd.getCheckAuth())
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DELETE, cmd.getOrgId(), cmd.getCommunityId());
 		}
 
@@ -1918,6 +1922,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 //		}
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
+		// just in case
+		dto.setCategoryId(contract.getCategoryId());
 		if(dto.getCreateUid() != null) {
 			User creator = userProvider.findUserById(dto.getCreateUid());
 			if(creator != null) {

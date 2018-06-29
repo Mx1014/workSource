@@ -2037,7 +2037,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	private void deleteOrganizationAdmin(Long organizationId, String contactToken, Long adminPrivilegeId){
 		User user = UserContext.current().getUser();
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId);
+		//仅获取管理员的 member
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId, OrganizationMemberGroupType.MANAGER.getCode());
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(null == member) {
 			LOGGER.error("User is not in the organization.");

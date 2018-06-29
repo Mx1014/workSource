@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationTask;
@@ -499,4 +500,6 @@ public interface PropertyMgrProvider {
 	List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId);
 
 	OrganizationOwnerBehavior findOrganizationOwnerBehaviorByOwnerAndAddressId(Long id, Long id1);
+
+    List<CommunityPmOwner> listCommunityPmOwnersWithLocator(CrossShardListingLocator locator, Integer pageSize);
 }
