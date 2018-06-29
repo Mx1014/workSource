@@ -119,16 +119,17 @@ public class WelfareServiceImpl implements WelfareService {
     }
 
     @Override
-    public void draftWelfare(DraftWelfareCommand cmd) {
+    public DraftWelfareResponse draftWelfare(DraftWelfareCommand cmd) {
         String lockName = CoordinationLocks.WELFARE_EDIT_LOCK.getCode();
-        if (cmd.getWelfare().getId() != null) {
-            lockName = lockName + cmd.getWelfare().getOwnerId() + cmd.getWelfare().getId();
+        WelfaresDTO welfareDTO = cmd.getWelfare();
+        if (welfareDTO.getId() != null) {
+            lockName = lockName + welfareDTO.getOwnerId() + welfareDTO.getId();
         } else {
-            lockName = lockName + cmd.getWelfare().getOwnerId();
+            lockName = lockName + welfareDTO.getOwnerId();
         }
         this.coordinationProvider.getNamedLock(lockName).enter(() -> {
-            if (cmd.getWelfare().getId() != null) {
-                Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfare().getId());
+            if (welfareDTO.getId() != null) {
+                Welfare welfare = welfareProvider.findWelfareById(welfareDTO.getId());
                 if(null == welfare){
                 	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
@@ -138,10 +139,11 @@ public class WelfareServiceImpl implements WelfareService {
                             WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能保存草稿");
                 }
             }
-            cmd.getWelfare().setStatus(WelfareStatus.DRAFT.getCode());
-            saveWelfare(cmd.getWelfare());
+            welfareDTO.setStatus(WelfareStatus.DRAFT.getCode());
+            welfareDTO.setId(saveWelfare(cmd.getWelfare()).getId());
             return null;
         });
+        return new DraftWelfareResponse(welfareDTO);
     }
 
     private Welfare saveWelfare(WelfaresDTO welfareDTO) {

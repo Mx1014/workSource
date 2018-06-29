@@ -9,7 +9,7 @@ public interface WelfareService {
 	ListWelfaresResponse listWelfares(ListWelfaresCommand cmd);
 
 
-	void draftWelfare(DraftWelfareCommand cmd);
+	DraftWelfareResponse draftWelfare(DraftWelfareCommand cmd);
 
 
 	SendWelfaresResponse sendWelfare(SendWelfareCommand cmd);
