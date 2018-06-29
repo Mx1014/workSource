@@ -65,14 +65,7 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
 
     // POST /admin/users/:username/repos
     @Override
-    public <T> T createRepo(String name, String description, Class<T> type) {
-        Map<String, Object> param = new HashMap<>();
-        param.put("name", name);
-        param.put("description", description);
-        param.put("private", false);
-        param.put("readme", "Default");
-        param.put("auto_init", true);
-
+    public <T> T createRepo(CreateGogsRepoParam param, Class<T> type) {
         String api = String.format("/admin/users/%s/repos", gogsAdmin);
         ResponseEntity<String> response = restCall(HttpMethod.POST, api, param, String.class);
         return GsonUtil.fromJson(response.getBody(), type);
@@ -128,6 +121,14 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
     public byte[] downloadArchive(String repoName) {
         String api = String.format("/repos/%s/%s/archive/%s.%s", gogsAdmin, repoName, "master", "zip");
         ResponseEntity<byte[]> response = restCall(HttpMethod.GET, api, null, byte[].class);
+        return response.getBody();
+    }
+
+    // POST /repos/:username/:reponame/hooks
+    @Override
+    public <T> T createHook(String repoName, CreateGogsHookParam param, Class<T> type) {
+        String api = String.format("/repos/%s/%s/hooks", gogsAdmin, repoName);
+        ResponseEntity<T> response = restCall(HttpMethod.POST, api, param, type);
         return response.getBody();
     }
 

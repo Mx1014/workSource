@@ -30,10 +30,4 @@ public interface ServiceModuleAppService {
 	ServiceModuleApp findReleaseServiceModuleAppByOriginId(Long originId);
 
 	ListServiceModuleAppsForBannerResponse listServiceModuleAppsForBanner(ListServiceModuleAppsForBannerCommand cmd);
-
-	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
-
-	void createAnAppMapping(CreateAnAppMappingCommand cmd);
-
-    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
 }
