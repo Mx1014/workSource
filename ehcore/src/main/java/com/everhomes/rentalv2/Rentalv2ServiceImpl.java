@@ -2232,6 +2232,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 			}
 		}
+		return useDetailSB.toString();
 	}
 
 
