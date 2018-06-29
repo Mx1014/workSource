@@ -11,6 +11,8 @@ package com.everhomes.rest.community;
  *  <li>areaSize:占地面积</li>
  *  <li>latitudeLongitude:经纬度</li>
  *  <li>buildingNumber:楼栋编号</li>
+ *  <li>trafficDescription:交通说明</li>
+ *  <li>trafficDescription:楼栋介绍</li>
  * </ul>
  * Created by ying.xiong on 2018/1/22.
  */
@@ -32,8 +34,28 @@ public class BuildingExportDetailDTO {
     private String contact;
 
     private String managerName;
+    
+    private String trafficDescription;
+    
+    private String description;
 
-    public String getAddress() {
+    public String getTrafficDescription() {
+		return trafficDescription;
+	}
+
+	public void setTrafficDescription(String trafficDescription) {
+		this.trafficDescription = trafficDescription;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getAddress() {
         return address;
     }
 

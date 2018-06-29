@@ -1202,4 +1202,25 @@ public class ForumProviderImpl implements ForumProvider {
 
     }
 
- }
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#post.id"),
+            @CacheEvict(value="ForumPostByUuid", key="#post.uuid")})
+    @Override
+    public void updatePostAfterPublish(Post post) {
+        assert(post.getId() != 0);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, post.getId()));
+        EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+        post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(post);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumAttachmentList", key="#postId")})
+    @Override
+    public void deleteAttachments(Long postId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        context.delete(Tables.EH_FORUM_ATTACHMENTS).where(Tables.EH_FORUM_ATTACHMENTS.POST_ID.eq(postId)).execute();
+    }
+
+}

@@ -207,7 +207,12 @@ public enum VersionRealmType {
 	ANDROID_GUOMAOWUFUWX("Android_GuoMaoWuFuwx"),
 	IOS_GUOMAOWUFUWX("iOS_GuoMaoWuFuwx"),
 	ANDROID_ZHONGKERUIGU("Android_ZhongKeRuiGu"),
-	IOS_ZHONGKERUIGU("iOS_ZhongKeRuiGu")
+	IOS_ZHONGKERUIGU("iOS_ZhongKeRuiGu"),
+	
+	ANDROID_FUNDTOWN("Android_FundTown"),
+	IOS_FUNDTOWN("iOS_FundTown"),
+	ANDROID_BIZ("Android_Biz"),
+	IOS_BIZ("iOS_Biz")
     ;
 
     private String code;

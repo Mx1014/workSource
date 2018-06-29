@@ -42,6 +42,15 @@ public class CreateBillCommand {
     private BillGroupDTO billGroupDTO;
     private Byte isSettled;
     private String invoiceNum;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public String getInvoiceNum() {
         return invoiceNum;

@@ -22,5 +22,6 @@ public interface CommunityServiceErrorCode {
     int ERROR_CONTACTOR_EMPTY = 20003;
     int ERROR_PHONE_EMPTY = 20004;
     int ERROR_LATITUDE_LONGITUDE = 20005;
+    int ERROR_AREASIZE_FORMAT = 20006;
 
 }
