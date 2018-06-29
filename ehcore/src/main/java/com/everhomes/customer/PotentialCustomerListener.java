@@ -13,6 +13,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.customer.PotentialCustomerType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.server.schema.tables.EhActivityRoster;
@@ -89,7 +90,13 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                         //人才团队信息
                     }
                 }
-
+                CustomerPotentialData data = new CustomerPotentialData();
+                if(activityRoster!=null){
+                    data.setName(activityRoster.getOrganizationName());
+                    data.setSourceId(activity.getCategoryId());
+                    data.setSourceType(PotentialCustomerType.ACTIVITY.getCode());
+                }
+                data.setSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getCode());
             }
         } else if (s.contains(EhGeneralFormVals.class.getSimpleName())) {
             GeneralFormVal generalFormValObject = generalFormValProvider.getGeneralFormValById(id);
@@ -99,14 +106,19 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
             }
             String allianceTextValue = generalFormValObject == null ? null : generalFormValObject.getFieldValue();
             namespaceId = generalFormValObject == null ? 0 : generalFormValObject.getNamespaceId();
-            if (StringUtils.isNotBlank(allianceTextValue)) {
-                PostApprovalFormTextValue textValue = new Gson().fromJson(allianceTextValue, PostApprovalFormTextValue.class);
+            if (StringUtils.isBlank(allianceTextValue)) {
+              return;
             }
+            PostApprovalFormTextValue textValue = new Gson().fromJson(allianceTextValue, PostApprovalFormTextValue.class);
             // text value is enterprise name we need  sync to customer  potential  temp tables
             CustomerConfiguration configutations = customerProvider.getSyncCustomerConfiguration(namespaceId);
             if (configutations != null && TrueOrFalseFlag.TRUE.equals(TrueOrFalseFlag.fromCode(configutations.getValue()))) {
                 // sync to customer potential tables
                 //todo: sync this record to customer potencial customer temp tables
+                CustomerPotentialData data = new CustomerPotentialData();
+                data.setName(textValue.getText());
+                data.setSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getCode());
+//                data.setSourceId();
             }
         }
     }

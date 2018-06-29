@@ -14,8 +14,8 @@ CREATE TABLE `eh_customer_configutations` (
 CREATE TABLE `eh_customer_potential_datas` (
   `id` bigint(20) NOT NULL,
   `name` text COMMENT 'potential customer name',
-  `source_id` tinyint(4) DEFAULT NULL,
-  `source_type` tinyint(4) DEFAULT NULL,
+  `source_id` BIGINT(20) DEFAULT NULL,
+  `source_type` text DEFAULT NULL,
   `source_value` text,
   `operate_uid` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL ,
