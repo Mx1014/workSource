@@ -15,6 +15,7 @@ public class UsingInfoDTO {
     private String userName;
     private Long startTime;
     private Long endTime;
+    private Byte rentalType;
 
     public String getResourceName() {
         return resourceName;
@@ -54,5 +55,13 @@ public class UsingInfoDTO {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public Byte getRentalType() {
+        return rentalType;
+    }
+
+    public void setRentalType(Byte rentalType) {
+        this.rentalType = rentalType;
     }
 }

@@ -3704,13 +3704,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 										+ String.valueOf((int) ((i % 1) * 60))
 										+ ":00"));
 
-//								rsr.setUnit(cmd.getUnit());
-//
-//								if(rsr.getUnit()<1){
-//									rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
-//									rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-//									rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
-//								}
+
 								rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
 
 								createRSR(rsr, cmd);
@@ -3722,28 +3716,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 //						rsr.setUnit(cmd.getUnit());
 						rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
 
-//						rsr.setRentalStep(1);
 
 						rsr.setAmorpm(AmorpmFlag.AM.getCode());
-//						if (rsr.getUnit() < 1) {
-//							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-//							rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-//							rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-//
-//						}
-						createRSR(rsr, cmd);
+                        Double v = cmd.getHalfDayTimeIntervals().get(0).getBeginTime() * 3600000;
+                        rsr.setBeginTime(new Timestamp(start.getTime().getTime()+v.longValue()));
+                        v = cmd.getHalfDayTimeIntervals().get(0).getEndTime() * 3600000;
+                        rsr.setEndTime(new Timestamp(start.getTime().getTime()+v.longValue()));
+                        createRSR(rsr, cmd);
 						rsr.setAmorpm(AmorpmFlag.PM.getCode());
+                        v = cmd.getHalfDayTimeIntervals().get(1).getBeginTime() * 3600000;
+                        rsr.setBeginTime(new Timestamp(start.getTime().getTime()+v.longValue()));
+                        v = cmd.getHalfDayTimeIntervals().get(1).getEndTime() * 3600000;
+                        rsr.setEndTime(new Timestamp(start.getTime().getTime()+v.longValue()));
 						createRSR(rsr, cmd);
 						if (cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())) {
 							rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
+                            v = cmd.getHalfDayTimeIntervals().get(2).getBeginTime() * 3600000;
+                            rsr.setBeginTime(new Timestamp(start.getTime().getTime()+v.longValue()));
+                            v = cmd.getHalfDayTimeIntervals().get(2).getEndTime() * 3600000;
+                            rsr.setEndTime(new Timestamp(start.getTime().getTime()+v.longValue()));
 							createRSR(rsr, cmd);
 						}
 
 					}else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
 						// 按日预定
 
-//						rsr.setRentalStep(1);
-//						rsr.setUnit(cmd.getUnit());
 
 						rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
 						createRSR(rsr, cmd );
@@ -7667,10 +7664,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		QueryDefaultRuleAdminCommand queryRuleCmd = ConvertHelper.convert(cmd,QueryDefaultRuleAdminCommand.class);
-		if (RuleSourceType.RESOURCE.getCode().equals(queryRuleCmd.getSourceType())){ //一个资源应该只有一条规则 忽略ownerType ownerId防止产生多条
-			queryRuleCmd.setOwnerId(null);
-			queryRuleCmd.setOwnerType(null);
-        }
 		QueryDefaultRuleAdminResponse queryRule = queryDefaultRule(queryRuleCmd);
 		return convertResourceTimeRuleDTO(queryRule, cmd.getSourceType());
 
@@ -8862,30 +8855,59 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(rentalSite.getId(), startTime, endTime);
 		if (rentalOrders == null || rentalOrders.size()==0)
 			return response;
-		rentalOrders.stream().flatMap(r->{
-			List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(r.getId());
-			if (rentalSite.getResourceCounts()>1.0 && NormalFlag.NEED.getCode() == rentalSite.getAutoAssign()){
-
-
-			}
-			UsingInfoDTO dto = new UsingInfoDTO();
-			dto.setResourceName(r.getRentalCount() > 1.0?r.getResourceName()+"*"+r.getRentalCount().intValue():r.getResourceName());
-			dto.setStartTime(r.getStartTime().getTime());
-			dto.setEndTime(r.getEndTime().getTime());
-			String userName = userProvider.findUserById(r.getRentalUid()).getNickName();
-			if (userName.length()>1)
-				userName = userName.substring(0,userName.length()-2)+"*"+userName.substring(userName.length()-1,userName.length());
-			dto.setUserName(userName);
-			if (null!=r.getUserEnterpriseId()) {
-				Organization org = this.organizationProvider.findOrganizationById(r.getUserEnterpriseId());
-				if (org != null) {
-					dto.setUserName(org.getName());
-				}
-			}
-			dto.setUsingDetail(parseUsingInfoDetail(resourceOrders,null));
-			return Stream.of(dto);
-		}).collect(Collectors.toList());
-		return null;
+        List<UsingInfoDTO> usingInfos = rentalOrders.stream().flatMap(r -> {
+            List<RentalResourceOrder> resourceOrders = rentalv2Provider.findRentalResourceOrderByOrderId(r.getId());
+            String userName = userProvider.findUserById(r.getRentalUid()).getNickName();
+            if (userName.length() > 1)
+                userName = userName.substring(0, userName.length() - 2) + "*" + userName.substring(userName.length() - 1, userName.length());
+            if (null != r.getUserEnterpriseId()) {
+                Organization org = this.organizationProvider.findOrganizationById(r.getUserEnterpriseId());
+                if (org != null) {
+                    userName = org.getName();
+                }
+            }
+            if (rentalSite.getResourceCounts() > 1.0 && NormalFlag.NEED.getCode() == rentalSite.getAutoAssign()) {
+                List<RentalResourceNumber> resourceNumbers = this.rentalv2Provider.queryRentalResourceNumbersByOwner(
+                        rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+                List<UsingInfoDTO> dtos = new ArrayList<>();
+                for (RentalResourceNumber number : resourceNumbers) {
+                    String detail = parseUsingInfoDetail(resourceOrders, number.getResourceNumber());
+                    if (StringUtils.isBlank(detail))
+                        continue;
+                    UsingInfoDTO dto = new UsingInfoDTO();
+                    dto.setUsingDetail(detail);
+                    dto.setResourceName(rentalSite.getResourceName() + number.getResourceNumber());
+                    dto.setUserName(userName);
+                    RentalResourceOrder firstOrder = resourceOrders.stream().filter(p -> number.getResourceNumber().equals(p.getResourceNumber())).
+                            min((p, q) -> p.getRentalResourceRuleId().compareTo(q.getRentalResourceRuleId())).get();
+                    RentalResourceOrder lastOrder = resourceOrders.stream().filter(p -> number.getResourceNumber().equals(p.getResourceNumber())).
+                            max((p, q) -> p.getRentalResourceRuleId().compareTo(q.getRentalResourceRuleId())).get();
+                    dto.setStartTime(firstOrder.getBeginTime() == null ? firstOrder.getBeginTime().getTime() : firstOrder.getResourceRentalDate().getTime());
+                    dto.setEndTime(lastOrder.getEndTime() == null ? lastOrder.getEndTime().getTime() : lastOrder.getResourceRentalDate().getTime());
+                    dto.setRentalType(r.getRentalType());
+                    dtos.add(dto);
+                }
+                return dtos.stream();
+            }
+            UsingInfoDTO dto = new UsingInfoDTO();
+            dto.setResourceName(r.getRentalCount() > 1.0 ? r.getResourceName() + "*" + r.getRentalCount().intValue() : r.getResourceName());
+            dto.setStartTime(r.getStartTime().getTime());
+            dto.setEndTime(r.getEndTime().getTime());
+            dto.setUserName(userName);
+            dto.setRentalType(r.getRentalType());
+            dto.setUsingDetail(parseUsingInfoDetail(resourceOrders, null));
+            return Stream.of(dto);
+        }).collect(Collectors.toList());
+        //重新排序
+        Collections.sort(usingInfos,(q,p)->q.getStartTime().compareTo(p.getStartTime()));
+        response.setUsingInfos(usingInfos);
+        response.setCurrentUsingInfos( usingInfos.stream().filter(r->{
+            if (RentalType.DAY.getCode() == r.getRentalType() || RentalType.WEEK.getCode() == r.getRentalType() ||
+                    RentalType.MONTH.getCode() == r.getRentalType())
+                return true;
+            return System.currentTimeMillis()>r.getStartTime() && System.currentTimeMillis()<r.getEndTime();
+        }).collect(Collectors.toList()));
+        return response;
 	}
 
 	private String parseUsingInfoDetail(List<RentalResourceOrder> resourceOrders,String number){
@@ -8899,6 +8921,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}).collect(Collectors.toList());
 		if (collect.size() == 0)
 			return "";
+        Collections.sort(collect,(q,p)->q.getId().compareTo(p.getId()));
 		SimpleDateFormat beginTimeSF = new SimpleDateFormat("HH:mm");
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
 		SimpleDateFormat beginMonthSF = new SimpleDateFormat("yyyy-MM-dd");

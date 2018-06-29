@@ -711,6 +711,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourceTimeRule")
 	@RestReturn(String.class)
 	public RestResponse updateResourceTimeRule(UpdateResourceTimeRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		rentalService.updateResourceTimeRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -726,7 +730,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceTimeRule")
 	@RestReturn(ResourceTimeRuleDTO.class)
 	public RestResponse getResourceTimeRule(GetResourceTimeRuleCommand cmd) {
-
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		RestResponse response = new RestResponse(rentalService.getResourceTimeRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -741,6 +748,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourcePriceRule")
 	@RestReturn(String.class)
 	public RestResponse updateResourcePriceRule(UpdateResourcePriceRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		rentalService.updateResourcePriceRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -756,6 +767,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourcePriceRule")
 	@RestReturn(ResourcePriceRuleDTO.class)
 	public RestResponse getResourcePriceRule(GetResourcePriceRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		RestResponse response = new RestResponse(rentalService.getResourcePriceRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -770,6 +785,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourceRentalRule")
 	@RestReturn(String.class)
 	public RestResponse updateResourceRentalRule(UpdateResourceRentalRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		rentalService.updateResourceRentalRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -785,7 +804,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceRentalRule")
 	@RestReturn(ResourceRentalRuleDTO.class)
 	public RestResponse getResourceRentalRule(GetResourceRentalRuleCommand cmd) {
-
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		RestResponse response = new RestResponse(rentalService.getResourceRentalRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -800,6 +822,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourceOrderRule")
 	@RestReturn(String.class)
 	public RestResponse updateResourceOrderRule(UpdateResourceOrderRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		rentalService.updateResourceOrderRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -815,7 +841,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceOrderRule")
 	@RestReturn(ResourceOrderRuleDTO.class)
 	public RestResponse getResourceOrderRule(GetResourceOrderRuleCommand cmd) {
-
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		RestResponse response = new RestResponse(rentalService.getResourceOrderRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
