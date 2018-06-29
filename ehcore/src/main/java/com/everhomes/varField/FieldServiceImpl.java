@@ -1,6 +1,8 @@
 package com.everhomes.varField;
 
 
+import com.everhomes.activity.ActivityCategories;
+import com.everhomes.activity.ActivityProivider;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
@@ -18,7 +20,42 @@ import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.CustomerAccountDTO;
+import com.everhomes.rest.customer.CustomerApplyProjectDTO;
+import com.everhomes.rest.customer.CustomerCertificateDTO;
+import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
+import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
+import com.everhomes.rest.customer.CustomerInvestmentDTO;
+import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerTalentDTO;
+import com.everhomes.rest.customer.CustomerTaxDTO;
+import com.everhomes.rest.customer.CustomerTrackingDTO;
+import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
+import com.everhomes.rest.customer.CustomerTrademarkDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.ListCustomerAccountsCommand;
+import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
+import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
+import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
+import com.everhomes.rest.customer.ListCustomerDepartureInfosCommand;
+import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
+import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
+import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
+import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
+import com.everhomes.rest.customer.ListCustomerTalentsCommand;
+import com.everhomes.rest.customer.ListCustomerTaxesCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
+import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
+import com.everhomes.rest.customer.PotentialCustomerType;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
@@ -29,7 +66,28 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.*;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ListScopeFieldItemCommand;
+import com.everhomes.rest.varField.ListSystemFieldCommand;
+import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
+import com.everhomes.rest.varField.ListSystemFieldItemCommand;
+import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.rest.varField.ScopeFieldGroupInfo;
+import com.everhomes.rest.varField.ScopeFieldInfo;
+import com.everhomes.rest.varField.ScopeFieldItemInfo;
+import com.everhomes.rest.varField.SystemFieldDTO;
+import com.everhomes.rest.varField.SystemFieldGroupDTO;
+import com.everhomes.rest.varField.SystemFieldItemDTO;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
+import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -41,6 +99,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.yellowPage.YellowPageProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -124,6 +183,12 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
+
+    @Autowired
+    private ActivityProivider activityProivider;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -490,6 +555,8 @@ public class FieldServiceImpl implements FieldService {
                         });
                         //按default order排序
                         items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
+                        // service alliance and activity expand items ,we add expand item flag for it
+                        addExpandItems(dto, items);
                         dto.setItems(items);
                     }
                     dtos.add(dto);
@@ -501,6 +568,24 @@ public class FieldServiceImpl implements FieldService {
             }
         }
         return null;
+    }
+
+    private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items) {
+        if (dto.getFieldName().equals("sourceItemId")) {
+            List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+            if (activityCategories != null && activityCategories.size() > 0) {
+                activityCategories.forEach((a) -> {
+                    FieldItemDTO activityItem = new FieldItemDTO();
+                    activityItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    activityItem.setFieldId(dto.getId());
+                    activityItem.setItemDisplayName(a.getName());
+                    activityItem.setId(a.getId());
+                    items.add(activityItem);
+                });
+            }
+            //add service alliance categories
+
+        }
     }
 
     @Override

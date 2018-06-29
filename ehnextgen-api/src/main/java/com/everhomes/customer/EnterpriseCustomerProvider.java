@@ -187,4 +187,12 @@ public interface EnterpriseCustomerProvider {
     void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId,Integer namespaceId);
 
     CustomerConfiguration getSyncCustomerConfiguration(Integer  namespaceId);
+
+    void createPotentialCustomer(CustomerPotentialData data);
+
+    CustomerPotentialData findPotentialCustomerByName(String text);
+
+    void deletePotentialCustomer(Long enterpriseId);
+
+    List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType);
 }

@@ -170,6 +170,7 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
 import com.everhomes.rest.customer.MonthStatistics;
 import com.everhomes.rest.customer.NamespaceCustomerType;
+import com.everhomes.rest.customer.PotentialCustomerDTO;
 import com.everhomes.rest.customer.QuarterStatistics;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
@@ -198,6 +199,7 @@ import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.YearQuarter;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
@@ -834,7 +836,8 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setLastTrackingTime(customer.getLastTrackingTime());
         updateCustomer.setAdminFlag(customer.getAdminFlag());
         updateCustomer.setVersion(customer.getVersion());
-
+        updateCustomer.setSourceId(customer.getSourceId());
+        updateCustomer.setSourceType(customer.getSourceType());
         if (cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
@@ -848,7 +851,7 @@ public class CustomerServiceImpl implements CustomerService {
             String geohash = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
             updateCustomer.setGeohash(geohash);
         }
-        if (null != updateCustomer && updateCustomer.getTrackingUid() != null && updateCustomer.getTrackingUid() != 0) {
+        if (updateCustomer.getTrackingUid() != null && updateCustomer.getTrackingUid() != 0) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(updateCustomer.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
                 updateCustomer.setTrackingName(detail.getContactName());
@@ -4190,5 +4193,20 @@ public class CustomerServiceImpl implements CustomerService {
             throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE, QualityServiceErrorCode.ERROR_DOWNLOAD_EXCEL, ex.getLocalizedMessage());
         }
         return response;
+    }
+
+    @Override
+    public void deletePotentialCustomer(DeleteEnterpriseCommand cmd) {
+        enterpriseCustomerProvider.deletePotentialCustomer(cmd.getEnterpriseId());
+    }
+
+    @Override
+    public List<PotentialCustomerDTO> listPotentialCustomers(DeleteEnterpriseCommand cmd) {
+        List<PotentialCustomerDTO> dtos = new ArrayList<>();
+        List<CustomerPotentialData> data = enterpriseCustomerProvider.listPotentialCustomers(cmd.getNamespaceId(),cmd.getSourceId(),cmd.getSourceType());
+        if(data!=null && data.size()>0){
+            data.forEach((r)->dtos.add(ConvertHelper.convert(r,PotentialCustomerDTO.class)));
+        }
+        return dtos;
     }
 }

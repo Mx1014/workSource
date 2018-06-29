@@ -108,6 +108,7 @@ import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
 import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
+import com.everhomes.rest.customer.PotentialCustomerDTO;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.SyncCustomerDataCommand;
@@ -129,6 +130,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
+import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -1653,5 +1655,32 @@ public class CustomerController extends ControllerBase {
     @RequestMapping("exportCustomerDetails")
     public HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse) {
         return customerService.exportCustomerDetails(cmd,httpResponse);
+    }
+
+    /**
+     * <b>URL: /customer/deletePotentialCustomer</b>
+     * <p>删除潜在客户信息</p>
+     */
+    @RequestMapping("deletePotentialCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse deletePotentialCustomer(DeleteEnterpriseCommand cmd) {
+        customerService.deletePotentialCustomer(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listPotentialCustomers</b>
+     * <p>列表潜在客户信息</p>
+     */
+    @RequestMapping("listPotentialCustomers")
+    @RestReturn(value = PotentialCustomerDTO.class,collection = true)
+    public RestResponse listPotentialCustomers(DeleteEnterpriseCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listPotentialCustomers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }

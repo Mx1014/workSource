@@ -44,6 +44,7 @@ import com.everhomes.server.schema.tables.daos.EhCustomerEntryInfosDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerEventsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerPotentialDatasDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTaxesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
@@ -64,6 +65,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerEntryInfos;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
 import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerPotentialDatas;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTaxes;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
@@ -85,6 +87,7 @@ import com.everhomes.server.schema.tables.records.EhCustomerEntryInfosRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerEventsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerInvestmentsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerPatentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerPotentialDatasRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTalentsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTaxesRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
@@ -2116,5 +2119,44 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .where(Tables.EH_CUSTOMER_CONFIGUTATIONS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_CUSTOMER_CONFIGUTATIONS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                 .fetchAnyInto(CustomerConfiguration.class);
+    }
+
+    @Override
+    public void createPotentialCustomer(CustomerPotentialData data) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerPotentialDatas.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerPotentialDatasDao dao = new EhCustomerPotentialDatasDao(context.configuration());
+        data.setId(id);
+        data.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.insert(data);
+    }
+
+    @Override
+    public CustomerPotentialData findPotentialCustomerByName(String text) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_CUSTOMER_POTENTIAL_DATAS)
+                .where(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAME.eq(text))
+                .fetchAnyInto(CustomerPotentialData.class);
+    }
+
+    @Override
+    public void deletePotentialCustomer(Long enterpriseId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerPotentialDatasDao datasDao = new EhCustomerPotentialDatasDao(context.configuration());
+        datasDao.deleteById(enterpriseId);
+    }
+
+    @Override
+    public List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerPotentialDatasRecord> query = context.selectQuery(Tables.EH_CUSTOMER_POTENTIAL_DATAS);
+        query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAMESPACE_ID.eq(namespaceId));
+        if (sourceId != null) {
+            query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.SOURCE_ID.eq(sourceId));
+        }
+        if (StringUtils.isNotBlank(sourceType)) {
+            query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.SOURCE_TYPE.eq(sourceType));
+        }
+        return query.fetchInto(CustomerPotentialData.class);
     }
 }

@@ -169,6 +169,9 @@ public class CreateEnterpriseCustomerCommand {
     private List<AttachmentDescriptor> banner;
     private String hotline;
 
+    private Long sourceId;
+    private String sourceType;
+
 
     public Long getOrgId() {
         return orgId;
@@ -832,5 +835,21 @@ public class CreateEnterpriseCustomerCommand {
 
     public void setDeviceType(Byte deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
     }
 }

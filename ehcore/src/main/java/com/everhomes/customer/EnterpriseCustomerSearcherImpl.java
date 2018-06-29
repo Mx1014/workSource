@@ -150,6 +150,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
             builder.field("adminFlag" , customer.getAdminFlag());
+            builder.field("sourceId" , customer.getSourceId());
+            builder.field("sourceType" , customer.getSourceType());
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -307,7 +309,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         
         if(null != cmd.getPropertyArea()){
         	RangeFilterBuilder rf = new RangeFilterBuilder("propertyArea");
-        	if(cmd.getPropertyArea().indexOf(",") > -1 && cmd.getPropertyArea().split(",").length == 2){
+        	if(cmd.getPropertyArea().contains(",") && cmd.getPropertyArea().split(",").length == 2){
         		if(null != cmd.getPropertyArea().split(",")[0] && !"@".equals(cmd.getPropertyArea().split(",")[0])){
         			rf.gte(Double.parseDouble(cmd.getPropertyArea().split(",")[0]));
         		}
@@ -320,7 +322,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
         if(null != cmd.getPropertyUnitPrice()){
         	RangeFilterBuilder rf = new RangeFilterBuilder("propertyUnitPrice");
-        	if(cmd.getPropertyUnitPrice().indexOf(",") > -1 && cmd.getPropertyUnitPrice().split(",").length == 2){
+        	if(cmd.getPropertyUnitPrice().contains(",") && cmd.getPropertyUnitPrice().split(",").length == 2){
         		if(null != cmd.getPropertyUnitPrice().split(",")[0] && !"@".equals(cmd.getPropertyUnitPrice().split(",")[0])){
         			rf.gte(Double.parseDouble(cmd.getPropertyUnitPrice().split(",")[0]));
         		}
@@ -329,6 +331,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         		}
         		fb = FilterBuilders.andFilter(fb, rf); 
         	}
+        }
+
+        if (cmd.getSourceId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("sourceId", cmd.getSourceId()));
+        }
+        if (cmd.getSourceType() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("sourceType", cmd.getSourceType()));
         }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

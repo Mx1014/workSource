@@ -32,6 +32,9 @@ public class FieldItemDTO {
 
     private Byte businessValue;
 
+    // 是否微活动和服务联盟的扩展items
+    private String expandFlag;
+
     public Byte getBusinessValue() {
         return businessValue;
     }
@@ -94,6 +97,14 @@ public class FieldItemDTO {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getExpandFlag() {
+        return expandFlag;
+    }
+
+    public void setExpandFlag(String expandFlag) {
+        this.expandFlag = expandFlag;
     }
 
     @Override
