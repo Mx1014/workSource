@@ -4298,9 +4298,18 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}*/
 		//正则校验数字
-		if (StringUtils.isNotEmpty(data.getAreaSize()) || StringUtils.isNotEmpty(data.getRentArea())) {
+		if (StringUtils.isNotEmpty(data.getAreaSize())) {
 			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
-			if(!Pattern.compile(reg).matcher(data.getAreaSize()).find() || !Pattern.compile(reg).matcher(data.getRentArea()).find()){
+			if(!Pattern.compile(reg).matcher(data.getAreaSize()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_AREASIZE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("AreaSize format is error");
+				return log;
+			}
+		}
+		if (StringUtils.isNotEmpty(data.getRentArea())) {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getRentArea()).find()){
 				log.setCode(CommunityServiceErrorCode.ERROR_AREASIZE_FORMAT);
 				log.setData(data);
 				log.setErrorLog("AreaSize format is error");
