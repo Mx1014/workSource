@@ -2705,7 +2705,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         forumService.cancelLikeTopic(cmd);
     }
 
-    @Caching(evict = {@CacheEvict(value = "ForumPostById", key = "#topicId")})
     private void sendComment(long topicId, long forumId, long orgId, OrganizationMember member, long category, int namespaceId) {
         User user = UserContext.current().getUser();
         Post comment = new Post();
@@ -6169,38 +6168,34 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd) {
-        Long enterpriseId = getTopOrganizationId(cmd.getOrganizationId());
-        Organization enterprise = this.checkOrganization(enterpriseId);
-
+        Long topOrgId = getTopOrganizationId(cmd.getOrganizationId());
+        Organization topOrg = this.checkOrganization(topOrgId);
         ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
         Organization org = this.checkOrganization(cmd.getOrganizationId());
         if (null == org)
             return response;
-
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        String keywords = cmd.getKeywords();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
-        //组装参数
-        VisibleFlag visibleFlag = VisibleFlag.SHOW;
+/*
+        VisibleFlag visibleFlag;
+        if (VisibleFlag.fromCode(cmd.getVisibleFlag()) != VisibleFlag.SHOW)
+            visibleFlag = VisibleFlag.ALL;
+
         if (VisibleFlag.ALL == VisibleFlag.fromCode(cmd.getVisibleFlag())) {
             visibleFlag = null;
         } else if (null != VisibleFlag.fromCode(cmd.getVisibleFlag())) {
             visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
         }
+*/
 
-        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0), cmd.getTargetTypes());
-
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(cmd.getKeywords(), cmd.getIsSignedup(), locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0), cmd.getTargetTypes());
         if (0 == organizationMembers.size()) {
             return response;
         }
 
         Map<String, OrganizationMember> contact_member = organizationMembers.stream().collect(Collectors.toMap(OrganizationMember::getContactToken, Function.identity()));
-
-        response.setNextPageAnchor(locator.getAnchor());
-
-
         // 开始聚合
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
@@ -6209,10 +6204,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
         groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
-        List<String> tokens = organizationMembers.stream().map(r -> {
-            return r.getContactToken();
-        }).collect(Collectors.toList());
-        List<OrganizationMember> origins = organizationProvider.listOrganizationMemberByPath(enterprise.getPath(), groupTypes, tokens);
+        List<String> tokens = organizationMembers.stream().map(EhOrganizationMembers::getContactToken).collect(Collectors.toList());
+        List<OrganizationMember> origins = organizationProvider.listOrganizationMemberByPath(topOrg.getPath(), groupTypes, tokens);
 
         Map<String, OrganizationMemberDTO> target_map = new HashMap<>();
 
@@ -6249,11 +6242,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             orgDto_target.setDepartments(departments);
                         } else {
                             orgDto_target.getDepartments().add(orgDTO_now);
-//                                departments = orgDto_target.getDepartments();
-//                                departments.add(orgDTO_now);
-//                                orgDto_target.setDepartments(departments);
                         }
-
                     }
                     break;
                 case JOB_POSITION:
@@ -6269,9 +6258,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                             orgDto_target.setJobPositions(jobPositions);
                         } else {
                             orgDto_target.getJobPositions().add(orgDTO_now);
-//                                jobPositions = orgDto_target.getJobPositions();
-//                                jobPositions.add(positionDTO_now);
-//                                orgDto_target.setJobPositions(jobPositions);
                         }
                     }
                     break;
@@ -6295,19 +6281,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         });
 
-        List<OrganizationMemberDTO> members = new ArrayList<>();
-        target_map.values().stream().map(r -> {
-            members.add(r);
-            return null;
-        }).collect(Collectors.toList());
+        //   the contactToken should be hidden while the visible flag is show.
+        List<OrganizationMemberDTO> members;
+        if(VisibleFlag.fromCode(cmd.getVisibleFlag()) == VisibleFlag.SHOW)
+            members = target_map.values().stream().peek(r -> {
+                if(VisibleFlag.fromCode(r.getVisibleFlag()) == VisibleFlag.HIDE)
+                    r.setContactToken(null);
+            }).collect(Collectors.toList());
+        else
+            members = new ArrayList<>(target_map.values());
+        //  set the order
+        members.sort((o1, o2) -> o2.getDetailId().compareTo(o1.getDetailId()));
 
-        Collections.sort(members, new Comparator<OrganizationMemberDTO>() {
-            @Override
-            public int compare(OrganizationMemberDTO o1, OrganizationMemberDTO o2) {
-                return o2.getDetailId().compareTo(o1.getDetailId());
-            }
-        });
-
+        response.setNextPageAnchor(locator.getAnchor());
         response.setMembers(members);
         return response;
     }
@@ -11416,7 +11402,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
         }
 
-        List<OrganizationMember> organizationMembers = null;
+        List<OrganizationMember> organizationMembers;
         if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE || (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode()))) {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(), cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
             response.setTotalCount(this.organizationProvider.countOrganizationPersonnels(cmd.getNamespaceId(), orgCommoand, cmd.getIsSignedup(), visibleFlag));

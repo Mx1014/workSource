@@ -5406,7 +5406,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
         List<OrganizationMember> result = new ArrayList<>();
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+        /* modify by lei lv,增加了detail表，部分信息挪到detail表里去取 */
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
@@ -5417,7 +5417,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         Organization org = findOrganizationById(listCommand.getOrganizationId());
 
-        Condition cond = null;
+        Condition cond;
         if (filterScopeType.equals(FilterOrganizationContactScopeType.CURRENT.getCode())) {
             // 当传入的是分公司节点时
             if (org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && org.getParentId() != 0) {
@@ -5443,7 +5443,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (!StringUtils.isEmpty(keywords)) {
             Condition cond1 = t2.field("contact_token").eq(keywords);
             cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%"));
-//			cond1 = cond1.or(t2.field("employee_no").like("%" + keywords + "%"));
             cond = cond.and(cond1);
         }
 
@@ -5496,10 +5495,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         List<OrganizationMember> records = step.where(condition).groupBy(t1.field("contact_token")).orderBy(t1.field("detail_id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, OrganizationMember.class));
-                return null;
-            }).collect(Collectors.toList());
+            records.forEach(r -> result.add(ConvertHelper.convert(r, OrganizationMember.class)));
         }
         if (null != locator)
             locator.setAnchor(null);
