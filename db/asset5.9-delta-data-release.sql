@@ -5,7 +5,8 @@ INSERT INTO `eh_rentalv2_order_records` (`id`,`order_no`,`biz_order_num`,`pay_or
 
 update `eh_rentalv2_order_records` t1 right join `eh_rentalv2_orders` t2 on t1.`order_no` = t2.`order_no` set t1.order_id = t2.id,t1.amount = t2.pay_total_money,t1.status = IF(t2.status in (2,7,9,10,14,20),1,0) ;
 
--- by cx.yang 新支付 start
+-- 通用脚本  
+-- ADD BY 杨崇鑫
 -- 新支付的配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 	VALUES ('pay.v2.appKey', '6caa8584-c723-4b7b-9aec-071b4e31418f', '新新支付appKey', '0');
@@ -14,7 +15,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 	VALUES ('pay.v2.payHomeUrl', 'http://payv2-beta.zuolin.com/pay', '新新支付payHomeUrl', '0');
 	
--- by cx.yang 支付回调
+-- 支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 	VALUES ('asset.pay.v2.callback.url', '/asset/payNotify', '物业缴费新支付回调接口', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
@@ -50,8 +51,7 @@ update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id=
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1003' where namespace_id=999990;
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4443' where namespace_id=999993;
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4422' where namespace_id=999979;
-
--- by cx.yang 新支付end
+-- END BY 杨崇鑫
 
 -- by yanlong.liang
 -- 支付回调
