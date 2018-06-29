@@ -59,7 +59,6 @@ public class DoorAuthDTO {
     private String   description;
     private String address;
     private String authMethod;
-
     private Long goFloor;
     private Byte authRuleType;
     private Integer totalAuthAmount;

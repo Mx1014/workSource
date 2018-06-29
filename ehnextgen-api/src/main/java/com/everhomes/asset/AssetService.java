@@ -66,7 +66,7 @@ public interface AssetService {
 
 	void OneKeyNotice(OneKeyNoticeCommand cmd);
 
-	ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
+	ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd);
 
 	List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
 
@@ -181,4 +181,6 @@ public interface AssetService {
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
     void noticeTrigger(Integer namespaceId);
+    //add by tangcen
+	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
 }

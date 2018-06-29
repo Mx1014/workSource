@@ -1643,6 +1643,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
             WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
+            //申请数量
+            dto.setRequestAmount(requestMaterial.getAmount());
             //增加flowCaseId
             //flow case id get
             FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(requestMaterial.getRequestId()
