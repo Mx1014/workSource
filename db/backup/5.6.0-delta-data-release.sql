@@ -1,3 +1,4 @@
+-- 通用脚本
 -- 物品放行 1.1 修改模块名
 -- by shiheng.ma
 update eh_service_modules set name = '物品放行' where id = 49200;
@@ -10,16 +11,18 @@ update eh_acl_privileges set name = '物品放行 全部权限',description = '�
 update eh_locale_templates t set t.description = '物品放行' , t.text = '物品放行' where t.scope = 'relocation' and t.code = 1;
 
 update eh_locale_templates t set t.description = '物品放行工作流申请人显示内容' , t.text = '放行物品：${items} 共${totalNum}件
- 放行时间：${relocationDate}' where t.scope = 'relocation' and t.code = 2;
+放行时间：${relocationDate}' where t.scope = 'relocation' and t.code = 2;
 
 update eh_locale_templates t set t.description = '物品放行工作流处理人显示内容' , t.text = '申请人：${requestorName}  企业名称：${requestorEnterpriseName}
- 放行物品：${items} 共${totalNum}件
+放行物品：${items} 共${totalNum}件
 放行时间：${relocationDate}' where t.scope = 'relocation' and t.code = 3;
 
 -- 能耗升级离线包版本 by  jiarui 20180619
 UPDATE eh_version_urls SET download_url = REPLACE(download_url,'1-0-3','1-0-4') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
 UPDATE eh_version_urls SET  info_url = REPLACE(info_url,'1-0-3','1-0-4') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
 UPDATE eh_version_urls SET  target_version = '1.0.4' WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement' LIMIT 1);
+-- END
+
 
 -- 通用脚本
 -- by 刘一麟 20180619
@@ -106,7 +109,7 @@ GROUP BY punch_month,owner_type,owner_id ORDER BY punch_month DESC   ;
 -- 考勤4.2  end
 
 
-
+-- 通用脚本
 -- 审批3.0初始数据, 需先执行schema后执行此sql start by ryan.
 UPDATE eh_general_form_templates SET id = 101 WHERE form_name = '日报';
 UPDATE eh_general_form_templates SET id = 102 WHERE form_name = '周报';
@@ -261,9 +264,9 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '园区入驻', 40100, NULL, '{"skipRoute":"zl://park-service/settle"}', 0, 1);
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_id`, `module_url`, `instance_config`,`parent_id`, `signal`) VALUES ((@jump_id := @jump_id + 1), @ns_id, '投诉建议', 20100, NULL, '{"taskCategoryId":9,"prefix":"/property-repair-web/build/index.html","skipRoute":"zl://browser/i?url="}', 0, 1);
 
-
 -- END
 
+-- 通用脚本
 -- 企业客户管理ERROR code  by jiarui
 SET @id = (SELECT MAX(id) from eh_locale_strings);
 
@@ -1290,3 +1293,11 @@ UPDATE `eh_var_field_group_scopes` SET `category_id`='1001' WHERE module_name='c
 UPDATE `eh_flows` SET `owner_id`='1001' WHERE  module_id='21200' AND namespace_id=999949;
 UPDATE `eh_flow_cases` SET `owner_id`='1001' WHERE module_id='21200' AND namespace_id=999949;
 -- END BY 丁建民
+
+-- 通用脚本  
+-- ADD BY 丁建民 
+-- issue32579 合同管理2.6
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10008', 'zh_CN', '合同查询参数错误');
+-- END BY 丁建民 

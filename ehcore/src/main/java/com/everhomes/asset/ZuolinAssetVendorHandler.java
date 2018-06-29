@@ -903,16 +903,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     }else{
                         dto.setAddressStr("");
                     }
-                    try{
-                        //获得contract的categoryId
-                        if(!StringUtils.isBlank(dto.getContractId())){
-                            Long categoryId = contractService.findContractCategoryIdByContractId(Long.valueOf(dto.getContractId()));
-                            dto.setCategoryId(categoryId);
-                        }
-                    }catch (Exception e){
-                        LOGGER.error("failed to get category id, contractId is={}",dto.getContractId(), e);
-                    }
-
                     tabBills.add(dto);
                 }
             }

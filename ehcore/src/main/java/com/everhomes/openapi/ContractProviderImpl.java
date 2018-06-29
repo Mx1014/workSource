@@ -141,14 +141,25 @@ public class ContractProviderImpl implements ContractProvider {
 
 	@Override
 	public List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers, Long categoryId) {
-		Result<Record> result = getReadOnlyContext().select()
-			.from(Tables.EH_CONTRACTS)
-			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-			.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.in(contractNumbers))
-			.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
-			.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
-			.fetch();
+		Result<Record> result = null;
+		if(categoryId == null || categoryId.longValue() <= 0L) {
+		    result = getReadOnlyContext().select()
+		            .from(Tables.EH_CONTRACTS)
+		            .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+		            .and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+		            .and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.in(contractNumbers))
+		            .orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+		            .fetch();
+		} else {
+    		result = getReadOnlyContext().select()
+    			.from(Tables.EH_CONTRACTS)
+    			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+    			.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+    			.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.in(contractNumbers))
+    			.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
+    			.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+    			.fetch();
+		}
 		
 		if (result != null) {
 			return result.map(r->ConvertHelper.convert(r, Contract.class));
@@ -222,14 +233,25 @@ public class ContractProviderImpl implements ContractProvider {
 
 	@Override
 	public List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize, Long categoryId) {
-		Result<Record> result = getReadOnlyContext().select()
-				.from(Tables.EH_CONTRACTS)
-				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
-				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
-				.limit(from, pageSize)
-				.fetch();
+	    Result<Record> result = null;
+	    if(categoryId == null || categoryId.longValue() >= 0L) {
+    		result = getReadOnlyContext().select()
+    				.from(Tables.EH_CONTRACTS)
+    				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+    				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+    				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+    				.limit(from, pageSize)
+    				.fetch();
+	    } else {
+	        result = getReadOnlyContext().select()
+                    .from(Tables.EH_CONTRACTS)
+                    .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                    .and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
+                    .orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+                    .limit(from, pageSize)
+                    .fetch();
+	    }
 			
 		if (result != null) {
 			return result.map(r->ConvertHelper.convert(r, Contract.class));
@@ -737,9 +759,9 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public Long findContractCategoryIdByContractId(Long contractId) {
 		DSLContext context = getReadOnlyContext();
-		return context.select(Tables.EH_CONTRACTS.CATEGORY_ID)
-				.from(Tables.EH_CONTRACTS)
-				.where(Tables.EH_CONTRACTS.ID.eq(contractId))
+        return context.select(Tables.EH_CONTRACTS.CATEGORY_ID)
+                .from(Tables.EH_CONTRACTS)
+                .where(Tables.EH_CONTRACTS.ID.eq(contractId))
                 .fetchOne(Tables.EH_CONTRACTS.CATEGORY_ID);
 	}
 

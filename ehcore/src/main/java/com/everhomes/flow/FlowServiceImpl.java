@@ -3172,6 +3172,7 @@ public class FlowServiceImpl implements FlowService {
         if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
             type = 1;
             flowUserType = FlowUserType.APPLIER;
+            cmd.setOrganizationId(null);
             details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, callback);
         } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
             type = 2;
@@ -5951,6 +5952,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        cmd.setOrganizationId(null);
 
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
         RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());
