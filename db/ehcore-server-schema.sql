@@ -1177,6 +1177,45 @@ CREATE TABLE `eh_archives_notifications` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_archives_operational_configurations`;
+
+
+CREATE TABLE `eh_archives_operational_configurations` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
+  `detail_id` BIGINT NOT NULL COMMENT 'the detail id that belongs to the employee which is the change target',
+  `operation_type` TINYINT NOT NULL COMMENT 'the type of operation',
+  `operation_date` DATE COMMENT 'the date of executing the operation',
+  `additional_info` TEXT COMMENT 'the addition information for the operation',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-cancel, 1-pending, 2-complete',
+  `create_time` DATETIME COMMENT 'create time',
+  `operator_uid` BIGINT COMMENT 'the id of the operator',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_archives_operational_logs`;
+
+
+CREATE TABLE `eh_archives_operational_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the log',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the organization',
+  `detail_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the detail id that belongs to the employee',
+  `operation_type` TINYINT NOT NULL COMMENT 'the type of the operate',
+  `operation_time` date NOT NULL COMMENT 'the time of the operate',
+  `string_tag1` VARCHAR(2048) COMMENT 'redundant information for the operate',
+  `string_tag2` VARCHAR(2048) COMMENT 'redundant information for the operate',
+  `string_tag3` VARCHAR(2048) COMMENT 'redundant information for the operate',
+  `string_tag4` VARCHAR(2048) COMMENT 'redundant information for the operate',
+  `string_tag5` VARCHAR(2048) COMMENT 'redundant information for the operate',
+  `string_tag6` VARCHAR(2048) COMMENT 'redundant information for the operate',
+  `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the operator',
+  `operator_name` VARCHAR(64) NOT NULL DEFAULT 0 COMMENT 'the id of the operator',
+  `create_time` DATETIME COMMENT 'create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_archives_sticky_contacts`;
 
 
@@ -1189,7 +1228,22 @@ CREATE TABLE `eh_archives_sticky_contacts` (
   `update_time` DATETIME COMMENT 'the time of data updating',
   `operator_uid` BIGINT COMMENT 'the id of the operator',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_asset_app_categories`;
+
+
+CREATE TABLE `eh_asset_app_categories` (
+  `id` BIGINT NOT NULL,
+  `category_id` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `create_uid` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `instance_flag` VARCHAR(1024),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `i_category_id` (`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='relation mappings among applications';
+
 DROP TABLE IF EXISTS `eh_asset_bill_notify_records`;
 
 
@@ -1285,6 +1339,25 @@ CREATE TABLE `eh_asset_bills` (
   UNIQUE KEY `u_eh_bill_account_period_address` (`account_period`,`address_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_asset_module_app_mappings`;
+
+
+CREATE TABLE `eh_asset_module_app_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `asset_category_id` BIGINT,
+  `contract_category_id` BIGINT,
+  `energy_category_id` BIGINT,
+  `energy_flag` TINYINT COMMENT '在每个域空间，只有一个energy flag为1，0为不启用',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '2:active; 0:inactive',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `create_uid` BIGINT NOT NULL,
+  `update_time` DATETIME,
+  `update_uid` BIGINT,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_asset_category_id` (`asset_category_id`),
+  UNIQUE KEY `u_contract_category_id` (`contract_category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='relation mappings among applications';
 
 DROP TABLE IF EXISTS `eh_asset_payment_order`;
 
@@ -2563,15 +2636,25 @@ CREATE TABLE `eh_configurations` (
   `description` VARCHAR(256),
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `display_name` VARCHAR(128),
-
+  `is_readonly` int(3) COMMENT '是否只读：1，是 ；null 或其他值为 否',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_configurations_record_change`;
 
 
---
--- member of global parition
--- shared among namespaces, no application module specific information
---
+CREATE TABLE `eh_configurations_record_change` (
+  `id` INTEGER NOT NULL COMMENT '主键',
+  `namespace_id` INTEGER NOT NULL COMMENT '域空间ID',
+  `conf_pre_json` VARCHAR(1024) COMMENT '变动前信息JSON字符串',
+  `conf_aft_json` VARCHAR(1024) COMMENT '变动后信息JSON字符串',
+  `record_change_type` int(3) COMMENT '变动类型。0，新增；1，修改；3，删除',
+  `operator_uid` BIGINT COMMENT '操作人userId',
+  `operate_time` DATETIME COMMENT '操作时间',
+  `operator_ip` VARCHAR(50) COMMENT '操作者的IP地址',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='配置项信息变更记录表';
+
 DROP TABLE IF EXISTS `eh_content_server`;
 
 
@@ -2661,6 +2744,28 @@ CREATE TABLE `eh_contract_building_mappings` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_contract_categories`;
+
+
+CREATE TABLE `eh_contract_categories` (
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `name` VARCHAR(64) NOT NULL,
+  `path` VARCHAR(128),
+  `default_order` INTEGER,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
+  `create_time` DATETIME,
+  `delete_uid` BIGINT DEFAULT 0 COMMENT 'record deleter user id',
+  `delete_time` DATETIME,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `logo_uri` VARCHAR(1024) COMMENT 'default cover uri',
+  `entry_id` INTEGER,
+  `contract_application_scene` TINYINT NOT NULL DEFAULT 0 COMMENT '0 租赁合同场景 1 物业合同场景 2 综合合同场景',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_contract_charging_change_addresses`;
 
@@ -2772,6 +2877,10 @@ CREATE TABLE `eh_contract_params` (
   `receivable_date` INTEGER NOT NULL DEFAULT 0 COMMENT '合同费用清单应收日期',
   `receivable_unit` TINYINT NOT NULL DEFAULT 0 COMMENT '单位：0: 分; 1: 小时; 2: 天; 3: 月; 4: 年',
   `paid_period` INTEGER NOT NULL DEFAULT 0 COMMENT '付款日期',
+  `payorreceive_contract_type` tinyint(2) DEFAULT 0 COMMENT '0 收款合同 1付款合同',
+  `contract_number_rulejson` TEXT COMMENT '合同规则',
+  `update_time` DATETIME COMMENT '更新时间',
+  `category_id` BIGINT COMMENT 'contract category id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -2882,6 +2991,7 @@ CREATE TABLE `eh_contracts` (
   `treaty_particulars` TEXT COMMENT '合同摘要',
   `payment_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0:普通合同；1：付款合同',
   `update_time` DATETIME,
+  `category_id` BIGINT COMMENT 'contract category id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -3321,6 +3431,9 @@ CREATE TABLE `eh_customer_trackings` (
   `intention_grade` INTEGER COMMENT '意向等级',
   `tracking_time` DATETIME COMMENT '跟进时间',
   `content` TEXT COMMENT '跟进内容',
+  `contact_phone` VARCHAR(255),
+  `visit_person_name` VARCHAR(64),
+  `visit_time_length` DECIMAL(10,2),
   `content_img_uri` VARCHAR(2048) COMMENT '跟进内容图片uri',
   `status` TINYINT NOT NULL DEFAULT 2,
   `creator_uid` BIGINT COMMENT '创建人uid',
@@ -4194,14 +4307,53 @@ CREATE TABLE `eh_enterprise_addresses` (
 
   `building_id` BIGINT NOT NULL DEFAULT 0,
   `building_name` VARCHAR(128),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_enterprise_approval_groups`;
+
+
+CREATE TABLE `eh_enterprise_approval_groups` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT,
+  `name` VARCHAR(64) NOT NULL COMMENT 'name of the approval group',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0. inactive, 1.active',
+  `group_attribute` VARCHAR(128) NOT NULL DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT, CUSTOMIZE',
+  `approval_icon` VARCHAR(1024) COMMENT 'the default icon that belongs to the group',
+  `operator_uid` BIGINT,
+  `operator_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_enterprise_approval_templates`;
 
---
--- member of eh_groups sharding group
---
+
+CREATE TABLE `eh_enterprise_approval_templates` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64),
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
+  `module_id` BIGINT DEFAULT 0 COMMENT 'the module id',
+  `module_type` VARCHAR(64),
+  `project_id` BIGINT NOT NULL DEFAULT 0,
+  `project_type` VARCHAR(64),
+  `form_template_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the template form',
+  `support_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'APP:0, WEB:1, APP_WEB: 2',
+  `approval_name` VARCHAR(128) NOT NULL,
+  `approval_remark` VARCHAR(256) COMMENT 'the remark of the approval',
+  `group_id` BIGINT NOT NULL DEFAULT '5' COMMENT 'the enterprise group id',
+  `approval_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
+  `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be modified from desk, 0: no, 1: yes',
+  `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be deleted from desk, 0: no, 1: yes',
+  `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
+  `update_time` DATETIME COMMENT 'last update time',
+  `create_time` DATETIME COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_enterprise_attachments`;
 
 
@@ -6358,6 +6510,7 @@ CREATE TABLE `eh_flow_scripts` (
   `integral_tag3` BIGINT NOT NULL DEFAULT 0,
   `integral_tag4` BIGINT NOT NULL DEFAULT 0,
   `integral_tag5` BIGINT NOT NULL DEFAULT 0,
+  `last_commit` VARCHAR(40) COMMENT 'repository last commit id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='flow scripts in dev mode';
 
@@ -6742,31 +6895,6 @@ CREATE TABLE `eh_general_approval_scope_map` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_general_approval_templates`;
-
-
-CREATE TABLE `eh_general_approval_templates` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_id` BIGINT,
-  `owner_type` VARCHAR(64),
-  `organization_id` BIGINT NOT NULL DEFAULT 0,
-  `module_id` BIGINT DEFAULT 0 COMMENT 'the module id',
-  `module_type` VARCHAR(64),
-  `project_id` BIGINT NOT NULL DEFAULT 0,
-  `project_type` VARCHAR(64),
-  `form_template_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the template form',
-  `support_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'APP:0, WEB:1, APP_WEB: 2',
-  `approval_name` VARCHAR(128) NOT NULL,
-  `approval_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE',
-  `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be modified from desk, 0: no, 1: yes',
-  `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be deleted from desk, 0: no, 1: yes',
-  `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
-  `update_time` DATETIME COMMENT 'last update time',
-  `create_time` DATETIME COMMENT 'record create time',
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
 DROP TABLE IF EXISTS `eh_general_approval_vals`;
 
 
@@ -6827,6 +6955,12 @@ CREATE TABLE `eh_general_approvals` (
   `icon_uri` VARCHAR(1024) COMMENT 'the avatar of the approval',
   `approval_remark` VARCHAR(256) COMMENT 'the remark of the approval',
   `default_order` INTEGER NOT NULL DEFAULT 0,
+  `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
   `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the userId of the operator',
   `operator_name` VARCHAR(128) COMMENT 'the real name of the operator',
   PRIMARY KEY (`id`)
@@ -6944,7 +7078,39 @@ CREATE TABLE `eh_general_forms` (
   `modify_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes',
   `delete_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_gogs_repos`;
+
+
+CREATE TABLE `eh_gogs_repos` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `module_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the module id',
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `repo_type` VARCHAR(32) NOT NULL,
+  `name` VARCHAR(128) COMMENT 'name',
+  `full_name` VARCHAR(512) COMMENT 'full name',
+  `description` TEXT COMMENT 'description',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
+  `create_time` datetime(3),
+  `creator_uid` BIGINT,
+  `update_time` datetime(3),
+  `update_uid` BIGINT,
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
+  `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag5` BIGINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='gogs repository';
 
 DROP TABLE IF EXISTS `eh_group_member_logs`;
 
@@ -7814,6 +7980,108 @@ CREATE TABLE `eh_me_web_menus` (
   `status` TINYINT DEFAULT 2 COMMENT '0: inactive, 2: active',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_meeting_invitations`;
+
+
+CREATE TABLE `eh_meeting_invitations` (
+  `id` BIGINT NOT NULL,
+  `meeting_reservation_id` BIGINT NOT NULL COMMENT '会议预约eh_meeting_reservations的id',
+  `source_type` VARCHAR(45) NOT NULL COMMENT '机构或者个人：ORGANIZATION OR MEMBER_DETAIL',
+  `source_id` BIGINT NOT NULL COMMENT '机构id或员工detail_id',
+  `source_name` VARCHAR(64) NOT NULL COMMENT '机构名称或者员工的姓名',
+  `role_type` VARCHAR(16) NOT NULL COMMENT '参会人或抄送人',
+  `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+  `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+  `operate_time` DATETIME COMMENT '记录更新时间',
+  `operator_uid` BIGINT COMMENT '记录更新人userId',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_meeting_reservation_id` (`meeting_reservation_id`),
+  KEY `i_eh_source_id` (`source_type`,`source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会议邀请清单，即参会人和抄送人清单';
+
+DROP TABLE IF EXISTS `eh_meeting_records`;
+
+
+CREATE TABLE `eh_meeting_records` (
+  `id` BIGINT NOT NULL COMMENT '主键',
+  `meeting_reservation_id` BIGINT NOT NULL COMMENT '会议预约ID，id of eh_meeting_reservations',
+  `meeting_subject` VARCHAR(256) COMMENT '会议主题，冗余字段，用于纪要列表展示主题名称',
+  `content` TEXT COMMENT '会议纪要详细内容',
+  `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+  `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+  `operate_time` DATETIME COMMENT '记录更新时间',
+  `operator_uid` BIGINT COMMENT '记录更新人userId',
+  `operator_name` VARCHAR(64) COMMENT '操作人姓名',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_meeting_reservation_id` (`meeting_reservation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会议纪要表';
+
+DROP TABLE IF EXISTS `eh_meeting_reservations`;
+
+
+CREATE TABLE `eh_meeting_reservations` (
+  `id` BIGINT NOT NULL COMMENT '主键',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间ID',
+  `organization_id` BIGINT NOT NULL COMMENT '总公司ID',
+  `subject` VARCHAR(256) COMMENT '会议主题',
+  `content` VARCHAR(1024) COMMENT '会议详细内容',
+  `meeting_room_name` VARCHAR(128) COMMENT '会议室名称，预约会议室后保存会议室名称，后期该值不随着会议室编辑而改变',
+  `meeting_room_seat_count` INTEGER COMMENT '可容纳座位数，预约会议室后保存会议室名称，后期该值不随着会议室编辑而改变',
+  `meeting_room_id` BIGINT COMMENT '会议室id,id of eh_meeting_rooms',
+  `meeting_sponsor_user_id` BIGINT NOT NULL DEFAULT 0 COMMENT '会议发起人的user_id',
+  `meeting_sponsor_detail_id` BIGINT NOT NULL COMMENT '会议发起人的detail_id',
+  `meeting_sponsor_name` VARCHAR(64) NOT NULL COMMENT '会议发起人的姓名',
+  `meeting_recorder_user_id` BIGINT COMMENT '会议纪要人user_id',
+  `meeting_recorder_detail_id` BIGINT COMMENT '会议纪要人detail_id',
+  `meeting_recorder_name` VARCHAR(64) COMMENT '会议纪要人的姓名',
+  `invitation_user_count` INTEGER COMMENT '会议受邀人数',
+  `meeting_date` date NOT NULL COMMENT '会议预定日期',
+  `expect_begin_time` DATETIME NOT NULL COMMENT '预计开始时间（预订会议室的时间）',
+  `expect_end_time` DATETIME NOT NULL COMMENT '预计结束时间（预订会议室的时间）',
+  `lock_begin_time` DATETIME NOT NULL COMMENT '实际锁定开始时间',
+  `lock_end_time` DATETIME NOT NULL COMMENT '实际锁定结束时间',
+  `act_begin_time` DATETIME COMMENT '实际开始时间，只有用户操作了开始会议才有值',
+  `act_end_time` DATETIME COMMENT '实际结束时间，只有用户操作了结束会议才有值',
+  `system_message_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启系统消息通知：0-关闭消息通知 1-开启消息通知',
+  `email_message_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启邮件通知：0-关闭邮件通知 1-开启邮件通知',
+  `act_remind_time` DATETIME COMMENT '实际发出提醒的时间',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：0:DELETED 删除，1:时间锁定， 2:CANCELED 取消,3:NORMAL 正常状态',
+  `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+  `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+  `operate_time` DATETIME COMMENT '记录更新时间',
+  `operator_uid` BIGINT COMMENT '记录更新人userId',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_namespace_organization_id` (`namespace_id`,`organization_id`),
+  KEY `i_eh_meeting_date` (`meeting_date`),
+  KEY `i_eh_meeting_room_id` (`meeting_room_id`),
+  KEY `i_eh_meeting_sponsor_detail_id` (`meeting_sponsor_detail_id`),
+  KEY `i_eh_meeting_recorder_detail_id` (`meeting_recorder_detail_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会议室预约表';
+
+DROP TABLE IF EXISTS `eh_meeting_rooms`;
+
+
+CREATE TABLE `eh_meeting_rooms` (
+  `id` BIGINT NOT NULL COMMENT '主键',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间ID',
+  `organization_id` BIGINT NOT NULL COMMENT '总公司ID',
+  `owner_type` VARCHAR(64) NOT NULL COMMENT '默认EhOrganizations，表示会议室归属的企业',
+  `owner_id` BIGINT NOT NULL COMMENT 'owner_type对应的ID  会议室归属的分公司',
+  `name` VARCHAR(128) NOT NULL COMMENT '会议室名称',
+  `seat_count` INTEGER NOT NULL COMMENT '可容纳座位数',
+  `description` VARCHAR(512) COMMENT '描述',
+  `open_begin_time` time NOT NULL COMMENT '会议室可预订的起始时间',
+  `open_end_time` time NOT NULL COMMENT '会议室可预订的结束时间',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态:  0: DELETED 删除  1:CLOSED 不可用  2 : OPENING 可用',
+  `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
+  `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+  `operate_time` DATETIME COMMENT '记录更新时间',
+  `operator_uid` BIGINT COMMENT '记录更新人userId',
+  `operator_name` VARCHAR(64) COMMENT '操作人姓名',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_namespace_owner_name` (`namespace_id`,`organization_id`,`owner_type`,`owner_id`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会议室资源管理表';
 
 DROP TABLE IF EXISTS `eh_message_boxs`;
 
@@ -9748,6 +10016,24 @@ CREATE TABLE `eh_parking_flow` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_parking_hubs`;
+
+
+CREATE TABLE `eh_parking_hubs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `parking_lot_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_lots',
+  `hub_name` VARCHAR(64) NOT NULL COMMENT 'hub的名称',
+  `hub_mac` VARCHAR(128) NOT NULL COMMENT 'hub的mac地址',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `update_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_parking_invoice_types`;
 
@@ -9901,6 +10187,7 @@ CREATE TABLE `eh_parking_spaces` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `parking_hubs_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10059,6 +10346,7 @@ CREATE TABLE `eh_payment_bill_groups` (
   `due_day_type` TINYINT DEFAULT 1 COMMENT '1:日，2：月 ',
   `brother_group_id` BIGINT COMMENT '兄弟账单组id，联动效果',
   `bills_day_type` TINYINT NOT NULL DEFAULT '4' COMMENT '1. 本周期前几日；2.本周期第几日；3.本周期结束日；4.下周期首月第几日',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='账单组表';
 
@@ -10119,6 +10407,7 @@ CREATE TABLE `eh_payment_bill_items` (
   `bill_group_rule_id` BIGINT,
   `contract_id_type` TINYINT DEFAULT 1 COMMENT '1:contract_id为合同id；0：不是',
   `late_fine_standard_id` BIGINT COMMENT '滞纳金标准id',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='明细';
 
@@ -10180,6 +10469,7 @@ CREATE TABLE `eh_payment_bills` (
   `payment_type` INTEGER COMMENT '账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）',
   `certificate_note` VARCHAR(255) COMMENT '上传凭证图片时附加的留言',
   `is_upload_certificate` TINYINT COMMENT '该账单是否上传了缴费凭证（0:否，1：是）',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='账单表';
 
@@ -10322,6 +10612,7 @@ CREATE TABLE `eh_payment_charging_item_scopes` (
   `owner_type` VARCHAR(64) NOT NULL,
   `project_level_name` VARCHAR(30) COMMENT '园区自定义的收费项目名字',
   `decoupling_flag` TINYINT DEFAULT 0 COMMENT '解耦标志，0:耦合中，收到域名下全部设置的影响;1:副本解耦',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='收费项目范围表';
 
@@ -10375,6 +10666,7 @@ CREATE TABLE `eh_payment_charging_standards_scopes` (
   `update_time` DATETIME,
   `namespace_id` INTEGER DEFAULT 0,
   `brother_standard_id` BIGINT COMMENT '兄弟收费标准id，联动效果',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='收费标准表';
 
@@ -10482,6 +10774,7 @@ CREATE TABLE `eh_payment_notice_config` (
   `notice_msg_id` BIGINT COMMENT '催缴sms信息模板的id',
   `create_time` DATETIME COMMENT '创建时间',
   `create_uid` BIGINT COMMENT '创建账号id',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10625,7 +10918,19 @@ CREATE TABLE `eh_payment_withdraw_orders` (
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_phone_white_list`;
+
+
+CREATE TABLE `eh_phone_white_list` (
+  `id` BIGINT NOT NULL COMMENT '主键',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间',
+  `phone_number` VARCHAR(128) NOT NULL COMMENT '白名单手机号码',
+  `creator_uid` BIGINT COMMENT '记录创建人userID',
+  `create_time` DATETIME COMMENT '记录创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='短信白名单';
 
 DROP TABLE IF EXISTS `eh_pm_notify_configurations`;
 
@@ -11747,7 +12052,29 @@ CREATE TABLE `eh_punch_logs` (
   `should_punch_time` BIGINT COMMENT '应该打卡时间(用以计算早退迟到时长)',
   PRIMARY KEY (`id`),
   KEY `i_eh_user_id` (`user_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_punch_month_reports`;
+
+
+CREATE TABLE `eh_punch_month_reports` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `punch_month` VARCHAR(8) COMMENT 'yyyymm',
+  `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
+  `owner_id` BIGINT COMMENT 'owner resource(user/organization) id',
+  `process` INTEGER COMMENT '进度百分比',
+  `error_info` VARCHAR(200) COMMENT '错误信息(如果归档错误)',
+  `status` TINYINT COMMENT '状态:0-创建更新中 1-创建完成 2-已归档',
+  `creator_uid` BIGINT COMMENT '创建者',
+  `create_time` DATETIME,
+  `punch_member_number` INTEGER COMMENT '考勤人数',
+  `filer_uid` BIGINT COMMENT '创建者',
+  `file_time` DATETIME,
+  `update_time` DATETIME,
+  `creator_Name` VARCHAR(128) COMMENT '创建者姓名',
+  `filer_Name` VARCHAR(128) COMMENT '归档者姓名',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='考勤月报表';
 
 DROP TABLE IF EXISTS `eh_punch_operation_logs`;
 
@@ -11912,7 +12239,7 @@ CREATE TABLE `eh_punch_statistics` (
   `belate_time` BIGINT COMMENT '迟到时长(毫秒数)',
   `leave_early_time` BIGINT COMMENT '早退时长(毫秒数)',
   `forgot_count` INTEGER COMMENT '下班缺卡次数',
-  `status_list` VARCHAR(1024) COMMENT '校正后状态列表(月初到月末)',
+  `status_list` TEXT COMMENT '校正后状态列表(月初到月末)',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -12829,14 +13156,32 @@ CREATE TABLE `eh_regions` (
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
   `hot_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not hot, 1: hot',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_region_name` (`namespace_id`,`parent_id`,`name`),
+  KEY `i_eh_region_name_level` (`name`,`level`),
+  KEY `i_eh_region_path` (`path`),
+  KEY `i_eh_region_path_level` (`path`,`level`),
+  KEY `i_eh_region_parent` (`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-  PRIMARY KEY(`id`),
-  UNIQUE KEY `u_eh_region_name`(`namespace_id`, `parent_id`, `name`),
-  KEY `i_eh_region_name_level`(`name`, `level`),
-  KEY `i_eh_region_path`(`path`),
-  KEY `i_eh_region_path_level`(`path`, `level`),
-  KEY `i_eh_region_parent`(`parent_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `eh_relocation_configs`;
+
+
+CREATE TABLE `eh_relocation_configs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) COMMENT 'attachment object owner type',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id',
+  `agreement_flag` TINYINT DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `agreement_content` TEXT COMMENT '协议内容',
+  `tips_flag` TINYINT DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `tips_content` VARCHAR(100) COMMENT '提示内容',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_relocation_request_attachments`;
 
@@ -12893,6 +13238,7 @@ CREATE TABLE `eh_relocation_requests` (
   `cancel_time` DATETIME,
   `cancel_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'cancel user id',
   `qr_code_url` VARCHAR(256) COMMENT 'url of the qr record',
+  `org_owner_type_id` BIGINT COMMENT '客户类型（小区场景）',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -14578,6 +14924,22 @@ CREATE TABLE `eh_search_types` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_sensitive_filter_record`;
+
+
+CREATE TABLE `eh_sensitive_filter_record` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL COMMENT '域空间ID',
+  `sensitive_words` VARCHAR(128) COMMENT '敏感词',
+  `module_id` BIGINT COMMENT '模块ID',
+  `community_id` BIGINT COMMENT '项目ID',
+  `creator_uid` BIGINT COMMENT '记录发布人userId',
+  `creator_name` VARCHAR(32) COMMENT '发布人姓名',
+  `phone` VARCHAR(128) COMMENT '发布人手机号',
+  `publish_time` DATETIME COMMENT '记录发布时间',
+  `text` TEXT COMMENT '文本内容',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='敏感词过滤日志表';
 
 DROP TABLE IF EXISTS `eh_sequences`;
 
@@ -15097,11 +15459,11 @@ CREATE TABLE `eh_service_hotlines` (
   `contact` VARCHAR(64) COMMENT '热线/客服 联系电话',
   `user_id` BIGINT COMMENT '客服 userid',
   `description` VARCHAR(400) COMMENT '客服 描述',
-  `status` TINYINT NOT NULL DEFAULT '1' COMMENT '0-deleted 1-active',
   `default_order` INTEGER DEFAULT 0 COMMENT '排序字段',
   `create_time` DATETIME,
   `creator_uid` BIGINT,
   `update_time` DATETIME,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-deleted 1-active',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -17590,6 +17952,7 @@ CREATE TABLE `eh_var_field_group_scopes` (
   `update_time` DATETIME,
   `community_id` BIGINT COMMENT '园区id',
   `group_parent_id` BIGINT COMMENT '父组系统id',
+  `category_id` BIGINT COMMENT 'category id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -17631,6 +17994,7 @@ CREATE TABLE `eh_var_field_item_scopes` (
   `update_time` DATETIME,
   `community_id` BIGINT COMMENT '园区id',
   `business_value` TINYINT COMMENT 'the value defined in special business like status',
+  `category_id` BIGINT COMMENT 'category id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -17672,6 +18036,7 @@ CREATE TABLE `eh_var_field_scopes` (
   `update_time` DATETIME,
   `community_id` BIGINT COMMENT '园区id',
   `group_path` VARCHAR(128) COMMENT 'path from the root',
+  `category_id` BIGINT COMMENT 'category id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
 
