@@ -5539,7 +5539,7 @@ public class ForumServiceImpl implements ForumService {
         }
         topicCmd.setCurrentOrgId(currentOrgId);
         topicCmd.setStatus((byte)2);
-        if (!StringUtils.isEmpty(topicCmd.getEmbeddedJson())) {
+        if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY) && !StringUtils.isEmpty(topicCmd.getEmbeddedJson())) {
             ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(topicCmd.getEmbeddedJson(),
                     ActivityPostCommand.class);
             if (tempCmd != null) {
