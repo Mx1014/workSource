@@ -3,6 +3,8 @@ package com.everhomes.rest.welfare;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * 
  * <ul>返回值:
@@ -18,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>imgUri: 图片uri</li>
  * <li>imgUrl: 图片url</li>
  * <li>sendTime: 发送时间</li>
+ * <li>items: 福利项列表 参考{@link com.everhomes.rest.welfare.WelfareItemDTO}</li>
  * </ul>
  */
 public class GetUserWelfareResponse {
@@ -32,7 +35,9 @@ public class GetUserWelfareResponse {
     private Long senderDetailId;
     private String imgUri;
     private String imgUrl;
-    private Long sendTime; 
+    private Long sendTime;
+	private List<WelfareItemDTO> items;
+
 
 	public GetUserWelfareResponse() {
 
@@ -149,4 +154,11 @@ public class GetUserWelfareResponse {
 		this.sendTime = sendTime;
 	}
 
+	public List<WelfareItemDTO> getItems() {
+		return items;
+	}
+
+	public void setItems(List<WelfareItemDTO> items) {
+		this.items = items;
+	}
 }

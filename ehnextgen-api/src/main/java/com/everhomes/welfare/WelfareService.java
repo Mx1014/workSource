@@ -9,6 +9,8 @@ public interface WelfareService {
 	ListWelfaresResponse listWelfares(ListWelfaresCommand cmd);
 
 
+	GetWelfareResponse getWelfare(GetWelfareCommand cmd);
+
 	DraftWelfareResponse draftWelfare(DraftWelfareCommand cmd);
 
 

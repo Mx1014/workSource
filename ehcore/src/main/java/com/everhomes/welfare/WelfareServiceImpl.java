@@ -84,6 +84,11 @@ public class WelfareServiceImpl implements WelfareService {
         return response;
     }
 
+    @Override
+    public GetWelfareResponse getWelfare(GetWelfareCommand cmd) {
+        Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfareId());
+        return new GetWelfareResponse(processWelfaresDTO(welfare));
+    }
     private WelfaresDTO processWelfaresDTO(Welfare r) {
         WelfaresDTO dto = ConvertHelper.convert(r, WelfaresDTO.class);
         dto.setUpdateTime(r.getUpdateTime().getTime());
@@ -305,6 +310,15 @@ public class WelfareServiceImpl implements WelfareService {
         }
         if (welfare.getSendTime() != null) {
             response.setSendTime(welfare.getSendTime().getTime());
+        }
+
+        response.setItems(new ArrayList<>());
+        List<WelfareItem> items = welfareItemProvider.listWelfareItem(welfare.getId());
+        if (null != items) {
+            for (WelfareItem item : items) {
+                WelfareItemDTO itemDTO = ConvertHelper.convert(item, WelfareItemDTO.class);
+                response.getItems().add(itemDTO);
+            }
         }
         return response;
     }

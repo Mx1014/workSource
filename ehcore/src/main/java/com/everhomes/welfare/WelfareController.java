@@ -16,7 +16,7 @@ public class WelfareController extends ControllerBase {
 	
 	@Autowired
 	private WelfareService welfareService;
-	
+
 	/**
 	 * <p>查询列表</p>
 	 * <b>URL: /welfare/listWelfares</b>
@@ -25,6 +25,16 @@ public class WelfareController extends ControllerBase {
 	@RestReturn(ListWelfaresResponse.class)
 	public RestResponse listWelfares(ListWelfaresCommand cmd){
 		return new RestResponse(welfareService.listWelfares(cmd));
+	}
+
+	/**
+	 * <p>查询某个福利</p>
+	 * <b>URL: /welfare/getWelfare</b>
+	 */
+	@RequestMapping("getWelfare")
+	@RestReturn(GetWelfareResponse.class)
+	public RestResponse getWelfare(GetWelfareCommand cmd){
+		return new RestResponse(welfareService.getWelfare(cmd));
 	}
 
 	/**
