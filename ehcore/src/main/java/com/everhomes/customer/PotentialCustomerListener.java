@@ -9,6 +9,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
@@ -24,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 
 /**
@@ -41,6 +45,8 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
     private EnterpriseCustomerProvider customerProvider;
     @Autowired
     private ActivityProivider activityProivider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     private static final String queueName = "potential_customer";
     private static final Logger LOGGER = LoggerFactory.getLogger(PotentialCustomerListener.class);
@@ -52,10 +58,10 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                 LOGGER.info("potentialCustomerListener start run.....");
                 Long id = (Long) o1;
                 if (null == id) {
-                    LOGGER.error("None of activities or service allience info id ......");
+                    LOGGER.error("None of activities or service alliance info id ......");
                 } else {
                     try {
-                        syncActivityAndServiceAllienceData(id, s);
+                        syncActivityAndServiceallianceData(id, s);
                     } catch (Exception e) {
                         LOGGER.error("execute potentialCustomerListener error service id =" + id, e);
                     }
@@ -67,7 +73,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
         return Action.none;
     }
 
-    private void syncActivityAndServiceAllienceData(Long id, String s) {
+    private void syncActivityAndServiceallianceData(Long id, String s) {
         Integer namespaceId;
         if (s.contains(com.everhomes.server.schema.tables.pojos.EhActivityRoster.class.getSimpleName())) {
             //sync  activities
@@ -77,18 +83,24 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
             Integer activityNamespaceId = activity == null ? 0 : activity.getNamespaceId();
             CustomerConfiguration activityConfigutations = customerProvider.getSyncCustomerConfiguration(activityNamespaceId);
             if (activityConfigutations != null && TrueOrFalseFlag.TRUE.equals(TrueOrFalseFlag.fromCode(activityConfigutations.getValue()))) {
-                //todo: sync this record to customer potencial customer temp tables
+                if (activityRoster != null) {
+                    List<OrganizationMember> activityMembers = organizationProvider.listOrganizationMembersByUId(activityRoster.getUid());
+                    if (activityMembers != null && activityMembers.size() > 0) {
+                        //人才团队信息
+                    }
+                }
+
             }
         } else if (s.contains(EhGeneralFormVals.class.getSimpleName())) {
             GeneralFormVal generalFormValObject = generalFormValProvider.getGeneralFormValById(id);
             if (generalFormValObject != null && GeneralFormDataSourceType.USER_COMPANY.equals(GeneralFormDataSourceType.fromCode(generalFormValObject.getFieldName()))) {
-                LOGGER.info("current service allience data is not user company");
+                LOGGER.info("current service alliance data is not user company");
                 return;
             }
-            String allienceTextValue = generalFormValObject == null ? null : generalFormValObject.getFieldValue();
+            String allianceTextValue = generalFormValObject == null ? null : generalFormValObject.getFieldValue();
             namespaceId = generalFormValObject == null ? 0 : generalFormValObject.getNamespaceId();
-            if (StringUtils.isNotBlank(allienceTextValue)) {
-                PostApprovalFormTextValue textValue = new Gson().fromJson(allienceTextValue, PostApprovalFormTextValue.class);
+            if (StringUtils.isNotBlank(allianceTextValue)) {
+                PostApprovalFormTextValue textValue = new Gson().fromJson(allianceTextValue, PostApprovalFormTextValue.class);
             }
             // text value is enterprise name we need  sync to customer  potential  temp tables
             CustomerConfiguration configutations = customerProvider.getSyncCustomerConfiguration(namespaceId);
@@ -103,9 +115,9 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         if (contextRefreshedEvent.getApplicationContext().getParent() == null) {
             String activitySubcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhActivityRoster.class, null);
-            String serviceAllienceSubcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhGeneralFormVals.class, null);
+            String serviceallianceSubcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhGeneralFormVals.class, null);
             localBus.subscribe(activitySubcribeKey, this);
-            localBus.subscribe(serviceAllienceSubcribeKey, this);
+            localBus.subscribe(serviceallianceSubcribeKey, this);
             workerPoolFactory.getWorkerPool().addQueue(queueName);
         }
     }
