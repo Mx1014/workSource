@@ -176,7 +176,7 @@ public class WelfareServiceImpl implements WelfareService {
             }
         }
         welfareReceiverProvider.deleteWelfareReceivers(welfare.getId());
-        if (null != welfareDTO.getItems()) {
+        if (null != welfareDTO.getReceivers()) {
             for (WelfareReceiverDTO dto : welfareDTO.getReceivers()) {
                 WelfareReceiver receiver = ConvertHelper.convert(dto, WelfareReceiver.class);
                 receiver.setOwnerId(welfare.getOwnerId());
