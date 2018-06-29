@@ -986,7 +986,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	 * 获取双休日和节假日关闭日期
 	 * </p>
 	 */
-	@RequestMapping("queryRentalStatistics")
+	@RequestMapping("getHolidayCloseDates")
 	@RestReturn(value = Long.class,collection = true)
 	public RestResponse getHolidayCloseDates( GetHolidayCloseDatesCommand cmd) {
 		RestResponse response = new RestResponse(rentalService.getHolidayCloseDates(cmd));
