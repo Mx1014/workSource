@@ -1332,4 +1332,20 @@ public class ParkingProviderImpl implements ParkingProvider {
 								ParkingRechargeOrderStatus.FAILED.getCode()))))
 				.fetchOneInto(Integer.class));
 	}
+
+	@Override
+	public List<ParkingLot> findParkingLotByIdHash(String parkingLotToken) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
+
+		SelectQuery<EhParkingLotsRecord> query = context.selectQuery(Tables.EH_PARKING_LOTS);
+		if(StringUtils.isNotBlank(parkingLotToken))
+			query.addConditions(Tables.EH_PARKING_LOTS.ID_HASH.like(parkingLotToken+"%"));
+
+		return query.fetch().map(r -> {
+			ParkingLot parkingLot = ConvertHelper.convert(r, ParkingLot.class);
+			populateParkingConfigInfo(parkingLot);
+
+			return parkingLot;
+		});
+	}
 }

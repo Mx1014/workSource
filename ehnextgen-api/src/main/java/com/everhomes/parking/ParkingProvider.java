@@ -160,4 +160,6 @@ public interface ParkingProvider {
     List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor);
 
     Long ParkingRechargeOrdersByUserId(Long userId);
+
+    List<ParkingLot> findParkingLotByIdHash(String parkingLotToken);
 }
