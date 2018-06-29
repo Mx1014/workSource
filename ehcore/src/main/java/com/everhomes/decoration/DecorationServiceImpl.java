@@ -13,6 +13,7 @@ import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalService;
 import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
@@ -309,7 +310,8 @@ public class DecorationServiceImpl implements  DecorationService {
         Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         if (cmd.getPageAnchor() == null)
             cmd.setPageAnchor(0l);
-        ListingLocator locator = new ListingLocator(cmd.getPageAnchor());
+        ListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
         List<DecorationWorker> workers = decorationProvider.listWorkersByRequestId(cmd.getRequestId(),cmd.getKeyword(),locator,pageSize+1);
         if (workers == null)
             return  null;
@@ -396,13 +398,14 @@ public class DecorationServiceImpl implements  DecorationService {
         SearchRequestResponse response = new SearchRequestResponse();
         Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListingLocator locator = null;
-        if (cmd.getPageAnchor() != null)
-            locator = new ListingLocator(cmd.getPageAnchor());
+        if (cmd.getPageAnchor() != null) {
+            locator = new CrossShardListingLocator();
+            locator.setAnchor(cmd.getPageAnchor());
+        }
+
         String address = cmd.getBuildingName();
         if (cmd.getDoorPlate() != null)
             address += "&"+cmd.getDoorPlate();
-        if (cmd.getCancelFlag() == null)
-            cmd.setCancelFlag((byte)0);
         List<DecorationRequest> requests =  this.decorationProvider.queryDecorationRequests(UserContext.getCurrentNamespaceId(),cmd.getCommunityId(),cmd.getStartTime(),
                 cmd.getEndTime(),address,cmd.getStatus(),cmd.getKeyword(),cmd.getCancelFlag(),pageSize+1,locator);
         if (requests == null || requests.size() == 0)
@@ -461,8 +464,10 @@ public class DecorationServiceImpl implements  DecorationService {
         SearchRequestResponse response = new SearchRequestResponse();
         Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListingLocator locator = null;
-        if (cmd.getPageAnchor() != null)
-            locator = new ListingLocator(cmd.getPageAnchor());
+        if (cmd.getPageAnchor() != null) {
+            locator = new CrossShardListingLocator(cmd.getPageAnchor());
+            locator.setAnchor(cmd.getPageAnchor());
+        }
         List<DecorationRequest> requests =  this.decorationProvider.queryUserRelateRequests(UserContext.getCurrentNamespaceId(),
                 cmd.getConmmunityId(),cmd.getPhone(),pageSize+1,locator);
         if (requests == null || requests.size() == 0)
