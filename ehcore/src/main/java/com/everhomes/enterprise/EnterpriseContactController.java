@@ -205,12 +205,10 @@ public class EnterpriseContactController extends ControllerBase {
         return res;
     }
 
-    /**
+    /*
+    /** 根据客户端反馈，该接口已不再使用 29/06/2018 feedback:WangRR modified by Ryan.
      * <b>URL: /contact/listContactsByEnterpriseId</b>
      * <p>显示企业联系人</p>
-     *
-     * @return {@link ListEnterpriseContactResponse}
-     */
     @RequestMapping("listContactsByEnterpriseId")
     @RestReturn(value = ListEnterpriseContactResponse.class)
     public RestResponse listContactsByEnterpriseId(@Valid ListContactsByEnterpriseIdCommand cmd) {
@@ -250,7 +248,7 @@ public class EnterpriseContactController extends ControllerBase {
         res.setErrorDescription("OK");
 
         return res;
-    }
+    }*/
 
 
     /**

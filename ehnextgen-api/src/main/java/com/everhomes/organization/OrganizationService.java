@@ -257,14 +257,10 @@ public interface OrganizationService {
 	PmManagementsResponse listPmManagements(ListPmManagementsCommand cmd);
 
 	ListTopicsByTypeCommandResponse listUserTask(ListUserTaskCommand cmd);
-//	ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd);
-//	void processPartnerOrganizationUser(Long userId, Long partnerId);
 
 	SearchTopicsByTypeResponse searchTopicsByType(SearchTopicsByTypeCommand cmd);
 
 	void createDepartment(CreateDepartmentCommand cmd);
-//	ListDepartmentsCommandResponse listDepartments(ListDepartmentsCommand cmd);
-
 
 	boolean updateOrganizationMemberByIds(UpdateOrganizationMemberByIdsCommand cmd);
 
@@ -294,8 +290,8 @@ public interface OrganizationService {
 	void deleteEnterpriseById(DeleteOrganizationIdCommand cmd, Boolean checkAuth);
 
 	ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd);
-	ListOrganizationMemberCommandResponse listOrganizationPersonnels(
-			ListOrganizationContactCommand cmd, boolean pinyinFlag);
+//	ListOrganizationMemberCommandResponse listOrganizationPersonnels(
+//			ListOrganizationContactCommand cmd, boolean pinyinFlag);
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
@@ -484,7 +480,7 @@ public interface OrganizationService {
 	String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
 
 
-	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
+//	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
 
 	void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd);
 
@@ -567,22 +563,6 @@ public interface OrganizationService {
 	 * @return ListOrganizationContactCommandResponse
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
-
-    /****** new interfac for archives-1.0  START******/
-
-    //  暂时舍弃 by R 20170718
-//    OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
-
-/*
-	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
-													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
-    Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
-
-    void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
-*/
-
-	/****** new interfac for archives-1.0 END******/
-
 	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
 	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);

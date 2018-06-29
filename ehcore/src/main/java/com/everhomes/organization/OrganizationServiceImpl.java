@@ -435,6 +435,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -6189,19 +6190,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
         }
 
-        //:todo
-        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0), cmd.getTargetTypes());
-
-        Map<String, OrganizationMember> contact_member = new HashMap<>();
-
-        organizationMembers.stream().map(r -> {
-            contact_member.put(r.getContactToken(), r);
-            return null;
-        }).collect(Collectors.toList());
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0), cmd.getTargetTypes());
 
         if (0 == organizationMembers.size()) {
             return response;
         }
+
+        Map<String, OrganizationMember> contact_member = organizationMembers.stream().collect(Collectors.toMap(OrganizationMember::getContactToken, Function.identity()));
 
         response.setNextPageAnchor(locator.getAnchor());
 
@@ -6811,7 +6806,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //        setUserDefaultCommunityByOrganization(namespaceId, userId, enterpriseId);
     }
 
-    @Override
+    /*@Override
     public ListOrganizationMemberCommandResponse listOrganizationPersonnels(ListOrganizationContactCommand cmd, boolean pinyinFlag) {
         Long startTime1 = System.currentTimeMillis();
         ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
@@ -6847,7 +6842,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().size() > 0) {
                     Condition cond = null;
                     if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode())) {
-                        /**当前节点是企业**/
+                        *//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**当前节点是企业**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//*
                         if (org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
                             //寻找隶属企业的直属隐藏部门
                             Organization underDirectOrg = organizationProvider.findUnderOrganizationByParentOrgId(org.getId());
@@ -6858,7 +6853,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
                             }
 
-                        } else {/**当前节点不是企业**/
+                        } else {*//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**当前节点不是企业**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//*
                             cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId());
                         }
                     }
@@ -6930,12 +6925,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.debug("Track: listOrganizationPersonnels: get organization member elapse:{}, convert elapse:{}, total elapse:{}", endTime2 - startTime2, endTime - startTime3, endTime - startTime1);
         }
         return response;
-    }
+    }*/
 
-    @Override
+/*    @Override
     public List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org) {
         return this.convertDTO(organizationMembers, org);
-    }
+    }*/
 
     @Override
     public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd) {
@@ -6943,7 +6938,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         command.setOrganizationId(cmd.getOrganizationId());
         command.setPageSize(100000);
         command.setKeywords(cmd.getKeywords());
-        ListOrganizationMemberCommandResponse response = this.listOrganizationPersonnels(command, false);
+        ListOrganizationMemberCommandResponse response = this.listOrganizationPersonnelsWithDownStream(command);
 
         List<OrganizationMemberDTO> roleMembers = new ArrayList<OrganizationMemberDTO>();
 
@@ -10670,7 +10665,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         command.setKeywords(cmd.getKeywords());
         command.setOrganizationId(cmd.getOrganizationId());
         command.setPageSize(100000);
-        ListOrganizationMemberCommandResponse response = this.listOrganizationPersonnels(command, false);
+        ListOrganizationMemberCommandResponse response = this.listOrganizationPersonnelsWithDownStream(command);
         List<OrganizationMemberDTO> memberDTOs = response.getMembers();
         ByteArrayOutputStream out = null;
         XSSFWorkbook wb = this.createXSSFWorkbook(memberDTOs);

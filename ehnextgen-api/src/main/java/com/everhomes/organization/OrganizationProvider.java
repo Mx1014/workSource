@@ -436,7 +436,7 @@ public interface OrganizationProvider {
 
 	List<UserOrganizations> listUserOrganizationByUserId(Long userId);
 
-	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes);
+	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes);
 	// path查询接口
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens);
 

@@ -5392,7 +5392,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes) {
+    public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType, List<String> groupTypes) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
         List<OrganizationMember> result = new ArrayList<>();
@@ -5440,10 +5440,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
             cond = cond.and(t1.field("target_id").ne(0L));
             cond = cond.and(t1.field("target_type").eq(OrganizationMemberTargetType.USER.getCode()));
-        }
-
-        if (null != visibleFlag) {
-            cond = cond.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
         }
 
         if (null != groupTypes && groupTypes.size() > 0) {
