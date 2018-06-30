@@ -551,14 +551,28 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 			}
 
 			// 解析
-			XiaomaoJsonEntity<List<XiaomaoCardType>> entity = JSONObject.parseObject(result,
-					new TypeReference<XiaomaoJsonEntity<List<XiaomaoCardType>>>() {
+			XiaomaoJsonEntity entity = JSONObject.parseObject(result,
+					new TypeReference<XiaomaoJsonEntity>() {
 					});
 			if (null == entity || !entity.isSuccess()) {
 				break;
 			}
-
-			cardTypeList = entity.getData();
+			if(entity.getData()==null){
+				break;
+			}
+			JSONArray array=null;
+			try{
+				array = JSONArray.parseArray(entity.getData().toString());
+			}catch(Exception e){
+				LOGGER.error("pasre error,",e);
+				break;
+			}
+			
+			cardTypeList = array.stream().map(r->{
+				return JSONObject.parseObject(r==null?"{}":r.toString(),
+						new TypeReference<XiaomaoCardType>() {
+						});
+			}).collect(Collectors.toList());
 
 		} while (false);
 
