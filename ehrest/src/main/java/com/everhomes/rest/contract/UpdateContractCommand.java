@@ -113,8 +113,18 @@ public class UpdateContractCommand {
     private String settled;
     private Long categoryId;
     private Byte contractApplicationScene = 0;
+    
+    private Long templateId;
 
-    public Byte getContractApplicationScene() {
+    public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public Byte getContractApplicationScene() {
 		return contractApplicationScene;
 	}
 

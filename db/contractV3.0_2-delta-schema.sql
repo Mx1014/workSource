@@ -24,3 +24,6 @@ CREATE TABLE `eh_contract_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- END by 丁建民
+
+-- 合同管理 合同套打
+ALTER TABLE `eh_contracts` ADD COLUMN `template_id` bigint(20) NULL COMMENT 'contract template_id';

@@ -376,10 +376,10 @@ public class ContractController extends ControllerBase {
 		
 	}
 	
-	/**
+/*	*//**
 	 * <p>合同关联模板，签约应用模板</p>
 	 * <b>URL: /contract/contractTemplateMappings</b>
-	 */
+	 *//*
 	@RequestMapping("contractTemplateMappings")
 	@RestReturn(String.class)
 	public RestResponse contractTemplateMappings(ContractTemplateMappingsCommand cmd) {
@@ -387,5 +387,5 @@ public class ContractController extends ControllerBase {
 		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.contractTemplateMappings(cmd));
 		
-	}
+	}*/
 }

@@ -1414,6 +1414,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(cmd.getCategoryId() != null) {
 			contract.setCategoryId(cmd.getCategoryId());
 		}
+		
+		if(cmd.getTemplateId() != null) {
+			contract.setCategoryId(cmd.getCategoryId());
+		}
+		
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		contractProvider.updateContract(contract);
