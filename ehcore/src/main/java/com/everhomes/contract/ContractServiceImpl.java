@@ -1,6 +1,40 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -10,11 +44,8 @@ import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.ResourceCategory;
-import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -51,7 +82,6 @@ import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
@@ -64,12 +94,60 @@ import com.everhomes.rest.asset.RentFree;
 import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.community.ListBuildingCommand;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
-import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.AddContractTemplateCommand;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ChangeType;
+import com.everhomes.rest.contract.ChargingVariablesDTO;
+import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractApplicationScene;
+import com.everhomes.rest.contract.ContractAttachmentDTO;
+import com.everhomes.rest.contract.ContractChargingChangeDTO;
+import com.everhomes.rest.contract.ContractChargingItemDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractExportDetailDTO;
+import com.everhomes.rest.contract.ContractLogDTO;
+import com.everhomes.rest.contract.ContractNumberDataType;
+import com.everhomes.rest.contract.ContractParamDTO;
+import com.everhomes.rest.contract.ContractParamGroupMapDTO;
+import com.everhomes.rest.contract.ContractParamGroupType;
+import com.everhomes.rest.contract.ContractPaymentPlanDTO;
+import com.everhomes.rest.contract.ContractPaymentType;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTemplateDTO;
+import com.everhomes.rest.contract.ContractTemplateStatus;
+import com.everhomes.rest.contract.ContractType;
+import com.everhomes.rest.contract.CreateContractCommand;
+import com.everhomes.rest.contract.CreatePaymentContractCommand;
+import com.everhomes.rest.contract.DeleteContractCommand;
+import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EntryContractCommand;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.GenerateContractNumberCommand;
+import com.everhomes.rest.contract.GenerateContractNumberRule;
+import com.everhomes.rest.contract.GetContractParamCommand;
+import com.everhomes.rest.contract.GetUserGroupsCommand;
+import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractTemplatesResponse;
+import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
+import com.everhomes.rest.contract.ListContractsBySupplierCommand;
+import com.everhomes.rest.contract.ListContractsBySupplierResponse;
+import com.everhomes.rest.contract.ListContractsCommand;
+import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
+import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
+import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.contract.ReviewContractCommand;
+import com.everhomes.rest.contract.SearchContractCommand;
+import com.everhomes.rest.contract.SetContractParamCommand;
+import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
+import com.everhomes.rest.contract.UpdateContractCommand;
+import com.everhomes.rest.contract.UpdateContractTemplateCommand;
+import com.everhomes.rest.contract.UpdatePaymentContractCommand;
+import com.everhomes.rest.contract.listContractTemplateCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -81,12 +159,10 @@ import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -109,50 +185,12 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppService;
-import com.everhomes.util.*;
-import com.everhomes.varField.Field;
 import com.everhomes.varField.FieldItem;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
-import com.everhomes.varField.ScopeField;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
@@ -1416,7 +1454,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		
 		if(cmd.getTemplateId() != null) {
-			contract.setCategoryId(cmd.getCategoryId());
+			contract.setTemplateId(cmd.getTemplateId());
 		}
 		
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -2540,8 +2578,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Override
 	public ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd) {
 		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
+		
+		ContractTemplate contractTemplateParent = null;
 		//新增的模板需要进行判断，是属于新增的还是复制的，如果存在id则表示是复制模板来的，需要添加parentId
 		if(cmd.getId() != null) {
+			contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
 			contractTemplate.setParentId(cmd.getId());
 		}
 		if(cmd.getId() == null) {
@@ -2550,6 +2591,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(cmd.getOwnerId() == null) {
 			contractTemplate.setOwnerType(cmd.getOwnerType());
 		}
+		
+		
+		if (contractTemplateParent!=null && cmd.getOwnerId()==null) {
+			contractTemplate.setVersion(contractTemplateParent.getVersion()+1);
+		}
+		
+		
 		contractProvider.createContractTemplate(contractTemplate);
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
 	}
@@ -2562,25 +2610,32 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					"Invalid id parameter in the command");
 		}
 		//根据id查询数据，
-		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);;
+		//ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);;
 		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
 		//通用模板更新
-		if (cmd.getOwnerType() == null) {
-			contractTemplate.setVersion(contractTemplateParent.getVersion() + 1);
-			contractTemplate.setParentId(contractTemplateParent.getId());
+		/*if (cmd.getOwnerType() == null) {
+			contractTemplateParent.setVersion(contractTemplateParent.getVersion() + 1);
+			contractTemplateParent.setParentId(contractTemplateParent.getId());
+		}*/
+		if (cmd.getName() != null) {
+			contractTemplateParent.setName(cmd.getName());
 		}
+		if (cmd.getContents() != null) {
+			contractTemplateParent.setContents(cmd.getContents());
+		}
+		
 		//普通模板
 		if (cmd.getOwnerType() != null) {
-			contractTemplate.setVersion(contractTemplateParent.getVersion());
+			contractTemplateParent.setVersion(contractTemplateParent.getVersion());
 		}
 		//传入status=0标识删除的
 		if (cmd.getStatus() == 0) {
-			contractTemplate.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			contractTemplate.setDeleteUid(UserContext.currentUserId());
-			contractTemplate.setStatus(ContractTemplateStatus.INACTIVE.getCode()); //无效的状态
+			contractTemplateParent.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			contractTemplateParent.setDeleteUid(UserContext.currentUserId());
+			contractTemplateParent.setStatus(ContractTemplateStatus.INACTIVE.getCode()); //无效的状态
 		}
-		contractProvider.updateContractTemplate(contractTemplate);
-		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
+		contractProvider.updateContractTemplate(contractTemplateParent);
+		return ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
 	}
 
 	@Override
@@ -2608,25 +2663,4 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return response;
 	}
 
-	@Override
-	public ContractTemplateMappingsDTO contractTemplateMappings(ContractTemplateMappingsCommand cmd) {
-		/*ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
-		
-		
-		
-		//新增的模板需要进行判断，是属于新增的还是复制的，如果存在id则表示是复制模板来的，需要添加parentId
-		if(cmd.getId() != null) {
-			contractTemplate.setParentId(cmd.getId());
-		}
-		if(cmd.getId() == null) {
-			contractTemplate.setVersion(0);
-		}
-		if(cmd.getOwnerId() == null) {
-			contractTemplate.setOwnerType(cmd.getOwnerType());
-		}
-		contractProvider.createContractTemplate(contractTemplate);
-		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);*/
-		
-		return null;
-	}
 }

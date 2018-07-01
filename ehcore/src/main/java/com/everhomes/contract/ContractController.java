@@ -335,7 +335,7 @@ public class ContractController extends ControllerBase {
     }
     
 	/**
-	 * <p>设置合同模板,新增模板</p>
+	 * <p>设置合同模板,新增模板,复制模板，修改通用模板</p>
 	 * <b>URL: /contract/addContractTemplate</b>
 	 */
 	@RequestMapping("addContractTemplate")
@@ -349,7 +349,7 @@ public class ContractController extends ControllerBase {
 	}
 	
 	/**
-	 * <p>设置合同模板,修改模板，删除模板</p>
+	 * <p>小区修改模板，删除模板</p>
 	 * <b>URL: /contract/updateContractTemplate</b>
 	 */
 	@RequestMapping("updateContractTemplate")
@@ -376,16 +376,4 @@ public class ContractController extends ControllerBase {
 		
 	}
 	
-/*	*//**
-	 * <p>合同关联模板，签约应用模板</p>
-	 * <b>URL: /contract/contractTemplateMappings</b>
-	 *//*
-	@RequestMapping("contractTemplateMappings")
-	@RestReturn(String.class)
-	public RestResponse contractTemplateMappings(ContractTemplateMappingsCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
-		ContractService contractService = getContractService(namespaceId);
-		return new RestResponse(contractService.contractTemplateMappings(cmd));
-		
-	}*/
 }

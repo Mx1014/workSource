@@ -798,6 +798,10 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public void updateContractTemplate(ContractTemplate contractTemplate) {
 		assert(contractTemplate.getId() != null);
+		
+		contractTemplate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contractTemplate.setUpdateUid(UserContext.currentUserId());
+		
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, contractTemplate.getId()));
         EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
         dao.update(contractTemplate);
@@ -808,26 +812,29 @@ public class ContractProviderImpl implements ContractProvider {
 	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,
 			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
+        EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
+        EhContractTemplates t2 = Tables.EH_CONTRACT_TEMPLATES.as("t2");
         SelectJoinStep<Record> query = context.select(Tables.EH_CONTRACT_TEMPLATES.fields()).from(Tables.EH_CONTRACT_TEMPLATES);
         
 		Condition cond = Tables.EH_CONTRACT_TEMPLATES.NAMESPACE_ID.eq(namespaceId);
 		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
-		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CONTRACT_TEMPLATE_TYPE.eq((byte) 0));
+		//cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CONTRACT_TEMPLATE_TYPE.eq((byte) 0));
 		
 		if(null != pageAnchor && pageAnchor != 0){
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID.gt(pageAnchor));
 		}
-		if(null != name){
+		if(null != name && !"".equals(name)){
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.NAME.like('%'+name+'%'));
 		}
 		if(null != categoryId){
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CATEGORY_ID.eq(categoryId));
 		}
-		//怎么取到最大的versionid
-		if(null != ownerId){
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.isNull()));
+		//取到最大的versionid
+		if (null != ownerId) {
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
 		}
-		
 		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.UPDATE_TIME.desc());
 		
 		if(null != pageSize)

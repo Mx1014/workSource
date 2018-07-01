@@ -22,6 +22,7 @@ import javax.validation.constraints.NotNull;
  */
 public class UpdateContractTemplateCommand {
 
+	@NotNull
 	private Long id;
 	@NotNull
 	private Integer namespaceId;

@@ -7,8 +7,6 @@ import com.everhomes.rest.openapi.OrganizationDTO;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-import java.util.List;
-
 public interface ContractService {
 	String CONTRACT_PREFIX = "contract-";
 
@@ -60,6 +58,4 @@ public interface ContractService {
 
 	ListContractTemplatesResponse listContractTemplates(listContractTemplateCommand cmd);
 
-	ContractTemplateMappingsDTO contractTemplateMappings(ContractTemplateMappingsCommand cmd);
-	
 }

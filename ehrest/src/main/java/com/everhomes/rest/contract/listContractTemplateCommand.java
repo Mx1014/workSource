@@ -39,7 +39,7 @@ public class listContractTemplateCommand {
 	private Integer version;
 	@NotNull
 	private Long orgId;
-	private Long pageAnchor;
+	private Long pageAnchor = 0L;
 	private Integer pageSize;
 	
 	public Long getPageAnchor() {
