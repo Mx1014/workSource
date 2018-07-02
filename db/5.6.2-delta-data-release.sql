@@ -1,5 +1,5 @@
 -- by st.zheng 数据迁移
-SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_order_records`),0);
+SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_order_records`),10000);
 INSERT INTO `eh_rentalv2_order_records` (`id`,`order_no`,`biz_order_num`,`pay_order_id`,`payment_order_type`,`status`,`create_time`,`update_time`)
     SELECT (@id := @id + 1), order_id,order_num,payment_order_id,payment_order_type,0,create_time,create_time  FROM eh_payment_order_records where order_type = 'rentalOrder';
 
