@@ -1328,57 +1328,31 @@ public class AssetProviderImpl implements AssetProvider {
 	                  PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
 	                  subtractionItem.setId(currentSubtractionItemSeq);
 	                  subtractionItem.setNamespaceId(UserContext.getCurrentNamespaceId());
+	                  subtractionItem.setCategoryId(categoryId);
+	                  subtractionItem.setOwnerId(ownerId);
+	                  subtractionItem.setOwnerType(ownerType);
+	                  subtractionItem.setBillId(nextBillId);
+	                  subtractionItem.setBillGroupId(billGroupId);
+	                  subtractionItem.setSubtractionType(dto.getSubtractionType());
+	                  subtractionItem.setChargingItemId(dto.getChargingItemId());
+	                  subtractionItem.setChargingItemName(dto.getChargingItemName());
+	                  subtractionItem.setCreatorUid(UserContext.currentUserId());
+	                  subtractionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	                  
-//	                  item.setBillGroupRuleId(dto.getBillGroupRuleId());
-//	                  item.setAddressId(dto.getAddressId());
-//	                  item.setBuildingName(dto.getBuildingName());
-//	                  item.setApartmentName(dto.getApartmentName());
-//	                  BigDecimal var1 = dto.getAmountReceivable();
-//	                  //减免项不覆盖收费项目的收付，暂时
-//	                  var1 = DecimalUtils.negativeValueFilte(var1);
-//	                  item.setAmountOwed(var1);
-//	                  item.setAmountReceivable(var1);
-//	                  item.setAmountReceived(new BigDecimal("0"));
-//	                  item.setBillGroupId(billGroupId);
-//	                  item.setBillId(nextBillId);
-//	                  item.setChargingItemName(dto.getBillItemName());
-//	                  item.setChargingItemsId(dto.getBillItemId());
-//	                  item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//	                  item.setCreatorUid(UserContext.currentUserId());
-//	                  item.setDateStr(dateStr);
-//	                  //时间假定
-//	                  item.setDateStrBegin(dates.get(0));
-//	                  item.setDateStrEnd(dates.get(1));
-//	                  item.setId(currentBillItemSeq);
-//	                  item.setNamespaceId(UserContext.getCurrentNamespaceId());
-//	                  item.setOwnerType(ownerType);
-//	                  item.setOwnerId(ownerId);
-//	                  item.setContractId(contractId);
-//	                  item.setContractNum(contractNum);
-//	                  // item 也添加categoryId， 这样费用清单简单些
-//	                  item.setCategoryId(categoryId);
-//	                  if(targetType!=null){
-//	                      item.setTargetType(targetType);
-//	                  }
-//	                  if(targetId != null) {
-//	                      item.setTargetId(targetId);
-//	                  }
-//	                  item.setTargetName(targetName);
-//	                  item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	                  billItemsList.add(item);
+	                  subtractionItemsList.add(subtractionItem);
 	
-	                  amountReceivable = amountReceivable.add(var1);
-	                  amountOwed = amountOwed.add(var1);
+	                  //amountReceivable = amountReceivable.add(var1);
+	                  //amountOwed = amountOwed.add(var1);
 	              }
 	
-	              if(amountOwed.compareTo(new BigDecimal("0"))!=1){
-	                  billStatus = 1;
-	              }
-	              for(int i = 0; i < billItemsList.size(); i++) {
-	                  billItemsList.get(i).setStatus(billStatus);
-	              }
-	              EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
-	              billItemsDao.insert(billItemsList);
+//	              if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+//	                  billStatus = 1;
+//	              }
+//	              for(int i = 0; i < billItemsList.size(); i++) {
+//	                  billItemsList.get(i).setStatus(billStatus);
+//	              }
+	              EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
+	              subtractionItemsDao.insert(subtractionItemsList);
             }
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
