@@ -20,27 +20,18 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-<<<<<<< HEAD
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-=======
-import com.everhomes.portal.PortalService;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.asset.*;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
->>>>>>> 5.6.0
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-<<<<<<< HEAD
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -68,46 +59,6 @@ import com.everhomes.util.RuntimeErrorException;
 *           LASCIATE OGNI SPERANZA, VOI CH'ENTRATE           *
 **************************************************************
 */
-=======
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.List;
-
-/**
- **************************************************************
- *                                                            *
- *   .=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.       *
- *    |                     ______                     |      *
- *    |                  .-"      "-.                  |      *
- *    |                 /            \                 |      *
- *    |     _          |              |          _     |      *
- *    |    ( \         |,  .-.  .-.  ,|         / )    |      *
- *    |     > "=._     | )(__/  \__)( |     _.=" <     |      *
- *    |    (_/"=._"=._ |/     /\     \| _.="_.="\_)    |      *
- *    |           "=._"(_     ^^     _)"_.="           |      *
- *    |               "=\__|IIIIII|__/="               |      *
- *    |              _.="| \IIIIII/ |"=._              |      *
- *    |    _     _.="_.="\          /"=._"=._     _    |      *
- *    |   ( \_.="_.="     `--------`     "=._"=._/ )   |      *
- *    |    > _.="                            "=._ <    |      *
- *    |   (_/                                    \_)   |      *
- *    |                                                |      *
- *    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='      *
- *                                                            *
- *           LASCIATE OGNI SPERANZA, VOI CH'ENTRATE           *
- **************************************************************
- */
->>>>>>> 5.6.0
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
 @RequestMapping("/asset")
@@ -1159,7 +1110,6 @@ public RestResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd){
 @RequestMapping(value = "listPaymentBill")
 @RestReturn(ListPaymentBillResp.class)
 public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-<<<<<<< HEAD
     ListPaymentBillResp result = assetService.listPaymentBill(cmd);
     RestResponse response = new RestResponse(result);
     return response;
@@ -1178,31 +1128,10 @@ public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletReq
             && listPaymentBillResp.getPaymentOrderBillDTOs().size() != 0 
             && listPaymentBillResp.getPaymentOrderBillDTOs().get(0) != null) {
         result = listPaymentBillResp.getPaymentOrderBillDTOs().get(0);
-=======
-//        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
-        ListPaymentBillResp result = paymentService.listPaymentBill(cmd);
-        RestResponse response = new RestResponse(result);
-        return response;
     }
-
-    /**
-     * <b>URL: /asset/listPaymentBillDetail</b>
-     * <p>交易明细查看账单明细接口</p>
-     */
-    @RequestMapping(value = "listPaymentBillDetail")
-    @RestReturn(PaymentOrderBillDTO.class)
-    public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
-        ListPaymentBillResp listPaymentBillResp = paymentService.listPaymentBill(cmd);
-        PaymentOrderBillDTO result = new PaymentOrderBillDTO();
-        if (listPaymentBillResp != null && listPaymentBillResp.getList() != null
-                && listPaymentBillResp.getList().size() != 0 && listPaymentBillResp.getList().get(0) != null
-                && listPaymentBillResp.getList().get(0).getChildren() != null) {
-            result = listPaymentBillResp.getList().get(0).getChildren().get(0);
-        }
-        RestResponse response = new RestResponse(result);
-        return response;
-    }
-
+    RestResponse response = new RestResponse(result);
+    return response;
+}
 
     /**
      * <b>URL: /asset/autoNoticeConfig</b>
@@ -1216,7 +1145,6 @@ public RestResponse listPaymentBillDetail(ListPaymentBillCmd cmd, HttpServletReq
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
->>>>>>> 5.6.0
     }
 
 
@@ -1415,7 +1343,6 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     }
     
     /**
-<<<<<<< HEAD
      * <b>URL: /asset/listPayeeAccounts</b>
      * <p>列出当前项目下所有的收款方账户</p>
      */
@@ -1483,7 +1410,9 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
-=======
+    }
+    
+    /*
      * <p>计算天企汇历史合同的租赁总额字段接口</p>
      * <b>URL: /asset/calculateRentForContract</b>
      */
@@ -1524,7 +1453,6 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
->>>>>>> 5.6.0
     }
 }
 

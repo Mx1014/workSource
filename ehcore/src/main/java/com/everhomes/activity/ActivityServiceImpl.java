@@ -106,6 +106,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -141,7 +143,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
-public class ActivityServiceImpl implements ActivityService {
+public class ActivityServiceImpl implements ActivityService , ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivityServiceImpl.class);
     
@@ -268,9 +270,16 @@ public class ActivityServiceImpl implements ActivityService {
     private SensitiveWordService sensitiveWordService;
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
-    @PostConstruct
+    //@PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
+    }
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
 
     @Override
@@ -5735,7 +5744,7 @@ public class ActivityServiceImpl implements ActivityService {
         Post post = this.forumProvider.findPostById(activity.getPostId());
         FilterWordsCommand command = new FilterWordsCommand();
         if (post != null) {
-            command.setCommunityId(post.getCommunityId());
+            command.setCommunityId(post.getVisibleRegionId());
             command.setModuleType(post.getModuleType());
         }
         List<String> list = new ArrayList<>();

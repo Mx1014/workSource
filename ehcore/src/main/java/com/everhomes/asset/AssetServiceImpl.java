@@ -34,11 +34,8 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-<<<<<<< HEAD
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.portal.PortalService;
-=======
->>>>>>> 5.6.0
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
@@ -4689,7 +4686,6 @@ public class AssetServiceImpl implements AssetService {
 		return judgeAppShowPayResponse;
 	}
 	
-<<<<<<< HEAD
 	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
@@ -4769,7 +4765,7 @@ public class AssetServiceImpl implements AssetService {
 	public void transferOrderPaymentType() {
 		assetProvider.transferOrderPaymentType();
 	}
-=======
+	
 	//issue 31594,计算天企汇历史合同的租赁总额字段
 	@Override
 	public void calculateRentForContract(CalculateRentCommand cmd){
@@ -4828,5 +4824,4 @@ public class AssetServiceImpl implements AssetService {
     public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
         return assetProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId);
     }
->>>>>>> 5.6.0
 }
