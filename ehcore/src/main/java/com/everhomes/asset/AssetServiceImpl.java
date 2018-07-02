@@ -179,16 +179,28 @@ public class AssetServiceImpl implements AssetService {
     private UserPrivilegeMgr userPrivilegeMgr;
 
     @Autowired
+    private CustomerService customerService;
+
+    @Autowired
     private NamespaceResourceService namespaceResourceService;
 
     @Autowired
     private LocaleTemplateProvider localeTemplateProvider;
+
+    @Autowired
+    private ImportFileService importFileService;
+
+    @Autowired
+    private PortalService portalService;
     
     @Autowired
     private ContentServerService contentServerService;
     
     @Autowired
     private PaymentService paymentService;
+    
+    @Autowired
+    private UserService userService;
     
     @Autowired
     private ContractProvider contractProvider;
@@ -821,42 +833,113 @@ public class AssetServiceImpl implements AssetService {
         int minute = c.get(Calendar.MINUTE);
         int second = c.get(Calendar.SECOND);
         String fileName = "bill"+year+month+date+hour+minute+ second;
-
-        List<exportPaymentBillsDetail> dataList = new ArrayList<>();
+        
+        //初始化
+        List<String> propertyNames = new ArrayList<String>();
+        List<String> titleName = new ArrayList<String>();
+        List<Integer> titleSize = new ArrayList<Integer>();
+        propertyNames.add("dateStrBegin");
+        titleName.add("账单开始时间");
+        titleSize.add(20);
+        propertyNames.add("dateStrEnd");
+        titleName.add("账单结束时间");
+        titleSize.add(20);
+        propertyNames.add("targetName");
+        titleName.add("客户名称");
+        titleSize.add(20);
+        propertyNames.add("contractNum");
+        titleName.add("合同编号");
+        titleSize.add(20);
+        propertyNames.add("customerTel");
+        titleName.add("客户手机号");
+        titleSize.add(20);
+        propertyNames.add("noticeTel");
+        titleName.add("催缴手机号");
+        titleSize.add(20);
+        //增加收费项的导出
+        ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
+        List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
+        for(BillItemDTO billItemDTO : billItemDTOList){
+        	if(billItemDTO.getBillItemId() != null) {
+        		propertyNames.add(billItemDTO.getBillItemId().toString());
+                titleName.add(billItemDTO.getBillItemName()+"(元)");
+                titleSize.add(20);
+        	}
+        }
+        propertyNames.add("addresses");
+        titleName.add("楼栋/门牌");
+        titleSize.add(20);
+        propertyNames.add("amountExemption");
+        titleName.add("减免金额");
+        titleSize.add(20);
+        propertyNames.add("remarkExemption");
+        titleName.add("减免备注");
+        titleSize.add(20);
+        propertyNames.add("amountSupplement");
+        titleName.add("增收金额");
+        titleSize.add(20);
+        propertyNames.add("remarkSupplement");
+        titleName.add("增收备注");
+        titleSize.add(20);
+        propertyNames.add("invoiceNum");
+        titleName.add("发票单号");
+        titleSize.add(20);
+        List<Map<String, String>> dataList = new ArrayList<>();
         //组装datalist来确定propertyNames的值
-
         for(int i = 0; i < dtos.size(); i++) {
             ListBillsDTO dto = dtos.get(i);
-            exportPaymentBillsDetail detail = new exportPaymentBillsDetail();
-            detail.setAmountOwed(dto.getAmountOwed().toString());
-            detail.setAmountReceivable(dto.getAmountReceivable().toString());
-            detail.setAmountReceived(dto.getAmountReceived().toString());
-            detail.setContractNum(dto.getContractNum());
-            detail.setBillGroupName(dto.getBillGroupName());
-            detail.setNoticeTel(dto.getNoticeTel());
-//            if(UserContext.getCurrentNamespaceId()!=999971){
-//                detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
-//            }else{
-//                detail.setNoticeTimes("");
-//            }
-            detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
-            detail.setTargetName(dto.getTargetName());
-            detail.setDateStr(dto.getDateStr()); 
-            // 增加发票单号 by wentian 2018/4/27
-            detail.setInvoiceNum(dto.getInvoiceNum());
-            // 增加账单开始时间、账单结束时间、楼栋名称、门牌名称、客户手机号
-            detail.setDateStrBegin(dto.getDateStrBegin());
-            detail.setDateStrEnd(dto.getDateStrEnd());
-            //detail.setBuildingName(dto.getBuildingName());
-            //detail.setApartmentName(dto.getApartmentName());
-            detail.setAddresses(dto.getAddresses());
-            detail.setCustomerTel(dto.getCustomerTel());
+            Map<String, String> detail = new HashMap<String, String>();
+            detail.put("dateStrBegin", dto.getDateStrBegin());
+            detail.put("dateStrEnd", dto.getDateStrEnd());
+            detail.put("targetName", dto.getTargetName());
+            detail.put("contractNum", dto.getContractNum());
+            detail.put("customerTel", dto.getCustomerTel());
+            detail.put("noticeTel", dto.getNoticeTel());
+            //导出增加费项列
+            List<BillItemDTO> billItemDTOs = new ArrayList<>();
+            List<ExemptionItemDTO> exemptionItemDTOs = new ArrayList<>();
+            ListBillDetailVO listBillDetailVO = new ListBillDetailVO();
+            if(dto.getBillId() != null) {
+    			listBillDetailVO = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
+    			if(listBillDetailVO != null && listBillDetailVO.getBillGroupDTO() != null) {
+    				billItemDTOs = listBillDetailVO.getBillGroupDTO().getBillItemDTOList();
+    				exemptionItemDTOs = listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList();
+    			}
+    		}
+            for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
+            	BigDecimal amountRecivable = BigDecimal.ZERO;
+        		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
+        			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
+        				//如果费项是一样的，那么导出的时候，对费项做相加
+        				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+        			}
+        		}
+        		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
+            }
+            detail.put("addresses", dto.getAddresses());
+            //导出增加减免（总和）、减免备注、增收（总和）、增收备注
+            if(listBillDetailVO != null) {
+            	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
+            	detail.put("amountSupplement", listBillDetailVO.getAmountSupplement() != null ? listBillDetailVO.getAmountSupplement().toString() : "");
+            }
+            StringBuffer remarkExemption = new StringBuffer();//减免备注
+            StringBuffer remarkSupplement = new StringBuffer();//增收备注
+            for(ExemptionItemDTO exemptionItemDTO : exemptionItemDTOs) {
+            	if(exemptionItemDTO.getAmount().compareTo(new BigDecimal("0"))==-1) {
+            		remarkExemption = remarkExemption.append(exemptionItemDTO.getRemark() + ",");
+                }else{
+                	remarkSupplement = remarkSupplement.append(exemptionItemDTO.getRemark() + ",");
+                }
+            }
+            if(remarkExemption.length() != 0) {
+            	detail.put("remarkExemption", remarkExemption.substring(0, remarkExemption.length() - 1));
+            }
+            if(remarkSupplement.length() != 0) {
+            	detail.put("remarkSupplement", remarkSupplement.substring(0, remarkSupplement.length() - 1));
+            }
+            detail.put("invoiceNum", dto.getInvoiceNum());
             dataList.add(detail);
         }
-
-        String[] propertyNames = {"dateStrBegin", "dateStrEnd", "billGroupName","targetName","contractNum","customerTel","noticeTel","addresses","amountReceivable","amountReceived","amountOwed","status","invoiceNum"};
-        String[] titleName ={"账单开始时间","账单结束时间","账单组","客户名称","合同编号","客户手机号","催缴手机号","楼栋门牌","应收(元)","已收(元)","欠收(元)","缴费状态", "发票单号"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20};
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
     }
@@ -4824,4 +4907,36 @@ public class AssetServiceImpl implements AssetService {
     public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
         return assetProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId);
     }
+
+	public IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd) {
+		String nickName = cmd.getUsername();
+		Integer namespaceId = cmd.getNamespaceId();
+		IsUserExistInAddressResponse response = new IsUserExistInAddressResponse();
+		response.setIsExist((byte)0);//初始化
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		//通过个人客户名称以及域空间，查找出所有的个人客户
+		List<User> users = userProvider.listUserByKeyword(null, null, null, nickName, null, namespaceId, locator, 9999999);
+		//查找个人客户所有关联的楼栋门牌
+		for(User user : users) {
+			UserContext.setCurrentNamespaceId(cmd.getNamespaceId());
+			UserContext.current().setUser(user);
+			ListUserRelatedScenesCommand listUserRelatedScenesCommand = new ListUserRelatedScenesCommand();
+        	List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(listUserRelatedScenesCommand);
+        	List<Long> addressIds = new ArrayList<>();
+        	//获取到个人客户所有关联的楼栋门牌
+        	for(SceneDTO sceneDTO : sceneDtoList) {
+        		//修复issue-32510 个人客户场景，审核中的门牌，该门牌关联了账单，期望不可以看到账单
+        		if(sceneDTO != null && sceneDTO.getStatus() != null && sceneDTO.getStatus().equals((byte)3)) {//2:审核中，3：已认证
+        			FamilyDTO familyDTO = (FamilyDTO) StringHelper.fromJsonString(sceneDTO.getEntityContent(), FamilyDTO.class);
+            		addressIds.add(familyDTO.getAddressId());
+        		}
+        	}
+        	//如果新建账单时，所有关联的楼栋门牌都被个人客户包含了，说明符合新增的规则
+        	if(addressIds != null && cmd.getAddressIds() != null && addressIds.containsAll(cmd.getAddressIds())) {
+        		response.setIsExist((byte)1);
+        		break;
+        	}
+		}
+		return response;
+	}
 }
