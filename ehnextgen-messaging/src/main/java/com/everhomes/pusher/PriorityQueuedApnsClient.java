@@ -59,9 +59,10 @@ public class PriorityQueuedApnsClient implements ApnsClient {
                     	Notification msg = queue.take();
                     	if(msg != null){
                     		NotificationResponse result = client.push(msg);
-	                       	 //推送失败将推送消息放回队列中
+	                       	 //推送失败,打印失败日志
 	                       	 if(result == null || result.getHttpStatusCode() != 200){
-	                       		 queue.add(msg);
+	                       		 //queue.add(msg);
+	                       		logger.error("Pushing message failure ,NotificationResponse= "+result+"  priority=" + msg.getPriority());
 	                       	 }
 	                           logger.info("Pushing message,NotificationResponse= "+result+"  priority=" + msg.getPriority());
 	                           logger.info("NotificationResponse:"+result);
