@@ -5432,6 +5432,5 @@ public class AssetProviderImpl implements AssetProvider {
 	public void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd) {
 		
 	}
-}
     
 }
