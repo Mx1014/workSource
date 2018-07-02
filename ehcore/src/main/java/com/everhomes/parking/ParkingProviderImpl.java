@@ -516,7 +516,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
 												 String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-												 Byte rechargeType, String paidType, String paySource, String keyWords) {
+												 Byte rechargeType, String paidType,String cardNumber, Byte status, String paySource, String keyWords) {
     	
     	final BigDecimal[] count = new BigDecimal[1];
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class), null, 
@@ -529,7 +529,6 @@ public class ParkingProviderImpl implements ParkingProvider {
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(ParkingOrderDeleteFlag.NORMAL.getCode()));
-                    condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.ge(ParkingRechargeOrderStatus.PAID.getCode()));
                     
                     if(StringUtils.isNotBlank(plateNumber))
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.eq(plateNumber));
@@ -539,6 +538,8 @@ public class ParkingProviderImpl implements ParkingProvider {
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(payerPhone));
                     if(StringUtils.isNotBlank(paidType))
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAID_TYPE.eq(paidType));
+					if(StringUtils.isNotBlank(cardNumber))
+						condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CARD_NUMBER.like("%" + cardNumber + "%"));
                     if(null != rechargeType)
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TYPE.eq(rechargeType));
                     if(null != startDate)
@@ -553,7 +554,13 @@ public class ParkingProviderImpl implements ParkingProvider {
 								.or(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.like("%" + keyWords + "%"))
 								.or(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.like("%" + keyWords + "%")));
 					}
-                	count[0] = query.where(condition).fetchOneInto(BigDecimal.class);
+					if (null != status) {
+						condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(status));
+					}else {
+						condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.ge(ParkingRechargeOrderStatus.PAID.getCode()));
+					}
+
+					count[0] = query.where(condition).fetchOneInto(BigDecimal.class);
                 	
                     return true;
                 });

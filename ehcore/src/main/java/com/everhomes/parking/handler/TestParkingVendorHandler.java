@@ -97,8 +97,8 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		dto.setPlateNumber(plateNumber);
-		dto.setPrice(new BigDecimal("0.01"));
-		dto.setOriginalPrice(new BigDecimal("0.01"));
+		dto.setPrice(new BigDecimal("1"));
+//		dto.setOriginalPrice(new BigDecimal("1"));
 		dto.setPayTime(System.currentTimeMillis());
 		dto.setEntryTime(System.currentTimeMillis() - 5000000);
 		dto.setOrderToken("11");

@@ -38,7 +38,7 @@ public interface ParkingProvider {
     
     BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
                                           String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-                                          Byte rechargeType, String paidType, String paySource, String keyWords);
+                                          Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords);
     
     void createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder);
     
