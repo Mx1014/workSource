@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
@@ -70,6 +71,8 @@ public class ServiceAllianceApprovalFormHandler implements GeneralApprovalFormHa
         cmd21.setReferId(ga.getId());
         cmd21.setProjectType(ga.getOwnerType());
         cmd21.setProjectId(ga.getOwnerId());
+        // 把command作为json传到content里，给flowcase的listener进行处理
+        cmd21.setContent(JSON.toJSONString(cmd));
         cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
         cmd21.setApplierOrganizationId(cmd.getOrganizationId());
         cmd21.setTitle(ga.getApprovalName());
