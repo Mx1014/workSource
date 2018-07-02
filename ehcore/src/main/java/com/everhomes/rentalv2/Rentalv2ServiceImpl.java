@@ -2157,7 +2157,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		StringBuilder useDetailSB = new StringBuilder();
 		for (String resourceNumber:resourceNumbers){
 			if (!StringUtils.isBlank(resourceNumber))
-				useDetailSB.append(resourceNumber+":");
+				useDetailSB.append(resourceNumber+"：");
 			List<RentalCell> collect = rentalCells.stream().filter(r -> StringUtils.isBlank(resourceNumber) || resourceNumber.equals(r.getResourceNumber()))
 					.collect(Collectors.toList());
 			Collections.sort(collect,(q,p)->q.getId().compareTo(p.getId()));
