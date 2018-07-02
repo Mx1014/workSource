@@ -52,8 +52,17 @@ public class OrganizationOwnerDTO {
 
     private String primaryFlag;
     private List<String> customerExtraTels;
+    private String customerExtraTelsForExport;
 
-    public List<String> getCustomerExtraTels() {
+    public String getCustomerExtraTelsForExport() {
+		return customerExtraTelsForExport;
+	}
+
+	public void setCustomerExtraTelsForExport(String customerExtraTelsForExport) {
+		this.customerExtraTelsForExport = customerExtraTelsForExport;
+	}
+
+	public List<String> getCustomerExtraTels() {
         return customerExtraTels;
     }
 

@@ -4771,9 +4771,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (cmd.getRegisteredResidence() != null)
                 owner.setRegisteredResidence(cmd.getRegisteredResidence());
             //added mutiple tels for customer by wentian 2016/6/11
-            if (cmd.getCustomerExtraTels() != null){
-				JsonArray array = new JsonParser().parse(StringHelper.toJsonString(cmd.getCustomerExtraTels())).getAsJsonArray();
-				owner.setContactExtraTels(array.toString());
+//            if (cmd.getCustomerExtraTels() != null){
+//				JsonArray array = new JsonParser().parse(StringHelper.toJsonString(cmd.getCustomerExtraTels())).getAsJsonArray();
+//				owner.setContactExtraTels(array.toString());
+//			}
+            //modify mutiple tels for customer by tangcen 2016/6/29
+            if(cmd.getCustomerExtraTels() != null && cmd.getCustomerExtraTels().size() > 0){
+	            try{
+	                owner.setContactExtraTels(StringHelper.toJsonString(cmd.getCustomerExtraTels()));
+	                //set owner's contact token for possible unknown uses
+					owner.setContactToken(cmd.getCustomerExtraTels().get(0));
+	            }catch (Exception e){
+	                LOGGER.error("failed to convert customerExtraTels into jsonarray, custoemrExtratel is={}", cmd.getCustomerExtraTels());
+	            }
 			}
             UserGender gender = UserGender.fromCode(cmd.getGender());
             if (gender != null) {
@@ -5642,7 +5652,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
             String fileName = String.format("客户信息_%s_%s", community.getName(), DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
-            String[] propertyNames = {"contactName", "gender", "orgOwnerType", "contactToken", "birthdayDate", "maritalStatus", "job", "company",
+            String[] propertyNames = {"contactName", "gender", "orgOwnerType", "customerExtraTelsForExport", "birthdayDate", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
             String[] titleNames = {"姓名", "性别", "客户类型", "手机号码", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
             int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30};
@@ -5666,11 +5676,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (genderLocale != null) {
             dto.setGender(genderLocale.getText());
         }
+        //如果用户支持多手机号，则导出customerExtraTelsForExport的值
         if(owner.getContactExtraTels() != null){
             String contactExtraTels = owner.getContactExtraTels();
-            List<String> o = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
-            dto.setCustomerExtraTels(o);
-        }
+            List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+            dto.setCustomerExtraTels(contactExtraTelsList);
+            //用在导出Excel时
+            String customerExtraTelsForExport = contactExtraTelsList.toString();
+            dto.setCustomerExtraTelsForExport(customerExtraTelsForExport.substring(1, customerExtraTelsForExport.length()-1));
+        }else {
+        	//如果不支持多手机号，则导出ContactToken的值
+        	dto.setCustomerExtraTelsForExport(dto.getContactToken());
+        	List<String> contactExtraTelsList = new ArrayList<>();
+        	contactExtraTelsList.add(dto.getContactToken());
+        	dto.setCustomerExtraTels(contactExtraTelsList);
+		}
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(owner.getOrgOwnerTypeId());
         if (ownerType != null) {
             dto.setOrgOwnerType(ownerType.getDisplayName());
