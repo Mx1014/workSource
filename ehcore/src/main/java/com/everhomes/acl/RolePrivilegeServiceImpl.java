@@ -1516,6 +1516,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
         String organizationName = getOrganizationDisplayName(contactDTO.getOrganizationId());
 
+        //add by huanglm ,如果organizationName为NotFound，那就不发推送。
+        //往后找到原因后再去掉
+        if("NotFound".equals(organizationName)){
+        	return ;
+        }
         Map<String, String> model = new HashMap<>();
         model.put("userName", defaultIfNull(contactDTO.getContactName(), ""));
         model.put("contactToken", defaultIfNull(contactDTO.getContactToken(), ""));
