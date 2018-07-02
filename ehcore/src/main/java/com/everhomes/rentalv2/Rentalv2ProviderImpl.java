@@ -1026,7 +1026,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		BigDecimal count = new BigDecimal(0);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<BigDecimal>> step = context.select(Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum()).from(Tables.EH_RENTALV2_ORDERS);
-		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode(),SiteBillStatus.IN_USING.getCode());
 		if (StringUtils.isNotBlank(resourceType))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
 		if (null!=resourceTypeId)
@@ -1054,7 +1054,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record2<BigDecimal,Long>> step = context.select(Tables.EH_RENTALV2_ORDERS.PAY_TOTAL_MONEY.sum(),
 				Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID).from(Tables.EH_RENTALV2_ORDERS);
-		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode(),SiteBillStatus.IN_USING.getCode());
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.isNotNull());
 		if (StringUtils.isNotBlank(resourceType))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
@@ -1086,7 +1086,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		Integer count = 0;
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_RENTALV2_ORDERS);
-		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode(),SiteBillStatus.IN_USING.getCode());
 		if (StringUtils.isNotBlank(resourceType))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));
 		if (null!=resourceTypeId)
@@ -1112,7 +1112,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 															  Long startTime, Long endTime,Integer order){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record2<Integer,Long>> step = context.select(DSL.count(),Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID).from(Tables.EH_RENTALV2_ORDERS);
-		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode());
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.COMPLETE.getCode(),SiteBillStatus.SUCCESS.getCode(),SiteBillStatus.IN_USING.getCode());
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.USER_ENTERPRISE_ID.isNotNull());
 		if (StringUtils.isNotBlank(resourceType))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.equal(resourceType));

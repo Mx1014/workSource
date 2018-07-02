@@ -2593,6 +2593,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                                         }
 									}
 								}
+							}else{
+								if (currTime + 60 * 1000L >= order.getEndTime().getTime()) {
+									order.setStatus(SiteBillStatus.COMPLETE.getCode());
+									rentalv2Provider.updateRentalBill(order);
+								}
 							}
 						}
 					});
@@ -2686,7 +2691,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderEndTimeLong);
 
 					}
-					//订单过期,置状态
+					//使用中
+					if (currTime >= order.getStartTime().getTime() ) {
+						order.setStatus(SiteBillStatus.IN_USING.getCode());
+						rentalv2Provider.updateRentalBill(order);
+					}
+					//订单过期,置状态 3.5以前的逻辑
 					if(orderEndTimeLong <= currTime){
 						order.setStatus(SiteBillStatus.COMPLETE.getCode());
 						rentalv2Provider.updateRentalBill(order);
@@ -2790,6 +2800,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 			if (cmd.getBillStatus().equals(BillQueryStatus.VALID.getCode())) {
 				status.add(SiteBillStatus.SUCCESS.getCode());
+				status.add(SiteBillStatus.IN_USING.getCode());
 				status.add(SiteBillStatus.REFUNDING.getCode());
 			} else if (cmd.getBillStatus().equals(BillQueryStatus.CANCELED.getCode())) {
 				status.add(SiteBillStatus.FAIL.getCode());
@@ -3782,8 +3793,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED,"Order has been canceled");
 		}
 
-		if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) &&
-				timestamp > order.getStartTime().getTime()) {
+		if (order.getStatus().equals(SiteBillStatus.IN_USING.getCode())) {
 			//当成功预约之后要判断是否过了取消时间
 			LOGGER.error("cancel over time");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
@@ -6301,70 +6311,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 	}
 
-//	@Override
-//	public RentalBillDTO completeBill(CompleteBillCommand cmd) {
-//		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
-//		if (!bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())
-//				&&!bill.getStatus().equals(SiteBillStatus.OVERTIME.getCode())){
-//			throw RuntimeErrorException
-//			.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_NOT_SUCCESS, "order is not success order.");
-//		}
-//		bill.setStatus(SiteBillStatus.COMPLETE.getCode());
-//		rentalv2Provider.updateRentalBill(bill);
-//		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
-//		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
-//		mappingRentalBillDTO(dto, bill);
-//		return dto;
-//	}
 
-//	@Override
-//	public RentalBillDTO incompleteBill(IncompleteBillCommand cmd) {
-//		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
-//		if (!bill.getStatus().equals(SiteBillStatus.COMPLETE.getCode())){
-//			throw RuntimeErrorException
-//			.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_NOT_COMPLETE,"order is not complete order.");
-//		}
-////		RentalRule rule = this.rentalProvider.getRentalRule(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType());
-//		RentalResource rs = this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
-//		java.util.Date cancelTime = new java.util.Date();
-//		if (cancelTime.before(new java.util.Date(bill.getEndTime().getTime()))) {
-//			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-//		}else{
-//			bill.setStatus(SiteBillStatus.OVERTIME.getCode());
-//		}
-//
-//		rentalv2Provider.updateRentalBill(bill);
-//		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
-//		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
-//		mappingRentalBillDTO(dto, bill);
-//		return dto;
-//	}
-
-//	@Override
-//	public BatchCompleteBillCommandResponse batchIncompleteBill(BatchIncompleteBillCommand cmd) {
-//		BatchCompleteBillCommandResponse response = new BatchCompleteBillCommandResponse();
-//		response.setBills(new ArrayList<>());
-//		if(null!=cmd.getRentalBillIds())
-//			for (Long billId : cmd.getRentalBillIds()){
-//				IncompleteBillCommand cmd2 = ConvertHelper.convert(cmd, IncompleteBillCommand.class);
-//				cmd2.setRentalBillId(billId);
-//				response.getBills().add(this.incompleteBill(cmd2));
-//			}
-//		return response;
-//	}
-//
-//	@Override
-//	public BatchCompleteBillCommandResponse batchCompleteBill(BatchCompleteBillCommand cmd) {
-//		BatchCompleteBillCommandResponse response = new BatchCompleteBillCommandResponse();
-//		response.setBills(new ArrayList<>());
-//		if(null!=cmd.getRentalBillIds())
-//			for (Long billId : cmd.getRentalBillIds()){
-//				CompleteBillCommand cmd2 = ConvertHelper.convert(cmd, CompleteBillCommand.class);
-//				cmd2.setRentalBillId(billId);
-//				response.getBills().add(this.completeBill(cmd2));
-//			}
-//		return response;
-//	}
 
 	@Override
 	public void exportRentalBills(ListRentalBillsCommand cmd, HttpServletResponse response) {
@@ -8100,7 +8047,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		long currTime = System.currentTimeMillis();
 		//订单开始 置为使用中的状态,防止定时器没有更新到订单状态
-		if (bill.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode()) &&bill.getStatus() == SiteBillStatus.SUCCESS.getCode() &&
+		if (bill.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode()) &&bill.getStatus() == SiteBillStatus.SUCCESS.getCode() &&
 				currTime >= bill.getStartTime().getTime() && currTime <= bill.getEndTime().getTime()) {
 			bill.setStatus(SiteBillStatus.IN_USING.getCode());
 			rentalv2Provider.updateRentalBill(bill);
