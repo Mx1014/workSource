@@ -4945,4 +4945,16 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return response;
 	}
+	
+	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.showCreateBillSubItemList(cmd.getBillGroupId());
+	}
+
+	public void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd) {
+		assetProvider.batchModifyNotSettledBill(cmd);
+	}
+
 }

@@ -1940,5 +1940,10 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	//支付模块回调接口，通知支付结果
     	assetPayService.payNotify(cmd, handler);
     }
+    
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId) {
+    	return assetProvider.showCreateBillSubItemList(billGroupId);
+    }
+    
 }
 

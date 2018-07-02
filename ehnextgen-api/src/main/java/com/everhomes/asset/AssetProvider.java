@@ -376,4 +376,8 @@ public interface AssetProvider {
     void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
     
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
+    
+    ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId);
+	
+	void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd);
 }
