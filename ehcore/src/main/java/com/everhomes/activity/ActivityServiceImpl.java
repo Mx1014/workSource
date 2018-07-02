@@ -909,7 +909,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }
 
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.activity", "");
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCommand.setBackUrl(backUrl);
     }
@@ -2230,7 +2230,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
         createOrderCommand.setSourceType(1);
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"activity.pay.v2.callback.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.activity", "");
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCommand.setBackUrl(backUrl);
         CreateOrderRestResponse refundResponse = payServiceV2.createRefundOrder(createOrderCommand);
