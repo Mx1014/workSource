@@ -2334,11 +2334,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	public MaxMinPrice findMaxMinPrice(Long resourceId, Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record record = context.select(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE),
 				DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE),
-				DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)
+				DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE)
 				)
 			.from(Tables.EH_RENTALV2_CELLS)
 			.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
@@ -2347,18 +2344,12 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
 			.fetchOne();
 		if (record != null) {
-			BigDecimal maxPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE)));
-			BigDecimal minPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE)));
-			BigDecimal maxOrgMemberPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE)));
-			BigDecimal minOrgMemberPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE)));
-			BigDecimal maxApprovingUserPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE)),
-					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)));
-			BigDecimal minApprovingUserPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE)),
-					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)));
+			BigDecimal maxPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE));
+			BigDecimal minPrice = maxPrice;
+			BigDecimal maxOrgMemberPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE));
+			BigDecimal minOrgMemberPrice = maxOrgMemberPrice;
+			BigDecimal maxApprovingUserPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE));
+			BigDecimal minApprovingUserPrice = maxApprovingUserPrice;
 			return new MaxMinPrice(maxPrice, minPrice, maxOrgMemberPrice, minOrgMemberPrice, maxApprovingUserPrice, minApprovingUserPrice);
 		}
 		return null;

@@ -1157,7 +1157,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
-	public FindRentalSitesCommandResponse findRentalSites(FindRentalSitesCommand cmd) {
+	public FindRentalSitesCommandResponse
+	findRentalSites(FindRentalSitesCommand cmd) {
 		if(null==cmd.getResourceTypeId()||null==cmd.getOwnerId()||null==cmd.getOwnerType()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter ResourceTypeId, OwnerId, OwnerType");
@@ -3511,66 +3512,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			timeCost = System.currentTimeMillis()- timeCost;
 			LOGGER.debug("Rentalv2 process cell resourceId = {} rentalType = {} time cost = {} ",rs.getId(),rentalType,timeCost);
 		}
-
-//		BigDecimal workdayPrice = priceRule.getWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getWorkdayPrice();
-//		BigDecimal weekendPrice = priceRule.getWeekendPrice() == null ? new BigDecimal(0) : priceRule.getWeekendPrice();
-//		BigDecimal initiatePrice = priceRule.getInitiatePrice() == null ? new BigDecimal(0) : priceRule.getInitiatePrice();
-//
-//		BigDecimal orgMemberWorkdayPrice = priceRule.getOrgMemberWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getOrgMemberWorkdayPrice();
-//		BigDecimal orgMemberWeekendPrice = priceRule.getOrgMemberWeekendPrice() == null ? new BigDecimal(0) : priceRule.getOrgMemberWeekendPrice();
-//		BigDecimal orgMemberInitiatePrice = priceRule.getOrgMemberInitiatePrice() == null ? new BigDecimal(0) : priceRule.getOrgMemberInitiatePrice();
-//
-//		BigDecimal approvingUserWorkdayPrice = priceRule.getApprovingUserWorkdayPrice() == null ? new BigDecimal(0) : priceRule.getApprovingUserWorkdayPrice();
-//		BigDecimal approvingUserWeekendPrice = priceRule.getApprovingUserWeekendPrice() == null ? new BigDecimal(0) : priceRule.getApprovingUserWeekendPrice();
-//		BigDecimal approvingUserInitiatePrice = priceRule.getApprovingUserInitiatePrice() == null ? new BigDecimal(0) : priceRule.getApprovingUserInitiatePrice();
-//
-////		List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
-//		AddRentalSiteSingleSimpleRule singleCmd = ConvertHelper.convert(rule, AddRentalSiteSingleSimpleRule.class);
-//		singleCmd.setRentalSiteId(rs.getId());
-////		singleCmd.setSiteCounts(rs.getResourceCounts());
-////		singleCmd.setOpenWeekday(resolveOpenWeekday(rs.getOpenWeekday()));
-//		singleCmd.setRentalType(rentalType);
-//		singleCmd.setPriceType(priceRule.getPriceType());
-//
-////		QueryDefaultRuleAdminResponse tempResponse = new QueryDefaultRuleAdminResponse();
-////		populateRentalRule(tempResponse, EhRentalv2Resources.class.getSimpleName(), rs.getId());
-////		singleCmd.setSiteNumbers(tempResponse.getSiteNumbers());
-////		singleCmd.setTimeIntervals(tempResponse.getTimeIntervals());
-////		singleCmd.setCloseDates(tempResponse.getCloseDates());
-////		singleCmd.setAttachments(tempResponse.getAttachments());
-////		singleCmd.setHalfDayTimeIntervals(tempResponse.getHalfDayTimeIntervals());
-//
-//		if(null != rule.getBeginDate() && null != rule.getEndDate()){
-//			singleCmd.setBeginDate(rule.getBeginDate());
-//			singleCmd.setEndDate(rule.getEndDate());
-//			singleCmd.setWorkdayPrice(workdayPrice);
-//			singleCmd.setInitiatePrice(priceRule.getInitiatePrice());
-//			singleCmd.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
-//			singleCmd.setOrgMemberInitiatePrice(priceRule.getOrgMemberInitiatePrice());
-//			singleCmd.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
-//			singleCmd.setApprovingUserInitiatePrice(priceRule.getApprovingUserInitiatePrice());
-//			if (rentalType == RentalType.HOUR.getCode())  {
-//				if(singleCmd.getTimeIntervals() != null){
-//					Double beginTime = null;
-//					Double endTime = null;
-//					for(TimeIntervalDTO timeInterval:singleCmd.getTimeIntervals()){
-//						if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
-//							continue;
-//						if(beginTime==null||beginTime>timeInterval.getBeginTime())
-//							beginTime=timeInterval.getBeginTime();
-//						if(endTime==null||endTime<timeInterval.getEndTime())
-//							endTime=timeInterval.getEndTime();
-//						singleCmd.setBeginTime(timeInterval.getBeginTime());
-//						singleCmd.setEndTime(timeInterval.getEndTime());
-//						if(null!=timeInterval.getTimeStep())
-//							singleCmd.setTimeStep(timeInterval.getTimeStep());
-//						addRentalSiteSingleSimpleRule(singleCmd);
-//					}
-//				}
-//			} else {
-//				addRentalSiteSingleSimpleRule(singleCmd);
-//			}
-//		}
 	}
 	/**
 	 * 根据单一时段的规则生成单元格
@@ -5295,8 +5236,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setBeginTime(rsr.getBeginTime().getTime());
 					dto.setEndTime(rsr.getEndTime().getTime());
 					dto.setPrice(dto.getPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
+					dto.setOriginalPrice(dto.getOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setApprovingUserPrice(dto.getApprovingUserPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
+					dto.setApprovingUserOriginalPrice(dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setOrgMemberPrice(dto.getOrgMemberPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
+					dto.setOrgMemberOriginalPrice(dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setInitiatePrice(dto.getInitiatePrice()==null?null:dto.getInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setApprovingUserInitiatePrice(dto.getApprovingUserInitiatePrice()==null?null:dto.getApprovingUserInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setOrgMemberInitiatePrice(dto.getOrgMemberInitiatePrice()==null?null:dto.getOrgMemberInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
@@ -7614,7 +7558,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 
-		BeanUtils.copyProperties(cmd, rule);
+		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -7746,7 +7690,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		buildPricePackages(cmd.getPricePackages());
 
-		BeanUtils.copyProperties(cmd, rule);
+		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -7798,6 +7742,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					r.setOrgMemberDiscountRatio(r.getDiscountRatio());
 					r.setOrgMemberFullPrice(r.getFullPrice());
 					r.setOrgMemberCutPrice(r.getCutPrice());
+					r.setOrgMemberOriginalPrice(r.getOriginalPrice());
 
 					r.setApprovingUserInitiatePrice(r.getInitiatePrice());
 					r.setApprovingUserWorkdayPrice(r.getWorkdayPrice());
@@ -7805,6 +7750,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					r.setApprovingUserDiscountRatio(r.getDiscountRatio());
 					r.setApprovingUserFullPrice(r.getFullPrice());
 					r.setApprovingUserCutPrice(r.getCutPrice());
+					r.setApprovingUserOriginalPrice(r.getOriginalPrice());
 				}
 			});
 
@@ -7822,6 +7768,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					r.setOrgMemberDiscountRatio(r.getDiscountRatio());
 					r.setOrgMemberFullPrice(r.getFullPrice());
 					r.setOrgMemberCutPrice(r.getCutPrice());
+					r.setOrgMemberOriginalPrice(r.getOriginalPrice());
 
 					r.setApprovingUserInitiatePrice(r.getInitiatePrice());
 					r.setApprovingUserPrice(r.getPrice());
@@ -7829,6 +7776,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					r.setApprovingUserDiscountRatio(r.getDiscountRatio());
 					r.setApprovingUserFullPrice(r.getFullPrice());
 					r.setApprovingUserCutPrice(r.getCutPrice());
+					r.setApprovingUserOriginalPrice(r.getOriginalPrice());
 				}
 			});
 		}
@@ -7885,7 +7833,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
 		}
 
-		BeanUtils.copyProperties(cmd, rule);
+		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 		rentalv2Provider.updateRentalDefaultRule(rule);
 
 	}
@@ -7918,7 +7866,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
 		}
 
-		BeanUtils.copyProperties(cmd, rule);
+		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
