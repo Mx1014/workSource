@@ -2174,4 +2174,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 .and(Tables.EH_ORGANIZATION_OWNER_ATTACHMENTS.OWNER_ID.eq(id))
                 .execute();
     }
+
+	@Override
+	public PmResourceReservation findReservationById(Long reservationId) {
+		EhPmResoucreReservationsDao dao = new EhPmResoucreReservationsDao(this.dbProvider.getDslContext(AccessSpec.readWrite()).configuration());
+		return ConvertHelper.convert(dao.findById(reservationId), PmResourceReservation.class);
+	}
+
+	@Override
+	public void updateReservation(PmResourceReservation oldReservation) {
+		EhPmResoucreReservationsDao dao = new EhPmResoucreReservationsDao(this.dbProvider.getDslContext(AccessSpec.readWrite()).configuration());
+		dao.update(oldReservation);
+	}
 }

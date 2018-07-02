@@ -9,6 +9,8 @@ import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
 import com.everhomes.rest.organization.pm.ReservationStatus;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
+import com.everhomes.server.schema.tables.pojos.EhPmResoucreReservations;
+
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
@@ -518,4 +520,8 @@ public interface PropertyMgrProvider {
 	List<ReservationInfo> listRunningReservations();
 
 	Byte getReservationPreviousLivingStatusById(Long reservationId);
+	//add by tangcen 2018年7月2日11:11:43
+	PmResourceReservation findReservationById(Long reservationId);
+
+	void updateReservation(PmResourceReservation oldReservation);
 }
