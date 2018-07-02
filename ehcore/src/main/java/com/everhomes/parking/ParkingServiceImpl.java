@@ -821,10 +821,25 @@ public class ParkingServiceImpl implements ParkingService {
 				return payMethodDTO;
 			}).collect(Collectors.toList()));//todo
 		}
+		Long expiredIntervalTime = getExpiredIntervalTime(response.getExpirationMillis());
+		preDto.setExpiredIntervalTime(expiredIntervalTime);
+		preDto.setOrderId(parkingRechargeOrder.getId());
 //		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
 		return preDto;
 	}
 
+	private Long getExpiredIntervalTime(Long expiration){
+		Long expiredIntervalTime = null;
+		if(expiration != null){
+			expiredIntervalTime = expiration - System.currentTimeMillis();
+			//转换成秒
+			expiredIntervalTime = expiredIntervalTime/1000;
+			if(expiredIntervalTime < 0){
+				expiredIntervalTime = 0L;
+			}
+		}
+		return expiredIntervalTime;
+	}
 	private CommonOrderDTO convertOrderDTOForV1(ParkingRechargeOrder parkingRechargeOrder, Byte rechargeType) {
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();

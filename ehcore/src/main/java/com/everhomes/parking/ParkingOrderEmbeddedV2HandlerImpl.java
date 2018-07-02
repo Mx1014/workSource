@@ -168,7 +168,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 						 * WITHDRAW(18): 通联通代付
 						 * QUICK_PAY(19):
 						 * WITHDRAW_AUTO(20):*/
-		if(paymentType==1 || paymentType==7 || paymentType==9 || paymentType==12)
+		if(paymentType==1 || paymentType==7 || paymentType==9 || paymentType==12 || paymentType==21)
 			return "10002";
 		if(paymentType==8 || paymentType==10 || paymentType==13)
 			return "10001";
