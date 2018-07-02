@@ -588,8 +588,6 @@ public interface OrganizationService {
 
 
 	// added by R, for salaryGroup 20170630
-	Organization createSalaryGroupOrganization(Long organizationId, String name);
-	ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
 	Organization createUniongroupOrganization(Long organizationId, String name, String groupType);
 
 	/**人事管理-离职**/

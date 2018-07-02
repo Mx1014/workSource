@@ -11382,15 +11382,22 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd) {
 
+        Long enterpriseId = getTopOrganizationId(cmd.getOrganizationId());
+        Organization enterprise = checkOrganization(enterpriseId);
+        ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
+        Organization org = this.checkOrganization(cmd.getOrganizationId());
+        if(null == org)
+            return response;
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        //  todo:more info.
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
 
-        ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
-        Organization org = this.checkOrganization(cmd.getOrganizationId());
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
+
 
         Organization orgCommoand = new Organization();
         orgCommoand.setId(org.getId());
@@ -11403,6 +11410,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         List<OrganizationMember> organizationMembers;
+
         if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE || (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode()))) {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(), cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
             response.setTotalCount(this.organizationProvider.countOrganizationPersonnels(cmd.getNamespaceId(), orgCommoand, cmd.getIsSignedup(), visibleFlag));
@@ -12583,12 +12591,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
     }
-
-    // added by R, for salaryGroup 20170630
-    @Override
-    public Organization createSalaryGroupOrganization(Long organizationId, String name) {
-        return createUniongroupOrganization(organizationId,name,UniongroupType.SALARYGROUP.getCode());
-    }
     
     @Override
     public Organization createUniongroupOrganization(Long organizationId, String name,String groupType) {
@@ -12618,30 +12620,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         }
 
-    }
-
-    @Override
-    public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize) {
-        ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
-
-        Organization org = this.checkOrganization(organizationId);
-        if (null == org)
-            return response;
-        int pageHandleSize = PaginationConfigHelper.getPageSize(configProvider, pageSize);
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(pageAnchorLong);
-
-        List<String> groupTypes = new ArrayList<>();
-        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-        groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
-
-        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMemberByPathHavingDetailId(keywords, org.getPath(),
-                groupTypes, null, locator, pageHandleSize);
-        response.setNextPageAnchor(locator.getAnchor());
-        response.setMembers(this.convertDTO(organizationMembers, org));
-        return response;
     }
 
     @Override
