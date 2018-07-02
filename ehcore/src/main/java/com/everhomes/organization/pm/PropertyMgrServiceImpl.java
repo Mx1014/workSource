@@ -6472,7 +6472,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
                 CommunityPmOwner owner = new CommunityPmOwner();
                 owner.setContactName(RowResult.trimString(result.getA()));
-                owner.setContactToken(RowResult.trimString(result.getC()));
+                //add by tangcen
+                String contactExtraTelsString = RowResult.trimString(result.getC());
+                List<String> contactExtraTels = Arrays.asList(contactExtraTelsString.split(","));
+                owner.setContactToken(contactExtraTels.get(0));
+                owner.setContactExtraTels(StringHelper.toJsonString(contactExtraTels));
+                
                 Address address = parseAddress(namespaceId, communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
