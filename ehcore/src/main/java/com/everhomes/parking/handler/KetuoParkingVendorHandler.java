@@ -488,9 +488,13 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 				int today = calendar.get(Calendar.DAY_OF_MONTH);
 
+				BigDecimal firstMonthPrice = dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
+						.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP);
+				if(firstMonthPrice.compareTo(dto.getPrice())>0){
+					firstMonthPrice = dto.getPrice();
+				}
 				BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
-						.add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
-								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+						.add(firstMonthPrice);
 				dto.setPayMoney(price);
 			}
 			if(configProvider.getBooleanValue("parking.ketuo.debug",false)){
