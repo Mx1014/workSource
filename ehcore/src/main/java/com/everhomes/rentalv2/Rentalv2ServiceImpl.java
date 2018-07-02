@@ -5236,11 +5236,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setBeginTime(rsr.getBeginTime().getTime());
 					dto.setEndTime(rsr.getEndTime().getTime());
 					dto.setPrice(dto.getPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
-					dto.setOriginalPrice(dto.getOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
+					dto.setOriginalPrice(dto.getOriginalPrice()==null?null:dto.getOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setApprovingUserPrice(dto.getApprovingUserPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
-					dto.setApprovingUserOriginalPrice(dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
+					dto.setApprovingUserOriginalPrice(dto.getApprovingUserOriginalPrice()==null?null:dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setOrgMemberPrice(dto.getOrgMemberPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
-					dto.setOrgMemberOriginalPrice(dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
+					dto.setOrgMemberOriginalPrice(dto.getApprovingUserOriginalPrice()==null?null:dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setInitiatePrice(dto.getInitiatePrice()==null?null:dto.getInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setApprovingUserInitiatePrice(dto.getApprovingUserInitiatePrice()==null?null:dto.getApprovingUserInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setOrgMemberInitiatePrice(dto.getOrgMemberInitiatePrice()==null?null:dto.getOrgMemberInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
