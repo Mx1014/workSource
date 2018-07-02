@@ -1301,15 +1301,6 @@ public class AssetProviderImpl implements AssetProvider {
                     amountReceivable = amountReceivable.add(var1);
                     amountOwed = amountOwed.add(var1);
                 }
-
-                if(amountOwed.compareTo(new BigDecimal("0"))!=1){
-                    billStatus = 1;
-                }
-                for(int i = 0; i < billItemsList.size(); i++) {
-                    billItemsList.get(i).setStatus(billStatus);
-                }
-                EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
-                billItemsDao.insert(billItemsList);
             }
             
             //增加减免费项
@@ -1350,16 +1341,19 @@ public class AssetProviderImpl implements AssetProvider {
 		                  }
 	                  }
 	              }
-	              //重新判断状态，如果待缴金额为0，则设置为已缴状态
-	              if(amountOwed.compareTo(new BigDecimal("0"))!=1){
-	                  billStatus = 1;
-	              }
-	              for(int i = 0; i < billItemsList.size(); i++) {
-	                  billItemsList.get(i).setStatus(billStatus);
-	              }
 	              EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
 	              subtractionItemsDao.insert(subtractionItemsList);
             }
+            
+            //重新判断状态，如果待缴金额为0，则设置为已缴状态
+            if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+                billStatus = 1;
+            }
+            for(int i = 0; i < billItemsList.size(); i++) {
+                billItemsList.get(i).setStatus(billStatus);
+            }
+            EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
+            billItemsDao.insert(billItemsList);
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
