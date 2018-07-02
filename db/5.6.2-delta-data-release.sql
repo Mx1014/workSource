@@ -75,7 +75,7 @@ update eh_activity_roster r,eh_payment_order_records t set r.refund_pay_order_id
 -- ENV: ALL
 -- DESCRIPTION: 收款方账号迁移
 -- AUTHOR: 梁燕龙 20180702
--- REMARK: 活动收款方账号迁移
+-- REMARK: 活动收款方账号迁移,在执行语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
 SET @id = ifnull((SELECT MAX(id) FROM `eh_activity_biz_payee`),10000);
 set @namespace_id = 1;
 set @account_id = 2327;
