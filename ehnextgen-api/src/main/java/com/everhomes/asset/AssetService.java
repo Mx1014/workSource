@@ -213,4 +213,6 @@ public interface AssetService {
 	void createAnAppMapping(CreateAnAppMappingCommand cmd);
 
 	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
+    
+    IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
 }
