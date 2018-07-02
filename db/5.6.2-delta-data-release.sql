@@ -9,24 +9,24 @@ update `eh_rentalv2_order_records` t1 right join `eh_rentalv2_orders` t2 on t1.`
 -- ADD BY 杨崇鑫
 -- 新支付的配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.appKey', '6caa8584-c723-4b7b-9aec-071b4e31418f', '新新支付appKey', '0');
+	VALUES ('pay.v2.appKey', '6caa8584-c723-4b7b-9aec-071b4e31418f', '新支付appKey', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.secretKey', 'zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==', '新新支付secretKey', '0');
+	VALUES ('pay.v2.secretKey', 'zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==', '新支付secretKey', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.payHomeUrl', 'http://payv2-beta.zuolin.com/pay', '新新支付payHomeUrl', '0');
+	VALUES ('pay.v2.payHomeUrl', 'http://payv2-beta.zuolin.com/pay', '新支付payHomeUrl', '0');
 	
 -- 支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('asset.pay.v2.callback.url', '/asset/payNotify', '物业缴费新支付回调接口', '0');
+	VALUES ('pay.v2.callback.url.asset', '/asset/payNotify', '物业缴费新支付回调接口', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pmsy.pay.v2.callback.url', '/pmsy/payNotify', '物业缴费新支付回调接口', '999993');
+	VALUES ('pay.v2.callback.url.pmsy', '/pmsy/payNotify', '物业缴费新支付回调接口', '999993');
 
 -- 由于海岸馨服务是定制的，web没有账单组管理，所以需要初始化收款方账户配置
 SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_bill_groups`),0);
 INSERT INTO `eh_payment_bill_groups` VALUES (@id := @id + 1, '999993', '999993', 'community', '物业缴费', '2', '5', '0', UTC_TIMESTAMP(), NULL, NULL, '1', NULL, NULL, NULL, '4',
 	'EhOrganizations', '4443');
 
--- 新新支付数据迁移
+-- 新支付数据迁移
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='2327' where namespace_id=1;
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4592' where namespace_id=999944;
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4333' where namespace_id=999946;

@@ -307,9 +307,9 @@ public class AssetPayServiceImpl implements AssetPayService{
         String backUri;
         if(UserContext.getCurrentNamespaceId().equals(999993)) {
         	//由于海岸馨服务是定制的
-        	backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pmsy.pay.v2.callback.url", "");
+        	backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.pmsy", "");
         }else {
-        	backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"asset.pay.v2.callback.url", "");
+        	backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.asset", "");
         }
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCmd.setBackUrl(backUrl);
