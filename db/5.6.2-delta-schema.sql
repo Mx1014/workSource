@@ -107,3 +107,9 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_status` TINYINT COM
 ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_create_time` DATETIME COMMENT '发票开票时间';
 -- dengs
 
+-- 通用脚本
+-- ADD BY 张智伟
+-- issue-32748
+ALTER TABLE eh_meeting_rooms DROP INDEX u_eh_namespace_owner_name;
+ALTER TABLE eh_meeting_rooms ADD INDEX `i_eh_namespace_owner_name` (`namespace_id` , `organization_id`, `owner_type` , `owner_id` , `name`);
+-- END
