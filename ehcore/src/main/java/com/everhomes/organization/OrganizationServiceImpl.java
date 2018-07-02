@@ -9636,7 +9636,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "Enterprise contact target user id can not be null");
         }
         //说明参数不为空,那么我们根据targetId和enterpriseId来查询数据库得到OrganizationMember对象
-        OrganizationMember organizationMember = this.organizationProvider.findOrganizationMemberByUidAndOrgId(targetId, enterpriseId);
+        OrganizationMember organizationMember = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(targetId, enterpriseId);
         //对OrganizationMember对象进行非空校验
         if (organizationMember == null) {
             LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid

@@ -73,7 +73,6 @@ public interface OrganizationProvider {
 	List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(Long communityId);
 	OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,String organizationType);
 	OrganizationMember findOrganizationMemberByUIdAndOrgId(Long userId, Long organizationId);
-	OrganizationMember findOrganizationMemberByUidAndOrgId(Long userId, Long organizationId);
 
 	List<OrganizationMember> findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId);
 
