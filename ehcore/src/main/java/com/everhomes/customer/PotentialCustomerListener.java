@@ -94,6 +94,22 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
         CustomerConfiguration activityConfigutations = customerProvider.getSyncCustomerConfiguration(activityNamespaceId);
         if (activityConfigutations != null && TrueOrFalseFlag.TRUE.equals(TrueOrFalseFlag.fromCode(activityConfigutations.getValue()))) {
             if (activityRoster != null) {
+                CustomerPotentialData existPotentialCustomer = customerProvider.findPotentialCustomerByName(activityRoster.getOrganizationName());
+                Long dataId = 0L;
+                if(existPotentialCustomer==null){
+                    CustomerPotentialData data = new CustomerPotentialData();
+                    data.setName(activityRoster.getOrganizationName());
+                    if (activity != null) {
+                        data.setSourceId(activity.getCategoryId());
+                    }
+                    data.setSourceType(PotentialCustomerType.ACTIVITY.getValue());
+                    data.setSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    customerProvider.createPotentialCustomer(data);
+                    dataId = data.getId();
+                }else {
+                    dataId = existPotentialCustomer.getId();
+                }
+
                 User user = userProvider.findUserById(activityRoster.getUid());
                 if (user != null) {
                     // customer talent info
@@ -101,17 +117,9 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                     talent.setCustomerId(0L);
                     talent.setName(user.getNickName());
                     talent.setPhone(user.getIdentifierToken());
+                    talent.setOriginSourceId(dataId);
                     customerProvider.createCustomerTalent(talent);
                 }
-
-                CustomerPotentialData data = new CustomerPotentialData();
-                data.setName(activityRoster.getOrganizationName());
-                if (activity != null) {
-                    data.setSourceId(activity.getCategoryId());
-                }
-                data.setSourceType(PotentialCustomerType.ACTIVITY.getValue());
-                data.setSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
-                customerProvider.createPotentialCustomer(data);
             }
         }
     }
@@ -142,6 +150,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
         CustomerConfiguration configutations = customerProvider.getSyncCustomerConfiguration(namespaceId);
         if (configutations != null && TrueOrFalseFlag.TRUE.equals(TrueOrFalseFlag.fromCode(configutations.getValue()))) {
             CustomerPotentialData existPotentialCustomer = customerProvider.findPotentialCustomerByName(textValue.getText());
+            Long dataId = 0L;
             if (existPotentialCustomer == null) {
                 ServiceAlliances serviceAlliance = yellowPageProvider.findServiceAllianceById(Long.valueOf(sourceId.getText()), null, null);
                 if (serviceAlliance == null) {
@@ -155,6 +164,9 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                 data.setSourceId(serviceAlliance.getParentId());
                 data.setNamespaceId(generaApporvalObject.getNamespaceId());
                 customerProvider.createPotentialCustomer(data);
+                dataId = data.getId();
+            }else {
+                dataId = existPotentialCustomer.getId();
             }
             //sync requestor info to customer talent
             if (StringUtils.isNotBlank(userPhone.getText())) {
@@ -164,6 +176,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                    talent.setCustomerId(0L);
                    talent.setName(users.get(0).getNickName());
                    talent.setPhone(userPhone.getText());
+                   talent.setOriginSourceId(dataId);
                    customerProvider.createCustomerTalent(talent);
                }
             }
