@@ -68,11 +68,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                 if (null == id) {
                     LOGGER.error("None of activities or service alliance info id ......");
                 } else {
-                    try {
-                        syncActivityAndServiceAllianceData(id, s);
-                    } catch (Exception e) {
-                        LOGGER.error("execute potentialCustomerListener error service id =" + id, e);
-                    }
+                    syncActivityAndServiceAllianceData(id, s);
                 }
             });
         } catch (Exception e) {
@@ -98,10 +94,9 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
         CustomerConfiguration activityConfigutations = customerProvider.getSyncCustomerConfiguration(activityNamespaceId);
         if (activityConfigutations != null && TrueOrFalseFlag.TRUE.equals(TrueOrFalseFlag.fromCode(activityConfigutations.getValue()))) {
             if (activityRoster != null) {
-//                List<OrganizationMember> activityMembers = organizationProvider.listOrganizationMembersByUId(activityRoster.getUid());
                 User user = userProvider.findUserById(activityRoster.getUid());
                 if (user != null) {
-                    //人才团队信息
+                    // customer talent info
                     CustomerTalent talent = new CustomerTalent();
                     talent.setCustomerId(0L);
                     talent.setName(user.getNickName());

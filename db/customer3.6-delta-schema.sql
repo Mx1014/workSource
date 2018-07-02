@@ -30,6 +30,7 @@ ALTER  TABLE `eh_enterprise_customers` ADD COLUMN `source_id` BIGINT(20) NOT NUL
 ALTER  TABLE `eh_enterprise_customers` ADD COLUMN `source_type` VARCHAR(64) NOT NULL  DEFAULT 0;
 -- 人才团队增加系统内来源  by jiarui 20180622
 ALTER TABLE `eh_customer_talents` ADD COLUMN `talent_source_item_id`  tinyint(4) NULL AFTER `age`;
+ALTER TABLE `eh_customer_talents` ADD COLUMN `origin_source_id`  bigint(20) NULL AFTER `age`;
 -- 动态表单增加系统来源同步标识  by jiarui
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `sync_flag`  tinyint(4) NULL AFTER `business_value`;
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `module_id`  tinyint(4) NULL AFTER `business_value`;
