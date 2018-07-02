@@ -53,16 +53,30 @@ update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id=
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4422' where namespace_id=999979;
 -- END BY 杨崇鑫
 
--- by yanlong.liang
--- 支付回调
+-- -----------------------------SECTION BEGIN--------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 支付回调
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动模块支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-VALUES ('activity.pay.v2.callback.url', '/activity/payNotify', '活动报名新支付回调接口', '0');
--- 活动支付订单迁移
+VALUES ('pay.v2.callback.url.activity', '/activity/payNotify', '活动报名新支付回调接口', '0');
+-- -----------------------------SECTION END----------------------------------------------
+
+-- -----------------------------SECTION BEGIN--------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 活动支付订单迁移,在执行该语句前，将eh_activity_roster，eh_payment_order_records这两张表进行全表备份
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动支付订单迁移
 update eh_activity_roster r,eh_payment_order_records t set r.pay_order_id = t.payment_order_id where t.order_type = 'activitySignupOrder' and r.order_no = t.order_id ;
 update eh_activity_roster r,eh_payment_order_records t set r.refund_pay_order_id = t.payment_order_id where t.order_type = 'activitySignupOrder' and r.refund_order_no = t.order_id ;
+-- -----------------------------SECTION END----------------------------------------------
 
--- 收款方账号迁移
-SET @id = ifnull((SELECT MAX(id) FROM `eh_activity_biz_payee`),0);
+-- -----------------------------SECTION BEGIN--------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 收款方账号迁移
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动收款方账号迁移,在执行语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
+SET @id = ifnull((SELECT MAX(id) FROM `eh_activity_biz_payee`),10000);
 set @namespace_id = 1;
 set @account_id = 2327;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
@@ -163,12 +177,11 @@ set @account_id = 4422;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
-set @namespace_id = 999979;
-set @account_id = 4422;
+set @namespace_id = 999993;
+set @account_id = 4443;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
--- yanlong.liang END
-
-
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+-- -----------------------------SECTION END----------------------------------------------
 
 -- by st.zheng
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
