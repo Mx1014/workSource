@@ -1248,12 +1248,8 @@ public class AssetProviderImpl implements AssetProvider {
                 exemptionItemsDao.insert(exemptionItems);
             }
             Byte billStatus = 0;
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
             if(list1!=null){
-                //billItems assemble
-                List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-//                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class), list1.size());
-//                long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
-
                 for(int i = 0; i < list1.size() ; i++) {
                     long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
                     if(currentBillItemSeq == 0){
@@ -1341,16 +1337,26 @@ public class AssetProviderImpl implements AssetProvider {
 	                  
 	                  subtractionItemsList.add(subtractionItem);
 	
-	                  //amountReceivable = amountReceivable.add(var1);
-	                  //amountOwed = amountOwed.add(var1);
+	                  //根据减免费项配置重新计费，减免费项类型为eh_payment_bill_items才需要重新计费，减免费项类型为滞纳金新增无需重新计费
+	                  if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.item.getCode())) {
+	                	  if(billItemsList != null){
+		                	  for(int j = 0; j < billItemsList.size() ; j++) {
+		                		  PaymentBillItems item = (PaymentBillItems) billItemsList.get(j);
+		                		  if(item.getChargingItemsId().equals(subtractionItem.getChargingItemId())) {
+		                			  //如果收费项明细和减免费项的charginItemId相等，那么该费项金额应该从账单中减掉
+		                			  amountOwed = amountOwed.subtract(item.getAmountReceivable());
+		                		  }
+		                	  }
+		                  }
+	                  }
 	              }
-	
-//	              if(amountOwed.compareTo(new BigDecimal("0"))!=1){
-//	                  billStatus = 1;
-//	              }
-//	              for(int i = 0; i < billItemsList.size(); i++) {
-//	                  billItemsList.get(i).setStatus(billStatus);
-//	              }
+	              //重新判断状态，如果待缴金额为0，则设置为已缴状态
+	              if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+	                  billStatus = 1;
+	              }
+	              for(int i = 0; i < billItemsList.size(); i++) {
+	                  billItemsList.get(i).setStatus(billStatus);
+	              }
 	              EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
 	              subtractionItemsDao.insert(subtractionItemsList);
             }
