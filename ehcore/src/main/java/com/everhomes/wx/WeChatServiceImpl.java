@@ -14,6 +14,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.wx.GetContentServerUriCommand;
 import com.everhomes.user.User;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -110,13 +112,32 @@ public class WeChatServiceImpl implements WeChatService {
 
 	@Override
 	public String getContentServerUrl(GetContentServerUrlCommand cmd) {
-		String accessToken = getAccessToken();
-		String url = getRestUri(WeChatConstant.GET_MEDIA) + "access_token=" + accessToken + "&media_id=" + cmd.getMediaId();
-
-		CloseableHttpClient httpclient = null;
-        
-        CloseableHttpResponse response = null;
+        CsFileLocationDTO csFileLocationDTO = commonGetContentServerResponse(cmd.getMediaId());
         String result = null;
+        if (csFileLocationDTO != null) {
+            result = csFileLocationDTO.getUrl();
+        }
+        return result;
+	}
+
+    @Override
+    public String getContentServerUri(GetContentServerUriCommand cmd) {
+        CsFileLocationDTO csFileLocationDTO = commonGetContentServerResponse(cmd.getMediaId());
+        String result = null;
+        if (csFileLocationDTO != null) {
+            result = csFileLocationDTO.getUri();
+        }
+        return result;
+    }
+
+    private CsFileLocationDTO commonGetContentServerResponse(String mediaId) {
+        String accessToken = getAccessToken();
+        String url = getRestUri(WeChatConstant.GET_MEDIA) + "access_token=" + accessToken + "&media_id=" + mediaId;
+
+        CloseableHttpClient httpclient = null;
+
+        CloseableHttpResponse response = null;
+        CsFileLocationDTO result = null;
         try {
             httpclient = HttpClients.createDefault();
             HttpGet httpGet = new HttpGet(url);
@@ -125,26 +146,26 @@ public class WeChatServiceImpl implements WeChatService {
             int status = response.getStatusLine().getStatusCode();
             if(status != 200){
                 LOGGER.error("Failed to get the http result, url={}, status={}", url, response.getStatusLine());
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                         "Failed to get the http result");
             } else {
-            	HttpEntity entity =  response.getEntity();
-            	InputStream is = entity.getContent();
-                 
-            	String fileName = getFileName(response.getLastHeader("Content-Type").getValue());
-        		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        		UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, fileName, token);
-        		if(fileResp.getErrorCode() == 0) {
-        			result = fileResp.getResponse().getUrl();
-        			
+                HttpEntity entity =  response.getEntity();
+                InputStream is = entity.getContent();
+
+                String fileName = getFileName(response.getLastHeader("Content-Type").getValue());
+                String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+                UploadCsFileResponse fileResp = contentServerService.uploadFileToContentServer(is, fileName, token);
+                if(fileResp.getErrorCode() == 0) {
+                    result = fileResp.getResponse();
+
                     if(LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Get http result, url={}, fileUrl={}", url, result);
                     }
 
-        		}
+                }
 
             }
-            
+
         } catch (Exception e) {
             LOGGER.error("Failed to get the http result, url={}", url, e);
         } finally {
@@ -155,7 +176,7 @@ public class WeChatServiceImpl implements WeChatService {
                     e.printStackTrace();
                 }
             }
-            
+
             if(httpclient != null) {
                 try {
                     httpclient.close();
@@ -164,11 +185,11 @@ public class WeChatServiceImpl implements WeChatService {
                 }
             }
         }
-		
-		return result;
-	}
-	
-	public static String getFileName(String contentType) {
+
+        return result;
+    }
+
+    public static String getFileName(String contentType) {
 	    LOGGER.info(" WeChatService contentType : " + contentType);
 	    if(!StringUtils.isEmpty(contentType)) {
 	    	String[] str = contentType.split("/");
