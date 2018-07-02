@@ -1343,7 +1343,6 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     }
     
     /**
-<<<<<<< HEAD
      * <b>URL: /asset/listPayeeAccounts</b>
      * <p>列出当前项目下所有的收款方账户</p>
      */
