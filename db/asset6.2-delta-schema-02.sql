@@ -1,98 +1,115 @@
--- Designer: zhiwei zhang
--- Description: ISSUE#28363 会议管理V1.0
-
-CREATE TABLE `eh_meeting_rooms` (
-    `id` BIGINT NOT NULL COMMENT '主键',
-    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间ID',
-    `organization_id` BIGINT NOT NULL COMMENT '总公司ID',
-    `owner_type` VARCHAR(64) NOT NULL COMMENT '默认EhOrganizations，表示会议室归属的企业',
-    `owner_id` BIGINT NOT NULL COMMENT 'owner_type对应的ID  会议室归属的分公司',
-    `name` VARCHAR(128) NOT NULL COMMENT '会议室名称',
-    `seat_count` INTEGER NOT NULL COMMENT '可容纳座位数',
-    `description` VARCHAR(512) COMMENT '描述',
-    `open_begin_time` TIME NOT NULL COMMENT '会议室可预订的起始时间',
-    `open_end_time` TIME NOT NULL COMMENT '会议室可预订的结束时间',
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态:  0: DELETED 删除  1:CLOSED 不可用  2 : OPENING 可用',
-    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
-    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
-    `operate_time` DATETIME NULL COMMENT '记录更新时间',
-    `operator_uid` BIGINT NULL COMMENT '记录更新人userId',
-    `operator_name` VARCHAR(64) NULL COMMENT '操作人姓名',
-    PRIMARY KEY (`id`),
-    UNIQUE INDEX `u_eh_namespace_owner_name` (`namespace_id` , `organization_id`, `owner_type` , `owner_id` , `name`)
-)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='会议室资源管理表';
+-- 通用脚本  
+-- ADD BY 杨崇鑫
+-- 为账单组管理增加“收款方账户”字段 
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_type` VARCHAR(128) COMMENT '收款方账户类型：EhUsers/EhOrganizations';
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_id` BIGINT COMMENT '收款方账户id';
+-- END BY 杨崇鑫
 
 
-CREATE TABLE `eh_meeting_reservations` (
-    `id` BIGINT NOT NULL COMMENT '主键',
-    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间ID',
-    `organization_id` BIGINT NOT NULL COMMENT '总公司ID',
-    `subject` VARCHAR(256)  COMMENT '会议主题',
-    `content` VARCHAR(1024) COMMENT '会议详细内容',
-    `meeting_room_name` VARCHAR(128) NULL COMMENT '会议室名称，预约会议室后保存会议室名称，后期该值不随着会议室编辑而改变',
-    `meeting_room_seat_count` INTEGER NULL COMMENT '可容纳座位数，预约会议室后保存会议室名称，后期该值不随着会议室编辑而改变',
-    `meeting_room_id` BIGINT NULL COMMENT '会议室id,id of eh_meeting_rooms',
-    `meeting_sponsor_user_id` BIGINT NOT NULL DEFAULT 0 COMMENT '会议发起人的user_id',
-    `meeting_sponsor_detail_id` BIGINT NOT NULL COMMENT '会议发起人的detail_id',
-    `meeting_sponsor_name` VARCHAR(64) NOT NULL COMMENT '会议发起人的姓名',
-    `meeting_recorder_user_id` BIGINT NULL COMMENT '会议纪要人user_id',
-    `meeting_recorder_detail_id` BIGINT NULL COMMENT '会议纪要人detail_id',
-    `meeting_recorder_name` VARCHAR(64) NULL COMMENT '会议纪要人的姓名',
-    `invitation_user_count` INT COMMENT '会议受邀人数',
-    `meeting_date` DATE NOT NULL COMMENT '会议预定日期',
-    `expect_begin_time` DATETIME NOT NULL COMMENT '预计开始时间（预订会议室的时间）',
-    `expect_end_time` DATETIME NOT NULL COMMENT '预计结束时间（预订会议室的时间）',
-    `lock_begin_time` DATETIME NOT NULL COMMENT '实际锁定开始时间',
-    `lock_end_time` DATETIME NOT NULL COMMENT '实际锁定结束时间',
-    `act_begin_time` DATETIME NULL COMMENT '实际开始时间，只有用户操作了开始会议才有值',
-    `act_end_time` DATETIME NULL COMMENT '实际结束时间，只有用户操作了结束会议才有值',
-    `system_message_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启系统消息通知：0-关闭消息通知 1-开启消息通知',
-    `email_message_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启邮件通知：0-关闭邮件通知 1-开启邮件通知',
-    `act_remind_time` DATETIME NULL COMMENT '实际发出提醒的时间',
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：0:DELETED 删除，1:时间锁定， 2:CANCELED 取消,3:NORMAL 正常状态',
-    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
-    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
-    `operate_time` DATETIME NULL COMMENT '记录更新时间',
-    `operator_uid` BIGINT NULL COMMENT '记录更新人userId',
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_namespace_organization_id` (`namespace_id`,`organization_id`),
-    INDEX `i_eh_meeting_date`(`meeting_date`),
-    INDEX `i_eh_meeting_room_id` (`meeting_room_id`),
-    INDEX `i_eh_meeting_sponsor_detail_id` (`meeting_sponsor_detail_id`),
-    INDEX `i_eh_meeting_recorder_detail_id` (`meeting_recorder_detail_id`)
-)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='会议室预约表';
+-- st.zheng
+CREATE TABLE `eh_rentalv2_order_records` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int NULL ,
+`order_id`  bigint(20) NULL COMMENT '资源预订订单id' ,
+`order_no`  bigint(20) NULL COMMENT '资源预订订单号' ,
+`biz_order_num`  varchar(64) NULL COMMENT '处理过的资源预订订单号' ,
+`pay_order_id`  bigint(20) NULL COMMENT '支付系统订单号' ,
+`payment_order_type`  tinyint(8) NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单' ,
+`status`  tinyint(8) NULL COMMENT '订单状态0未支付 1已支付' ,
+`amount` decimal(16) NULL COMMENT '订单金额' ,
+`account_id`  bigint(20) NULL COMMENT '收款方账号' ,
+`order_commit_url` varchar(1024) NULL,
+`order_commit_token` varchar(1024) NULL,
+`order_commit_nonce` varchar(128) NULL,
+`order_commit_timestamp`  bigint(20) NULL  ,
+`pay_info` text NULL,
+`create_time`  datetime  ,
+`update_time`  datetime  ,
+PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_rentalv2_pay_accounts` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int NULL ,
+`community_id`  bigint(20) NULL ,
+`resource_type`  varchar(20) NULL,
+`resource_type_id`  bigint(20) NULL ,
+`source_type`  varchar(20) NULL COMMENT 'default_rule:默认规则 resource_rule:资源规则' ,
+`source_id`  bigint(20) NULL ,
+`resource_name`  varchar(20) NULL,
+`account_id`  bigint(20) NULL ,
+`create_time`  datetime  ,
+PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- yanlong.liang 发起活动的企业与收款方账户映射表
+CREATE TABLE `eh_activity_biz_payee` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id` int not null,
+`owner_id` bigint not null COMMENT '应用类型id',
+`biz_payee_id` bigint(20) NOT NULL COMMENT '收款方账户ID',
+`biz_payee_type` VARCHAR(128) COMMENT '收款方账户类型：EhUsers/EhOrganizations',
+PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+-- 活动表增加企业ID，用于查询收款方.
+ALTER TABLE `eh_activities` ADD COLUMN `organization_id` BIGINT COMMENT '企业ID';
+-- 活动报名表增加支付系统订单ID，关联支付订单.
+ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_order_id` BIGINT COMMENT '支付系统订单ID';
+ALTER TABLE `eh_activity_roster` ADD COLUMN `refund_pay_order_id` BIGINT COMMENT '支付系统退款订单ID';
+-- yanlong.liang END
 
 
-CREATE TABLE `eh_meeting_invitations` (
-    `id` BIGINT NOT NULL,
-    `meeting_reservation_id` BIGINT NOT NULL COMMENT '会议预约eh_meeting_reservations的id',
-    `source_type` VARCHAR(45) NOT NULL COMMENT '机构或者个人：ORGANIZATION OR MEMBER_DETAIL',
-    `source_id` BIGINT NOT NULL COMMENT '机构id或员工detail_id',
-    `source_name` VARCHAR(64) NOT NULL COMMENT '机构名称或者员工的姓名',
-    `role_type` VARCHAR(16) NOT NULL COMMENT '参会人或抄送人',
-    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
-    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
-    `operate_time` DATETIME NULL COMMENT '记录更新时间',
-    `operator_uid` BIGINT NULL COMMENT '记录更新人userId',
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_meeting_reservation_id` (`meeting_reservation_id`),
-    INDEX `i_eh_source_id`(`source_type`,`source_id`)
-)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='会议邀请清单，即参会人和抄送人清单';
 
+-- DROP TABLE IF EXISTS `eh_parking_business_payee_accounts`;
+CREATE TABLE `eh_parking_business_payee_accounts` (
+  `id` bigint NOT NULL,
+  `namespace_id` int NOT NULL,
+  `owner_type` varchar(32) NOT NULL COMMENT 'community 园区或者其他类型',
+  `owner_id` bigint NOT NULL COMMENT '园区id或者其他id',
+  `parking_lot_id` bigint NOT NULL COMMENT '停车场id',
+  `parking_lot_name` varchar(512) NOT NULL COMMENT '停车场名称',
+  `business_type` varchar(32) NOT NULL COMMENT '业务 tempfee:临时车缴费 vipParking:vip车位预约 monthRecharge:月卡充值',
+  `payee_id` bigint NOT NULL COMMENT '支付帐号id',
+  `payee_user_type` varchar(128) NOT NULL COMMENT '帐号类型，1-个人帐号、2-企业帐号',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0: inactive, 2: active',
+  `creator_uid` bigint DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint DEFAULT NULL,
+  `operate_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '停车充值收款账户表';
 
-CREATE TABLE `eh_meeting_records` (
-    `id` BIGINT NOT NULL COMMENT '主键',
-    `meeting_reservation_id` BIGINT NOT NULL COMMENT '会议预约ID，id of eh_meeting_reservations',
-    `meeting_subject` VARCHAR(256)  COMMENT '会议主题，冗余字段，用于纪要列表展示主题名称',
-    `content` TEXT COMMENT '会议纪要详细内容',
-    `creator_uid` BIGINT NOT NULL COMMENT '记录创建人userId',
-    `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
-    `operate_time` DATETIME NULL COMMENT '记录更新时间',
-    `operator_uid` BIGINT NULL COMMENT '记录更新人userId',
-    `operator_name` VARCHAR(64) NULL COMMENT '操作人姓名',
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_meeting_reservation_id` (`meeting_reservation_id`)
-)  ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='会议纪要表';
+-- DROP TABLE IF EXISTS `eh_siyin_print_business_payee_accounts`;
+CREATE TABLE `eh_siyin_print_business_payee_accounts` (
+  `id` bigint NOT NULL,
+  `namespace_id` int NOT NULL,
+  `owner_type` varchar(32) NOT NULL COMMENT 'community 园区',
+  `owner_id` bigint NOT NULL COMMENT '园区id',
+  `payee_id` bigint NOT NULL COMMENT '支付帐号id',
+  `payee_user_type` varchar(128) NOT NULL COMMENT '帐号类型，1-个人帐号、2-企业帐号',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0: inactive, 2: active',
+  `creator_uid` bigint DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint DEFAULT NULL,
+  `operate_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '云打印收款账户表';
 
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_order_no`  VARCHAR(64) COMMENT '支付系统单号';
 
--- End by: zhiwei zhang
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_order_no`  VARCHAR(64)  COMMENT '支付系统单号';
+
+-- 添加停车订单字段 bydengs
+-- 通用脚本
+-- 32033	左邻	任务	停车支持发票系统接口 (未处理)
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `payee_id` BIGINT COMMENT '收款方id';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_status` TINYINT COMMENT '0 =发票未开，2发票已开';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `invoice_create_time` DATETIME COMMENT '发票开票时间';
+-- dengs
+
+-- 通用脚本
+-- ADD BY 张智伟
+-- issue-32748
+ALTER TABLE eh_meeting_rooms DROP INDEX u_eh_namespace_owner_name;
+ALTER TABLE eh_meeting_rooms ADD INDEX `i_eh_namespace_owner_name` (`namespace_id` , `organization_id`, `owner_type` , `owner_id` , `name`);
+-- END
