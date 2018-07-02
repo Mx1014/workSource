@@ -48,6 +48,7 @@ import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -1115,6 +1116,7 @@ public class AssetProviderImpl implements AssetProvider {
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            List<SubItemDTO> list3 = billGroupDTO.getSubItemDTOList();//增加减免费项
             String apartmentName = null;
             String buildingName = null;
             if(list1!=null && list1.size() > 0){
@@ -1313,7 +1315,71 @@ public class AssetProviderImpl implements AssetProvider {
                 EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
                 billItemsDao.insert(billItemsList);
             }
-
+            
+            //增加减免费项
+            if(list3 != null) {
+            	  List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+	              for(int i = 0; i < list3.size() ; i++) {
+	                  long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+	                  if(currentSubtractionItemSeq == 0){
+	                      this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+	                  }
+	                  SubItemDTO dto = list3.get(i);
+	                  PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+	                  subtractionItem.setId(currentSubtractionItemSeq);
+	                  subtractionItem.setNamespaceId(UserContext.getCurrentNamespaceId());
+	                  
+//	                  item.setBillGroupRuleId(dto.getBillGroupRuleId());
+//	                  item.setAddressId(dto.getAddressId());
+//	                  item.setBuildingName(dto.getBuildingName());
+//	                  item.setApartmentName(dto.getApartmentName());
+//	                  BigDecimal var1 = dto.getAmountReceivable();
+//	                  //减免项不覆盖收费项目的收付，暂时
+//	                  var1 = DecimalUtils.negativeValueFilte(var1);
+//	                  item.setAmountOwed(var1);
+//	                  item.setAmountReceivable(var1);
+//	                  item.setAmountReceived(new BigDecimal("0"));
+//	                  item.setBillGroupId(billGroupId);
+//	                  item.setBillId(nextBillId);
+//	                  item.setChargingItemName(dto.getBillItemName());
+//	                  item.setChargingItemsId(dto.getBillItemId());
+//	                  item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//	                  item.setCreatorUid(UserContext.currentUserId());
+//	                  item.setDateStr(dateStr);
+//	                  //时间假定
+//	                  item.setDateStrBegin(dates.get(0));
+//	                  item.setDateStrEnd(dates.get(1));
+//	                  item.setId(currentBillItemSeq);
+//	                  item.setNamespaceId(UserContext.getCurrentNamespaceId());
+//	                  item.setOwnerType(ownerType);
+//	                  item.setOwnerId(ownerId);
+//	                  item.setContractId(contractId);
+//	                  item.setContractNum(contractNum);
+//	                  // item 也添加categoryId， 这样费用清单简单些
+//	                  item.setCategoryId(categoryId);
+//	                  if(targetType!=null){
+//	                      item.setTargetType(targetType);
+//	                  }
+//	                  if(targetId != null) {
+//	                      item.setTargetId(targetId);
+//	                  }
+//	                  item.setTargetName(targetName);
+//	                  item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                  billItemsList.add(item);
+	
+	                  amountReceivable = amountReceivable.add(var1);
+	                  amountOwed = amountOwed.add(var1);
+	              }
+	
+	              if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+	                  billStatus = 1;
+	              }
+	              for(int i = 0; i < billItemsList.size(); i++) {
+	                  billItemsList.get(i).setStatus(billStatus);
+	              }
+	              EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
+	              billItemsDao.insert(billItemsList);
+            }
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志

@@ -4,6 +4,7 @@
 CREATE TABLE `eh_payment_subtraction_items` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER,
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id',
   `owner_id` BIGINT,
   `owner_type` VARCHAR(64),
   `bill_id` BIGINT NOT NULL DEFAULT 0,
