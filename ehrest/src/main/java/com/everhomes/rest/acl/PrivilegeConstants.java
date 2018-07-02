@@ -183,6 +183,7 @@ public interface PrivilegeConstants {
     long METER_INACTIVE = 21006L;
     long METER_READING_SEARCH = 21007L;
     long METER_READING_DELETE = 21008L;
+    long ENERGY_MODULE = 49100L;
     long ENERGY_STAT_BY_DAY = 21009L;
     long ENERGY_STAT_BY_MONTH = 21010L;
     long ENERGY_STAT_BY_YEAR = 21011L;
@@ -271,6 +272,10 @@ public interface PrivilegeConstants {
     long ENTERPRISE_CUSTOMER_MANAGE_EXPORT = 21112L;//管理的导出
     long ENTERPRISE_CUSTOMER_STAT = 21113L;//客户的统计分析查看
 
+
+    long ENTERPRISE_CUSTOMER_MANNAGER_SET = 21115L;// 查看企业管理员
+
+    long CONTRACT_MODULE = 21200L; //合同模块id
     long CONTRACT_CREATE = 21201L;//新增合同
     long CONTRACT_LAUNCH = 21202L;//签约 发起审批
     long CONTRACT_UPDATE = 21203L;//修改

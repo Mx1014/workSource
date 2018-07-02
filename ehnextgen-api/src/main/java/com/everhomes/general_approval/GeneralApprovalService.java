@@ -1,10 +1,9 @@
 package com.everhomes.general_approval;
 
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseDetail;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import com.everhomes.rest.general_approval.*;
 
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -19,8 +18,6 @@ import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
-
-import javax.servlet.http.HttpServletResponse;
 
 public interface GeneralApprovalService {
 
@@ -52,28 +49,15 @@ public interface GeneralApprovalService {
 
     GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd);
 
-
     void enableGeneralApproval(GeneralApprovalIdCommand cmd);
 
     void disableGeneralApproval(GeneralApprovalIdCommand cmd);
 
     Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map);
 
-    VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd);
-
-    void createApprovalTemplates(CreateApprovalTemplatesCommand cmd);
-
     GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute);
 
     ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
-
-    ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
-
-    GeneralApprovalRecordDTO convertGeneralApprovalRecordDTO(FlowCase r);
-
-    void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
-
-    OutputStream getGeneralApprovalExportStream(ListGeneralApprovalRecordsCommand cmd, Long taskId);
 
     GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd);
 
@@ -83,5 +67,5 @@ public interface GeneralApprovalService {
 
     ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd);
 
-    void initializeGeneralApprovalScope();
+    boolean checkTheApprovalScope(List<GeneralApprovalScopeMapDTO> scopes, OrganizationMember member);
 }

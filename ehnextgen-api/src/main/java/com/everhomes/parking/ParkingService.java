@@ -135,4 +135,12 @@ public interface ParkingService {
     ListParkingSpaceLogsResponse exportParkingSpaceLogs(ListParkingSpaceLogsCommand cmd,HttpServletResponse response);
 
     void refreshToken(RefreshTokenCommand cmd);
+
+    SearchParkingHubsResponse searchParkingHubs(SearchParkingHubsCommand cmd);
+
+    ParkingHubDTO createOrUpdateParkingHub(CreateOrUpdateParkingHubCommand cmd);
+
+    void deleteParkingHub(DeleteParkingHubCommand cmd);
+
+    GetParkingSpaceLockFullStatusDTO getParkingSpaceLockFullStatus(DeleteParkingSpaceCommand cmd);
 }

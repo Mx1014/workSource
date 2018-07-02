@@ -97,7 +97,7 @@ redis.store.master.port: 6380
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8&encrypted=0
+db.master: jdbc:mysql://ehcore:ehcore@db-master:13318/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: true
@@ -107,11 +107,12 @@ db.tx.timeout: 600
 # ElasticSearch configuration
 #
 elastic:    
-    index: everhomesv31x
+    index: everhomesv3
     nodes:
         hosts: elasticsearch
         ports: 9300
         httpports: 9200
+cluster.name: elasticsearch37
 
 #
 # for API code generation
@@ -139,3 +140,6 @@ ems.sys.account: A1234567890Z
 ems.sys.password: e10adc3949ba59abbe56e057f20f883e
 
 schedule.running.flag: 1
+
+# 允许在 nashorn 中通过 Java.type 访问的类
+nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService

@@ -1,24 +1,24 @@
 package com.everhomes.repeat;
 
-import java.sql.Timestamp;
-
-import org.jooq.DSLContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.repeat.RepeatSettingStatus;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRepeatSettingsDao;
 import com.everhomes.server.schema.tables.pojos.EhRepeatSettings;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
 
 @Component
 public class RepeatProviderImpl implements RepeatProvider {
@@ -35,8 +35,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(RepeatProviderImpl.
 	private SequenceProvider sequenceProvider;
 	@Override
 	public void createRepeatSettings(RepeatSettings repeat) {
-
-		long id = this.shardingProvider.allocShardableContentId(EhRepeatSettings.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+	    long id = this.dbProvider.allocPojoRecordId(EhRepeatSettings.class);
+		//long id = this.shardingProvider.allocShardableContentId(EhRepeatSettings.class).second();
 		
 		repeat.setId(id);
 		repeat.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -65,7 +66,10 @@ private static final Logger LOGGER = LoggerFactory.getLogger(RepeatProviderImpl.
 	@Override
 	public void deleteRepeatSettingsById(Long id) {
 		// TODO Auto-generated method stub
-		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_REPEAT_SETTINGS)
+				.where(Tables.EH_REPEAT_SETTINGS.ID.eq(id))
+				.execute();
 	}
 
 	@Override

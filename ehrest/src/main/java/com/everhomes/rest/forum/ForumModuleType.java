@@ -13,16 +13,24 @@ package com.everhomes.rest.forum;
  */
 public enum ForumModuleType {
 
-    FORUM((byte) 1), ACTIVITY((byte) 2), ANNOUNCEMENT((byte) 3), CLUB((byte) 4), GUILD((byte) 5), FEEDBACK((byte) 6);
+    FORUM((byte) 1, (long)10100), ACTIVITY((byte) 2, (long)10600), ANNOUNCEMENT((byte) 3, (long)10300),
+    CLUB((byte) 4, (long)10750), GUILD((byte) 5, (long)10760), FEEDBACK((byte) 6, null);
 
     private Byte code;
 
-    private ForumModuleType(Byte code) {
+    private Long moduleTypeId;
+
+    private ForumModuleType(Byte code, Long moduleTypeId) {
         this.code = code;
+        this.moduleTypeId = moduleTypeId;
     }
 
     public Byte getCode() {
         return this.code;
+    }
+
+    public Long getModuleTypeId() {
+        return this.moduleTypeId;
     }
 
     public static ForumModuleType fromCode(Byte code) {

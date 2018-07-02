@@ -75,6 +75,8 @@ public class SearchUtils {
     public static final String ENERGY_PLAN= "energyPlan";
     public static final String ENERGY_TASK= "energyTask";
     public static final String PAYMENT_APPLICATION= "paymentApplication";
+	public static final String MESSAGE_RECORD= "messageRecord";
+    public static final String VISITORSYS= "visitorsys";
 
     public static Long getLongField(Object o) {
         Long v = -1l;

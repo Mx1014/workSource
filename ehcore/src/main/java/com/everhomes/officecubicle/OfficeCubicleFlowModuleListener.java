@@ -1,13 +1,10 @@
 package com.everhomes.officecubicle;
 
-import com.alibaba.fastjson.JSON;
 import com.everhomes.flow.*;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.officecubicle.OfficeOrderType;
 import com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus;
@@ -176,12 +173,6 @@ public class OfficeCubicleFlowModuleListener implements FlowModuleListener {
     @Override
     public void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) {
     	LOGGER.debug("onScanQRCode");
-    }
-
-    @Override
-    public List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
-    	LOGGER.debug("listFlowPredefinedParam");
-    	return null;
     }
 
     @Override

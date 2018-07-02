@@ -225,25 +225,46 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         });
 	}
 
-//	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
-//			"#categoryId,#keywords,#condition}", unless="#result == null")
+	/**   
+	* @Function: YellowPageProviderImpl.java
+	* @Description: 后台查询服务联盟使用
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月1日 下午4:11:45 
+	*
+	*/
 	@Override
-	public List<ServiceAlliances> queryServiceAlliance(
+	public List<ServiceAlliances> queryServiceAllianceAdmin(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords,Condition conditionOR) {
+			Long ownerId, Long parentId, Long categoryId, String keywords, Byte displayFlag) {
+		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, parentId, categoryId, keywords, displayFlag, false);
+	}
+	
+	
+	private List<ServiceAlliances> queryServiceAlliance(
+			CrossShardListingLocator locator, int pageSize, String ownerType,
+			Long ownerId, Long parentId, Long categoryId, String keywords, Byte displayFlag, boolean isByScene) {
 		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
 
-        if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
-			query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%").or(Tables.EH_SERVICE_ALLIANCES.RANGE.
-					eq("all")));
-		}else{
-//        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType).
-//					and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId)));
-			query.addConditions(conditionOR);
-		}
+        if (isByScene) {
+			query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%" + ownerId + "%")
+					.or(Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all")));
+    		
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(DisplayFlagType.SHOW.getCode()));
+    		
+        } else {
+        	
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+    		
+            if (null != displayFlag) {
+            	query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(displayFlag));
+            }
+        }
 
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
@@ -259,12 +280,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
         }
         
-        if(null!=parentId){
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
-        } else {
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
-		}
-
+        // 必须传对应parentId，如旧版本有数据问题需通过sql解决
+    	query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
 
         //by dengs,按照defaultorder排序，20170525
         query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
@@ -282,60 +299,21 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         }
         return saList;
 	}
-//	@Cacheable(value="queryServiceAlliance", key="{#locator.anchor, #pageSize, #ownerType, #ownerId,#parentId," +
-//			"#categoryId,#keywords,#organizationId,#organizationType}", unless="#result == null")
+	
+	/** 
+	* @see com.everhomes.yellowPage.YellowPageProvider#queryServiceAllianceByScene(com.everhomes.listing.CrossShardListingLocator, int, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String)   
+	* @Function: YellowPageProviderImpl.java
+	* @Description: 客户端查询时使用
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月1日 下午4:13:54 
+	*/
 	@Override
-	public List<ServiceAlliances> queryServiceAlliance(
-			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords, Long organizationId,String organizationType) {
-		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
- 
-
-		query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%")
-						.or(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationId).and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(organizationType))
-						.and(Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all")))
-		);
-        
-        if(locator.getAnchor() != null) {
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
-            }
-        
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
-        
-        if(!org.springframework.util.StringUtils.isEmpty(keywords)){
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.NAME.like("%" + keywords + "%"));
-        }
-        
-        if(categoryId != null) {
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
-        }
-        
-        if(null!=parentId){
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
-        } else {
-    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
-		}
-        //by dengs,客户端不能查看displayFlag为 HIDE的服务联盟
-        query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(DisplayFlagType.SHOW.getCode()));
-        query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
-        query.addLimit(pageSize);
-
-        LOGGER.info(query.toString());
-
-        query.fetch().map((r) -> {
-        	saList.add(ConvertHelper.convert(r, ServiceAlliances.class));
-            return null;
-        });
-        
-        if(saList != null && saList.size() > 0) {
-            return saList;
-        }
-        return saList;
+	public List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
+			Long ownerId, Long parentId, Long categoryId, String keywords) {
+		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, parentId, categoryId, keywords, null, true);
 	}
-
 
 	@Override
 	public YellowPage findYellowPageById(Long id, String ownerType, Long ownerId) {
@@ -405,7 +383,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAlliances.class));
         sa.setId(id);
       //设置序号默认是id，by dengs,20170524.
-        sa.setDefaultOrder(id);
+        sa.setDefaultOrder(-id); //缺陷 #29826：旧的排序保持，新的排序按id倒叙排
         if(sa.getStatus() == null) {
             sa.setStatus(YellowPageStatus.ACTIVE.getCode());    
         }
@@ -1094,7 +1072,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public List<JumpModuleDTO> jumpModules(Integer namespaceId) {
+	public List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString) {
 		List<JumpModuleDTO> modules = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1104,7 +1082,9 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				or(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.eq(SignalEnum.APPROVAL.getCode())
 		);
 		query.addConditions(condition);
-
+		if (!StringUtils.isEmpty(bizString)) {
+			query.addConditions(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.MODULE_URL.eq(bizString));
+		}
 
 		query.fetch().map((r) -> {
 			modules.add(ConvertHelper.convert(r, JumpModuleDTO.class));
@@ -1243,4 +1223,5 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         return query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
 	
 	}
+	
 }

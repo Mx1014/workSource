@@ -2,6 +2,7 @@ package com.everhomes.contract;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -151,6 +152,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
             builder.field("paymentFlag", contract.getPaymentFlag());
+            builder.field("categoryId", contract.getCategoryId());
+            
             if(contract.getRent() != null) {
                 builder.field("rent", contract.getRent());
             } else {
@@ -237,6 +240,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Override
     public ListContractsResponse queryContracts(SearchContractCommand cmd) {
+    	if (cmd.getOrgId() == null || cmd.getCommunityId() == null) {
+    		throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+                    "OrgIdorCommunityId user privilege error");
+		}
         if(cmd.getPaymentFlag() == 1) {
             checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
         } else {
@@ -291,6 +298,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
+        
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
 
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
@@ -321,7 +330,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
         Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
         if(contracts != null && contracts.size() > 0) {
-            //一把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
+            //把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
             ids.forEach(id -> {
                 Contract contract = contracts.get(id);
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);

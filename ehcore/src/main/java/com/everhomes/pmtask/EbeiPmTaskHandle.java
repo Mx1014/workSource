@@ -48,6 +48,8 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
@@ -65,7 +67,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI)
-public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
+public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final String LIST_SERVICE_TYPE = "/rest/crmFeedBackInfoJoin/serviceTypeList";
     private static final String CREATE_TASK = "/rest/crmFeedBackInfoJoin/uploadFeedBackOrder";
@@ -104,13 +106,22 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
     @Autowired
     private AddressProvider addressProvider;
 
-    @PostConstruct
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void init() {
         httpclient = HttpClients.createDefault();
         //对接的科兴，所以默认科兴 园区id
         projectId = configProvider.getValue("pmtask.ebei.projectId", "240111044331055940");
     }
 
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
+    }
+    
     private List<CategoryDTO> listServiceType(String projectId, Long parentId) {
         JSONObject param = new JSONObject();
         param.put("projectId", projectId);
@@ -776,9 +787,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle{
         Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
         SearchTasksResponse response = new SearchTasksResponse();
-        List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
-                cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),cmd.getCreatorType(),
-                cmd.getPageAnchor(), pageSize+1);
+        List<PmTaskDTO> list = pmTaskSearch.searchAllDocsByType(cmd,pageSize + 1);
+//        List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
+//                cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),cmd.getCreatorType(),
+//                cmd.getPageAnchor(), pageSize+1);
         int listSize = list.size();
         if(listSize > 0){
             response.setRequests(list.stream().map(t -> {

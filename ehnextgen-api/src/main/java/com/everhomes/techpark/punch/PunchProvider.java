@@ -260,7 +260,7 @@ public interface PunchProvider {
 	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
 			List<Long> userIds, CrossShardListingLocator locator, int i);
   
-	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId);
+	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId,Long detailId);
 
 	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
 
@@ -361,4 +361,12 @@ public interface PunchProvider {
 
 	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId,
 			Date startDate, Date endDate);
+ 
+	List<PunchLog> listPunchLogs(Long userId, Long companyId, String startDay, String endDay);
+
+	public List<Long> listPunchLogEnterprise(String startDayString, String endDayString);
+
+	public List<Long> listPunchLogUserId(Long enterpriseId, String startDayString, String endDayString);
+
+	Integer countpunchStatistic(String punchMonth, Long ownerId);
 }

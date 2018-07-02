@@ -526,6 +526,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 dto.setIsPlus((byte)1);
             }
         }
+        //返回时增加缴费凭证留言和缴费凭证图片的信息（add by tangcen）
+        ListUploadCertificatesCommand listUploadCertificatesCommand = new ListUploadCertificatesCommand();
+        listUploadCertificatesCommand.setBillId(cmd.getBillId());
+        UploadCertificateInfoDTO uploadCertificateInfoDTO = assetService.listUploadCertificates(listUploadCertificatesCommand);
+        response.setCertificateNote(uploadCertificateInfoDTO.getCertificateNote());
+        response.setUploadCertificateDTOList(uploadCertificateInfoDTO.getUploadCertificateDTOList());
         return response;
     }
 
@@ -562,15 +568,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
-//        if(!cmd.getOwnerType().equals("community")){
-//            throw new RuntimeException("保存账单不在一个园区");
-//        }
-//        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
-//        if(targetDto!=null){
-//            cmd.setContractId(targetDto.getContractId());
-//            cmd.setTargetId(targetDto.getTargetId());
-//        }
-//        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
         return assetProvider.creatPropertyBill(cmd);
     }
 
@@ -614,11 +611,11 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         List<BillStaticsDTO> list = new ArrayList<>();
         Byte dimension = cmd.getDimension();
         if(dimension==1){
-            list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType());
+            list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
         }else if(dimension==2){
-            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginLimit(),cmd.getEndLimit());
+            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getCategoryId());
         }else if(dimension==3){
-            list = assetProvider.listBillStaticsByCommunities(cmd.getBeginLimit(),cmd.getEndLimit(),UserContext.getCurrentNamespaceId());
+            list = assetProvider.listBillStaticsByCommunities(cmd.getBeginLimit(),cmd.getEndLimit(),UserContext.getCurrentNamespaceId(),cmd.getCategoryId());
         }
         return list;
     }
@@ -899,6 +896,13 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     });
                     dto.setBills(list);
                     dto.setOverAllAmountOwed(owedMoney.toString());
+                    // stringbuilder append null results in 'null' str
+                    // , thus hereby I use emtpy string to replace 'null' str by wentian @2018.5.11
+                    if(!StringUtils.isBlank(dto.getAddressStr())){
+                        dto.setAddressStr(dto.getAddressStr().replace("null","").trim());
+                    }else{
+                        dto.setAddressStr("");
+                    }
                     tabBills.add(dto);
                 }
             }
@@ -921,15 +925,16 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         List<String> headList = new ArrayList<>();
         List<Integer> mandatoryIndex = new ArrayList<>();
         Integer cur = -1;
-        headList.add("账期");
-        cur++;
-        mandatoryIndex.add(1);
+        //批量导入的字段去掉账期
+        //headList.add("账期");
+        //cur++;
+        //mandatoryIndex.add(1);
         headList.add("账单开始时间");
         cur++;
-        mandatoryIndex.add(0);
+        mandatoryIndex.add(1);//账期开始时间置为必填
         headList.add("账单结束时间");
         cur++;
-        mandatoryIndex.add(0);
+        mandatoryIndex.add(1);//账期结束时间置为必填
         headList.add("客户属性");
         cur++;
         mandatoryIndex.add(1);
@@ -991,7 +996,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         "5、账单、收费项以导出的为准，不可修改，修改后将导致导入不成功。\n" +
                         "6、企业客户需填写与系统内客户管理一致的准企业名称，个人客户需填写与系统内个人客户资料一致的手机号，否则会导致无法定位客户。\n" +
                         "7、客户属性为个人客户时，手机号为唯一身份识别标识，客户手机号必填。\n" +
-                        "8、账期，计费开始和结束时间的格式只能为 2018-01,2018-01-12,2018/01,2018/01/12", (short)13, (short)2500)
+                        "8、账单开始时间，账单结束时间的格式只能为 2018-01-12,2018/01/12", (short)13, (short)2500)
                 .setNeedSequenceColumn(false)
                 .setIsCellStylePureString(true)
                 .writeExcel(null, headers, true, null, null);
@@ -1014,6 +1019,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE
                     , "file illegal");
         }
+        // get categoryid
+        Long categoryId =assetProvider.findCategoryIdFromBillGroup(cmd.getBillGroupId());
 
         //准备任务
         ImportFileTask task = new ImportFileTask();
@@ -1032,6 +1039,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 datas = entry.getValue();
             }
             for(CreateBillCommand command : createBillCommands){
+                command.setCategoryId(categoryId);
                 createBill(command);
             }
             //设置导出报错的结果excel的标
@@ -1161,12 +1169,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         if(claimedIdentifierByToken!=null){
                             cmd.setTargetId(claimedIdentifierByToken.getOwnerUid());
                         }
-                        cmd.setCustomerTel(data[j]);
                     }
+                    cmd.setCustomerTel(data[j]);
                 }
-                else if(headers[j].equals("账单开始时间")){
+                else if(headers[j].equals("*账单开始时间")){
                     cmd.setDateStrBegin(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
-                }else if(headers[j].equals("账单结束时间")){
+                }else if(headers[j].equals("*账单结束时间")){
                     cmd.setDateStrEnd(DateUtils.guessDateTimeFormatAndFormatIt(data[j], "yyyy-MM-dd"));
                 }else if(headers[j].equals("合同编号")){
                     cmd.setContractNum(data[j]);

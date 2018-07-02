@@ -1,6 +1,5 @@
 package com.everhomes.rentalv2;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.*;
 
 import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
-import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
@@ -20,7 +18,6 @@ import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
-import com.everhomes.util.StringHelper;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,22 +27,12 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.*;
-import com.everhomes.flow.node.FlowGraphNodeEnd;
-import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
-import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
@@ -54,15 +41,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.Tuple;
-import org.elasticsearch.common.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
@@ -113,7 +91,17 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
+		FlowCase flowCase = ctx.getFlowCase();
+		RentalOrder order = null;
+		if(null != flowCase.getReferId()){
+			order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
+		}
+		if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
+				&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode()) {
+			CancelRentalBillCommand cmd = new CancelRentalBillCommand();
+			cmd.setRentalBillId(order.getId());
+			rentalv2Service.cancelRentalBill(cmd,false);
+		}
 
 	}
 
@@ -153,12 +141,6 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 						rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
 					}
 				}
-			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
-				CancelRentalBillCommand cmd = new CancelRentalBillCommand();
-				cmd.setRentalBillId(order.getId());
-				if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
-						&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode())
-					rentalv2Service.cancelRentalBill(cmd);
 			}
 
 		}
@@ -239,19 +221,13 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				"organization", RentalNotificationTemplateCode.locale, ""));
 
 		Long orgId = order.getUserEnterpriseId();
+		e.setValue("无");
 		if (null != orgId) {
 			Organization org = organizationProvider.findOrganizationById(orgId);
-			e.setValue(org.getName());
-		}else {
-			List<OrganizationSimpleDTO> organizationDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
-
-			for(OrganizationSimpleDTO org : organizationDTOs){
-				if (StringUtils.isNotBlank(e.getValue()))
-					e.setValue(e.getValue() + "、" + org.getName());
-				else
-					e.setValue(org.getName());
-			}
+			if (org!=null)
+				e.setValue(org.getName());
 		}
+
 		entities.add(e);
 
 		e = new FlowCaseEntity();
@@ -415,7 +391,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		String contentString = "";
 		if(null != order.getOfflinePayeeUid()){
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(order.getOfflinePayeeUid(), order.getOrganizationId());
 			if(null!=member){
 				map.put("offlinePayeeName", member.getContactName());
 				map.put("offlinePayeeContact", member.getContactToken());
@@ -544,7 +520,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			String contactName="";
 			String contactToken="";
 			if(null != order.getOfflinePayeeUid()){
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
+				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(order.getOfflinePayeeUid(), order.getOrganizationId());
 				if(null != member){
 					contactName = member.getContactName();
 					contactToken = member.getContactToken();

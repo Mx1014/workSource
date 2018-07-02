@@ -16,6 +16,7 @@ import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.server.schema.tables.daos.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -1014,20 +1015,93 @@ public class PunchProviderImpl implements PunchProvider {
         }).collect(Collectors.toList());
         return result;
     }
+    @Override
+    public List<Long> listPunchLogUserId(Long enterpriseId, String startDay, String endDay){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record1<Long>> step = context.selectDistinct(Tables.EH_PUNCH_LOGS.USER_ID).from(Tables.EH_PUNCH_LOGS); 
+        Condition condition = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(enterpriseId); 
+        if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+            Date startDate = Date.valueOf(startDay);
+            Date endDate = Date.valueOf(endDay);
+            condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+        }
+        // modify by wh 2017-4-25 order by punch date asc
+        List<Long> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc()).fetch()
+                .map((r) -> {
+                    return r.value1();
+                });
+        return resultRecord;
+    }
 
     @Override
-    public List<PunchDayLog> listPunchDayLogs(Long userId,
-                                              Long companyId, String startDay, String endDay) {
-        // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+    public Integer countpunchStatistic(String punchMonth, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
-//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
-//	 
-        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
-        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
-//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+        SelectConditionStep<Record1<Integer>> step = context.select(Tables.EH_PUNCH_STATISTICS.ID.count()).from(Tables.EH_PUNCH_STATISTICS)
+                .where(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth));
+        return step.fetchAny().value1();
+    }
 
+    @Override
+	public List<Long> listPunchLogEnterprise(String startDay, String endDay){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record1<Long>> step = context.selectDistinct(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID).from(Tables.EH_PUNCH_LOGS); 
+        Condition condition = Tables.EH_PUNCH_LOGS.USER_ID.isNotNull(); 
+        if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+            Date startDate = Date.valueOf(startDay);
+            Date endDate = Date.valueOf(endDay);
+            condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+        }
+        // modify by wh 2017-4-25 order by punch date asc
+        List<Long> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc()).fetch()
+                .map((r) -> {
+                    return r.value1();
+                });
+        return resultRecord;
+	}
+    @Override
+    public List<PunchLog> listPunchLogs(Long userId,
+                                              Long companyId, String startDay, String endDay) { 
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_LOGS); 
+        Condition condition = Tables.EH_PUNCH_LOGS.USER_ID.isNotNull();
+        if(null != companyId){
+        	condition = condition.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(companyId));
+        }
+        if(null != userId){
+        	condition = condition.and(Tables.EH_PUNCH_LOGS.USER_ID.equal(userId));
+        } 
+        if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+            Date startDate = Date.valueOf(startDay);
+            Date endDate = Date.valueOf(endDay);
+            condition = condition.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+        }
+        // modify by wh 2017-4-25 order by punch date asc
+        List<EhPunchLogsRecord> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc()).fetch()
+                .map((r) -> {
+                    return ConvertHelper.convert(r, EhPunchLogsRecord.class);
+                });
+
+        List<PunchLog> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchLog.class);
+        }).collect(Collectors.toList());
+        return result;
+    }
+    @Override
+    public List<PunchDayLog> listPunchDayLogs(Long userId,
+                                              Long companyId, String startDay, String endDay) { 
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS); 
+        Condition condition = Tables.EH_PUNCH_DAY_LOGS.USER_ID.isNotNull();
+        if(null != companyId){
+        	condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+        }
+        if(null != userId){
+        	condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
+        } 
         if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
             Date startDate = Date.valueOf(startDay);
             Date endDate = Date.valueOf(endDay);
@@ -2303,7 +2377,7 @@ public class PunchProviderImpl implements PunchProvider {
 
     @Override
     public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
-                                                     List<Long> userIds, CrossShardListingLocator locator, int i) {
+                                                     List<Long> detailIds, CrossShardListingLocator locator, int i) {
         List<PunchStatistic> result = queryPunchStatistics(locator, i, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -2312,8 +2386,8 @@ public class PunchProviderImpl implements PunchProvider {
                 query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq(ownerType));
                 if (null != exceptionStatus)
                     query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));
-                if (null != userIds)
-                    query.addConditions(Tables.EH_PUNCH_STATISTICS.USER_ID.in(userIds));
+                if (null != detailIds)
+                    query.addConditions(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.in(detailIds));
                 if (null != months)
                     query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.in(months));
 
@@ -2325,13 +2399,14 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId) {
+    public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId, Long detailId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         DeleteWhereStep<EhPunchStatisticsRecord> step = context
                 .delete(Tables.EH_PUNCH_STATISTICS);
         Condition condition = Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.equal(punchMonth)
                 .and(Tables.EH_PUNCH_STATISTICS.USER_ID.equal(userId))
                 .and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.in(ownerId))
+                .and(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.equal(detailId))
                 .and(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.equal(ownerType));
         step.where(condition);
         step.execute();
@@ -3091,8 +3166,8 @@ public class PunchProviderImpl implements PunchProvider {
         condition = condition.and(condition4);
         condition = condition.and(condition5);
         step.where(condition);
-        List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.USER_ID.asc(),
-                Tables.EH_PUNCH_LOGS.PUNCH_DATE.asc(), Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
+        List<PunchLog> result = step.orderBy(
+                Tables.EH_PUNCH_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_LOGS.USER_ID.asc(),Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.asc(),
                 Tables.EH_PUNCH_LOGS.PUNCH_TYPE.asc(), Tables.EH_PUNCH_LOGS.PUNCH_TIME.asc())
                 .fetch().map((r) -> {
                     return ConvertHelper.convert(r, PunchLog.class);

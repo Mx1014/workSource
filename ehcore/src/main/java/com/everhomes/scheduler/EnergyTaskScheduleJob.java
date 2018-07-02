@@ -41,6 +41,7 @@ import com.everhomes.organization.pm.DefaultChargingItemProvider;
 import com.everhomes.organization.pm.OrganizationOwnerAddress;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.ContractProperty;
 import com.everhomes.rest.asset.FeeRules;
@@ -302,7 +303,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         feeRules.add(feeRule);
                         contractId.add(item.getContractId());
                     });
-                    //suanqian paymentExpectancies_re_struct();
+                    //suanqian paymentExpectanciesCalculate();
                     paymentExpectancies_re_struct(task, address, feeRules, contractId.get(0));
                 } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
                     List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
@@ -315,7 +316,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                                     task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
                             feeRules.add(feeRule);
                         });
-                        //suanqian paymentExpectancies_re_struct();
+                        //suanqian paymentExpectanciesCalculate();
                         paymentExpectancies_re_struct(task, address, feeRules, null);
                         generateFlag = true;
                     } else {
@@ -329,7 +330,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                                         task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
                                 feeRules.add(feeRule);
                             });
-                            //suanqian paymentExpectancies_re_struct();
+                            //suanqian paymentExpectanciesCalculate();
                             paymentExpectancies_re_struct(task, address, feeRules, null);
                             generateFlag = true;
                         } else {
@@ -343,7 +344,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                                             task.getExecutiveStartTime().getTime(), task.getExecutiveExpireTime().getTime(), item.getChargingVariables(), address,meter.getMeterType());
                                     feeRules.add(feeRule);
                                 });
-                                //suanqian paymentExpectancies_re_struct();
+                                //suanqian paymentExpectanciesCalculate();
                                 paymentExpectancies_re_struct(task, address, feeRules, null);
                                 generateFlag = true;
                             }
@@ -380,7 +381,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 //      没合同时  eh_organization_owner_address eh_organization_addresses
         if(command.getContractIdType() == 0) {
             OrganizationAddress organizationAddress = organizationProvider.findActiveOrganizationAddressByAddressId(address.getAddressId());
-            LOGGER.debug("paymentExpectancies_re_struct organizationAddress: {}", StringHelper.toJsonString(organizationAddress));
+            LOGGER.debug("paymentExpectanciesCalculate organizationAddress: {}", StringHelper.toJsonString(organizationAddress));
             if(organizationAddress != null) {
                 command.setTargetType("eh_organization");
                 command.setTargetId(organizationAddress.getOrganizationId());
@@ -389,7 +390,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 command.setNoticeTel(detail.getContact());
             } else {
                 List<OrganizationOwnerAddress> addresses = propertyMgrProvider.listOrganizationOwnerAuthAddressByAddressId(task.getNamespaceId(), address.getAddressId());
-                LOGGER.debug("paymentExpectancies_re_struct organizationAddress: {}", StringHelper.toJsonString(addresses));
+                LOGGER.debug("paymentExpectanciesCalculate organizationAddress: {}", StringHelper.toJsonString(addresses));
                 if(addresses != null && addresses.size() > 0) {
                     command.setTargetType("eh_user");
                     for(OrganizationOwnerAddress ownerAddress : addresses) {
@@ -432,10 +433,10 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 }
             }
         }
-
-        LOGGER.debug("paymentExpectancies_re_struct command: {}", command);
+        command.setModuleId(PrivilegeConstants.ENERGY_MODULE);
+        LOGGER.debug("paymentExpectanciesCalculate command: {}", command);
         assetService.upodateBillStatusOnContractStatusChange(command.getContractId(), AssetPaymentConstants.CONTRACT_CANCEL);
-        assetService.paymentExpectancies_re_struct(command);
+        assetService.paymentExpectanciesCalculate(command);
     }
 
     private FeeRules generateChargingItemsFeeRule(BigDecimal amount, Long chargingItemId, Long chargingStandardId,

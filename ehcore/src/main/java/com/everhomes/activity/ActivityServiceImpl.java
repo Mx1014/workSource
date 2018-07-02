@@ -65,6 +65,7 @@ import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
@@ -75,6 +76,7 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
@@ -96,6 +98,8 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -130,7 +134,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
-public class ActivityServiceImpl implements ActivityService {
+public class ActivityServiceImpl implements ActivityService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivityServiceImpl.class);
     
@@ -249,11 +253,21 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Autowired
 	private PayService payService;
-	
-	
-    @PostConstruct
+
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
+    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
+    //@PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
+    }
+    
+    @Override  
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
     }
 
     @Override
@@ -1735,12 +1749,14 @@ public class ActivityServiceImpl implements ActivityService {
     	}
     	roster.setGender(signupInfoDTO.getGender());
     	roster.setCommunityName(signupInfoDTO.getCommunityName());
-    	if(roster.getOrganizationName() == null){
-    		roster.setOrganizationName(signupInfoDTO.getOrganizationName());
-    	}
-    	if(roster.getPosition() == null){
-    		roster.setPosition(signupInfoDTO.getPosition());
-    	}
+
+    	//产品沟通不默认设置公司和职位，因为小区场景默认是没有公司和职位的  add by yanjun 20180515
+//    	if(roster.getOrganizationName() == null){
+//    		roster.setOrganizationName(signupInfoDTO.getOrganizationName());
+//    	}
+//    	if(roster.getPosition() == null){
+//    		roster.setPosition(signupInfoDTO.getPosition());
+//    	}
     	if(roster.getEmail() == null){
     		roster.setEmail(signupInfoDTO.getEmail());
     	}
@@ -5380,7 +5396,20 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
-
+        //敏感词过滤 start add by yanlong.liang 20180626
+        Post post = this.forumProvider.findPostById(activity.getPostId());
+        FilterWordsCommand command = new FilterWordsCommand();
+        if (post != null) {
+            command.setCommunityId(post.getVisibleRegionId());
+            command.setModuleType(post.getModuleType());
+        }
+        List<String> list = new ArrayList<>();
+        if (!StringUtils.isEmpty(cmd.getAchievement()) && !"link".equals(cmd.getAchievementType())) {
+            list.add(cmd.getAchievement());
+        }
+        command.setTextList(list);
+        this.sensitiveWordService.filterWords(command);
+        // 敏感词过滤 end
         activity.setAchievement(cmd.getAchievement());
         activity.setAchievementType(cmd.getAchievementType());
         activity.setAchievementRichtextUrl(cmd.getAchievementRichtextUrl());
@@ -5471,10 +5500,39 @@ public class ActivityServiceImpl implements ActivityService {
         activityProvider.updateActivityAttachment(attachment);
     }
 
+
+    private void filterGoods(ActivityGoods goods) {
+        Activity activity = activityProvider.findActivityById(goods.getActivityId());
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", goods.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + goods.getActivityId());
+        }
+        //敏感词过滤 start add by yanlong.liang 20180626
+        Post post = this.forumProvider.findPostById(activity.getPostId());
+        FilterWordsCommand command = new FilterWordsCommand();
+        if (post != null) {
+            command.setCommunityId(post.getCommunityId());
+            command.setModuleType(post.getModuleType());
+        }
+        List<String> list = new ArrayList<>();
+        if (!StringUtils.isEmpty(goods.getName())) {
+            list.add(goods.getName());
+        }
+        if (!StringUtils.isEmpty(goods.getHandlers())) {
+            list.add(goods.getHandlers());
+        }
+        command.setTextList(list);
+        this.sensitiveWordService.filterWords(command);
+        // 敏感词过滤 end
+    }
     @Override
     public void createActivityGoods(CreateActivityGoodsCommand cmd) {
         ActivityGoods goods = ConvertHelper.convert(cmd, ActivityGoods.class);
         goods.setCreatorUid(UserContext.current().getUser().getId());
+
+        filterGoods(goods);
+
         activityProvider.createActivityGoods(goods);
     }
 
@@ -5492,6 +5550,8 @@ public class ActivityServiceImpl implements ActivityService {
         goods.setQuantity(cmd.getQuantity());
         goods.setTotalPrice(cmd.getTotalPrice());
         goods.setHandlers(cmd.getHandlers());
+
+        filterGoods(goods);
 
         activityProvider.updateActivityGoods(goods);
     }

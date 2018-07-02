@@ -9,6 +9,7 @@ import java.io.Serializable;
  * <ul>actionType为SERVICEALLIANCE(33)，服务联盟
  * <li>type：类型，参考{@link com.everhomes.rest.yellowPage.YellowPageType}</li>
  * <li>parentId: 服务联盟中筛选条件列表中的类型对应的父亲类型</li>
+ * <li>enableComment: 是否允许评论 0-不允许 1-允许</li>
  * </ul>
  */
 public class ServiceAllianceActionData implements Serializable{
@@ -19,6 +20,8 @@ public class ServiceAllianceActionData implements Serializable{
     private Long parentId;
 
     private String displayType;
+    
+    private Byte enableComment;
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -52,4 +55,12 @@ public class ServiceAllianceActionData implements Serializable{
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Byte getEnableComment() {
+		return enableComment;
+	}
+
+	public void setEnableComment(Byte enableComment) {
+		this.enableComment = enableComment;
+	}
 }

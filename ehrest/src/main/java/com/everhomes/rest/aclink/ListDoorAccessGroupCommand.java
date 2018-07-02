@@ -1,9 +1,20 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>ownerId: 所属上级的id</li>
+ * <li>ownerType: 所属上级的类型</li>
+ * <li>doorType:门禁类型{@link: com.everhomes.rest.aclink.DoorAccessType}
+ * <li>search: 搜索关键字</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每页大小</li>
+ * </ul>
+ */
 public class ListDoorAccessGroupCommand {
     @NotNull
     private Long ownerId;
@@ -16,6 +27,8 @@ public class ListDoorAccessGroupCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
+    
+    private Byte doorType;
 
     public Long getOwnerId() {
         return ownerId;
@@ -57,7 +70,15 @@ public class ListDoorAccessGroupCommand {
         this.search = search;
     }
 
-    @Override
+    public Byte getDoorType() {
+		return doorType;
+	}
+
+	public void setDoorType(Byte doorType) {
+		this.doorType = doorType;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

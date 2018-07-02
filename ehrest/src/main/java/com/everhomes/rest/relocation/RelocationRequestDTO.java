@@ -32,6 +32,8 @@ public class RelocationRequestDTO {
     private Timestamp cancelTime;
     private Long cancelUid;
 
+    private String orgOwnerType;
+
     @ItemType(RelocationRequestItemDTO.class)
     private List<RelocationRequestItemDTO> items;
 
@@ -201,6 +203,14 @@ public class RelocationRequestDTO {
 
     public void setContactPhone(String contactPhone) {
         this.contactPhone = contactPhone;
+    }
+
+    public String getOrgOwnerType() {
+        return orgOwnerType;
+    }
+
+    public void setOrgOwnerType(String orgOwnerType) {
+        this.orgOwnerType = orgOwnerType;
     }
 
     @Override

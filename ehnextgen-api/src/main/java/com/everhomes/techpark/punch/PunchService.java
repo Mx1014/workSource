@@ -3,6 +3,7 @@ package com.everhomes.techpark.punch;
 import java.io.OutputStream;
 import java.sql.Time;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -265,7 +266,7 @@ public interface PunchService {
 			String userName, String ownerType, Long ownerId, Long taskId, Long userId);
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
-			String userName, String ownerType, Long ownerId, Long taskId);
+			String userName, String ownerType, Long ownerId, Long taskId, Long monthReportId);
 
 	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd);
 
@@ -280,4 +281,22 @@ public interface PunchService {
 	public ImportFileTaskDTO importVacationBalances(MultipartFile[] files, ImportVacationBalancesCommand cmd);
 
 	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
+
+	ArrayList processImportExcel2ArrayList(MultipartFile[] files);
+	
+	void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd);
+
+	void refreshMonthReport(String month);
+
+	public ListPunchMonthReportsResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd);
+
+
+	public void updateMonthReport(UpdateMonthReportCommand cmd);
+
+
+	public GetMonthReportProcessResponse getMonthReportProcess(GetMonthReportProcessCommand cmd);
+
+
+	public void fileMonthReport(FileMonthReportCommand cmd);
+
 }

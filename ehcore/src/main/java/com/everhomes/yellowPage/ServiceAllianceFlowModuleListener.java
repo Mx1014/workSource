@@ -1,8 +1,6 @@
 package com.everhomes.yellowPage;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,9 +13,9 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
@@ -32,6 +30,8 @@ import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +43,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowEvaluate;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
@@ -53,12 +54,17 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
+	
+	private final String ALLIANCE_TEMPLATE_TYPE = "flowCase";
+	private final String ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME = "workflowStatus";
+	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher serviceAllianceRequestInfoSearcher;
 	public static final long MODULE_ID = 40500;
@@ -82,6 +88,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	private GroupProvider groupProvider;
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
+	
+	@Autowired
+	ServiceAllianceProviderProvider serviceAllianceProvidProvider;
 	
 	@Override
 	public FlowModuleInfo initModule() {
@@ -229,7 +238,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setSecondCategoryId(sa.getCategoryId());
 		request.setWorkflowStatus(status);
 		request.setId(flowCase.getId());
-		request.setTemplateType("flowCase");
+		request.setTemplateType(ALLIANCE_TEMPLATE_TYPE);
 		ServiceAllianceApplicationRecord record = ConvertHelper.convert(request, ServiceAllianceApplicationRecord.class);
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
 		if(org!=null){
@@ -424,7 +433,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		if (flowCase.getOwnerType() != null && !FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType()))
 			return this.processCustomRequest(flowCase);
 
-
+		flowCase.setCustomObject(getCustomObject(flowCase));
+		
+		
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		if (flowCase.getCreateTime() != null) {
 			entities.add(new FlowCaseEntity("申请时间", flowCase.getCreateTime().toLocalDateTime().format(fmt), FlowCaseEntityType.MULTI_LINE.getCode()));
@@ -552,4 +563,111 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			return dto;
 		}).collect(Collectors.toList());
 	}
+	
+	@Override
+	/*
+	 * 评价完成后，对新建事件进行评分更新
+	 * */
+    public void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates) {
+		
+		//获取工作流
+		FlowCase flowCase = ctx.getFlowCase();
+		if (!FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType())) {
+			//非表单审核项，直接返回
+			return;
+		}
+		
+		// 如果评价项是空，直接返回
+		if (CollectionUtils.isEmpty(evaluates)) {
+			return;
+		}
+		
+		// 对每一项进行更新
+		for (FlowEvaluate item : evaluates) {
+			serviceAllianceProvidProvider.updateScoreByEvaluation(flowCase.getId(), item);
+		}
+    }
+	
+	/**
+	 * 根据工作流保存一些业务信息
+	 * @param approvalId
+	 * @return
+	 */
+	private String getCustomObject(FlowCase flowCase) {
+
+		if (!FlowOwnerType.GENERAL_APPROVAL.getCode().equals(flowCase.getOwnerType())) {
+			return null;
+		}
+
+		Byte enableProvider = (byte) 0;
+		do {
+
+			GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getOwnerId());
+			if (null == ga) {
+				break;
+			}
+
+			ServiceAlliances sa = yellowPageProvider.queryServiceAllianceTopic(null, null, ga.getModuleId());
+			if (null == sa || null == sa.getEnableProvider()) {
+				break;
+			}
+
+			enableProvider = sa.getEnableProvider();
+
+		} while (false);
+
+		JSONObject json = new JSONObject();
+		json.put("enableProvider", enableProvider);
+
+		return json.toJSONString();
+	}
+	
+	@Override
+	public void onFlowCaseStateChanged(FlowCaseState ctx) {
+		
+		FlowCase flowCase = ctx.getFlowCase();
+		
+		reNewEsWorkFlowStatus(flowCase.getId(), flowCase.getStatus());
+		
+	}
+	
+	/**   
+	* @Function: ServiceAllianceFlowModuleListener.java
+	* @Description: 更新es服务器里服务的状态
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月20日 下午1:54:27 
+	*
+	*/
+	private void reNewEsWorkFlowStatus(Long flowCaseId, Byte flowCaseStatus) {
+
+		// 将工作流状态转成服务状态
+		ServiceAllianceWorkFlowStatus newStatus = ServiceAllianceWorkFlowStatus.getFromFlowCaseStatus(flowCaseStatus);
+
+		// 更新es存储的服务状态
+		serviceAllianceRequestInfoSearcher.updateDocByField(flowCaseId, ALLIANCE_TEMPLATE_TYPE,
+				ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME, newStatus.getCode());
+
+	}
+	
+	@Override
+	public void onFlowButtonFired(FlowCaseState ctx) {
+		
+		if (FlowStepType.SUSPEND_STEP != ctx.getStepType() && FlowStepType.ABORT_SUSPEND_STEP != ctx.getStepType()) {
+			return;
+		}
+
+		FlowCase flowCase = ctx.getFlowCase();
+		
+		byte newFlowCaseStatus = FlowCaseStatus.SUSPEND.getCode();
+		if (FlowStepType.ABORT_SUSPEND_STEP == ctx.getStepType()) {
+			newFlowCaseStatus = FlowCaseStatus.PROCESS.getCode();
+		} 
+		
+		//更新es状态 #31378
+		reNewEsWorkFlowStatus(flowCase.getId(), newFlowCaseStatus);
+	}
+
+	
 }

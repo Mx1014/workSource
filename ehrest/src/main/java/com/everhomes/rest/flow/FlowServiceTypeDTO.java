@@ -2,18 +2,22 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+import java.io.Serializable;
+
 /**
  * <ul>
  *     <li>id: id</li>
  *     <li>moduleId: moduleId</li>
+ *     <li>organizationId: organizationId</li>
  *     <li>namespaceId: namespaceId</li>
  *     <li>serviceName: serviceName</li>
  * </ul>
  */
-public class FlowServiceTypeDTO {
+public class FlowServiceTypeDTO implements Serializable {
 
     private Long id;
     private Long moduleId;
+    private Long organizationId;
     private Integer namespaceId;
     private String serviceName;
 
@@ -47,6 +51,14 @@ public class FlowServiceTypeDTO {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     @Override

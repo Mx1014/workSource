@@ -187,7 +187,32 @@ public enum VersionRealmType {
     ANDROID_SHUMIYUANPARK("Android_ShuMiYuanPark"),
     IOS_SHUMIYUANPARK("iOS_ShuMiYuanPark"),
     ANDROID_ZHIGUHUI("Android_ZhiGuHui"),
-    IOS_ZHIGUHUI("iOS_ZhiGuHui")
+    IOS_ZHIGUHUI("iOS_ZhiGuHui"),
+    ANDROID_BJWKZX("Android_Bjwkzx"),
+	IOS_BJWKZX("iOS_Bjwkzx"),
+	ANDROID_CHUANGJIHE("Android_ChuangJiHe"),
+	IOS_CHUANGJIHE("iOS_ChuangJiHe"),
+	ANDROID_COREDEMO("Android_CoreDemo"),
+	IOS_COREDEMO("iOS_CoreDemo"),
+	ANDROID_DINGFENGHUI("Android_DingFengHui"),
+	IOS_DINGFENGHUI("iOS_DingFengHui"),
+	ANDROID_TIANQIHUI("Android_TianQiHui"),
+	IOS_TIANQIHUI("iOS_TianQiHui"),
+	ANDROID_ZHIHUIYINGXING("ANDROID_ZHIHUIYINGXING"),
+	IOS_ZHIHUIYINGXING("iOS_ZhiHuiYinXing"),
+	ANDROID_ZIBENHUI("Android_ZiBenHui"),
+	IOS_ZIBENHUI("iOS_ZiBenHui"),
+	ANDROID_XIXIANDAXIA("Android_XiXianDaXia"),
+	IOS_XIXIANDAXIA("iOS_XiXianDaXia"),
+	ANDROID_GUOMAOWUFUWX("Android_GuoMaoWuFuwx"),
+	IOS_GUOMAOWUFUWX("iOS_GuoMaoWuFuwx"),
+	ANDROID_ZHONGKERUIGU("Android_ZhongKeRuiGu"),
+	IOS_ZHONGKERUIGU("iOS_ZhongKeRuiGu"),
+	
+	ANDROID_FUNDTOWN("Android_FundTown"),
+	IOS_FUNDTOWN("iOS_FundTown"),
+	ANDROID_BIZ("Android_Biz"),
+	IOS_BIZ("iOS_Biz")
     ;
 
     private String code;

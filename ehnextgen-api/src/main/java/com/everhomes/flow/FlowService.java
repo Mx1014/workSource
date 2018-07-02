@@ -4,8 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
+import org.springframework.web.context.request.async.DeferredResult;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface FlowService {
 	
@@ -196,7 +200,10 @@ public interface FlowService {
 
     FlowCase getFlowCaseById(Long flowCaseId);
 
-    FlowCaseProcessorsProcessor getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
+	/**
+	 * 获取当前任务的处理人列表
+	 */
+    FlowCaseProcessorsResolver getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
 
     List<UserInfo> getSupervisor(FlowCase flowCase);
 
@@ -390,8 +397,6 @@ public interface FlowService {
 
 	FlowEvaluateDTO getEvaluateInfo(Long flowCaseId);
 
-	ListScriptsResponse listScripts(ListScriptsCommand cmd);
-
 	FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd);
 
 	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
@@ -444,7 +449,9 @@ public interface FlowService {
 
     FlowGraphDTO getFlowGraphNew(FlowIdCommand cmd);
 
-    FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd);
+	FlowRuntimeScript toRuntimeScript(FlowScript script);
+
+	FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd);
 
     FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphJsonCommand cmd);
 
@@ -501,4 +508,20 @@ public interface FlowService {
                                                  Long userId, String referType, Long referId, boolean needFlowButton);
 
     GetFlowCaseCountResponse getFlowCaseCount(SearchFlowCaseCommand cmd);
+
+    FlowScriptDTO createFlowScript(CreateFlowScriptCommand cmd);
+
+    void deleteFlowScript(DeleteFlowScriptCommand cmd);
+
+	FlowScriptDTO updateFlowScript(UpdateFlowScriptCommand cmd);
+
+	ListFlowScriptsResponse listFlowScripts(ListFlowScriptsCommand cmd);
+
+    void updateNeedAllProcessorComplete(UpdateNeedAllProcessorCompleteCommand cmd);
+
+    ListFlowModuleAppsResponse listFlowModuleApps(ListFlowModuleAppsCommand cmd);
+
+	ListFlowModuleAppServiceTypesResponse listFlowModuleAppServiceTypes(ListFlowModuleAppServiceTypesCommand cmd);
+
+    DeferredResult<Object> flowScriptMappingCall(Byte mode, Long id1, Long id2, String functionName, HttpServletRequest request);
 }

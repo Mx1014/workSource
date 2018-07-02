@@ -4,6 +4,7 @@ package com.everhomes.asset;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,7 +67,7 @@ public interface AssetService {
 
 	void OneKeyNotice(OneKeyNoticeCommand cmd);
 
-	ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
+	ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd);
 
 	List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
 
@@ -92,10 +93,6 @@ public interface AssetService {
 
 	String deletExemptionItem(ExemptionItemIdCommand cmd);
 
-	PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd);
-
-	void generateBillsOnContractSigned(String contractNum);
-
 	void upodateBillStatusOnContractStatusChange(Long contractId, String targetStatus);
 
 	PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd);
@@ -111,8 +108,6 @@ public interface AssetService {
 	PaymentBillItems findBillItemById(Long billItemId);
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
-
-	void updateBillSwitchOnTime();
 
 	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
@@ -150,13 +145,11 @@ public interface AssetService {
 
 	List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
-	void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd);
+	void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd);
 
 	ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd);
 
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
-
-	void activeAutoBillNotice();
 
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
 
@@ -166,11 +159,7 @@ public interface AssetService {
 
 	FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 
-	void syncCustomer(Integer namespaceId);
-
 	List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
-
-	void activeLateFine();
 
 	void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
 
@@ -183,4 +172,27 @@ public interface AssetService {
     void reCalBill(ReCalBillCommand cmd);
 
     void modifySettledBill(ModifySettledBillCommand cmd);
+
+    UploadCertificateInfoDTO uploadCertificate(UploadCertificateCommand cmd);
+
+	UploadCertificateInfoDTO listUploadCertificates(ListUploadCertificatesCommand cmd);
+
+    JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
+    
+    void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
+
+    void noticeTrigger(Integer namespaceId);
+
+    long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
+
+	void saveInstanceConfig(long categoryId, String ret);
+	
+    //add by tangcen
+	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
+
+	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+	void createAnAppMapping(CreateAnAppMappingCommand cmd);
+
+	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
 }

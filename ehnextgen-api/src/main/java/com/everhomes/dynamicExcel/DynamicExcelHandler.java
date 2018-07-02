@@ -2,6 +2,7 @@
 package com.everhomes.dynamicExcel;
 
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.organization.ImportFileResultLog;
 
 import java.util.List;
 import java.util.Map;
@@ -39,9 +40,10 @@ public interface DynamicExcelHandler {
      * @param sheetName sheet的名字
      * @param params 在dynamicaService.exportDynamicExcel()和importDynamicExcel() 传递的调用者的参数,导出时dynamicField的前提参数
      * @param headers 导入时，获取dynamicField的前提参数
+     * @param withData
      * @Return Dynamic实例对象集合
      */
-    List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport);
+    List<DynamicSheet> getDynamicSheet(String sheetName, Object params, List<String> headers, boolean isImport, boolean withData);
 
     /**
      * 标题行和返回的数据的list的下表必须保持对应
@@ -61,5 +63,5 @@ public interface DynamicExcelHandler {
      * @param params  在dynamicaService.importMultiSheet() 传递的调用者的参数
      * @param response  方法DynamicExcelService.importMultiSheet的返回，对于每一个sheet的导入结果都应该放入此返回中
      */
-    void importData(DynamicSheet ds, List<DynamicRowDTO> rowDatas, Object params,Map<Object,Object> context,DynamicImportResponse response);
+    void importData(DynamicSheet ds, List<DynamicRowDTO> rowDatas, Object params, Map<Object,Object> context, DynamicImportResponse response, List<ImportFileResultLog<Map<String,String>>> resultLogs);
 }

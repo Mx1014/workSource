@@ -108,7 +108,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Override
     public void createCommunity(Long creatorId, Community community) {
-        long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
+        // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
+        long id = this.dbProvider.allocPojoRecordId(EhCommunities.class);
+        //long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
 
         community.setId(id);
         community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -881,12 +883,14 @@ public class CommunityProviderImpl implements CommunityProvider {
 	public Building findBuildingByCommunityIdAndName(long communityId, String buildingName) {
 //		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
-		Condition cond = Tables.EH_BUILDINGS.NAME.eq(buildingName);
-		cond = cond.or(Tables.EH_BUILDINGS.ALIAS_NAME.eq(buildingName));
+		
+		//产品确认过的只用楼栋名称查，不用去查简称
+		/*Condition cond = Tables.EH_BUILDINGS.NAME.eq(buildingName);
+		cond = cond.or(Tables.EH_BUILDINGS.ALIAS_NAME.eq(buildingName));*/
 		SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
 		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
 //		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(cond);
+		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
 
         LOGGER.debug("findBuildingByCommunityIdAndName, sql=" + query.getSQL());
         LOGGER.debug("findBuildingByCommunityIdAndName, bindValues=" + query.getBindValues());
@@ -934,9 +938,12 @@ public class CommunityProviderImpl implements CommunityProvider {
         	buildingIds.add(building.getId());
         	mapBuildings.put(building.getId(), building);
         }
-
-        List<Integer> shards = this.shardingProvider.getContentShards(EhBuildings.class, buildingIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
+        
+        // 平台1.0.0版本更新，已不支持getContentShards()接口，经与kelven讨论目前没有用到多shard，
+        // 故先暂时去掉，若后面需要支持多shard再思考解决办法 by lqs 20180516
+        //List<Integer> shards = this.shardingProvider.getContentShards(EhBuildings.class, buildingIds);
+        //this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhBuildingAttachmentsRecord> query = context.selectQuery(Tables.EH_BUILDING_ATTACHMENTS);
             query.addConditions(Tables.EH_BUILDING_ATTACHMENTS.BUILDING_ID.in(buildingIds));
             query.fetch().map((EhBuildingAttachmentsRecord record) -> {

@@ -2,10 +2,12 @@ package com.everhomes.aclink;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.user.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface DoorAccessService {
@@ -32,7 +34,7 @@ public interface DoorAccessService {
 
     Long deleteDoorAccess(Long doorAccessId);
 
-    ListAesUserKeyByUserResponse listAesUserKeyByUser();
+    ListAesUserKeyByUserResponse listAesUserKeyByUser(ListAesUserKeyByUserCommand cmd);
 
     List<AesUserKey> listAesUserKeyByUserId(Long userId);
 
@@ -46,7 +48,7 @@ public interface DoorAccessService {
 
     void updateDoorAccess(DoorAccessAdminUpdateCommand cmd);
 
-    ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth();
+    ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth(ListAdminAesUserKeyCommand cmd);
 
     DoorAccess onDoorAccessConnecting(AclinkConnectingCommand cmd);
 
@@ -144,10 +146,31 @@ public interface DoorAccessService {
 
     //要不要生成门禁二维码信息，如果是 web 端，则需要直接生成给 web
     ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(
-            boolean generate);
+    		DoorAccessDriverType driverType, boolean generate);
 
     void doAlipayRedirect(HttpServletRequest request,
             HttpServletResponse response);
 
     GetVisitorResponse getAlipayQR(HttpServletRequest r);
+
+	public void excuteMessage(AclinkWebSocketMessage cmd);
+
+    DoorAccessGroupResp listDoorAccessByUser(ListDoorAccessByUserCommand cmd);
+
+
+	public QueryDoorAccessByServerResponse listDoorAccessByServerId(QueryDoorAccessByServerCommand cmd);
+
+	public ListDoorAccessByGroupIdResponse listDoorAccessByGroupId(ListDoorAccessByGroupIdCommand cmd);
+
+	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser(ListFacialRecognitionKeyByUserCommand cmd);
+
+	public AesUserKey getAesUserKey(User user, DoorAuth doorAuth);
+
+	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd);
+
+	public int invalidVistorAuth(Long DoorId, String phone);
+
+	public ListDoorAccessQRKeyResponse listBusAccessQRKey();
+
+	public void updateAccessType(Long doorId, byte doorType);
 }

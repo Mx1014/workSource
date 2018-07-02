@@ -144,6 +144,8 @@ public interface UserProvider {
     TargetDTO findUserByTokenAndName(String tel, String targetName);
 	
 	TargetDTO findUserByToken(String tel,Integer namespaceId);
+	
+	TargetDTO findUserTargetById(Long userId) ;
 
     /**
      * 查询非当前userId的正常用户数据
@@ -169,4 +171,9 @@ public interface UserProvider {
     List<Long> listUsersByNamespaceUserInfo(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
 	
 	String findMobileByUid(Long contactId);
+
+    String findUserTokenOfUser(Long userId);
+
+    UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
+            String identifierToken, Integer namespaceId);
 }
