@@ -39,7 +39,6 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
-import com.everhomes.rest.acl.ListRoleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
@@ -216,7 +215,6 @@ import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
@@ -266,6 +264,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -698,7 +697,7 @@ public class CustomerServiceImpl implements CustomerService {
         String originalTrackingName = customer.getTrackingName();
         Long currentTrackingUid = updateCustomer.getTrackingUid();
         String currentTrackingName = updateCustomer.getTrackingName();
-        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), null, false);
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), null, false,cmd.getOrgId());
 
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setCommunityId(customer.getCommunityId());
@@ -776,35 +775,38 @@ public class CustomerServiceImpl implements CustomerService {
         return convertToDTO(updateCustomer);
     }
 
-    private void routeMsgForTrackingChanged(Long originalTrackingUid, Long currentTrackingUid, String originalTrackingName, String currentTrackingName, String customerName, Integer namespaceId, boolean deleteCustomer) {
-        Map<String,Object> map = new HashMap<>();
+    private void routeMsgForTrackingChanged(Long originalTrackingUid, Long currentTrackingUid, String originalTrackingName, String currentTrackingName, String customerName, Integer namespaceId, boolean deleteCustomer,Long organizationId) {
+        Map<String, Object> map = new HashMap<>();
         map.put("customerName", customerName);
         map.put("originalTrackingName", originalTrackingName);
         map.put("currentTrackingName", currentTrackingName);
-        if(deleteCustomer){
-             routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_tracking_on_customer_delete, map, namespaceId);
-             return;
+        if (deleteCustomer) {
+            routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_tracking_on_customer_delete, map, namespaceId);
+            return;
         }
-        if(currentTrackingUid != null && currentTrackingUid != originalTrackingUid){
-                 // to new tracking people
-                routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_new_tracking
-                , map, namespaceId);
+        if (currentTrackingUid != null && !Objects.equals(currentTrackingUid, originalTrackingUid)) {
+            // to new tracking people
+            routeAppMsg(currentTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_new_tracking, map, namespaceId);
         }
         if (originalTrackingUid != null) {
-            if (currentTrackingUid != null && currentTrackingUid != originalTrackingUid) {
+            if (currentTrackingUid != null && !Objects.equals(currentTrackingUid, originalTrackingUid)) {
                 // two messges should be sent to two seperate users
-               // to old tracking people
-                routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_old_tracking
-                , map, namespaceId);
+                // to old tracking people
+                routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_old_tracking, map, namespaceId);
             } else if (currentTrackingUid == null) {
                 // only one message sent to admin
-                //todo
-//                ListRoleAdministratorsCommand cmd = new ListRoleAdministratorsCommand();
-//                cmd.setOwnerType("EhOrganizations");
-//                cmd.setOwnerId("");
-//                rolePrivilegeService.listRoleAdministrators()
-                 routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_admin_no_candidate
-                , map, namespaceId);
+                // change route message to module admins modify by jiarui 20180702
+                ListServiceModuleAdministratorsCommand administratorsCommand = new ListServiceModuleAdministratorsCommand();
+                administratorsCommand.setModuleId(21100L);
+                administratorsCommand.setActivationFlag(ActivationFlag.YES.getCode());
+                administratorsCommand.setOrganizationId(organizationId);
+                administratorsCommand.setOwnerId(organizationId);
+                administratorsCommand.setOwnerType("EhOrganizations");
+                ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse = rolePrivilegeService.listServiceModuleAppsAdministrators(administratorsCommand);
+                List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
+                if (moduleAdmins != null && moduleAdmins.size() > 0) {
+                    moduleAdmins.forEach((r) -> routeAppMsg(r.getTargetId(), CustomerNotification.scope, CustomerNotification.msg_to_admin_no_candidate, map, namespaceId));
+                }
             }
         }
     }
@@ -867,7 +869,7 @@ public class CustomerServiceImpl implements CustomerService {
             organizationService.deleteEnterpriseById(command, false);
         }
         routeMsgForTrackingChanged(null, null, null, null
-        , customer.getName(), null, true);
+                , customer.getName(), null, true, cmd.getOrgId());
 
     }
 
@@ -3162,7 +3164,7 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, orignalTrackingName, currentTrackingName,
-                customer.getName(), null, false);
+                customer.getName(), null, false, cmd.getOrgId());
     }
 
     @Override
@@ -3183,7 +3185,7 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, orignalTrackingName, currentTrackingName,
-        customer.getName(), null, false);
+                customer.getName(), null, false, cmd.getOrgId());
     }
 
     @Override
