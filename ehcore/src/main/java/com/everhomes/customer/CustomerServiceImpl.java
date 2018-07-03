@@ -825,12 +825,6 @@ public class CustomerServiceImpl implements CustomerService {
         }
         checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
-        // 判定跟进人是否进行了改变，如果改变了，那么应当在update操作完成后，去通知新的跟进人 by wentian at 2018/6/5
-        Long originalTrackingUid = customer.getTrackingUid();
-        String originalTrackingName = customer.getTrackingName();
-        Long currentTrackingUid = updateCustomer.getTrackingUid();
-        String currentTrackingName = updateCustomer.getTrackingName();
-        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), null, false,cmd.getOrgId());
 
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setCommunityId(customer.getCommunityId());
@@ -870,6 +864,13 @@ public class CustomerServiceImpl implements CustomerService {
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
+
+        // 判定跟进人是否进行了改变，如果改变了，那么应当在update操作完成后，去通知新的跟进人 by wentian at 2018/6/5
+        Long originalTrackingUid = customer.getTrackingUid();
+        String originalTrackingName = customer.getTrackingName();
+        Long currentTrackingUid = updateCustomer.getTrackingUid();
+        String currentTrackingName = updateCustomer.getTrackingName();
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), null, false,cmd.getOrgId());
 
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
