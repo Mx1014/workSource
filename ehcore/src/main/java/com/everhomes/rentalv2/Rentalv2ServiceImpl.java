@@ -642,6 +642,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//设置默认退款
 		addCmd.setRefundFlag(NormalFlag.NEED.getCode());
 		addCmd.setRefundRatio(30);
+		//节假日设定
+		addCmd.setHolidayType(RentalHolidayType.NORMAL_WEEKEND.getCode());
+		addCmd.setHolidayOpenFlag((byte)1);
         //附件信息
 //        AttachmentConfigDTO attachment = new AttachmentConfigDTO();
 //		attachment.setAttachmentType(AttachmentType.ATTACHMENT.getCode());
@@ -1803,7 +1806,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		billDTO.setHolidayType(rule.getHolidayType());
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalBill.getResourceType(),
 				EhRentalv2Resources.class.getSimpleName(), rentalBill.getRentalResourceId());
-		List<Long> defaultDate = rule.getHolidayType().equals(RentalHolidayType.NORMAL_WEEKEND.getCode())?normalWeekend:legalHoliday;
+		List<Long> defaultDate = new ArrayList<>();
+		if (rule.getHolidayOpenFlag() !=null && rule.getHolidayOpenFlag() == 0){//不开放
+			defaultDate = rule.getHolidayType().equals(RentalHolidayType.NORMAL_WEEKEND.getCode())?normalWeekend:legalHoliday;
+		}
 		List<Long> settingDate = closeDates == null || closeDates.size() == 0 ?new ArrayList<>():
 				closeDates.stream().map(r->r.getCloseDate().getTime()).collect(Collectors.toList());
 		Set<Long> defaultDateSet = new HashSet<>(defaultDate);
@@ -6463,8 +6469,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//查询默认规则，创建资源规则
 		cmd2.setResourceTypeId(resource.getResourceTypeId());
 		cmd2.setResourceType(resource.getResourceType());
-		cmd2.setOwnerType(RentalOwnerType.ORGANIZATION.getCode());
-		cmd2.setOwnerId(resource.getOrganizationId());
+		cmd2.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		cmd2.setOwnerId(resource.getCommunityId());
 		//cmd2.setSourceType(RuleSourceType.DEFAULT.getCode());
 		QueryDefaultRuleAdminResponse rule = this.queryDefaultRule(cmd2);
 
@@ -6479,6 +6485,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		AddDefaultRuleAdminCommand addRuleCmd = ConvertHelper.convert(rule, AddDefaultRuleAdminCommand.class);
 		addRuleCmd.setSourceType(RuleSourceType.RESOURCE.getCode());
 		addRuleCmd.setSourceId(resource.getId());
+		addRuleCmd.setOwnerType(RentalOwnerType.ORGANIZATION.getCode());
+		addRuleCmd.setOwnerId(resource.getOrganizationId());
 		addRule(addRuleCmd);
 	}
 
