@@ -755,7 +755,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //        cmd2pay.setPaymentParams(paymentParamsDTO);
 
         //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
-        cmd.setBillGroupId(427L);
         PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
         if(paymentBillGroup != null) {
         	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
