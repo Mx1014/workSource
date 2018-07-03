@@ -497,7 +497,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         
         if(platform.equals("iOS")) {
         	//chagne by huanglm for IOS pusher update
-        	String flag = configProvider.getValue(0, ConfigConstants.apple_pusher_flag,"");
+        	Integer namespaceId = destLogin.getNamespaceId() ;
+            namespaceId = UserContext.getCurrentNamespaceId(namespaceId); 
+        	String flag = configProvider.getValue(namespaceId, ConfigConstants.APPLE_PUSHER_FLAG,"");
         	//苹果推送方式开关，值为1时为基于http2的新方式推送，其他值或空为旧方式推送
         	if(flag.equals("1")){
         		LOGGER.info("configuration flag is {},there will use http2 new pusher ", flag);
