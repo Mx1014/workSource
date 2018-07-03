@@ -1182,7 +1182,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				siteIds.add(siteOwner.getRentalResourceId());
 			}  
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
-		filteRentalSitesByTime(siteIds,cmd);
+        siteIds = filteRentalSitesByTime(siteIds,cmd);
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
 				locator, pageSize+1, RentalSiteStatus.NORMAL.getCode(),siteIds,cmd.getCommunityId());
 
@@ -1212,16 +1212,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return response;
 	}
 
-	private void filteRentalSitesByTime(List<Long> siteIds,FindRentalSitesCommand cmd){
+	private List<Long> filteRentalSitesByTime(List<Long> siteIds,FindRentalSitesCommand cmd){
 		if (cmd.getRentalType() == null)
-			return;
+			return siteIds;
 		siteIds = siteIds.stream().filter(r->{
 			List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(cmd.getResourceType(),
 					PriceRuleType.RESOURCE.getCode(), r);
 			return priceRules.stream().map(p->p.getRentalType()).anyMatch(p->p.equals(cmd.getRentalType()));
 		}).collect(Collectors.toList());
 
-		siteIds = siteIds.stream().filter(r->{
+		return siteIds.stream().filter(r->{
 			Long startTime = cmd.getStartTime();
 			Long endTime = cmd.getEndTime();
 			if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode())||cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
