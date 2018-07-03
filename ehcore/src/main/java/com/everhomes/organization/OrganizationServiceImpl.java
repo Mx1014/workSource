@@ -6281,7 +6281,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         });
 
-        List<OrganizationMemberDTO> members = new ArrayList<>(target_map.values());
+        //   the contactToken should be hidden while the visible flag is show.
+        List<OrganizationMemberDTO> members;
+        if(VisibleFlag.fromCode(cmd.getVisibleFlag()) == VisibleFlag.SHOW)
+            members = target_map.values().stream().peek(r -> {
+                if(VisibleFlag.fromCode(r.getVisibleFlag()) == VisibleFlag.HIDE)
+                    r.setContactToken(null);
+            }).collect(Collectors.toList());
+        else
+            members = new ArrayList<>(target_map.values());
         //  set the order
         members.sort((o1, o2) -> o2.getDetailId().compareTo(o1.getDetailId()));
 
@@ -11443,11 +11451,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 String avatarUri = userService.getUserAvatarUriByGender(0L, UserContext.getCurrentNamespaceId(), dto.getGender());
                 dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), 0L));
             }
-            // 4.手机号屏蔽
+            //  4.手机号屏蔽
             if(VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.HIDE){
                 dto.setContactToken(null);
             }
-            //其他字符置换成#号
+            //  其他字符置换成#号
             if (!StringUtils.isEmpty(r.getInitial())) {
                 dto.setInitial(r.getInitial().replace("~", "#"));
             }
