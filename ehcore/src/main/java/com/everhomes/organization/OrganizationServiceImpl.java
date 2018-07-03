@@ -160,6 +160,7 @@ import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyForEnterpriseContactByEmailCommand;
+import com.everhomes.rest.organization.ApplyForEnterpriseContactNewCommand;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.BatchUpdateOrganizationContactVisibleFlagCommand;
@@ -406,6 +407,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -1090,6 +1092,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
+        dto.setAdminMembers(getAdmins(org.getOrganizationId()));
         if(!StringUtils.isEmpty(organization.getWebsite())){
             dto.setWebsite(organization.getWebsite());
         }
@@ -5778,7 +5781,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationDTO.setFeedbackForumId(community.getFeedbackForumId());
                 organizationDTO.setCommunityType(community.getCommunityType());
             }
-
+            organizationDTO.setManagerList(getAdmins(cmd.getOrganizationId()));
             return organizationDTO;
         }
 
@@ -5846,8 +5849,47 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationDTO.setFeedbackForumId(community.getFeedbackForumId());
                 organizationDTO.setCommunityType(community.getCommunityType());
             }
-
+            organizationDTO.setManagerList(getAdmins(cmd.getOrganizationId()));
             return organizationDTO;
+        }
+    }
+
+
+    private boolean checkUserEmailDomain(ApplyForEnterpriseContactNewCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("OrganizationId is null");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "OrganizationId is null");
+        }
+        Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+        if (organization == null) {
+            LOGGER.error("organization is null");
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST, "organization not exists");
+        }
+        boolean flag = false;
+        if (!StringUtils.isEmpty(cmd.getEmail())) {
+            String[] email = cmd.getEmail().split("@");
+            if (email != null && email.length > 1) {
+                String emailDomain = email[1];
+                if (!StringUtils.isEmpty(emailDomain) && emailDomain.equals(organization.getEmailDomain())) {
+                    flag = true;
+                }
+            }
+        }
+        return flag;
+    }
+
+    @Override
+    public OrganizationDTO applyForEnterpriseContactNew(ApplyForEnterpriseContactNewCommand cmd) {
+        boolean flag = checkUserEmailDomain(cmd);
+        OrganizationDTO dto = new OrganizationDTO();
+        if (flag) {
+            ApplyForEnterpriseContactByEmailCommand command = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
+            this.applyForEnterpriseContactByEmail(command);
+            return dto;
+        }else {
+            CreateOrganizationMemberCommand command = ConvertHelper.convert(cmd, CreateOrganizationMemberCommand.class);
+            dto = this.applyForEnterpriseContact(command);
+            return dto;
         }
     }
 
