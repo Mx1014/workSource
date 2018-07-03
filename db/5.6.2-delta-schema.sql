@@ -265,3 +265,9 @@ ALTER TABLE `eh_door_access` ADD `max_count` INTEGER COMMENT '按次授权最大
 ALTER TABLE `eh_door_access` ADD `defualt_invalid_duration` INTEGER COMMENT '按次授权默认有效期(天)';
 ALTER TABLE `eh_door_access` ADD `enable_duration` TINYINT DEFAULT '1' COMMENT '是否支持按有效期开门';
 -- issue-31813 END
+
+-- 通用脚本
+-- ADD BY shiheng.ma
+-- issue-26467 物业报修 增加企业Id字段
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `enterprise_id`  bigint(20) NOT NULL DEFAULT 0 COMMENT '需求人公司Id';
+-- END

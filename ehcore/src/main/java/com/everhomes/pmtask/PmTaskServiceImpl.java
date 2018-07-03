@@ -2608,13 +2608,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 			dto.setOrganizationUid(task.getOrganizationUid());
 			dto.setRequestorName(task.getRequestorName());
 			dto.setRequestorPhone(task.getRequestorPhone());
-			if(task.getStatus()==0){
+			if(task.getStatus()==1){
 				dto.setStatus("待处理");
-			}else if(task.getStatus()==1){
-				dto.setStatus("处理中");
 			}else if(task.getStatus()==2){
-				dto.setStatus("已取消");
+				dto.setStatus("处理中");
 			}else if(task.getStatus()==3){
+				dto.setStatus("已取消");
+			}else if(task.getStatus()==4){
 				dto.setStatus("已完成");
 			}
 			dto.setTaskCategoryName(categoryProvider.findCategoryById(task.getTaskCategoryId()).getName());
@@ -2631,13 +2631,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if (list != null && list.size() > 0) {
 			list.forEach(r -> {
 				SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
-				if(r.getStatus()==0){
+				if(r.getStatus()==1){
 					dto.setStatus("待处理");
-				}else if(r.getStatus()==1){
-					dto.setStatus("处理中");
 				}else if(r.getStatus()==2){
-					dto.setStatus("已取消");
+					dto.setStatus("处理中");
 				}else if(r.getStatus()==3){
+					dto.setStatus("已取消");
+				}else if(r.getStatus()==4){
 					dto.setStatus("已完成");
 				}
 
