@@ -218,3 +218,11 @@ ALTER TABLE `eh_launch_pad_items` ADD COLUMN `access_control_type`  tinyint(4) N
 
 -- END BY 严军
 
+-- 通用脚本
+-- ADD BY dengs  2018年7月3日16:01:33
+-- 停车缴费6.5.5  #31856 
+ALTER TABLE eh_parking_recharge_orders ADD COLUMN `pay_source` VARCHAR(16) DEFAULT 'app' COMMENT 'app:APP支付, qrcode:扫码支付';
+ALTER TABLE eh_parking_lots ADD COLUMN `id_hash` VARCHAR(128) COMMENT 'id_hash';
+
+-- END BY dengs
+

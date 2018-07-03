@@ -39,7 +39,6 @@ import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -53,7 +52,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import kafka.utils.Json;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -580,6 +578,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
 		param.setClientAppName(cmd.getClientAppName());//todoed
+		param.setPaymentType(cmd.getPaymentType());
 
 		return (PreOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V2);
 
@@ -642,7 +641,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingRechargeOrder.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		parkingRechargeOrder.setPayerUid(user.getId());
-		parkingRechargeOrder.setPayerPhone(userIdentifier.getIdentifierToken());
+		parkingRechargeOrder.setPayerPhone(userIdentifier==null?null:userIdentifier.getIdentifierToken());
 		parkingRechargeOrder.setCreatorUid(user.getId());
 		Long now = System.currentTimeMillis();
 		parkingRechargeOrder.setCreateTime(new Timestamp(now));
@@ -710,11 +709,11 @@ public class ParkingServiceImpl implements ParkingService {
 		if (ActivityRosterPayVersionFlag.V1 == version) {
 			return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
 		}else {
-			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName(),parkingLot);
+			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName(),parkingLot,cmd.getPaymentType());
 		}
 	}
 
-	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName,ParkingLot parkingLot ) {
+	private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName, ParkingLot parkingLot, Integer paymentType) {
 		Long amount = parkingRechargeOrder.getPrice().multiply(new BigDecimal(100)).longValue();
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
@@ -739,25 +738,35 @@ public class ParkingServiceImpl implements ParkingService {
 			bussinessType = ParkingBusinessType.TEMPFEE;
 		}
 		User user = UserContext.current().getUser();
-		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
+//		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
+		String sNamespaceId = BIZ_ACCOUNT_PRE+"999957";		//todoed
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
-		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
-				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
+		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+		//公众号支付
+		String paySource = ParkingPaySourceType.APP.getCode();
+		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			paySource = ParkingPaySourceType.QRCODE.getCode();
+			createOrderCommand.setPayerUserId(configProvider.getLongValue("parking.order.defaultpayer",1041));
+		}else {
+			ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
+					sNamespaceId, userTarget.getUserIdentifier(), null, null, null);
+			createOrderCommand.setPayerUserId(payerDto.getAccountId());
+		}
+		//保存支付方id
+		parkingRechargeOrder.setPayeeId(createOrderCommand.getPayerUserId());
+		parkingRechargeOrder.setInvoiceStatus((byte)0);
+		parkingRechargeOrder.setPaySource(paySource);
+		parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
 		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
 				parkingLot.getOwnerType(), parkingLot.getOwnerId(), parkingLot.getId(),bussinessType.getCode());
 		if(payeeAccounts==null || payeeAccounts.size()==0){
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_NO_PAYEE_ACCOUNT,
 					"未设置收款方账号");
 		}
-		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+
 		createOrderCommand.setAccountCode(sNamespaceId);
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
 		createOrderCommand.setClientAppName(clientAppName);//todoed
-		createOrderCommand.setPayerUserId(payerDto.getAccountId());
-		//保存支付方id
-		parkingRechargeOrder.setPayeeId(payerDto.getAccountId());
-		parkingRechargeOrder.setInvoiceStatus((byte)0);
-		parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
 
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		createOrderCommand.setAmount(amount);
@@ -767,8 +776,25 @@ public class ParkingServiceImpl implements ParkingService {
 		String homeurl = configProvider.getValue("home.url", "");
 		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		createOrderCommand.setBackUrl(callbackurl);
+		//公众号支付
+		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			Map<String, String> flattenMap = new HashMap<>();
+			flattenMap.put("acct",user.getNamespaceUserToken());
+//			String vspCusid = configProvider.getValue(UserContext.getCurrentNamespaceId(), "tempVspCusid", "550584053111NAJ");
+//			flattenMap.put("vspCusid",vspCusid);
+			flattenMap.put("payType","no_credit");
+			createOrderCommand.setPaymentParams(flattenMap);
+			createOrderCommand.setCommitFlag(1);
+			createOrderCommand.setOrderType(3);
+		}
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
-		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+		CreateOrderRestResponse purchaseOrder = null;
+		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			purchaseOrder = sdkPayService.createCustomOrder(createOrderCommand);
+		}else {
+			purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
+		}
 		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
 			LOGGER.info("purchaseOrder "+purchaseOrder);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -797,10 +823,25 @@ public class ParkingServiceImpl implements ParkingService {
 				return payMethodDTO;
 			}).collect(Collectors.toList()));//todo
 		}
+		Long expiredIntervalTime = getExpiredIntervalTime(response.getExpirationMillis());
+		preDto.setExpiredIntervalTime(expiredIntervalTime);
+		preDto.setOrderId(parkingRechargeOrder.getId());
 //		preDto.setPayMethod(getPayMethods(response.getOrderPaymentStatusQueryUrl()));//todo
 		return preDto;
 	}
 
+	private Long getExpiredIntervalTime(Long expiration){
+		Long expiredIntervalTime = null;
+		if(expiration != null){
+			expiredIntervalTime = expiration - System.currentTimeMillis();
+			//转换成秒
+			expiredIntervalTime = expiredIntervalTime/1000;
+			if(expiredIntervalTime < 0){
+				expiredIntervalTime = 0L;
+			}
+		}
+		return expiredIntervalTime;
+	}
 	private CommonOrderDTO convertOrderDTOForV1(ParkingRechargeOrder parkingRechargeOrder, Byte rechargeType) {
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
@@ -925,7 +966,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getStatus(), cmd.getPageAnchor(), pageSize);
+				cmd.getStatus(), cmd.getPaySource(),cmd.getKeyWords(),cmd.getPageAnchor(), pageSize);
 		int size = list.size();
 		if(size > 0){
 			response.setOrders(list.stream().map(r -> {
@@ -949,7 +990,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 		BigDecimal totalAmount = parkingProvider.countParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType());
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(),cmd.getCardNumber(),
+				cmd.getStatus(),cmd.getPaySource(),cmd.getKeyWords());
 		response.setTotalAmount(totalAmount);
 
 		return response;
@@ -1431,7 +1473,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getStatus(), cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getStatus(), cmd.getPaySource(), cmd.getKeyWords(), cmd.getPageAnchor(), cmd.getPageSize());
 		Workbook wb = new XSSFWorkbook();
 
 		Font font = wb.createFont();
@@ -1456,9 +1498,12 @@ public class ParkingServiceImpl implements ParkingService {
 		row.createCell(8).setCellValue("临时车进场时间");
 		row.createCell(9).setCellValue("临时车出场时间");
 		row.createCell(10).setCellValue("临时车停车时长(分钟)");
-		row.createCell(11).setCellValue("金额");
-		row.createCell(12).setCellValue("支付方式");
-		row.createCell(13).setCellValue("缴费类型");
+		row.createCell(11).setCellValue("应收金额");
+		row.createCell(12).setCellValue("实收金额");
+		row.createCell(13).setCellValue("支付方式");
+		row.createCell(14).setCellValue("缴费类型");
+		row.createCell(15).setCellValue("订单状态");
+		row.createCell(16).setCellValue("缴费来源");
 
 
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
@@ -1470,7 +1515,7 @@ public class ParkingServiceImpl implements ParkingService {
 			handler.setCellValues(list,sheet);
 		}
 
-		for (int i = 0; i < 14; i++) {
+		for (int i = 0; i < 17; i++) {
 			String stringCellValue = sheet.getRow(0).getCell(i).getStringCellValue();
 			sheet.setColumnWidth(i,stringCellValue.length() * 700);
 		}
@@ -2907,7 +2952,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getCommunityId());
 		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
-		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
+//		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
+		String key = OwnerType.ORGANIZATION.getCode() + "1039387";
 		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
 		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
 		if(payUserList==null || payUserList.size() == 0){
@@ -3230,6 +3276,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 	}
 
+
 	public void deleteParkingHub(DeleteParkingHubCommand cmd) {
 		ParkingHub parkingHub = parkingHubProvider.findParkingHubById(cmd.getId());
 		if(parkingHub!=null) {
@@ -3251,5 +3298,84 @@ public class ParkingServiceImpl implements ParkingService {
 	public GetParkingSpaceLockFullStatusDTO getParkingSpaceLockFullStatus(DeleteParkingSpaceCommand cmd) {
 		GetParkingSpaceLockFullStatusDTO fullStatusDTO = dingDingParkingLockHandler.readParkingSpaceLock(cmd.getId());
 		return fullStatusDTO;
+	}
+	@Override
+	public ParkingLotDTO getParkingLotByToken(GetParkingLotByTokenCommand cmd) {
+		int tokenlen = configProvider.getIntValue("parking.token.maxlen", 20);
+		List<ParkingLot> list = parkingProvider.findParkingLotByIdHash(cmd.getParkingLotToken());
+		if(list==null || list.size()==0 || list.size()>1){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+					"非法parkingLotToken");
+		}
+		ParkingLot r = list.get(0);
+		User user = UserContext.current().getUser();
+		ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
+
+		if (r.getVipParkingFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+			String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
+			String detailUrl = configProvider.getValue(ConfigConstants.RENTAL_ORDER_DETAIL_URL, "");
+
+			RentalResourceType type = rentalv2Provider.findRentalResourceTypes(UserContext.getCurrentNamespaceId(),
+					RentalV2ResourceType.VIP_PARKING.getCode());
+
+			detailUrl = String.format(detailUrl, RentalV2ResourceType.VIP_PARKING.getCode(), type.getId(),
+					RuleSourceType.RESOURCE.getCode(), dto.getId());
+			dto.setVipParkingUrl(homeUrl + detailUrl);
+		}
+
+		Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
+		//当没有设置工作流的时候，表示是禁用模式
+		if(null == flow) {
+			dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+
+		}else {
+
+			String tag1 = flow.getStringTag1();
+			Integer flowMode = Integer.valueOf(tag1);
+			dto.setFlowMode(flowMode);
+
+			LOGGER.info("parking enabled flow, flow={}", flow);
+			Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
+			LOGGER.info("parking main flow, flow={}", mainFlow);
+			//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
+			if (null != mainFlow) {
+				if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+					dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+				}
+			}
+		}
+		return dto;
+
+	}
+
+	@Override
+	public String transformToken(TransformTokenCommand cmd) {
+		Long id = null;
+		try {
+			id = Long.valueOf(cmd.getId());
+		}catch (Exception e){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+					"no long");
+		}
+		String token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
+		int tokenlen = configProvider.getIntValue("parking.token.maxlen", 20);
+		if(token!=null && token.length()>tokenlen){
+			token = token.substring(0,tokenlen);
+		}
+		ParkingLot parkinglot = parkingProvider.findParkingLotById(id);
+		if(parkinglot==null){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+					"非法停车场id");
+		}
+		parkinglot.setIdHash(token);
+		parkingProvider.updateParkingLot(parkinglot);
+
+		List<ParkingLot> parkingLotByIdHash = parkingProvider.findParkingLotByIdHash(token);
+		if(parkingLotByIdHash == null || parkingLotByIdHash.size()==0 || parkingLotByIdHash.size()>1){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+					"hash过短");
+		}
+		return token;
 	}
 }

@@ -160,4 +160,8 @@ public interface ParkingService {
     void deleteParkingHub(DeleteParkingHubCommand cmd);
 
     GetParkingSpaceLockFullStatusDTO getParkingSpaceLockFullStatus(DeleteParkingSpaceCommand cmd);
+
+    ParkingLotDTO getParkingLotByToken(GetParkingLotByTokenCommand cmd);
+
+    String transformToken(TransformTokenCommand cmd);
 }

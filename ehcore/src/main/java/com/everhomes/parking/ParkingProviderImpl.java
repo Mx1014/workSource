@@ -14,9 +14,7 @@ import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.parking.*;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
 import com.everhomes.server.schema.tables.pojos.EhParkingCarVerifications;
@@ -83,7 +81,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 
 		ParkingLot parkingLot = ConvertHelper.convert(dao.findById(id), ParkingLot.class);
 
-		populateParkingConfigInfo(parkingLot);
+		if(parkingLot!=null) {
+			populateParkingConfigInfo(parkingLot);
+		}
 
         return parkingLot;
     }
@@ -437,8 +437,8 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte rechargeType, String paidType, String cardNumber, Byte status, Long pageAnchor, Integer pageSize) {
+																  String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
+																  Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, Long pageAnchor, Integer pageSize) {
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -466,6 +466,14 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(startDate));
         if(null != endDate)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(endDate));
+        if(paySource !=null){
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_SOURCE.eq(paySource));
+		}
+		if(keyWords!=null){
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_NAME.like("%" + keyWords + "%")
+			.or(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.like("%" + keyWords + "%"))
+			.or(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.like("%" + keyWords + "%")));
+		}
         if (null != status) {
             query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(status));
         }else {
@@ -507,8 +515,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 
     @Override
     public BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte rechargeType, String paidType) {
+												 String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
+												 Byte rechargeType, String paidType,String cardNumber, Byte status, String paySource, String keyWords) {
     	
     	final BigDecimal[] count = new BigDecimal[1];
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class), null, 
@@ -521,7 +529,6 @@ public class ParkingProviderImpl implements ParkingProvider {
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(ParkingOrderDeleteFlag.NORMAL.getCode()));
-                    condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(ParkingRechargeOrderStatus.RECHARGED.getCode()));
                     
                     if(StringUtils.isNotBlank(plateNumber))
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.eq(plateNumber));
@@ -531,14 +538,29 @@ public class ParkingProviderImpl implements ParkingProvider {
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(payerPhone));
                     if(StringUtils.isNotBlank(paidType))
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAID_TYPE.eq(paidType));
+					if(StringUtils.isNotBlank(cardNumber))
+						condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CARD_NUMBER.like("%" + cardNumber + "%"));
                     if(null != rechargeType)
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TYPE.eq(rechargeType));
                     if(null != startDate)
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(startDate));
                     if(null != endDate)
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(endDate));
-                    
-                	count[0] = query.where(condition).fetchOneInto(BigDecimal.class);
+					if(paySource !=null){
+						condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_SOURCE.eq(paySource));
+					}
+					if(keyWords!=null){
+						condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_NAME.like("%" + keyWords + "%")
+								.or(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.like("%" + keyWords + "%"))
+								.or(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.like("%" + keyWords + "%")));
+					}
+					if (null != status) {
+						condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(status));
+					}else {
+						condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.ge(ParkingRechargeOrderStatus.PAID.getCode()));
+					}
+
+					count[0] = query.where(condition).fetchOneInto(BigDecimal.class);
                 	
                     return true;
                 });
@@ -1327,6 +1349,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 								ParkingRechargeOrderStatus.FAILED.getCode()))))
 				.fetchOneInto(Integer.class));
 	}
+
 	public List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingSpaces.class));
 		SelectQuery<EhParkingSpacesRecord> query = context.selectQuery(Tables.EH_PARKING_SPACES);
@@ -1339,6 +1362,22 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_SPACES.PARKING_HUBS_ID.eq(parkingHubsId));
 		query.addOrderBy(Tables.EH_PARKING_SPACES.ID.asc());
 		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingSpace.class));
+	}
 
+
+	@Override
+	public List<ParkingLot> findParkingLotByIdHash(String parkingLotToken) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
+
+		SelectQuery<EhParkingLotsRecord> query = context.selectQuery(Tables.EH_PARKING_LOTS);
+		if(StringUtils.isNotBlank(parkingLotToken))
+			query.addConditions(Tables.EH_PARKING_LOTS.ID_HASH.like(parkingLotToken+"%"));
+
+		return query.fetch().map(r -> {
+			ParkingLot parkingLot = ConvertHelper.convert(r, ParkingLot.class);
+			populateParkingConfigInfo(parkingLot);
+
+			return parkingLot;
+		});
 	}
 }
