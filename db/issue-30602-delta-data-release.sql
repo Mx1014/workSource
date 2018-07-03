@@ -49,4 +49,9 @@ SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_bundleid_mapper);
 INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'1000000','develop ','com.techpark.ios.zuolin');
 INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'1000000','appbeta','com.techpark.ios.zuolin');
 INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'1000000','appstore','com.techpark.ios.zuolin');
+
+SET @a_id = (SELECT MAX(id) FROM eh_configurations);
+
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name` ) 
+VALUES (@a_id:= @a_id +1, 'apple.pusher.flag', '0','苹果推送方式开关，值为1时为基于http2的新方式推送，其他值（一般选0）或空为旧方式推送',0,NULL);
 -- ADD by 黄良铭 20180629 end 
