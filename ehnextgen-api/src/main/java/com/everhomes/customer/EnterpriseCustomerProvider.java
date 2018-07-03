@@ -5,11 +5,7 @@ import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.Organization;
-import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 
 import java.math.BigDecimal;
@@ -186,4 +182,9 @@ public interface EnterpriseCustomerProvider {
 
     void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId,Integer namespaceId);
 
+    String getEnterpriseCustomerNameById(Long enterpriseCustomerId);
+
+    List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomerNameAndId(List<Long> ids);
+
+    List<EasySearchEnterpriseCustomersDTO> listCommunityEnterpriseCustomers(Long communityId, Integer namespaceId);
 }

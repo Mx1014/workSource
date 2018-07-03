@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>addressId: 地址信息</li>
  * <li>livingStatus: 地址状态, 详见{@link com.everhomes.rest.organization.pm.PmMemberStatus}</li>
  * <li>owed: 是否欠费 , 详见{@link com.everhomes.rest.organization.pm.OwedType}</li>
+ * <li>reservationInvolved: 是否被预定业务占用</li>
  * </ul>
  */
 public class PropFamilyDTO {
@@ -24,8 +25,17 @@ public class PropFamilyDTO {
     private Byte livingStatus;
     private String enterpriseName;
     private Double areaSize;
-    
-    private Byte owed;
+    private Byte reservationInvolved;
+
+	public Byte getReservationInvolved() {
+		return reservationInvolved;
+	}
+
+	public void setReservationInvolved(Byte reservationInvolved) {
+		this.reservationInvolved = reservationInvolved;
+	}
+
+	private Byte owed;
     
     public PropFamilyDTO () {
     }

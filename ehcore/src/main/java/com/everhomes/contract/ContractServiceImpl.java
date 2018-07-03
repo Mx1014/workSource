@@ -1138,7 +1138,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		flowService.createFlowCase(createFlowCaseCommand);
 	}
 
-		
 	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments,Byte contractApplicationScene) {
 		//add by tangcen
 		List<String> oldApartments = new ArrayList<>();
@@ -1194,6 +1193,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					//物业合同不修改资产状态
 					if(!parentAddressIds.contains(buildingApartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
+						if(LOGGER.isDebugEnabled()){
+							LOGGER.error("!!!777 addressMapping : {}",addressMapping);
+						}
 						//26058  已售的状态不变
 						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
 							addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
@@ -1776,19 +1778,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					}
 
 				}
-
+				
+				if(cmd.getPaymentFlag() == 1) {
+					addToFlowCase(contract, flowcasePaymentContractOwnerType);
+				}else {
+					addToFlowCase(contract, flowcaseContractOwnerType);
+				}
+				//工作流未开启，修改数据需要回滚，然后同步es，把最新的状态同步到es，否则数据就会不一致  更新完所有的操作，要在最后同步es by -- dingjianmin 
 				contract.setStatus(cmd.getResult());
 				Contract exist = checkContract(cmd.getId());
 				contractProvider.updateContract(contract);
 				//记录合同事件日志，by tangcen
 				contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 				contractSearcher.feedDoc(contract);
-				if(cmd.getPaymentFlag() == 1) {
-					addToFlowCase(contract, flowcasePaymentContractOwnerType);
-				}else {
-					addToFlowCase(contract, flowcaseContractOwnerType);
-				}
-
 			}
 			return null;
 		});

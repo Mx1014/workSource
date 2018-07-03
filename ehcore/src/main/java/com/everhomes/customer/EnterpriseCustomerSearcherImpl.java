@@ -12,11 +12,7 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.customer.CustomerEntryInfoDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -378,6 +374,47 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 //        Collections.sort(dtos);
         response.setDtos(dtos);
         return response;
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> easyQueryEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb = null;
+        String keyWord = cmd.getKeyWord();
+        if(org.jooq.tools.StringUtils.isBlank(keyWord)) {
+            return new ArrayList<>();
+        } else {
+            qb = QueryBuilders.wildcardQuery("name.baidu", keyWord+"*");
+        }
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
+        fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        qb = QueryBuilders.filteredQuery(qb, fb);
+
+        int pageSize = 10;
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setSize(pageSize);
+        builder.setQuery(qb);
+
+        SearchResponse rsp = builder.execute().actionGet();
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("EnterpriseCustomerSearcherImpl query builder: {}, rsp: {}", builder, rsp);
+
+        List<Long> ids = getIds(rsp);
+        if(ids.size() < 1) {
+            return new ArrayList<>();
+        }
+        List<EasySearchEnterpriseCustomersDTO> list = new ArrayList<>();
+
+        return  enterpriseCustomerProvider.listEnterpriseCustomerNameAndId(ids);
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+         return enterpriseCustomerProvider.listCommunityEnterpriseCustomers(cmd.getCommunityId(), cmd.getNamespaceId());
     }
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {

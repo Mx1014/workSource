@@ -532,7 +532,6 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'contract.tracking', '19', 'zh_CN', '资产更改事件', '修改关联资产，由${oldApartmnets}变为${newApartmnets}', '0');
 -- --------------------- SECTION END -------------------------------------------------------
 
-
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
@@ -564,3 +563,12 @@ update eh_service_module_apps set action_type = 14 where module_id = 40500;
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ALL
+-- AUTHOR: 丁建民  20180703
+-- REMARK: #30490 资产管理V2.7（产品功能）
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10017', 'zh_CN', '省份所属填写错误');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10018', 'zh_CN', '城市所属填写错误');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10019', 'zh_CN', '区县所属填写错误');
+-- --------------------- SECTION END ---------------------------------------------------------
