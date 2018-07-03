@@ -77,4 +77,19 @@ public class InvoiceController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /invoice/listAllParkingLots</b>
+     * <p>查询所有的停车场列表</p>
+     */
+    @RequestMapping("listAllParkingLots")
+    @RestReturn(value=ParkingLotDTO.class, collection=true)
+    public RestResponse listAllParkingLots(ListAllParkingLotsCommand cmd) {
+
+        List<ParkingLotDTO> parkingLotList = invoiceService.listAllParkingLots(cmd);
+        RestResponse response = new RestResponse(parkingLotList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

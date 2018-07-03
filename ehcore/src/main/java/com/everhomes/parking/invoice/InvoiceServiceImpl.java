@@ -6,8 +6,10 @@ import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.parking.ParkingErrorCode;
+import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.invoice.*;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -79,5 +81,12 @@ public class InvoiceServiceImpl implements InvoiceService{
         GetPayeeIdByOrderNoResponse response = new GetPayeeIdByOrderNoResponse();
         response.setPayeeId(rechargeOrder.getPayeeId());
         return response;
+    }
+
+    @Override
+    public List<ParkingLotDTO> listAllParkingLots(ListAllParkingLotsCommand cmd) {
+        List<ParkingLot> list = parkingProvider.listParkingLots(null, null);
+        List<ParkingLotDTO> parkingLotList = list.stream().map(r -> ConvertHelper.convert(r, ParkingLotDTO.class)).collect(Collectors.toList());
+        return parkingLotList;
     }
 }

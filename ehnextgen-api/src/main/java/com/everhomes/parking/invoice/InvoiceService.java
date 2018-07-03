@@ -1,7 +1,10 @@
 // @formatter:off
 package com.everhomes.parking.invoice;
 
+import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.invoice.*;
+
+import java.util.List;
 
 /**
  * @Author dengs[shuang.deng@zuolin.com]
@@ -13,4 +16,6 @@ public interface InvoiceService {
     void notifyOrderInvoiced(NotifyOrderInvoicedCommand cmd);
 
     GetPayeeIdByOrderNoResponse getPayeeIdByOrderNo(GetPayeeIdByOrderNoCommand cmd);
+
+    List<ParkingLotDTO> listAllParkingLots(ListAllParkingLotsCommand cmd);
 }

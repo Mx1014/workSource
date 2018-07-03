@@ -5,64 +5,92 @@ INSERT INTO `eh_rentalv2_order_records` (`id`,`order_no`,`biz_order_num`,`pay_or
 
 update `eh_rentalv2_order_records` t1 right join `eh_rentalv2_orders` t2 on t1.`order_no` = t2.`order_no` set t1.order_id = t2.id,t1.amount = t2.pay_total_money,t1.status = IF(t2.status in (2,7,9,10,14,20),1,0) ;
 
--- 通用脚本  
+-- 通用脚本 
 -- ADD BY 杨崇鑫
 -- 新支付的配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.appKey', '6caa8584-c723-4b7b-9aec-071b4e31418f', '新新支付appKey', '0');
+	VALUES ('pay.v2.appKey', '6caa8584-c723-4b7b-9aec-071b4e31418f', '新支付appKey', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.secretKey', 'zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==', '新新支付secretKey', '0');
+	VALUES ('pay.v2.secretKey', 'zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==', '新支付secretKey', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.payHomeUrl', 'http://payv2-beta.zuolin.com/pay', '新新支付payHomeUrl', '0');
+	VALUES ('pay.v2.payHomeUrl', 'http://payv2-beta.zuolin.com/pay', '新支付payHomeUrl', '0');
 	
 -- 支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('asset.pay.v2.callback.url', '/asset/payNotify', '物业缴费新支付回调接口', '0');
+	VALUES ('pay.v2.callback.url.asset', '/asset/payNotify', '物业缴费新支付回调接口', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pmsy.pay.v2.callback.url', '/pmsy/payNotify', '物业缴费新支付回调接口', '999993');
+	VALUES ('pay.v2.callback.url.pmsy', '/pmsy/payNotify', '物业缴费新支付回调接口', '999993');
 
 -- 由于海岸馨服务是定制的，web没有账单组管理，所以需要初始化收款方账户配置
 SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_bill_groups`),0);
-INSERT INTO `eh_payment_bill_groups` VALUES (@id := @id + 1, '999993', '999993', 'community', '物业缴费', '2', '5', '0', UTC_TIMESTAMP(), NULL, NULL, '1', NULL, NULL, NULL, '4',
-	'EhOrganizations', '4443');
+INSERT INTO `eh_payment_bill_groups` (`id`, `namespace_id`, `owner_id`, `owner_type`, `name`, `balance_date_type`, `bills_day`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`, `due_day`, `due_day_type`, `brother_group_id`, `bills_day_type`, `biz_payee_type`, `biz_payee_id`, `category_id`) 
+VALUES (@id := @id + 1, '999993', '999993', 'community', '物业缴费', '2', '5', '0', UTC_TIMESTAMP(), NULL, NULL, '1', NULL, NULL, NULL, '4',
+	'EhOrganizations', '4443', '1028');
 
--- 新新支付数据迁移
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='2327' where namespace_id=1;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4592' where namespace_id=999944;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4333' where namespace_id=999946;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4241' where namespace_id=999947;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4334' where namespace_id=999948;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4303' where namespace_id=999950;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4208' where namespace_id=999951;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4335' where namespace_id=999952;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4242' where namespace_id=999955;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4197' where namespace_id=999957;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4249' where namespace_id=999958;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='3799' where namespace_id=999959;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='3777' where namespace_id=999961;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4590' where namespace_id=999963;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1005' where namespace_id=999966;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4526' where namespace_id=999967;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1000' where namespace_id=999971;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1004' where namespace_id=999973;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='3800' where namespace_id=999981;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1006' where namespace_id=999983;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1001' where namespace_id=999985;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1003' where namespace_id=999990;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4443' where namespace_id=999993;
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4422' where namespace_id=999979;
+-- 新支付数据迁移
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='2327' where namespace_id=1; -- Volgo
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4592' where namespace_id=999944; -- 天企汇
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4333' where namespace_id=999946; -- 聚变
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4241' where namespace_id=999947; -- 智慧空港
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4334' where namespace_id=999948; -- 国贸服务
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4303' where namespace_id=999950; -- 智汇银星
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4208' where namespace_id=999951; -- 鼎峰汇
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4335' where namespace_id=999952; -- 创集合
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4242' where namespace_id=999955; -- ELive
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4197' where namespace_id=999957; -- 杭州越空间
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4249' where namespace_id=999958; -- 创意园
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='3799' where namespace_id=999959; -- 启迪香山
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='3777' where namespace_id=999961; -- 智富汇
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4590' where namespace_id=999963; -- 路福联合广场
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4526' where namespace_id=999967; -- 大沙河建投
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1000' where namespace_id=999971; -- 张江高科
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1004' where namespace_id=999973; -- E-BOILL
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='3800' where namespace_id=999981; -- 上海万科星商汇
+-- update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1006' where namespace_id=999983; 
+-- update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1001' where namespace_id=999985;
+-- update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1003' where namespace_id=999990;
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4443' where namespace_id=999993; -- 海岸馨服务
+
 -- END BY 杨崇鑫
 
--- by yanlong.liang
--- 支付回调
+-- 深圳湾适用脚本[999966]  
+-- ADD BY 杨崇鑫 
+-- 新支付数据迁移
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1005' where namespace_id=999966; -- 深圳湾
+-- END BY 杨崇鑫
+
+
+-- 光大we谷适用脚本[999979]  
+-- ADD BY 杨崇鑫 
+-- 新支付数据迁移
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4422' where namespace_id=999979; -- 光大we谷
+-- END BY 杨崇鑫
+
+
+-- -----------------------------SECTION BEGIN--------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 支付回调
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动模块支付回调
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-VALUES ('activity.pay.v2.callback.url', '/activity/payNotify', '活动报名新支付回调接口', '0');
--- 活动支付订单迁移
+VALUES ('pay.v2.callback.url.activity', '/activity/payNotify', '活动报名新支付回调接口', '0');
+-- -----------------------------SECTION END----------------------------------------------
+
+-- -----------------------------SECTION BEGIN--------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 活动支付订单迁移,在执行该语句前，将eh_activity_roster，eh_payment_order_records这两张表进行全表备份
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动支付订单迁移
 update eh_activity_roster r,eh_payment_order_records t set r.pay_order_id = t.payment_order_id where t.order_type = 'activitySignupOrder' and r.order_no = t.order_id ;
 update eh_activity_roster r,eh_payment_order_records t set r.refund_pay_order_id = t.payment_order_id where t.order_type = 'activitySignupOrder' and r.refund_order_no = t.order_id ;
+-- -----------------------------SECTION END----------------------------------------------
 
--- 收款方账号迁移
-SET @id = ifnull((SELECT MAX(id) FROM `eh_activity_biz_payee`),0);
+-- -----------------------------SECTION BEGIN--------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 收款方账号迁移
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动收款方账号迁移,在执行语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
+SET @id = ifnull((SELECT MAX(id) FROM `eh_activity_biz_payee`),10000);
 set @namespace_id = 1;
 set @account_id = 2327;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
@@ -163,12 +191,11 @@ set @account_id = 4422;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
-set @namespace_id = 999979;
-set @account_id = 4422;
+set @namespace_id = 999993;
+set @account_id = 4443;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
--- yanlong.liang END
-
-
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+-- -----------------------------SECTION END----------------------------------------------
 
 -- by st.zheng
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
