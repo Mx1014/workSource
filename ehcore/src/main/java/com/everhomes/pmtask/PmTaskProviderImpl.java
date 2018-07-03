@@ -9,13 +9,7 @@ import java.util.stream.Collectors;
 import com.everhomes.rest.pmtask.PmTaskHistoryAddressStatus;
 import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -493,5 +487,14 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 			condition = condition.and(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.in(taskcategoryIds));
 		condition = condition.and(Tables.EH_PM_TASKS.FLOW_CASE_ID.ne(0L));
 		return query.where(condition).fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASKS.recordType(), PmTask.class));
+	}
+
+	@Override
+	public PmTask findTaskByFlowCaseId(Long flowCaseId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+		SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+		if(null != flowCaseId)
+			query.addConditions(Tables.EH_PM_TASKS.FLOW_CASE_ID.eq(flowCaseId));
+		return query.fetchOne().map(record -> ConvertHelper.convert(record, PmTask.class));
 	}
 }
