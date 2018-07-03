@@ -2379,8 +2379,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             resp = listMixCommunitiesByDistance(cmd, locator, pageSize);
             return resp;
         } else {
-            results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize + 1);
-
+           // results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize + 1);
+            //update by huanglm ,#22488【iOS&安卓】左上角地址切换不是按照距离最近来排序的 
+        	List<Community> communities = this.listMixCommunitiesByDistanceWithNamespaceId(cmd, locator, pageSize);
+        	communities.stream().map(r->{
+				CommunityDTO dto = ConvertHelper.convert(r,CommunityDTO.class);					
+				results.add(dto);
+				return null;
+			}).collect(Collectors.toList());
+        	
             if (results != null && results.size() > pageSize) {
                 results.remove(results.size() - 1);
                 resp.setNextPageAnchor(results.get(results.size() - 1).getId());
