@@ -24,6 +24,7 @@ import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerConfigurationCommand;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
@@ -32,6 +33,7 @@ import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
 import com.everhomes.rest.customer.CustomerInvestmentDTO;
 import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerPotentialResponse;
 import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
 import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
 import com.everhomes.rest.customer.CustomerTalentDTO;
@@ -102,7 +104,6 @@ import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
 import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
-import com.everhomes.rest.customer.PotentialCustomerDTO;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.SyncCustomerDataCommand;
@@ -368,5 +369,7 @@ public interface CustomerService {
 
     void deletePotentialCustomer(DeleteEnterpriseCommand cmd);
 
-    List<PotentialCustomerDTO> listPotentialCustomers(DeleteEnterpriseCommand cmd);
+    CustomerPotentialResponse listPotentialCustomers(DeleteEnterpriseCommand cmd);
+
+    void setSyncPotentialCustomer(CustomerConfigurationCommand cmd);
 }

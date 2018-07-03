@@ -194,5 +194,5 @@ public interface EnterpriseCustomerProvider {
 
     void deletePotentialCustomer(Long enterpriseId);
 
-    List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType);
+    List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType, String name);
 }

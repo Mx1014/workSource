@@ -2147,7 +2147,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType) {
+    public List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType,String name) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerPotentialDatasRecord> query = context.selectQuery(Tables.EH_CUSTOMER_POTENTIAL_DATAS);
         query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAMESPACE_ID.eq(namespaceId));
@@ -2156,6 +2156,9 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         }
         if (StringUtils.isNotBlank(sourceType)) {
             query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.SOURCE_TYPE.eq(sourceType));
+        }
+        if(StringUtils.isNotBlank(name)){
+            query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAME.like("%" + name + "%"));
         }
         return query.fetchInto(CustomerPotentialData.class);
     }

@@ -4,15 +4,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>enterpriseId: 企业id</li>
- *  <li>communityId: 园区id</li>
+ * <li>enterpriseId: 企业id</li>
+ * <li>communityId: 园区id</li>
  * </ul>
- *
  */
 public class DeleteEnterpriseCommand {
-	
+
 	private Long enterpriseId;
-	
+
 	private Long communityId;
 
 	private Integer namespaceId;
@@ -20,6 +19,12 @@ public class DeleteEnterpriseCommand {
 	private Long sourceId;
 
 	private String sourceType;
+
+	private String potentialName;
+
+	private Long pageSize;
+
+	private Long pageAnchor;
 
 	public Long getEnterpriseId() {
 		return enterpriseId;
@@ -59,6 +64,31 @@ public class DeleteEnterpriseCommand {
 
 	public void setSourceType(String sourceType) {
 		this.sourceType = sourceType;
+	}
+
+
+	public Long getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Long pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public String getPotentialName() {
+		return potentialName;
+	}
+
+	public void setPotentialName(String potentialName) {
+		this.potentialName = potentialName;
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerConfigurationCommand;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
@@ -37,6 +38,7 @@ import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
 import com.everhomes.rest.customer.CustomerInvestmentDTO;
 import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerPotentialResponse;
 import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
 import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
 import com.everhomes.rest.customer.CustomerTalentDTO;
@@ -108,7 +110,6 @@ import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
 import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
-import com.everhomes.rest.customer.PotentialCustomerDTO;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.SyncCustomerDataCommand;
@@ -1676,9 +1677,23 @@ public class CustomerController extends ControllerBase {
      * <p>列表潜在客户信息</p>
      */
     @RequestMapping("listPotentialCustomers")
-    @RestReturn(value = PotentialCustomerDTO.class,collection = true)
+    @RestReturn(value = CustomerPotentialResponse.class)
     public RestResponse listPotentialCustomers(DeleteEnterpriseCommand cmd) {
         RestResponse response = new RestResponse(customerService.listPotentialCustomers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/setSyncPotentialCustomer</b>
+     * <p>设置客户同步按钮</p>
+     */
+    @RequestMapping("setSyncPotentialCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse setSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
+        customerService.setSyncPotentialCustomer(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -81,6 +81,7 @@ import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectStatus;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerConfigurationCommand;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
@@ -92,6 +93,7 @@ import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
 import com.everhomes.rest.customer.CustomerInvestmentDTO;
 import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerPotentialResponse;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
 import com.everhomes.rest.customer.CustomerSourceStatisticsDTO;
@@ -4201,12 +4203,24 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<PotentialCustomerDTO> listPotentialCustomers(DeleteEnterpriseCommand cmd) {
+    public CustomerPotentialResponse listPotentialCustomers(DeleteEnterpriseCommand cmd) {
         List<PotentialCustomerDTO> dtos = new ArrayList<>();
-        List<CustomerPotentialData> data = enterpriseCustomerProvider.listPotentialCustomers(cmd.getNamespaceId(),cmd.getSourceId(),cmd.getSourceType());
-        if(data!=null && data.size()>0){
-            data.forEach((r)->dtos.add(ConvertHelper.convert(r,PotentialCustomerDTO.class)));
+        CustomerPotentialResponse response = new CustomerPotentialResponse();
+        List<CustomerPotentialData> data = enterpriseCustomerProvider.listPotentialCustomers(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType(),cmd.getPotentialName());
+        if (data != null && data.size() > 0) {
+            data.forEach((r) -> dtos.add(ConvertHelper.convert(r, PotentialCustomerDTO.class)));
         }
-        return dtos;
+        if (dtos.size() > cmd.getPageSize()) {
+            dtos.remove(dtos.size() - 1);
+            response.setNextPageAnchor(dtos.get(dtos.size() - 1).getId());
+        }
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public void setSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
+        CustomerConfiguration customerConfiguration = ConvertHelper.convert(cmd, CustomerConfiguration.class);
+        enterpriseCustomerProvider.createCustomerConfiguration(customerConfiguration);
     }
 }
