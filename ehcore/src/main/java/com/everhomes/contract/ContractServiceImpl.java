@@ -1498,16 +1498,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						});
 					}
 				}
-
-				contract.setStatus(cmd.getResult());
-				contractProvider.updateContract(contract);
-				contractSearcher.feedDoc(contract);
 				if(cmd.getPaymentFlag() == 1) {
 					addToFlowCase(contract, flowcasePaymentContractOwnerType);
 				}else {
 					addToFlowCase(contract, flowcaseContractOwnerType);
 				}
-
+				//工作流未开启，修改数据需要回滚，然后同步es，把最新的状态同步到es，否则数据就会不一致  更新完所有的操作，要在最后同步es by -- dingjianmin 
+				contract.setStatus(cmd.getResult());
+				contractProvider.updateContract(contract);
+				contractSearcher.feedDoc(contract);
 			}
 			return null;
 		});
