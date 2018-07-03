@@ -2095,16 +2095,29 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum, String noticeTel) {
+    public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd){
+    	//卸载参数
+    	Long billId = cmd.getBillId();
+    	BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
+    	String targetType = cmd.getTargetType();
+    	Long targetId = cmd.getTargetId();
+    	String targetName = cmd.getTargetName();
+    	String invoiceNum = cmd.getInvoiceNum();
+    	String noticeTel = cmd.getNoticeTel();
+    	Long categoryId = cmd.getCategoryId();
+    	String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+    			
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
             EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
             EhPaymentExemptionItems t2 = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t2");
+            com.everhomes.server.schema.tables.EhPaymentSubtractionItems t3 = Tables.EH_PAYMENT_SUBTRACTION_ITEMS.as("t3");
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            List<SubItemDTO> subItemDTOList = billGroupDTO.getSubItemDTOList();//增加减免费项
             //需要组装的信息
             BigDecimal amountExemption = new BigDecimal("0");
             BigDecimal amountSupplement = new BigDecimal("0");
@@ -2164,21 +2177,48 @@ public class AssetProviderImpl implements AssetProvider {
                         exemptionItems.add(exemptionItem);
                         includeExemptionIds.add(nextId);
                     }
-//                    if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
-//                        //更新账单的增加项
-//                        amountExemption = amountExemption.add(exemptionItemDTO.getAmount().multiply(new BigDecimal("-1")));
-//                    }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
-//                        //更新账单的减免项
-//                        amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
-//                    }
                 }
             }
             EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
             exemptionItemsDao.insert(exemptionItems);
             //删除include进来之外的增收减免
             context.delete(t2)
-                    .where(t2.ID.notIn(includeExemptionIds))
+                    .where(t2.ID.notIn(includeExemptionIds))//includeExemptionIds.add(-1l)
                     .execute();
+            
+            //修改减免费项配置
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+            if(subItemDTOList != null) {
+            	//先删除：根据billId删除该账单原来的减免费项配置
+                context.delete(t3)
+                        .where(t3.BILL_ID.eq(billId))
+                        .execute();
+                //后插入：新增修改后的配置
+            	for(int i = 0; i < subItemDTOList.size(); i++){
+            		long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+	                if(currentSubtractionItemSeq == 0){
+	                   this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+	                }
+	                SubItemDTO dto = subItemDTOList.get(i);
+            		PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+            		subtractionItem.setId(currentSubtractionItemSeq);
+            		subtractionItem.setNamespaceId(UserContext.getCurrentNamespaceId());
+            		subtractionItem.setCategoryId(categoryId);
+            		subtractionItem.setOwnerId(ownerId);
+            		subtractionItem.setOwnerType(ownerType);
+            		subtractionItem.setBillId(billId);
+            		subtractionItem.setBillGroupId(billGroupId);
+            		subtractionItem.setSubtractionType(dto.getSubtractionType());
+            		subtractionItem.setChargingItemId(dto.getChargingItemId());
+            		subtractionItem.setChargingItemName(dto.getChargingItemName());
+            		subtractionItem.setCreatorUid(UserContext.currentUserId());
+            		subtractionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            		subtractionItemsList.add(subtractionItem);
+            	}
+            	EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
+	            subtractionItemsDao.insert(subtractionItemsList);
+            }
+            
             reCalBillById(billId);//重新计算账单
             // 更新发票
             context.update(Tables.EH_PAYMENT_BILLS)

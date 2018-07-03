@@ -31,6 +31,9 @@ public class ModifyNotSettledBillCommand {
     private String invoiceNum;
     private String noticeTel;
     private String customerTel;
+    private Long categoryId;
+    private String ownerType;
+    private Long ownerId;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -111,5 +114,29 @@ public class ModifyNotSettledBillCommand {
 
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }
