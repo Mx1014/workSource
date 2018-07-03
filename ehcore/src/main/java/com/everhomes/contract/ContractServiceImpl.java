@@ -2733,11 +2733,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			dto = ConvertHelper.convert(contract, ContractDTO.class);
 		}
 		
-		if (contract.getTemplateId() != null) {
-			
+		if (cmd.getTemplateId() != null) {
 			dto = ConvertHelper.convert(cmd, ContractDTO.class);
-			
-			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
+			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getTemplateId());
 			ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
 			dto.setContractTemplate(contractTemplatedto);
 		}
