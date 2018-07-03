@@ -38,6 +38,7 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.*;
+import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetTargetType;
@@ -186,6 +187,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private AssetService assetService;
+
+	@Autowired
+    private NamespaceProvider namespaceProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -2022,7 +2026,7 @@ public class CommunityServiceImpl implements CommunityService {
 			String displayName = organization.getName();
 			Long organizationId = organization.getId();
 			if(detail != null){
-				if(detail.getDisplayName() != null){
+				if(!StringUtils.isBlank(detail.getDisplayName())){
 					displayName = detail.getDisplayName();
 				}
 				if(detail.getOrganizationId() != null) {
@@ -2547,8 +2551,13 @@ public class CommunityServiceImpl implements CommunityService {
 		font.setFontHeightInPoints((short) 16);
 		CellStyle style = wb.createCellStyle();
 		style.setFont(font);
-
-		Sheet sheet = wb.createSheet("parkingRechargeOrders");
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String fileName = "userlist";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        if (namespace != null) {
+            fileName = namespace.getName()+"用户列表";
+        }
+		Sheet sheet = wb.createSheet(fileName);
 		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
@@ -2577,9 +2586,8 @@ public class CommunityServiceImpl implements CommunityService {
 			StringBuffer address = new StringBuffer();
 			if(dto.getAddressDtos() != null && dto.getAddressDtos().size() > 0){
 				for (AddressDTO addressDTO: dto.getAddressDtos()){
+					//不需要拼接ApartmentName,因为address中已经包含门牌号
 					address.append(addressDTO.getAddress());
-					address.append("-");
-					address.append(addressDTO.getApartmentName());
 					address.append("、");
 				}
 			}
@@ -2598,7 +2606,7 @@ public class CommunityServiceImpl implements CommunityService {
 		try {
 			out = new ByteArrayOutputStream();
 			wb.write(out);
-			DownloadUtils.download(out, response);
+			DownloadUtils.download(out, response,fileName);
 		} catch (IOException e) {
 			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

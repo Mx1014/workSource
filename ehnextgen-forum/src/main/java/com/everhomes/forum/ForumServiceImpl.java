@@ -252,7 +252,7 @@ public class ForumServiceImpl implements ForumService {
         if (!StringUtils.isEmpty(cmd.getContent())) {
             textList.add(cmd.getContent());
         }
-        if (cmd.getEmbeddedAppId().equals(AppConstants.APPID_POLL)) {
+        if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_POLL)) {
             PollPostCommand pollPostCommand = (PollPostCommand)StringHelper.fromJsonString(cmd.getEmbeddedJson(),
                     PollPostCommand.class);
             if (pollPostCommand != null) {
@@ -299,7 +299,7 @@ public class ForumServiceImpl implements ForumService {
                 }
                 ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(temp.getEmbeddedJson(),
                         ActivityPostCommand.class);
-                if (tempCmd != null && tempCmd.getStatus() == (byte)2) {
+                if (tempCmd != null && tempCmd.getStatus()!= null && tempCmd.getStatus() == (byte)2) {
                     PostDTO post = this.updateTopic(cmd);
                     return post;
                 }
@@ -4786,7 +4786,7 @@ public class ForumServiceImpl implements ForumService {
                 if(namespaceId == null){
                     namespaceId = UserContext.getCurrentNamespaceId();
                 }
-
+                ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
 
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
                     LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl 
@@ -4804,18 +4804,17 @@ public class ForumServiceImpl implements ForumService {
                         //改用直接传输的方式。因为增加微信报名活动后，涉及到报名取消支付等操作，这些操作都要编码的话，工作量会巨大。
                         //添加命名空间ns
                         // 增加是否支持微信报名wechatSignup  add by yanjun 20170620
-                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
                         Byte wechatSignup = 0;
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
                         }
-                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
+                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup + "&categoryId=" + activity.getCategoryId());
                 	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
                         //投票帖子用自己的分享链接 modified by yanjun 220171227
                         relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
-                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId());
                     }else {
-                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId());
                 	}
                 }
             } catch(Exception e) {
@@ -5538,7 +5537,15 @@ public class ForumServiceImpl implements ForumService {
             topicCmd.setOwnerId(visibleRegionId);
         }
         topicCmd.setCurrentOrgId(currentOrgId);
-
+        topicCmd.setStatus((byte)2);
+        if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY) && !StringUtils.isEmpty(topicCmd.getEmbeddedJson())) {
+            ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(topicCmd.getEmbeddedJson(),
+                    ActivityPostCommand.class);
+            if (tempCmd != null) {
+                tempCmd.setStatus((byte)2);
+                topicCmd.setEmbeddedJson(StringHelper.toJsonString(tempCmd));
+            }
+        }
         if(creatorTag != null) {
             topicCmd.setCreatorTag(creatorTag.getCode());
         }

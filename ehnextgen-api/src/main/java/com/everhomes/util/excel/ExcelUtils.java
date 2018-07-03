@@ -20,6 +20,7 @@ import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xq.tian on 2016/9/8.
@@ -316,29 +317,36 @@ public class ExcelUtils {
                         //使首字母大写
                         String UTitle = StringUtils.capitalize(title); // 使其首字母大写;
                         String methodName = "get" + UTitle;
-                        // 设置要执行的方法
-                        Method method = clazz.getMethod(methodName);
-                        //获取返回类型
-                        String returnType = method.getReturnType().getName();
+                        //由于导出的账单组费项是动态的，原有的对象属性get/set不满足要求，采用map处理动态字段
+                        if(obj instanceof Map) {
+                        	Map map = (Map) obj;
+                        	String data = (String) map.get(title);
+                        	cell.setCellValue(data);
+                        }else {
+                        	// 设置要执行的方法
+                            Method method = clazz.getMethod(methodName);
+                            //获取返回类型
+                            String returnType = method.getReturnType().getName();
 
-                        Object ret = method.invoke(obj);
-                        String data = ret == null ? "" : ret.toString();
-                        if (!"".equals(data)) {
-                            switch (returnType) {
-                                case "int":
-                                    cell.setCellValue(Integer.parseInt(data));
-                                    break;
-                                case "long":
-                                    cell.setCellValue(Long.parseLong(data));
-                                    break;
-                                case "float":
-                                    cell.setCellValue(Float.parseFloat(data));
-                                    break;
-                                case "double":
-                                    cell.setCellValue(Double.parseDouble(data));
-                                    break;
-                                default:
-                                    cell.setCellValue(data);
+                            Object ret = method.invoke(obj);
+                            String data = ret == null ? "" : ret.toString();
+                            if (!"".equals(data)) {
+                                switch (returnType) {
+                                    case "int":
+                                        cell.setCellValue(Integer.parseInt(data));
+                                        break;
+                                    case "long":
+                                        cell.setCellValue(Long.parseLong(data));
+                                        break;
+                                    case "float":
+                                        cell.setCellValue(Float.parseFloat(data));
+                                        break;
+                                    case "double":
+                                        cell.setCellValue(Double.parseDouble(data));
+                                        break;
+                                    default:
+                                        cell.setCellValue(data);
+                                }
                             }
                         }
                     }

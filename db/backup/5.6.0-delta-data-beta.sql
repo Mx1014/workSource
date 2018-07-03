@@ -47,4 +47,17 @@ INSERT INTO `eh_service_module_app_mappings` (`id`, `app_origin_id_male`, `app_m
 
 -- 请执行在es上执行db/search/contract.sh add by 丁建民
 
--- 5.6.0 上线时需要部署 Gogs 程序, 部署文档：http://s.a.com/docs/faq/baseline-21529636264
+-- 5.6.0 上线时需要部署 Gogs 程序, 部署文档：http://s.a.com/docs/faq/baseline-21529636264 ADD BY xq.tian  2018/06/28
+
+/*
+5.6.0 上线时需要更新 contentserver 二进制, 修复了一些bug, 二进制位置在: ehnextgen/contentserver/release/server/contentserver
+
+并且在 contentsever 的配置文件中新增两个配置项:
+
+# 日志文件轮转大小 megabytes
+logMaxSize     = 100
+# 历史日志保留天数
+logMaxAge      = 365
+
+ADD BY xq.tian  2018/06/28
+*/

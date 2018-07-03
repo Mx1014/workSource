@@ -5,14 +5,10 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.order.*;
-import com.everhomes.rest.pay.controller.PayOrderRestResponse;
-import com.everhomes.rest.pay.controller.QueryOrderPaymentStatusRestResponse;
 import com.everhomes.rest.order.QueryOrderPaymentStatusCommand;
+import com.everhomes.user.UserContext;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.*;
-
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +26,8 @@ public class PayController extends ControllerBase {
 	
 	@Autowired
 	private PayService payService;
+	@Autowired
+	private PayProvider payProvider;
 	
 	/**
 	 * <b>URL: /pay/payNotify</b>
@@ -160,4 +158,20 @@ public class PayController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /pay/getPayServerHomeURL</b>
+     * <p>查询支付服务域名</p>
+     */
+    @RequestMapping("getPayServerHomeURL")
+    public RestResponse getPayServerHomeURL() {
+
+        String url = payService.getPayServerHomeURL();
+        url = url.substring(0, url.length() - 4);
+        RestResponse response = new RestResponse(url);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

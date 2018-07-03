@@ -64,7 +64,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
 
-    ListBillsDTO creatPropertyBill(CreateBillCommand cmd);
+    ListBillsDTO creatPropertyBill(CreateBillCommand cmd, Long billId);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -162,7 +162,8 @@ public interface AssetProvider {
     void changeOrderStaus(Long orderId, Byte finalOrderStatus);
 
     void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId);
-
+    
+    void changeOrderPaymentType(Long orderId, Integer paymentType);
 
     PaymentUser findByOwner(String userType, Long id);
 
@@ -347,6 +348,17 @@ public interface AssetProvider {
 
 	void setRent(Long contractId, BigDecimal rent);
 
+    
+    List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
+    
+    IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+    IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+    IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+	void transferOrderPaymentType();
+
     PaymentLateFine findLastedFine(Long id);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
@@ -364,4 +376,6 @@ public interface AssetProvider {
     Long checkEnergyFlag(Integer namespaceID);
 
     void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
+    
+    void modifyBillForImport(Long billId, CreateBillCommand cmd);
 }
