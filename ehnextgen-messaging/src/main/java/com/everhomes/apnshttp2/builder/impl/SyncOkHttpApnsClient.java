@@ -124,6 +124,7 @@ public class SyncOkHttpApnsClient implements ApnsClient {
         this.defaultTopic = defaultTopic;
 
         gateway = (production ? ApnsConstants.ENDPOINT_PRODUCTION : ApnsConstants.ENDPOINT_SANDBOX) + ":" + connectionPort;
+        logger.info("gateway:{}",gateway);
     }
 
     /**
@@ -215,6 +216,7 @@ public class SyncOkHttpApnsClient implements ApnsClient {
 
         this.defaultTopic = defaultTopic;
         gateway = (production ? ApnsConstants.ENDPOINT_PRODUCTION : ApnsConstants.ENDPOINT_SANDBOX) + ":" + connectionPort;
+        logger.info("gateway:{}",gateway);
     }
 
     /**
