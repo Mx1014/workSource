@@ -44,7 +44,7 @@ CREATE TABLE `eh_decoration_setting` (
 `community_id`  bigint(20) NOT NULL ,
 `owner_type`  varchar(64) NOT NULL COMMENT '\'basic\' 基础设置 \'file\'装修资料 \'fee\'缴费 \'apply\'施工申请 \'complete\'竣工验收 \'refound\'押金退回' ,
 `owner_id`  bigint(20) NULL COMMENT '当owner_type为apply 时 表示审批id' ,
-`content`  varchar(16384) NULL ,
+`content`  text NULL ,
 `address`  varchar(255) NULL COMMENT '收款地址或资料提交地址' ,
 `longitude` DOUBLE,
 `latitude` DOUBLE,
