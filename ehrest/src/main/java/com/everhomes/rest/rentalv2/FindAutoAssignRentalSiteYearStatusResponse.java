@@ -70,7 +70,7 @@ public class FindAutoAssignRentalSiteYearStatusResponse {
 	private List<AttachmentConfigDTO> attachments;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
-	private List<RentalOpenTimeDTO> openTimes;
+	private String openTimes;
 	
 	@Override
     public String toString() {
@@ -347,11 +347,11 @@ public class FindAutoAssignRentalSiteYearStatusResponse {
 		this.siteCounts = siteCounts;
 	}
 
-	public List<RentalOpenTimeDTO> getOpenTimes() {
+	public String getOpenTimes() {
 		return openTimes;
 	}
 
-	public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
+	public void setOpenTimes(String openTimes) {
 		this.openTimes = openTimes;
 	}
 }

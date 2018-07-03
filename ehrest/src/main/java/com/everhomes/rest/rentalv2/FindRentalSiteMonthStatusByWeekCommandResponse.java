@@ -67,7 +67,7 @@ public class FindRentalSiteMonthStatusByWeekCommandResponse {
     private List<AttachmentConfigDTO> attachments;
     @ItemType(SiteItemDTO.class)
     private List<SiteItemDTO> siteItems;
-    private List<RentalOpenTimeDTO> openTimes;
+    private String openTimes;
 
     public Long getRentalSiteId() {
         return rentalSiteId;
@@ -269,11 +269,11 @@ public class FindRentalSiteMonthStatusByWeekCommandResponse {
         this.siteItems = siteItems;
     }
 
-    public List<RentalOpenTimeDTO> getOpenTimes() {
+    public String getOpenTimes() {
         return openTimes;
     }
 
-    public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
+    public void setOpenTimes(String openTimes) {
         this.openTimes = openTimes;
     }
 }

@@ -14,7 +14,7 @@ public class GetResourceUsingInfoResponse {
 
     private List<UsingInfoDTO> usingInfos;
     private List<UsingInfoDTO> currentUsingInfos;
-    private List<RentalOpenTimeDTO> openTimes;
+    private String openTimes;
 
     public List<UsingInfoDTO> getUsingInfos() {
         return usingInfos;
@@ -32,11 +32,11 @@ public class GetResourceUsingInfoResponse {
         this.currentUsingInfos = currentUsingInfos;
     }
 
-    public List<RentalOpenTimeDTO> getOpenTimes() {
+    public String getOpenTimes() {
         return openTimes;
     }
 
-    public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
+    public void setOpenTimes(String openTimes) {
         this.openTimes = openTimes;
     }
 }

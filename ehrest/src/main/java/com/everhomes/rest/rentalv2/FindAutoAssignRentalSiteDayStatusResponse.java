@@ -73,7 +73,7 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	private List<SiteItemDTO> siteItems;
 	@ItemType(Long.class)
 	private List<Long> dayTimes;
-	private List<RentalOpenTimeDTO> openTimes;
+	private String openTimes;
 
 	@Override
     public String toString() {
@@ -361,11 +361,11 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 		this.dayTimes = dayTimes;
 	}
 
-	public List<RentalOpenTimeDTO> getOpenTimes() {
+	public String getOpenTimes() {
 		return openTimes;
 	}
 
-	public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
+	public void setOpenTimes(String openTimes) {
 		this.openTimes = openTimes;
 	}
 }

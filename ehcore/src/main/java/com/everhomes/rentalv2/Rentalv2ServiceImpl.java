@@ -3029,30 +3029,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			dto.setResourceType(resourceType.getIdentify());
 		}
 		//每日开放时间
-		if (!bill.getRentalType().equals(RentalType.HOUR.getCode())){
-			if (bill.getRentalType().equals(RentalType.HALFDAY.getCode()) || bill.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
-				List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(bill.getResourceType(),
-						RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), bill.getRentalResourceId());
-				if(null != halfTimeIntervals) {
-					List<TimeIntervalDTO> halfDayIntervals = halfTimeIntervals.stream().map(h -> ConvertHelper.convert(h, TimeIntervalDTO.class))
-							.collect(Collectors.toList());
-					StringBuilder builder = new StringBuilder();
-					builder.append("上午:").append(parseTimeInterval(halfDayIntervals.get(0).getBeginTime())).append("-")
-							.append(parseTimeInterval(halfDayIntervals.get(0).getEndTime())).append("\n");
-					builder.append("下午:").append(parseTimeInterval(halfDayIntervals.get(1).getBeginTime())).append("-")
-							.append(parseTimeInterval(halfDayIntervals.get(1).getEndTime())).append("\n");
-					if (halfDayIntervals.size()>2)
-						builder.append("晚上:").append(parseTimeInterval(halfDayIntervals.get(2).getBeginTime())).append("-")
-								.append(parseTimeInterval(halfDayIntervals.get(2).getEndTime())).append("\n");
-					dto.setOpenTime(builder.toString());
-				}
-			}else {
-				List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(bill.getResourceType(),
-						EhRentalv2Resources.class.getSimpleName(), bill.getRentalResourceId(),bill.getRentalType());
-				if (dayopenTimes != null && dayopenTimes.size()>0)
-					dto.setOpenTime(parseTimeInterval(dayopenTimes.get(0).getOpenTime())+"-"+parseTimeInterval(dayopenTimes.get(0).getCloseTime()));
-			}
-		}
+		dto.setOpenTime(getResourceOpenTime(bill.getResourceType(),bill.getRentalResourceId(),bill.getRentalType(),"\n"));
+
 	}
 
 	private String parseTimeInterval(Double time){
@@ -4732,22 +4710,37 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
 		//每日开放时间
-		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
 		return response;
 	}
 
-	private List<RentalOpenTimeDTO> getResourceOpenTime(String resourceType, Long rentalSiteId,Byte rentalType){
-		List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(resourceType,
-				EhRentalv2Resources.class.getSimpleName(), rentalSiteId,rentalType);
-		if (dayopenTimes!=null)
-			return dayopenTimes.stream().map(r->{
-				RentalOpenTimeDTO dto = new RentalOpenTimeDTO();
-				dto.setRentalType(r.getRentalType());
-				dto.setDayOpenTime(r.getOpenTime());
-				dto.setDayCloseTime(r.getCloseTime());
-				return dto;
-			}).collect(Collectors.toList());
+	private String getResourceOpenTime(String resourceType, Long rentalSiteId,Byte rentalType,String separate){
+
+		if (rentalType.equals(RentalType.HOUR.getCode())){
+			if (rentalType.equals(RentalType.HALFDAY.getCode()) || rentalType.equals(RentalType.THREETIMEADAY.getCode())){
+				List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(resourceType,
+						RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rentalSiteId);
+				if(null != halfTimeIntervals) {
+					List<TimeIntervalDTO> halfDayIntervals = halfTimeIntervals.stream().map(h -> ConvertHelper.convert(h, TimeIntervalDTO.class))
+							.collect(Collectors.toList());
+					StringBuilder builder = new StringBuilder();
+					builder.append("上午:").append(parseTimeInterval(halfDayIntervals.get(0).getBeginTime())).append("-")
+							.append(parseTimeInterval(halfDayIntervals.get(0).getEndTime())).append(separate);
+					builder.append("下午:").append(parseTimeInterval(halfDayIntervals.get(1).getBeginTime())).append("-")
+							.append(parseTimeInterval(halfDayIntervals.get(1).getEndTime())).append(separate);
+					if (halfDayIntervals.size()>2)
+						builder.append("晚上:").append(parseTimeInterval(halfDayIntervals.get(2).getBeginTime())).append("-")
+								.append(parseTimeInterval(halfDayIntervals.get(2).getEndTime())).append(separate);
+					return builder.toString();
+				}
+			}else {
+				List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(resourceType,
+						EhRentalv2Resources.class.getSimpleName(), rentalSiteId,rentalType);
+				if (dayopenTimes != null && dayopenTimes.size()>0)
+					return parseTimeInterval(dayopenTimes.get(0).getOpenTime())+"-"+parseTimeInterval(dayopenTimes.get(0).getCloseTime());
+			}
+		}
 
 		return null;
 	}
@@ -4806,7 +4799,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
 		//每日开放时间
-		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
 		return response;
 	}
@@ -4868,7 +4861,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	 		response.setDayTimes(dayTimes);
  		}
 		//每日开放时间
-		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
 		return response;
 	}
@@ -4985,7 +4978,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setDiscountType(dto.getDiscountType());
 		response.setDiscountRatio(dto.getDiscountRatio());
 		//每日开放时间
-		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
 		return response;
 	}
@@ -5730,7 +5723,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		}
 		//每日开放时间
-		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
 		return response;
 	}
@@ -5895,7 +5888,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 		//每日开放时间
-		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
 		return response;
 	}
@@ -6066,7 +6059,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		}
 		//每日开放时间
-		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
 		return response;
 	}
@@ -6233,7 +6226,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		Collections.sort(dayTimes);
  		response.setDayTimes(dayTimes);
 		//每日开放时间
-		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType()));
+		response.setOpenTimes(getResourceOpenTime(rs.getResourceType(),rs.getId(),cmd.getRentalType(),","));
 		cellList.get().clear();
 		return response;
 	}
@@ -8762,17 +8755,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		closeDates.stream().anyMatch(r-> startTime == r.getCloseDate().getTime()))
 			return response;
 		//每日开放时间
-		List<RentalDayopenTime> dayopenTimes = rentalv2Provider.queryRentalDayopenTimeByOwner(rentalSite.getResourceType(),
-				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(),null);
-		if (dayopenTimes!=null){
-			response.setOpenTimes(dayopenTimes.stream().map(r->{
-				RentalOpenTimeDTO dto = new RentalOpenTimeDTO();
-				dto.setRentalType(r.getRentalType());
-				dto.setDayOpenTime(r.getOpenTime());
-				dto.setDayCloseTime(r.getCloseTime());
-				return dto;
-			}).collect(Collectors.toList()));
+		RentalType[] iterators = {RentalType.HALFDAY,RentalType.DAY,RentalType.WEEK,RentalType.MONTH};
+		StringBuilder builder = new StringBuilder();
+		String separate = "注:";
+		for (RentalType iterator:iterators){
+			builder.append(separate);
+			switch (iterator){
+				case HALFDAY:
+					builder.append("按半天预订时每日开放时间为");
+					break;
+				case DAY:
+					builder.append("按天预订时每日开放时间为");
+					break;
+				case WEEK:
+					builder.append("按周预订时每日开放时间为");
+					break;
+				case MONTH:
+			}
+			builder.append(getResourceOpenTime(rentalSite.getResourceType(),rentalSite.getId(),iterator.getCode(),","));
+			separate = ";";
 		}
+		response.setOpenTimes(builder.toString());
 		//今天(包含)的订单
 		today = today.plusDays(1);
 		Long endTime = LocalDateTime.of(today.getYear(),today.getMonth(),today.getDayOfMonth(),0,0).atZone(ZoneId.systemDefault())
