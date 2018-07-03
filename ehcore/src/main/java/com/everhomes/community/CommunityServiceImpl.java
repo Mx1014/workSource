@@ -2593,9 +2593,8 @@ public class CommunityServiceImpl implements CommunityService {
 			StringBuffer address = new StringBuffer();
 			if(dto.getAddressDtos() != null && dto.getAddressDtos().size() > 0){
 				for (AddressDTO addressDTO: dto.getAddressDtos()){
+					//不需要拼接ApartmentName,因为address中已经包含门牌号
 					address.append(addressDTO.getAddress());
-					address.append("-");
-					address.append(addressDTO.getApartmentName());
 					address.append("、");
 				}
 			}

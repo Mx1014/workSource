@@ -1,7 +1,9 @@
 
 package com.everhomes.asset;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
@@ -182,6 +184,22 @@ public interface AssetService {
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
     void noticeTrigger(Integer namespaceId);
+    
+    List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
+    
+    /**
+     * 用于接受支付系统的回调信息
+     * @param cmd
+     */
+    void payNotify(OrderPaymentNotificationCommand cmd);
+    	
+    ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd);
+    
+    ListBillsDTO createTestZJGKBill();
+
+	IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd);
+	
+	void transferOrderPaymentType();
 
     long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
 
@@ -195,4 +213,6 @@ public interface AssetService {
 	void createAnAppMapping(CreateAnAppMappingCommand cmd);
 
 	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
+    
+    IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
 }

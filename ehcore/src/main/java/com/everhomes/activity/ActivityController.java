@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
@@ -104,7 +105,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("createSignupOrderV2")
     @RestReturn(value=PreOrderDTO.class)
     public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
-        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
+        PreOrderDTO dto = activityService.createSignupOrderV3(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -514,6 +515,51 @@ public class ActivityController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /activity/setActivityPayee</b>
+     * <p>设置活动收款方</p>
+     */
+    @RequestMapping("setActivityPayee")
+    @RestReturn(value=String .class)
+    public RestResponse setActivityPayee(CreateOrUpdateActivityPayeeCommand cmd){
+        activityService.createOrUpdateActivityPayee(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /activity/getActivityPayee</b>
+     * <p>获取已设置的活动收款方</p>
+     */
+    @RequestMapping("getActivityPayee")
+    @RestReturn(value=GetActivityPayeeDTO.class)
+    public RestResponse getActivityPayee(GetActivityPayeeCommand cmd){
+        return new RestResponse(activityService.getActivityPayee(cmd));
+    }
+
+    /**
+     * <b>URL: /activity/listActivityPayee</b>
+     * <p>获取活动收款方列表</p>
+     */
+    @RequestMapping("listActivityPayee")
+    @RestReturn(value=ActivityPayeeDTO.class,collection = true)
+    public RestResponse listActivityPayee(ListActivityPayeeCommand cmd){
+        List<ActivityPayeeDTO> list = activityService.listActivityPayee(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/checkPayeeIsUseful</b>
+     * <p>校验收款方是否可用</p>
+     */
+    @RequestMapping("checkPayeeIsUseful")
+    @RestReturn(value=CheckPayeeIsUsefulResponse.class)
+    public RestResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd){
+        return new RestResponse(activityService.checkPayeeIsUseful(cmd));
+    }
+
+    /**
      * <b>URL: /activity/setActivityWarning</b>
      * <p>设置活动提醒</p>
      */
@@ -835,6 +881,21 @@ public class ActivityController extends ControllerBase {
     public RestResponse listActivitiesByCategoryId(ListActivitiesByCategoryIdCommand cmd){
         ListActivitiesByCategoryIdResponse result = activityService.listActivitiesByCategoryId(cmd);
         RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/payNotify</b>
+     * <p>支付模块回调接口，通知支付结果</p>
+     */
+    @RequestMapping("payNotify")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
+        activityService.payNotify(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

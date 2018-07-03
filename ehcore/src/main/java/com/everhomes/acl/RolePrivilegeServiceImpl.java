@@ -1524,7 +1524,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toOtherTemplateCode,
+                toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1552,7 +1552,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toTargetTemplateCode,
+                toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -2047,6 +2047,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(null != userIdentifier){
 				member.setTargetType(OrganizationMemberTargetType.USER.getCode());
 				member.setTargetId(userIdentifier.getOwnerUid());
+				//update by huanglm ,fix 缺陷 #31483 .添加userName、contactToken、organizationId等后续消息使用到的字段，
+				//要不然在发送的消息内容中这些字段会为空		
+				member.setContactToken(contactToken);
+				member.setOrganizationId(organizationId);
+				User deleteuser = userProvider.findUserById(userIdentifier.getOwnerUid());
+				if(deleteuser != null){
+					member.setContactName(deleteuser.getNickName());					
+				}				
 			}
 		}else{
 			//从公司人员里面把管理员的标识去掉

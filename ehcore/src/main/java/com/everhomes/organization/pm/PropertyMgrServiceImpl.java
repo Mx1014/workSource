@@ -6943,7 +6943,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
 
     private Address parseAddress(Integer namespaceId, Long communityId, String building, String apartment) {
-        Address address = addressProvider.findApartmentAddress(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+        Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
                 StringUtils.trimAllWhitespace(apartment));
         if (address == null) {
             String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);
