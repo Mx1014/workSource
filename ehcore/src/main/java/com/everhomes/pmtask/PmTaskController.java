@@ -838,4 +838,18 @@ public class PmTaskController extends ControllerBase {
         pmTaskService.exportTaskStat(cmd, resp);
     }
 
+    /**
+     * <b>URL: /pmtask/searchOrgTasks</b>
+     * <p>查询企业所有的报修</p>
+     */
+    @RequestMapping("searchOrgTasks")
+    @RestReturn(value=SearchTasksByOrgDTO.class,collection = true)
+    public RestResponse searchOrgasks(SearchOrgTasksCommand cmd) {
+        List<SearchTasksByOrgDTO> res = pmTaskService.searchOrgTasks(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
