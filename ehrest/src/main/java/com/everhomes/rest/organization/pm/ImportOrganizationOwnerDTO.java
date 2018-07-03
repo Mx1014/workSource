@@ -21,8 +21,17 @@ public class ImportOrganizationOwnerDTO {
     private String company = "";
     private String idCardNumber = "";
     private String registeredResidence = "";
+    private String contactExtraTels = "";
+    
+    public String getContactExtraTels() {
+		return contactExtraTels;
+	}
 
-    public String getContactName() {
+	public void setContactExtraTels(String contactExtraTels) {
+		this.contactExtraTels = contactExtraTels;
+	}
+
+	public String getContactName() {
         return contactName;
     }
 

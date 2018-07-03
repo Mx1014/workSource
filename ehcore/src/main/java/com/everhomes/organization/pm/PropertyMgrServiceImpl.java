@@ -272,6 +272,45 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
+import jdk.nashorn.internal.parser.JSONParser;
+import net.greghaines.jesque.Job;
+import org.apache.poi.ss.usermodel.*;
+import org.jooq.Record;
+import org.jooq.RecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.io.*;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import net.greghaines.jesque.Job;
 
@@ -4871,61 +4910,77 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         Tuple<CommunityPmOwner, Boolean> tuple =
                 coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ORGANIZATION_OWNER.getCode() + cmd.getId()).enter(() -> {
-                    CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
-                    if (owner == null) {
-                        LOGGER.error("Organization owner are not exist, id = {}", cmd.getId());
-                        throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
-                                "Organization owner are not exist, id = %s", cmd.getId());
-                    }
-                    boolean needUpdateDoc = false;
-                    Boolean flag = false;
-                    if (cmd.getContactName() != null && !owner.getContactName().equals(cmd.getContactName())) {
-                        flag = true;
-                    }
-                    if (cmd.getContactName() != null) {
-                        owner.setContactName(cmd.getContactName());
-                        needUpdateDoc = true;
-                    }
-                    if (cmd.getAvatar() != null)
-                        owner.setAvatar(cmd.getAvatar());
-                    if (cmd.getBirthday() != null) {
-                        owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
-                    } else {
-                        owner.setBirthday(null);
-                    }
-                    if (cmd.getOrgOwnerTypeId() != null)
-                        owner.setOrgOwnerTypeId(cmd.getOrgOwnerTypeId());
-                    if (cmd.getMaritalStatus() != null)
-                        owner.setMaritalStatus(cmd.getMaritalStatus());
-                    if (cmd.getJob() != null)
-                        owner.setJob(cmd.getJob());
-                    if (cmd.getCompany() != null)
-                        owner.setCompany(cmd.getCompany());
-                    if (cmd.getIdCardNumber() != null)
-                        owner.setIdCardNumber(cmd.getIdCardNumber());
-                    if (cmd.getRegisteredResidence() != null)
-                        owner.setRegisteredResidence(cmd.getRegisteredResidence());
-                    UserGender gender = UserGender.fromCode(cmd.getGender());
-                    if (gender != null) {
-                        owner.setGender(gender.getCode());
-                    }
-                    propertyMgrProvider.updatePropOwner(owner);
-                    if (needUpdateDoc) {
-                        pmOwnerSearcher.feedDoc(owner);
-                    }
-                    //修改了客户名称则要同步修改合同里面的客户名称
-                    if (flag) {
-                        List<Contract> contracts = contractProvider.listContractByCustomerId(null, owner.getId(), CustomerType.INDIVIDUAL.getCode());
-                        if (contracts != null && contracts.size() > 0) {
-                            contracts.forEach(contract -> {
-                                contract.setCustomerName(owner.getContactName());
-                                contractProvider.updateContract(contract);
-                                contractSearcher.feedDoc(contract);
-                            });
-                        }
-                    }
-                    return owner;
-                });
+            CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
+            if (owner == null) {
+                LOGGER.error("Organization owner are not exist, id = {}", cmd.getId());
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
+                        "Organization owner are not exist, id = %s", cmd.getId());
+            }
+            boolean needUpdateDoc = false;
+			Boolean flag = false;
+			if(cmd.getContactName() != null && !owner.getContactName().equals(cmd.getContactName())) {
+				flag = true;
+			}
+            if (cmd.getContactName() != null) {
+                owner.setContactName(cmd.getContactName());
+                needUpdateDoc = true;
+            }
+            if (cmd.getAvatar() != null)
+                owner.setAvatar(cmd.getAvatar());
+            if (cmd.getBirthday() != null) {
+				owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+			}else {
+            	owner.setBirthday(null);
+			}
+            if (cmd.getOrgOwnerTypeId() != null)
+                owner.setOrgOwnerTypeId(cmd.getOrgOwnerTypeId());
+            if (cmd.getMaritalStatus() != null)
+                owner.setMaritalStatus(cmd.getMaritalStatus());
+            if (cmd.getJob() != null)
+                owner.setJob(cmd.getJob());
+            if (cmd.getCompany() != null)
+                owner.setCompany(cmd.getCompany());
+            if (cmd.getIdCardNumber() != null)
+                owner.setIdCardNumber(cmd.getIdCardNumber());
+            if (cmd.getRegisteredResidence() != null)
+                owner.setRegisteredResidence(cmd.getRegisteredResidence());
+            //added mutiple tels for customer by wentian 2016/6/11
+//            if (cmd.getCustomerExtraTels() != null){
+//				JsonArray array = new JsonParser().parse(StringHelper.toJsonString(cmd.getCustomerExtraTels())).getAsJsonArray();
+//				owner.setContactExtraTels(array.toString());
+//			}
+            //modify mutiple tels for customer by tangcen 2016/6/29
+            if(cmd.getCustomerExtraTels() != null && cmd.getCustomerExtraTels().size() > 0){
+	            try{
+	                owner.setContactExtraTels(StringHelper.toJsonString(cmd.getCustomerExtraTels()));
+	                //set owner's contact token for possible unknown uses
+					owner.setContactToken(cmd.getCustomerExtraTels().get(0));
+	            }catch (Exception e){
+	                LOGGER.error("failed to convert customerExtraTels into jsonarray, custoemrExtratel is={}", cmd.getCustomerExtraTels());
+	            }
+			}
+            UserGender gender = UserGender.fromCode(cmd.getGender());
+            if (gender != null) {
+                owner.setGender(gender.getCode());
+            }
+            propertyMgrProvider.updatePropOwner(owner);
+            if (needUpdateDoc) {
+                pmOwnerSearcher.feedDoc(owner);
+            }
+			//修改了客户名称则要同步修改合同里面的客户名称
+			if(flag) {
+				List<Contract> contracts = contractProvider.listContractByCustomerId(null, owner.getId(), CustomerType.INDIVIDUAL.getCode());
+				if(contracts != null && contracts.size() > 0) {
+					contracts.forEach(contract -> {
+						contract.setCustomerName(owner.getContactName());
+						contractProvider.updateContract(contract);
+						contractSearcher.feedDoc(contract);
+					});
+				}
+			}
+            return owner;
+        });
+
 
         List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(cmd.getNamespaceId(), cmd.getId());
         for (OrganizationOwnerAddressCommand addressCmd : cmd.getAddresses()) {
@@ -5025,7 +5080,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (ownerType == null) {
             invalidParameterException("orgOwnerTypeId", cmd.getOrgOwnerTypeId());
         }
-        checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
+        //checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
 
         CommunityPmOwner owner = ConvertHelper.convert(cmd, CommunityPmOwner.class);
         if (cmd.getBirthday() != null) {
@@ -5035,6 +5090,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         owner.setOrgOwnerTypeId(ownerType.getId());
         owner.setNamespaceId(cmd.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
+        if(cmd.getCustomerExtraTels() != null && cmd.getCustomerExtraTels().size() > 0){
+        	checkContactExtraTels(cmd.getCommunityId(), cmd.getCustomerExtraTels());
+        	try{
+                owner.setContactExtraTels(StringHelper.toJsonString(cmd.getCustomerExtraTels()));
+                //set owner's contact token for possible unknown uses
+				owner.setContactToken(cmd.getCustomerExtraTels().get(0));
+            }catch (Exception e){
+                LOGGER.error("failed to convert customerExtraTels into jsonarray, custoemrExtratel is={}", cmd.getCustomerExtraTels());
+            }
+		}
         UserGender gender = UserGender.fromCode(cmd.getGender());
         if (gender != null) {
             owner.setGender(gender.getCode());
@@ -5076,8 +5141,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         });
         return convertOwnerToDTO(owner);
     }
+	
+    private void checkContactExtraTels(Long communityId, List<String> customerExtraTels) {
+    	for(String tel : customerExtraTels){
+    		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(currentNamespaceId(),communityId, tel);
+    		if (pmOwners != null && pmOwners.size() > 0) {
+                LOGGER.error("OrganizationOwner are already exist, tel = {}.", tel);
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_EXIST,
+                        "OrganizationOwner are already exist, tel = %s.", tel);
+            }
+    	}
+	}
 
-    // 如果小区里有该手机号的用户, 则自动审核当前客户
+	// 如果小区里有该手机号的用户, 则自动审核当前客户
     private void autoApprovalOrganizationOwnerAddress(Long communityId, String contactToken, OrganizationOwnerAddress ownerAddress) {
         GroupMember member = getGroupMemberByContactToken(communityId, contactToken, ownerAddress);
         if (member != null) {
@@ -5778,6 +5854,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
             String fileName = String.format("客户信息_%s_%s", community.getName(), DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
+
             excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                     "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照提示输入。\n" +
                     "2、请在表格里面逐行录入数据，建议一次导入不超过500条信息。\n" +
@@ -5814,6 +5891,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (genderLocale != null) {
             dto.setGender(genderLocale.getText());
         }
+        //如果用户支持多手机号，则导出customerExtraTelsForExport的值
+        if(owner.getContactExtraTels() != null){
+            String contactExtraTels = owner.getContactExtraTels();
+            List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+            dto.setCustomerExtraTels(contactExtraTelsList);
+            //用在导出Excel时
+            String customerExtraTelsForExport = contactExtraTelsList.toString();
+            dto.setCustomerExtraTelsForExport(customerExtraTelsForExport.substring(1, customerExtraTelsForExport.length()-1));
+        }else {
+        	//如果不支持多手机号，则导出ContactToken的值
+        	dto.setCustomerExtraTelsForExport(dto.getContactToken());
+        	List<String> contactExtraTelsList = new ArrayList<>();
+        	contactExtraTelsList.add(dto.getContactToken());
+        	dto.setCustomerExtraTels(contactExtraTelsList);
+		}
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(owner.getOrgOwnerTypeId());
         if (ownerType != null) {
             dto.setOrgOwnerType(ownerType.getDisplayName());
@@ -6825,7 +6917,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             ImportOrganizationOwnerDTO owner = new ImportOrganizationOwnerDTO();
             owner.setContactName(RowResult.trimString(result.getA()) == null ? "" : RowResult.trimString(result.getA()));
             owner.setContactType(RowResult.trimString(result.getB()) == null ? "" : RowResult.trimString(result.getB()));
-            owner.setContactToken(RowResult.trimString(result.getC()) == null ? "" : RowResult.trimString(result.getC()));
+            //fix conflict by tangcen
+            //owner.setContactToken(RowResult.trimString(result.getC()) == null ? "" : RowResult.trimString(result.getC()));
+            String contactExtraTelsString = RowResult.trimString(result.getC());
+            List<String> contactExtraTels = Arrays.asList(contactExtraTelsString.split(","));
+            owner.setContactToken(contactExtraTels.get(0));
+            owner.setContactExtraTels(StringHelper.toJsonString(contactExtraTels));
+            
             owner.setGender(RowResult.trimString(result.getD()) == null ? "" : RowResult.trimString(result.getD()));
             owner.setBuilding(RowResult.trimString(result.getE()) == null ? "" : RowResult.trimString(result.getE()));
             owner.setAddress(RowResult.trimString(result.getF()) == null ? "" : RowResult.trimString(result.getF()));
