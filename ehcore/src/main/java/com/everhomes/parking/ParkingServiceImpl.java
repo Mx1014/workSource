@@ -738,8 +738,8 @@ public class ParkingServiceImpl implements ParkingService {
 			bussinessType = ParkingBusinessType.TEMPFEE;
 		}
 		User user = UserContext.current().getUser();
-//		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
-		String sNamespaceId = BIZ_ACCOUNT_PRE+"999957";		//todoed
+		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
+//		String sNamespaceId = BIZ_ACCOUNT_PRE+"999957";		//todoed
 		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		//公众号支付
