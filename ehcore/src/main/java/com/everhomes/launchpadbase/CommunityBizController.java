@@ -29,11 +29,10 @@ public class CommunityBizController extends ControllerBase {
 
     /**
      * <b>URL: /communityBiz/createCommunityBiz</b>
-     * <p>获取运营板块信息</p>
+     * <p>新建园区电商入口</p>
      */
     @RequestMapping("createCommunityBiz")
     @RestReturn(value=CommunityBizDTO.class)
-    @RequireAuthentication(false)
     public RestResponse createCommunityBiz(CreateCommunityBiz cmd) {
         CommunityBizDTO res = communityBizService.CreateCommunityBiz(cmd);
         RestResponse response =  new RestResponse(res);
@@ -45,11 +44,10 @@ public class CommunityBizController extends ControllerBase {
 
     /**
      * <b>URL: /communityBiz/updateCommunityBiz</b>
-     * <p>获取运营板块信息</p>
+     * <p>更新园区电商入口</p>
      */
     @RequestMapping("updateCommunityBiz")
     @RestReturn(value=CommunityBizDTO.class)
-    @RequireAuthentication(false)
     public RestResponse updateCommunityBiz(updateCommunityBiz cmd) {
         CommunityBizDTO res = communityBizService.updateCommunityBiz(cmd);
         RestResponse response =  new RestResponse(res);
@@ -60,11 +58,10 @@ public class CommunityBizController extends ControllerBase {
 
     /**
      * <b>URL: /communityBiz/deleteCommunityBiz</b>
-     * <p>获取运营板块信息</p>
+     * <p>删除园区电商入口</p>
      */
     @RequestMapping("deleteCommunityBiz")
     @RestReturn(value=String.class)
-    @RequireAuthentication(false)
     public RestResponse deleteCommunityBiz(DeleteCommunityBiz cmd) {
         communityBizService.deleteCommunityBiz(cmd);
         RestResponse response =  new RestResponse();
@@ -74,7 +71,7 @@ public class CommunityBizController extends ControllerBase {
     }
     /**
      * <b>URL: /communityBiz/findCommunityBizByCommunityId</b>
-     * <p>获取运营板块信息</p>
+     * <p>查询园区电商入口</p>
      */
     @RequestMapping("findCommunityBizByCommunityId")
     @RestReturn(value=CommunityBizDTO.class)
