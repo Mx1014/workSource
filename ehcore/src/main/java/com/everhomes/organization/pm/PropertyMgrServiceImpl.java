@@ -4905,7 +4905,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (ownerType == null) {
             invalidParameterException("orgOwnerTypeId", cmd.getOrgOwnerTypeId());
         }
-        checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
+        //checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
 
         CommunityPmOwner owner = ConvertHelper.convert(cmd, CommunityPmOwner.class);
         if (cmd.getBirthday() != null) {
@@ -4916,7 +4916,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         owner.setNamespaceId(cmd.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
         if(cmd.getCustomerExtraTels() != null && cmd.getCustomerExtraTels().size() > 0){
-            try{
+        	checkContactExtraTels(cmd.getCommunityId(), cmd.getCustomerExtraTels());
+        	try{
                 owner.setContactExtraTels(StringHelper.toJsonString(cmd.getCustomerExtraTels()));
                 //set owner's contact token for possible unknown uses
 				owner.setContactToken(cmd.getCustomerExtraTels().get(0));
@@ -4965,8 +4966,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         });
         return convertOwnerToDTO(owner);
     }
+	
+    private void checkContactExtraTels(Long communityId, List<String> customerExtraTels) {
+    	for(String tel : customerExtraTels){
+    		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(currentNamespaceId(),communityId, tel);
+    		if (pmOwners != null && pmOwners.size() > 0) {
+                LOGGER.error("OrganizationOwner are already exist, tel = {}.", tel);
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_EXIST,
+                        "OrganizationOwner are already exist, tel = %s.", tel);
+            }
+    	}
+	}
 
-    // 如果小区里有该手机号的用户, 则自动审核当前客户
+	// 如果小区里有该手机号的用户, 则自动审核当前客户
     private void autoApprovalOrganizationOwnerAddress(Long communityId, String contactToken, OrganizationOwnerAddress ownerAddress) {
         GroupMember member = getGroupMemberByContactToken(communityId, contactToken, ownerAddress);
         if (member != null) {
