@@ -1,4 +1,8 @@
--- 20180601-huangliangming-iOS推送流程升级-#30602
+
+-- 通用脚本
+-- ADD BY 黄良铭  2018年7月3日
+-- issue-30602  iOS推送流程升级 #30602
+
 -- 创建 开发者账号信息表
 CREATE TABLE `eh_developer_account_info` (
   `id` INT(11)  NOT NULL COMMENT '主键',
@@ -25,4 +29,4 @@ CREATE TABLE `eh_bundleid_mapper` (
   `bundle_id` VARCHAR(100)  COMMENT '关联应用',
   PRIMARY KEY(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'bundleId 映射信息表';
--- 20180601-huangliangming
+-- END
