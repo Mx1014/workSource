@@ -5581,7 +5581,59 @@ public class AssetProviderImpl implements AssetProvider {
 	}
 
 	public void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd) {
+		//卸载参数
+		Long billGroupId = cmd.getBillGroupId();
+		Long categoryId = cmd.getCategoryId();
+    	String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+        List<Long> billIdList = cmd.getBillIdList();
+		List<SubItemDTO> subItemDTOList = cmd.getSubItemDTOList();
 		
+		//修改减免费项配置
+		this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            com.everhomes.server.schema.tables.EhPaymentSubtractionItems t3 = Tables.EH_PAYMENT_SUBTRACTION_ITEMS.as("t3");
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+            if(billIdList != null && subItemDTOList != null ) {
+            	//先删除：根据billId删除该账单原来的减免费项配置
+                context.delete(t3)
+                        .where(t3.BILL_ID.in(billIdList))
+                        .execute();
+                //后插入：新增修改后的配置
+            	for(int i = 0; i < subItemDTOList.size(); i++){
+            		long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+                    if(currentSubtractionItemSeq == 0){
+                       this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+                    }
+                    SubItemDTO dto = subItemDTOList.get(i);
+                    for(int j = 0;j < billIdList.size();j++) {
+                    	Long billId = billIdList.get(j);
+                    	PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+                		subtractionItem.setId(currentSubtractionItemSeq);
+                		subtractionItem.setNamespaceId(UserContext.getCurrentNamespaceId());
+                		subtractionItem.setCategoryId(categoryId);
+                		subtractionItem.setOwnerId(ownerId);
+                		subtractionItem.setOwnerType(ownerType);
+                		subtractionItem.setBillGroupId(billGroupId);
+                		subtractionItem.setSubtractionType(dto.getSubtractionType());
+                		subtractionItem.setChargingItemId(dto.getChargingItemId());
+                		subtractionItem.setChargingItemName(dto.getChargingItemName());
+                		subtractionItem.setCreatorUid(UserContext.currentUserId());
+                		subtractionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                		subtractionItem.setBillId(billId);
+                		subtractionItemsList.add(subtractionItem);
+                    }
+            	}
+            	EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
+                subtractionItemsDao.insert(subtractionItemsList);
+                
+                for(int j = 0;j < billIdList.size();j++) {
+                	Long billId = billIdList.get(j);
+                	reCalBillById(billId);//重新计算账单
+                }
+            }
+            return null;
+        });
 	}
     
 }

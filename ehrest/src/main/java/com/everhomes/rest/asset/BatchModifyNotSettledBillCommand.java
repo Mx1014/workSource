@@ -14,12 +14,18 @@ import java.util.List;
 
 /**
  *<ul>
+ * <li>categoryId:多应用入口区分标识</li>
+ * <li>ownerType:所属者类型</li>
+ * <li>ownerId:所属者ID</li>
  * <li>billIdList:账单id列表</li>
  * <li>billGroupId:账单组id</li>
  * <li>subItemDTOList:减免费项的集合，参考{@link com.everhomes.rest.asset.SubItemDTO}</li>
  *</ul>
  */
 public class BatchModifyNotSettledBillCommand {
+	private Long categoryId;
+    private String ownerType;
+    private Long ownerId;
     private List<Long> billIdList;
     private Long billGroupId;
     @ItemType(SubItemDTO.class)
@@ -42,5 +48,23 @@ public class BatchModifyNotSettledBillCommand {
 	}
 	public void setSubItemDTOList(List<SubItemDTO> subItemDTOList) {
 		this.subItemDTOList = subItemDTOList;
+	}
+	public Long getCategoryId() {
+		return categoryId;
+	}
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+	public String getOwnerType() {
+		return ownerType;
+	}
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }

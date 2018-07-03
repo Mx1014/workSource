@@ -18,6 +18,9 @@ import java.util.List;
  * <li>invoiceNum:发票编号</li>
  * <li>noticeTel:催缴联系号码</li>
  * <li>customerTel:客户手机号</li>
+ * <li>categoryId:多应用入口区分标识</li>
+ * <li>ownerType:所属者类型</li>
+ * <li>ownerId:所属者ID</li>
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
