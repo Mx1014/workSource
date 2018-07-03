@@ -1,9 +1,12 @@
--- by st.zheng 数据迁移
+-- 通用脚本
+-- ADD BY 郑思挺
+-- 数据迁移
 SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_order_records`),10000);
 INSERT INTO `eh_rentalv2_order_records` (`id`,`order_no`,`biz_order_num`,`pay_order_id`,`payment_order_type`,`status`,`create_time`,`update_time`)
     SELECT (@id := @id + 1), order_id,order_num,payment_order_id,payment_order_type,0,create_time,create_time  FROM eh_payment_order_records where order_type = 'rentalOrder';
 
 update `eh_rentalv2_order_records` t1 right join `eh_rentalv2_orders` t2 on t1.`order_no` = t2.`order_no` set t1.order_id = t2.id,t1.amount = t2.pay_total_money,t1.status = IF(t2.status in (2,7,9,10,14,20),1,0) ;
+-- END BY 郑思挺
 
 -- 通用脚本 
 -- ADD BY 杨崇鑫
@@ -196,12 +199,13 @@ set @account_id = 4443;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 -- -----------------------------SECTION END----------------------------------------------
-
--- by st.zheng
+-- 通用脚本
+-- ADD BY 郑思挺
+-- 回调接口
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-VALUES ('rental.pay.v2.callback.url', '/rental/payNotify', '资源预订新支付回调接口', '0');
+VALUES ('pay.v2.callback.url.rental', '/rental/payNotify', '资源预订新支付回调接口', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-VALUES ('rental.refund.v2.callback.url', '/rental/refundNotify', '资源预订新退款回调接口', '0');
+VALUES ('refund.v2.callback.url.rental', '/rental/refundNotify', '资源预订新退款回调接口', '0');
 -- 收款账户迁移
 SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),0);
 set @namespace_id = 999973;
@@ -288,7 +292,7 @@ set @namespace_id = 999944;
 set @account_id = 4592;
 INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
 SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
-
+-- END 郑思挺
 
 -- bydengs
 -- 通用脚本

@@ -368,7 +368,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         cmd.setBizOrderNum(record.getOrderNo().toString());
         cmd.setAmount(amount);
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"rental.refund.v2.callback.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"refund.v2.callback.url.rental", "");
         String backUrl = homeUrl + contextPath + backUri;
         cmd.setBackUrl(backUrl);
         cmd.setAccountCode("NS"+record.getNamespaceId().toString());
@@ -439,7 +439,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             createOrderCmd.setExpirationMillis(cmd.getExpiration());
         }
         String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
-        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"rental.pay.v2.callback.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.rental", "");
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCmd.setBackUrl(backUrl);
         createOrderCmd.setExtendInfo(cmd.getExtendInfo());
