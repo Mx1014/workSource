@@ -34,6 +34,8 @@ public interface ContentServerService {
 
     String parserUri(String uri, String ownerType, Long ownerId);
 
+    String parseSharedUri(String uri);
+
     ContentServerResource findResourceByUri(String uri);
     
     ImageBody parserImageBody(String uri, String ownerType, Long ownerId);

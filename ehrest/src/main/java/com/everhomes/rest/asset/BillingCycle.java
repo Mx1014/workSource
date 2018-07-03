@@ -12,7 +12,10 @@ public enum BillingCycle {
     ONE_DEAL((byte)5, null, false),
     CONTRACT_MONTH((byte)6, 0, true),
     CONTRACT_QUARTER((byte)7, 2, true),
-    CONTRACT_YEAR((byte)8, 11, true);
+    CONTRACT_YEAR((byte)8, 11, true),
+	CONTRACT_TWOMONTH((byte)9, 1, true),//新增按合同两个月
+	CONTRACT_SIXMONTH((byte)10, 5, true);//新增按合同6个月
+	
     private byte code;
     private Integer monthOffset;
     private boolean isContract;

@@ -14,7 +14,8 @@ import javax.validation.constraints.NotNull;
  * <li>namespaceId: 域空间</li>
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id</li>
- * <li>appId: 应用id</li> * 
+ * <li>appId: 应用id</li> 
+ * <li>extraParam: 额外参数　json字符串</li> 
  * </ul>
  */
 public class GetChatGroupListCommand {
@@ -33,6 +34,8 @@ public class GetChatGroupListCommand {
 	private Long currentProjectId;
 	@NotNull
 	private Long appId;	
+	
+	private String extraParam;
 	
 	public String getOwnerType() {
 		return ownerType;
@@ -93,6 +96,12 @@ public class GetChatGroupListCommand {
 	}
 	public void setAppId(Long appId) {
 		this.appId = appId;
+	}
+	public String getExtraParam() {
+		return extraParam;
+	}
+	public void setExtraParam(String extraParam) {
+		this.extraParam = extraParam;
 	}
 	
 }

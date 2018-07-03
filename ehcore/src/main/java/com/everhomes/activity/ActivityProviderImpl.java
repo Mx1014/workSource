@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import com.everhomes.rest.forum.NeedTemporaryType;
 import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -42,16 +44,6 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhActivityAttachments;
-import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
-import com.everhomes.server.schema.tables.pojos.EhActivityGoods;
-import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
-import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
-import com.everhomes.server.schema.tables.records.EhActivityAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhActivityCategoriesRecord;
-import com.everhomes.server.schema.tables.records.EhActivityGoodsRecord;
-import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
@@ -342,7 +334,24 @@ public class ActivityProviderImpl implements ActivityProivider {
                 });
         return rosters[0];
     }
-    
+
+    @Override
+    public ActivityRoster findRosterByPayOrderId(Long payOrderId) {
+        ActivityRoster[] rosters = new ActivityRoster[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),null,
+                (context, obj) -> {
+                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
+                            .where(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()))
+                            .and(Tables.EH_ACTIVITY_ROSTER.PAY_ORDER_ID.eq(payOrderId)).fetch().forEach(item -> {
+                        rosters[0] = ConvertHelper.convert(item, ActivityRoster.class);
+                    });
+                    if (rosters[0] != null)
+                        return false;
+                    return true;
+                });
+        return rosters[0];
+    }
+
 
     @Override
     public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId, boolean onlyConfirm) {
@@ -758,6 +767,45 @@ public class ActivityProviderImpl implements ActivityProivider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
         dao.deleteById(id);
+    }
+
+    @Override
+    public ActivityBizPayee getActivityPayee(Long categoryId, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityBizPayee.class));
+        SelectQuery<EhActivityBizPayeeRecord> query = context.selectQuery(Tables.EH_ACTIVITY_BIZ_PAYEE);
+        if (categoryId != null) {
+            query.addConditions(Tables.EH_ACTIVITY_BIZ_PAYEE.OWNER_ID.eq(categoryId));
+        }
+        if (namespaceId != null) {
+            query.addConditions(Tables.EH_ACTIVITY_BIZ_PAYEE.NAMESPACE_ID.eq(namespaceId));
+        }
+        EhActivityBizPayeeRecord activityBizPayee = query.fetchOne();
+        if (activityBizPayee == null) {
+            return null;
+        }
+        return ConvertHelper.convert(activityBizPayee, ActivityBizPayee.class);
+    }
+
+    @Override
+    public void CreateActivityPayee(ActivityBizPayee activityBizPayee) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhActivityBizPayee.class));
+        activityBizPayee.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityBizPayeeDao dao = new EhActivityBizPayeeDao(context.configuration());
+        dao.insert(activityBizPayee);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, ActivityBizPayee.class, null);
+
+    }
+
+    @Override
+    public void updateActivityPayee(ActivityBizPayee activityBizPayee) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityBizPayeeDao dao = new EhActivityBizPayeeDao(context.configuration());
+        dao.update(activityBizPayee);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, ActivityBizPayee.class, null);
     }
 
     @Override

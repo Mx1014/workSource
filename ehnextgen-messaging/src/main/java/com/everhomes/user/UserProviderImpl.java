@@ -1939,24 +1939,22 @@ public class UserProviderImpl implements UserProvider {
 		com.everhomes.server.schema.tables.EhUserIdentifiers token = Tables.EH_USER_IDENTIFIERS.as("token");
 		com.everhomes.server.schema.tables.EhUsers user = Tables.EH_USERS.as("user");
 
-		TargetDTO targetDTO = new TargetDTO();
-		context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user).leftOuterJoin(token)
-				.on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID))).where(user.ID.eq(userId))
-				.fetchOne().map(r -> {
-					targetDTO.setTargetName(r.getValue(user.NICK_NAME));
-					targetDTO.setTargetType("eh_user");
-					targetDTO.setTargetId(r.getValue(user.ID));
-					targetDTO.setUserIdentifier(r.getValue(token.IDENTIFIER_TOKEN));
-					return null;
-				});
-
-		if (!userId.equals(targetDTO.getTargetId())) {
+		Record3<String, Long, String> ret = 
+				context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user)
+				.leftOuterJoin(token).on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID)))
+				.where(user.ID.eq(userId))
+				.fetchOne();
+		
+		if (null == ret) {
 			return null;
 		}
+		
+		TargetDTO targetDTO = new TargetDTO();
+		targetDTO.setTargetName(ret.getValue(user.NICK_NAME));
+		targetDTO.setTargetType("eh_user");
+		targetDTO.setTargetId(ret.getValue(user.ID));
+		targetDTO.setUserIdentifier(ret.getValue(token.IDENTIFIER_TOKEN));
 
 		return targetDTO;
 	}
-
-    
-
 }

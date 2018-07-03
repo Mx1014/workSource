@@ -1,4 +1,4 @@
-package com.everhomes.rest.news;
+package com.everhomes.rest.common;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 查询tag标签使用的类
  * <li>parentTagId: 父标签Id</li>
- * <li>categoryId: 父标签下的所有子标签</li>
+ * <li>childTagIds: 父标签下的所有子标签id</li>
  * </ul>
  */
 public class TagSearchItem {
