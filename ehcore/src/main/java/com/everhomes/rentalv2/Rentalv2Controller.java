@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.oauth2.RequireOAuth2Authentication;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.rentalv2.*;
@@ -41,6 +43,8 @@ public class Rentalv2Controller extends ControllerBase {
 	public static final Long moduleId = 40400L;
 	@Autowired
 	private Rentalv2Service rentalService;
+    @Autowired
+    private Rentalv2PayService  rentalv2PayService;
 
 	/**
 	 * <b>URL: /rental/findRentalSites</b>
@@ -623,6 +627,38 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 *
+	 * <b>URL: /rental/payNotify <b>
+	 * <p>支付回调</p>
+	 */
+	@RequireAuthentication(false)
+	@RequestMapping("payNotify")
+	@RestReturn(String.class)
+	public RestResponse payNotify(OrderPaymentNotificationCommand cmd) {
+	    this.rentalv2PayService.payNotify(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+    /**
+     *
+     * <b>URL: /rental/refundNotify <b>
+     * <p>退款回调</p>
+     */
+	@RequireAuthentication(false)
+    @RequestMapping("refundNotify")
+    @RestReturn(String.class)
+    public RestResponse refundNotify(OrderPaymentNotificationCommand  cmd) {
+        this.rentalv2PayService.refundNotify(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 *

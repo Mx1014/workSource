@@ -73,7 +73,10 @@ import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.poll.PollItemDTO;
+import com.everhomes.rest.poll.PollPostCommand;
 import com.everhomes.rest.search.SearchContentType;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.forum.*;
 import com.everhomes.rest.ui.user.*;
@@ -83,6 +86,7 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
@@ -105,6 +109,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
@@ -215,6 +220,9 @@ public class ForumServiceImpl implements ForumService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
         if(forumId == ForumConstants.SYSTEM_FORUM) {
@@ -232,9 +240,53 @@ public class ForumServiceImpl implements ForumService {
         
         return result;
     }
-    
+    //敏感词检测  --add by yanlong.liang 20180614
+    private void filterWords(NewTopicCommand cmd) {
+        List<String> textList = new ArrayList<>();
+        FilterWordsCommand command = new FilterWordsCommand();
+        command.setModuleType(cmd.getModuleType());
+        command.setCommunityId(cmd.getCommunityId());
+        if (!StringUtils.isEmpty(cmd.getSubject())) {
+            textList.add(cmd.getSubject());
+        }
+        if (!StringUtils.isEmpty(cmd.getContent())) {
+            textList.add(cmd.getContent());
+        }
+        if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_POLL)) {
+            PollPostCommand pollPostCommand = (PollPostCommand)StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                    PollPostCommand.class);
+            if (pollPostCommand != null) {
+                List<PollItemDTO> list = pollPostCommand.getItemList();
+                if (!CollectionUtils.isEmpty(list)) {
+                    for (PollItemDTO pollItemDTO : list) {
+                        if (!StringUtils.isEmpty(pollItemDTO.getSubject())) {
+                            textList.add(pollItemDTO.getSubject());
+                        }
+                    }
+                }
+            }
+        }else{
+            ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(cmd.getEmbeddedJson(),
+                    ActivityPostCommand.class);
+            if (activityPostCommand != null) {
+                if (!StringUtils.isEmpty(activityPostCommand.getDescription())) {
+                    textList.add(activityPostCommand.getDescription());
+                }
+                if (!StringUtils.isEmpty(activityPostCommand.getContent())) {
+                    textList.add(activityPostCommand.getContent());
+                }
+                if (!StringUtils.isEmpty(activityPostCommand.getLocation())) {
+                    textList.add(activityPostCommand.getLocation());
+                }
+            }
+        }
+        command.setTextList(textList);
+        this.sensitiveWordService.filterWords(command);
+    }
+
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        filterWords(cmd);
 
 
         if(cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY)) {
@@ -247,7 +299,7 @@ public class ForumServiceImpl implements ForumService {
                 }
                 ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(temp.getEmbeddedJson(),
                         ActivityPostCommand.class);
-                if (tempCmd.getStatus() == (byte)2) {
+                if (tempCmd != null && tempCmd.getStatus()!= null && tempCmd.getStatus() == (byte)2) {
                     PostDTO post = this.updateTopic(cmd);
                     return post;
                 }
@@ -956,7 +1008,7 @@ public class ForumServiceImpl implements ForumService {
             	if(postDto.getEmbeddedAppId().equals(AppConstants.APPID_ORGTASK)){
             		OrganizationTask task = organizationProvider.findOrganizationTaskById(postDto.getEmbeddedId());
                 	if(null != task){
-                		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), task.getOrganizationId());
+                		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(task.getTargetId(), task.getOrganizationId());
         				if(null != member){
         		    		task.setTargetName(member.getContactName());
         		    		task.setTargetToken(member.getContactToken());
@@ -4734,7 +4786,7 @@ public class ForumServiceImpl implements ForumService {
                 if(namespaceId == null){
                     namespaceId = UserContext.getCurrentNamespaceId();
                 }
-
+                ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
 
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
                     LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl 
@@ -4752,18 +4804,17 @@ public class ForumServiceImpl implements ForumService {
                         //改用直接传输的方式。因为增加微信报名活动后，涉及到报名取消支付等操作，这些操作都要编码的话，工作量会巨大。
                         //添加命名空间ns
                         // 增加是否支持微信报名wechatSignup  add by yanjun 20170620
-                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
                         Byte wechatSignup = 0;
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
                         }
-                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
+                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup + "&categoryId=" + activity.getCategoryId());
                 	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
                         //投票帖子用自己的分享链接 modified by yanjun 220171227
                         relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
-                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId());
                     }else {
-                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId());
                 	}
                 }
             } catch(Exception e) {
@@ -5391,7 +5442,7 @@ public class ForumServiceImpl implements ForumService {
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         
         NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
-        
+
         PostEntityTag creatorTag = PostEntityTag.USER;
         VisibleRegionType visibleRegionType = null;
         Long visibleRegionId = null;
@@ -5486,7 +5537,15 @@ public class ForumServiceImpl implements ForumService {
             topicCmd.setOwnerId(visibleRegionId);
         }
         topicCmd.setCurrentOrgId(currentOrgId);
-
+        topicCmd.setStatus((byte)2);
+        if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY) && !StringUtils.isEmpty(topicCmd.getEmbeddedJson())) {
+            ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(topicCmd.getEmbeddedJson(),
+                    ActivityPostCommand.class);
+            if (tempCmd != null) {
+                tempCmd.setStatus((byte)2);
+                topicCmd.setEmbeddedJson(StringHelper.toJsonString(tempCmd));
+            }
+        }
         if(creatorTag != null) {
             topicCmd.setCreatorTag(creatorTag.getCode());
         }
@@ -7357,6 +7416,9 @@ public class ForumServiceImpl implements ForumService {
             if (StringUtils.isEmpty(postDTO.getCreatorNickName())) {
                 postDTO.setCreatorNickName(user.getNickName());
             }
+            String url =  contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId());
+            postDTO.setCreatorAvatarUrl(url);
+            postDTO.setCreatorAvatar(user.getAvatar());
         }
         if (postDTO.getCreateTime() == null) {
             Timestamp timeStamp = new Timestamp(new Date().getTime());

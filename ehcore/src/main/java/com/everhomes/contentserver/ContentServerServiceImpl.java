@@ -38,7 +38,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
@@ -234,6 +233,14 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
         return null;
     }
 
+    @Override
+    public String parseSharedUri(String uri) {
+        if (uri != null && !uri.isEmpty()) {
+            return parserSingleUri(uri, getServersHash(), null, null, null, "Shared");
+        }
+        return null;
+    }
+
     private Map<Long, ContentServer> getServersHash() {
         List<ContentServer> servers = contentServerProvider.listContentServers();
         Map<Long, ContentServer> cache = new HashMap<>();
@@ -244,6 +251,11 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
     }
 
     private String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId, String token) {
+        return parserSingleUri(uri, cache, ownerType, ownerId, token, null);
+    }
+
+    private String parserSingleUri(String uri, Map<Long, ContentServer> cache,
+                                   String ownerType, Long ownerId, String token, String vendor) {
         if (StringUtils.isEmpty(uri)) {
             return null;
         }
@@ -299,7 +311,7 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
         uriParams.put("pxw", width);
         uriParams.put("pxh", height);
 
-        return ContentURLVendors.evaluateURL(scheme, publicAddress, port, uri, uriParams);
+        return ContentURLVendors.evaluateURL(scheme, publicAddress, port, uri, uriParams, vendor);
     }
 
     private Tuple<Integer, Integer> parseWidthAndHeight(String uri) {

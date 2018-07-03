@@ -1297,7 +1297,7 @@ public class BannerServiceImpl implements BannerService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid ownerType parameter.");
 		}
 		/*User user = UserContext.current().getUser();
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), ownerId);
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), ownerId);
 		if(member == null){
 			LOGGER.error("User {} is not in the organization {}.", user.getId(), ownerId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 

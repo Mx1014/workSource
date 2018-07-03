@@ -982,7 +982,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
 
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), cmd.getOrganizationId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
         QueryMyMeetingsCondition condition = new QueryMyMeetingsCondition(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(),
                 MeetingGeneralFlag.ON == MeetingGeneralFlag.fromCode(cmd.getEndFlag()),
                 member.getDetailId(), pageSize + 1, offset);
@@ -1187,7 +1187,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         int pageOffset = (cmd.getPageOffset() == null || cmd.getPageOffset() == 0) ? 1 : cmd.getPageOffset();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), cmd.getOrganizationId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
         QueryMyMeetingRecordsCondition condition = new QueryMyMeetingRecordsCondition(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId(), member.getDetailId(), pageSize + 1, offset);
         List<MeetingRecord> meetingRecords = meetingProvider.findMeetingRecordsByDetailId(condition);
         ListMyMeetingRecordsResponse response = new ListMyMeetingRecordsResponse();
@@ -1282,7 +1282,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         String routeUrl = RouterBuilder.build(Router.MEETING_RESERVATION_DETAIL, new MeetingReservationDetailActionData(meetingReservation.getId(), meetingReservation.getOrganizationId()));
         String locale = UserContext.current().getUser().getLocale();
-        String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
+        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
@@ -1323,7 +1323,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         String routeUrl = RouterBuilder.build(Router.MEETING_RESERVATION_DETAIL, new MeetingReservationDetailActionData(meetingReservation.getId(), meetingReservation.getOrganizationId()));
         String locale = UserContext.current().getUser().getLocale();
-        String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
+        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
@@ -1375,7 +1375,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
 
         String locale = UserContext.current().getUser().getLocale();
-        String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
+        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
@@ -1444,7 +1444,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
 
-        handler.sendMail(UserContext.getCurrentNamespaceId(), account, email, subject, content);
+        handler.sendMail(0, account, email, subject, content);
     }
 
     private void sendMessage(Long receiveUserId, String content, String url, String messageSubject) {
@@ -1527,7 +1527,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     }
 
     private String getContractNameByUserId(Long userId, Long organizationId) {
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+        OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
         if (member != null) {
             return member.getContactName();
         }

@@ -142,4 +142,7 @@ public interface CommunityService {
 	
 	ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd);
 
+	//导入项目信息
+	ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile multipartFile);
+
 }

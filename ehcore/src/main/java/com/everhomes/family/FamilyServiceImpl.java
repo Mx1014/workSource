@@ -428,10 +428,15 @@ public class FamilyServiceImpl implements FamilyService {
             messageDto.setBody(message);
             messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 
-            if(meta != null){
-                messageDto.setMeta(meta);
+          //add by huanlm 20180628 .fix 缺陷 #25651 ,the meta loss metaObjectType
+            if(meta == null) {
+            	meta = new HashMap<>();
             }
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            //update by huanlm 20180628
+            messageDto.setMeta(meta);
 
+                       
             includeList.stream().distinct().forEach(targetId -> {
                 messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN,

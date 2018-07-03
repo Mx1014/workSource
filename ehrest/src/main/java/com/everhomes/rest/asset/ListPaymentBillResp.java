@@ -25,6 +25,7 @@ public class ListPaymentBillResp {
     private Long pageSize;
     @ItemType(PaymentBillResp.class)
     private List<PaymentBillResp> list;
+    private List<PaymentOrderBillDTO> paymentOrderBillDTOs;
 
     public ListPaymentBillResp() {
 
@@ -56,4 +57,10 @@ public class ListPaymentBillResp {
     public void setList(List<PaymentBillResp> list) {
         this.list = list;
     }
+	public List<PaymentOrderBillDTO> getPaymentOrderBillDTOs() {
+		return paymentOrderBillDTOs;
+	}
+	public void setPaymentOrderBillDTOs(List<PaymentOrderBillDTO> paymentOrderBillDTOs) {
+		this.paymentOrderBillDTOs = paymentOrderBillDTOs;
+	}
 }

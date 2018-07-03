@@ -1,14 +1,24 @@
 //@formatter:off
 package com.everhomes.order;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.pay.order.PaymentDTO;
 import com.everhomes.pay.order.PaymentType;
-import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -27,13 +37,6 @@ import com.everhomes.server.schema.tables.records.EhPaymentWithdrawOrdersRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import org.jooq.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class PayProviderImpl implements PayProvider {
@@ -81,11 +84,11 @@ public class PayProviderImpl implements PayProvider {
     }
 
     @Override
-    public PaymentAccount findPaymentAccountBySystemId(Integer systemId) {
+    public PaymentAccount findPaymentAccountBySystemId(Long systemId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhPaymentAccountsRecord>  query = context.selectQuery(Tables.EH_PAYMENT_ACCOUNTS);
         if(systemId != null){
-            query.addConditions(Tables.EH_PAYMENT_ACCOUNTS.SYSTEM_ID.eq(systemId));
+            query.addConditions(Tables.EH_PAYMENT_ACCOUNTS.SYSTEM_ID.eq(systemId.intValue()));
         }
         return query.fetchOneInto(PaymentAccount.class);
     }
@@ -257,4 +260,5 @@ public class PayProviderImpl implements PayProvider {
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentWithdrawOrders.class, order.getId());
     }
+
 }

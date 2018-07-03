@@ -1,6 +1,8 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.rentalv2.AddItemAdminCommand;
 import com.everhomes.rest.rentalv2.AddRentalBillCommand;
@@ -293,6 +295,7 @@ public interface Rentalv2Service {
 	QueryOrgRentalStatisticsResponse queryOrgRentalStatistics (QueryRentalStatisticsCommand cmd);
 
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
+
 
 	void test();
 

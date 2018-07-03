@@ -20,4 +20,8 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_ALLIANCE_PROVIDER_NOT_FOUND = 11003;  //该服务商不存在
     static final int ERROR_NEW_EVENT_FILE_NOT_VALID = 11004;  //上传的文件地址为空
     static final int ERROR_MAIL_FILES_SAVE_ERROR = 11005;  //邮件附件获取失败
+    
+    static final int ERROR_ALLIANCE_TAG_NOT_VALID = 11100;  //需要更新父筛选为空
+    static final int ERROR_ALLIANCE_TAG_TYPE_NOT_VALID = 11101;  //筛选的类型不合法
+    
 }

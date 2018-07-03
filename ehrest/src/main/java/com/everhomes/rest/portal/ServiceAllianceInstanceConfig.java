@@ -14,6 +14,7 @@ import java.util.List;
  * <li>displayType: 样式</li>
  * <li>enableComment: 是否允许评论 0-不允许 1-允许</li>
  * <li>enableProvider: 是否开启服务商的功能 0-不开启 1-开启</li>
+ * <li>enableCustomerService: 是否开启客服会话查看和导出功能 0-不开启 1-开启</li>
  * </ul>
  */
 public class ServiceAllianceInstanceConfig {
@@ -29,6 +30,8 @@ public class ServiceAllianceInstanceConfig {
 	private Byte enableComment;
 	
 	private Byte enableProvider;
+	
+	private Byte enableCustomerService;
 
 	@ItemType(ServiceAllianceJump.class)
 	private List<ServiceAllianceJump> jumps;
@@ -79,19 +82,55 @@ public class ServiceAllianceInstanceConfig {
 	}
 
 	public Byte getEnableProvider() {
+		if (null == enableProvider) {
+			return (byte)0;
+		}
+		
 		return enableProvider;
 	}
 
 	public void setEnableProvider(Byte enableProvider) {
+		if (null == enableProvider) {
+			this.enableProvider = (byte)0;
+			return;
+		}
+		
 		this.enableProvider = enableProvider;
 	}
 
 	public Byte getEnableComment() {
+		if (null == enableComment) {
+			return (byte) 0;
+		}
+		
 		return enableComment;
 	}
 
 	public void setEnableComment(Byte enableComment) {
+		if (null == enableComment) {
+			this.enableComment = (byte) 0;
+			return;
+		}
+		
 		this.enableComment = enableComment;
+	}
+
+	public Byte getEnableCustomerService() {
+		if (null == enableCustomerService) {
+			return (byte) 0;
+		}
+		
+		return enableCustomerService;
+	}
+
+	public void setEnableCustomerService(Byte enableCustomerService) {
+		
+		if (null ==  enableCustomerService) {
+			this.enableCustomerService = (byte)0;
+			return;
+		} 
+		
+		this.enableCustomerService = enableCustomerService;
 	}
 
 }

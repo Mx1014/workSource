@@ -103,7 +103,7 @@ public class DbProviderImpl implements DbProvider {
 //        }
 	    
 	    // 改用每张表都查询的方式，但为了减少时间，使用SELECT EXISTS(SELECT 1 FROM table_name)的方式，如果表有行则返回1、否则返回0；
-	    // 这样查询时间也比较短； by lqs 20161102
+		// 这样查询时间也比较短； by lqs 20161102
 	    List<Table<?>> tables = this.dslContext.select(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_SCHEMA,
                org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME)
            .from(org.jooq.util.mysql.information_schema.Tables.TABLES)

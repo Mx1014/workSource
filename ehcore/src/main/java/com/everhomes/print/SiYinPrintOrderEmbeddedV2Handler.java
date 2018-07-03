@@ -1,6 +1,6 @@
 package com.everhomes.print;
 
-import com.everhomes.order.PayService;
+//import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
@@ -8,14 +8,17 @@ import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.PRINT_ORDER_CODE)
 public class SiYinPrintOrderEmbeddedV2Handler implements PaymentCallBackHandler{
 
 	@Autowired
 	public SiYinPrintOrderEmbeddedHandler handler;
 
-	@Autowired
-	private PayService payService;
+//	@Autowired
+//	private PayService payService;
 
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
@@ -41,7 +44,7 @@ public class SiYinPrintOrderEmbeddedV2Handler implements PaymentCallBackHandler{
 		PayCallbackCommand cmd = new PayCallbackCommand();
 		cmd.setOrderNo(String.valueOf(from.getOrderId()));
 //		cmd.setVendorType(String.valueOf(from.getOrderType()));
-		cmd.setPayAmount(payService.changePayAmount(from.getAmount()).toString());
+		cmd.setPayAmount(new BigDecimal(from.getAmount()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP).toString());
 		return cmd;
 	}
 }

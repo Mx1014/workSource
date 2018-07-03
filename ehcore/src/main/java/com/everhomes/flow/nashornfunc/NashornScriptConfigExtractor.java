@@ -1,7 +1,7 @@
 package com.everhomes.flow.nashornfunc;
 
+import com.everhomes.flow.FlowRuntimeScript;
 import com.everhomes.flow.NashornEngineService;
-import com.everhomes.flow.FlowScript;
 import com.everhomes.flow.NashornScript;
 import com.everhomes.rest.flow.FlowScriptConfigInfo;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -21,7 +21,7 @@ public class NashornScriptConfigExtractor implements NashornScript<List<FlowScri
     private NashornScriptConfig scriptConfig;
     private LinkedTransferQueue<List<FlowScriptConfigInfo>> queue;
 
-    public NashornScriptConfigExtractor(FlowScript script,
+    public NashornScriptConfigExtractor(FlowRuntimeScript script,
                                         LinkedTransferQueue<List<FlowScriptConfigInfo>> queue) {
         this.scriptConfig = new NashornScriptConfig(script, null);
         this.queue = queue;

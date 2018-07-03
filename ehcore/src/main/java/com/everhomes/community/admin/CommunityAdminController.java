@@ -657,4 +657,24 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/community/importCommunityDataAdmin</b>
+     * <p>导入项目信息excel</p>
+     */
+    @RequestMapping("importCommunityDataAdmin")
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importCommunityDataAdmin(ImportCommunityCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId={}",userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+        RestResponse response = new RestResponse(communityService.importCommunityDataAdmin(cmd, files[0]));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

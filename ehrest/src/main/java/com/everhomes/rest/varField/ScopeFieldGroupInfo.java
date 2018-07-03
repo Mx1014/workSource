@@ -13,6 +13,7 @@ import java.util.List;
  *     <li>groupId: 在系统组里的id</li>
  *     <li>groupDisplayName: 组名</li>
  *     <li>defaultOrder: 顺序</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -29,6 +30,16 @@ public class ScopeFieldGroupInfo {
     private String groupDisplayName;
 
     private Integer defaultOrder;
+    
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
 
     public Integer getDefaultOrder() {
         return defaultOrder;

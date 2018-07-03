@@ -8,11 +8,12 @@ package com.everhomes.rest.organization;
  * <li>PERSONNEL_FILE("personnel_file"): 人事档案导入</li>
  * <li>ENERGY_METER("energy_meter"): 能耗表计</li>
  * <li>    SOCIAL_SERCURITY_PAYMENTS("social_sercurity_payments"):社保导入</li>
+ * <li>COMMUNITY("community"): 项目导入</li>
  * </ul>
  */
 public enum ImportFileTaskType {
 
-    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"), BUILDING("building"), APARTMENT("apartment"),
+    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"), BUILDING("building"), APARTMENT("apartment"),COMMUNITY("community"),
     WAREHOUSE_MATERIAL("warehouse_material"),
     WAREHOUSE_MATERIAL_CATEGORY("warehouse_material_category"),
     ENTERPRISE_CUSTOMER("enterprise_customer"),
@@ -21,7 +22,8 @@ public enum ImportFileTaskType {
     SOCIAL_SERCURITY_PAYMENTS("social_sercurity_payments"),
     SALARY_GROUP("salary_group"), ENERGY_METER("energy_meter"), ENERGY_PLAN_TASK("energy_plan_task"),
     FIXED_ASSET("fixed_asset_"),
-    PUNCH_VACATION("punch_vacation");
+    PUNCH_VACATION("punch_vacation"), CUSTOMER_TASK("customer_task"),
+    INDIVIDUAL_CUSTOMER("individual customer");
 
 	private String code;
 
