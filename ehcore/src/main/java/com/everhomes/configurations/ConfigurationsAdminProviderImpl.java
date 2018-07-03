@@ -12,20 +12,22 @@ import org.jooq.SelectJoinStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configurations_record_change.ConfigurationsRecordChange;
 import com.everhomes.configurations_record_change.ConfigurationsRecordChangeProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.schema.Tables;
+import com.everhomes.rest.configurations.admin.ConfigurationsErrorCode;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhConfigurationsDao;
 import com.everhomes.server.schema.tables.pojos.EhConfigurations;
 import com.everhomes.user.UserContext;
@@ -68,6 +70,10 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	 * 只读
 	 */
 	private static final int READONLY = 1;
+	/**
+	 * 非只读(可维护)
+	 */
+	private static final int NOTREADONLY = 0;
 
 	@Override
 	public List<Configurations> listConfigurations(Integer namespaceId, String name,
@@ -104,7 +110,15 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 			query.limit(pageSize);
 		}
 		
-		result = query.fetch().map((r) -> ConvertHelper.convert(r, Configurations.class));
+		query.fetch().map((r) -> {	
+			Configurations bo = ConvertHelper.convert(r, Configurations.class);
+			//将非 1 值的的展示出来时都是展示0
+			if(bo.getIsReadonly()==null || bo.getIsReadonly() !=READONLY){
+				bo.setIsReadonly(NOTREADONLY);
+			}
+			result.add(bo);
+			return null;
+		});
 		
 		if(locator != null ){
 			locator.setAnchor(null);//重置分页锚点类
@@ -118,17 +132,22 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		return result;
 	}
 
-	@Override
+	@Override	
 	public Configurations getConfigurationById(Integer id, Integer namespaceId) {
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhConfigurationsDao dao = new EhConfigurationsDao(context.configuration());
 		EhConfigurations ehBo = dao.findById(id);
-		
+		//将非 1 值的的展示出来时都是展示0
+		if(ehBo !=null &&( ehBo.getIsReadonly()==null || ehBo.getIsReadonly() !=READONLY)){
+			ehBo.setIsReadonly(NOTREADONLY);
+		}
 		return ConvertHelper.convert(ehBo, Configurations.class);
 	}
 
 	@Override
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+			          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
 	public void crteateConfiguration(Configurations bo) {
 		
 		//重复校验
@@ -150,13 +169,15 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	}
 
 	@Override
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+	          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
 	public void updateConfiguration(Configurations bo) {
 		
 		//修改前先查询出来
 		Configurations preBo = getConfigurationById(bo.getId(),null);
 		//是否只读校验，只读数据不能修改
 		if(preBo.getIsReadonly() !=null && READONLY == preBo.getIsReadonly().intValue()){
-			throwSelfDefNullException("the data is read-only,  not allowed to modify.");
+			throwReadonlyException("the data is read-only,  not allowed to modify.");
 		}
 		//重复校验
 		checkMultiple(bo.getId(),bo.getNamespaceId(),bo.getName());
@@ -174,21 +195,21 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	}
 
 	@Override
-	public void deleteConfiguration(Integer id) {
+	@Caching(evict = {@CacheEvict(value = {"Configuration2"},key = "{#bo.namespaceId, #bo.name}"), 
+	          @CacheEvict(value = {"Configuration2-List"},key = "#bo.namespaceId")} )
+	public void deleteConfiguration(Configurations bo) {
 		
-		//删除前先查询出来
-		Configurations bo = getConfigurationById(id,null);
 		
 		//是否只读校验，只读数据不能删除
 		if(bo.getIsReadonly() !=null && READONLY == bo.getIsReadonly().intValue()){
-			throwSelfDefNullException("the data is read-only,  not allowed to modify.");
+			throwReadonlyException("the data is read-only,  not allowed to modify.");
 		}
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhConfigurationsDao dao = new EhConfigurationsDao(context.configuration());
-		dao.deleteById(id);
+		dao.deleteById(bo.getId());
 		
 		//广播删除数据事件
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhConfigurations.class, id.longValue());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhConfigurations.class, bo.getId().longValue());
 		
 		//保存日志		
 		saveChageRecord(bo,null,DELETE);
@@ -253,7 +274,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		recordBo.setOperatorUid(uid);
 		//操作时间
 		Timestamp operatorTime = DateUtils.currentTimestamp();
-		recordBo.setOperatorTime(operatorTime);
+		recordBo.setOperateTime(operatorTime);
 		//获取操作者的IP地址,目前并未获取
 		recordBo.setOperatorIp(null);
 		configurationsRecordChangeProvider.crteateConfiguration(recordBo);
@@ -275,28 +296,37 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 		//ID 为空，说明是新增数据，否则为修改数据
 		if(id == null ){			
 			if(resultList !=null && resultList.size() >0){
-				throwSelfDefNullException("A nemespace is not allowed to repeat name .");
+				throwRepeatNameException("A nemespace is not allowed to repeat name .");
 			}
 		}else { 
 			//同一域空间内name 相同的有两个及以上是肯定有问题的
 			if(resultList !=null && resultList.size() >1){
-				throwSelfDefNullException("A nemespace is not allowed to repeat name .");
+				throwRepeatNameException("A nemespace is not allowed to repeat name .");
 			}else if(resultList !=null && resultList.size() == 1){
 				//如果只查出一条，判断该 条是否自己本身，不是则要抛出异常
 				Configurations bo = resultList.get(0);
 				if(bo  != null && id.intValue() != bo.getId().intValue() ){
-					throwSelfDefNullException("A nemespace is not allowed to repeat name .");
+					throwRepeatNameException("A nemespace is not allowed to repeat name .");
 				}
 			}
 		}
 	}
 	
 	/**
-	 * 抛出运行时异常，异常信息参数传递过来
+	 * 抛出运行时repeat name异常，异常信息参数传递过来
 	 * @param msg 报错信息
 	 */
-	private void throwSelfDefNullException(String msg ){
+	private void throwRepeatNameException(String msg ){
 		LOGGER.error(msg);
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,msg);
+		throw RuntimeErrorException.errorWith(ConfigurationsErrorCode.SCOPE, ConfigurationsErrorCode.ERROR_CODE_MULTIPLE,msg);
+	}
+	
+	/**
+	 * 抛出运行时read-only异常，异常信息参数传递过来
+	 * @param msg 报错信息
+	 */
+	private void throwReadonlyException(String msg ){
+		LOGGER.error(msg);
+		throw RuntimeErrorException.errorWith(ConfigurationsErrorCode.SCOPE, ConfigurationsErrorCode.ERROR_CODE_READONLY,msg);
 	}
 }
