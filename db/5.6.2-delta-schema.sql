@@ -127,3 +127,17 @@ CREATE TABLE `eh_contract_events` (
   `content` text COMMENT '修改内容描述'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '合同日志记录表';
 -- END BY 唐岑
+
+
+-- 通用脚本
+-- ADD BY 严军  2018年7月3日16:01:33
+-- 服务广场V2.8  #26705  域空间配置V1.6 #18061
+
+-- 用户端访问权限，即广场上的icon能否点击进去  add by yanjun 20180619
+ALTER TABLE `eh_service_modules` ADD COLUMN `access_control_type`  tinyint(4) NULL DEFAULT 1 COMMENT '0-all, 1-logon, 2-auth';
+
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `access_control_type`  tinyint(4) NULL DEFAULT 1 COMMENT '0-all, 1-logon, 2-auth';
+
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `access_control_type`  tinyint(4) NULL DEFAULT 1 COMMENT '0-all, 1-logon, 2-auth';
+
+-- END BY 严军
