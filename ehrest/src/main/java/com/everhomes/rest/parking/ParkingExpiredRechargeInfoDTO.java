@@ -18,6 +18,7 @@ import java.math.BigDecimal;
  * <li>cardTypeName: 卡类型名称</li>
  * <li>startPeriod: 充值开始时间</li>
  * <li>endPeriod: 充值结束时间</li>
+ * <li>entryTime: 过期入场时间</li>
  * </ul>
  */
 public class ParkingExpiredRechargeInfoDTO {
@@ -34,6 +35,7 @@ public class ParkingExpiredRechargeInfoDTO {
     private String cardTypeName;
     private Long startPeriod;
     private Long endPeriod;
+    private Long entryTime;
 
     @Override
     public String toString() {
@@ -130,6 +132,14 @@ public class ParkingExpiredRechargeInfoDTO {
 
     public Long getEndPeriod() {
         return endPeriod;
+    }
+
+    public Long getEntryTime() {
+        return entryTime;
+    }
+
+    public void setEntryTime(Long entryTime) {
+        this.entryTime = entryTime;
     }
 
     public void setEndPeriod(Long endPeriod) {

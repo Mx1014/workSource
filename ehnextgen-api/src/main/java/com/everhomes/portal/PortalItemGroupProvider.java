@@ -20,4 +20,6 @@ public interface PortalItemGroupProvider {
 	void createPortalItemGroups(List<PortalItemGroup> portalItemGroups);
 
     List<PortalItemGroup> listPortalItemGroupByVersion(Integer namespaceId, Long versionId);
+
+    List<PortalItemGroup> listPortalItemGroupByWidgetAndStyle(Integer namespaceId, Long versionId, String widget, String style);
 }

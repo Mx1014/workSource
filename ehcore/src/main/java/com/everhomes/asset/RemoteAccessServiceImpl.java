@@ -15,6 +15,7 @@ import com.everhomes.query.QueryCondition;
 import com.everhomes.query.SortSpec;
 import com.everhomes.rest.MapListRestResponse;
 import com.everhomes.rest.RestErrorCode;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
@@ -73,7 +74,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         QueryBuilder queryBuilder = payCmd.builder();
         queryBuilder.select(
                 PaymentAttributes.ID.spec(),
-                PaymentAttributes.ACCOUNT_ID.spec(),
+                //PaymentAttributes.ACCOUNT_ID.spec(),
+                PaymentAttributes.ACCOUNT_CODE.spec(),
                 PaymentAttributes.USER_ID.spec(),//支付系统用户id
                 PaymentAttributes.BIZ_SYSTEM_ID.spec(),//子系统id
                 PaymentAttributes.CLIENT_APP_ID.spec(),//客户端id
@@ -139,10 +141,15 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                     String targetType = "";
                     for(int i = 0;i < listBillDetailVOs.size();i++) {
                     	ListBillDetailVO listBillDetailVO = listBillDetailVOs.get(i);
-                    	if(listBillDetailVO != null) {
+                        Long billId = listBillDetailVO.getBillId();
+                        //todo categoryid filter, copy or merge chongxin's code here
+                        if(!assetProvider.checkBillByCategory(billId, cmd.getCategoryId())){
+                            continue;
+                        }
+                        if(listBillDetailVO != null) {
                     		PaymentOrderBillDTO p2 = new PaymentOrderBillDTO();
                     		p2 = (PaymentOrderBillDTO) paymentOrderBillDTO.clone();
-                    		p2.setBillId(listBillDetailVO.getBillId());
+                    		p2.setBillId(billId);
                     		p2.setDateStrBegin(listBillDetailVO.getDateStrBegin());
                     		p2.setDateStrEnd(listBillDetailVO.getDateStrEnd());
                     		p2.setTargetName(listBillDetailVO.getTargetName());
@@ -187,6 +194,11 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }else{
             result.setNextPageAnchor(null);
         }
+//        if(result.getList()!= null){
+//            for(PaymentBillResp resp : result.getList()){
+//                resp.getOrderRemark2();
+//            }
+//        }
         return result;
     }
     
@@ -410,13 +422,14 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
 //        String payHomeUrl = "http://paytest.zuolin.com:8080/pay";
         String payHomeUrl = configurationProvider.getValue(0, ConfigConstants.PAY_V2_HOME_URL, "");
-        PaymentAccountResp account = paymentService.findPaymentAccount();
-        RestClient restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
-        com.everhomes.rest.RestResponseBase response = (com.everhomes.rest.RestResponseBase) restClient.restCall(
+        //PaymentAccountResp account = paymentService.findPaymentAccount();
+        //RestClient restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
+        /*com.everhomes.rest.RestResponseBase response = (com.everhomes.rest.RestResponseBase) restClient.restCall(
                 method,
                 uri,
                 cmd,
-                classType);
+                classType);*/
+        com.everhomes.rest.RestResponseBase response = new RestResponseBase();
         if(LOGGER.isDebugEnabled()) {LOGGER.debug("callPaymentMethod.response=" + GsonUtil.toJson(response));}
 
         checkPaymentResponse(response);

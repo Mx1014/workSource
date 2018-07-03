@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  *<li>latitude:纬度</li>
  *<li>changeVersion:版本</li>
  *<li>posterUri:海报</li>
+ *<li>posterUrl:海报url</li>
  *<li>guest:嘉宾</li>
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
@@ -48,6 +49,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
  * <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
  * <li>cloneFlag: 克隆标识，参考{@link com.everhomes.rest.forum.PostCloneFlag}</li>
+ * <li>organizationId: 企业ID，用户付款时，查询收款方</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -74,6 +76,7 @@ public class ActivityPostCommand{
     private String tag;
     private transient Long id;
     private String posterUri;
+    private String posterUrl;
     private String guest;
     
     private String mediaUrl;
@@ -113,7 +116,19 @@ public class ActivityPostCommand{
 
     private Byte cloneFlag;
 
-	public String getSignupEndTime() {
+
+    private Long organizationId;
+
+
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public String getSignupEndTime() {
 		return signupEndTime;
 	}
 
@@ -450,6 +465,14 @@ public class ActivityPostCommand{
 
     public void setCloneFlag(Byte cloneFlag) {
         this.cloneFlag = cloneFlag;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     @Override

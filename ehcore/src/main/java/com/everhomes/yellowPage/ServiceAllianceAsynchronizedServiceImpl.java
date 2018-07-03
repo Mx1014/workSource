@@ -34,9 +34,9 @@ public class ServiceAllianceAsynchronizedServiceImpl implements ApplicationListe
 	
     private String serviceAllianceTasks = "serviceAllianceSendEmailTasks";
     
-	void pushToQueque(String contents,Long userId) {
+	void pushToQueque(String jsonContents) {
 		
-		final Job job = new Job(ServiceAllianceAsynchronizedAction.class.getName(), new Object[]{contents,String.valueOf(userId)});
+		final Job job = new Job(ServiceAllianceAsynchronizedAction.class.getName(), new Object[]{jsonContents});
 		
 		jesqueClientFactory.getClientPool().enqueue(serviceAllianceTasks, job);
 		

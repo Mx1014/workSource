@@ -6,6 +6,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PaymentOrderRecord;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import org.jooq.SortField;
 
 public interface ParkingProvider {
@@ -135,7 +137,7 @@ public interface ParkingProvider {
     void createParkingSpace(ParkingSpace parkingSpace);
 
     List<ParkingSpace> searchParkingSpaces(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,
-                                           String keyword, String lockStatus, Long pageAnchor, Integer pageSize);
+                                           String keyword, String lockStatus, Long parkingHubsId,Long pageAnchor, Integer pageSize);
 
     List<ParkingSpaceLog> listParkingSpaceLogs(String spaceNo, Long startTime, Long endTime, Long pageAnchor, Integer pageSize);
 
@@ -151,4 +153,13 @@ public interface ParkingProvider {
 
     void createParkingSpaceLog(ParkingSpaceLog log);
 
+    ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String userId, String accountCode,String userIdenify, String tag1, String tag2, String tag3);
+
+    List<PaymentOrderRecord> listParkingPaymentOrderRecords(Long pageAnchor, Integer pageSize);
+
+    List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor);
+
+    Long ParkingRechargeOrdersByUserId(Long userId);
+
+    List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId);
 }

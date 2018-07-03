@@ -2,11 +2,13 @@
 package com.everhomes.asset;
 
 import com.everhomes.asset.zjgkVOs.*;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.rest.order.OrderType;
@@ -54,8 +56,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     @Autowired
     private UserProvider userProvider;
     @Autowired
-    private PayService payService;
-
+    private AssetPayService assetPayService;
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum, Integer namespaceID) {
@@ -798,7 +799,14 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
 //        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
 //        cmd2pay.setPaymentParams(paymentParamsDTO);
 
-        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
+        //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+        cmd.setBillGroupId(427L);
+        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
+        if(paymentBillGroup != null) {
+        	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
+        	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
+        }
+        PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
 //        response.setExpiredIntervalTime(15l*60l);
 //        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
@@ -875,7 +883,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
         if(pageSize == null){
             pageSize = 20;
         }
-        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType);
+        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType, cmd.getCategoryId());
         List<ListBillsDTO> list = new ArrayList<>();
         if(status!=1){
             LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
@@ -1211,6 +1219,13 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
             LOGGER.error(fieldName+":"+fieldValue+"为必填，不能为空");
             throw new RuntimeException(fieldName+":"+fieldValue+"为必填，不能为空");
         }
+    }
+    
+    public void payNotify(OrderPaymentNotificationCommand cmd) {
+    	PaymentCallBackHandler handler = PlatformContext.getComponent(
+    			PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.ZJGK_RENTAL_CODE);
+    	//支付模块回调接口，通知支付结果
+    	assetPayService.payNotify(cmd, handler);
     }
 
 }

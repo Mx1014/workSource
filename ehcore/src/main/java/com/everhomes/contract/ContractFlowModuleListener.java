@@ -3,6 +3,8 @@ package com.everhomes.contract;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -10,15 +12,18 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
+import com.everhomes.rest.contract.ContractType;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +34,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/8/21.
@@ -42,8 +46,8 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
     private FlowService flowService;
 
-    @Autowired
-    private UserProvider userProvider;
+    /*@Autowired
+    private UserProvider userProvider;*/
 
     @Autowired
     private ContractProvider contractProvider;
@@ -62,6 +66,12 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private ServiceModuleAppService serviceModuleAppService;
+    
+    @Autowired
+	private EnterpriseCustomerProvider enterpriseCustomerProvider;
+    
+    @Autowired
+	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
 
 
 //    @Autowired
@@ -108,12 +118,20 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             LOGGER.debug("step into onFlowCaseAbsorted, ctx: {}", ctx);
         }
         FlowCase flowCase = ctx.getFlowCase();
+        
         Contract contract = contractProvider.findContractById(flowCase.getReferId());
+        //查询合同适用场景，物业合同不修改资产状态。
+        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+        
         if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
             contract.setStatus(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
             contractProvider.updateContract(contract);
             contractSearcher.feedDoc(contract);
-            dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+            //审批不通过的续约合同，变更合同不修改资产状态
+			if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))
+					&& ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+				dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+			}
         }else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 
         }
@@ -131,14 +149,27 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         }
         FlowCase flowCase = ctx.getFlowCase();
         Contract contract = contractProvider.findContractById(flowCase.getReferId());
+        Contract exist = contractProvider.findContractById(flowCase.getReferId());
         //因为异常终止也会进FlowCaseEnd，所以需要再判断一下是不是正常结束 by xiongying20170908
+        //查询合同适用场景，物业合同不修改资产状态。
+        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+        
         if(FlowStepType.APPROVE_STEP.equals(ctx.getStepType()) || FlowStepType.END_STEP.equals(ctx.getStepType())) {
             if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                 contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
                 contractProvider.updateContract(contract);
                 contractSearcher.feedDoc(contract);
-            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                //记录合同事件日志，by tangcen
+        		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
+            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
                 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+              //查询企业客户信息，客户状态会由已成交客户变为历史客户
+        		if (contract.getCustomerType()==0) {
+        			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+        			enterpriseCustomer.setLevelItemId(7L);
+        			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+        			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
+        		}
             }
         }
     }

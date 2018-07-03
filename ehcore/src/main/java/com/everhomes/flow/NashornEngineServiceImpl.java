@@ -7,7 +7,6 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
@@ -146,7 +145,7 @@ public class NashornEngineServiceImpl implements NashornEngineService {
             future = rawExecutorService.submit(() -> func.process(this));
 
             // 超过5分钟就终止
-            O result = future.get(60 * 1, TimeUnit.SECONDS);
+            O result = future.get(60 * 5, TimeUnit.SECONDS);
 
             func.onComplete(result);
         } catch (Exception e) {
@@ -210,8 +209,7 @@ public class NashornEngineServiceImpl implements NashornEngineService {
         }
     }
 
-    @Override
-    public CompliedScriptHolder getCompliedScriptHolder() {
+    private CompliedScriptHolder getCompliedScriptHolder() {
         return scriptHolderThreadLocal.get();
     }
 

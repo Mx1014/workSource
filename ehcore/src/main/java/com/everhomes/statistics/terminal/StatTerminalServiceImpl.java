@@ -24,7 +24,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -103,7 +102,11 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                 } else if (TerminalStatisticsType.START == type) {
                     datas.add(hourStatistic.getStartNumber().doubleValue());
                 } else if (TerminalStatisticsType.CUMULATIVE_USER == type) {
-                    datas.add(hourStatistic.getCumulativeUserNumber().doubleValue());
+                    if (datas.size() > 0) {
+                        datas.add(datas.get(datas.size() - 1) + hourStatistic.getActiveUserNumber().doubleValue());
+                    } else {
+                        datas.add(hourStatistic.getActiveUserNumber().doubleValue());
+                    }
                 }
             }
             yData.setName(date);

@@ -25,8 +25,18 @@ public class ListCustomerContractsCommand {
     private Byte status;
 
     private Byte adminFlag = 0;
+    
+    private Long categoryId;
 
-    public Byte getAdminFlag() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Byte getAdminFlag() {
         return adminFlag;
     }
 

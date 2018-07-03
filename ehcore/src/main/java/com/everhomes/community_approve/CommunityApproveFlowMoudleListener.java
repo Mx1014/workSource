@@ -6,6 +6,7 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.general_approval.GeneralApprovalFieldProcessor;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormVal;
@@ -13,6 +14,8 @@ import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.community_approve.CommunityApproveKeyMapping;
+import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.user.UserContext;
@@ -49,6 +52,9 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
     private GeneralFormValProvider generalFormValProvider;
     @Autowired
     protected ContentServerService contentServerService;
+    @Autowired
+    private GeneralApprovalFieldProcessor generalApprovalFieldProcessor;
+
     public CommunityApproveFlowMoudleListener(){
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
             DEFUALT_FIELDS.add(value.getCode());
@@ -193,80 +199,22 @@ public class CommunityApproveFlowMoudleListener implements FlowModuleListener {
                                 case NUMBER_TEXT:
                                 case DATE:
                                 case DROP_BOX:
-                                    e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                                    e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                                    entities.add(e);
+                                    generalApprovalFieldProcessor.processDropBoxField(entities, e, val.getFieldValue());
                                     break;
                                 case MULTI_LINE_TEXT:
-                                    e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-                                    e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                                    entities.add(e);
+                                    generalApprovalFieldProcessor.processMultiLineTextField(entities, e, val.getFieldValue());
                                     break;
                                 case IMAGE:
-                                    e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-                                    //工作流images怎么传
-                                    PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
-                                    for (String uriString : imageValue.getUris()) {
-                                        String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                                        e.setValue(url);
-                                        FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-                                        entities.add(e2);
-                                    }
+                                    generalApprovalFieldProcessor.processImageField(entities, e, val.getFieldValue());
                                     break;
                                 case FILE:
-//						e.setEntityType(FlowCaseEntityType.F.getCode());
-                                    //TODO:工作流需要新增类型file
-                                    e.setEntityType(FlowCaseEntityType.FILE.getCode());
-                                    PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
-                                    if (null == fileValue || fileValue.getFiles() == null)
-                                        break;
-                                    List<FlowCaseFileDTO> files = new ArrayList<>();
-                                    for (PostApprovalFormFileDTO dto2 : fileValue.getFiles()) {
-                                        FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-                                        String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                                        ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-                                        fileDTO.setUrl(url);
-                                        fileDTO.setFileName(dto2.getFileName());
-                                        fileDTO.setFileSize(resource.getResourceSize());
-                                        files.add(fileDTO);
-                                    }
-                                    FlowCaseFileValue value = new FlowCaseFileValue();
-                                    value.setFiles(files);
-                                    e.setValue(JSON.toJSONString(value));
-                                    entities.add(e);
+                                    generalApprovalFieldProcessor.processFileField(entities, e, val.getFieldValue());
                                     break;
                                 case INTEGER_TEXT:
-                                    e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                                    e.setValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-                                    entities.add(e);
+                                    generalApprovalFieldProcessor.processIntegerTextField(entities, e, val.getFieldValue());
                                     break;
                                 case SUBFORM:
-
-                                    PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormSubformValue.class);
-                                    //取出设置的子表单fields
-                                    GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class);
-                                    //给子表单计数从1开始
-                                    int formCount = 1;
-                                    //循环取出每一个子表单值
-                                    for (PostApprovalFormSubformItemValue subForm1 : subFormValue.getForms()) {
-                                        e = new FlowCaseEntity();
-                                        e.setKey(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
-                                        e.setEntityType(FlowCaseEntityType.LIST.getCode());
-                                        e.setValue(formCount++ + "");
-                                        entities.add(e);
-                                        List<GeneralFormVal> subVals = new ArrayList<>();
-                                        //循环取出一个子表单的每一个字段值
-                                        for (PostApprovalFormItem subFromValue1 : subForm1.getValues()) {
-                                            GeneralFormVal obj = new GeneralFormVal();
-                                            obj.setFieldName(subFromValue1.getFieldName());
-                                            obj.setFieldType(subFromValue1.getFieldType());
-                                            obj.setFieldValue(subFromValue1.getFieldValue());
-                                            subVals.add(obj);
-                                        }
-                                        List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
-                                        processEntities(subSingleEntities, subVals, subFromExtra.getFormFields());
-                                        entities.addAll(subSingleEntities);
-                                    }
+                                    generalApprovalFieldProcessor.processSubFormField(entities, dto, val.getFieldValue());
                                     break;
                             }
                             if (StringUtils.isEmpty(e.getValue())) {

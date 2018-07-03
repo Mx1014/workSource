@@ -23,6 +23,7 @@ import java.util.List;
  * <li>instruction:说明</li>
  * <li>suggestUnitPrice:建议单价</li>
  * <li>areaSizeType:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
+ * <li>categoryId: genious creation</li>
  * <li>useUnitPrice: 是否启用填单价，1：启用；0：不启用</li>
  *</ul>
  */
@@ -52,7 +53,16 @@ public class CreateChargingStandardCommand {
     @ItemType(VariableConstraints.class)
     private List<VariableConstraints> stepValuePairs;
     private Long chargingStandardId;
+    private Long categoryId;
 
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
     private Byte useUnitPrice;
 
     public Byte getUseUnitPrice() {
