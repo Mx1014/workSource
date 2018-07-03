@@ -2,11 +2,14 @@
 package com.everhomes.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.web.socket.WebSocketSession;
 
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.util.StringHelper;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -103,8 +106,10 @@ public class AclinkWebSocketState {
         cmd.setId(this.getId());
         cmd.setSeq(new Long(0));
         cmd.setType(new Integer(0));
-        cmd.setPayload(Base64.encodeBase64String(Arrays.copyOfRange(buf, 10, buf.length)));
-        handler.excuteMessage(cmd, session, this);
+        cmd.setPayload(Base64.encodeBase64String(buf));
+        Map<String, String> params = new HashMap<String, String>();
+        StringHelper.toStringMap(null, cmd, params);
+        handler.excuteMessage(params, session, this, "/aclink/excuteMessage");
     }
     
     public void onServerMessage(AclinkWebSocketMessage cmd, WebSocketSession session, AclinkWebSocketHandler handler) {

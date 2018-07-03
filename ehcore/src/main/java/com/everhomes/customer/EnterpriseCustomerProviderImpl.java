@@ -2101,6 +2101,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+
     public String getEnterpriseCustomerNameById(Long enterpriseCustomerId) {
         return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ENTERPRISE_CUSTOMERS.NAME)
                 .from(Tables.EH_ENTERPRISE_CUSTOMERS).where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(enterpriseCustomerId))
@@ -2141,5 +2142,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                     dtos.add(dto);
                 });
         return dtos;
+    }
+
+    public void deleteCustomerEntryInfoByBuildingId(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .set(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS,CommonStatus.INACTIVE.getCode())
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.BUILDING_ID.eq(id))
+                .execute();
+
     }
 }

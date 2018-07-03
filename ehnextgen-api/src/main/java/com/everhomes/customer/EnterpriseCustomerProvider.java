@@ -187,4 +187,7 @@ public interface EnterpriseCustomerProvider {
     List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomerNameAndId(List<Long> ids);
 
     List<EasySearchEnterpriseCustomersDTO> listCommunityEnterpriseCustomers(Long communityId, Integer namespaceId);
+
+    void deleteCustomerEntryInfoByBuildingId(Long id);
+
 }

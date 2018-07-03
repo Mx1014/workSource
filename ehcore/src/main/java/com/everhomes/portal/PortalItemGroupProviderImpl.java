@@ -129,6 +129,16 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 				.and(Tables.EH_PORTAL_ITEM_GROUPS.VERSION_ID.eq(versionId))
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
 	}
+
+	@Override
+	public List<PortalItemGroup> listPortalItemGroupByWidgetAndStyle(Integer namespaceId, Long versionId, String widget, String style) {
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_GROUPS)
+				.where(Tables.EH_PORTAL_ITEM_GROUPS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_PORTAL_ITEM_GROUPS.VERSION_ID.eq(versionId))
+				.and(Tables.EH_PORTAL_ITEM_GROUPS.WIDGET.eq(widget))
+				.and(Tables.EH_PORTAL_ITEM_GROUPS.STYLE.eq(style))
+				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
+	}
 	
 	private EhPortalItemGroupsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

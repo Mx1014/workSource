@@ -572,3 +572,27 @@ INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUE
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10018', 'zh_CN', '城市所属填写错误');
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10019', 'zh_CN', '区县所属填写错误');
 -- --------------------- SECTION END ---------------------------------------------------------
+
+-- 通用脚本
+-- ADD BY 严军  2018年7月3日16:01:33
+-- 服务广场V2.8  #26705  域空间配置V1.6 #18061
+
+-- 0-all, 1-logon, 2-auth
+-- 一些模块设置为“所有用户”或者“仅认证用户”
+UPDATE `eh_service_modules` SET access_control_type = 1;
+-- 全部
+UPDATE `eh_service_modules` SET access_control_type = 0 where id in(10800, 10800001, 40500, 92100, 10750, 10760, 10100, 10600);
+-- 认证
+UPDATE `eh_service_modules` SET access_control_type = 2 where id in(50600, 50100, 13000, 41020, 41010, 41000, 20400);
+
+
+UPDATE `eh_service_module_apps` SET access_control_type = 1;
+-- 全部
+UPDATE `eh_service_module_apps` SET access_control_type = 0 where module_id in(10800, 10800001, 40500, 92100, 10750, 10760, 10100, 10600);
+-- 认证
+UPDATE `eh_service_module_apps` SET access_control_type = 2 where module_id in(50600, 50100, 13000, 41020, 41010, 41000, 20400);
+
+
+UPDATE  eh_launch_pad_items  SET access_control_type = 0;
+
+-- END BY 严军
