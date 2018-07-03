@@ -2619,11 +2619,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public List<SearchTasksByOrgDTO> searchOrgTasks(SearchOrgTasksCommand cmd) {
 		List<SearchTasksByOrgDTO> ret = new ArrayList<>();
-		List<PmTask> list = pmTaskProvider.findTasksByOrg(cmd.getCommunityId(),cmd.getNamespaceId(), cmd.getAddressIds(), cmd.getTaskCategoryId());
+		List<PmTask> list = pmTaskProvider.findTasksByOrg(cmd.getCommunityId(),cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getTaskCategoryId());
 		if (list != null && list.size() > 0) {
 			list.forEach(r -> {
 				SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
 				dto.setStatus(r.getStatus());
+				dto.setStatusString(PmTaskFlowStatus.fromCode(r.getStatus()).getDescription());
 				dto.setRequestorPhone(r.getRequestorPhone());
 				dto.setRequestorName(r.getRequestorName());
 				dto.setOrganizationUid(r.getOrganizationUid());

@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.pmtask;
 
+import com.everhomes.util.StringHelper;
+
 import java.sql.Timestamp;
 
 /**
@@ -15,6 +17,7 @@ public class SearchTasksByOrgDTO {
     private String requestorPhone;
     private Timestamp createTime;
     private Byte status;
+    private String statusString;
     private String content;
     private Long flowCaseId;
 
@@ -88,5 +91,18 @@ public class SearchTasksByOrgDTO {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public String getStatusString() {
+        return statusString;
+    }
+
+    public void setStatusString(String statusString) {
+        this.statusString = statusString;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

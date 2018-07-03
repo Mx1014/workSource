@@ -64,5 +64,5 @@ public interface PmTaskProvider {
 
     List<PmTask> listPmTasksByOrgId(Integer namespaceId, Long communityId, Long organizationId);
 
-    List<PmTask> findTasksByOrg(Long communityId, Integer namespaceId, List<Long> addressIds, Long taskCategoryId);
+    List<PmTask> findTasksByOrg(Long communityId, Integer namespaceId, Long organizationId, Long taskCategoryId);
 }
