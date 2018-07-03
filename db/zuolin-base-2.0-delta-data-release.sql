@@ -229,3 +229,20 @@ UPDATE `eh_service_module_apps` SET `instance_config`='{"url":"${home.url}/goods
 UPDATE `eh_service_modules` SET `client_handler_type`='2' WHERE `id`='49200';
 -- end
 
+-- #issue-26479更新园区快讯WEB跳转地址
+update eh_launch_pad_items set action_data = replace(action_data,'#/newsList#sign_suffix',concat('&ns=',namespace_id,'#/newsList#sign_suffix')) where action_type = 13 and action_data like '%park-news-web%';
+
+-- #issue-26479 迁移原新闻从organization属性至community属性
+update  eh_news nu ,
+	(select news.id as news_id,  com.community_id as community_id from eh_news news 
+	left join 	(select n.namespace_id as namespace_id, n.resource_id as community_id   
+					from eh_namespace_resources n 
+					where n.resource_type  = 'COMMUNITY'
+					group by n.namespace_id
+					order by n.namespace_id,n.default_order,n.resource_id) 
+					as com 
+	on com.namespace_id = news.namespace_id
+	where news.owner_type = 'organization' and news.owner_id > 0) 
+	as n_c
+set nu.owner_type = 'EhCommunities', nu.owner_id = n_c.community_id 
+where nu.id = n_c.news_id;
