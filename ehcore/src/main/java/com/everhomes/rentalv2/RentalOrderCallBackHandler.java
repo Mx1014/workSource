@@ -5,7 +5,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.flow.FlowAutoStepDTO;
@@ -29,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -58,8 +58,6 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 	private SmsProvider smsProvider;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
-	@Autowired
-	private PayService payService;
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 
@@ -70,7 +68,7 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 
 				RentalOrder order = rentalProvider.findRentalBillByOrderNo(String.valueOf(cmd.getOrderId()));
 
-				BigDecimal payAmount = payService.changePayAmount(cmd.getAmount());
+				BigDecimal payAmount = changePayAmount(cmd.getAmount());
 
 				order.setPaidMoney(order.getPaidMoney().add(payAmount));
 				order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -166,6 +164,14 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 				return null;
 			});
 
+	}
+
+	private BigDecimal changePayAmount(Long amount){
+
+		if(amount == null){
+			return new BigDecimal(0);
+		}
+		return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
 	}
 
 	@Override

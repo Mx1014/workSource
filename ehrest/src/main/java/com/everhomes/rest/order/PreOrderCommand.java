@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
  *     <li>clientAppName: 客户端realm值</li>
  *     <li>orderType: orderType {@link com.everhomes.rest.order.OrderType}</li>
  *     <li>orderId: 订单Id</li>
- *     <li>payerId: 卖家用户ID</li>
+ *     <li>payerId: 付款方ID</li>
  *     <li>amount: 支付金额，BigDecimal转换本类提供了方法changePayAmount</li>
  *     <li>resourceType: 订单资源类型</li>
  *     <li>resourceId: 订单资源类型ID</li>
@@ -22,6 +22,8 @@ import javax.validation.constraints.NotNull;
  *     <li>extendInfo: 额外信息，将原样返回</li>
  *     <li>paymentType: 支付类型，不传则获取除微信公众号以外的所有方式，微信公众号必传 参考{@link com.everhomes.pay.order.PaymentType}</li>
  *     <li>paymentParams: 支付参数 微信公众号必传 {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
+ *     <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
+ *     <li>bizPayeeId:收款方账户id</li>
  * </ul>
  */
 public class PreOrderCommand {
@@ -35,8 +37,19 @@ public class PreOrderCommand {
     private String orderType;
     @NotNull
     private Long orderId;
+    
+    /** 付款方类型，参考{@link com.everhomes.rest.order.OwnerType}，若不填则默认是个人 */
+    // 由于后面付款方有可能是企业钱包，故需要加上该类型来区分  by lqs 20180526
+    private String payerType;
+    
     @NotNull
     private Long payerId;
+
+    /** 收款方ID，注意：该ID来自于支付系统，并记录在业务自己的关联表中 */
+    // 由于产品方案修改，支付收款方由各业务自己记录，故添加该ID，并且做兼容，当业务不填该ID时则取自通用表 by lqs 20180526
+    private String bizPayeeType;
+    private Long bizPayeeId;
+    
     @NotNull
     private Long amount;
 
@@ -86,8 +99,36 @@ public class PreOrderCommand {
         this.orderId = orderId;
     }
 
+    public String getPayerType() {
+        return payerType;
+    }
+
+    public void setPayerType(String payerType) {
+        this.payerType = payerType;
+    }
+
     public Long getPayerId() {
         return payerId;
+    }
+
+    public void setPayerId(Long payerId) {
+        this.payerId = payerId;
+    }
+
+    public String getBizPayeeType() {
+        return bizPayeeType;
+    }
+
+    public void setBizPayeeType(String bizPayeeType) {
+        this.bizPayeeType = bizPayeeType;
+    }
+
+    public Long getBizPayeeId() {
+        return bizPayeeId;
+    }
+
+    public void setBizPayeeId(Long bizPayeeId) {
+        this.bizPayeeId = bizPayeeId;
     }
 
     public Long getCommunityId() {
@@ -96,10 +137,6 @@ public class PreOrderCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
-    }
-
-    public void setPayerId(Long payerId) {
-        this.payerId = payerId;
     }
 
     public Long getAmount() {

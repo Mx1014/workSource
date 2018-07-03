@@ -477,7 +477,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 			dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 
 			dto.setPlateNumber(cmd.getPlateNumber());
-			long now = System.currentTimeMillis();
+			long now = configProvider.getLongValue("parking.opencard.now",System.currentTimeMillis());
 			dto.setOpenDate(now);
 			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
 			if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {

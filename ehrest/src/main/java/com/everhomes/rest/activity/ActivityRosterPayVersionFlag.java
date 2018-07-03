@@ -8,7 +8,7 @@ package com.everhomes.rest.activity;
  * </ul>
  */
 public enum ActivityRosterPayVersionFlag {
-	V1((byte) 1), V2((byte) 2);
+	V1((byte) 1), V2((byte) 2), V3((byte) 3);
 	private byte code;
 
 	private ActivityRosterPayVersionFlag(byte code) {
