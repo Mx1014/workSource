@@ -324,6 +324,7 @@ update eh_payment_bill_items set charging_item_name=REPLACE(charging_item_name,"
 update eh_payment_bill_items set charging_item_name=REPLACE(charging_item_name,"(元)","");
 -- END BY 杨崇鑫
 
+
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- 此SECTION放升级相关的操作要求，如调接口、查询数据确认等
@@ -523,3 +524,36 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'contract.tracking', '18', 'zh_CN', '合同变更事件', '产生变更合同，子合同名称为:${contractName}', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'contract.tracking', '19', 'zh_CN', '资产更改事件', '修改关联资产，由${oldApartmnets}变为${newApartmnets}', '0');
 -- --------------------- SECTION END -------------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+-- AUTHOR: 黄明波  20180703
+-- REMARK: 服务联盟v3.4 issue-29989
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11100', 'zh_CN', '需要更新的筛选为空');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11101', 'zh_CN', '筛选的类型不合法');
+
+update eh_locale_templates set text = '<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\"><html><head><style>img{height: 200px;width: 200px;}</style><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>${title}</title></head><body><p>预订人：${creatorName}</p><p>手机号：${creatorMobile}</p><p>公司名称：${creatorOrganization}</p><p>服务名称：${serviceOrgName}</p>${note}</body></html>' where scope = 'serviceAlliance.request.notification' and code = 4;
+update eh_locale_strings set text = 'USER_NAME,USER_PHONE,USER_COMPANY' where scope = 'serviceAlliance.request.notification' and code = '10006';
+
+update eh_service_modules set action_type = 14 where id = 40500;
+update eh_service_module_apps set action_type = 14 where module_id = 40500;
+-- --------------------- SECTION END ---------------------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: OPERATION
+-- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
+-- AUTHOR: 黄明波  20180703
+-- REMARK: 服务联盟v3.4 issue-29989
+-- REMARK: 更新服务的封面图，迁移服务广场的item
+
+-- /yellowPage/transferPosterUriToAttachment
+-- 参数:1802
+
+
+--/yellowPage/transferLaunchPadItems
+-- 参数:1802
+
+-- --------------------- SECTION END ---------------------------------------------------------
+
