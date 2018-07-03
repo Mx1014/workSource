@@ -7102,12 +7102,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		resourceReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
 		resourceReservation.setStatus((byte)2);
 		resourceReservation.setAddressId(cmd.getAddressId());
-        Byte livingStatus = addressProvider.getAddressLivingStatus(cmd.getAddressId());
+		//add by tangcen 解决EH_ORGANIZATION_ADDRESS_MAPPINGS表中，一个address_id会对应两条数据的问题，实际应该是脏数据导致的。
+		Address address = addressProvider.findAddressById(cmd.getAddressId());
+		Byte livingStatus = addressProvider.getAddressLivingStatus(address.getId(),address.getAddress());
+        //Byte livingStatus = addressProvider.getAddressLivingStatus(cmd.getAddressId());
         resourceReservation.setPreviousLivingStatus(livingStatus);
 //		this.dbProvider.execute((status) -> {
 
 			// living status的完整枚举记录在前端，后端和数据库没有
-			int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
+        	// add by tangcen 
+			//int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
+        	int effectedRow = addressProvider.changeAddressLivingStatus(address.getId(),address.getAddress(), AddressLivingStatus.OCCUPIED.getCode());
 			if(effectedRow != 1){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
 						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
@@ -7169,7 +7174,29 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	public void updateReservation(UpdateReservationCommand cmd) {
     	Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
 		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
-    	propertyMgrProvider.updateReservation(cmd.getReservationId(), start, end, cmd.getEnterpriseCustomerId());
+		PmResourceReservation oldReservation = propertyMgrProvider.findReservationById(cmd.getReservationId());
+		
+		if (cmd.getAddressId()!=null && !cmd.getAddressId().equals(oldReservation.getAddressId())) {
+			//如果修改了预定的地址，则需要将以前的资源释放
+			addressProvider.changeAddressLivingStatus(oldReservation.getAddressId(), oldReservation.getPreviousLivingStatus());
+    		//修改新的资源的状态
+    		Address address = addressProvider.findAddressById(cmd.getAddressId());
+    		Byte livingStatus = addressProvider.getAddressLivingStatus(address.getId(),address.getAddress());
+    		oldReservation.setPreviousLivingStatus(livingStatus);
+    		int effectedRow = addressProvider.changeAddressLivingStatus(address.getId(),address.getAddress(), AddressLivingStatus.OCCUPIED.getCode());
+			if(effectedRow != 1){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
+						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
+			}
+		}
+		PmResourceReservation resourceReservation = new PmResourceReservation();
+		oldReservation.setStatus((byte)2);
+		oldReservation.setEndTime(end);
+		oldReservation.setStartTime(start);
+		oldReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
+		oldReservation.setAddressId(cmd.getAddressId());
+		propertyMgrProvider.updateReservation(oldReservation);
+    	//propertyMgrProvider.updateReservation(cmd.getReservationId(), start, end, cmd.getEnterpriseCustomerId(),cmd.getAddressId());
 	}
 
 	/**

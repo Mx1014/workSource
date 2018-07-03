@@ -750,23 +750,53 @@ public class AddressProviderImpl implements AddressProvider {
                 .execute();
     }
 
-    @Override
-    public Byte getAddressLivingStatus(Long addressId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
-                .from(Tables.EH_ADDRESSES)
-                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
-                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
-        if(aByte == null){
-            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
-                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
-                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
-                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
-        }
-        if(aByte == null){
-            aByte = 1;
-        }
-        return aByte;
-    }
+//    @Override
+//    public Byte getAddressLivingStatus(Long addressId) {
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
+//                .from(Tables.EH_ADDRESSES)
+//                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+//                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
+//        if(aByte == null){
+//            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
+//                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+//                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+//                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
+//        }
+//        if(aByte == null){
+//            aByte = 1;
+//        }
+//        return aByte;
+//    }
 
+	@Override
+	public Byte getAddressLivingStatus(Long addressId, String addressName) {
+		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+	        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
+	                .from(Tables.EH_ADDRESSES)
+	                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+	                .and(Tables.EH_ADDRESSES.ADDRESS.eq(addressName))
+	                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
+	        if(aByte == null){
+	            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
+	                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+	                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+	                    .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(addressName))
+	                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
+	        }
+	        if(aByte == null){
+	            aByte = 1;
+	        }
+	        return aByte;
+	}
+
+	@Override
+	public int changeAddressLivingStatus(Long addressId, String addressName, byte status) {
+		LOGGER.info("address living status xfesijfisejsj");
+        return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                .set(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS, status)
+                .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+                .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(addressName))
+                .execute();
+	}
 }
