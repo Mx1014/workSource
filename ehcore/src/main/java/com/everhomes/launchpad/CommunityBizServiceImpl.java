@@ -112,7 +112,7 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 
 		CommunityBiz communityBiz = ConvertHelper.convert(cmd, CommunityBiz.class);
 
-		CommunityBiz oldCommunityBiz = communityBizProvider.findCommunityBizByCommunityId(cmd.getCommunityId());
+		CommunityBiz oldCommunityBiz = communityBizProvider.findCommunityBiz(cmd.getCommunityId(), null);
 		if(oldCommunityBiz != null){
 			communityBiz.setId(oldCommunityBiz.getId());
 			communityBizProvider.updateCommunityBiz(communityBiz);
@@ -133,7 +133,7 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 		CommunityBiz oldCommunityBiz = communityBizProvider.getCommunityBizById(cmd.getId());
 
 		if(oldCommunityBiz == null && cmd.getCommunityId() != null){
-			oldCommunityBiz = communityBizProvider.findCommunityBizByCommunityId(cmd.getCommunityId());
+			oldCommunityBiz = communityBizProvider.findCommunityBiz(cmd.getCommunityId(), null);
 		}
 
 		if(oldCommunityBiz != null){
@@ -157,19 +157,11 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 	@Override
 	public CommunityBizDTO findCommunityBizByCommunityId(FindCommunityBizByCommunityId cmd) {
 
-		Long communityId = cmd.getCommunityId();
-		if(communityId == null){
-			AppContext appContext = UserContext.current().getAppContext();
-			if(appContext != null && appContext.getCommunityId() != null){
-				communityId = appContext.getCommunityId();
-			}
-		}
-
-		if(communityId == null){
+		if(cmd.getCommunityId() == null){
 			return null;
 		}
 
-		CommunityBiz communityBiz = communityBizProvider.findCommunityBizByCommunityId(communityId);
+		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(cmd.getCommunityId(), null);
 		CommunityBizDTO dto = toDto(communityBiz);
 
 		return dto;
@@ -184,6 +176,16 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 			dto.setLogoUrl(url);
 		}
 
+		return dto;
+	}
+
+
+	@Override
+	public CommunityBizDTO findCommunityBizForApp() {
+
+		AppContext appContext = UserContext.current().getAppContext();
+		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(appContext.getCommunityId(), CommunityBizStatus.ENABLE.getCode());
+		CommunityBizDTO dto = toDto(communityBiz);
 		return dto;
 	}
 }

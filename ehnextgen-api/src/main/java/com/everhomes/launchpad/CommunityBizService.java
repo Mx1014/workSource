@@ -24,5 +24,5 @@ public interface CommunityBizService {
     CommunityBizDTO findCommunityBizByCommunityId(FindCommunityBizByCommunityId cmd);
 
 
-
+    CommunityBizDTO findCommunityBizForApp();
 }

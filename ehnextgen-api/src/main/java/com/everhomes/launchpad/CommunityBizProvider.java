@@ -15,6 +15,6 @@ public interface CommunityBizProvider {
 
     CommunityBiz getCommunityBizById(Long id);
 
-    CommunityBiz findCommunityBizByCommunityId(Long communityId);
+    CommunityBiz findCommunityBiz(Long communityId, Byte status);
 
 }

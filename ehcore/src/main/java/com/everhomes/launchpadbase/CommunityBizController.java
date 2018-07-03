@@ -75,7 +75,6 @@ public class CommunityBizController extends ControllerBase {
      */
     @RequestMapping("findCommunityBizByCommunityId")
     @RestReturn(value=CommunityBizDTO.class)
-    @RequireAuthentication(false)
     public RestResponse findCommunityBizByCommunityId(FindCommunityBizByCommunityId cmd) {
         CommunityBizDTO res = communityBizService.findCommunityBizByCommunityId(cmd);
         RestResponse response =  new RestResponse(res);
@@ -84,5 +83,19 @@ public class CommunityBizController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /communityBiz/findCommunityBizForApp</b>
+     * <p>查询园区电商入口</p>
+     */
+    @RequestMapping("findCommunityBizForApp")
+    @RestReturn(value=CommunityBizDTO.class)
+    @RequireAuthentication(false)
+    public RestResponse findCommunityBizForApp() {
+        CommunityBizDTO res = communityBizService.findCommunityBizForApp();
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }
