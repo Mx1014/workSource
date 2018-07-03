@@ -17,6 +17,7 @@ import java.sql.Timestamp;
  * <li>version: 版本记录</li>
  * <li>creatorUid: 创建者uid</li>
  * <li>createTime: 创建时间</li>
+ * <li>createDate: 创建时间界面显示</li>
  * </ul>
  * Created by jm.ding on 2018/6/27.
  */
@@ -34,6 +35,29 @@ public class ContractTemplateDTO {
 	private Integer version;
 	private Timestamp createTime;
 	private Long creatorUid;
+	
+	private String creatorName;
+	private String templateOwner;
+	private String createDate;
+	
+	public String getCreateDate() {
+		return createDate;
+	}
+	public void setCreateDate(String createDate) {
+		this.createDate = createDate;
+	}
+	public String getTemplateOwner() {
+		return templateOwner;
+	}
+	public void setTemplateOwner(String templateOwner) {
+		this.templateOwner = templateOwner;
+	}
+	public String getCreatorName() {
+		return creatorName;
+	}
+	public void setCreatorName(String creatorName) {
+		this.creatorName = creatorName;
+	}
 	public Long getId() {
 		return id;
 	}

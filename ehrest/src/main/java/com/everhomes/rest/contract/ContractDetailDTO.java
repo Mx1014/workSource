@@ -62,6 +62,7 @@ import java.util.List;
  *     <li>denunciationName: 退约人姓名</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
+ *     <li>contractTemplate: 合同模板信息{@link com.everhomes.rest.contract.ContractTemplateDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -149,6 +150,16 @@ public class ContractDetailDTO {
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
+	@ItemType(ContractTemplateDTO.class)
+    private ContractTemplateDTO contractTemplate;
+
+	public ContractTemplateDTO getContractTemplate() {
+		return contractTemplate;
+	}
+
+	public void setContractTemplate(ContractTemplateDTO contractTemplate) {
+		this.contractTemplate = contractTemplate;
+	}
 
     public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;

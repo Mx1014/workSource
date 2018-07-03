@@ -846,11 +846,17 @@ public class ContractProviderImpl implements ContractProvider {
 		return contracttemplates;
 	}
 
+	@Override
+	public void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber,
+			Long ownerId, Long templateId) {
+		getReadWriteContext().update(Tables.EH_CONTRACTS)
+		.set(Tables.EH_CONTRACTS.TEMPLATE_ID, templateId)
+		.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_CONTRACTS.ID.eq(contractId))
+		.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
+		.execute();
+	}
+
 	
-	/*getReadWriteContext().update(Tables.EH_CONTRACTS)
-	.set(Tables.EH_CONTRACTS.STATUS, CommonStatus.INACTIVE.getCode())
-	.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-	.and(Tables.EH_CONTRACTS.CUSTOMER_NAME.eq(organizationName))
-	.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
-	.execute();*/
+	/**/
 }

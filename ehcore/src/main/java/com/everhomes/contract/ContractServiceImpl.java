@@ -1479,7 +1479,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 		});
 
-		return ConvertHelper.convert(contract, ContractDetailDTO.class);
+		ContractDetailDTO contractDetailDTO = ConvertHelper.convert(contract, ContractDetailDTO.class);
+		
+		if(cmd.getTemplateId() != null) {
+			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
+			ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
+			contractDetailDTO.setContractTemplate(contractTemplatedto);
+		}
+
+		return contractDetailDTO;
+				//ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
 	private Timestamp setToEnd(Long date) {
@@ -2652,6 +2661,27 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(list.size() > 0){
 			List<ContractTemplateDTO> resultList = list.stream().map((c) -> {
 				ContractTemplateDTO dto = ConvertHelper.convert(c, ContractTemplateDTO.class);
+				if (dto.getCreatorUid() != null) {
+					//用户可能不在组织架构中 所以用nickname
+					User user = userProvider.findUserById(dto.getCreatorUid());
+					if(user != null) {
+						dto.setCreatorName(user.getNickName());
+					}
+				}
+				
+				if (!dto.getOwnerId().equals(0L)) {
+					Community community = communityProvider.findCommunityById(dto.getOwnerId());
+					if(null == community){
+						LOGGER.debug("community is null...");
+					}else{
+						dto.setTemplateOwner(community.getName());
+					}
+				}else {
+					dto.setTemplateOwner("通用配置");
+				}
+				if (dto.getCreateTime() != null) {
+					dto.setCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dto.getCreateTime()));
+				}
 				return dto;
 			}).collect(Collectors.toList());
     		response.setRequests(resultList);
@@ -2666,24 +2696,24 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public ContractDTO setPrintContractTemplate(SetPrintContractTemplateCommand cmd) {
-		if (null == cmd.getId()) {
+		if (null == cmd.getId() || cmd.getContractId() == null || cmd.getTemplateId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		
 		//1更新合同模板映射
-		
-		
-		
+		contractProvider.setPrintContractTemplate(cmd.getNamespaceId(), cmd.getContractId(), cmd.getCategoryId(), cmd.getContractNumber(), cmd.getOwnerId(), cmd.getTemplateId());
+		//
 		Contract contract = contractProvider.findContractById(cmd.getContractId());
+		ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
 		
+		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
+		ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
 		
-		//ContractTemplate 
+		dto.setContractTemplate(contractTemplatedto);
 		
-		
-		
-		return null;
+		return dto;
 	}
 
 }
