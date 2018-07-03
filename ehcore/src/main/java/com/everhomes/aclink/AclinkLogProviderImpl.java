@@ -126,14 +126,14 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
-        query.addOrderBy(Tables.EH_ACLINK_LOGS.ID.desc());
+        query.addOrderBy(Tables.EH_ACLINK_LOGS.CREATE_TIME.desc());
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ACLINK_LOGS.ID.le(locator.getAnchor()));
+            query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.le(new Timestamp(locator.getAnchor())));
             }
 
         //暂过滤掉物理按键开门的日志, by liuyilin 20180625
         query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.ne(AclinkLogEventType.BUTTON_OPEN.getCode()));
-        
+
         if (count > 0){
         	query.addLimit(count + 1);
         }
@@ -142,7 +142,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         });
 
         if(count > 0 && objs.size() > count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
+            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
             objs.remove(objs.size() - 1);
         } else {
             locator.setAnchor(null);

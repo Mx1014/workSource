@@ -4833,7 +4833,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //			logItem.setNamespaceId(namespaceId);
 			logItem.setDoorId(door.getId());
 			logItem.setUserId(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 10, 14)));
-			logItem.setLogTime(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 15, 19)));
+			logItem.setLogTime(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 15, 19)) * 1000);
 			switch (msgArr[14]){
 			case 0x1:
 				logItem.setEventType(3L);
@@ -4853,13 +4853,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
 			AclinkLog aclinkLog = ConvertHelper.convert(logItem, AclinkLog.class);
 			UserInfo user = userService.getUserSnapshotInfo(logItem.getUserId());
+			
         	if(user.getPhones() != null && user.getPhones().size() > 0) {
-                   aclinkLog.setUserIdentifier(user.getPhones().get(0));    
+                   aclinkLog.setUserIdentifier(userService.getUserIdentifier(logItem.getUserId()).getIdentifierToken());    
                }
-        	
-        	aclinkLog.setUserName(user.getNickName());
+        	aclinkLog.setUserName(logItem.getUserId() == 1L?"访客":user.getNickName());
         	aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
-            
             aclinkLog.setHardwareId(door.getHardwareId());
             aclinkLog.setOwnerId(door.getOwnerId());
             aclinkLog.setOwnerType(door.getOwnerType());
