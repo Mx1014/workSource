@@ -2182,9 +2182,9 @@ public class AssetProviderImpl implements AssetProvider {
             EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
             exemptionItemsDao.insert(exemptionItems);
             //删除include进来之外的增收减免
-            context.delete(t2)
-                    .where(t2.ID.notIn(includeExemptionIds))//includeExemptionIds.add(-1l)
-                    .execute();
+//            context.delete(t2)
+//                    .where(t2.ID.notIn(includeExemptionIds))//includeExemptionIds.add(-1l)
+//                    .execute();
             
             //修改减免费项配置
             List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
@@ -4485,14 +4485,45 @@ public class AssetProviderImpl implements AssetProvider {
         final BigDecimal[] amountExempled = {new BigDecimal("0")};
         final BigDecimal[] amountSupplement = {new BigDecimal("0")};
         BigDecimal zero = new BigDecimal("0");
-        getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED)
+        //取出所有的减免费项配置
+        final List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+        getReadOnlyContext().select(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.SUBTRACTION_TYPE,Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_ID,
+        		Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_NAME)
+	        .from(Tables.EH_PAYMENT_SUBTRACTION_ITEMS)
+	        .where(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.BILL_ID.eq(billId))
+	        .fetch()
+	        .forEach(r -> {
+	        	PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+	        	subtractionItem.setSubtractionType(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.SUBTRACTION_TYPE));
+	        	subtractionItem.setChargingItemId(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_ID));
+	        	subtractionItem.setChargingItemName(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_NAME));
+	        	subtractionItemsList.add(subtractionItem);
+	        });
+        getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,
+        		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED,Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID)
                 .from(Tables.EH_PAYMENT_BILL_ITEMS)
                 .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
                 .fetch()
                 .forEach(r -> {
-                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));
-                    amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));
-                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));//应收
+                    amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));//已收
+                    //根据减免费项配置重新计算待收金额
+                    Boolean isConfigSubtraction = false;//用于判断该费项是否配置了减免费项
+                    if(subtractionItemsList != null) {
+                    	for(int i = 0;i < subtractionItemsList.size();i++) {
+                    		PaymentSubtractionItem subtractionItem = (PaymentSubtractionItem) subtractionItemsList.get(i);
+                    		//如果减免费项类型是"eh_payment_bill_items"，并且charginItemsId相等
+                    		if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.item.getCode())) {
+                    			Long charingItemId = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
+                    			if(charingItemId != null && charingItemId.equals(subtractionItem.getChargingItemId())) {
+                    				isConfigSubtraction = true;
+		                		}
+      	                  }
+                    	}
+                    }
+                    if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
+                    	amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
+                    }
                 });
         getReadOnlyContext().select(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT)
                 .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
@@ -4508,14 +4539,36 @@ public class AssetProviderImpl implements AssetProvider {
                     }
                 });
         //包括滞纳金
-        getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+        getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT,Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID)
                 .from(Tables.EH_PAYMENT_LATE_FINE)
                 .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ID.eq(billId))
                 .fetch()
                 .forEach(r ->{
                     BigDecimal value = r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT);
                     if(value != null){
-                        amountOwed[0] = amountOwed[0].add(value);
+                    	Long billItemId = r.getValue(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID);
+                    	//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
+                    	Long charingItemId = getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID)
+                                .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                                .and(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+                                .fetchOne(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
+                    	//根据减免费项配置重新计算待收金额
+                        Boolean isConfigSubtraction = false;//用于判断该费项是否配置了减免费项
+                        if(subtractionItemsList != null) {
+                        	for(int i = 0;i < subtractionItemsList.size();i++) {
+                        		PaymentSubtractionItem subtractionItem = (PaymentSubtractionItem) subtractionItemsList.get(i);
+                        		//如果减免费项类型是"eh_payment_late_fine"，并且charginItemsId相等
+                        		if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.lateFine.getCode())) {
+                        			if(charingItemId != null && charingItemId.equals(subtractionItem.getChargingItemId())) {
+                        				isConfigSubtraction = true;
+    		                		}
+          	                  }
+                        	}
+                        }
+                        if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
+                        	amountOwed[0] = amountOwed[0].add(value);
+                        }    
                     }
                 });
         //修复issue-32525 "导入一个账单，减免大于收费项，列表显示了负数"的bug
