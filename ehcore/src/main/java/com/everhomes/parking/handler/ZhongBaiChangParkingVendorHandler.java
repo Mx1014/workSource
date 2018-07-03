@@ -71,12 +71,20 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 		params.put("car_no", plateNumber);
 		params.put("signature", ZhongBaiChangSignatureUtil.getSign(params, secretKey));
 		String result = "";
-		try {
-			result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
-					StandardCharsets.UTF_8);
-		}catch (Exception e){
-			LOGGER.error("The request error,", e);
-			return null;
+		int maxTryPosts = configProvider.getIntValue("parking.max.trypost",3);
+		int i=0;
+		while(i<maxTryPosts) {
+			try {
+				result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
+						StandardCharsets.UTF_8);
+				break;
+			} catch (Exception e) {
+				LOGGER.error("The request error,", e);
+				if(i==maxTryPosts-1) {
+					return null;
+				}
+			}
+			i++;
 		}
 
 		ZhongBaiChangCardInfo<ZhongBaiChangData> entity = JSONObject.parseObject(result,
@@ -165,12 +173,20 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			order.setStartPeriod(new Timestamp(newStartTime));
 			order.setEndPeriod(rechargeEndTimestamp);
 			String result = null;
-			try{
-				result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
-					StandardCharsets.UTF_8);
-			}catch (Exception e) {
-				LOGGER.error("The request error,", e);
-				return false;
+			int maxTryPosts = configProvider.getIntValue("parking.max.trypost",3);
+			int i=0;
+			while(i<maxTryPosts) {
+				try {
+					result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
+							StandardCharsets.UTF_8);
+					break;
+				} catch (Exception e) {
+					LOGGER.error("The request times{} error,", i+1, e);
+					if(i==maxTryPosts-1){
+						return false;
+					}
+				}
+				i++;
 			}
 			//将充值信息存入订单
 			order.setErrorDescriptionJson(result);

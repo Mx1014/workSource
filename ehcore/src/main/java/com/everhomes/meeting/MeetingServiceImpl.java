@@ -1282,7 +1282,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         String routeUrl = RouterBuilder.build(Router.MEETING_RESERVATION_DETAIL, new MeetingReservationDetailActionData(meetingReservation.getId(), meetingReservation.getOrganizationId()));
         String locale = UserContext.current().getUser().getLocale();
-        String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
+        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
@@ -1323,7 +1323,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         String routeUrl = RouterBuilder.build(Router.MEETING_RESERVATION_DETAIL, new MeetingReservationDetailActionData(meetingReservation.getId(), meetingReservation.getOrganizationId()));
         String locale = UserContext.current().getUser().getLocale();
-        String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
+        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
@@ -1375,7 +1375,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
 
         String locale = UserContext.current().getUser().getLocale();
-        String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
+        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
@@ -1444,7 +1444,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
 
-        handler.sendMail(UserContext.getCurrentNamespaceId(), account, email, subject, content);
+        handler.sendMail(0, account, email, subject, content);
     }
 
     private void sendMessage(Long receiveUserId, String content, String url, String messageSubject) {

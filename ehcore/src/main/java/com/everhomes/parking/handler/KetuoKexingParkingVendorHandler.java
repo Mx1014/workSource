@@ -188,9 +188,16 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 					//查询车在场信息，来判断车是否在场
 					KetuoCarInfo carInfo = getKetuoCarInfo(plateNumber);
-					if (null != carInfo && carInfo.getlEntryTime()!=null) {
-//						long entryTime = strToLong(carInfo.getEntryTime());
-						long entryTime = carInfo.getlEntryTime();
+					Long lEntryTime = null;
+					if (null != carInfo) {
+						try {
+							lEntryTime = carInfo.getlEntryTime();
+						} catch (Exception e) {
+							LOGGER.error("format EntryTime failed, entryTime = {}",carInfo.getEntryTime(),e);
+							throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+									"格式转换失败");
+						}
+						long entryTime = lEntryTime;
 						//车进场时间
 						Calendar entryCalendar = Calendar.getInstance();
 						entryCalendar.setTimeInMillis(entryTime);
@@ -244,7 +251,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 					ParkingRechargeRateDTO rateDTO = convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
 					dto = ConvertHelper.convert(rateDTO, ParkingExpiredRechargeInfoDTO.class);
-
+					dto.setEntryTime(lEntryTime);
 					dto.setStartPeriod(startPeriod);
 
 					dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getLastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
@@ -474,8 +481,16 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			String strStartTime = sdf2.format(new Date(now)) + " 00:00:00";
 			//查询车在场信息，来判断车是否在场
 			KetuoCarInfo carInfo = getKetuoCarInfo(plateNumber);
-			if (null != carInfo && carInfo.getlEntryTime()!=null) {
-				long entryTime = carInfo.getlEntryTime();
+			if (null != carInfo) {
+				Long lEntryTime = null;
+				try {
+					lEntryTime = carInfo.getlEntryTime();
+				} catch (Exception e) {
+					LOGGER.error("format EntryTime failed, entryTime = {}",carInfo.getEntryTime(),e);
+					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+							"格式转换失败");
+				}
+				long entryTime = lEntryTime;
 				//车进场时间
 				Calendar entryCalendar = Calendar.getInstance();
 				entryCalendar.setTimeInMillis(entryTime);
