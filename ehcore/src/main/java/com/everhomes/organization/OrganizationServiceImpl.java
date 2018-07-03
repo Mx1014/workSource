@@ -6281,15 +6281,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         });
 
-        //   the contactToken should be hidden while the visible flag is show.
-        List<OrganizationMemberDTO> members;
-        if(VisibleFlag.fromCode(cmd.getVisibleFlag()) == VisibleFlag.SHOW)
-            members = target_map.values().stream().peek(r -> {
-                if(VisibleFlag.fromCode(r.getVisibleFlag()) == VisibleFlag.HIDE)
-                    r.setContactToken(null);
-            }).collect(Collectors.toList());
-        else
-            members = new ArrayList<>(target_map.values());
+        List<OrganizationMemberDTO> members = new ArrayList<>(target_map.values());
         //  set the order
         members.sort((o1, o2) -> o2.getDetailId().compareTo(o1.getDetailId()));
 
@@ -11392,15 +11384,16 @@ public class OrganizationServiceImpl implements OrganizationService {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
 
-        //  通讯录默认采用本节点及子节点方式读取人员
+        //  通讯录默认（包含本节点及下级部门）
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-
         List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(
                 cmd.getKeywords(), cmd.getIsSignedup(), locator, pageSize, cmd,
                 FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode(), groupTypes);
-/*
+        if (0 == organizationMembers.size())
+            return response;
+        /*
         Organization orgCommoand = new Organization();
         orgCommoand.setId(org.getId());
         orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -11426,10 +11419,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //转拼音
-        organizationMembers = convertPinyin(organizationMembers);*/
-
-        if (0 == organizationMembers.size())
-            return response;
+        organizationMembers = convertPinyin(organizationMembers);
+        */
 
         List<OrganizationContactDTO> members = organizationMembers.stream().map(r -> {
             OrganizationContactDTO dto = ConvertHelper.convert(r, OrganizationContactDTO.class);
@@ -11456,19 +11447,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             if(VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.HIDE){
                 dto.setContactToken(null);
             }
-            /*//  added by R 20120713, 获取岗位与 detailId
-            //  取总公司的 path ，查出所有职位
-            String[] path = org.getPath().split("/");
-            List<OrganizationDTO> positionList = this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, r.getContactToken(), "/" + path[1]);
-            String position = "";
-            if (positionList != null && positionList.size() > 0) {
-                for (OrganizationDTO sonList : positionList) {
-                    position += (sonList.getName() + ",");
-                }
-                position = position.substring(0, position.length() - 1);
-            }
-            dto.setJobPosition(position);
-            */
             //其他字符置换成#号
             if (!StringUtils.isEmpty(r.getInitial())) {
                 dto.setInitial(r.getInitial().replace("~", "#"));
