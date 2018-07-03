@@ -56,6 +56,13 @@ update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id=
 
 -- END BY 杨崇鑫
 
+-- 通用脚本
+-- ADD BY liangqishi 20180703 重用原来的企业账户菜单，但web的data_type由enterprise-account修改为business-account 
+UPDATE `eh_web_menus` SET `data_type`='business-account' WHERE `id`=52000000;  -- 企业账户(type: park)
+UPDATE `eh_web_menus` SET `data_type`='business-account' WHERE `id`=16070000;  -- 企业账户模块(type: zuolin)
+-- END BY 梁其师
+
+
 -- 深圳湾适用脚本[999966]  
 -- ADD BY 杨崇鑫 
 -- 新支付数据迁移
