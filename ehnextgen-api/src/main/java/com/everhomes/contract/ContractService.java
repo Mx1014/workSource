@@ -60,4 +60,8 @@ public interface ContractService {
 
 	ContractDTO setPrintContractTemplate(SetPrintContractTemplateCommand cmd);
 
+	ContractDTO getContractTemplateDetail(GetContractTemplateDetailCommand cmd);
+
+	void deleteContractTemplate(DeleteContractTemplateCommand cmd);
+
 }

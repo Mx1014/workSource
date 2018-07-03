@@ -122,12 +122,14 @@ import com.everhomes.rest.contract.ContractType;
 import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
+import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GenerateContractNumberRule;
 import com.everhomes.rest.contract.GetContractParamCommand;
+import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
@@ -1481,11 +1483,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		ContractDetailDTO contractDetailDTO = ConvertHelper.convert(contract, ContractDetailDTO.class);
 		
-		if(cmd.getTemplateId() != null) {
+		/*if(cmd.getTemplateId() != null) {
 			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
 			ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
 			contractDetailDTO.setContractTemplate(contractTemplatedto);
-		}
+		}*/
 
 		return contractDetailDTO;
 				//ConvertHelper.convert(contract, ContractDetailDTO.class);
@@ -2708,12 +2710,60 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		Contract contract = contractProvider.findContractById(cmd.getContractId());
 		ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
 		
-		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
+		/*ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
 		ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
 		
-		dto.setContractTemplate(contractTemplatedto);
+		dto.setContractTemplate(contractTemplatedto);*/
 		
 		return dto;
+	}
+
+	@Override
+	public ContractDTO getContractTemplateDetail(GetContractTemplateDetailCommand cmd) {
+		if (cmd.getContractId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		
+		Contract contract = contractProvider.findContractById(cmd.getContractId());
+		ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+		
+		if (contract.getTemplateId() != null) {
+			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
+			ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
+			dto.setContractTemplate(contractTemplatedto);
+		}
+		
+		return dto;
+	}
+
+	@Override
+	public void deleteContractTemplate(DeleteContractTemplateCommand cmd) {
+		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DENUNCIATION, cmd.getOrgId(), cmd.getCommunityId());
+
+		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
+		
+		contractTemplateParent.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contractTemplateParent.setDeleteUid(UserContext.currentUserId());
+		contractTemplateParent.setStatus(ContractTemplateStatus.INACTIVE.getCode()); //无效的状态
+		
+		contractProvider.updateContractTemplate(contractTemplateParent);
+		
+		/*Contract contract = checkContract(cmd.getId());
+		contract.setStatus(ContractStatus.DENUNCIATION.getCode());
+		contract.setDenunciationReason(cmd.getDenunciationReason());
+		contract.setDenunciationUid(cmd.getDenunciationUid());
+		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
+		contractProvider.updateContract(contract);
+		contractSearcher.feedDoc(contract);
+//		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
+//		assetService.deleteUnsettledBillsOnContractId(contract.getId());
+		if(cmd.getPaymentFlag() == 1) {
+			addToFlowCase(contract, flowcasePaymentContractOwnerType);
+		}else {
+			addToFlowCase(contract, flowcaseContractOwnerType);
+		}*/
 	}
 
 }

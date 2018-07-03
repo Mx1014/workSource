@@ -351,7 +351,7 @@ public class ContractController extends ControllerBase {
 	}
 	
 	/**
-	 * <p>小区修改模板，删除模板</p>
+	 * <p>小区修改模板</p>
 	 * <b>URL: /contract/updateContractTemplate</b>
 	 */
 	@RequestMapping("updateContractTemplate")
@@ -367,7 +367,7 @@ public class ContractController extends ControllerBase {
 	
 	/**
 	 * <p>合同模板列表，关键字查询</p>
-	 * <b>URL: /contract/listContractTemplates</b>
+	 * <b>URL: /contract/searchContractTemplates</b>
 	 */
 	@RequestMapping("searchContractTemplates")
 	@RestReturn(ListContractTemplatesResponse.class)
@@ -392,4 +392,35 @@ public class ContractController extends ControllerBase {
 		return new RestResponse(contractService.setPrintContractTemplate(cmd));
 		
 	}
+	
+	/**
+	 * <p>获取合同详情，以及模板详情信息</p>
+	 * <b>URL: /contract/getContractTemplateDetail</b>
+	 */
+	@RequestMapping("getContractTemplateDetail")
+	@RestReturn(String.class)
+	public RestResponse getContractTemplateDetail(GetContractTemplateDetailCommand cmd) {
+		
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		
+		return new RestResponse(contractService.getContractTemplateDetail(cmd));
+		
+	}
+	/**
+	 * <p>删除模板</p>
+	 * <b>URL: /contract/deleteContractTemplate</b>
+	 */
+	@RequestMapping("deleteContractTemplate")
+	@RestReturn(String.class)
+	public RestResponse deleteContractTemplate(DeleteContractTemplateCommand cmd) {
+		
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		contractService.deleteContractTemplate(cmd);
+		
+		return new RestResponse();
+		
+	}
+	
 }

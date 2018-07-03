@@ -22,11 +22,13 @@ import com.everhomes.rest.contract.ContractTemplateDTO;
 import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.CreatePaymentContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
+import com.everhomes.rest.contract.DeleteContractTemplateCommand;
 import com.everhomes.rest.contract.DenunciationContractCommand;
 import com.everhomes.rest.contract.EntryContractCommand;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GetContractParamCommand;
+import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
@@ -267,6 +269,18 @@ public class SZWContractHandler implements ContractService{
 	public ContractDTO setPrintContractTemplate(SetPrintContractTemplateCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ContractDTO getContractTemplateDetail(GetContractTemplateDetailCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteContractTemplate(DeleteContractTemplateCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

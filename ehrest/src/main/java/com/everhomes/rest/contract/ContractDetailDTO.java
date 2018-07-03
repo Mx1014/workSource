@@ -145,12 +145,14 @@ public class ContractDetailDTO {
     private BigDecimal lumpSumPayment;
     private String treatyParticulars;
     private Byte paymentFlag;
+    private Long templateId;
 
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
-	@ItemType(ContractTemplateDTO.class)
+    
+    /*@ItemType(ContractTemplateDTO.class)
     private ContractTemplateDTO contractTemplate;
 
 	public ContractTemplateDTO getContractTemplate() {
@@ -159,9 +161,17 @@ public class ContractDetailDTO {
 
 	public void setContractTemplate(ContractTemplateDTO contractTemplate) {
 		this.contractTemplate = contractTemplate;
+	}*/
+
+    public Long getTemplateId() {
+		return templateId;
 	}
 
-    public List<ContractChargingChangeDTO> getAdjusts() {
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;
     }
 
