@@ -119,7 +119,7 @@ public class UserProviderImpl implements UserProvider {
     
     public UserProviderImpl() {
     }
-    
+
     @Override
     public void createUser(User user) {
         // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
@@ -568,6 +568,34 @@ public class UserProviderImpl implements UserProvider {
             .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
             .fetchAny();
         return ConvertHelper.convert(record, UserIdentifier.class);
+    }
+
+    @Override
+    public UserIdentifier findClaimingIdentifierByToken(Integer namespaceId, String identifierToken) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())
+                            .or(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.VERIFYING.getCode())))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+
+        if(result.size() == 1)
+            return result.get(0);
+        else if(result.size() > 1) {
+            LOGGER.warn(String.format("%s has been claimed by multiple users", identifierToken));
+            return result.get(0);
+        }
+
+        return null;
     }
 
     @Override
