@@ -271,3 +271,10 @@ ALTER TABLE `eh_door_access` ADD `enable_duration` TINYINT DEFAULT '1' COMMENT '
 -- issue-26467 物业报修 增加企业Id字段
 ALTER TABLE `eh_pm_tasks` ADD COLUMN `enterprise_id`  bigint(20) NOT NULL DEFAULT 0 COMMENT '需求人公司Id';
 -- END
+
+-- 通用脚本
+-- ADD BY 唐岑 2018年7月3日22:04:25
+-- issue-28195
+-- 个人客户管理V2.1
+ALTER TABLE `eh_organization_owners` ADD COLUMN `contact_extra_tels` VARCHAR(1024) DEFAULT NULL COMMENT '客户多手机号，以jsonarray方式存储';
+-- END BY 唐岑
