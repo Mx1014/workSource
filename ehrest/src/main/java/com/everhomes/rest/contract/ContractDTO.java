@@ -32,7 +32,8 @@ import com.everhomes.util.StringHelper;
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
  * <li>rent: 合同总金额</li>
- * <li>categoryId: 合同类型categoryId，用于多入口</li>
+ * <li>categoryId: 合同类型categoryId，用于多入口</li>ContractTemplates
+ * <li>contractTemplates: 合同模板信息{@link com.everhomes.rest.contract.ContractTemplateDTO}</li>
  * </ul>
  */
 public class ContractDTO {
@@ -104,6 +105,17 @@ public class ContractDTO {
 	private String namespaceContractToken;
 
 	private Byte paymentFlag;
+	
+	@ItemType(ContractTemplateDTO.class)
+    private List<ContractTemplateDTO> contractTemplates;
+
+	public List<ContractTemplateDTO> getContractTemplates() {
+		return contractTemplates;
+	}
+
+	public void setContractTemplates(List<ContractTemplateDTO> contractTemplates) {
+		this.contractTemplates = contractTemplates;
+	}
 
 	public Long getCategoryItemId() {
 		return categoryItemId;

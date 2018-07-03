@@ -8,6 +8,8 @@ import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.itextpdf.text.log.SysoCounter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -367,13 +369,27 @@ public class ContractController extends ControllerBase {
 	 * <p>合同模板列表，关键字查询</p>
 	 * <b>URL: /contract/listContractTemplates</b>
 	 */
-	@RequestMapping("listContractTemplates")
+	@RequestMapping("searchContractTemplates")
 	@RestReturn(ListContractTemplatesResponse.class)
-	public RestResponse listContractTemplates(listContractTemplateCommand cmd) {
+	public RestResponse searchContractTemplates(listContractTemplateCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
-		return new RestResponse(contractService.listContractTemplates(cmd));
+		return new RestResponse(contractService.searchContractTemplates(cmd));
 		
 	}
 	
+	/**
+	 * <p>没有关联合同模板，打印预览选择合同模板</p>
+	 * <b>URL: /contract/setPrintContractTemplate</b>
+	 */
+	@RequestMapping("setPrintContractTemplate")
+	@RestReturn(String.class)
+	public RestResponse setPrintContractTemplate(SetPrintContractTemplateCommand cmd) {
+		
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		
+		return new RestResponse(contractService.setPrintContractTemplate(cmd));
+		
+	}
 }

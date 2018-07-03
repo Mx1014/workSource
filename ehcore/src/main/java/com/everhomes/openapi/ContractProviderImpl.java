@@ -846,4 +846,11 @@ public class ContractProviderImpl implements ContractProvider {
 		return contracttemplates;
 	}
 
+	
+	/*getReadWriteContext().update(Tables.EH_CONTRACTS)
+	.set(Tables.EH_CONTRACTS.STATUS, CommonStatus.INACTIVE.getCode())
+	.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+	.and(Tables.EH_CONTRACTS.CUSTOMER_NAME.eq(organizationName))
+	.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
+	.execute();*/
 }

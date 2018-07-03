@@ -143,6 +143,7 @@ import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.rest.contract.ReviewContractCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.contract.SetContractParamCommand;
+import com.everhomes.rest.contract.SetPrintContractTemplateCommand;
 import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
@@ -1631,15 +1632,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 				}
 
-				contract.setStatus(cmd.getResult());
-				contractProvider.updateContract(contract);
-				contractSearcher.feedDoc(contract);
 				if(cmd.getPaymentFlag() == 1) {
 					addToFlowCase(contract, flowcasePaymentContractOwnerType);
 				}else {
 					addToFlowCase(contract, flowcaseContractOwnerType);
 				}
-
+				//工作流不存在，修改数据需要回滚，然后同步es，把最新的状态同步到es，否则数据就会不一致
+				contract.setStatus(cmd.getResult());
+				contractProvider.updateContract(contract);
+				contractSearcher.feedDoc(contract);
 			}
 			return null;
 		});
@@ -2639,7 +2640,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 	@Override
-	public ListContractTemplatesResponse listContractTemplates(listContractTemplateCommand cmd) {
+	public ListContractTemplatesResponse searchContractTemplates(listContractTemplateCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
@@ -2661,6 +2662,28 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
         	}
     	}
 		return response;
+	}
+
+	@Override
+	public ContractDTO setPrintContractTemplate(SetPrintContractTemplateCommand cmd) {
+		if (null == cmd.getId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		
+		//1更新合同模板映射
+		
+		
+		
+		Contract contract = contractProvider.findContractById(cmd.getContractId());
+		
+		
+		//ContractTemplate 
+		
+		
+		
+		return null;
 	}
 
 }
