@@ -170,7 +170,40 @@ public interface ConfigConstants {
 	public static final String ASSET_ZHUZONG_QUERYCOSTBYHOUSELIST_URL = "asset.zhuzong.QueryCostByHouseList.url";
 	public static final String ASSET_ZHUZONG_QUERYCOSTDETAILBYID_URL = "asset.zhuzong.QueryCostDetailByID.url";
 	public static final String ASSET_ZHUZONG_ACCOUNTCODE = "asset.zhuzong.AccountCode";
-	
+
+    public static final String MEETING_ROOM_OPEN_BEGIN_TIME = "meeting.room.open.begin.time";
+    public static final String MEETING_ROOM_OPEN_END_TIME = "meeting.room.open.end.time";
+    public static final String MEETING_ROOM_OPEN_TIME_SPLIT_COUNT = "meeting.room.open.time.split.count";
+    public static final String MEETING_ROOM_OPEN_TIME_SPLIT_MINUTE_COUNT = "meeting.room.open.time.split.minute.count";
+    public static final String MEETING_RECORD_WORD_LIMIT = "meeting.record.word.limit";
 	public static final String ASSET_DINGFENGHUI_APPSHOWPAY = "asset.dingfenghui.appshowpay";
 	public static final String OPENAPI_LUFU_KEY = "openapi.lufu.key";
+
+	
+	//<!--深圳湾携程用户对接所用配置项 start  create by huanglm-->
+	public static final String CT_APPKEY = "ct.AppKey";
+	public static final String CT_APPSECURITY = "ct.AppSecurity";
+	public static final String CT_APPID = "ct.Appid";
+	public static final String CT_CORPPAYTYPE = "ct.CorpPayType";
+	public static final String CT_INITPAGE = "ct.InitPage";
+	public static final String CT_CALLBACK = "ct.Callback";
+	public static final String CT_LIMITNAMESPACEID = "ct.limitNamespaceId";
+	public static final String CT_GETTICKETURL = "ct.getTicketURL";
+	public static final String CT_SIGNINFOURL = "ct.signInfoURL";
+	public static final String CT_ONERROR = "ct.OnError";
+	public static final String CT_BATCH_LOGON_APPID = "ct.batch.Logon_Appid";
+	
+	public static final String CT_BATCH_PRODUCTION_GETTICKETURL = "ct.batch.production.getTicketURL";
+	public static final String CT_BATCH_TEST_GETTICKETURL = "ct.batch.test.getTicketURL";
+	public static final String CT_RESTFUL_PRODUCTION_BATCHURL = "ct.restful.production.batchURL";
+	public static final String CT_SOAP_PRODUCTION_BATCHURL = "ct.soap.production.batchURL";
+	public static final String CT_RESTFUL_TEST_BATCHURL = "ct.restful.test.batchURL";
+	public static final String CT_SOAP_TEST_BATCHURL = "ct.soap.test.batchURL";
+	public static final String CT_ISOPENEDCARDURL = "ct.isOpenedCardURL";
+	//<!--深圳湾携程用户对接所用配置项 end   -->
+
+	public static final String SENSITIVE_URL = "sensitiveword.url";
+    public static final String SENSITIVE_FILENAME = "sensitiveword.fileName";
+    public static final String SENSITIVE_FILEPATH = "sensitiveword.filePath";
+    public static final String SENSITIVE_SETTING = "sensitiveword.settings";
 }

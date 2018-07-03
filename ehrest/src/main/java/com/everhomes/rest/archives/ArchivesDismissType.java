@@ -18,20 +18,16 @@ public enum ArchivesDismissType {
         this.code = code;
     }
 
-    public Byte getCode() {
-        return code;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public byte getCode() {
+        return this.code;
     }
 
     public static ArchivesDismissType fromCode(Byte code) {
-        if (code != null) {
-            for (ArchivesDismissType a : ArchivesDismissType.values()) {
-                if (code.byteValue() == a.getCode().byteValue()) {
-                    return a;
+        if(code != null) {
+            ArchivesDismissType[] values = ArchivesDismissType.values();
+            for(ArchivesDismissType value : values) {
+                if(code.byteValue() == value.code) {
+                    return value;
                 }
             }
         }

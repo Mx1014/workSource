@@ -2,7 +2,6 @@ package com.everhomes.payment_application;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
@@ -14,8 +13,6 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.PaymentApplicationSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -214,7 +211,7 @@ public class PaymentApplicationSearcherImpl extends AbstractElasticSearch implem
 
             b.field("status", application.getStatus());
 
-            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(application.getApplicantUid(), application.getApplicantOrgId());
+            OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(application.getApplicantUid(), application.getApplicantOrgId());
             if(member != null) {
                 b.field("applicantName", member.getContactName());
             } else {

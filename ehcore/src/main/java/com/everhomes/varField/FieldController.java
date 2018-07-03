@@ -98,7 +98,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFields")
     @RestReturn(value=String.class)
     public RestResponse updateFields(@Valid UpdateFieldsCommand cmd) {
-        fieldService.updateFields(cmd);
+    	fieldService.updateFields(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

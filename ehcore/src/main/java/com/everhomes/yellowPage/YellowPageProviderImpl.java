@@ -1072,7 +1072,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public List<JumpModuleDTO> jumpModules(Integer namespaceId) {
+	public List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString) {
 		List<JumpModuleDTO> modules = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1082,7 +1082,9 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				or(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.SIGNAL.eq(SignalEnum.APPROVAL.getCode())
 		);
 		query.addConditions(condition);
-
+		if (!StringUtils.isEmpty(bizString)) {
+			query.addConditions(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.MODULE_URL.eq(bizString));
+		}
 
 		query.fetch().map((r) -> {
 			modules.add(ConvertHelper.convert(r, JumpModuleDTO.class));

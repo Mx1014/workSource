@@ -18,6 +18,10 @@ public class DebugExcelUtil {
     ) throws Exception {
         // 生成一个表格
         Sheet sheet = workbook.createSheet();
+        // add by jiarui 2018/6/22 format all cell to text
+        CellStyle style =  workbook.createCellStyle();
+        DataFormat format =  workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("@"));
         workbook.setSheetName(sheetNum, sheetName);
         // 设置表格默认列宽度为20个字节
         sheet.setDefaultColumnWidth((short) 30);
@@ -79,6 +83,7 @@ public class DebugExcelUtil {
             int index = 1;
             for (List<String> rowContent : data) {
                 row = sheet.createRow(index+1);
+                row.setRowStyle(style);
                 int cellIndex = 0;
                 for (int i = 0; i < fields.size(); i++) {
                     String cellContent = rowContent.get(i);

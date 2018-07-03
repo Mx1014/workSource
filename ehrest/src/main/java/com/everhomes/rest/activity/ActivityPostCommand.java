@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  *<li>latitude:纬度</li>
  *<li>changeVersion:版本</li>
  *<li>posterUri:海报</li>
+ *<li>posterUrl:海报url</li>
  *<li>guest:嘉宾</li>
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
@@ -74,6 +75,7 @@ public class ActivityPostCommand{
     private String tag;
     private transient Long id;
     private String posterUri;
+    private String posterUrl;
     private String guest;
     
     private String mediaUrl;
@@ -113,7 +115,15 @@ public class ActivityPostCommand{
 
     private Byte cloneFlag;
 
-	public String getSignupEndTime() {
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public String getSignupEndTime() {
 		return signupEndTime;
 	}
 

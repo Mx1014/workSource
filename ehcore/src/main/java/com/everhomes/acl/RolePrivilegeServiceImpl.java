@@ -573,7 +573,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			superAdminRoleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 		}
 
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getUserId(), cmd.getOrganizationId());
 		if(null != member){
 			member.setContactName(cmd.getContactName());
 			member.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -613,7 +613,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			superAdminRoleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 		}
 
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getUserId(), cmd.getOrganizationId());
 		if(null != member){
 			member.setContactName(cmd.getContactName());
 			member.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1308,7 +1308,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		Long childrenOrgId = organizationId;
 		if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, org.getId());
 			if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
 				childrenOrgId = member.getGroupId();
 			}
@@ -1937,7 +1937,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					OrganizationContactDTO dto = new OrganizationContactDTO();
 					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(roleassignment.getTargetId(), IdentifierType.MOBILE.getCode());
 					User user = userProvider.findUserById(roleassignment.getTargetId());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
+					OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(roleassignment.getTargetId(), organizationId);
 					if(user != null){
 						dto.setId(user.getId());
 						dto.setNickName(user.getNickName());
@@ -1976,7 +1976,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					OrganizationContactDTO dto = new OrganizationContactDTO();
 					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(roleassignment.getTargetId(), IdentifierType.MOBILE.getCode());
 					User user = userProvider.findUserById(roleassignment.getTargetId());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
+					OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(roleassignment.getTargetId(), organizationId);
 					if(user != null){
 						dto.setId(user.getId());
 						dto.setNickName(user.getNickName());
@@ -2037,7 +2037,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	private void deleteOrganizationAdmin(Long organizationId, String contactToken, Long adminPrivilegeId){
 		User user = UserContext.current().getUser();
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId);
+		//仅获取管理员的 member
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId, OrganizationMemberGroupType.MANAGER.getCode());
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(null == member) {
 			LOGGER.error("User is not in the organization.");
@@ -3817,7 +3818,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(EntityType.USER == EntityType.fromCode(dto.getTargetType())){
 			OrganizationMember member = null;
 			if(EntityType.fromCode(dto.getOwnerType()) == EntityType.ORGANIZATIONS){
-				member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getTargetId(), dto.getOwnerId());
+				member = organizationProvider.findOrganizationMemberByUIdAndOrgId(dto.getTargetId(), dto.getOwnerId());
 			}
 
 			//设置昵称

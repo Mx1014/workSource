@@ -134,6 +134,9 @@ public class ImportFileServiceImpl implements ImportFileService{
             XSSFWorkbook wb = new XSSFWorkbook();
             try{
                 String sheetName = "错误数据";
+                if(logs!=null && logs.size()>0 && StringUtils.isNotBlank(logs.get(0).getSheetName())){
+                    sheetName = logs.get(0).getSheetName();
+                }
                 XSSFSheet sheet = wb.createSheet(sheetName);
 
                 XSSFCellStyle style = wb.createCellStyle();// 样式对象

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationTask;
@@ -503,6 +504,7 @@ public interface PropertyMgrProvider {
 	List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId);
 
 	OrganizationOwnerBehavior findOrganizationOwnerBehaviorByOwnerAndAddressId(Long id, Long id1);
+
     void insertResourceReservation(PmResourceReservation resourceReservation);
 
     List<PmResourceReservation> listReservationsByAddresses(List<Long> ids);
@@ -518,4 +520,6 @@ public interface PropertyMgrProvider {
 	List<ReservationInfo> listRunningReservations();
 
 	Byte getReservationPreviousLivingStatusById(Long reservationId);
+
+    List<CommunityPmOwner> listCommunityPmOwnersWithLocator(CrossShardListingLocator locator, Integer pageSize);
 }

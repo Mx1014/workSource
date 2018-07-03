@@ -46,6 +46,7 @@ import com.everhomes.util.StringHelper;
  *     <li>forumEntryId: 论坛应用入口Id</li>
  *     <li>moduleType: 模块类型，现在所有的帖子都要往帖子表里写，通过判断条件已经很难区分是哪里来的帖子了，现在由创建帖子的时候带来。 参考{@link ForumModuleType}</li>
  *     <li>moduleCategoryId: 业务模块的入口id</li>
+ *     <li>communityId: 项目(园区/小区)ID</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -127,6 +128,16 @@ public class NewTopicCommand {
     private Byte moduleType;
 
     private Long moduleCategoryId;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getOldId() {
         return oldId;
@@ -419,6 +430,7 @@ public class NewTopicCommand {
     public void setModuleCategoryId(Long moduleCategoryId) {
         this.moduleCategoryId = moduleCategoryId;
     }
+
 
     @Override
     public String toString() {

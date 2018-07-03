@@ -10,7 +10,7 @@ import com.everhomes.rest.flow.FlowConditionRelationalOperatorType;
 import com.everhomes.rest.flow.FlowConditionVariableDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormGoOutValue;
+import com.everhomes.rest.enterpriseApproval.ComponentGoOutValue;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class FormFieldGoOutProcessor implements FormFieldProcessor{
     @Override
     public FlowConditionVariable getFlowConditionVariable(GeneralFormFieldDTO fieldDTO, String variable, String extra) {
 
-        PostApprovalFormGoOutValue goOut = JSON.parseObject(fieldDTO.getFieldValue(), PostApprovalFormGoOutValue.class);
+        ComponentGoOutValue goOut = JSON.parseObject(fieldDTO.getFieldValue(), ComponentGoOutValue.class);
         if ("开始时间".equals(variable)) {
             return new FlowConditionStringVariable(goOut.getStartTime());
         } else if ("结束时间".equals(variable)) {

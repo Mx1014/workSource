@@ -453,7 +453,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
 
     private void checkUserInOrg(Long userId, Long orgId) {
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
         if (member != null) {
             LOGGER.error("User is in the organization.");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -468,7 +468,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter organizationId [ %s ]", orgId);
 		}
-		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, orgId);
 		if(member == null){
 			LOGGER.error("User is not in the organization.");
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -6600,7 +6600,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     private List<ImportFileResultLog<ImportOrganizationOwnerDTO>> importOrganizationOwnerData(long organizationId, Long communityId, Integer namespaceId, List<ImportOrganizationOwnerDTO> datas) {
         List<ImportFileResultLog<ImportOrganizationOwnerDTO>> resultLogs = new ArrayList<>();
-//        List<String> contactTokenList = new ArrayList<>();
+        List<String> contactTokenList = new ArrayList<>();
         if (datas == null || datas.size() == 0) {
             return resultLogs;
         }
@@ -6704,6 +6704,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 owner.setBirthday(date);
             }
 
+
             // 检查手机号的唯一性
             CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
             if (exist != null) {
@@ -6712,8 +6713,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 compareOwnerInfo(exist, owner);
                 owner.setId(exist.getId());
             }
-//            contactTokenList.add(dto.getContactToken());
-
+            if (!contactTokenList.contains(dto.getContactToken()) && exist!=null) {
+                propertyMgrProvider.deleteOrganizationOwnerAddressByOwnerId(namespaceId, exist.getId());
+            }
+            contactTokenList.add(dto.getContactToken());
             owner.setNamespaceId(namespaceId);
             owner.setCreatorUid(UserContext.currentUserId());
             owner.setOrganizationId(organizationId);
@@ -6992,7 +6995,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (resourceType == EntityType.ORGANIZATIONS) {
             // requestId 已经无法使用了，组织架构那边改了好多
 			/*OrganizationMember organizationMember = organizationProvider.
-                    findOrganizationMemberByOrgIdAndUId(cmd.getRequestorUid(), cmd.getResourceId());*/
+                    findOrganizationMemberByUIdAndOrgId(cmd.getRequestorUid(), cmd.getResourceId());*/
             OrganizationMember organizationMember = null;
             List<OrganizationMember> organizationMemberList = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(cmd.getResourceId(), cmd.getRequestorUid());
             if (organizationMemberList != null) {
