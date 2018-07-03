@@ -1431,10 +1431,12 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItems k = Tables.EH_PAYMENT_CHARGING_ITEMS.as("k");
         EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");
         EhAddresses t1 = Tables.EH_ADDRESSES.as("t1");
+        com.everhomes.server.schema.tables.EhPaymentSubtractionItems t2 = Tables.EH_PAYMENT_SUBTRACTION_ITEMS.as("t2");//增加减免费项
         ListBillDetailVO vo = new ListBillDetailVO();
         BillGroupDTO dto = new BillGroupDTO();
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
+        List<SubItemDTO> subItemDTOList = new ArrayList<SubItemDTO>();//增加减免费项
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
                 , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS)
@@ -1518,8 +1520,24 @@ public class AssetProviderImpl implements AssetProvider {
                     list2.add(exemDto);
                     return null;
                 });
+        
+        //增加减免费项
+        context.select(t2.ID,t2.SUBTRACTION_TYPE,t2.CHARGING_ITEM_ID, t2.CHARGING_ITEM_NAME)
+	        .from(t2)
+	        .where(t2.BILL_ID.eq(billId))
+	        .fetch()
+	        .map(f -> {
+	        	SubItemDTO subItemDTO = new SubItemDTO();
+	        	subItemDTO.setSubtractionType(f.getValue(t2.SUBTRACTION_TYPE));
+	        	subItemDTO.setChargingItemId(f.getValue(t2.CHARGING_ITEM_ID));
+	        	subItemDTO.setChargingItemName(f.getValue(t2.CHARGING_ITEM_NAME));
+	        	subItemDTOList.add(subItemDTO);
+	            return null;
+        });
+        
         dto.setBillItemDTOList(list1);
         dto.setExemptionItemDTOList(list2);
+        dto.setSubItemDTOList(subItemDTOList);//增加减免费项
         vo.setBillGroupDTO(dto);
         return vo;
     }
