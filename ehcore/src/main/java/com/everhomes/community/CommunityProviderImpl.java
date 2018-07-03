@@ -1827,8 +1827,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 		query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(cond);
 
-        LOGGER.debug("findCommunityByNamespaceIdAndName, sql=" + query.getSQL());
-        LOGGER.debug("findCommunityByNamespaceIdAndName, bindValues=" + query.getBindValues());
+        LOGGER.debug("findCommunityByNamespaceIdAndName, sql = {}" , query.getSQL());
+        LOGGER.debug("findCommunityByNamespaceIdAndName, bindValues = {}" , query.getBindValues());
         return ConvertHelper.convert(query.fetchOne(), Community.class);
 	}
 
@@ -1839,8 +1839,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 		query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_NUMBER.eq(communityNumber));
 		query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
 
-        LOGGER.debug("findCommunityByNumber, sql=" + query.getSQL());
-        LOGGER.debug("findCommunityByNumber, bindValues=" + query.getBindValues());
+        LOGGER.debug("findCommunityByNumber, sql={}", query.getSQL());
+        LOGGER.debug("findCommunityByNumber, bindValues={}", query.getBindValues());
         return ConvertHelper.convert(query.fetchOne(), Community.class);
 	}
 

@@ -732,9 +732,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     return true;
                 });
         Collections.sort(results);
-        for(ApartmentDTO dto : results){
-
-        }
         long endTime = System.currentTimeMillis();
         LOGGER.info("List apartments by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);

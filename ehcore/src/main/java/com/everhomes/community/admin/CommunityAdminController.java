@@ -668,7 +668,7 @@ public class CommunityAdminController extends ControllerBase {
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
-			LOGGER.error("files is null。userId="+userId);
+			LOGGER.error("files is null。userId={}",userId);
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
 					"files is null");
 		}
