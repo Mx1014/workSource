@@ -2996,6 +2996,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			case 2 : this.exportTaskStatByCreator(cmd,sheet);break;
 			case 3 : this.exportTaskStatByStatus(cmd,sheet);break;
 			case 4 : this.exportTaskStatByArea(cmd,sheet);break;
+            case 5 : this.exportTaskEval(cmd,sheet);break;
 		}
 
 		exportExcel(wb, resp);
@@ -3175,6 +3176,46 @@ public class PmTaskServiceImpl implements PmTaskService {
 		lastRow.createCell(1).setCellValue("合计");
 		lastRow.createCell(2).setCellValue(sum);
 	}
+
+	private void exportTaskEval(GetTaskStatCommand cmd,Sheet sheet){
+	    GetEvalStatCommand cmd1 = ConvertHelper.convert(cmd,GetEvalStatCommand.class);
+	    cmd1.setBeginTime(cmd.getDateStart());
+	    cmd1.setEndTime(cmd.getDateEnd());
+	    cmd1.setOwnerType("PMTASK");
+	    cmd1.setModuleType("any-module");
+	    cmd1.setProjectId(cmd.getOwnerId());
+	    cmd1.setProjectType("EhCommunities");
+	    List<PmTaskEvalStatDTO> datalist = this.getEvalStat(cmd1);
+
+		int rownum = 0;
+		Row row = sheet.createRow(rownum++);
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("评价项");
+		tableHead.add("非常好(5分)");
+		tableHead.add("很好(4分)");
+		tableHead.add("一般(3分)");
+		tableHead.add("很差(2分)");
+		tableHead.add("非常差(1分)");
+		tableHead.add("合计");
+		tableHead.add("平均分");
+		int colnum = 0;
+		for(String th:tableHead){
+			row.createCell(colnum++).setCellValue(th);
+		}
+		for (PmTaskEvalStatDTO bean : datalist) {
+			Row tempRow = sheet.createRow(rownum);
+			tempRow.createCell(0).setCellValue(rownum++);
+			tempRow.createCell(1).setCellValue(bean.getEvalName());
+			tempRow.createCell(2).setCellValue(bean.getAmount5());
+			tempRow.createCell(3).setCellValue(bean.getAmount4());
+			tempRow.createCell(4).setCellValue(bean.getAmount3());
+			tempRow.createCell(5).setCellValue(bean.getAmount2());
+			tempRow.createCell(6).setCellValue(bean.getAmount1());
+			tempRow.createCell(7).setCellValue(bean.getTotalAmount());
+			tempRow.createCell(8).setCellValue(bean.getEvalAvg());
+		}
+    }
 
 	private List<PmTask> getSurveyData(GetTaskStatCommand cmd){
 		List<Long> ownerIds = this.getOwnerIds(cmd);

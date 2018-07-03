@@ -662,6 +662,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates) {
-		pmTaskProvider
+	    Long flowCaseId = evaluates.get(0).getFlowCaseId();
+	    if(null != flowCaseId){
+	        PmTask task = pmTaskProvider.findTaskByFlowCaseId(flowCaseId);
+	        Double avgEval = evaluates.stream().collect(Collectors.averagingDouble(FlowEvaluate::getStar));
+	        task.setStar(avgEval.byteValue());
+	        pmTaskProvider.updateTask(task);
+            pmTaskSearch.feedDoc(task);
+        }
 	}
 }

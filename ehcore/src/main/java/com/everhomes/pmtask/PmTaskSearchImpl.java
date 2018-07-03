@@ -81,6 +81,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("requestorPhone", task.getRequestorPhone());
             b.field("buildingName", task.getBuildingName());
             b.field("organizationUid",task.getOrganizationUid()==null?0:task.getOrganizationUid());
+            b.field("star",task.getStar());
 
             Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
             //多入口查全部数据
@@ -372,6 +373,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
             doc.setBuildingName((String)source.get("buildingName"));
             doc.setOrganizationUid(SearchUtils.getLongField(source.get("organizationUid")));
+            doc.setStar(source.get("star") == null ? null : SearchUtils.getLongField(source.get("star")).byteValue());
             
             return doc;
         }catch (Exception ex) {

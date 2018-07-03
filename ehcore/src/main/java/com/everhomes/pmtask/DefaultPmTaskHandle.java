@@ -330,14 +330,6 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 				if (dto.getOrganizationUid()==0)
 					dto.setOrganizationUid(null);
 
-    			if(null != task.getFlowCaseId()){
-    				List<FlowEvaluate> evals = flowEvaluateProvider.findEvaluatesByCaseId(task.getFlowCaseId());
-    				if(evals.size() > 0){
-    					Double star = evals.stream().collect(Collectors.averagingInt(FlowEvaluate::getStar));
-    					dto.setStar(star.byteValue());
-					}
-				}
-
     			return dto;
     		}).collect(Collectors.toList()));
     		if(response.getRequests() != null && response.getRequests().size() > pageSize){

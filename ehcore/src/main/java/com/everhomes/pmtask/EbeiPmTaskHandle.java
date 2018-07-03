@@ -807,14 +807,6 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
 
-                if(null != t.getFlowCaseId()){
-                    List<FlowEvaluate> evals = flowEvaluateProvider.findEvaluatesByCaseId(t.getFlowCaseId());
-                    if(evals.size() > 0){
-                        Double star = evals.stream().collect(Collectors.averagingInt(FlowEvaluate::getStar));
-                        dto.setStar(star.byteValue());
-                    }
-                }
-
                 return dto;
             }).collect(Collectors.toList()));
             if(listSize <= pageSize){
