@@ -2162,4 +2162,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         }
         return query.fetchInto(CustomerPotentialData.class);
     }
+
+    @Override
+    public void updatePotentialTalentsToCustomer(Long customerId, Long sourceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_TALENTS)
+                .set(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID, customerId)
+                .set(Tables.EH_CUSTOMER_TALENTS.STATUS,CommonStatus.ACTIVE.getCode())
+                .where(Tables.EH_CUSTOMER_TALENTS.ORIGIN_SOURCE_ID.eq(sourceId))
+                .execute();
+    }
 }

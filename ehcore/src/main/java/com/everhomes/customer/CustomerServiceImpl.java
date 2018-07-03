@@ -579,15 +579,14 @@ public class CustomerServiceImpl implements CustomerService {
 
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
-        // 同步到企业管理中   v3.2  現在改成已成交客户才同步  入口： 合同 、 入驻信息、excel
-        //ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
-        if (customer.getLevelItemId() != null && customer.getLevelItemId() == 6) {
-            OrganizationDTO organizationDTO = createOrganization(customer);
-            customer.setOrganizationId(organizationDTO.getId());
-            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-        }
+        syncPotentialTalentToCustomer(customer.getId(),cmd.getSourceId());
         enterpriseCustomerSearcher.feedDoc(customer);
         return convertToDTO(customer);
+    }
+
+    private void syncPotentialTalentToCustomer(Long customerId, Long sourceId) {
+        // source id is potential customer data primary key
+        enterpriseCustomerProvider.updatePotentialTalentsToCustomer(customerId, sourceId);
     }
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
