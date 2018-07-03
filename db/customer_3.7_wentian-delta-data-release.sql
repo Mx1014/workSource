@@ -28,7 +28,7 @@ VALUES
 
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
 VALUES
-  (@field_id := @field_id + 1, 'enterprise_customer', 'status', '状态', 'datetime', '37', '/37/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
+  (@field_id := @field_id + 1, 'enterprise_customer', 'status', '状态', 'datetime', '37', '/37/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
 VALUES
