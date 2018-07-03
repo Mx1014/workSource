@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import com.everhomes.util.StringHelper;
@@ -7,6 +8,36 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ * <li>id: id</li>
+ * <li>status: 授权状态， 0 失效，1 有效</li>
+ * <li>authType:授权类型，{@link com.everhomes.rest.aclink.DoorAuthType}</li>
+ * <li>validFromMs: 有效期开始时间</li>
+ * <li>userId: 访客id</li>
+ * <li>createTime: 创建时间</li>
+ * <li>validEndMs: 有效期终止时间</li>
+ * <li>doorId: 门禁ID</li>
+ * <li>ownerId: 门禁所属的ID</li>
+ * <li>approveUserId:授权主体id</li>
+ * <li>ownerType:门禁所属的类型</li>
+ * <li>doorName:门禁名称</li>
+ * <li>hardwareId：门禁mac地址</li>
+ * <li>nickname:访客姓名</li>
+ * <li>phone:访客手机号</li>
+ * <li>approveUserName:授权主体名称</li>
+ * <li>organization: 公司名称</li>
+ * <li>description: 来访说明</li>
+ * <li>address: 地点</li>
+ * <li>authMethod: 授权方式,mobile/admin{@link com.everhomes.aclink.DoorAuthMethodType}</li>
+ * <li>goFloor: 所到楼层</li>
+ * <li>authRuleType: 授权规则种类，0 时长，1 次数 {@link com.everhomes.rest.aclink.DoorAuthRuleType}</li>
+ * <li>totalAuthAmount: 授权的总开门次数</li>
+ * <li>validAuthAmount: 剩余有效开门次数</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class DoorAuthDTO {
     private Byte     status;
     private Byte     authType;
@@ -28,9 +59,13 @@ public class DoorAuthDTO {
     private String   description;
     private String address;
     private String authMethod;
-
     private Long goFloor;
-
+    private Byte authRuleType;
+    private Integer totalAuthAmount;
+    private Integer validAuthAmount;
+    private String localAuthKey;
+    private String qrString;
+    private Byte rightOpen;
 
     public String getAddress() {
         return address;
@@ -243,7 +278,67 @@ public class DoorAuthDTO {
         this.goFloor = goFloor;
     }
 
-    @Override
+    public Byte getAuthRuleType() {
+		return authRuleType;
+	}
+
+
+	public void setAuthRuleType(Byte authRuleType) {
+		this.authRuleType = authRuleType;
+	}
+
+
+	public Integer getTotalAuthAmount() {
+		return totalAuthAmount;
+	}
+
+
+	public void setTotalAuthAmount(Integer totalAuthAmount) {
+		this.totalAuthAmount = totalAuthAmount;
+	}
+
+
+	public Integer getValidAuthAmount() {
+		return validAuthAmount;
+	}
+
+
+	public void setValidAuthAmount(Integer validAuthAmount) {
+		this.validAuthAmount = validAuthAmount;
+	}
+
+
+	public String getLocalAuthKey() {
+		return localAuthKey;
+	}
+
+
+	public void setLocalAuthKey(String localAuthKey) {
+		this.localAuthKey = localAuthKey;
+	}
+	
+
+	public String getQrString() {
+		return qrString;
+	}
+
+
+	public void setQrString(String qrString) {
+		this.qrString = qrString;
+	}
+
+
+	public Byte getRightOpen() {
+		return rightOpen;
+	}
+
+
+	public void setRightOpen(Byte rightOpen) {
+		this.rightOpen = rightOpen;
+	}
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

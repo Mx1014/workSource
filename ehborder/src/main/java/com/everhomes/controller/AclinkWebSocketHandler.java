@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.controller;
 
 import java.io.IOException;
@@ -216,7 +217,31 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         }
       });
     }
+    
+    public void excuteMessage(AclinkWebSocketMessage cmd, WebSocketSession session, AclinkWebSocketState state) {
+        Map<String, String> params = new HashMap<String, String>();
+        StringHelper.toStringMap(null, cmd, params);
+        final AclinkWebSocketHandler handler = this;
+        String uuid = uuidFromSession(session);
+        params.put("uuid", uuid);
+        if(cmd.getPayload() != null) {
+            LOGGER.info("Got reply = {}", cmd);    
+        }
+        
+        httpRestCallProvider.restCall("/aclink/excuteMessage", params, new ListenableFutureCallback<ResponseEntity<String>> () {
 
+        @Override
+        public void onSuccess(ResponseEntity<String> result) {
+            LOGGER.info("success");
+        }
+
+        @Override
+        public void onFailure(Throwable ex) {
+            LOGGER.error("call core server error=", ex);
+        }
+      });
+    }
+    
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         AclinkWebSocketState state = session2State.get(session);
@@ -237,19 +262,31 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
             LOGGER.info("Message error, ignored, len=" + len);
             return;
         }
-
+        
+        //硬件实际数据格式与文档不一致，此处将实际数据补充成文档的格式 by liuyilin 20180320
+        if (buf.length == 18){
+        	byte[] convertArr = new byte[28];
+        	System.arraycopy(buf, 0, convertArr, 10, buf.length);
+        	buf = convertArr;
+        	buf[3] = (byte) 0x18;
+        	len = 24;
+        }
+        
         byte[] bDataSize = Arrays.copyOfRange(buf, 0, 4);
         int dataSize = DataUtil.byteArrayToInt(bDataSize);
         if(dataSize != len) {
             LOGGER.info("Message error length, ignored, dataSize=" + dataSize + ", len=" + len);
             return;
         }
-
-        state.onMessage(buf, session, this);
+        //硬件数据没有传DataType，在此处先按照CMD进行路由 by liuyilin 20180320
+        if(buf[10] == (byte) 0x10){
+        	state.onRequest(buf, session, this);
+        }else{
+        	state.onMessage(buf, session, this);
+        }
+        
     }
-
-
-
+    
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
         LOGGER.info("Got pong message from " + uuidFromSession(session));

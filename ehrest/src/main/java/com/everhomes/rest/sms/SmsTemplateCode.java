@@ -142,6 +142,12 @@ public interface SmsTemplateCode {
 
     int SYSTEM_AUTO_UPDATE_SPACE_PLATE_OWNER = 66; //订单变更通知 给车主发短信
 
+    //物业缴费自动催款模板SCOPE
+    static final String ASSET_MSG_SCOPE = "asset.sms";
+    int VISITORSYS_VERIFICATION_CODER = 67; //访客管理发送访客验证码
+    int VISITORSYS_INVT_INVITATION_LETTER = 68; //预约访客发送访客邀请函
+    int VISITORSYS_TEMP_INVITATION_LETTER = 69; //临时访客发送访客邀请函
+
     //装修办理
     int DECORATION_APPLY_SUCCESS = 67; //装修申请通过 通知负责人:尊敬的“装修公司负责人姓名”，用户（“申请人姓名”：“申请人手机号”）提交的装修申请（“租户公司名称”）已审核通过，需尽快提交相关装修资料，请前往APP查看详情，您可以点击以下链接下载APP，并使用本机号码进行注册：https://core.zuolin.com/evh/aclink/id=1283jh213a
 

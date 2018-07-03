@@ -33,6 +33,7 @@ import com.everhomes.rest.customer.CustomerTrackingDTO;
 import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
 import com.everhomes.rest.customer.CustomerTrademarkDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ListCustomerAccountsCommand;
 import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
@@ -56,6 +57,7 @@ import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
@@ -123,6 +125,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -237,11 +240,11 @@ public class FieldServiceImpl implements FieldService {
         ExportFieldsExcelCommand command = ConvertHelper.convert(cmd, ExportFieldsExcelCommand.class);
         List<FieldGroupDTO> results = getAllGroups(command,true,false);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
             String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
-                sheetNames.removeIf((s) -> !s.equals(cmd.getEquipmentCategoryName()));
+                sheetNames.removeIf((s) -> !(Long.parseLong(s)==10000L));
                 excelTemplateName = cmd.getEquipmentCategoryName() +
                         new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
             }
@@ -299,7 +302,7 @@ public class FieldServiceImpl implements FieldService {
         }
         List<FieldGroupDTO> results = getAllGroups(cmd,true,true);
         if(results != null && results.size() > 0) {
-            List<String> sheetNames = results.stream().map(FieldGroupDTO::getGroupDisplayName).collect(Collectors.toList());
+            List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, true, null);
         }
 
@@ -449,14 +452,27 @@ public class FieldServiceImpl implements FieldService {
     private List<FieldDTO> listScopeFields(ListFieldCommand cmd) {
         Map<Long, ScopeField> scopeFields = new HashMap<>();
         Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
         if(cmd.getCommunityId() != null) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
             if(scopeFields != null && scopeFields.size() > 0) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
         if(namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath());
+            if (scopeFields != null && scopeFields.size() > 0) {
+                globalFlag = false;
+            }
+            // don't read general configutations when choose all scope
+//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
+//                globalFlag = false;
+//            }
+        }
+        // add general scope fields version 3.5
+        if(globalFlag) {
+            scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath());
         }
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
@@ -471,8 +487,10 @@ public class FieldServiceImpl implements FieldService {
             List<Field> fields = fieldProvider.listFields(fieldIds);
 
             Map<Long, ScopeFieldItem> scopeItems = new HashMap<>();
-            if(namespaceFlag) {
-                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null);
+            if (globalFlag) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null);
+            } else if (namespaceFlag) {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
             } else {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
             }
@@ -493,18 +511,14 @@ public class FieldServiceImpl implements FieldService {
                             }
                         });
                         //按default order排序
-                        Collections.sort(items, (a,b) -> {
-                            return a.getDefaultOrder() - b.getDefaultOrder();
-                        });
+                        items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
                         dto.setItems(items);
                     }
                     dtos.add(dto);
                 });
 
                 //按default order排序
-                Collections.sort(dtos, (a,b) -> {
-                    return a.getDefaultOrder() - b.getDefaultOrder();
-                });
+                dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
                 return dtos;
             }
         }
@@ -515,16 +529,27 @@ public class FieldServiceImpl implements FieldService {
     public List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd) {
         Map<Long, ScopeFieldItem> fieldItems = new HashMap<>();
         Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
         List<Long> fieldIds = new ArrayList<>();
         fieldIds.add(cmd.getFieldId());
         if(cmd.getCommunityId() != null) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
             if(fieldItems != null && fieldItems.size() > 0) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
         if(namespaceFlag) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null);
+            if(fieldItems!=null && fieldItems.size()>0){
+                globalFlag = false;
+            }
+//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
+//                globalFlag = false;
+//            }
+        }
+        if(globalFlag) {
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null);
         }
         if(fieldItems != null && fieldItems.size() > 0) {
             List<FieldItemDTO> dtos = new ArrayList<>();
@@ -532,11 +557,8 @@ public class FieldServiceImpl implements FieldService {
                 FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
                 dtos.add(fieldItem);
             });
-
             //按default order排序
-            Collections.sort(dtos, (a,b) -> {
-                return a.getDefaultOrder() - b.getDefaultOrder();
-            });
+            dtos.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
             return dtos;
         }
 
@@ -739,10 +761,17 @@ public class FieldServiceImpl implements FieldService {
             case "员工情况":
                 if(customerType == null) {
                     SearchEnterpriseCustomerCommand cmd0 = ConvertHelper.convert(params, SearchEnterpriseCustomerCommand.class);
+                    ExportEnterpriseCustomerCommand exportcmd = ConvertHelper.convert(params, ExportEnterpriseCustomerCommand.class);
                     cmd0.setCommunityId(communityId);
                     cmd0.setNamespaceId(namespaceId);
                     cmd0.setOrgId(orgId);
                     cmd0.setPageSize(Integer.MAX_VALUE - 1);
+                    //request by get method
+                    if(StringUtils.isNotEmpty(exportcmd.getTrackingUids())){
+//                        Long[] trackingUids = (Long[]) StringHelper.fromJsonString(exportcmd.getTrackingUids(), Long[].class);
+//                        cmd0.setTrackingUids(Arrays.asList(trackingUids));
+                        cmd0.setTrackingUid(Long.valueOf(exportcmd.getTrackingUids()));
+                    }
                     Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
                     SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);
                     if (response.getDtos() != null && response.getDtos().size() > 0) {
@@ -1099,6 +1128,29 @@ public class FieldServiceImpl implements FieldService {
         if(invoke==null){
             return "";
         }
+        //增加管理员和楼栋门牌特殊情况
+        if ("enterpriseAdmins".equals(fieldName)) {
+            if(invoke instanceof  ArrayList){
+                List<OrganizationContactDTO> contacts =  (ArrayList<OrganizationContactDTO>) invoke;
+                if(contacts.size()>0){
+                    List<String> admin = new ArrayList<>();
+                    contacts.forEach((c)->admin.add(c.getContactName()+"("+c.getContactToken()+")"));
+                    return String.join(",", admin);
+                }else {
+                    return "";
+                }
+            }
+        }
+        if("entryInfos".equals(fieldName)){
+            List<CustomerEntryInfoDTO> entryInfos = (ArrayList<CustomerEntryInfoDTO>) invoke;
+            if(entryInfos.size()>0){
+                List<String> entryInfo = new ArrayList<>();
+                entryInfos.forEach((c)->entryInfo.add(c.getBuilding()+"/"+c.getApartment()));
+                return String.join(",", entryInfo);
+            }else {
+                return "";
+            }
+        }
         try {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
                 SimpleDateFormat sdf = null;
@@ -1180,11 +1232,15 @@ public class FieldServiceImpl implements FieldService {
                 invoke = String.valueOf(detail.getContactName());
             }else{
                 if(uid > 0) {
-                    UserInfo userInfo = userService.getUserInfo(uid);
-                    if(userInfo != null){
-                        invoke = String.valueOf(userInfo.getNickName());
-                    } else {
-                        LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                    try {
+                        UserInfo userInfo = userService.getUserInfo(uid);
+                        if(userInfo != null){
+                            invoke = String.valueOf(userInfo.getNickName());
+                        } else {
+                            LOGGER.error("field "+ fieldName+" find name in organization member failed ,uid is "+ uid);
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("cannot find user any information.uid={}",uid);
                     }
                 } else {
                     invoke = "";
@@ -1622,7 +1678,8 @@ public class FieldServiceImpl implements FieldService {
             boolean isRealSheet = true;
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
-            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0 && !group.getGroupDisplayName().equals("客户信息")){
+//            if (group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0 && !CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(group.getName()))) {
+            if (group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0 && !(group.getGroupId() == 1L)) {
                 getAllGroups(group.getChildrenGroup(), allGroups);
                 //父节点的标识改为false
                 isRealSheet = false;
@@ -1701,6 +1758,8 @@ public class FieldServiceImpl implements FieldService {
                 if(scopeFieldGroup.getId() == null) {
                     scopeFieldGroup.setCreatorUid(userId);
                     fieldProvider.createScopeFieldGroup(scopeFieldGroup);
+                    //add default fileds and items
+                    updateFieldGroupWithDefaultFieldsAndItems(scopeFieldGroup);
                 } else {
                     ScopeFieldGroup exist = fieldProvider.findScopeFieldGroup(scopeFieldGroup.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
                     if(exist != null) {
@@ -1728,6 +1787,38 @@ public class FieldServiceImpl implements FieldService {
                 Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), systemGroup.getPath());
                 inactiveScopeField(scopeFieldMap);
             });
+        }
+    }
+
+    private void updateFieldGroupWithDefaultFieldsAndItems(ScopeFieldGroup scopeFieldGroup) {
+        List<Field> systemFields = fieldProvider.listMandatoryFields(scopeFieldGroup.getModuleName(), scopeFieldGroup.getGroupId());
+        if(systemFields!=null && systemFields.size()>0){
+            // auto init default fields and items
+            Integer defaultOrder = 0;
+            for (Field field: systemFields) {
+                ScopeField scopeField = new ScopeField();
+                scopeField = ConvertHelper.convert(field, ScopeField.class);
+                scopeField.setFieldId(field.getId());
+                scopeField.setFieldDisplayName(field.getDisplayName());
+                scopeField.setNamespaceId(scopeFieldGroup.getNamespaceId());
+                scopeField.setCommunityId(scopeFieldGroup.getCommunityId());
+                scopeField.setCreatorUid(UserContext.currentUserId());
+                scopeField.setDefaultOrder(defaultOrder++);
+                fieldProvider.createScopeField(scopeField);
+                if(field.getFieldParam().contains("select")){
+                    List<FieldItem> systemItems = fieldProvider.listFieldItems(field.getId());
+                    if(systemItems!=null && systemItems.size()>0){
+                        systemItems.forEach((r)->{
+                            ScopeFieldItem scopeFieldItem = ConvertHelper.convert(r, ScopeFieldItem.class);
+                            scopeFieldItem.setCommunityId(scopeFieldGroup.getCommunityId());
+                            scopeFieldItem.setNamespaceId(scopeFieldGroup.getNamespaceId());
+                            scopeFieldItem.setItemId(r.getId());
+                            scopeFieldItem.setItemDisplayName(r.getDisplayName());
+                            fieldProvider.createScopeFieldItem(scopeFieldItem);
+                        });
+                    }
+                }
+            }
         }
     }
 
@@ -1798,14 +1889,43 @@ public class FieldServiceImpl implements FieldService {
     public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId) {
         ScopeFieldItem fieldItem = null;
         Boolean namespaceFlag = true;
-        if(communityId != null) {
+        Boolean globalFlag = true;
+        if (communityId != null) {
             fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
-            if(fieldItem != null) {
+            if (fieldItem != null) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
-        if(namespaceFlag) {
+        if (namespaceFlag) {
             fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+            if (fieldItem != null) {
+                globalFlag = false;
+            }
+        }
+
+        if (globalFlag) {
+            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
+        }
+        // 三种情况 要求删除的item不显示
+        if (fieldItem != null) {
+            Map<Long, ScopeFieldGroup> scopeFieldGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, communityId, fieldItem.getModuleName());
+            // community
+            if (scopeFieldGroupMap != null && scopeFieldGroupMap.size() > 0) {
+                fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
+            } else {
+                //namespace
+                Map<Long, ScopeFieldGroup> namespaceGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, null, fieldItem.getModuleName());
+                if (namespaceGroupMap != null && namespaceGroupMap.size() > 0) {
+                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+                } else {
+                    //global
+                    Map<Long, ScopeFieldGroup> globalGroupMap = fieldProvider.listScopeFieldGroups(0, null, fieldItem.getModuleName());
+                    if (globalGroupMap != null && globalGroupMap.size() > 0) {
+                        fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
+                    }
+                }
+            }
         }
 
         return fieldItem;
@@ -1815,14 +1935,22 @@ public class FieldServiceImpl implements FieldService {
     public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName) {
         ScopeFieldItem fieldItem = null;
         Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
         if(communityId != null) {
             fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
             if(fieldItem != null) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
         if(namespaceFlag) {
             fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
+            if(fieldItem!=null){
+                globalFlag = false;
+            }
+        }
+        if(globalFlag){
+            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(0, null, moduleName, displayName);
         }
 
         return fieldItem;
@@ -1851,14 +1979,26 @@ public class FieldServiceImpl implements FieldService {
     private List<FieldGroupDTO> listScopeFieldGroups(ListFieldGroupCommand cmd) {
         Map<Long, ScopeFieldGroup> groups = new HashMap<>();
         Boolean namespaceFlag = true;
+        Boolean globalFlag = true;
         if(cmd.getCommunityId() != null) {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
             if(groups != null && groups.size() > 0) {
                 namespaceFlag = false;
+                globalFlag = false;
             }
         }
         if(namespaceFlag) {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), null, cmd.getModuleName());
+            if(groups!=null && groups.size()>0){
+                globalFlag = false;
+            }
+//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
+//                globalFlag = false;
+//            }
+        }
+        //add global general scope groups version 3.5
+        if(globalFlag){
+            groups = fieldProvider.listScopeFieldGroups(0, null, cmd.getModuleName());
         }
 
         if(groups != null && groups.size() > 0) {
@@ -1886,9 +2026,7 @@ public class FieldServiceImpl implements FieldService {
             List<FieldGroupDTO> groupDTOs = fieldGroupDTO.getChildrenGroup();
             LOGGER.info("groupDTOs: {}", groupDTOs);
             //按default order排序
-            Collections.sort(groupDTOs, (a,b) -> {
-                return a.getDefaultOrder() - b.getDefaultOrder();
-            });
+            Collections.sort(groupDTOs, Comparator.comparingInt(FieldGroupDTO::getDefaultOrder));
 
             return groupDTOs;
         }

@@ -2,6 +2,8 @@ package com.everhomes.rest.address;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.Objects;
+
 /**
  * <ul>
  *     <li>id: id</li>
@@ -279,5 +281,20 @@ public class AddressDTO {
     public String toString(){
         return StringHelper.toJsonString(this);
         
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof AddressDTO)) {
+            return false;
+        }
+        AddressDTO obj = (AddressDTO) o;
+        return id == obj.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

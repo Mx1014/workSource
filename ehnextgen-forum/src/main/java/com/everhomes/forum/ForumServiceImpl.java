@@ -240,6 +240,11 @@ public class ForumServiceImpl implements ForumService {
             cmd.setForumEntryId(0L);
         }
 
+        //没有forumId，则设置当前域空间默认的forumId
+        if(cmd.getForumId() == null) {
+            setNamespaceDefaultForumId(cmd);
+        }
+
         //这个原来只用一行代码的方法终于要发挥他的作用啦。
         PostDTO dto = new PostDTO();
 
@@ -1945,7 +1950,7 @@ public class ForumServiceImpl implements ForumService {
     public ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
-        Long operatorId = operator.getId();
+        Long operatorId = operator == null ? 0 : operator.getId();
         Long organizationId = cmd.getOrganizationId();
         Long communityId = cmd.getCommunityId();
         final Long forumId = cmd.getForumId();
@@ -2066,6 +2071,10 @@ public class ForumServiceImpl implements ForumService {
             
             if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.EXPIRED){
             	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
+            }
+
+            if (TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.PUBLISHING_AND_EXPIRED) {
+                query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
             }
             
             
@@ -2362,30 +2371,45 @@ public class ForumServiceImpl implements ForumService {
         checkStickPostPrivilege(operatorId, cmd.getOrganizationId(), cmd.getPostId());
         checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
 
-        dbProvider.execute((status) -> {
-            Post post = this.forumProvider.findPostById(cmd.getPostId());
+        List<Long> postIds = new ArrayList<>();
+        postIds.add(cmd.getPostId());
 
-            post.setStickFlag(cmd.getStickFlag());
-
-            if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
-                post.setStickTime(new Timestamp(System.currentTimeMillis()));
-            }else {
-                post.setStickTime(null);
+        List<Post> posts = forumProvider.listPostsByRealPostId(cmd.getPostId());
+        if(posts != null && posts.size() > 0){
+            for (Post post: posts){
+                postIds.add(post.getId());
             }
+        }
 
-            forumProvider.updatePost(post);
-            if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
-                Activity activity = activityProvider.findSnapshotByPostId(cmd.getPostId());
-                activity.setStickFlag(cmd.getStickFlag());
+
+        dbProvider.execute((status) -> {
+
+            for (Long postId: postIds){
+                Post post = this.forumProvider.findPostById(postId);
+
+                post.setStickFlag(cmd.getStickFlag());
 
                 if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
-                    activity.setStickTime(new Timestamp(System.currentTimeMillis()));
+                    post.setStickTime(new Timestamp(System.currentTimeMillis()));
                 }else {
-                    activity.setStickTime(null);
+                    post.setStickTime(null);
                 }
 
-                activityProivider.updateActivity(activity);
+                forumProvider.updatePost(post);
+                if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
+                    Activity activity = activityProvider.findSnapshotByPostId(postId);
+                    activity.setStickFlag(cmd.getStickFlag());
+
+                    if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
+                        activity.setStickTime(new Timestamp(System.currentTimeMillis()));
+                    }else {
+                        activity.setStickTime(null);
+                    }
+
+                    activityProivider.updateActivity(activity);
+                }
             }
+
             return null;
         });
     }
@@ -5427,6 +5451,25 @@ public class ForumServiceImpl implements ForumService {
     	if(community != null) {
     		topicCmd.setForumId(community.getDefaultForumId());
     	}
+    }
+
+    /**
+     *
+     * 设置当前域空间默认forumId
+     */
+    private void setNamespaceDefaultForumId(NewTopicCommand topicCmd) {
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+
+        if(UserContext.getCurrentNamespaceId() == null){
+            return;
+        }
+
+        List<Community> communities = communityProvider.listCommunities(UserContext.getCurrentNamespaceId(), locator, 1, null);
+
+        if(communities != null && communities.size() > 0){
+            topicCmd.setForumId(communities.get(0).getDefaultForumId());
+        }
     }
     
     @Override

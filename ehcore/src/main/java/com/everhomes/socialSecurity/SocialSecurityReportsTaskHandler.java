@@ -87,7 +87,7 @@ public class SocialSecurityReportsTaskHandler implements FileDownloadTaskHandler
         } else if (reportType.equals("exportSocialSecurityInoutReports")) {
             outputStream = socialSecurityService.getSocialSecurityInoutReportsOutputStream(ownerId, payMonth);
         }
-        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 

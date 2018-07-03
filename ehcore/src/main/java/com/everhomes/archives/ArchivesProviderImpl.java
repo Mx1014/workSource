@@ -70,6 +70,16 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
+    public void deleteArchivesStickyContactsByDetailIds(Integer namespaceId, List<Long> detailIds){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhArchivesStickyContactsRecord> query = context.deleteQuery(Tables.EH_ARCHIVES_STICKY_CONTACTS);
+        query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.DETAIL_ID.in(detailIds));
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMap.class, null);
+    }
+
+    @Override
     public ArchivesStickyContacts findArchivesStickyContactsById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhArchivesStickyContactsDao dao = new EhArchivesStickyContactsDao(context.configuration());

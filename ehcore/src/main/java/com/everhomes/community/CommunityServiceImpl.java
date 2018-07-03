@@ -2261,7 +2261,13 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<CommunityUserDto> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords());
+
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(
+		        cmd.getNamespaceId(),
+                cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1,
+                CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType(),
+                cmd.getKeywords(), cmd.getStartTime(), cmd.getEndTime());
+
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2310,7 +2316,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<CommunityUserAddressDTO> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.RESIDENTIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.RESIDENTIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords(), cmd.getStartTime(), cmd.getEndTime());
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2353,8 +2359,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
-		//暂时定成查询1000条记录，且总是从第一条开始导出 by 20170630
-		cmd.setPageSize(1000);
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		cmd.setPageSize(pageSize);
 		cmd.setPageAnchor(null);
 
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
@@ -2513,7 +2520,7 @@ public class CommunityServiceImpl implements CommunityService {
 			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
 
 			StringBuffer address = new StringBuffer();
-			if(dto.getAddressDtos() != null){
+			if(dto.getAddressDtos() != null && dto.getAddressDtos().size() > 0){
 				for (AddressDTO addressDTO: dto.getAddressDtos()){
 					address.append(addressDTO.getAddress());
 					address.append("-");

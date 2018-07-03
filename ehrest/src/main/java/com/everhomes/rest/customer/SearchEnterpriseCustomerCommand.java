@@ -75,6 +75,12 @@ public class SearchEnterpriseCustomerCommand {
     @ItemType(Long.class)
     private List<Long> trackingUids;
 
+    private Byte adminFlag;
+
+    private Long buildingId;
+
+    private Long addressId;
+
     public Long getOwnerId() {
         return ownerId;
     }
@@ -243,6 +249,30 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setTrackingName(String trackingName) {
         this.trackingName = trackingName;
+    }
+
+    public Byte getAdminFlag() {
+        return adminFlag;
+    }
+
+    public void setAdminFlag(Byte adminFlag) {
+        this.adminFlag = adminFlag;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     @Override
