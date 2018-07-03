@@ -6442,41 +6442,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			resource.setAutoAssign((byte)0);
 			resource.setMultiUnit((byte)0);
 
-
-//			resource.setExclusiveFlag(defaultRule.getExclusiveFlag());
-//			resource.setDayOpenTime(defaultRule.getDayOpenTime());
-//			resource.setDayCloseTime(defaultRule.getDayCloseTime());
-//			if(defaultRule.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
-//				defaultRule.setUnit(1.0);
-//				defaultRule.setAutoAssign(NormalFlag.NONEED.getCode());
-//				defaultRule.setMultiUnit(NormalFlag.NONEED.getCode());
-//				defaultRule.setSiteCounts(1.0);
-//			}
-//			if(null == defaultRule.getAutoAssign())
-//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-//	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter AutoAssign   is null");
-//			resource.setResourceCounts(defaultRule.getSiteCounts());
-//			resource.setAutoAssign(defaultRule.getAutoAssign());
-//			resource.setMultiUnit(defaultRule.getMultiUnit());
-//			resource.setNeedPay(defaultRule.getNeedPay());
-//
-//			resource.setMultiTimeInterval(defaultRule.getMultiTimeInterval());
-//			resource.setRentalEndTimeFlag(defaultRule.getRentalEndTimeFlag());
-//			resource.setRentalStartTimeFlag(defaultRule.getRentalStartTimeFlag());
-//			resource.setRentalEndTime(defaultRule.getRentalEndTime());
-//			resource.setRentalStartTime(defaultRule.getRentalStartTime());
-////			resource.setTimeStep(defaultRule.getTimeStep());
-////			resource.setCancelTime(defaultRule.getCancelTime());
-//			resource.setRefundFlag(defaultRule.getRefundFlag());
-//			resource.setRefundRatio(defaultRule.getRefundRatio());
-////			resource.setUnit(defaultRule.getUnit());
-//			resource.setBeginDate(new Date(defaultRule.getBeginDate()));
-//			resource.setEndDate(new Date(defaultRule.getEndDate()));
-//
-//			resource.setOpenWeekday(convertOpenWeekday(defaultRule.getOpenWeekday()));
-
-//			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
-
 			rentalv2Provider.createRentalSite(resource);
 			//添加资源时，才添加场所编号 TODO:新的对接需要添加
 //			setRentalRuleSiteNumbers(resource.getResourceType(), EhRentalv2Resources.class.getSimpleName(), resource.getId(), cmd.getSiteNumbers());
@@ -6487,18 +6452,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			createSiteOwners(cmd.getOwners(), resource);
 			//资源图片
 			createSiteDetailUris(cmd.getDetailUris(), resource);
-
-
-//			LOGGER.debug("test enter cerate resource price rules, defaultRule={}", defaultRule);
-//			createPriceRules(PriceRuleType.RESOURCE, resource.getId(), defaultRule.getPriceRules());
-//			createPricePackages(PriceRuleType.RESOURCE,resource.getId(),defaultRule.getPricePackages());
-//			createRentalConfigAttachment(defaultRule.getAttachments(), resource.getId(), EhRentalv2Resources.class.getSimpleName());
-//
-//			//close dates
-//			setRentalRuleCloseDates(defaultRule.getCloseDates(), resource.getId(), EhRentalv2Resources.class.getSimpleName());
-//
-//			setRentalRuleTimeIntervals(EhRentalv2Resources.class.getSimpleName(), resource.getId(), defaultRule.getTimeIntervals());
-//			setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), resource.getId(), defaultRule.getHalfDayTimeIntervals());
 
 			return null;
 		});
