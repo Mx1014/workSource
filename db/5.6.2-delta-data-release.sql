@@ -164,11 +164,6 @@ set @account_id = 4590;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
-set @namespace_id = 999966;
-set @account_id = 1005;
-INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
-SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
-
 set @namespace_id = 999967;
 set @account_id = 4526;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
@@ -189,13 +184,32 @@ set @account_id = 3800;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
+set @namespace_id = 999993;
+set @account_id = 4443;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+-- -----------------------------SECTION END----------------------------------------------
+
+-- -----------------------------SECTION BEGIN--------------------------------------------
+-- ENV: 光大we谷
+-- DESCRIPTION: 收款方账号迁移
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动收款方账号迁移；
+
 set @namespace_id = 999979;
 set @account_id = 4422;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+-- -----------------------------SECTION END----------------------------------------------
 
-set @namespace_id = 999993;
-set @account_id = 4443;
+-- -----------------------------SECTION BEGIN--------------------------------------------
+-- ENV: 深圳湾
+-- DESCRIPTION: 收款方账号迁移
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动收款方账号迁移；
+
+set @namespace_id = 999966;
+set @account_id = 1005;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 -- -----------------------------SECTION END----------------------------------------------
