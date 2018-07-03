@@ -457,7 +457,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private UniongroupService uniongroupService;
-    
+
     @Autowired
     private NamespaceProvider namespaceProvider;
 
@@ -1044,9 +1044,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (Long id : rlt.getIds()) {
             OrganizationDetailDTO detail = toOrganizationDetailDTO(id, false);
             if(detail != null) {
-                dtos.add(detail);    
+                dtos.add(detail);
             }
-            
+
         }
         dtos = dtos.stream().filter(r->r != null).collect(Collectors.toList());
         LOGGER.debug("searchEnterprise result = {}", dtos.toString());
@@ -1805,7 +1805,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     address.setCreatorUid(userId);
                     address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    
+
                     if(addr != null) {
                         //地址冗余字段 added by jannson
                         address.setBuildingName(addr.getBuildingName());
@@ -1813,13 +1813,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                         if(building != null) {
                             address.setBuildingId(building.getId());
                             }
-                        
+
                     }
-                    
+
                     address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
-                    
-                    
-                    
+
+
+
                     this.organizationProvider.createOrganizationAddress(address);
                 }
             }
@@ -6044,7 +6044,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return "0";
     }
- 
+
 // HEAD
 //    public void updatePressTest() {
 //        this.organizationProvider.updatePressTest();
@@ -6365,7 +6365,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         return res;
     }
-	
+
 	@Override
     public List<Long> ListDetailsByEnterpriseId(Long enterpriseId) {
             Organization org = this.organizationProvider.findOrganizationById(enterpriseId);
@@ -6622,9 +6622,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //设置上下文对象 Added by Jannson
                     UserContext.setCurrentNamespaceId(namespaceId);
                     UserContext.setCurrentUser(user);
-                    
+
                     leaveOrganizationAfterOperation(user.getId(), members);
-                    
+
                     //设置完成之后要清空
                     UserContext.setCurrentNamespaceId(null);
                     UserContext.setCurrentUser(null);
@@ -7505,9 +7505,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
- 
+
         return member;
-    } 
+    }
 
     @Override
     public OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken) {
@@ -8738,10 +8738,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (OrganizationDTO dto : orgs) {
             addPathOrganizationId(dto.getPath(), orgnaizationIds);
         }
-        
+
         //Added by janson，这个接口原本的意思是拿用户所有的公司，但是在 getOrganizationMemberGroups 是拿用户自己关联的子公司，所以这里把本公司加上
         orgnaizationIds.add(organizationId);
-        
+
         return orgnaizationIds;
     }
 
@@ -9248,7 +9248,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return r.getTargetId();
             }).collect(Collectors.toList());
         }
-        
+
         return new ArrayList<Long>();
     }
 
@@ -10328,19 +10328,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
-    private List<OrganizationMember> convertPinyin(List<OrganizationMember> organizationMembers) {
+    private List<OrganizationMember> convertPinyin(List<OrganizationMember> members) {
 
-        organizationMembers = organizationMembers.stream().map((c) -> {
+        members = members.stream().peek((c) -> {
             String pinyin = PinYinHelper.getPinYin(c.getContactName());
             c.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
             c.setFullPinyin(pinyin.replaceAll(" ", ""));
             c.setInitial(PinYinHelper.getCapitalInitial(c.getFullPinyin()));
-            return c;
         }).collect(Collectors.toList());
 
-        Collections.sort(organizationMembers);
+        Collections.sort(members);
 
-        return organizationMembers;
+        return members;
     }
 
     @Override
@@ -11133,7 +11132,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 //添加除公司之外的机构成员
                 departments.addAll(repeatCreateOrganizationmembers(departmentIds, cmd.getContactToken(), enterpriseIds, organizationMember));
-                
+
                 //：todo 自动加入薪酬组
                 this.uniongroupService.reallocatedUnion(org.getId(), departmentIds, organizationMember);
 
@@ -11382,8 +11381,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd) {
 
-        Long enterpriseId = getTopOrganizationId(cmd.getOrganizationId());
-        Organization enterprise = checkOrganization(enterpriseId);
         ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
         Organization org = this.checkOrganization(cmd.getOrganizationId());
         if(null == org)
@@ -11391,14 +11388,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-
-        //  todo:more info.
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
 
+        //  通讯录默认采用本节点及子节点方式读取人员
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 
-
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(
+                cmd.getKeywords(), cmd.getIsSignedup(), locator, pageSize, cmd,
+                FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode(), groupTypes);
+/*
         Organization orgCommoand = new Organization();
         orgCommoand.setId(org.getId());
         orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -11424,33 +11426,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //转拼音
-        organizationMembers = convertPinyin(organizationMembers);
+        organizationMembers = convertPinyin(organizationMembers);*/
 
-        if (0 == organizationMembers.size()) {
+        if (0 == organizationMembers.size())
             return response;
-        }
+
         List<OrganizationContactDTO> members = organizationMembers.stream().map(r -> {
             OrganizationContactDTO dto = ConvertHelper.convert(r, OrganizationContactDTO.class);
-
-            //  added by R 20120713, 获取岗位与 detailId
-            //  取总公司的 path ，查出所有职位
-            String[] path = org.getPath().split("/");
-            List<OrganizationDTO> positionList = this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, r.getContactToken(), "/" + path[1]);
-            String position = "";
-            if (positionList != null && positionList.size() > 0) {
-                for (OrganizationDTO sonList : positionList) {
-                    position += (sonList.getName() + ",");
-                }
-                position = position.substring(0, position.length() - 1);
-            }
-            dto.setJobPosition(position);
-            if (!StringUtils.isEmpty(r.getDetailId()))
-                dto.setDetailId(r.getDetailId());
-            //  需要将隐藏性显示出来
+            //  1.添加职位
+            dto.setJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(r.getDetailId())));
+            //  2.detailId, 隐藏性信息
+            dto.setDetailId(r.getDetailId());
             dto.setVisibleFlag(r.getVisibleFlag());
-
-
-            //获取用户头像 昵称
+            //  3.头像
             if (OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())) {
                 User user = userProvider.findUserById(r.getTargetId());
                 if (null != user) {
@@ -11464,12 +11452,23 @@ public class OrganizationServiceImpl implements OrganizationService {
                 String avatarUri = userService.getUserAvatarUriByGender(0L, UserContext.getCurrentNamespaceId(), dto.getGender());
                 dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), 0L));
             }
-
-            // 是否展示手机号
-            if (r.getIntegralTag4() != null && r.getIntegralTag4() == 1) {
+            // 4.手机号屏蔽
+            if(VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.HIDE){
                 dto.setContactToken(null);
             }
-
+            /*//  added by R 20120713, 获取岗位与 detailId
+            //  取总公司的 path ，查出所有职位
+            String[] path = org.getPath().split("/");
+            List<OrganizationDTO> positionList = this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, r.getContactToken(), "/" + path[1]);
+            String position = "";
+            if (positionList != null && positionList.size() > 0) {
+                for (OrganizationDTO sonList : positionList) {
+                    position += (sonList.getName() + ",");
+                }
+                position = position.substring(0, position.length() - 1);
+            }
+            dto.setJobPosition(position);
+            */
             //其他字符置换成#号
             if (!StringUtils.isEmpty(r.getInitial())) {
                 dto.setInitial(r.getInitial().replace("~", "#"));
@@ -12591,7 +12590,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
     }
-    
+
     @Override
     public Organization createUniongroupOrganization(Long organizationId, String name,String groupType) {
         checkNameRepeat(organizationId, name, groupType,null);

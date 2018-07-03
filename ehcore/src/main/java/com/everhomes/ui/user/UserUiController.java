@@ -89,15 +89,15 @@ public class UserUiController extends ControllerBase {
  	    List<SceneContactDTO> dtos = null;
 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-			//兼容老版本的app by sfyan 20161020
+			//	兼容老版本的app by sf.yan 20161020
 			if(null == cmd.getOrganizationId()){
 				cmd.setOrganizationId(sceneToken.getEntityId());
 			}
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(Integer.MAX_VALUE - 1);
 			command.setIsSignedup(cmd.getIsSignedup());
-			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
-			    command.setVisibleFlag(VisibleFlag.ALL.getCode());
+/*			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
+			    command.setVisibleFlag(VisibleFlag.ALL.getCode());*/
 			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
 			List<OrganizationContactDTO> members = res.getMembers();
 			if(null != members){
@@ -118,29 +118,14 @@ public class UserUiController extends ControllerBase {
 					return dto;
 				}).collect(Collectors.toList());
 			}
-			 
+
 		}
 
 		List<FamilyMemberDTO> resp = null;
-		// 仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
- 	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
-// 	    	command.setIsPinyin(1);
-// 	    	command.setType(ParamType.COMMUNITY.getCode());
-// 	    	command.setId(sceneToken.getEntityId());
-// 	    	resp= familyService.listNeighborUsers(command);
-		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-
-// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
-// 	    	command.setIsPinyin(1);
-// 	    	command.setType(ParamType.FAMILY.getCode());
-// 	    	command.setId(sceneToken.getEntityId());
-//			resp = familyService.listNeighborUsers(command);
-			
-			// 群聊里只看同一个家庭的人  edit by yanjun 20170803
+		//	仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
+		if (UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType()))
 			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
-		}
- 	    
+
  	    if(null != resp &&  0 != resp.size()){
  	    	dtos = resp.stream().map(r->{
 				SceneContactDTO dto = new SceneContactDTO();
