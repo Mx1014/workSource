@@ -93,6 +93,7 @@ import com.everhomes.rest.community.GetCommunityByUuidCommand;
 import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.rest.community.GetTreeProjectCategoriesCommand;
 import com.everhomes.rest.community.ImportBuildingDataDTO;
+import com.everhomes.rest.community.ImportCommunityDataDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.community.ListChildProjectCommand;
