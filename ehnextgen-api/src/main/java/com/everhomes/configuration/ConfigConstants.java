@@ -173,4 +173,6 @@ public interface ConfigConstants {
 	
 	public static final String ASSET_DINGFENGHUI_APPSHOWPAY = "asset.dingfenghui.appshowpay";
 	public static final String OPENAPI_LUFU_KEY = "openapi.lufu.key";
+	
+	public static final String apple_pusher_flag = "apple.pusher.flag";
 }

@@ -41,6 +41,7 @@ import com.everhomes.bundleid_mapper.BundleidMapperProvider;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.developer_account_info.DeveloperAccountInfo;
 import com.everhomes.developer_account_info.DeveloperAccountInfoProvider;
@@ -496,8 +497,16 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         
         if(platform.equals("iOS")) {
         	//chagne by huanglm for IOS pusher update
-           // pushMessageApple(senderLogin, destLogin, msgId, msg, platform, devMessage);
-        	pushMessageApplehttp2(senderLogin, destLogin, msgId, msg, platform, devMessage);
+        	String flag = configProvider.getValue(0, ConfigConstants.apple_pusher_flag,"");
+        	//苹果推送方式开关，值为1时为基于http2的新方式推送，其他值或空为旧方式推送
+        	if(flag.equals("1")){
+        		LOGGER.info("configuration flag is {},there will use http2 new pusher ", flag);
+        		pushMessageApplehttp2(senderLogin, destLogin, msgId, msg, platform, devMessage);
+        	}else{
+        		LOGGER.info("configuration flag is {},there will use old pusher ", flag);
+        		pushMessageApple(senderLogin, destLogin, msgId, msg, platform, devMessage);
+        	}
+        	
         } else if (platform.equals("xiaomi")) {
             pusherVendorService.pushMessageAsync(PusherVenderType.XIAOMI, senderLogin, destLogin, msg, devMessage);
         } else if (platform.equals("huawei")) {
