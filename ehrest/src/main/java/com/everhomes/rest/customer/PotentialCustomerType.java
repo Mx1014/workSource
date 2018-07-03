@@ -22,7 +22,7 @@ public enum PotentialCustomerType {
         return value;
     }
 
-    private static PotentialCustomerType fromCode(byte code) {
+    public static PotentialCustomerType fromCode(byte code) {
         for (PotentialCustomerType customerType : PotentialCustomerType.values()) {
             if (customerType.getCode() == code) {
                 return customerType;

@@ -2,6 +2,8 @@ package com.everhomes.customer;
 
 import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.activity.ActivityCategories;
+import com.everhomes.activity.ActivityProivider;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
@@ -88,6 +90,7 @@ import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerExpandItemDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
@@ -174,6 +177,7 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
 import com.everhomes.rest.customer.MonthStatistics;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.customer.PotentialCustomerDTO;
+import com.everhomes.rest.customer.PotentialCustomerType;
 import com.everhomes.rest.customer.QuarterStatistics;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
@@ -241,7 +245,9 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
@@ -266,6 +272,8 @@ import com.everhomes.varField.FieldGroup;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.everhomes.yellowPage.YellowPageProvider;
 import com.everhomes.yellowPage.YellowPageService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -379,6 +387,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
 
+    @Autowired
+    private ActivityProivider activityProivider;
+
     private static final String queueDelay = "trackingPlanTaskDelays";
     private static final String queueNoDelay = "trackingPlanTaskNoDelays";
 
@@ -417,6 +428,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private OrganizationSearcher organizationSearcher;
+
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
 
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
@@ -4206,7 +4220,8 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerPotentialResponse listPotentialCustomers(DeleteEnterpriseCommand cmd) {
         List<PotentialCustomerDTO> dtos = new ArrayList<>();
         CustomerPotentialResponse response = new CustomerPotentialResponse();
-        List<CustomerPotentialData> data = enterpriseCustomerProvider.listPotentialCustomers(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType(),cmd.getPotentialName());
+        cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
+        List<CustomerPotentialData> data = enterpriseCustomerProvider.listPotentialCustomers(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType(), cmd.getPotentialName(), cmd.getPageAnchor(), cmd.getPageSize() + 1);
         if (data != null && data.size() > 0) {
             data.forEach((r) -> dtos.add(ConvertHelper.convert(r, PotentialCustomerDTO.class)));
         }
@@ -4221,7 +4236,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void setSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
         CustomerConfiguration customerConfiguration = ConvertHelper.convert(cmd, CustomerConfiguration.class);
-        enterpriseCustomerProvider.deleteCustomerConfiguration(cmd.getNamespaceId());
+        enterpriseCustomerProvider.deleteCustomerConfiguration(cmd.getNamespaceId(),cmd.getScopeType());
         enterpriseCustomerProvider.createCustomerConfiguration(customerConfiguration);
     }
 
@@ -4233,5 +4248,70 @@ public class CustomerServiceImpl implements CustomerService {
             configurations.forEach((c) -> dtos.add(ConvertHelper.convert(c, CustomerConfigurationDTO.class)));
         }
         return dtos;
+    }
+
+    @Override
+    public List<CustomerExpandItemDTO> listExpandItems(CustomerConfigurationCommand cmd) {
+
+        List<CustomerExpandItemDTO> items = new ArrayList<>();
+        List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+        if (activityCategories != null && activityCategories.size() > 0) {
+            activityCategories.forEach((a) -> {
+                CustomerExpandItemDTO activityItem = new CustomerExpandItemDTO();
+                activityItem.setSourceType(PotentialCustomerType.ACTIVITY.getValue());
+                activityItem.setDisplayName(a.getName());
+                activityItem.setSourceId(a.getId());
+                items.add(activityItem);
+            });
+        }
+        //add service alliance categories
+        ListServiceAllianceCategoriesCommand command = new ListServiceAllianceCategoriesCommand();
+        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(command);
+        if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+            serviceAllianceCategories.forEach((r) -> {
+                CustomerExpandItemDTO allianceItem = new CustomerExpandItemDTO();
+                allianceItem.setSourceId(r.getId());
+                allianceItem.setDisplayName(r.getName());
+                allianceItem.setSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                items.add(allianceItem);
+            });
+        }
+        return items;
+    }
+
+    @Override
+    public List<CustomerTalentDTO> listPotentialTalent(DeleteEnterpriseCommand cmd) {
+        List<CustomerTalent> dtos = enterpriseCustomerProvider.listPotentialTalentBySourceId(cmd.getSourceId());
+        List<CustomerTalentDTO> result = new ArrayList<>();
+        if(dtos!=null && dtos.size()>0){
+            dtos.forEach((r)->{
+                CustomerTalentDTO dto = ConvertHelper.convert(r, CustomerTalentDTO.class);
+                if (r.getTalentSourceItemId() != null && StringUtils.isNotBlank(r.getOriginSourceType())) {
+                    if (PotentialCustomerType.SERVICE_ALLIANCE.getValue().equals(r.getOriginSourceType())) {
+                        ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(r.getTalentSourceItemId());
+                        if (serviceAllianceCategories != null) {
+                            dto.setTalentSourceItemId(serviceAllianceCategories.getName());
+                        }
+                    } else if (PotentialCustomerType.ACTIVITY.getValue().equals(r.getOriginSourceType())) {
+                        ActivityCategories activityCategories = activityProivider.findActivityCategoriesById(r.getTalentSourceItemId());
+                        if (activityCategories != null) {
+                            dto.setTalentSourceItemId(activityCategories.getName());
+                        }
+                    }
+                }
+            });
+        }
+        return result;
+    }
+
+    @Override
+    public void updatePotentialCustomer(DeleteEnterpriseCommand cmd) {
+        CustomerPotentialData data = enterpriseCustomerProvider.findPotentialCustomerByName(cmd.getName());
+        if (data != null) {
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,
+                    "potential customer name  is already exist");
+        }
+        enterpriseCustomerProvider.updatePotentialCustomer(cmd.getSourceId(), cmd.getName(), UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
     }
 }

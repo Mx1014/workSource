@@ -39,6 +39,8 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
             "buildingId":{"type":"string"},
             "addressId":{"type":"string"},
             "adminFlag":{"type":"long"},
+            "sourceId":{"type":"long"},
+            "sourceType":{"type":"string"},
             "propertyArea":{"type":"double"},
 			"lastTrackingTime":{"type":"date"}
 		}

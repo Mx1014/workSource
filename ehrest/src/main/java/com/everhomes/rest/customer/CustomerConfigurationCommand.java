@@ -7,17 +7,17 @@ import com.everhomes.util.StringHelper;
  */
 
 public class CustomerConfigurationCommand {
-    private Byte scopeType;
+    private String scopeType;
     private Long scopeId;
     private Byte value;
     private Byte status;
     private Integer namespaceId;
 
-    public Byte getScopeType() {
+    public String getScopeType() {
         return scopeType;
     }
 
-    public void setScopeType(Byte scopeType) {
+    public void setScopeType(String scopeType) {
         this.scopeType = scopeType;
     }
 

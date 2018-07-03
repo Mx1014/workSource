@@ -103,7 +103,6 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                         data.setSourceId(activity.getCategoryId());
                     }
                     data.setSourceType(PotentialCustomerType.ACTIVITY.getValue());
-                    data.setSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
                     customerProvider.createPotentialCustomer(data);
                     dataId = data.getId();
                 }else {

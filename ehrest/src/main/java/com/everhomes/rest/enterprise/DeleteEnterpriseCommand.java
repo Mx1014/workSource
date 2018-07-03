@@ -22,7 +22,9 @@ public class DeleteEnterpriseCommand {
 
 	private String potentialName;
 
-	private Long pageSize;
+	private String name;
+
+	private Integer pageSize;
 
 	private Long pageAnchor;
 
@@ -67,11 +69,11 @@ public class DeleteEnterpriseCommand {
 	}
 
 
-	public Long getPageSize() {
+	public Integer getPageSize() {
 		return pageSize;
 	}
 
-	public void setPageSize(Long pageSize) {
+	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
 
@@ -89,6 +91,14 @@ public class DeleteEnterpriseCommand {
 
 	public void setPotentialName(String potentialName) {
 		this.potentialName = potentialName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

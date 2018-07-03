@@ -2130,6 +2130,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         EhCustomerPotentialDatasDao dao = new EhCustomerPotentialDatasDao(context.configuration());
         data.setId(id);
         data.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        data.setStatus(CommonStatus.ACTIVE.getCode());
         dao.insert(data);
     }
 
@@ -2145,23 +2146,33 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public void deletePotentialCustomer(Long enterpriseId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhCustomerPotentialDatasDao datasDao = new EhCustomerPotentialDatasDao(context.configuration());
-        datasDao.deleteById(enterpriseId);
+        CustomerPotentialData data = ConvertHelper.convert(datasDao.findById(enterpriseId), CustomerPotentialData.class);
+        if(data!=null){
+            data.setStatus(CommonStatus.INACTIVE.getCode());
+            datasDao.update(data);
+        }
     }
 
     @Override
-    public List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType,String name) {
+    public List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType,String name,Long pageAnchor,Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerPotentialDatasRecord> query = context.selectQuery(Tables.EH_CUSTOMER_POTENTIAL_DATAS);
         query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        if (pageAnchor != null && pageAnchor != 0) {
+            query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.ID.lt(pageAnchor));
+        }
         if (sourceId != null) {
             query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.SOURCE_ID.eq(sourceId));
         }
         if (StringUtils.isNotBlank(sourceType)) {
             query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.SOURCE_TYPE.eq(sourceType));
         }
-        if(StringUtils.isNotBlank(name)){
+        if (StringUtils.isNotBlank(name)) {
             query.addConditions(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAME.like("%" + name + "%"));
         }
+        query.addOrderBy(Tables.EH_CUSTOMER_POTENTIAL_DATAS.ID.desc());
+        query.addLimit(pageSize);
         return query.fetchInto(CustomerPotentialData.class);
     }
 
@@ -2177,10 +2188,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
 
     @Override
-    public void deleteCustomerConfiguration(Integer namespaceId) {
+    public void deleteCustomerConfiguration(Integer namespaceId,String sourceType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_CUSTOMER_CONFIGUTATIONS)
                 .where(Tables.EH_CUSTOMER_CONFIGUTATIONS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_CUSTOMER_CONFIGUTATIONS.SCOPE_TYPE.eq(sourceType))
                 .execute();
     }
 
@@ -2203,5 +2215,34 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .where(Tables.EH_CUSTOMER_CONFIGUTATIONS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_CUSTOMER_CONFIGUTATIONS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                 .fetchInto(CustomerConfiguration.class);
+    }
+
+    @Override
+    public List<CustomerTalent> listPotentialTalentBySourceId(Long sourceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTalentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TALENTS);
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID.eq(0L));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.ORIGIN_SOURCE_ID.eq(sourceId));
+        query.addConditions(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTalent> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTalent.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void updatePotentialCustomer(Long sourceId, String name, Long userId, Integer currentNamespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_POTENTIAL_DATAS)
+                .set(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAME, name)
+                .set(Tables.EH_CUSTOMER_POTENTIAL_DATAS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+                .set(Tables.EH_CUSTOMER_POTENTIAL_DATAS.OPERATE_UID, userId)
+                .where(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAMESPACE_ID.eq(currentNamespaceId))
+                .and(Tables.EH_CUSTOMER_POTENTIAL_DATAS.ID.eq(sourceId))
+                .execute();
     }
 }

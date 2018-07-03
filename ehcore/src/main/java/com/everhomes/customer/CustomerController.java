@@ -35,6 +35,7 @@ import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerExpandItemDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
 import com.everhomes.rest.customer.CustomerInvestmentDTO;
@@ -1674,6 +1675,20 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /customer/updatePotentialCustomer</b>
+     * <p>修改潜在客户信息</p>
+     */
+    @RequestMapping("updatePotentialCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse updatePotentialCustomer(DeleteEnterpriseCommand cmd) {
+        customerService.updatePotentialCustomer(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /customer/listPotentialCustomers</b>
      * <p>列表潜在客户信息</p>
      */
@@ -1709,6 +1724,34 @@ public class CustomerController extends ControllerBase {
     public RestResponse listSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
        List<CustomerConfigurationDTO> customerConfigurations =  customerService.listSyncPotentialCustomer(cmd);
         RestResponse response = new RestResponse(customerConfigurations);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listExpandItems</b>
+     * <p>获取服务联盟和活动多入口列表信息</p>
+     */
+    @RequestMapping("listExpandItems")
+    @RestReturn(value = CustomerExpandItemDTO.class,collection = true)
+    public RestResponse listExpandItems(CustomerConfigurationCommand cmd) {
+       List<CustomerExpandItemDTO> items =  customerService.listExpandItems(cmd);
+        RestResponse response = new RestResponse(items);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listPotentialTalent</b>
+     * <p>获取潜在客户的人才团队</p>
+     */
+    @RequestMapping("listPotentialTalent")
+    @RestReturn(value = CustomerTalentDTO.class,collection = true)
+    public RestResponse listPotentialTalent(DeleteEnterpriseCommand cmd) {
+       List<CustomerTalentDTO> dtos =  customerService.listPotentialTalent(cmd);
+        RestResponse response = new RestResponse(dtos);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -30,6 +30,7 @@ import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerExpandItemDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
 import com.everhomes.rest.customer.CustomerInvestmentDTO;
@@ -375,4 +376,10 @@ public interface CustomerService {
     void setSyncPotentialCustomer(CustomerConfigurationCommand cmd);
 
     List<CustomerConfigurationDTO> listSyncPotentialCustomer(CustomerConfigurationCommand cmd);
+
+    List<CustomerExpandItemDTO> listExpandItems(CustomerConfigurationCommand cmd);
+
+    List<CustomerTalentDTO> listPotentialTalent(DeleteEnterpriseCommand cmd);
+
+    void updatePotentialCustomer(DeleteEnterpriseCommand cmd);
 }

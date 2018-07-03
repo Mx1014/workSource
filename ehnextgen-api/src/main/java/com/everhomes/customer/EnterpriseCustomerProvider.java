@@ -196,11 +196,15 @@ public interface EnterpriseCustomerProvider {
 
     void updatePotentialTalentsToCustomer(Long customerId,Long sourceId);
 
-    List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType, String name);
+    List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType, String name,Long pageAnchor,Integer pageSize);
 
-    void deleteCustomerConfiguration(Integer namespaceId);
+    void deleteCustomerConfiguration(Integer namespaceId,String sourceType);
 
     void createCustomerConfiguration(CustomerConfiguration customerConfiguration);
 
     List<CustomerConfiguration> listSyncPotentialCustomer(Integer namespaceId);
+
+    List<CustomerTalent> listPotentialTalentBySourceId(Long sourceId);
+
+    void updatePotentialCustomer(Long sourceId, String name, Long aLong, Integer currentNamespaceId);
 }

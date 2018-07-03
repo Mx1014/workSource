@@ -14,7 +14,6 @@ public class PotentialCustomerDTO {
     private String name;
     private Long sourceId;
     private String sourceType;
-    private String sourceValue;
     private Long operateUid;
     private Timestamp updateTime;
     private Timestamp createTime;
@@ -60,13 +59,6 @@ public class PotentialCustomerDTO {
         this.sourceType = sourceType;
     }
 
-    public String getSourceValue() {
-        return sourceValue;
-    }
-
-    public void setSourceValue(String sourceValue) {
-        this.sourceValue = sourceValue;
-    }
 
     public Long getOperateUid() {
         return operateUid;

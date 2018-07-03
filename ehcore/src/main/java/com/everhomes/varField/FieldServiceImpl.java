@@ -88,7 +88,9 @@ import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
 import com.everhomes.rest.varField.UpdateFieldItemsCommand;
 import com.everhomes.rest.varField.UpdateFieldsCommand;
 import com.everhomes.rest.varField.VarFieldStatus;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
@@ -100,6 +102,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.yellowPage.YellowPageProvider;
+import com.everhomes.yellowPage.YellowPageService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -189,6 +192,9 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private ActivityProivider activityProivider;
+
+    @Autowired
+    private YellowPageService yellowPageService;
 
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
@@ -576,15 +582,27 @@ public class FieldServiceImpl implements FieldService {
             if (activityCategories != null && activityCategories.size() > 0) {
                 activityCategories.forEach((a) -> {
                     FieldItemDTO activityItem = new FieldItemDTO();
-                    activityItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
                     activityItem.setFieldId(dto.getId());
                     activityItem.setItemDisplayName(a.getName());
-                    activityItem.setId(a.getId());
+                    activityItem.setFieldId(a.getId());
                     items.add(activityItem);
                 });
             }
             //add service alliance categories
-
+            ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
+            if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+                serviceAllianceCategories.forEach((r) -> {
+                    FieldItemDTO allianceItem = new FieldItemDTO();
+                    allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    allianceItem.setFieldId(dto.getId());
+                    allianceItem.setItemDisplayName(r.getName());
+                    allianceItem.setFieldId(r.getId());
+                    items.add(allianceItem);
+                });
+            }
         }
     }
 

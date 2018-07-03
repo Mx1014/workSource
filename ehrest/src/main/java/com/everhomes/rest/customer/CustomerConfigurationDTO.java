@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 public class CustomerConfigurationDTO {
     private Long id;
-    private Byte scopeType;
+    private String scopeType;
     private Long scopeId;
     private Byte value;
     private Byte status;
@@ -18,11 +18,11 @@ public class CustomerConfigurationDTO {
         this.id = id;
     }
 
-    public Byte getScopeType() {
+    public String getScopeType() {
         return scopeType;
     }
 
-    public void setScopeType(Byte scopeType) {
+    public void setScopeType(String scopeType) {
         this.scopeType = scopeType;
     }
 

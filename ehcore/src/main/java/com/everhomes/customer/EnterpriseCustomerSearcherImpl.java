@@ -334,10 +334,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (cmd.getSourceId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("sourceId", cmd.getSourceId()));
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceId", cmd.getSourceId()));
         }
         if (cmd.getSourceType() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("sourceType", cmd.getSourceType()));
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceType", cmd.getSourceType()));
         }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
