@@ -23,7 +23,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 
 -- 由于海岸馨服务是定制的，web没有账单组管理，所以需要初始化收款方账户配置
 SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_bill_groups`),0);
-INSERT INTO `eh_payment_bill_groups` VALUES (@id := @id + 1, '999993', '999993', 'community', '物业缴费', '2', '5', '0', UTC_TIMESTAMP(), NULL, NULL, '1', NULL, NULL, NULL, '4',
+INSERT INTO `eh_payment_bill_groups` (`id`, `namespace_id`, `owner_id`, `owner_type`, `name`, `balance_date_type`, `bills_day`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`, `due_day`, `due_day_type`, `brother_group_id`, `bills_day_type`, `biz_payee_type`, `biz_payee_id`, `category_id`) 
+VALUES (@id := @id + 1, '999993', '999993', 'community', '物业缴费', '2', '5', '0', UTC_TIMESTAMP(), NULL, NULL, '1', NULL, NULL, NULL, '4',
 	'EhOrganizations', '4443', '1028');
 
 -- 新支付数据迁移
