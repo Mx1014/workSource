@@ -37,6 +37,7 @@ import com.everhomes.server.schema.tables.daos.EhCustomerAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerConfigutationsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerDepartureInfosDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorStatisticsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
@@ -58,6 +59,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
+import com.everhomes.server.schema.tables.pojos.EhCustomerConfigutations;
 import com.everhomes.server.schema.tables.pojos.EhCustomerDepartureInfos;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicatorStatistics;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
@@ -2171,5 +2173,35 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .set(Tables.EH_CUSTOMER_TALENTS.STATUS,CommonStatus.ACTIVE.getCode())
                 .where(Tables.EH_CUSTOMER_TALENTS.ORIGIN_SOURCE_ID.eq(sourceId))
                 .execute();
+    }
+
+
+    @Override
+    public void deleteCustomerConfiguration(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_CUSTOMER_CONFIGUTATIONS)
+                .where(Tables.EH_CUSTOMER_CONFIGUTATIONS.NAMESPACE_ID.eq(namespaceId))
+                .execute();
+    }
+
+    @Override
+    public void createCustomerConfiguration(CustomerConfiguration customerConfiguration) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerConfigutations.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerConfigutationsDao dao = new EhCustomerConfigutationsDao(context.configuration());
+        customerConfiguration.setId(id);
+        customerConfiguration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        customerConfiguration.setStatus(CommonStatus.ACTIVE.getCode());
+        customerConfiguration.setCreatorUid(UserContext.currentUserId());
+        dao.insert(customerConfiguration);
+    }
+
+    @Override
+    public List<CustomerConfiguration> listSyncPotentialCustomer(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_CUSTOMER_CONFIGUTATIONS)
+                .where(Tables.EH_CUSTOMER_CONFIGUTATIONS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_CUSTOMER_CONFIGUTATIONS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchInto(CustomerConfiguration.class);
     }
 }

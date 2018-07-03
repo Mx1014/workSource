@@ -82,6 +82,7 @@ import com.everhomes.rest.customer.CustomerApplyProjectStatus;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
 import com.everhomes.rest.customer.CustomerConfigurationCommand;
+import com.everhomes.rest.customer.CustomerConfigurationDTO;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
@@ -4220,6 +4221,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void setSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
         CustomerConfiguration customerConfiguration = ConvertHelper.convert(cmd, CustomerConfiguration.class);
+        enterpriseCustomerProvider.deleteCustomerConfiguration(cmd.getNamespaceId());
         enterpriseCustomerProvider.createCustomerConfiguration(customerConfiguration);
+    }
+
+    @Override
+    public List<CustomerConfigurationDTO> listSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
+        List<CustomerConfiguration> configurations = enterpriseCustomerProvider.listSyncPotentialCustomer(cmd.getNamespaceId());
+        List<CustomerConfigurationDTO> dtos = new ArrayList<>();
+        if (configurations != null && configurations.size() > 0) {
+            configurations.forEach((c) -> dtos.add(ConvertHelper.convert(c, CustomerConfigurationDTO.class)));
+        }
+        return dtos;
     }
 }

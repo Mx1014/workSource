@@ -30,6 +30,7 @@ import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
 import com.everhomes.rest.customer.CustomerConfigurationCommand;
+import com.everhomes.rest.customer.CustomerConfigurationDTO;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
@@ -1687,13 +1688,27 @@ public class CustomerController extends ControllerBase {
 
     /**
      * <b>URL: /customer/setSyncPotentialCustomer</b>
-     * <p>设置客户同步按钮</p>
+     * <p>设置客户同步</p>
      */
     @RequestMapping("setSyncPotentialCustomer")
     @RestReturn(value = String.class)
     public RestResponse setSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
         customerService.setSyncPotentialCustomer(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listSyncPotentialCustomer</b>
+     * <p>获取客户同步设置</p>
+     */
+    @RequestMapping("listSyncPotentialCustomer")
+    @RestReturn(value = CustomerConfigurationDTO.class,collection = true)
+    public RestResponse listSyncPotentialCustomer(CustomerConfigurationCommand cmd) {
+       List<CustomerConfigurationDTO> customerConfigurations =  customerService.listSyncPotentialCustomer(cmd);
+        RestResponse response = new RestResponse(customerConfigurations);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

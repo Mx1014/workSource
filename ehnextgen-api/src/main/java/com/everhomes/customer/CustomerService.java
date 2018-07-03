@@ -25,6 +25,7 @@ import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
 import com.everhomes.rest.customer.CustomerConfigurationCommand;
+import com.everhomes.rest.customer.CustomerConfigurationDTO;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
@@ -372,4 +373,6 @@ public interface CustomerService {
     CustomerPotentialResponse listPotentialCustomers(DeleteEnterpriseCommand cmd);
 
     void setSyncPotentialCustomer(CustomerConfigurationCommand cmd);
+
+    List<CustomerConfigurationDTO> listSyncPotentialCustomer(CustomerConfigurationCommand cmd);
 }

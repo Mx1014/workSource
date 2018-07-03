@@ -7,6 +7,7 @@ CREATE TABLE `eh_customer_configutations` (
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: invalid, 2: valid',
   `namespace_id` int(11) not NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'record create time',
+  `creator_uid` BIGINT(20) DEFAULT NULL COMMENT 'creatorUid',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
