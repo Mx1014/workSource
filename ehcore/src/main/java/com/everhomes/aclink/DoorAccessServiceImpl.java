@@ -1615,6 +1615,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}
         	doorAccess.setEnableAmount(cmd.getEnableAmount());
         }
+		if(cmd.getEnableDuration() != null){
+			doorAccess.setEnableDuration(cmd.getEnableDuration());
+		}
 
 		if(cmd.getServerId() != null){
 			if(cmd.getServerId() != 0L){
@@ -3519,10 +3522,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         resp.setPhone(auth.getPhone());
-        if(auth.getValidEndMs() > System.currentTimeMillis()) {
-            resp.setIsValid((byte)1);    
+        if(auth.getValidEndMs() < System.currentTimeMillis() || ((byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
+            resp.setIsValid((byte)0);    
         } else {
-            resp.setIsValid((byte)0);
+            resp.setIsValid((byte)1);
         }
         resp.setDescription(auth.getDescription());
         resp.setValidDay(1l);
