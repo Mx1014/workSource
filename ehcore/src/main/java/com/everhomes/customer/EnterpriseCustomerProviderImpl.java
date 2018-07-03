@@ -129,6 +129,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -1711,6 +1713,20 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                                 Timestamp newTime = (Timestamp) objNew;
                                 newData = newTime.toLocalDateTime().format(formatter);
                             }
+                        }
+                        // remove rich text html lable
+                        if("corp_description".equals(field.getFieldName())){
+                             String regEx_html = "<[^>]+>";
+                            Pattern pattern = Pattern.compile(regEx_html);
+                            Matcher oldDataMatcher = pattern.matcher(oldData);
+                            Matcher newDataMatcher = pattern.matcher(newData);
+                            if(oldDataMatcher.find()){
+                                oldData = oldDataMatcher.replaceAll("");
+                            }
+                            if (newDataMatcher.find()) {
+                                newData = newDataMatcher.replaceAll("");
+                            }
+
                         }
                         Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
