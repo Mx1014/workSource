@@ -9,7 +9,7 @@ CREATE TABLE `eh_contract_events` (
   `opearte_time` datetime NOT NULL COMMENT '修改时间',
   `opearte_type` tinyint(4) NOT NULL COMMENT '操作类型（1：增加，2：删除，3：修改）',
   `content` text COMMENT '修改内容描述'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '合同日志记录表';
 -- END BY 唐岑
 
 
