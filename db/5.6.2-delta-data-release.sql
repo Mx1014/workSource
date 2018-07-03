@@ -309,3 +309,177 @@ INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `de
 update eh_payment_bill_items set charging_item_name=REPLACE(charging_item_name,"*","");
 update eh_payment_bill_items set charging_item_name=REPLACE(charging_item_name,"(元)","");
 -- END BY 杨崇鑫
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: OPERATION
+-- 此SECTION放升级相关的操作要求，如调接口、查询数据确认等
+-- AUTHOR: liangqishi  20180702
+-- REMARK: 某某模块涉及到数据迁移，升级后需要调用/xxxx/xxxx接口更新ES
+-- --------------------- SECTION END -------------------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: 基线执行
+-- AUTHOR: dengs  20180703
+-- REMARK: 基线停车支付收款方迁移
+
+-- Volgo
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 1;
+set @communityid = '240111044331058733';
+set @parkinglotId = 10030;
+SET @parkingLotName = '左邻停车场';
+set @payeeId = 2327;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+-- 天企汇
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999944;
+set @communityid = '240111044332061061';
+set @parkinglotId = 10034;
+SET @parkingLotName = '联科停车场';
+set @payeeId = 4592;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999944;
+set @communityid = '240111044332061063';
+set @parkinglotId = 10035;
+SET @parkingLotName = '创投大厦停车场';
+set @payeeId = 4592;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999944;
+set @communityid = '240111044332061063';
+set @parkinglotId = 10036;
+SET @parkingLotName = '孵化中心停车场';
+set @payeeId = 4592;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999944;
+set @communityid = '240111044332061063';
+set @parkinglotId = 10037;
+SET @parkingLotName = 'IT研发中心停车场';
+set @payeeId = 4592;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+-- 智汇银星
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999950;
+set @communityid = '240111044332060200';
+set @parkinglotId = 10028;
+SET @parkingLotName = '银星工业区停车场';
+set @payeeId = 4303;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+
+-- 创意园
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999958;
+set @communityid = '240111044332060016';
+set @parkinglotId = 10024;
+SET @parkingLotName = '中百畅停车场';
+set @payeeId = 4249;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+-- 路福联合广场
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999963;
+set @communityid = '240111044332060139';
+set @parkinglotId = 10032;
+SET @parkingLotName = '路福联合大厦停车场';
+set @payeeId = 4590;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+-- 上海万科星商汇
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999981;
+set @communityid = '240111044331056041';
+set @parkinglotId = 10021;
+SET @parkingLotName = '御河企业公馆停车场';
+set @payeeId = 3800;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+-- --------------------- SECTION END -------------------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: 深圳湾独立环境执行
+-- AUTHOR: dengs  20180703
+-- REMARK: 基线停车支付收款方迁移
+-- 深圳湾
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999966;
+set @communityid = '240111044331050370';
+set @parkinglotId = 10011;
+SET @parkingLotName = '软件产业基地停车场';
+set @payeeId = 1129;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999966;
+set @communityid = '240111044331050371';
+set @parkinglotId = 10012;
+SET @parkingLotName = '创投大厦停车场';
+set @payeeId = 1129;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999966;
+set @communityid = '240111044331050369';
+set @parkinglotId = 10013;
+SET @parkingLotName = '生态园停车场';
+set @payeeId = 1129;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+-- --------------------- SECTION END -------------------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: 光大we谷独立环境执行
+-- AUTHOR: dengs  20180703
+-- REMARK: 基线停车支付收款方迁移
+-- 光大we谷
+SET @id = IFNULL((SELECT MAX(id) from eh_parking_business_payee_accounts),9999);
+set @ns = 999979;
+set @communityid = '240111044331056800';
+set @parkinglotId = 10026;
+SET @parkingLotName = '光大we谷停车场';
+set @payeeId = 4422;
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'tempfee', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'vipParking', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
+
+-- --------------------- SECTION END -------------------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: 基线执行
+-- AUTHOR: dengs  20180703
+-- REMARK: 基线执行云打印收款方
+-- volgo
+SET @id = IFNULL((SELECT MAX(id) from eh_siyin_print_business_payee_accounts),9999);
+INSERT INTO `eh_siyin_print_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES (@id:=@id+1, '1', 'community', '240111044331058733', '2327', 'EhOrganizations', '2', '1', now(), '1', now());
+-- --------------------- SECTION END -------------------------------------------------------
