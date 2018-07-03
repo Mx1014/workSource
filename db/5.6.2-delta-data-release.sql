@@ -5,7 +5,7 @@ INSERT INTO `eh_rentalv2_order_records` (`id`,`order_no`,`biz_order_num`,`pay_or
 
 update `eh_rentalv2_order_records` t1 right join `eh_rentalv2_orders` t2 on t1.`order_no` = t2.`order_no` set t1.order_id = t2.id,t1.amount = t2.pay_total_money,t1.status = IF(t2.status in (2,7,9,10,14,20),1,0) ;
 
--- 通用脚本  
+-- 通用脚本 
 -- ADD BY 杨崇鑫
 -- 新支付的配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
@@ -42,7 +42,6 @@ update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id=
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='3799' where namespace_id=999959; -- 启迪香山
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='3777' where namespace_id=999961; -- 智富汇
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4590' where namespace_id=999963; -- 路福联合广场
-update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1005' where namespace_id=999966; -- 深圳湾
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4526' where namespace_id=999967; -- 大沙河建投
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1000' where namespace_id=999971; -- 张江高科
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1004' where namespace_id=999973; -- E-BOILL
@@ -51,8 +50,22 @@ update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id=
 -- update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1001' where namespace_id=999985;
 -- update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1003' where namespace_id=999990;
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4443' where namespace_id=999993; -- 海岸馨服务
+
+-- END BY 杨崇鑫
+
+-- 深圳湾适用脚本[999966]  
+-- ADD BY 杨崇鑫 
+-- 新支付数据迁移
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1005' where namespace_id=999966; -- 深圳湾
+-- END BY 杨崇鑫
+
+
+-- 光大we谷适用脚本[999979]  
+-- ADD BY 杨崇鑫 
+-- 新支付数据迁移
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4422' where namespace_id=999979; -- 光大we谷
 -- END BY 杨崇鑫
+
 
 -- -----------------------------SECTION BEGIN--------------------------------------------
 -- ENV: ALL
