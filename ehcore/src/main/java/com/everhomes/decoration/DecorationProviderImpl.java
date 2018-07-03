@@ -7,6 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.decoration.DecorationAttachmentDTO;
+import com.everhomes.rest.decoration.DecorationRequestStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -183,7 +184,8 @@ public class DecorationProviderImpl implements  DecorationProvider {
         SelectJoinStep<Record> step = context.select(Tables.EH_DECORATION_REQUESTS.fields()).from(Tables.EH_DECORATION_REQUESTS).leftOuterJoin(Tables.EH_DECORATION_WORKERS).on(
                 Tables.EH_DECORATION_REQUESTS.ID.eq(Tables.EH_DECORATION_WORKERS.REQUEST_ID));
         Condition condition = Tables.EH_DECORATION_REQUESTS.APPLY_PHONE.eq(phone);
-        condition = condition.or(Tables.EH_DECORATION_REQUESTS.DECORATOR_PHONE.eq(phone));
+        condition = condition.or(Tables.EH_DECORATION_REQUESTS.DECORATOR_PHONE.eq(phone).and(
+                Tables.EH_DECORATION_REQUESTS.STATUS.lt(DecorationRequestStatus.APPLY.getCode())));
         condition = condition.or(Tables.EH_DECORATION_WORKERS.PHONE.eq(phone));
         if (locator != null)
             condition = condition.and(Tables.EH_DECORATION_REQUESTS.ID.lt(locator.getAnchor()));
