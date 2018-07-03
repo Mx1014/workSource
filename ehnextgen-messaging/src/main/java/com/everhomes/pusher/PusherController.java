@@ -158,7 +158,7 @@ public class PusherController extends ControllerBase {
             this.deviceProvider.registDevice(device);
             
             //用于开发阶段服务器后台打印信息，最后要注掉
-            LOGGER.error("registDevice create new DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
+           // LOGGER.error("registDevice create new DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
         }
         //else if(StringUtils.isBlank(device.getBundleId())||StringUtils.isBlank(device.getPusherServiceType()))
         else{
@@ -168,10 +168,10 @@ public class PusherController extends ControllerBase {
             
             this.deviceProvider.updateDevice(device);
           //用于开发阶段服务器后台打印信息，最后要注掉
-            LOGGER.error("registDevice update new DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
+          //  LOGGER.error("registDevice update new DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
         }
       //用于开发阶段服务器后台打印信息，最后要注掉
-        LOGGER.error("registDevice  DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
+       // LOGGER.error("registDevice  DeviceId:"+cmd.getDeviceId()+";BundleId:"+cmd.getBundleId());
         return new RestResponse(ConvertHelper.convert(device, DeviceDTO.class));
     }
 
