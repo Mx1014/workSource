@@ -2,6 +2,8 @@ package com.everhomes.rest.contract;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>id: id</li>
@@ -63,5 +65,8 @@ public class DeleteContractTemplateCommand {
 		this.orgId = orgId;
 	}
 
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

@@ -2698,7 +2698,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public ContractDTO setPrintContractTemplate(SetPrintContractTemplateCommand cmd) {
-		if (null == cmd.getId() || cmd.getContractId() == null || cmd.getTemplateId() == null) {
+		if (cmd.getContractId() == null || cmd.getTemplateId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter in the command");
@@ -2720,16 +2720,23 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public ContractDTO getContractTemplateDetail(GetContractTemplateDetailCommand cmd) {
-		if (cmd.getContractId() == null) {
+		if (cmd.getTemplateId() == null || cmd.getNamespaceId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter in the command");
 		}
+		Contract contract = null;
+		ContractDTO dto = null;
 		
-		Contract contract = contractProvider.findContractById(cmd.getContractId());
-		ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+		if (cmd.getContractId() != null) {
+			contract = contractProvider.findContractById(cmd.getContractId());
+			dto = ConvertHelper.convert(contract, ContractDTO.class);
+		}
 		
 		if (contract.getTemplateId() != null) {
+			
+			dto = ConvertHelper.convert(cmd, ContractDTO.class);
+			
 			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
 			ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
 			dto.setContractTemplate(contractTemplatedto);

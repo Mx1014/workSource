@@ -2,6 +2,8 @@ package com.everhomes.rest.contract;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>id: id</li>
@@ -21,11 +23,21 @@ public class GetContractTemplateDetailCommand {
 	@NotNull
 	private Long categoryId;
 	private Long ownerId;
-	@NotNull
+	
 	private Long contractId;
 	private String contractNumber;
 	@NotNull
 	private Long orgId;
+	@NotNull
+	private Long templateId;
+
+    public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -63,5 +75,10 @@ public class GetContractTemplateDetailCommand {
 	public void setOrgId(Long orgId) {
 		this.orgId = orgId;
 	}
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	
 }
