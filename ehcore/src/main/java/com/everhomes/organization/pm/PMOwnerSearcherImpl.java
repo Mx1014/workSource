@@ -4,6 +4,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.rest.address.AddressDTO;
@@ -93,17 +94,24 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         feedDoc(owner.getId().toString(), source);
 	}
 
-	@Override
-	public void syncFromDb() {
+    @Override
+    public void syncFromDb() {
         this.deleteAll();
-        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwners(null, null);
-        if(owners.size() > 0) {
-            this.bulkUpdate(owners);
+        Integer pageSize = 200;
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        for (; ; ) {
+            List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersWithLocator(locator, pageSize);
+            if (owners.size() > 0) {
+                this.bulkUpdate(owners);
+            }
+            if (locator.getAnchor() == null) {
+                break;
+            }
         }
         this.optimize(1);
         this.refresh();
         LOGGER.info("sync for organization owner ok");
-	}
+    }
 
 	@Override
 	public ListOrganizationOwnersResponse query(SearchOrganizationOwnersCommand cmd) {

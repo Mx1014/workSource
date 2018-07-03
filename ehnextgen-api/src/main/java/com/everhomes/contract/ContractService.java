@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.openapi.OrganizationDTO;
 
@@ -39,7 +40,7 @@ public interface ContractService {
 	void setContractParam(SetContractParamCommand cmd);
 	ContractParamDTO getContractParam(GetContractParamCommand cmd);
 
-	String generateContractNumber();
+	String generateContractNumber(GenerateContractNumberCommand cmd);
 	String syncContractsFromThirdPart(SyncContractsFromThirdPartCommand cmd, Boolean authFlag);
 
 	Boolean checkAdmin(CheckAdminCommand cmd);
@@ -51,4 +52,7 @@ public interface ContractService {
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
 
     ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
+    //add by tangcen
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+   
 }

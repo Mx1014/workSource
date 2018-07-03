@@ -4,7 +4,14 @@ package com.everhomes.contractDebug;
 import com.everhomes.dynamicExcel.DynamicField;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.List;
@@ -19,6 +26,10 @@ public class DebugExcelUtil {
     ) throws Exception {
         // 生成一个表格
         Sheet sheet = workbook.createSheet();
+        // add by jiarui 2018/6/22 format all cell to text
+        CellStyle style =  workbook.createCellStyle();
+        DataFormat format =  workbook.createDataFormat();
+        style.setDataFormat(format.getFormat("@"));
         workbook.setSheetName(sheetNum, sheetName);
         // 设置表格默认列宽度为20个字节
         sheet.setDefaultColumnWidth((short) 30);
@@ -80,6 +91,7 @@ public class DebugExcelUtil {
             int index = 1;
             for (List<String> rowContent : data) {
                 row = sheet.createRow(index+1);
+                row.setRowStyle(style);
                 int cellIndex = 0;
                 for (String cellContent : rowContent) {
                     Cell cell = row.createCell((short) cellIndex);

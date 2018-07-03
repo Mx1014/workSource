@@ -1,13 +1,12 @@
 package com.everhomes.yellowPage;
 
 
-import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.common.PrivilegeType;
 import com.everhomes.rest.yellowPage.*;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 public interface YellowPageService {
 
@@ -87,7 +86,20 @@ public interface YellowPageService {
 	
 	void exportServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd,  HttpServletResponse httpResp);
 	
-	String transferServiceToCommunity();
+	String transferPosterUriToAttachment();
+
+
+	ListOnlineServicesResponse listOnlineServices(ListOnlineServicesCommand cmd);
+
 
 	void checkPrivilege(PrivilegeType privilegeType, Long currentPMId, Long appId, Long checkCommunityId);
+
+	void updateAllianceTag(UpdateAllianceTagCommand cmd);
+
+	GetAllianceTagResponse getAllianceTagList(GetAllianceTagCommand cmd);
+
+	String transferLaunchPadItems();
+
+
+
 }

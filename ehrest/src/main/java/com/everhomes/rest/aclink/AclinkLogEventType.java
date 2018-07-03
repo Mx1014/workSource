@@ -1,7 +1,7 @@
 package com.everhomes.rest.aclink;
 
 public enum AclinkLogEventType {
-    PHONE_BLE_OPEN(0l), PHONE_QR_OPEN(1l);
+    PHONE_BLE_OPEN(0l), PHONE_QR_OPEN(1l), PHONE_REMOTE_OPEN(2l), BUTTON_OPEN(3l);
     private long code;
     
     private AclinkLogEventType(long code) {
@@ -21,6 +21,10 @@ public enum AclinkLogEventType {
             return PHONE_BLE_OPEN;
         case 1:
             return PHONE_QR_OPEN;
+        case 2:
+        	return PHONE_REMOTE_OPEN;
+        case 3:
+        	return BUTTON_OPEN;
         default :
             break;
         }

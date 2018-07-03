@@ -13,6 +13,9 @@ import com.everhomes.util.StringHelper;
  * <li>qr: 二维码数据 </li>
  * <li>isValid: 当前是否有效 </li>
  * <li>approveName: 授权人</li>
+ * <li>validFromMs: 有效期开始时间</li>
+ * <li>validEndMs: 有效期终止时间</li>
+ * <li>validAuthAmount: 剩余有效开门次数</li>
  * </ul>
  * @author janson
  *
@@ -34,8 +37,22 @@ public class GetVisitorResponse {
     Long validEndMs;
     String namespaceName;
     String qrIntro;
+    private Long validFromMs;
+    private Integer validAuthAmount;
     
-    public String getUserName() {
+    public Long getValidFromMs() {
+		return validFromMs;
+	}
+	public void setValidFromMs(Long validFromMs) {
+		this.validFromMs = validFromMs;
+	}
+	public Integer getValidAuthAmount() {
+		return validAuthAmount;
+	}
+	public void setValidAuthAmount(Integer validAuthAmount) {
+		this.validAuthAmount = validAuthAmount;
+	}
+	public String getUserName() {
         return userName;
     }
     public void setUserName(String userName) {

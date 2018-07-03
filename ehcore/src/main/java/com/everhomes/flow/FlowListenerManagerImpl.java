@@ -359,6 +359,19 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
+    public void onFlowStateChanging(Flow flow) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getModuleListener();
+            try {
+                listener.onFlowStateChanging(flow);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+        }
+    }
+
+    @Override
     public void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {

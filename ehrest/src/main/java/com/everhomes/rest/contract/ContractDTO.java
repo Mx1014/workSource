@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
  * <li>rent: 合同总金额</li>
+ * <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  */
 public class ContractDTO {
@@ -52,6 +53,26 @@ public class ContractDTO {
 
 	private String customerName;
 	
+	private Long categoryId;
+	private Long configId;
+	
+	
+	public Long getConfigId() {
+		return configId;
+	}
+
+	public void setConfigId(Long configId) {
+		this.configId = configId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
 

@@ -114,7 +114,7 @@ public class PreOrderDTO {
         return payMethod;
     }
 
-    public void setPayMethod(List<PayMethodDTO> payMethod) {
-        this.payMethod = payMethod;
+    public void setPayMethod(List<PayMethodDTO> list) {
+        this.payMethod = list;
     }
 }

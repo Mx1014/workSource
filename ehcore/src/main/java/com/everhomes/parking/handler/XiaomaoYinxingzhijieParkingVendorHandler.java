@@ -147,7 +147,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
             dto.setPlateNumber(cmd.getPlateNumber());
             long now = System.currentTimeMillis();
             dto.setOpenDate(now);
-            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
             if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
                 dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
             }else {
@@ -265,7 +265,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
         }
 
         Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
-        Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue());
+        Timestamp timestampEnd = new Timestamp(Utils.getLongByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue(),true));
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
 

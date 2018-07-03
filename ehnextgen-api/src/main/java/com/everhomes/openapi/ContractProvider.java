@@ -1,9 +1,16 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import com.everhomes.contract.ContractAttachment;
+import com.everhomes.contract.ContractCategory;
+import com.everhomes.contract.ContractChargingChange;
+import com.everhomes.contract.ContractChargingItem;
+import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.news.NewsCategory;
+import com.everhomes.rest.contract.ContractAttachmentDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
 
 import java.sql.Timestamp;
@@ -25,9 +32,9 @@ public interface ContractProvider {
 
 	void deleteContractByOrganizationName(Integer namespaceId, String name);
 
-	List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers);
+	List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers, Long categoryId);
 
-	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize);
+	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize, Long categoryId);
 
 	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue, Integer namespaceId);
 
@@ -35,11 +42,11 @@ public interface ContractProvider {
 
 	void deleteContract(Contract contract);
 
-	List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId);
+	List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId, Long categoryId);
 
-	List<Contract> listContractByOrganizationId(Long organizationId);
+	List<Contract> listContractByOrganizationId(Long organizationId, Long categoryId);
 	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType);
-	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status);
+	List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType, Byte status, Long categoryId);
 
 	Map<Long, Contract> listContractsByIds(List<Long> ids);
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
@@ -53,7 +60,7 @@ public interface ContractProvider {
 
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
-	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId);
+	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long categoryId);
 
 	void createContractParamGroupMap(ContractParamGroupMap map);
 	void deleteContractParamGroupMap(ContractParamGroupMap map);
@@ -72,5 +79,29 @@ public interface ContractProvider {
 	List<Long> SimpleFindContractByNumber(String header);
 
     List<ContractLogDTO> listContractsBySupplier(Long supplierId, Long pageAnchor, Integer pageSize);
+    //add by steve
+	List<Contract> listContractByNamespaceId(Integer namespaceId);
+
+    //多入口
+    void createContractCategory(ContractCategory newsCategory);
+
+	ContractCategory findContractCategoryById(Long categoryId);
+
+	void updateContractCategory(ContractCategory contractCategory);
+
+	//记录合同修改日志 by tangcen
+	void saveContractEvent(int i, Contract contract, Contract exist);
+	void insertContractEvents(ContractEvents event);
+	void saveContractEventAboutApartments(int opearteType, Contract contract, ContractBuildingMapping mapping);
+	void saveContractEventAboutChargingItem(int opearteType, Contract contract,ContractChargingItem contractChargingItem);
+	void saveContractEventAboutAttachment(int opearteType, Contract contract, ContractAttachment contractAttachment);
+	void saveContractEventAboutChargingChange(int adjustAdd, Contract contract,ContractChargingChange contractChargingChange);
+	List<ContractEvents> listContractEvents(Long contractId);
+
+    boolean isNormal(Long cid);
+
+	void saveContractEventAboutApartments(int opearteType, Contract contract, String oldApartmnets,String newApartmnets);
+
+    Long findContractCategoryIdByContractId(Long contractId);
 
 }

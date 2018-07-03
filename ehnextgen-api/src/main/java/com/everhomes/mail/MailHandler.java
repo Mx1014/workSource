@@ -9,4 +9,5 @@ public interface MailHandler {
     
     void sendMail(Integer namespaceId, String from, String to, String subject, String body);
     void sendMail(Integer namespaceId, String from, String to, String subject, String body, List<String> attachmentList);
+    void sendMails(Integer namespaceId, String from, List<String> toList, List<String> ccList, List<String> bccList, String subject, String body, List<String> attachmentList);
 }

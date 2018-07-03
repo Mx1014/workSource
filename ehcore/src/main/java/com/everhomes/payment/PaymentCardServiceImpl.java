@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.order.PayService;
 import com.everhomes.rest.activity.ActivityLocalStringCode;
 import com.everhomes.rest.order.*;
 import org.apache.commons.codec.binary.Base64;
@@ -126,8 +125,6 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     BigCollectionProvider bigCollectionProvider;
     @Autowired
 	private LocaleStringService localeStringService;
-	@Autowired
-	private PayService payService;
     @Autowired
     private CoordinationProvider coordinationProvider;
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -259,9 +256,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 //				UserContext.current().getUser().getLocale(),
 //				"activity roster pay");
 //		preOrderCommand.setSummary(temple);
-
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-		return callBack;
+		//不再维护
+		//PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		return null;
 	}
 
 	@Override

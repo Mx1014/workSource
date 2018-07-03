@@ -166,6 +166,8 @@ public class EnterpriseController extends ControllerBase {
     					return ConvertHelper.convert(n,EnterpriseAttachmentDTO.class); 
     			}).collect(Collectors.toList()));
     		 }
+    		 eDto.setAdminMembers(r.getAdminMembers());
+    		 eDto.setEmailDomain(r.getEmailDomain());
         	return eDto;
         }).collect(Collectors.toList());
         ListEnterpriseResponse r = new ListEnterpriseResponse();

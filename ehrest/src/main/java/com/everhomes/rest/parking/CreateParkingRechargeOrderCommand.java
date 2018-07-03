@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>orderType: 订单类型</li>
  * <li>invoiceType: 发票类型ID</li>
  * <li>clientAppName: 新支付clientAppName</li>
+ * <li>paymentType: 支付方式,这里传 9， WECHAT_APPPAY(1): 微信APP支付  WECHAT_SCAN_PAY(7): 微信扫码支付(正扫) ALI_SCAN_PAY(8): 支付宝扫码支付(正扫) WECHAT_JS_PAY(9): 微信JS 支付（公众号） ALI_JS_PAY(10): 支付宝JS 支付（生活号）WECHAT_JS_ORG_PAY(21): 微信公众帐号支付</li>
  * </ul>
  */
 public class CreateParkingRechargeOrderCommand {
@@ -51,7 +52,7 @@ public class CreateParkingRechargeOrderCommand {
     private Long invoiceType;
 
     private String clientAppName;
-
+    private Integer paymentType;
     public CreateParkingRechargeOrderCommand() {
     }
 
@@ -173,6 +174,14 @@ public class CreateParkingRechargeOrderCommand {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public Integer getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(Integer paymentType) {
+        this.paymentType = paymentType;
     }
 
     @Override
