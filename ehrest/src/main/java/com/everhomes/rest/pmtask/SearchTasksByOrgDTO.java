@@ -16,8 +16,7 @@ public class SearchTasksByOrgDTO {
     private String requestorName;
     private String requestorPhone;
     private Timestamp createTime;
-    private Byte status;
-    private String statusString;
+    private String status;
     private String content;
     private Long flowCaseId;
 
@@ -85,20 +84,12 @@ public class SearchTasksByOrgDTO {
         this.createTime = createTime;
     }
 
-    public Byte getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Byte status) {
+    public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getStatusString() {
-        return statusString;
-    }
-
-    public void setStatusString(String statusString) {
-        this.statusString = statusString;
     }
 
     @Override
