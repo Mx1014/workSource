@@ -17,6 +17,7 @@ import com.everhomes.discover.ItemType;
  * <li>nextPageOffset:下一次offset</li>
  * <li>totalAmount:费用总额</li>
  * <li>list:明细列表，参考{@link com.everhomes.rest.asset.PaymentExpectancyDTO}</li>
+ * <li>generated:账单是否已生成(0:账单明细未生成，1：账单明细已生成)</li>
  *</ul>
  */
 public class PaymentExpectanciesResponse {
@@ -24,8 +25,18 @@ public class PaymentExpectanciesResponse {
     List<PaymentExpectancyDTO>  list;
     private Integer nextPageOffset;
     private String totalAmount;
+    //add by tangcen
+    private Byte generated;
 
-    public String getTotalAmount() {
+    public Byte getGenerated() {
+		return generated;
+	}
+
+	public void setGenerated(Byte generated) {
+		this.generated = generated;
+	}
+
+	public String getTotalAmount() {
         return totalAmount;
     }
 

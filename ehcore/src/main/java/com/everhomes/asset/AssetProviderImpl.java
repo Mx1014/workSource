@@ -3939,8 +3939,13 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(contract.CONTRACT_ID.eq(contractId))
                     .fetch(contract.IN_WORK);
         }
+//<<<<<<< HEAD
+//        if ( aByte == null) {
+//        	return false;
+//            //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
         if ( aByte.size() == 0) {
-            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
+            //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
+        	return false;
         }
         if( aByte.get(aByte.size()-1) == (byte)0){
             return false;
@@ -4777,6 +4782,35 @@ public class AssetProviderImpl implements AssetProvider {
     private static EhPaymentChargingStandards standard = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("standard");
     private static EhPaymentChargingItemScopes itemScope = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("itemScope");
     private static EhPaymentBillGroupsRules groupRule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("groupRule");
+
+
+    //add by tangcen 
+	@Override
+	public String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long categoryId, Long chargingItemId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        String projectChargingItemName = null;
+        projectChargingItemName =context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
+                				.from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                				.where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
+                				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
+                				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+                				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CATEGORY_ID.eq(categoryId))
+                				.fetchOne(0,String.class);
+        if (org.springframework.util.StringUtils.isEmpty(projectChargingItemName)) {
+        	projectChargingItemName =context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
+    				.from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+    				.where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
+    				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(new Long(Integer.toString(namespaceId))))
+    				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID.eq(chargingItemId))
+    				.and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CATEGORY_ID.eq(categoryId))
+    				.fetchOne(0,String.class);
+		}
+        if(LOGGER.isDebugEnabled()) {
+        	LOGGER.debug("ownerId: {}; namespaceId: {}; chargingItemId: {}; projectChargingItemName: {}",
+        			ownerId, namespaceId, chargingItemId,projectChargingItemName);
+        }
+        return projectChargingItemName;
+	}
 
     //add by steve
 	@Override
