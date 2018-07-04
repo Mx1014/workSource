@@ -4677,7 +4677,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (memberArchive == null)
             return dto;
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(), dto.getOrganizationId());
-        boolean isAdmin = checkUserPrivilege(UserContext.currentUserId(), dto.getOrganizationId());
 
         //  1.设置基本信息
         dto.setOrganizationId(memberArchive.getOrganizationId());
@@ -4732,7 +4731,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (member == null)
             return dto;
         dto.setVisibleFlag(member.getVisibleFlag());
-        if (!isAdmin)
+        if (!checkUserPrivilege(UserContext.currentUserId(), dto.getOrganizationId()))
             if (VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.HIDE)
                 dto.setContactToken(null);
 
