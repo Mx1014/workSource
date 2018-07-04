@@ -216,3 +216,58 @@ ALTER TABLE `ehcore`.`eh_version_urls` CHANGE COLUMN `download_url` `download_ur
 ALTER TABLE `ehcore`.`eh_version_urls` CHANGE COLUMN `info_url` `info_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html';
 --end
 
+CREATE TABLE `eh_pm_task_orders` (
+  `id`  bigint(20) NOT NULL ,
+  `namespace_id`  int NULL ,
+  `task_id` bigint(20) NOT NULL COMMENT '报修单Id',
+  `order_id`  bigint(20) NULL COMMENT '资源预订订单id' ,
+  `order_no`  bigint(20) NULL COMMENT '资源预订订单号' ,
+  `biz_order_num`  varchar(64) NULL COMMENT '处理过的资源预订订单号' ,
+  `pay_order_id`  bigint(20) NULL COMMENT '支付系统订单号' ,
+  `payment_order_type`  tinyint(8) NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单' ,
+  `status`  tinyint(8) NULL COMMENT '订单状态0未支付 1已支付' ,
+  `amount` decimal(16) NULL COMMENT '订单金额' ,
+  `service_fee` decimal(16) NULL COMMENT '服务费' ,
+  `product_fee` decimal(16) NULL COMMENT '产品费' ,
+  `account_id`  bigint(20) NULL COMMENT '收款方账号' ,
+  `order_commit_url` varchar(1024) NULL,
+  `order_commit_token` varchar(1024) NULL,
+  `order_commit_nonce` varchar(128) NULL,
+  `order_commit_timestamp`  bigint(20) NULL  ,
+  `pay_info` text NULL,
+  `create_time`  datetime  ,
+  `update_time`  datetime  ,
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修订单表';
+
+-- 订单明细
+CREATE TABLE `eh_pm_task_order_details` (
+  `id`  bigint(20) NOT NULL ,
+  `namespace_id`  int NULL ,
+  `owner_id` bigint(20),
+  `owner_type` varchar(32),
+  `task_id` bigint(20) NOT NULL COMMENT '报修单Id',
+  `order_id`  bigint(20) NOT NULL COMMENT '资源预订订单id' ,
+
+  `product_name` varchar(60) NULL COMMENT '产品名称',
+  `product_amount` int NULL COMMENT '产品数量',
+  `product_price` decimal(16) NULL COMMENT '产品单价' ,
+
+  `create_time`  datetime  ,
+  `update_time`  datetime  ,
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修订单明细表';
+
+CREATE TABLE `eh_pm_task_pay_accounts` (
+  `id`  bigint(20) NOT NULL ,
+  `namespace_id`  int NULL ,
+  `community_id`  bigint(20) NULL ,
+  `resource_type`  varchar(20) NULL,
+  `resource_type_id`  bigint(20) NULL ,
+  `source_type`  varchar(20) NULL COMMENT 'default_rule:默认规则 resource_rule:资源规则' ,
+  `source_id`  bigint(20) NULL ,
+  `resource_name`  varchar(20) NULL,
+  `account_id`  bigint(20) NULL,
+  `create_time`  datetime  ,
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修支付账号表';
