@@ -891,7 +891,8 @@ public class AssetProviderImpl implements AssetProvider {
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
                 });
-        dslContext.select(fine.AMOUNT,fine.NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.AMOUNT_OWED)
+        dslContext.select(fine.AMOUNT,fine.NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.AMOUNT_OWED,
+        		fine.BILL_ITEM_ID)
                 .from(fine,t)
                 .where(fine.BILL_ITEM_ID.eq(t.ID))
                 .and(fine.BILL_ID.eq(billId))
@@ -904,19 +905,20 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivable(r.getValue(fine.AMOUNT));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
-                    //根据减免费项配置重新计算待收金额
-                    Long charingItemId = r.getValue(t.CHARGING_ITEMS_ID);
-                    Boolean isConfigSubtraction = isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
-                    if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
+                    Long billItemId = r.getValue(fine.BILL_ITEM_ID);
+                	//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
+                	Long chargingItemId = getPaymentBillItemsChargingItemID(billId,billItemId);
+                	//根据减免费项配置重新计算待收金额
+                    Boolean isConfigSubtraction = isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
+                    if(!isConfigSubtraction) {//如果滞纳金没有配置减免费项，那么需要相加到待缴金额中
                     	dto.setIsConfigSubtraction((byte)0);
-                    	amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                    	amountOwed[0] = amountOwed[0].add(r.getValue(fine.AMOUNT));
                     }else {
                     	dto.setIsConfigSubtraction((byte)1);
-                    }
+                    }  
                     dtos.add(dto);
                     dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
                     dateStrEnd[0] = r.getValue(t.DATE_STR_END);
-                    amountOwed[0] = amountOwed[0].add(r.getValue(fine.AMOUNT));
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(fine.AMOUNT));
                     return null;
                 });
