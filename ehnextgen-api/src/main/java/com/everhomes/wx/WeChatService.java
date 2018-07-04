@@ -1,5 +1,6 @@
 package com.everhomes.wx;
 
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.wx.GetContentServerUriCommand;
 import com.everhomes.rest.wx.GetContentServerUrlCommand;
 import com.everhomes.rest.wx.GetSignatureCommand;
@@ -15,7 +16,7 @@ public interface WeChatService {
 	
 	String getContentServerUrl(GetContentServerUrlCommand cmd);
 
-	String getContentServerUri(GetContentServerUriCommand cmd);
+	CsFileLocationDTO getContentServerUri(GetContentServerUriCommand cmd);
 
 //    String testRestCall(String cmd, Object params, String url);
 

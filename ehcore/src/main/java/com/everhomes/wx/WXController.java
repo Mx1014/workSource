@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.wx.GetContentServerUriCommand;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -288,7 +289,7 @@ public class WXController extends ControllerBase {
 	 * <p>获取上传文件在content server的路径</p>
 	 */
 	@RequestMapping("getContentServerUri")
-	@RestReturn(value = String.class)
+	@RestReturn(value = CsFileLocationDTO.class)
 	public RestResponse getContentServerUri(GetContentServerUriCommand cmd) {
 		RestResponse response = new RestResponse(wechatService.getContentServerUri(cmd));
 

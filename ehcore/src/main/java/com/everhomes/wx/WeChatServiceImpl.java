@@ -121,13 +121,8 @@ public class WeChatServiceImpl implements WeChatService {
 	}
 
     @Override
-    public String getContentServerUri(GetContentServerUriCommand cmd) {
-        CsFileLocationDTO csFileLocationDTO = commonGetContentServerResponse(cmd.getMediaId());
-        String result = null;
-        if (csFileLocationDTO != null) {
-            result = csFileLocationDTO.getUri();
-        }
-        return result;
+    public CsFileLocationDTO getContentServerUri(GetContentServerUriCommand cmd) {
+        return commonGetContentServerResponse(cmd.getMediaId());
     }
 
     private CsFileLocationDTO commonGetContentServerResponse(String mediaId) {
