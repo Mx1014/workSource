@@ -452,11 +452,16 @@ INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`reso
 SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 
 set @namespace_id = 999944;
-set @account_id = 4592;
+set @account_id = 4691;
 INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
 SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 
 set @namespace_id = 999993;
+set @account_id = 4443;
+INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
+SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
+
+set @namespace_id = 999954;
 set @account_id = 4443;
 INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
 SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
