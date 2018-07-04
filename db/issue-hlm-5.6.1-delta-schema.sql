@@ -221,18 +221,18 @@ ALTER TABLE `eh_service_module_apps` ADD COLUMN `default_app_flag`  tinyint(4) N
 -- 修改appId名字，实际为应用originId
 ALTER TABLE `eh_banners` CHANGE COLUMN `appId` `app_id`  bigint(20) NULL DEFAULT NULL;
 
--- Already delete in 5.5.1
--- ALTER TABLE `eh_organization_member_details` ADD COLUMN `profile_integrity` INTEGER NOT NULL DEFAULT '0';
-
--- end Janson
-
--- 园区表增加namespace_id索引 add by yanjun 20180615
-alter table eh_communities add index namespace_id_index(`namespace_id`);
-
-
--- fix for zuolinbase only, remove this after 5.5.2
--- ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
--- end Janson
+-- 园区广场电商 add by yanjun 20180703
+CREATE TABLE `eh_community_bizs` (
+  `id` bigint(20) NOT NULL,
+  `organization_id` bigint(20) DEFAULT NULL,
+  `community_id` bigint(20) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `biz_url` varchar(255) DEFAULT NULL,
+  `logo_uri` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '2' COMMENT '0-delete，1-disable，2-enable',
+  PRIMARY KEY (`id`),
+  KEY `community_id` (`community_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 通用脚本
 -- ADD BY 黄良铭
