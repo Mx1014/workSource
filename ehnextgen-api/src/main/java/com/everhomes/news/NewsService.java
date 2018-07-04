@@ -42,6 +42,8 @@ public interface NewsService {
 	AddNewsCommentResponse addNewsComment(AddNewsCommentCommand cmd);
 
 	ListNewsCommentResponse listNewsComment(ListNewsCommentCommand cmd);
+	
+	GetNewsCommentResponse getNewsComment(GetNewsCommentCommand cmd);
 
 	void deleteNewsComment(DeleteNewsCommentCommand cmd);
 
@@ -76,4 +78,10 @@ public interface NewsService {
 	void syncNewsWhenDelete(Long id);
 	
 	Long checkNewsToken(Long userId, String newsToken);
+
+	String getNewsQR(UpdateNewsCommand cmd);
+	
 }
+
+
+

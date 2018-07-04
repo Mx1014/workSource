@@ -15,6 +15,7 @@ import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,12 @@ public class OPPushActivityHandler implements OPPushHandler {
 
         ListNearbyActivitiesBySceneCommand listCmd = new ListNearbyActivitiesBySceneCommand();
         OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
+
+        ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getAppId());
+
         Long categoryId = 1L;
-        if(config.getAppConfig() != null){
-            ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(config.getAppConfig().toString(), ActivityEntryConfigulation.class);
+        if(app != null && app.getInstanceConfig() != null){
+            ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(app.getInstanceConfig(), ActivityEntryConfigulation.class);
             if(configulation != null){
                 categoryId = configulation.getCategoryId();
             }

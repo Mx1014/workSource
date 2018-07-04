@@ -7317,7 +7317,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 
-		BeanUtils.copyProperties(cmd, rule);
+		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -7491,7 +7491,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		buildPricePackages(cmd.getPricePackages());
 
-		BeanUtils.copyProperties(cmd, rule);
+		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -7630,7 +7630,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
 		}
 
-		BeanUtils.copyProperties(cmd, rule);
+		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 		rentalv2Provider.updateRentalDefaultRule(rule);
 
 	}
@@ -7663,7 +7663,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
 		}
 
-		BeanUtils.copyProperties(cmd, rule);
+		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
