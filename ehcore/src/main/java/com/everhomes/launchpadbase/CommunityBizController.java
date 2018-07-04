@@ -27,7 +27,7 @@ public class CommunityBizController extends ControllerBase {
      */
     @RequestMapping("createCommunityBiz")
     @RestReturn(value=CommunityBizDTO.class)
-    public RestResponse createCommunityBiz(CreateCommunityBiz cmd) {
+    public RestResponse createCommunityBiz(CreateCommunityBizCommand cmd) {
         CommunityBizDTO res = communityBizService.CreateCommunityBiz(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -37,12 +37,12 @@ public class CommunityBizController extends ControllerBase {
 
 
     /**
-     * <b>URL: /communityBiz/updateCommunityBiz</b>
+     * <b>URL: /communityBiz/UpdateCommunityBizCommand</b>
      * <p>更新园区电商入口</p>
      */
     @RequestMapping("updateCommunityBiz")
     @RestReturn(value=CommunityBizDTO.class)
-    public RestResponse updateCommunityBiz(updateCommunityBiz cmd) {
+    public RestResponse updateCommunityBiz(UpdateCommunityBizCommand cmd) {
         CommunityBizDTO res = communityBizService.updateCommunityBiz(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -56,7 +56,7 @@ public class CommunityBizController extends ControllerBase {
      */
     @RequestMapping("deleteCommunityBiz")
     @RestReturn(value=String.class)
-    public RestResponse deleteCommunityBiz(DeleteCommunityBiz cmd) {
+    public RestResponse deleteCommunityBiz(DeleteCommunityBizCommand cmd) {
         communityBizService.deleteCommunityBiz(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -69,7 +69,7 @@ public class CommunityBizController extends ControllerBase {
      */
     @RequestMapping("findCommunityBiz")
     @RestReturn(value=CommunityBizDTO.class)
-    public RestResponse findCommunityBiz(FindCommunityBiz cmd) {
+    public RestResponse findCommunityBiz(FindCommunityBizCommand cmd) {
         CommunityBizDTO res = communityBizService.findCommunityBiz(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -84,8 +84,8 @@ public class CommunityBizController extends ControllerBase {
     @RequestMapping("findCommunityBizForApp")
     @RestReturn(value=CommunityBizDTO.class)
     @RequireAuthentication(false)
-    public RestResponse findCommunityBizForApp() {
-        CommunityBizDTO res = communityBizService.findCommunityBizForApp();
+    public RestResponse findCommunityBizForApp(FindCommunityBizForAppCommand cmd) {
+        CommunityBizDTO res = communityBizService.findCommunityBizForApp(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

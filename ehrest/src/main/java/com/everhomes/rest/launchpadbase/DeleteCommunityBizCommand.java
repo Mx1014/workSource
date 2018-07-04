@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>id: id</li>
  * </ul>
  */
-public class DeleteCommunityBiz {
+public class DeleteCommunityBizCommand {
 
     private Long id;
 

@@ -3,7 +3,6 @@ package com.everhomes.launchpad;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityService;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
@@ -34,7 +33,7 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 
 
 	@Override
-	public CommunityBizDTO CreateCommunityBiz(CreateCommunityBiz cmd) {
+	public CommunityBizDTO CreateCommunityBiz(CreateCommunityBizCommand cmd) {
 
 
 		if(cmd.getCommunityId() == null && cmd.getOrganizationId() == null){
@@ -66,7 +65,7 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 	}
 
 	@Override
-	public CommunityBizDTO updateCommunityBiz(updateCommunityBiz cmd) {
+	public CommunityBizDTO updateCommunityBiz(UpdateCommunityBizCommand cmd) {
 
 
 		if(cmd.getCommunityId() == null && cmd.getOrganizationId() == null){
@@ -102,13 +101,13 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 	}
 
 	@Override
-	public void deleteCommunityBiz(DeleteCommunityBiz cmd) {
+	public void deleteCommunityBiz(DeleteCommunityBizCommand cmd) {
 
 		communityBizProvider.deleteCommunityBiz(cmd.getId());
 	}
 
 	@Override
-	public CommunityBizDTO findCommunityBiz(FindCommunityBiz cmd) {
+	public CommunityBizDTO findCommunityBiz(FindCommunityBizCommand cmd) {
 
 		if(cmd.getCommunityId() == null && cmd.getOrganizationId() == null){
 			throw RuntimeErrorException.errorWith("communityBiz", 1001,
@@ -146,10 +145,9 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 
 
 	@Override
-	public CommunityBizDTO findCommunityBizForApp() {
+	public CommunityBizDTO findCommunityBizForApp(FindCommunityBizForAppCommand cmd) {
 
-		AppContext appContext = UserContext.current().getAppContext();
-		Community community = communityProvider.findCommunityById(appContext.getCommunityId());
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
 		if(community == null){
 			throw RuntimeErrorException.errorWith("communityBiz", 1003,
