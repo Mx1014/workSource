@@ -332,7 +332,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ListOrganizationContactCommand cmdContact = new ListOrganizationContactCommand();
     	cmdContact.setVisibleFlag(VisibleFlag.ALL.getCode());
     	cmdContact.setOrganizationId(org.getId());
-    	ListOrganizationContactCommandResponse contactResp = organizationService.listOrganizationContacts(cmdContact);
+		ListOrganizationMemberCommandResponse contactResp = organizationService.listOrganizationPersonnelsWithDownStream(cmdContact);
     	Assert.assertTrue(contactResp.getMembers().size() > 0);
     }
     

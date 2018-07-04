@@ -5373,6 +5373,60 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+    @Override
+    public List<OrganizationMember> queryOrganizationPersonnelsWithDownStream(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
+        List<OrganizationMember> results = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(t1);
+        query.addJoin(t2, JoinType.LEFT_OUTER_JOIN, t1.field("detail_id").eq(t2.field("id")));
+        queryBuilderCallback.buildCondition(locator, query);
+
+        Condition condition = t1.field("id").gt(0L);
+        Organization org = findOrganizationById(organizationId);
+        condition = condition.and(t1.field("group_path").like(org.getPath() + "%"));
+        condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        // 不包括经理
+        condition = condition.and(t1.field("group_type").notEqual(OrganizationGroupType.MANAGER.getCode()));
+        condition = condition.and(t1.field("detail_id").isNotNull());
+        query.addConditions(condition);
+        query.addGroupBy(t1.field("contact_token"));
+        LOGGER.debug("sql : " + query.toString());
+        List<OrganizationMember> records = query.fetch().map(new OrganizationMemberRecordMapper());
+        if (records != null) {
+            records.forEach(r -> {
+                results.add(ConvertHelper.convert(r, OrganizationMember.class));
+            });
+        }
+        return results;
+    }
+
+    @Override
+    public Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS, JoinType.LEFT_OUTER_JOIN, Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID));
+        query.addSelect(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID);
+        if (queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ID.gt(0L);
+
+        Organization org = findOrganizationById(organizationId);
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        // 不包括经理
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.notEqual(OrganizationGroupType.MANAGER.getCode()));
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.isNotNull());
+        query.addConditions(condition);
+        query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+        return query.fetchCount();
+    }
+
 
     @Override
     public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens) {
@@ -5555,7 +5609,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
         queryBuilderCallback.buildCondition(locator, query);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
-        LOGGER.info(query.getSQL(true));    //  print the sql to check
         List<OrganizationMemberDetails> results = query.fetchInto(OrganizationMemberDetails.class);
         if (null == results || results.size() == 0)
             return null;
@@ -5575,60 +5628,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return null;
         return results;
     }
-
-    @Override
-    public Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(Tables.EH_ORGANIZATION_MEMBERS);
-        query.addJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS, JoinType.LEFT_OUTER_JOIN, Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID));
-        query.addSelect(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID);
-        queryBuilderCallback.buildCondition(locator, query);
-
-        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ID.gt(0L);
-
-        Organization org = findOrganizationById(organizationId);
-        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
-        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        // 不包括经理
-        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.notEqual(OrganizationGroupType.MANAGER.getCode()));
-        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.isNotNull());
-        query.addConditions(condition);
-        query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
-        return query.fetchCount();
-    }
-
-    @Override
-    public List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback) {
-        List<OrganizationMember> results = new ArrayList<>();
-
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(t1);
-        query.addJoin(t2, JoinType.LEFT_OUTER_JOIN, t1.field("detail_id").eq(t2.field("id")));
-        queryBuilderCallback.buildCondition(locator, query);
-
-        Condition condition = t1.field("id").gt(0L);
-        Organization org = findOrganizationById(organizationId);
-        condition = condition.and(t1.field("group_path").like(org.getPath() + "%"));
-        condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        // 不包括经理
-        condition = condition.and(t1.field("group_type").notEqual(OrganizationGroupType.MANAGER.getCode()));
-        condition = condition.and(t1.field("detail_id").isNotNull());
-        query.addConditions(condition);
-        query.addGroupBy(t1.field("contact_token"));
-        LOGGER.debug("sql : " + query.toString());
-        List<OrganizationMember> records = query.fetch().map(new OrganizationMemberRecordMapper());
-        if (records != null) {
-            records.forEach(r -> {
-                results.add(ConvertHelper.convert(r, OrganizationMember.class));
-            });
-        }
-        return results;
-    }
-
 
     @Override
     public List<Organization> listPMOrganizations(Integer namespaceId) {

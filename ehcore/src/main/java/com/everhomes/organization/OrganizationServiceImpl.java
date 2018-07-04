@@ -6230,7 +6230,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 case DIRECT_UNDER_ENTERPRISE:
                 case DEPARTMENT:
                 case GROUP:
-                    List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+                    List<OrganizationDTO> departments = new ArrayList<>();
                     //拼装
                     if (orgDto_target == null) {  //首次拼装
                         departments.add(orgDTO_now);
@@ -6246,7 +6246,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     }
                     break;
                 case JOB_POSITION:
-                    List<OrganizationDTO> jobPositions = new ArrayList<OrganizationDTO>();
+                    List<OrganizationDTO> jobPositions = new ArrayList<>();
                     //拼装
                     if (orgDto_target == null) {  //首次拼装
                         jobPositions.add(orgDTO_now);
@@ -11378,6 +11378,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return dto;
     }
 
+    /* 仅仅由企业通讯录调用,其它业务不再提供维护 */
     @Override
     public ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd) {
 
@@ -11392,7 +11393,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
 
-        //  通讯录默认（包含本节点及下级部门）
+        //  默认（包含本节点及下级部门）
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());

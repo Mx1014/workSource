@@ -1051,10 +1051,10 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
 
-    /**
+    /*
      * <b>URL: /org/listOrganizationContacts</b>
-     * <p>通讯录</p>
-     */
+     * <p>通讯录（停用）</p>
+
     @RequestMapping("listOrganizationContacts")
     @RestReturn(value = ListOrganizationContactCommandResponse.class)
     public RestResponse listOrganizationContacts(ListOrganizationContactCommand cmd) {
@@ -1062,7 +1062,7 @@ public class OrganizationController extends ControllerBase {
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
-    }
+    }*/
 
     /**
      * <b>URL: /org/getContactTopDepartment</b>

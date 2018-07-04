@@ -674,11 +674,8 @@ public class GroupServiceImpl implements GroupService {
                     dto.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
 
                 // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
-                //if(dto.getMemberCount() == 0){
-                long count = getOrganizationMemberCount(organization.getId());
-                dto.setMemberCount(count);
-                //}
-
+                Integer count = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), organization.getId(), null);
+                dto.setMemberCount(Long.valueOf(count));
                 dto.setOrgId(organization.getId());
             }
 
@@ -863,11 +860,8 @@ public class GroupServiceImpl implements GroupService {
                         }
 
                         // 某些公司会出现group人数为0，比如管理公司  add by yanjun 20170802
-                        //if(dto.getMemberCount() == 0){
-                        long count = getOrganizationMemberCount(org.getId());
-                        dto.setMemberCount(count);
-                        //}
-
+                        Integer count = organizationProvider.queryOrganizationPersonnelCounts(new ListingLocator(), org.getId(), null);
+                        dto.setMemberCount(Long.valueOf(count));
                         dto.setOrgId(org.getId());
                         groupDtoList.add(dto);
                     } else {
@@ -969,7 +963,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
 
-    private long getOrganizationMemberCount(Long orgId){
+/*    private long getOrganizationMemberCount(Long orgId){
         ListOrganizationContactCommand command = new ListOrganizationContactCommand();
         command.setOrganizationId(orgId);
         command.setPageSize(1);
@@ -979,7 +973,7 @@ public class GroupServiceImpl implements GroupService {
             return res.getTotalCount().longValue();
         }
         return 0;
-    }
+    }*/
 
     @Override
     public String getGroupAlias(Long groupId){

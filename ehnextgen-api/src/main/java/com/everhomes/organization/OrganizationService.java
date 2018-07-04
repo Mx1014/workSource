@@ -459,12 +459,7 @@ public interface OrganizationService {
      */
 	OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd);
 
-	/**
-	 * 简单的通讯录
-	 * @param cmd
-     * @return
-     */
-	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd);
+	/* 认证 */
 	void batchApproveForEnterpriseContact(BatchApproveContactCommand cmd);
 	void batchRejectForEnterpriseContact(BatchRejectContactCommand cmd);
 
@@ -605,6 +600,7 @@ public interface OrganizationService {
 
 	/**通讯录查询接口**/
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
+	ListOrganizationContactCommandResponse listOrganizationContacts(ListOrganizationContactCommand cmd); //	简洁的查询
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
 
 	/**根据detailId更新通用信息**/
