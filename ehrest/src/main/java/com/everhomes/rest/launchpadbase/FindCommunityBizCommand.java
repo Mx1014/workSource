@@ -7,10 +7,10 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>organizationId: 默认配置时使用organizationId</li>
- *     <li>communityId: 园区独立配置时使用communityId</li>
+ *     <li>communityId: 园区独立配置时使用communityId，客户端仅传communityId</li>
  * </ul>
  */
-public class FindCommunityBiz {
+public class FindCommunityBizCommand {
 
     private Long organizationId;
 

@@ -1,7 +1,12 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
@@ -20,13 +25,33 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 	@Autowired
 	private ContentServerService contentServerService;
 
+	@Autowired
+	private CommunityProvider communityProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+
 
 	@Override
-	public CommunityBizDTO CreateCommunityBiz(CreateCommunityBiz cmd) {
+	public CommunityBizDTO CreateCommunityBiz(CreateCommunityBizCommand cmd) {
+
+
+		if(cmd.getCommunityId() == null && cmd.getOrganizationId() == null){
+			throw RuntimeErrorException.errorWith("communityBiz", 1001,
+					"organizationId and communityId is null");
+		}
+
+		if(cmd.getOrganizationId() != null && cmd.getCommunityId() != null){
+			throw RuntimeErrorException.errorWith("communityBiz", 1002,
+					"organizationId and communityId duplicate");
+		}
 
 		CommunityBiz communityBiz = ConvertHelper.convert(cmd, CommunityBiz.class);
 
-		CommunityBiz oldCommunityBiz = communityBizProvider.findCommunityBiz(cmd.getCommunityId(), null);
+		CommunityBiz oldCommunityBiz = communityBizProvider.findCommunityBiz(cmd.getOrganizationId(), cmd.getCommunityId(), null);
+
+
+
 		if(oldCommunityBiz != null){
 			communityBiz.setId(oldCommunityBiz.getId());
 			communityBizProvider.updateCommunityBiz(communityBiz);
@@ -40,14 +65,27 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 	}
 
 	@Override
-	public CommunityBizDTO updateCommunityBiz(updateCommunityBiz cmd) {
+	public CommunityBizDTO updateCommunityBiz(UpdateCommunityBizCommand cmd) {
+
+
+		if(cmd.getCommunityId() == null && cmd.getOrganizationId() == null){
+			throw RuntimeErrorException.errorWith("communityBiz", 1001,
+					"organizationId and communityId is null");
+		}
+
+		if(cmd.getOrganizationId() != null && cmd.getCommunityId() != null){
+			throw RuntimeErrorException.errorWith("communityBiz", 1002,
+					"organizationId and communityId duplicate");
+		}
 
 		CommunityBiz communityBiz = ConvertHelper.convert(cmd, CommunityBiz.class);
 
+
+		//查询已有的电商配置
 		CommunityBiz oldCommunityBiz = communityBizProvider.getCommunityBizById(cmd.getId());
-
+		//查询已有的电商配置
 		if(oldCommunityBiz == null && cmd.getCommunityId() != null){
-			oldCommunityBiz = communityBizProvider.findCommunityBiz(cmd.getCommunityId(), null);
+			oldCommunityBiz = communityBizProvider.findCommunityBiz(cmd.getOrganizationId(), cmd.getCommunityId(), null);
 		}
 
 		if(oldCommunityBiz != null){
@@ -63,19 +101,26 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 	}
 
 	@Override
-	public void deleteCommunityBiz(DeleteCommunityBiz cmd) {
+	public void deleteCommunityBiz(DeleteCommunityBizCommand cmd) {
 
 		communityBizProvider.deleteCommunityBiz(cmd.getId());
 	}
 
 	@Override
-	public CommunityBizDTO findCommunityBiz(FindCommunityBiz cmd) {
+	public CommunityBizDTO findCommunityBiz(FindCommunityBizCommand cmd) {
 
-		if(cmd.getCommunityId() == null){
-			return null;
+		if(cmd.getCommunityId() == null && cmd.getOrganizationId() == null){
+			throw RuntimeErrorException.errorWith("communityBiz", 1001,
+					"organizationId and communityId is null");
 		}
 
-		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(cmd.getCommunityId(), null);
+		if(cmd.getOrganizationId() != null && cmd.getCommunityId() != null){
+			throw RuntimeErrorException.errorWith("communityBiz", 1002,
+					"organizationId and communityId duplicate");
+		}
+
+
+		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(cmd.getOrganizationId(), cmd.getCommunityId(), null);
 		CommunityBizDTO dto = toDto(communityBiz);
 
 		return dto;
@@ -83,6 +128,11 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 
 
 	private CommunityBizDTO toDto(CommunityBiz communityBiz){
+
+		if(communityBiz == null){
+			return null;
+		}
+
 		CommunityBizDTO dto = ConvertHelper.convert(communityBiz, CommunityBizDTO.class);
 
 		if(dto.getLogoUri() != null){
@@ -95,10 +145,27 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 
 
 	@Override
-	public CommunityBizDTO findCommunityBizForApp() {
+	public CommunityBizDTO findCommunityBizForApp(FindCommunityBizForAppCommand cmd) {
 
-		AppContext appContext = UserContext.current().getAppContext();
-		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(appContext.getCommunityId(), CommunityBizStatus.ENABLE.getCode());
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+
+		if(community == null){
+			throw RuntimeErrorException.errorWith("communityBiz", 1003,
+					"invalid communityId");
+		}
+
+		//判断使用默认的还是园区独立配置的
+		Long communityId = community.getId();
+		Long organizationId = null;
+		if(TrueOrFalseFlag.fromCode(community.getAppSelfConfigFlag()) == TrueOrFalseFlag.FALSE){
+			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationProperty(communityId);
+			if(organizationCommunity != null){
+				communityId = null;
+				organizationId  = organizationCommunity.getOrganizationId();
+			}
+		}
+
+		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(organizationId, communityId, CommunityBizStatus.ENABLE.getCode());
 		CommunityBizDTO dto = toDto(communityBiz);
 		return dto;
 	}

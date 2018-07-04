@@ -5,14 +5,14 @@ import com.everhomes.rest.launchpadbase.*;
 
 public interface CommunityBizService {
 
-    CommunityBizDTO CreateCommunityBiz(CreateCommunityBiz cmd);
+    CommunityBizDTO CreateCommunityBiz(CreateCommunityBizCommand cmd);
 
-    CommunityBizDTO updateCommunityBiz(updateCommunityBiz cmd);
+    CommunityBizDTO updateCommunityBiz(UpdateCommunityBizCommand cmd);
 
-    void deleteCommunityBiz(DeleteCommunityBiz cmd);
+    void deleteCommunityBiz(DeleteCommunityBizCommand cmd);
 
-    CommunityBizDTO findCommunityBiz(FindCommunityBiz cmd);
+    CommunityBizDTO findCommunityBiz(FindCommunityBizCommand cmd);
 
 
-    CommunityBizDTO findCommunityBizForApp();
+    CommunityBizDTO findCommunityBizForApp(FindCommunityBizForAppCommand cmd);
 }

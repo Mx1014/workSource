@@ -58,10 +58,16 @@ public class CommunityBizProviderImpl implements CommunityBizProvider {
     }
 
     @Override
-    public CommunityBiz findCommunityBiz(Long communityId, Byte status) {
+    public CommunityBiz findCommunityBiz(Long organizationId, Long communityId, Byte status) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunityBizs.class));
         SelectQuery<EhCommunityBizsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_BIZS);
-        query.addConditions(Tables.EH_COMMUNITY_BIZS.COMMUNITY_ID.eq(communityId));
+
+        //默认配置和独立配置
+        if(organizationId != null){
+            query.addConditions(Tables.EH_COMMUNITY_BIZS.ORGANIZATION_ID.eq(organizationId));
+        }else if(communityId != null){
+            query.addConditions(Tables.EH_COMMUNITY_BIZS.COMMUNITY_ID.eq(communityId));
+        }
 
         if(status != null){
             query.addConditions(Tables.EH_COMMUNITY_BIZS.STATUS.eq(status));

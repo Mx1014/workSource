@@ -43,7 +43,9 @@ public class ServiceModuleAppController extends ControllerBase {
 	@RequestMapping("installApp")
 	@RestReturn(value=ServiceModuleAppDTO.class)
 	public RestResponse installApp(InstallAppCommand cmd) {
-		//TODO 需要对接权限，当前公司的管理员才可以操作
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		ServiceModuleAppDTO res = serviceModuleAppService.installApp(cmd);
 		RestResponse response =  new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -75,7 +77,9 @@ public class ServiceModuleAppController extends ControllerBase {
 	@RequestMapping("uninstallApp")
 	@RestReturn(value=String.class)
 	public RestResponse uninstallApp(UninstallAppCommand cmd) {
-		//TODO 需要对接权限，当前公司的管理员才可以操作
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		serviceModuleAppService.uninstallApp(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -90,7 +94,9 @@ public class ServiceModuleAppController extends ControllerBase {
 	@RequestMapping("updateStatus")
 	@RestReturn(value=String.class)
 	public RestResponse updateStatus(UpdateStatusCommand cmd) {
-		//TODO 需要对接权限，当前公司的管理员才可以操作
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		serviceModuleAppService.updateStatus(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -119,7 +125,9 @@ public class ServiceModuleAppController extends ControllerBase {
 	@RequestMapping("changeCommunityConfigFlag")
 	@RestReturn(value=String.class)
 	public RestResponse changeCommunityConfigFlag(ChangeCommunityConfigFlagCommand cmd) {
-		//TODO 需要对接权限，当前公司的管理员才可以操作
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		serviceModuleAppService.changeCommunityConfigFlag(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -148,7 +156,9 @@ public class ServiceModuleAppController extends ControllerBase {
 	@RequestMapping("updateAppCommunityConfig")
 	@RestReturn(value=String.class)
 	public RestResponse updateAppCommunityConfig(UpdateAppCommunityConfigCommand cmd) {
-		//TODO 需要对接权限，当前公司的管理员才可以操作
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
 		serviceModuleAppService.updateAppCommunityConfig(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
