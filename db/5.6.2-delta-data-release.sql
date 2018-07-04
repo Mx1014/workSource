@@ -346,10 +346,6 @@ set @account_id = 4526;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
-set @namespace_id = 999971;
-set @account_id = 1000;
-INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
-SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
 set @namespace_id = 999973;
 set @account_id = 1004;
@@ -793,6 +789,13 @@ SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@accou
 -- AUTHOR: 杨崇鑫
 -- REMARK: 物业缴费新支付数据迁移
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4692' where namespace_id=999949; -- 安邦物业
+
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动收款方账号迁移；
+set @namespace_id = 999949;
+set @account_id = 4692;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
