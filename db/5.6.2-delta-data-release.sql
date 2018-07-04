@@ -4,10 +4,9 @@
 -- AUTHOR: 黄明波  20180703
 -- REMARK: 服务联盟v3.4 issue-29989
 -- REMARK: 更新服务的封面图，迁移服务广场的item
--- /yellowPage/transferPosterUriToAttachment
--- 参数:1802
---/yellowPage/transferLaunchPadItems
--- 参数:1802
+-- REMARK: /yellowPage/transferPosterUriToAttachment  参数:1802
+-- REMARK: /yellowPage/transferLaunchPadItems 参数:1802
+-- REMARK: 上线后清一下redis缓存。定时器有缓存问题。
 
 
 -- AUTHOR: 梁燕龙 20180702
@@ -153,6 +152,8 @@ update eh_locale_strings set text = 'USER_NAME,USER_PHONE,USER_COMPANY' where sc
 
 update eh_service_modules set action_type = 14 where id = 40500;
 update eh_service_module_apps set action_type = 14 where module_id = 40500;
+
+update eh_flow_predefined_params set namespace_id = 0 where module_id = 40500 and entity_type = 'flow_button';
 
 
 
