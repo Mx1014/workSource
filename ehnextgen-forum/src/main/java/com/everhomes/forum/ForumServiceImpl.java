@@ -4814,6 +4814,9 @@ public class ForumServiceImpl implements ForumService {
                         relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
                 	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId());
                     }else {
+                	    if (embededAppId != null && embededAppId.equals(AppConstants.APPID_LINK)) {
+                            relativeUrl = configProvider.getValue(ConfigConstants.POST_LINK_SHARE_URL, "");
+                        }
                 		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId());
                 	}
                 }

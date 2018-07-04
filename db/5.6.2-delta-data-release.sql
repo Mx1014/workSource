@@ -218,7 +218,11 @@ SET @c_id = (SELECT IFNULL(MAX(id),1) FROM eh_developer_account_info);
 INSERT INTO `eh_developer_account_info` (`id`, `bundle_ids`, `team_id`, `authkey_id`, `authkey`, `create_time`, `create_name`) 
 VALUES(@c_id:= @c_id +1,'com.ios','4H44DAN2YD','Q77V8W78L2','MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgexxG8QrtsI2+Xuwf75baYuZBQYBDzSBfEPijhC2GOmagCgYIKoZIzj0DAQehRANCAAT4qnM82JvBxnJ/R3ESPFgylVgU4st8QlQdf1QEYQtU3lVNStrg8W6DcLvYyL/7I/Tc0HFXm+8YQijz7ayWDOp7','2018-06-12 16:11:41','');
 
-	
+-- AUTHOR: 梁燕龙 20180704
+-- REMARK: 活动模块分享链接修改
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('post.link.share.url', '/mobile/static/share_post/share_post.html#', 'the relative path for sharing topic link', '0');
+UPDATE `eh_configurations` SET value = '/forum/build/index.html#/detail' WHERE NAME = 'post.share.url';
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
