@@ -2592,24 +2592,30 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
 		
 		ContractTemplate contractTemplateParent = null;
-		//新增的模板需要进行判断，是属于新增的还是复制的，如果存在id则表示是复制模板来的，需要添加parentId
+		//新增的模板需要进行判断，是属于新增的还是复制的，如果存在id则表示是复制模板来的，需要添加parentId,id不为空，通用修改，小区复制模板
 		if(cmd.getId() != null) {
+			//添加父节点，版本号+1
 			contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
 			contractTemplate.setParentId(cmd.getId());
+			if (cmd.getOwnerType() == null || "".equals(cmd.getOwnerType())) {
+				//来自通用模板修改
+				contractTemplate.setVersion(contractTemplateParent.getVersion()+1);
+			}else {
+				contractTemplate.setVersion(0);
+			}
 		}
+		//新增通用，新增园区模板
 		if(cmd.getId() == null) {
 			contractTemplate.setVersion(0);
+			contractTemplate.setParentId(0L);
 		}
-		if(cmd.getOwnerId() == null) {
+		/*if(cmd.getOwnerId() == null) {
 			contractTemplate.setOwnerType(cmd.getOwnerType());
 		}
-		
-		
-		if (contractTemplateParent!=null && cmd.getOwnerId()==null) {
+		*/
+		/*if (contractTemplateParent!=null && cmd.getOwnerId()==null) {
 			contractTemplate.setVersion(contractTemplateParent.getVersion()+1);
-		}
-		
-		
+		}*/
 		contractProvider.createContractTemplate(contractTemplate);
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
 	}
@@ -2622,7 +2628,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					"Invalid id parameter in the command");
 		}
 		//根据id查询数据，
-		//ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);;
+		//ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
 		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
 		//通用模板更新
 		/*if (cmd.getOwnerType() == null) {
@@ -2636,17 +2642,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contractTemplateParent.setContents(cmd.getContents());
 		}
 		
+		contractTemplateParent.setParentId(cmd.getId());
+		contractTemplateParent.setVersion(contractTemplateParent.getVersion()+1);
+		
 		//普通模板
-		if (cmd.getOwnerType() != null) {
+		/*if (cmd.getOwnerType() != null) {
 			contractTemplateParent.setVersion(contractTemplateParent.getVersion());
-		}
-		//传入status=0标识删除的
-		if (cmd.getStatus() == 0) {
-			contractTemplateParent.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			contractTemplateParent.setDeleteUid(UserContext.currentUserId());
-			contractTemplateParent.setStatus(ContractTemplateStatus.INACTIVE.getCode()); //无效的状态
-		}
-		contractProvider.updateContractTemplate(contractTemplateParent);
+		}*/
+		
+		contractProvider.createContractTemplate(contractTemplateParent);
+		//contractProvider.updateContractTemplate(contractTemplateParent);
 		return ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
 	}
 
@@ -2746,6 +2751,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Override
 	public void deleteContractTemplate(DeleteContractTemplateCommand cmd) {
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DENUNCIATION, cmd.getOrgId(), cmd.getCommunityId());
+		if (cmd.getId() == null || cmd.getNamespaceId() == null || cmd.getCategoryId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
 
 		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
 		
@@ -2754,21 +2764,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contractTemplateParent.setStatus(ContractTemplateStatus.INACTIVE.getCode()); //无效的状态
 		
 		contractProvider.updateContractTemplate(contractTemplateParent);
-		
-		/*Contract contract = checkContract(cmd.getId());
-		contract.setStatus(ContractStatus.DENUNCIATION.getCode());
-		contract.setDenunciationReason(cmd.getDenunciationReason());
-		contract.setDenunciationUid(cmd.getDenunciationUid());
-		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
-		contractProvider.updateContract(contract);
-		contractSearcher.feedDoc(contract);
-//		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
-//		assetService.deleteUnsettledBillsOnContractId(contract.getId());
-		if(cmd.getPaymentFlag() == 1) {
-			addToFlowCase(contract, flowcasePaymentContractOwnerType);
-		}else {
-			addToFlowCase(contract, flowcaseContractOwnerType);
-		}*/
 	}
 
 }

@@ -30,11 +30,7 @@ public class AddContractTemplateCommand {
 	private Long ownerId;
 	private String ownerType;
 	private String name;
-	private Byte contracttemplateType;
-	private Byte status;
 	private String contents;
-	private Long parentId;
-	private Integer version;
 	@NotNull
 	private Long orgId;
 	public Long getId() {
@@ -73,35 +69,11 @@ public class AddContractTemplateCommand {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Byte getContracttemplateType() {
-		return contracttemplateType;
-	}
-	public void setContracttemplateType(Byte contracttemplateType) {
-		this.contracttemplateType = contracttemplateType;
-	}
-	public Byte getStatus() {
-		return status;
-	}
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
 	public String getContents() {
 		return contents;
 	}
 	public void setContents(String contents) {
 		this.contents = contents;
-	}
-	public Long getParentId() {
-		return parentId;
-	}
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
-	}
-	public Integer getVersion() {
-		return version;
-	}
-	public void setVersion(Integer version) {
-		this.version = version;
 	}
 	public Long getOrgId() {
 		return orgId;

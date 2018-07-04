@@ -834,8 +834,17 @@ public class ContractProviderImpl implements ContractProvider {
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
+			
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
+		}else {
+			//查询所有的通用模板
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L));
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
 		}
-		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.UPDATE_TIME.desc());
+		
+		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
 		
 		if(null != pageSize)
 			query.limit(pageSize);

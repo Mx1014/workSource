@@ -351,7 +351,7 @@ public class ContractController extends ControllerBase {
 	}
 	
 	/**
-	 * <p>小区修改模板</p>
+	 * <p>小区修改模板，小区模板版本递增</p>
 	 * <b>URL: /contract/updateContractTemplate</b>
 	 */
 	@RequestMapping("updateContractTemplate")
@@ -420,7 +420,6 @@ public class ContractController extends ControllerBase {
 		contractService.deleteContractTemplate(cmd);
 		
 		return new RestResponse();
-		
 	}
 	
 }
