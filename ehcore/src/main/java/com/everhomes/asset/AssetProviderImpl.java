@@ -4485,20 +4485,6 @@ public class AssetProviderImpl implements AssetProvider {
         final BigDecimal[] amountExempled = {new BigDecimal("0")};
         final BigDecimal[] amountSupplement = {new BigDecimal("0")};
         BigDecimal zero = new BigDecimal("0");
-        //取出所有的减免费项配置
-        final List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
-        getReadOnlyContext().select(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.SUBTRACTION_TYPE,Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_ID,
-        		Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_NAME)
-	        .from(Tables.EH_PAYMENT_SUBTRACTION_ITEMS)
-	        .where(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.BILL_ID.eq(billId))
-	        .fetch()
-	        .forEach(r -> {
-	        	PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
-	        	subtractionItem.setSubtractionType(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.SUBTRACTION_TYPE));
-	        	subtractionItem.setChargingItemId(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_ID));
-	        	subtractionItem.setChargingItemName(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_NAME));
-	        	subtractionItemsList.add(subtractionItem);
-	        });
         getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,
         		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED,Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID)
                 .from(Tables.EH_PAYMENT_BILL_ITEMS)
@@ -4508,19 +4494,8 @@ public class AssetProviderImpl implements AssetProvider {
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));//应收
                     amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));//已收
                     //根据减免费项配置重新计算待收金额
-                    Boolean isConfigSubtraction = false;//用于判断该费项是否配置了减免费项
-                    if(subtractionItemsList != null) {
-                    	for(int i = 0;i < subtractionItemsList.size();i++) {
-                    		PaymentSubtractionItem subtractionItem = (PaymentSubtractionItem) subtractionItemsList.get(i);
-                    		//如果减免费项类型是"eh_payment_bill_items"，并且charginItemsId相等
-                    		if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.item.getCode())) {
-                    			Long charingItemId = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
-                    			if(charingItemId != null && charingItemId.equals(subtractionItem.getChargingItemId())) {
-                    				isConfigSubtraction = true;
-		                		}
-      	                  }
-                    	}
-                    }
+                    Long charingItemId = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
+                    Boolean isConfigSubtraction = isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
                     if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
                     	amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
                     }
@@ -4554,18 +4529,7 @@ public class AssetProviderImpl implements AssetProvider {
                                 .and(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
                                 .fetchOne(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
                     	//根据减免费项配置重新计算待收金额
-                        Boolean isConfigSubtraction = false;//用于判断该费项是否配置了减免费项
-                        if(subtractionItemsList != null) {
-                        	for(int i = 0;i < subtractionItemsList.size();i++) {
-                        		PaymentSubtractionItem subtractionItem = (PaymentSubtractionItem) subtractionItemsList.get(i);
-                        		//如果减免费项类型是"eh_payment_late_fine"，并且charginItemsId相等
-                        		if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.lateFine.getCode())) {
-                        			if(charingItemId != null && charingItemId.equals(subtractionItem.getChargingItemId())) {
-                        				isConfigSubtraction = true;
-    		                		}
-          	                  }
-                        	}
-                        }
+                        Boolean isConfigSubtraction = isConfigLateFineSubtraction(billId, charingItemId);//用于判断该滞纳金是否配置了减免费项
                         if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
                         	amountOwed[0] = amountOwed[0].add(value);
                         }    
@@ -5634,6 +5598,60 @@ public class AssetProviderImpl implements AssetProvider {
             }
             return null;
         });
+	}
+	
+	//取出所有的减免费项配置
+	public List<EhPaymentSubtractionItems> getSubtractionItemsByBillId(Long billId){
+		List<EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+		getReadOnlyContext().select(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.SUBTRACTION_TYPE,Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_ID,
+        		Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_NAME)
+	        .from(Tables.EH_PAYMENT_SUBTRACTION_ITEMS)
+	        .where(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.BILL_ID.eq(billId))
+	        .fetch()
+	        .forEach(r -> {
+	        	PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+	        	subtractionItem.setSubtractionType(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.SUBTRACTION_TYPE));
+	        	subtractionItem.setChargingItemId(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_ID));
+	        	subtractionItem.setChargingItemName(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_NAME));
+	        	subtractionItemsList.add(subtractionItem);
+	        });
+		return subtractionItemsList;
+	}
+	
+	//判断收费项是否配置了减免费项
+	public Boolean isConfigItemSubtraction(Long billId, Long charingItemId) {
+		List<EhPaymentSubtractionItems> subtractionItemsList = getSubtractionItemsByBillId(billId);//取出所有的减免费项配置
+		Boolean isConfigSubtraction = false;//用于判断该费项是否配置了减免费项
+	    if(subtractionItemsList != null) {
+	    	for(int i = 0;i < subtractionItemsList.size();i++) {
+	    		PaymentSubtractionItem subtractionItem = (PaymentSubtractionItem) subtractionItemsList.get(i);
+	    		//如果减免费项类型是"eh_payment_bill_items"，并且charginItemsId相等
+	    		if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.item.getCode())) {
+	    			if(charingItemId != null && charingItemId.equals(subtractionItem.getChargingItemId())) {
+	    				isConfigSubtraction = true;
+	        		}
+	            }
+	    	}
+	    }
+	    return isConfigSubtraction;
+	}
+	
+	//判断滞纳金是否配置了减免费项
+	public Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId) {
+		List<EhPaymentSubtractionItems> subtractionItemsList = getSubtractionItemsByBillId(billId);//取出所有的减免费项配置
+		Boolean isConfigSubtraction = false;//用于判断该费项是否配置了减免费项
+        if(subtractionItemsList != null) {
+        	for(int i = 0;i < subtractionItemsList.size();i++) {
+        		PaymentSubtractionItem subtractionItem = (PaymentSubtractionItem) subtractionItemsList.get(i);
+        		//如果减免费项类型是"eh_payment_late_fine"，并且charginItemsId相等
+        		if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.lateFine.getCode())) {
+        			if(charingItemId != null && charingItemId.equals(subtractionItem.getChargingItemId())) {
+        				isConfigSubtraction = true;
+            		}
+                }
+        	}
+        }
+	    return isConfigSubtraction;
 	}
     
 }
