@@ -1417,6 +1417,22 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /user/checkVerifyCodeAndResetPasswordWithoutIdentifyToken</b>
+	 * <p>校验验证码并重置密码（无需手机号码）</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCodeAndResetPasswordWithoutIdentifyToken")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCodeAndResetPasswordWithoutIdentifyToken(@Valid CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand cmd) {
+		userService.checkVerifyCodeAndResetPasswordWithoutIdentifyToken(cmd);
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
 	 * <b>URL: /user/checkUserTemporaryToken</b>
 	 * 检验用户临时token，标准是：1、是本系统加密的token，2、token未过期
 	 * 成功会返回改token内容

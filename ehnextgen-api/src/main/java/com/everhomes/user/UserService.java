@@ -272,6 +272,8 @@ public interface UserService {
 
     void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
 
+    void checkVerifyCodeAndResetPasswordWithoutIdentifyToken(CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand cmd);
+
     UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd);
 
     SceneDTO getProfileScene();

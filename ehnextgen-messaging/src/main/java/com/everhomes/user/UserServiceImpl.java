@@ -5455,6 +5455,35 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	}
 
 	@Override
+	public void checkVerifyCodeAndResetPasswordWithoutIdentifyToken(CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand cmd) {
+		User user = UserContext.current().getUser();
+		if (user == null) {
+            LOGGER.error("user not exists");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
+                    "user not exists");
+		}
+		UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(user.getId(),user.getNamespaceId());
+		if (userIdentifier == null) {
+            LOGGER.error("userIdentifier not exists");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "userIdentifier not exists");
+        }
+        if (StringUtils.isBlank(userIdentifier.getVerificationCode()) || !userIdentifier.getVerificationCode().equals(cmd.getVerifyCode())) {
+            LOGGER.error("invalid operation,can not find verify information");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+                    "invalid params");
+        }
+        // check the expire time
+        if (DateHelper.currentGMTTime().getTime() - userIdentifier.getNotifyTime().getTime() > 10 * 60000) {
+            LOGGER.error("the verifycode is invalid with timeout");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+        }
+		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
+		userProvider.updateUser(user);
+	}
+
+	@Override
 	public UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd) {
 
 		if(StringUtils.isEmpty(cmd.getUserToken())){

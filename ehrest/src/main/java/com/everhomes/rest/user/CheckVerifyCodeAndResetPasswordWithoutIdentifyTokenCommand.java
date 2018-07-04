@@ -1,0 +1,40 @@
+package com.everhomes.rest.user;
+
+import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
+
+/**
+ * <ul>
+ *     <li>verifyCode: 验证码</li>
+ *     <li>newPassword: 新密码</li>
+ * </ul>
+ */
+public class CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand {
+    @NotNull
+    private String verifyCode;
+    @NotNull
+    private String newPassword;
+
+    public String getVerifyCode() {
+        return verifyCode;
+    }
+
+    public void setVerifyCode(String verifyCode) {
+        this.verifyCode = verifyCode;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+}
