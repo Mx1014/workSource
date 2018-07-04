@@ -4812,12 +4812,12 @@ public class ForumServiceImpl implements ForumService {
                 	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
                         //投票帖子用自己的分享链接 modified by yanjun 220171227
                         relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
-                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId());
+                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId() + "&communityId=" + communityId);
                     }else {
                 	    if (embededAppId != null && embededAppId.equals(AppConstants.APPID_LINK)) {
                             relativeUrl = configProvider.getValue(ConfigConstants.POST_LINK_SHARE_URL, "");
                         }
-                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId());
+                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId() + "&communityId=" + communityId + "&userId=" + userId);
                 	}
                 }
             } catch(Exception e) {
