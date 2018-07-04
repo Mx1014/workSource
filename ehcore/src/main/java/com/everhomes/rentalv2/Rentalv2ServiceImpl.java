@@ -4818,24 +4818,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (StringUtils.isBlank(cmd.getResourceType())) {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
-//		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getSiteId());
 
 		RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 				rs.getResourceType(), rs.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rs.getId());
 
-//		correctRetalResource(rs, cmd.getRentalType());
+		Long timeStamp = System.currentTimeMillis();
 		processCells(rs, cmd.getRentalType());
+		LOGGER.info("processCells costs time :"+(System.currentTimeMillis()-timeStamp)/1000);
 		FindRentalSiteWeekStatusCommandResponse response = ConvertHelper.convert(rule, FindRentalSiteWeekStatusCommandResponse.class);
 		response.setRentalSiteId(rs.getId());
-//		List<RentalResourcePic> pics = this.rentalv2Provider.findRentalSitePicsByOwnerTypeAndId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
-//		response.setSitePics(convertRentalSitePicDTOs(pics));
+
 
 		response.setAnchorTime(0L);
 
-//		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
-//		response.setAttachments(convertAttachments(attachments));
+
 
 		// 查rules
 		
@@ -4848,8 +4847,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		end.add(Calendar.DAY_OF_YEAR, 7);
 		response.setSiteDays(new ArrayList<>());
 
+		timeStamp = System.currentTimeMillis();
 		processDayRuleDTOs(start, end, response.getSiteDays(), rs, rule, cmd.getSceneToken(), cmd.getRentalType(),
 				cmd.getPackageName());
+		LOGGER.info("processDayRuleDTO costs time :"+(System.currentTimeMillis()-timeStamp)/1000);
 		//设置优惠信息
 		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs, cmd.getSceneToken(), cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
