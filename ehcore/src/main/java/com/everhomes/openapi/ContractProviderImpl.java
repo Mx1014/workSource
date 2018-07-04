@@ -802,7 +802,7 @@ public class ContractProviderImpl implements ContractProvider {
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CATEGORY_ID.eq(categoryId));
 		}
 		//取到最大的versionid
-		if (null != ownerId) {
+		if (null != ownerId && ownerId != -1) {
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));

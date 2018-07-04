@@ -2715,6 +2715,29 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			dto = ConvertHelper.convert(cmd, ContractDTO.class);
 			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getTemplateId());
 			ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
+			
+			if (contractTemplatedto.getCreatorUid() != null) {
+				//用户可能不在组织架构中 所以用nickname
+				User user = userProvider.findUserById(contractTemplatedto.getCreatorUid());
+				if(user != null) {
+					contractTemplatedto.setCreatorName(user.getNickName());
+				}
+			}
+			
+			if (!contractTemplatedto.getOwnerId().equals(0L)) {
+				Community community = communityProvider.findCommunityById(contractTemplatedto.getOwnerId());
+				if(null == community){
+					LOGGER.debug("community is null...");
+				}else{
+					contractTemplatedto.setTemplateOwner(community.getName());
+				}
+			}else {
+				contractTemplatedto.setTemplateOwner("通用配置");
+			}
+			if (contractTemplatedto.getCreateTime() != null) {
+				contractTemplatedto.setCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(contractTemplatedto.getCreateTime()));
+			}
+			
 			dto.setContractTemplate(contractTemplatedto);
 		}
 		
