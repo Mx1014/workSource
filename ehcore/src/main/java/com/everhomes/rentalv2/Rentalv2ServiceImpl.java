@@ -3756,7 +3756,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
-	public void cancelRentalBill(CancelRentalBillCommand cmd,boolean ifAbsordFlow) {
+	public void cancelRentalBill(CancelRentalBillCommand cmd) {
 
 		Long timestamp = System.currentTimeMillis();
 
@@ -3822,8 +3822,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			rentalv2Provider.updateRentalBill(order);
 
 			handler.releaseOrderResourceStatus(order);
-			//只要退款就给管理员发消息,不管是退款中还是已退款
-			onOrderCancel(order,ifAbsordFlow);
+
 			if (!StringUtils.isEmpty(order.getDoorAuthId())) {//解除门禁授权
 				String[] ids = order.getDoorAuthId().split(",");
 				for (String id:ids)
@@ -3844,6 +3843,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			rentalv2Provider.deleteRentalOrderStatisticsByOrderId(order.getId());
 			return null;
 		});
+        //只要退款就给管理员发消息,不管是退款中还是已退款
+        onOrderCancel(order);
 	}
 
 
@@ -4260,19 +4261,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
-	public void onOrderCancel(RentalOrder order,boolean ifAbsordFlow) {
-		//终止工作流
-		FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, Rentalv2Controller.moduleId);
-		if(null != flowcase && ifAbsordFlow && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
-			FlowAutoStepDTO dto = new FlowAutoStepDTO();
-			dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
-			dto.setFlowCaseId(flowcase.getId());
-			dto.setFlowMainId(flowcase.getFlowMainId());
-			dto.setFlowNodeId(flowcase.getCurrentNodeId());
-			dto.setFlowVersion(flowcase.getFlowVersion());
-			dto.setStepCount(flowcase.getStepCount());
-			this.flowService.processAutoStep(dto);
-		}
+	public void onOrderCancel(RentalOrder order) {
+        //终止工作流
+        FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, Rentalv2Controller.moduleId);
+        if(null != flowcase  && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
+            FlowAutoStepDTO dto = new FlowAutoStepDTO();
+            dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+            dto.setFlowCaseId(flowcase.getId());
+            dto.setFlowMainId(flowcase.getFlowMainId());
+            dto.setFlowNodeId(flowcase.getCurrentNodeId());
+            dto.setFlowVersion(flowcase.getFlowVersion());
+            dto.setStepCount(flowcase.getStepCount());
+            try {
+                this.flowService.processAutoStep(dto);
+            }catch (Exception e){
+
+            }
+        }
 		//发消息
 		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
 
@@ -8721,6 +8726,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		StringBuilder builder = new StringBuilder();
 		String separate = "注:";
 		for (RentalType iterator:iterators){
+            String s = getResourceOpenTime(rentalSite.getResourceType(),rentalSite.getId(),iterator.getCode(),",");
+            if (s == null)
+                continue;
 			builder.append(separate);
 			switch (iterator){
 				case HALFDAY:
@@ -8734,7 +8742,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					break;
 				case MONTH:
 			}
-			builder.append(getResourceOpenTime(rentalSite.getResourceType(),rentalSite.getId(),iterator.getCode(),","));
+			builder.append(s);
 			separate = ";";
 		}
 		response.setOpenTimes(builder.toString());

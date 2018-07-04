@@ -27,7 +27,7 @@ public interface Rentalv2Service {
 
 	void changeRentalBillPayInfo(ChangeRentalBillPayInfoCommand cmd);
 
-	void cancelRentalBill(CancelRentalBillCommand cmd,boolean ifAbsoredFlow);
+	void cancelRentalBill(CancelRentalBillCommand cmd);
 
 	void deleteRentalSiteItem(DeleteItemAdminCommand cmd);
 
@@ -122,7 +122,7 @@ public interface Rentalv2Service {
 	void onOrderSuccess(RentalOrder bill);
 
 
-	void onOrderCancel(RentalOrder order,boolean ifAbsordFlow);
+	void onOrderCancel(RentalOrder order);
 
 
 	void updateRentalDate(UpdateRentalDateCommand cmd);

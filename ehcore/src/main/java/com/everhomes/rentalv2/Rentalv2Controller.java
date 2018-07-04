@@ -368,7 +368,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("cancelRentalBill")
 	@RestReturn(value = String.class)
 	public RestResponse CancelRentalBill(@Valid CancelRentalBillCommand cmd) {
-		rentalService.cancelRentalBill(cmd,true);
+		rentalService.cancelRentalBill(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
