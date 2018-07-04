@@ -69,7 +69,6 @@ public class OPPushBizHandler implements OPPushHandler {
                     e.printStackTrace();
                 }
 
-                card.setRouterPath(dto.getMetadata());
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());
                 properties.add(dto.getSubject());
