@@ -6,12 +6,23 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>communityId: communityId</li>
+ *     <li>organizationId: 默认配置时使用organizationId</li>
+ *     <li>communityId: 园区独立配置时使用communityId</li>
  * </ul>
  */
-public class FindCommunityBizByCommunityId {
+public class FindCommunityBiz {
+
+    private Long organizationId;
 
     private Long communityId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getCommunityId() {
         return communityId;

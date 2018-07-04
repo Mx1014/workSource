@@ -224,7 +224,8 @@ ALTER TABLE `eh_banners` CHANGE COLUMN `appId` `app_id`  bigint(20) NULL DEFAULT
 -- 园区广场电商 add by yanjun 20180703
 CREATE TABLE `eh_community_bizs` (
   `id` bigint(20) NOT NULL,
-  `community_id` bigint(20) NOT NULL,
+  `organization_id` bigint(20) DEFAULT NULL,
+  `community_id` bigint(20) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `biz_url` varchar(255) DEFAULT NULL,
   `logo_uri` varchar(255) DEFAULT NULL,

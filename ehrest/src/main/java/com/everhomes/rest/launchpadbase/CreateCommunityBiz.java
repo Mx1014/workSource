@@ -6,7 +6,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>communityId: communityId</li>
+ *     <li>organizationId: 默认配置时使用organizationId</li>
+ *     <li>communityId: 园区独立配置时使用communityId</li>
  *     <li>name: name</li>
  *     <li>bizUrl: bizUrl</li>
  *     <li>logoUri: logoUri</li>
@@ -15,11 +16,20 @@ import com.everhomes.util.StringHelper;
  */
 public class CreateCommunityBiz {
 
+    private Long organizationId;
     private Long communityId;
     private String name;
     private String bizUrl;
     private String logoUri;
     private Byte status;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getCommunityId() {
         return communityId;
