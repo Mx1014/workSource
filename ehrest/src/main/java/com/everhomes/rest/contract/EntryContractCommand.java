@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>id: 合同id</li>
@@ -69,4 +71,9 @@ public class EntryContractCommand {
     public void setOrgId(Long orgId) {
         this.orgId = orgId;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

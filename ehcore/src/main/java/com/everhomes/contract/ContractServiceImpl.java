@@ -42,7 +42,6 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
-import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -286,9 +285,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Autowired
 	private PropertyMgrService propertyMgrService;
 
-	/*@Autowired
-	private PortalService portalService;*/
-
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
 
@@ -317,17 +313,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Autowired
     private FieldService fieldService;
 	
-	/*@Autowired
-	private ServiceModuleAppProvider serviceModuleAppProvider;*/
-
 	@Autowired
 	private CustomerService customerService;
 
 	@Autowired
 	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
-
-	@Autowired
-	private BigCollectionProvider bigCollectionProvider;
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -2037,6 +2027,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				dto.setLayoutName(item.getItemDisplayName());
 			}
 		}
+		//获取合同模板的名称
+		if (contract.getTemplateId() != null) {
+			ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
+			if(contractTemplateParent != null) {
+				dto.setTemplateName(contractTemplateParent.getName());
+			}
+		}
+		
 		processContractApartments(dto);
 		processContractChargingItems(dto);
 		processContractAttachments(dto);
@@ -2609,13 +2607,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contractTemplate.setVersion(0);
 			contractTemplate.setParentId(0L);
 		}
-		/*if(cmd.getOwnerId() == null) {
-			contractTemplate.setOwnerType(cmd.getOwnerType());
-		}
-		*/
-		/*if (contractTemplateParent!=null && cmd.getOwnerId()==null) {
-			contractTemplate.setVersion(contractTemplateParent.getVersion()+1);
-		}*/
 		contractProvider.createContractTemplate(contractTemplate);
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
 	}
@@ -2628,27 +2619,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					"Invalid id parameter in the command");
 		}
 		//根据id查询数据，
-		//ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
 		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
-		//通用模板更新
-		/*if (cmd.getOwnerType() == null) {
-			contractTemplateParent.setVersion(contractTemplateParent.getVersion() + 1);
-			contractTemplateParent.setParentId(contractTemplateParent.getId());
-		}*/
 		if (cmd.getName() != null) {
 			contractTemplateParent.setName(cmd.getName());
 		}
 		if (cmd.getContents() != null) {
 			contractTemplateParent.setContents(cmd.getContents());
 		}
-		
 		contractTemplateParent.setParentId(cmd.getId());
 		contractTemplateParent.setVersion(contractTemplateParent.getVersion()+1);
-		
-		//普通模板
-		/*if (cmd.getOwnerType() != null) {
-			contractTemplateParent.setVersion(contractTemplateParent.getVersion());
-		}*/
 		
 		contractProvider.createContractTemplate(contractTemplateParent);
 		//contractProvider.updateContractTemplate(contractTemplateParent);
@@ -2714,12 +2693,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		//
 		Contract contract = contractProvider.findContractById(cmd.getContractId());
 		ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
-		
-		/*ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(contract.getTemplateId());
-		ContractTemplateDTO contractTemplatedto = ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
-		
-		dto.setContractTemplate(contractTemplatedto);*/
-		
 		return dto;
 	}
 
@@ -2758,7 +2731,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 
 		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
-		
 		contractTemplateParent.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractTemplateParent.setDeleteUid(UserContext.currentUserId());
 		contractTemplateParent.setStatus(ContractTemplateStatus.INACTIVE.getCode()); //无效的状态

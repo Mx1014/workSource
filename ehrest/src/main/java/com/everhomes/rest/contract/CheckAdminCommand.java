@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>namespaceId: 域空间id</li>
@@ -27,4 +29,9 @@ public class CheckAdminCommand {
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

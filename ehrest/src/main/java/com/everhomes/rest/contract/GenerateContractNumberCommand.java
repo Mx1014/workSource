@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>namespaceId: 域空间id</li>
@@ -64,5 +66,10 @@ public class GenerateContractNumberCommand {
 
 	public void setOrgId(Long orgId) {
 		this.orgId = orgId;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

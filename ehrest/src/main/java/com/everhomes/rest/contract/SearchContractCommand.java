@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
@@ -174,4 +176,9 @@ public class SearchContractCommand {
     public void setStatus(Byte status) {
         this.status = status;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

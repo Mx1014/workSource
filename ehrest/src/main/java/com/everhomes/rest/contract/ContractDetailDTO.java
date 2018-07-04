@@ -1,6 +1,7 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -63,6 +64,8 @@ import java.util.List;
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
  *     <li>contractTemplate: 合同模板信息{@link com.everhomes.rest.contract.ContractTemplateDTO}</li>
+ *     <li>templateId: 合同模板id</li>
+ *     <li>templateName: 合同模板名称</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -121,7 +124,6 @@ public class ContractDetailDTO {
     private String layoutName;
     private String settled;
     private Byte status;
-
     private BigDecimal remainingAmount;
     private Long bidItemId;
     private Long createOrgId;
@@ -146,24 +148,22 @@ public class ContractDetailDTO {
     private String treatyParticulars;
     private Byte paymentFlag;
     private Long templateId;
+    private String templateName;
 
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
     
-    /*@ItemType(ContractTemplateDTO.class)
-    private ContractTemplateDTO contractTemplate;
-
-	public ContractTemplateDTO getContractTemplate() {
-		return contractTemplate;
+    public String getTemplateName() {
+		return templateName;
 	}
 
-	public void setContractTemplate(ContractTemplateDTO contractTemplate) {
-		this.contractTemplate = contractTemplate;
-	}*/
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
 
-    public Long getTemplateId() {
+	public Long getTemplateId() {
 		return templateId;
 	}
 
@@ -846,4 +846,5 @@ public class ContractDetailDTO {
     public void setApplicationTheme(String applicationTheme) {
         this.applicationTheme = applicationTheme;
     }
+
 }

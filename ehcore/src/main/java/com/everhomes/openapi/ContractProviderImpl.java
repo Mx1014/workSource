@@ -748,7 +748,96 @@ public class ContractProviderImpl implements ContractProvider {
 				.where(Tables.EH_CONTRACTS.ID.eq(contractId))
                 .fetchOne(Tables.EH_CONTRACTS.CATEGORY_ID);
 	}
+	
+	@Override
+	public void createContractTemplate(ContractTemplate contractTemplate) {
+        long id = this.dbProvider.allocPojoRecordId(EhContractTemplates.class);
+        contractTemplate.setId(id);
+        contractTemplate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        contractTemplate.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+        contractTemplate.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, id));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        dao.insert(contractTemplate);
 
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractTemplates.class, null);
+	}
+
+	@Override
+	public ContractTemplate findContractTemplateById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractTemplates.class, id));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ContractTemplate.class);
+	}
+
+	@Override
+	public void updateContractTemplate(ContractTemplate contractTemplate) {
+		assert(contractTemplate.getId() != null);
+		contractTemplate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contractTemplate.setUpdateUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, contractTemplate.getId()));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        dao.update(contractTemplate);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTemplates.class, contractTemplate.getId());
+	}
+
+	@Override
+	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,
+			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
+        EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
+        EhContractTemplates t2 = Tables.EH_CONTRACT_TEMPLATES.as("t2");
+        SelectJoinStep<Record> query = context.select(Tables.EH_CONTRACT_TEMPLATES.fields()).from(Tables.EH_CONTRACT_TEMPLATES);
+        
+		Condition cond = Tables.EH_CONTRACT_TEMPLATES.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		
+		if(null != pageAnchor && pageAnchor != 0){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID.gt(pageAnchor));
+		}
+		if(null != name && !"".equals(name)){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.NAME.like('%'+name+'%'));
+		}
+		if(null != categoryId){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CATEGORY_ID.eq(categoryId));
+		}
+		//取到最大的versionid
+		if (null != ownerId) {
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
+			
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
+		}else {
+			//查询所有的通用模板
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.notEqual(0L)))));
+		}
+		
+		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
+		
+		if(null != pageSize)
+			query.limit(pageSize);
+		
+		List<ContractTemplate> contracttemplates = query.where(cond).fetch().
+				map(new DefaultRecordMapper(Tables.EH_CONTRACT_TEMPLATES.recordType(), ContractTemplate.class));
+
+		return contracttemplates;
+	}
+
+	@Override
+	public void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber,
+			Long ownerId, Long templateId) {
+		getReadWriteContext().update(Tables.EH_CONTRACTS)
+		.set(Tables.EH_CONTRACTS.TEMPLATE_ID, templateId)
+		.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_CONTRACTS.ID.eq(contractId))
+		.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
+		.execute();
+	}
 
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
@@ -774,98 +863,4 @@ public class ContractProviderImpl implements ContractProvider {
 		return dbProvider.getDslContext(accessSpec);
 	}
 
-	@Override
-	public void createContractTemplate(ContractTemplate contractTemplate) {
-        long id = this.dbProvider.allocPojoRecordId(EhContractTemplates.class);
-        contractTemplate.setId(id);
-        contractTemplate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        contractTemplate.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
-        contractTemplate.setCreatorUid(UserContext.currentUserId());
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, id));
-        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
-        dao.insert(contractTemplate);
-
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractTemplates.class, null);
-	}
-
-	@Override
-	public ContractTemplate findContractTemplateById(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractTemplates.class, id));
-        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
-        return ConvertHelper.convert(dao.findById(id), ContractTemplate.class);
-	}
-
-	@Override
-	public void updateContractTemplate(ContractTemplate contractTemplate) {
-		assert(contractTemplate.getId() != null);
-		
-		contractTemplate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		contractTemplate.setUpdateUid(UserContext.currentUserId());
-		
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, contractTemplate.getId()));
-        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
-        dao.update(contractTemplate);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTemplates.class, contractTemplate.getId());
-	}
-
-	@Override
-	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,
-			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
-        EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
-        EhContractTemplates t2 = Tables.EH_CONTRACT_TEMPLATES.as("t2");
-        SelectJoinStep<Record> query = context.select(Tables.EH_CONTRACT_TEMPLATES.fields()).from(Tables.EH_CONTRACT_TEMPLATES);
-        
-		Condition cond = Tables.EH_CONTRACT_TEMPLATES.NAMESPACE_ID.eq(namespaceId);
-		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
-		//cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CONTRACT_TEMPLATE_TYPE.eq((byte) 0));
-		
-		if(null != pageAnchor && pageAnchor != 0){
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID.gt(pageAnchor));
-		}
-		if(null != name && !"".equals(name)){
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.NAME.like('%'+name+'%'));
-		}
-		if(null != categoryId){
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CATEGORY_ID.eq(categoryId));
-		}
-		//取到最大的versionid
-		if (null != ownerId) {
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
-					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
-			
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
-					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
-		}else {
-			//查询所有的通用模板
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L));
-			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
-					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
-		}
-		
-		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
-		
-		if(null != pageSize)
-			query.limit(pageSize);
-		
-		List<ContractTemplate> contracttemplates = query.where(cond).fetch().
-				map(new DefaultRecordMapper(Tables.EH_CONTRACT_TEMPLATES.recordType(), ContractTemplate.class));
-
-		return contracttemplates;
-	}
-
-	@Override
-	public void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber,
-			Long ownerId, Long templateId) {
-		getReadWriteContext().update(Tables.EH_CONTRACTS)
-		.set(Tables.EH_CONTRACTS.TEMPLATE_ID, templateId)
-		.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-		.and(Tables.EH_CONTRACTS.ID.eq(contractId))
-		.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
-		.execute();
-	}
-
-	
-	/**/
 }

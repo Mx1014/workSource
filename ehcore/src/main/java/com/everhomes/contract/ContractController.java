@@ -1,28 +1,54 @@
 // @formatter:off
 package com.everhomes.contract;
 
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.contract.*;
-import com.everhomes.search.ContractSearcher;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.itextpdf.text.log.SysoCounter;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import com.everhomes.rest.contract.AddContractTemplateCommand;
+import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractParamDTO;
+import com.everhomes.rest.contract.CreateContractCommand;
+import com.everhomes.rest.contract.DeleteContractCommand;
+import com.everhomes.rest.contract.DeleteContractTemplateCommand;
+import com.everhomes.rest.contract.DenunciationContractCommand;
+import com.everhomes.rest.contract.EntryContractCommand;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.GenerateContractNumberCommand;
+import com.everhomes.rest.contract.GetContractParamCommand;
+import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
+import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractTemplatesResponse;
+import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
+import com.everhomes.rest.contract.ListContractsBySupplierCommand;
+import com.everhomes.rest.contract.ListContractsBySupplierResponse;
+import com.everhomes.rest.contract.ListContractsCommand;
+import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
+import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
+import com.everhomes.rest.contract.ReviewContractCommand;
+import com.everhomes.rest.contract.SearchContractCommand;
+import com.everhomes.rest.contract.SetContractParamCommand;
+import com.everhomes.rest.contract.SetPrintContractTemplateCommand;
+import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
+import com.everhomes.rest.contract.UpdateContractCommand;
+import com.everhomes.rest.contract.UpdateContractTemplateCommand;
+import com.everhomes.rest.contract.listContractTemplateCommand;
+import com.everhomes.search.ContractSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 
 @RestController
 @RequestMapping("/contract")
@@ -30,8 +56,6 @@ public class ContractController extends ControllerBase {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-//	@Autowired
-//	private ContractService contractService;
 
 	@Autowired
 	private ContractSearcher contractSearcher;
@@ -343,7 +367,6 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("addContractTemplate")
 	@RestReturn(String.class)
 	public RestResponse addContractTemplate(AddContractTemplateCommand cmd) {
-		
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.addContractTemplate(cmd));
@@ -351,13 +374,12 @@ public class ContractController extends ControllerBase {
 	}
 	
 	/**
-	 * <p>小区修改模板，小区模板版本递增</p>
+	 * <p>园区修改模板，园区模板版本递增</p>
 	 * <b>URL: /contract/updateContractTemplate</b>
 	 */
 	@RequestMapping("updateContractTemplate")
 	@RestReturn(String.class)
 	public RestResponse updateContractTemplate(UpdateContractTemplateCommand cmd) {
-		
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
 		
@@ -385,7 +407,6 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("setPrintContractTemplate")
 	@RestReturn(String.class)
 	public RestResponse setPrintContractTemplate(SetPrintContractTemplateCommand cmd) {
-		
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
 		
@@ -400,7 +421,6 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("getContractTemplateDetail")
 	@RestReturn(String.class)
 	public RestResponse getContractTemplateDetail(GetContractTemplateDetailCommand cmd) {
-		
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
 		
@@ -414,7 +434,6 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("deleteContractTemplate")
 	@RestReturn(String.class)
 	public RestResponse deleteContractTemplate(DeleteContractTemplateCommand cmd) {
-		
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
 		contractService.deleteContractTemplate(cmd);

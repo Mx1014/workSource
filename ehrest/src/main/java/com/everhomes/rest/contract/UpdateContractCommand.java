@@ -61,6 +61,7 @@ import java.util.List;
  *     <li>buildingRename: 房间别名</li>
  *     <li>categoryId: 合同类型多入口</li>
  *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
+ *     <li>templateId: 合同模板id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/5.
  */

@@ -2,6 +2,8 @@ package com.everhomes.rest.contract;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>id: id</li>
@@ -10,13 +12,8 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId: 所有者id</li>
  * <li>ownerType: 所有者类型，通用配置为空</li>
  * <li>name: 模板名称</li>
- * <li>contracttemplateType: 0 收款合同模板 1付款合同模板</li>
- * <li>status: 0: inactive, 1: confirming, 2: active</li>
  * <li>contents: 模板内容</li>
- * <li>parentId: 复制于哪个合同模板</li>
  * <li>version: 版本记录</li>
- * <li>creatorUid: 创建者uid</li>
- * <li>createTime: 创建时间</li>
  * </ul>
  * Created by jm.ding on 2018/6/27.
  */
@@ -83,5 +80,8 @@ public class UpdateContractTemplateCommand {
 		this.orgId = orgId;
 	}
 
-	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

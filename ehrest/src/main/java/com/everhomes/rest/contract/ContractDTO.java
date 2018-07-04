@@ -318,11 +318,6 @@ public class ContractDTO {
 		this.serviceUserPhone = serviceUserPhone;
 	}
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
 	public Long getId() {
 		return id;
 	}
@@ -330,4 +325,5 @@ public class ContractDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
 }
