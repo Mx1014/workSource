@@ -234,6 +234,10 @@ ALTER TABLE eh_organization_member_details ADD COLUMN job_level_ids VARCHAR(256)
 -- 园区表增加namespace_id索引 add by yanjun 20180615
 alter table eh_communities add index namespace_id_index(`namespace_id`);
 
+
+-- fix for zuolinbase only, remove this after 5.5.2
+--ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
+-- end Janson
 -- 20180522-huangliangming-配置项管理-#30016
 -- 创建配置项信息变更记录表
 CREATE TABLE `eh_configurations_record_change` (
@@ -251,8 +255,3 @@ CREATE TABLE `eh_configurations_record_change` (
 -- 配置项信息表新增一列（字段 ） is_readyonly
 ALTER  TABLE eh_configurations  ADD  is_readonly  INT(3)  COMMENT '是否只读：1，是 ；null 或其他值为 否';
 -- 20180522-huangliangming end
-
--- fix for zuolinbase only, remove this after 5.5.2
---ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
--- end Janson
-
