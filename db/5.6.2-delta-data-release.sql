@@ -266,7 +266,7 @@ update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id=
 -- update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1001' where namespace_id=999985;
 -- update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1003' where namespace_id=999990;
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4443' where namespace_id=999993; -- 海岸馨服务
-
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4691' where namespace_id=999954; -- 新微创源
 
 -- AUTHOR: 梁燕龙 20180702
 -- REMARK: 活动收款方账号迁移,在执行语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
