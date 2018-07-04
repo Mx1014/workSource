@@ -82,7 +82,7 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping(value = "listContactsByScene")
     @RestReturn(value = ListContactBySceneRespose.class)
-    public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
+    public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd){
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 
@@ -111,7 +111,7 @@ public class UserUiController extends ControllerBase {
 					dto.setInitial(r.getInitial());
 					dto.setFullInitial(r.getFullInitial());
 					dto.setFullPinyin(r.getFullPinyin());
-					//增加岗位显示与 detailId added by R 20120713
+					//增加岗位显示与 detailId added by ryan 20120713
 					dto.setJobPosition(r.getJobPosition());
 					dto.setDetailId(r.getDetailId());
 					dto.setVisibleFlag(r.getVisibleFlag());
@@ -307,7 +307,7 @@ public class UserUiController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /ui/user/checkContactAdmin </b>
-	 * <p>判断用户是否为管理员</p>
+	 * <p>判断用户是否拥有通讯录权限</p>
 	 */
 	@RequestMapping("checkContactAdmin")
 	@RestReturn(value=CheckContactAdminResponse.class)

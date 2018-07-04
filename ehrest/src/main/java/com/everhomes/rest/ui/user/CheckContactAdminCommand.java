@@ -14,6 +14,10 @@ public class CheckContactAdminCommand {
     public CheckContactAdminCommand() {
     }
 
+    public CheckContactAdminCommand(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
     public Long getOrganizationId() {
         return organizationId;
     }
