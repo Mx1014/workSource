@@ -88,7 +88,56 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         return resultList;
     }
 
-    private XiaomaoCard getCard(String plateNumber, Long parkingId){
+	@Override
+	public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+		XiaomaoCard xiaomaoCard = getCard(cmd.getPlateNumber(), cmd.getParkingLotId());
+		if (xiaomaoCard == null) {
+			return null;
+		}
+		List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(parkingLot, null, null);
+		if(parkingRechargeRates==null || parkingRechargeRates.size()==0){
+			return null;
+		}
+
+		ParkingRechargeRateDTO targetRateDTO = null;
+		String cardTypeId = xiaomaoCard.getMemberType();
+		for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+			if (rateDTO.getCardTypeId().equals(cardTypeId) && rateDTO.getMonthCount().intValue()==parkingLot.getExpiredRechargeMonthCount()) {
+				targetRateDTO = rateDTO;
+				break;
+			}
+		}
+
+		if (null == targetRateDTO) {
+			parkingRechargeRates.sort((r1,r2)->r1.getMonthCount().compareTo(r2.getMonthCount()));
+			for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+				if (rateDTO.getCardTypeId().equals(cardTypeId)) {
+					targetRateDTO = rateDTO;
+					break;
+				}
+			}
+		}
+		if (null == targetRateDTO) {
+			return null;
+		}
+
+		ParkingExpiredRechargeInfoDTO dto = ConvertHelper.convert(targetRateDTO,ParkingExpiredRechargeInfoDTO.class);
+		dto.setCardTypeName(targetRateDTO.getCardType());
+		if (xiaomaoCard != null  && xiaomaoCard.getEndTime() != null) {
+			Date expireDate = xiaomaoCard.getEndTime();
+			long newStartTime = expireDate.getTime();
+			dto.setStartPeriod(newStartTime);
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddDistanceMonth(newStartTime, parkingLot.getExpiredRechargeMonthCount());
+			dto.setEndPeriod(rechargeEndTimestamp.getTime());
+			dto.setMonthCount(new BigDecimal(parkingLot.getExpiredRechargeMonthCount()));
+			dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.xiaomao.rateName","个月"));
+			dto.setPrice(targetRateDTO.getPrice().divide(targetRateDTO.getMonthCount(),OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP)
+				.multiply(new BigDecimal(parkingLot.getExpiredRechargeMonthCount())));
+		}
+		return dto;
+	}
+
+	private XiaomaoCard getCard(String plateNumber, Long parkingId){
         JSONObject param = new JSONObject();
 
         param.put("licenseNumber",plateNumber);
@@ -118,8 +167,15 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Long expireTime = card.getEndTime().getTime();
+			boolean baseNewestTime = configProvider.getBooleanValue("parking.xiaomao.baseNewestTime." + order.getParkingLotId(), false);
+			if(baseNewestTime){
+				Long now = System.currentTimeMillis();
+				if(now>expireTime){
+					expireTime=now;
+				}
+			}
 
-            Timestamp timestampStart = Utils.addSecond(expireTime, 1);
+			Timestamp timestampStart = Utils.addSecond(expireTime, 1);
             Timestamp timestampEnd = getCardEndTime(expireTime, order.getMonthCount().intValue());
             String validStart = sdf.format(timestampStart);
             String validEnd = sdf.format(timestampEnd);
@@ -192,8 +248,8 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         }else{
             XiaomaoCard card = getCard(plateNumber, parkingLot.getId());
             String cardType = card.getMemberType();
-            parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
-                    parkingLot.getId(), cardType);
+			parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+					parkingLot.getId(), cardType);
         }
 
         List<XiaomaoCardType> types = listCardTypes(parkingLot.getId());
