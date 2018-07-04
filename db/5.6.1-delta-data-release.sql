@@ -234,17 +234,17 @@ update eh_launch_pad_items set action_data = replace(action_data,'#/newsList#sig
 
 -- #issue-26479 迁移原新闻从organization属性至community属性
 update  eh_news nu ,
-	(select news.id as news_id,  com.community_id as community_id from eh_news news 
-	left join 	(select n.namespace_id as namespace_id, n.resource_id as community_id   
-					from eh_namespace_resources n 
+	(select news.id as news_id,  com.community_id as community_id from eh_news news
+	left join 	(select n.namespace_id as namespace_id, n.resource_id as community_id
+					from eh_namespace_resources n
 					where n.resource_type  = 'COMMUNITY'
 					group by n.namespace_id
-					order by n.namespace_id,n.default_order,n.resource_id) 
-					as com 
+					order by n.namespace_id,n.default_order,n.resource_id)
+					as com
 	on com.namespace_id = news.namespace_id
-	where news.owner_type = 'organization' and news.owner_id > 0) 
+	where news.owner_type = 'organization' and news.owner_id > 0)
 	as n_c
-set nu.owner_type = 'EhCommunities', nu.owner_id = n_c.community_id 
+set nu.owner_type = 'EhCommunities', nu.owner_id = n_c.community_id
 where nu.id = n_c.news_id;
 
 -- 20180528-huangliangming-配置项管理-#30016
@@ -254,3 +254,7 @@ UPDATE eh_configurations s SET s.is_readonly = 1 ;
 INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
 VALUES(30000000 ,'后台配置项',11000000,NULL,'server-configuration',1,2,'/11000000/30000000','zuolin',50,60100,3,'system','module',NULL);
 -- 20180522-huangliangming
+
+-- janson 电商
+INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`) VALUES ('1', 'zuolinAccount', '0', '0', 'd7c0c950-d57d-4290-9318-f927dcca92c2', '1k0ty3aZPC8bjMm8V9+pFmsU5B7cImfQXB4GUm4ACSFPP1IhZI5basNbUBXe7p6gJ7OC8J03DW1U8fvvtpim6Q==', NOW());
+-- end janson
