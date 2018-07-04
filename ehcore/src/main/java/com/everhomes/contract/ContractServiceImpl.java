@@ -1281,6 +1281,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					contractChargingItem.setCreateTime(exist.getCreateTime());
 					contractChargingItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractChargingItemProvider.updateContractChargingItem(contractChargingItem);
+					//修复issue-32556，已存在的ChargingItem如果修改了关联的Apartments，应该更新ChargingItem和Apartments的对应关系
+					dealContractChargingItemAddresses(contractChargingItem, item.getApartments());
 					map.remove(item.getId());
 					//add by tangcen
 					if (!compareContractChargingItem(contractChargingItem,exist)) {
