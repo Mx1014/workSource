@@ -4676,7 +4676,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         OrganizationMemberDetails memberArchive = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         if (memberArchive == null)
             return dto;
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(), dto.getOrganizationId());
 
         //  1.设置基本信息
         dto.setOrganizationId(memberArchive.getOrganizationId());
@@ -4728,6 +4727,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 
         //	6.隐私保护电话号码处理
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(), dto.getOrganizationId());
         if (member == null)
             return dto;
         dto.setVisibleFlag(member.getVisibleFlag());
