@@ -4679,12 +4679,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(), dto.getOrganizationId());
         boolean isAdmin = checkUserPrivilege(UserContext.currentUserId(), dto.getOrganizationId());
 
-        //  1.设置基本信息（由于隐私原因电话号码最后处理）
+        //  1.设置基本信息
         dto.setOrganizationId(memberArchive.getOrganizationId());
         dto.setUserId(memberArchive.getTargetId());
         dto.setTargetType(memberArchive.getTargetType());
         dto.setDetailId(memberArchive.getId());
         dto.setContactName(memberArchive.getContactName());
+        dto.getContactToken()
         if (!StringUtils.isEmpty(memberArchive.getEnName()))
             dto.setContactEnglishName(memberArchive.getEnName());
         dto.setGender(memberArchive.getGender());
@@ -4731,12 +4732,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (member == null)
             return dto;
         dto.setVisibleFlag(member.getVisibleFlag());
-        if (isAdmin)
-            dto.setContactToken(memberArchive.getContactToken());
-        else {
-            if (VisibleFlag.fromCode(dto.getVisibleFlag()) != VisibleFlag.HIDE)
-                dto.setContactToken(memberArchive.getContactToken());
-        }
+        if (!isAdmin)
+            if (VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.HIDE)
+                dto.setContactToken(null);
 
         return dto;
     }
