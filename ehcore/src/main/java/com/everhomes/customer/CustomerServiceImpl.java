@@ -899,6 +899,7 @@ public class CustomerServiceImpl implements CustomerService {
                 command.setLongitude(updateCustomer.getLongitude());
                 command.setLatitude(updateCustomer.getLatitude());
                 command.setWebsite(updateCustomer.getCorpWebsite());
+                command.setEmailDomain(updateCustomer.getCorpEmail());
                 command.setAttachments(cmd.getBanner());
                 command.setPostUri(cmd.getPostUri());
                 command.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
