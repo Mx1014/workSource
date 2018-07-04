@@ -5601,12 +5601,12 @@ public class AssetProviderImpl implements AssetProvider {
                         .execute();
                 //后插入：新增修改后的配置
             	for(int i = 0; i < subItemDTOList.size(); i++){
-            		long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
-                    if(currentSubtractionItemSeq == 0){
-                       this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
-                    }
                     SubItemDTO dto = subItemDTOList.get(i);
                     for(int j = 0;j < billIdList.size();j++) {
+                    	long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+                        if(currentSubtractionItemSeq == 0){
+                           this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+                        }
                     	Long billId = billIdList.get(j);
                     	PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
                 		subtractionItem.setId(currentSubtractionItemSeq);
