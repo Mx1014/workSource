@@ -235,7 +235,7 @@ ALTER TABLE eh_organization_member_details ADD COLUMN job_level_ids VARCHAR(256)
 alter table eh_communities add index namespace_id_index(`namespace_id`);
 
 -- fix for zuolinbase only, remove this after 5.5.2
-ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
+--ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
 -- end Janson
 
 -- 20180522-huangliangming-配置项管理-#30016
