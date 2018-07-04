@@ -1600,18 +1600,29 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}
         	doorAccess.setEnableAmount(cmd.getEnableAmount());
         }
+		if(cmd.getEnableDuration() != null){
+			doorAccess.setEnableDuration(cmd.getEnableDuration());
+		}
 
-		if(cmd.getServerId() != null && cmd.getServerId() != 0L){
-			if(aclinkServerService.findLocalServerById(cmd.getServerId()) != null){
-				doorAccess.setLocalServerId(cmd.getServerId());
+		if(cmd.getServerId() != null){
+			if(cmd.getServerId() != 0L){
+				if(aclinkServerService.findLocalServerById(cmd.getServerId()) != null){
+					doorAccess.setLocalServerId(cmd.getServerId());
+				}else{
+					throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "关联服务器不存在");
+				}
 			}else{
-				throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "关联服务器不存在");
+				doorAccess.setLocalServerId(0L);
 			}
+			
 		}
 
         doorAccess.setLatitude(cmd.getLatitude());
         doorAccess.setLongitude(cmd.getLongitude());
         doorAccess.setHasQr(cmd.getHasQr());
+        doorAccess.setMaxCount(cmd.getMaxCount());
+        doorAccess.setMaxDuration(cmd.getMaxDuration());
+        doorAccess.setDefualtInvalidDuration(cmd.getDefualtInvalidDuration());
         doorAccessProvider.updateDoorAccess(doorAccess);
         if(doorCommand != null) {
             doorCommandProvider.createDoorCommand(doorCommand);
@@ -3081,7 +3092,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			auth.setValidAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
 			auth.setValidFromMs(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
 			auth.setKeyValidTime(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
-			auth.setValidEndMs(cmd.getValidEndMs() == null ? (auth.getValidFromMs() + KEY_TICK_7_DAY) : cmd.getValidEndMs());
+			if(cmd.getValidEndMs() == null){
+				auth.setValidEndMs(auth.getValidFromMs() + (doorAccess.getDefualtInvalidDuration() == null ? KEY_TICK_7_DAY : KEY_TICK_ONE_DAY * doorAccess.getDefualtInvalidDuration()));
+			}else{
+				auth.setValidEndMs(cmd.getValidEndMs());
+			}
+			
 			auth.setRightRemote((byte) 1);
 		} else {
 			auth.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
@@ -3491,10 +3507,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         resp.setPhone(auth.getPhone());
-        if(auth.getValidEndMs() > System.currentTimeMillis()) {
-            resp.setIsValid((byte)1);    
+        if(auth.getValidEndMs() < System.currentTimeMillis() || ((byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
+            resp.setIsValid((byte)0);    
         } else {
-            resp.setIsValid((byte)0);
+            resp.setIsValid((byte)1);
         }
         resp.setDescription(auth.getDescription());
         resp.setValidDay(1l);
@@ -3502,6 +3518,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setUserName(auth.getNickname());
         resp.setValidEndMs(auth.getValidEndMs());
         resp.setQrIntro(this.configProvider.getValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_INTRO, AclinkConstant.QR_INTRO_URL));
+        resp.setValidFromMs(auth.getValidFromMs());
+        resp.setValidAuthAmount(auth.getValidAuthAmount());
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {

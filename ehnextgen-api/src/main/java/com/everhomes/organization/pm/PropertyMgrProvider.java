@@ -505,6 +505,8 @@ public interface PropertyMgrProvider {
 
 	List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId);
 
+	List<CommunityPmOwner> listCommunityPmOwnersByTel(Integer currentNamespaceId, Long communityId, String tel);
+
 	OrganizationOwnerBehavior findOrganizationOwnerBehaviorByOwnerAndAddressId(Long id, Long id1);
 
     void insertResourceReservation(PmResourceReservation resourceReservation);

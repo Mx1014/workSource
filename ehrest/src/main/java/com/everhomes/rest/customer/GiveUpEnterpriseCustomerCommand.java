@@ -11,7 +11,7 @@ public class GiveUpEnterpriseCustomerCommand {
 
     private Long id;
 
-
+    private Long orgId;
 
     public Long getId() {
         return id;
@@ -19,6 +19,14 @@ public class GiveUpEnterpriseCustomerCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     @Override

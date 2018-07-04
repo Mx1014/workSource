@@ -2202,6 +2202,28 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
 
 	@Override
+
+	public List<CommunityPmOwner> listCommunityPmOwnersByTel(Integer namespaceId, Long communityId, String tel) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_EXTRA_TELS.like("%"+tel+"%"));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
+		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listCommunityPmOwnersByTel, sql = {}" , query.getSQL());
+			LOGGER.debug("listCommunityPmOwnersByTel, bindValues = {}" , query.getBindValues());
+		}
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+			return null;
+		});
+		return result;
+	}
+
 	public PmResourceReservation findReservationById(Long reservationId) {
 		EhPmResoucreReservationsDao dao = new EhPmResoucreReservationsDao(this.dbProvider.getDslContext(AccessSpec.readWrite()).configuration());
 		return ConvertHelper.convert(dao.findById(reservationId), PmResourceReservation.class);
@@ -2211,5 +2233,6 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	public void updateReservation(PmResourceReservation oldReservation) {
 		EhPmResoucreReservationsDao dao = new EhPmResoucreReservationsDao(this.dbProvider.getDslContext(AccessSpec.readWrite()).configuration());
 		dao.update(oldReservation);
+
 	}
 }

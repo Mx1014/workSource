@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>doorId: 门禁 ID</li>
  * <li>validFromMs: 授权开始有效时间</li>
  * <li>validEndMs: 授权失效时间</li>
+ * <li>totalAuthAmount:授权有效次数</li>
  * <li>organization: 用户来自于</li>
  * <li>description: 授权描述</li>
  * </ul>
@@ -39,8 +40,15 @@ public class CreateDoorAuthByUser {
     private String description;
     
     private String authMethod;
+    private Integer totalAuthAmount;
     
-    public Long getDoorId() {
+    public Integer getTotalAuthAmount() {
+		return totalAuthAmount;
+	}
+	public void setTotalAuthAmount(Integer totalAuthAmount) {
+		this.totalAuthAmount = totalAuthAmount;
+	}
+	public Long getDoorId() {
         return doorId;
     }
     public void setDoorId(Long doorId) {

@@ -257,3 +257,24 @@ CREATE TABLE `eh_bundleid_mapper` (
   PRIMARY KEY(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'bundleId 映射信息表';
 -- END
+
+-- Designer: liuyilin
+-- Description:   issue-31813门禁2.9.7客户端支持自定义门禁授权方式 20180615
+ALTER TABLE `eh_door_access` ADD `max_duration` INTEGER COMMENT '有效时间最大值(天)';
+ALTER TABLE `eh_door_access` ADD `max_count` INTEGER COMMENT '按次授权最大次数';
+ALTER TABLE `eh_door_access` ADD `defualt_invalid_duration` INTEGER COMMENT '按次授权默认有效期(天)';
+ALTER TABLE `eh_door_access` ADD `enable_duration` TINYINT DEFAULT '1' COMMENT '是否支持按有效期开门';
+-- issue-31813 END
+
+-- 通用脚本
+-- ADD BY shiheng.ma
+-- issue-26467 物业报修 增加企业Id字段
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `enterprise_id`  bigint(20) NOT NULL DEFAULT 0 COMMENT '需求人公司Id';
+-- END
+
+-- 通用脚本
+-- ADD BY 唐岑 2018年7月3日22:04:25
+-- issue-28195
+-- 个人客户管理V2.1
+ALTER TABLE `eh_organization_owners` ADD COLUMN `contact_extra_tels` VARCHAR(1024) DEFAULT NULL COMMENT '客户多手机号，以jsonarray方式存储';
+-- END BY 唐岑
