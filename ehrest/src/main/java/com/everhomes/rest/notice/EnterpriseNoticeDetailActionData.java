@@ -7,12 +7,14 @@ import com.everhomes.util.StringHelper;
  * <li>bulletinId : 公告ID</li>
  * <li>bulletinTitle : 公告标题</li>
  * <li>showType:是否预览，请查看{@link EnterpriseNoticeShowType}</li>
+ * <li>organizationId: 总公司ID</li>
  * </ul>
  */
 public class EnterpriseNoticeDetailActionData {
     private Long bulletinId;
     private String bulletinTitle;
     private Byte showType;
+    private Long organizationId;
 
     public Long getBulletinId() {
         return bulletinId;
@@ -36,6 +38,14 @@ public class EnterpriseNoticeDetailActionData {
 
     public void setBulletinTitle(String bulletinTitle) {
         this.bulletinTitle = bulletinTitle;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     @Override
