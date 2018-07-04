@@ -358,7 +358,7 @@ SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM e
 
 -- AUTHOR: 郑思挺
 -- REMARK: 收款账户迁移 eh_rentalv2_pay_accounts
-SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),0);
+SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),10000);
 set @namespace_id = 999973;
 set @account_id = 1004;
 INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
@@ -444,6 +444,10 @@ set @account_id = 4592;
 INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
 SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 
+set @namespace_id = 999993;
+set @account_id = 4443;
+INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
+SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 
 -- AUTHOR: 邓爽  20180703
 -- REMARK: 基线停车支付收款方迁移
@@ -665,6 +669,13 @@ INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_t
 INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) 
 	VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
 
+-- AUTHOR: 郑思挺
+-- REMARK: 收款账户迁移 eh_rentalv2_pay_accounts
+SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),10000);
+set @namespace_id = 999979;
+set @account_id = 4422;
+INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
+SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -734,7 +745,13 @@ SET @c_id = (SELECT IFNULL(MAX(id),1) FROM eh_developer_account_info);
 INSERT INTO `eh_developer_account_info` (`id`, `bundle_ids`, `team_id`, `authkey_id`, `authkey`, `create_time`, `create_name`) 
 	VALUES(@c_id:= @c_id +1,'com.mybay.ios','2PRZ3336PJ','UT7B95V928','MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgOj5WmRF9x4eO3CASZUYBKv56BTkf1ZyhJJPhGcSJxC2gCgYIKoZIzj0DAQehRANCAATX2Qw+DzB3IocGXaVDfxX17WJ8D9PT8jaj7rRwKeHDXS1IXDidOVxAnhxedwNcP9UKqLu0zpqUIGvCvyC83hU0','2018-06-13 17:11:34','');
 
-	
+-- AUTHOR: 郑思挺
+-- REMARK: 收款账户迁移 eh_rentalv2_pay_accounts
+SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),10000);
+set @namespace_id = 999966;
+set @account_id = 1129;
+INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
+SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
