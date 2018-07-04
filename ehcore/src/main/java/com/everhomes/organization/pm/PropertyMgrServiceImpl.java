@@ -5868,10 +5868,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     "9、客户类型为：业主、租户、亲属、朋友、保姆、地产中介、其他、无；\n" +
                     "10、是否在户：是、否\n" +
                     "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
-            String[] propertyNames = {"contactName", "orgOwnerType", "contactToken", "gender","building","address", "livingStatus","livingDate", "birthdayDate", "maritalStatus", "job", "company",
+            String[] propertyNames = {"contactName", "orgOwnerType", "customerExtraTelsForExport", "gender","building","address", "livingStatus","livingDate", "birthdayDate", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
+            
+            
             String[] titleNames = {"姓名", "客户类型", "手机号码", "性别","楼栋","门牌", "是否在户", "迁入日期","生日", "婚姻状况", "职业", "单位", "证件号码", "户口所在地"};
-            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40,40, 30, 30, 40, 40};
+            int[] titleSizes = {20, 10, 40, 30, 20, 10, 20, 30, 40,40, 30, 30, 40, 40};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, owners);
         } else {
             // LOGGER.error("Organization owner are not exist.");
