@@ -144,7 +144,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  校验权限 by lei.lv
         if (cmd.getDetailId() != null) {
             Long departmentId = organizationService.getDepartmentByDetailId(cmd.getDetailId());
-            organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
+            organizationService.checkOrganizationPrivilege(departmentId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
         }
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  组织架构添加人员
@@ -211,7 +211,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //权限校验
         cmd.getDetailIds().forEach(detailId -> {
             Long departmentId = organizationService.getDepartmentByDetailId(detailId);
-            organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.MODIFY_DEPARTMENT_JOB_POSITION);
+            organizationService.checkOrganizationPrivilege(departmentId, PrivilegeConstants.MODIFY_DEPARTMENT_JOB_POSITION);
         });
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
@@ -233,7 +233,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //权限校验
         cmd.getDetailIds().forEach(detailId -> {
             Long departmentId = organizationService.getDepartmentByDetailId(detailId);
-            organizationService.checkOrganizationpPivilege(departmentId, PrivilegeConstants.DELETE_PERSON);
+            organizationService.checkOrganizationPrivilege(departmentId, PrivilegeConstants.DELETE_PERSON);
         });
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();

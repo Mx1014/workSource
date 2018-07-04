@@ -633,7 +633,7 @@ public interface OrganizationService {
 	Byte setOrganizationDetailFlag(SetOrganizationDetailFlagCommand cmd);
 	Byte getOrganizationDetailFlag(GetOrganizationDetailFlagCommand cmd);
 
-	void checkOrganizationpPivilege(Long orgId, Long pivilegeId);
+	void checkOrganizationPrivilege(Long orgId, Long pivilegeId);
 
 	// 根据detailId获取部门
 	Long getDepartmentByDetailId(Long detailId);
