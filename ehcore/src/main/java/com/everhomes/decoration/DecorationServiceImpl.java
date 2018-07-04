@@ -746,7 +746,7 @@ public class DecorationServiceImpl implements  DecorationService {
     @Override
     public void cancelRequest(RequestIdCommand cmd) {
         DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
-        request.setStatus((byte)2);
+        request.setCancelFlag((byte)2);
         request.setCancelReason(cmd.getReason());
         this.decorationProvider.updateDecorationRequest(request);
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(UserContext.currentUserId(), IdentifierType.MOBILE.getCode());;
