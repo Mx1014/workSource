@@ -769,7 +769,7 @@ public class DecorationServiceImpl implements  DecorationService {
                 .getApprovalId());
         this.dbProvider.execute((TransactionStatus status) -> {
             //先删除旧的审批
-            this.decorationProvider.deleteApprovalValByRequestId(cmd.getRequestId());
+            this.decorationProvider.deleteApprovalValByRequestId(cmd.getRequestId(),cmd.getApprovalId());
             //保存审批数据
             DecorationApprovalVal val = new DecorationApprovalVal();
             val.setApprovalId(cmd.getApprovalId());

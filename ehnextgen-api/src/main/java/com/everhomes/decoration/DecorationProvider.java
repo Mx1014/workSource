@@ -60,7 +60,7 @@ public interface DecorationProvider {
 
     void createApprovalVals(DecorationApprovalVal val);
 
-    void deleteApprovalValByRequestId(Long requestId);
+    void deleteApprovalValByRequestId(Long requestId, Long approvalId);
 
     void updateApprovalVals(DecorationApprovalVal val);
 

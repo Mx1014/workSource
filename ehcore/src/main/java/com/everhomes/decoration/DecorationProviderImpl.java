@@ -412,10 +412,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
     }
 
     @Override
-    public void deleteApprovalValByRequestId(Long requestId) {
+    public void deleteApprovalValByRequestId(Long requestId,Long approvalId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         context.update(Tables.EH_DECORATION_APPROVAL_VALS).set(Tables.EH_DECORATION_APPROVAL_VALS.DELETE_FLAG,(byte)1)
-                .where(Tables.EH_DECORATION_APPROVAL_VALS.REQUEST_ID.eq(requestId))
+                .where(Tables.EH_DECORATION_APPROVAL_VALS.REQUEST_ID.eq(requestId).and(Tables.EH_DECORATION_APPROVAL_VALS.APPROVAL_ID.eq(approvalId)))
                 .execute();
     }
 
