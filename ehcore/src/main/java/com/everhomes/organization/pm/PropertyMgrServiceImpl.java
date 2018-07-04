@@ -5350,8 +5350,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void processUserForOwner(UserIdentifier identifier) {
         // TODO Auto-generated method stub
-        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
-                identifier.getNamespaceId(), identifier.getIdentifierToken());
+//        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
+//                identifier.getNamespaceId(), identifier.getIdentifierToken());
+        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByTel(identifier.getNamespaceId(), null, identifier.getIdentifierToken());
         LOGGER.debug("processUserForOwner: user identifier: {}, owners: {}", identifier.getIdentifierToken(), StringHelper.toJsonString(owners));
         if (null != owners && owners.size() > 0) {
             for (CommunityPmOwner owner : owners) {
