@@ -5,6 +5,8 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.user.*;
@@ -26,6 +28,9 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 
 	@Autowired
 	private CommunityProvider communityProvider;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 
 	@Override
@@ -124,6 +129,11 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 
 
 	private CommunityBizDTO toDto(CommunityBiz communityBiz){
+
+		if(communityBiz == null){
+			return null;
+		}
+
 		CommunityBizDTO dto = ConvertHelper.convert(communityBiz, CommunityBizDTO.class);
 
 		if(dto.getLogoUri() != null){
@@ -146,10 +156,18 @@ public class CommunityBizServiceImpl implements CommunityBizService {
 					"invalid communityId");
 		}
 
-		if(TrueOrFalseFlag.fromCode(community.getAppSelfConfigFlag()) == )
+		//判断使用默认的还是园区独立配置的
+		Long communityId = community.getId();
+		Long organizationId = null;
+		if(TrueOrFalseFlag.fromCode(community.getAppSelfConfigFlag()) == TrueOrFalseFlag.FALSE){
+			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationProperty(communityId);
+			if(organizationCommunity != null){
+				communityId = null;
+				organizationId  = organizationCommunity.getOrganizationId();
+			}
+		}
 
-
-		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(appContext.getCommunityId(), CommunityBizStatus.ENABLE.getCode());
+		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(organizationId, communityId, CommunityBizStatus.ENABLE.getCode());
 		CommunityBizDTO dto = toDto(communityBiz);
 		return dto;
 	}
