@@ -894,15 +894,15 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountOwed(r.getValue(fine.AMOUNT));
                     dto.setBillItemName(r.getValue(fine.NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setAmountReceivable(r.getValue(fine.AMOUNT));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dtos.add(dto);
                     //dateStr[0] = r.getValue(t.DATE_STR);
                     dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
                     dateStrEnd[0] = r.getValue(t.DATE_STR_END);
-                    amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
-                    amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
+                    amountOwed[0] = amountOwed[0].add(r.getValue(fine.AMOUNT));
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(fine.AMOUNT));
                     return null;
                 });
         //查询该账单id是否存在对应的缴费凭证记录
