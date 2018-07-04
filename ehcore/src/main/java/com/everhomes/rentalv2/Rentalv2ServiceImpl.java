@@ -8712,6 +8712,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					1001, "资源不存在");
 		GetResourceUsingInfoResponse response = new GetResourceUsingInfoResponse();
 
+		response.setSourceName(rentalSite.getResourceName());
 		List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalSite.getResourceType(),
 				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
 		LocalDate today = LocalDate.now();

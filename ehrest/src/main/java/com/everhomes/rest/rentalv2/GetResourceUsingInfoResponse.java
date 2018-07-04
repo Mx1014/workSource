@@ -15,6 +15,7 @@ public class GetResourceUsingInfoResponse {
     private List<UsingInfoDTO> usingInfos;
     private List<UsingInfoDTO> currentUsingInfos;
     private String openTimes;
+    private String sourceName;
 
     public List<UsingInfoDTO> getUsingInfos() {
         return usingInfos;
@@ -38,5 +39,13 @@ public class GetResourceUsingInfoResponse {
 
     public void setOpenTimes(String openTimes) {
         this.openTimes = openTimes;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
     }
 }
