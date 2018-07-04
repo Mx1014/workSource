@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.servicehotline.*;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +15,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.archives.ExportArchivesContactsCommand;
-import com.everhomes.rest.archives.VerifyPersonnelByPasswordCommand;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.util.RequireAuthentication;
 

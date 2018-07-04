@@ -123,7 +123,7 @@ public class ArchivesController extends ControllerBase{
      */
     @RequestMapping("exportArchivesContacts")
     @RestReturn(value = String.class)
-    public RestResponse exportArchivesContacts(ExportArchivesContactsCommand cmd){
+    public RestResponse exportArchivesContacts(ListArchivesContactsCommand cmd){
         archivesService.exportArchivesContacts(cmd);
         return new RestResponse();
     }

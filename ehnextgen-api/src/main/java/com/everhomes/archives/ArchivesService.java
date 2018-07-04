@@ -32,7 +32,7 @@ public interface ArchivesService {
     ImportFileTaskDTO importArchivesContacts(
             MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
 
-    void exportArchivesContacts(ExportArchivesContactsCommand cmd);
+    void exportArchivesContacts(ListArchivesContactsCommand cmd);
 
     OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
 

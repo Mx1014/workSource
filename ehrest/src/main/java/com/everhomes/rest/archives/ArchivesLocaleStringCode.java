@@ -19,6 +19,7 @@ public interface ArchivesLocaleStringCode {
     int ERROR_DATE_WRONG_FORMAT = 100013;   //  日期格式错误
 
     int ERROR_NO_TARGETS = 200001;  //  通知目标为空
+    int ERROR_DELETE_ADMIN = 200002;    //  无法删除管理员，请先解除其管理权限再重试
 
     String CONTACT_DELETE = "1001";  //  通讯录删除
     String CONTACT_LIST = "1002";    //  通讯录成员列表

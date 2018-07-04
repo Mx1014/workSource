@@ -25,6 +25,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
+import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
@@ -138,6 +139,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Autowired
     private TaskService taskService;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
@@ -239,11 +243,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
-                //  1.置顶表删除
-                archivesProvider.deleteArchivesStickyContactsByDetailIds(namespaceId, cmd.getDetailIds());
-                //  2.人事删除
+                //  1.人事删除
                 DeleteArchivesEmployeesCommand command = ConvertHelper.convert(cmd, DeleteArchivesEmployeesCommand.class);
                 deleteArchivesEmployees(command);
+
+                //  2.置顶表删除
+                archivesProvider.deleteArchivesStickyContactsByDetailIds(namespaceId, cmd.getDetailIds());
             }
             return null;
         });
@@ -583,12 +588,14 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void exportArchivesContacts(ExportArchivesContactsCommand cmd) {
+    public void exportArchivesContacts(ListArchivesContactsCommand cmd) {
         //  export with the file download center
         Map<String, Object> params = new HashMap<>();
         //  the value could be null if it is not exist
         params.put("organizationId", cmd.getOrganizationId());
         params.put("keywords", cmd.getKeywords());
+        params.put("filterScopeTypes", JSON.toJSONString(cmd.getFilterScopeTypes()));
+        params.put("targetTypes", JSON.toJSONString(cmd.getTargetTypes()));
         params.put("namespaceId", UserContext.getCurrentNamespaceId());
         String fileName = localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.CONTACT_LIST, "zh_CN", "userLists") + ".xlsx";
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesContactsExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
@@ -599,7 +606,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  get the output stream which will be used by the file download center
         OutputStream outputStream = null;
         cmd.setPageSize(Integer.MAX_VALUE - 1);
-        cmd.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
         ListArchivesContactsResponse response = listArchivesContacts(cmd);
         taskService.updateTaskProcess(taskId, 10);
         if (response.getContacts() != null && response.getContacts().size() > 0) {
@@ -770,6 +776,19 @@ public class ArchivesServiceImpl implements ArchivesService {
                 names = new StringBuilder(names.subSequence(0, names.length() - 1));
         }
         return names.toString();
+    }
+
+    private boolean checkTheEmployeePrivilege(Long detailId, Long enterpriseId, Long organizationId){
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if(employee == null || employee.getTargetId() == 0)
+            return false;
+        boolean isAdmin;
+        try {
+            isAdmin = userPrivilegeMgr.checkUserPrivilege(employee.getTargetId(), enterpriseId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON, FlowConstants.ORGANIZATION_MODULE, null, null, organizationId, null);
+        } catch (Exception e) {
+            isAdmin = false;
+        }
+        return isAdmin;
     }
 
     @Override
@@ -1560,50 +1579,50 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
-            if (!ArchivesUtil.parseDate(cmd.getDismissTime()).after(ArchivesUtil.currentDate())) {
-                archivesProvider.deleteLastConfiguration(namespaceId, cmd.getDetailIds(), ArchivesOperationType.DISMISS.getCode());
-                dismissArchivesEmployees(cmd);
-            } else {
-                for (Long detailId : cmd.getDetailIds()) {
-                    createArchivesOperation(
-                            namespaceId,
-                            cmd.getOrganizationId(),
-                            detailId,
-                            ArchivesOperationType.DISMISS.getCode(),
-                            ArchivesUtil.parseDate(cmd.getDismissTime()),
-                            StringHelper.toJsonString(cmd));
+            for (Long detailId : cmd.getDetailIds()) {
+                //  1.校验管理员
+                if (checkTheEmployeePrivilege(detailId, cmd.getOrganizationId(), cmd.getOrganizationId())) {
+                    throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DELETE_ADMIN,
+                            "No rights to remove the admin.");
+                }
+                //  2.按照操作时间执行分情况执行下一步
+                if (!ArchivesUtil.parseDate(cmd.getDismissTime()).after(ArchivesUtil.currentDate())) {
+                    dismissArchivesEmployee(detailId, namespaceId, cmd);
+                } else {
+                    createArchivesOperation(namespaceId, cmd.getOrganizationId(), detailId, ArchivesOperationType.DISMISS.getCode(),
+                            ArchivesUtil.parseDate(cmd.getDismissTime()), StringHelper.toJsonString(cmd));
                 }
             }
-            if (TrueOrFalseFlag.fromCode(cmd.getLogFlag()) != TrueOrFalseFlag.FALSE)
+            if (!ArchivesUtil.parseDate(cmd.getDismissTime()).after(ArchivesUtil.currentDate())) {
+                archivesProvider.deleteLastConfiguration(namespaceId, cmd.getDetailIds(), ArchivesOperationType.DISMISS.getCode());
+            }
+            if (TrueOrFalseFlag.fromCode(cmd.getLogFlag()) != TrueOrFalseFlag.FALSE) {
                 addDismissLogs(cmd);
+            }
             return null;
         });
     }
 
-    private void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        for (Long detailId : cmd.getDetailIds()) {
-            //  1.将员工添加到离职人员表
-            OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            ArchivesDismissEmployees dismissEmployee = processDismissEmployee(employee, cmd);
-            archivesProvider.createArchivesDismissEmployee(dismissEmployee);
+    private void dismissArchivesEmployee(Long detailId, Integer namespaceId, DismissArchivesEmployeesCommand cmd){
+        //  1.将员工添加到离职人员表
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        ArchivesDismissEmployees dismissEmployee = processDismissEmployee(employee, cmd);
+        archivesProvider.createArchivesDismissEmployee(dismissEmployee);
 
-            //  2.改为离职状态
-            employee.setEmployeeStatus(EmployeeStatus.DISMISSAL.getCode());
-            employee.setDismissTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
-            organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
+        //  2.改为离职状态
+        employee.setEmployeeStatus(EmployeeStatus.DISMISSAL.getCode());
+        employee.setDismissTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
+        organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
 
-            //  3.删除置顶信息
-            archivesProvider.deleteArchivesStickyContactsByDetailId(namespaceId, detailId);
+        //  3.删除置顶信息
+        archivesProvider.deleteArchivesStickyContactsByDetailId(namespaceId, detailId);
 
-            //  4.删除员工权限
-            DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
-            deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(employee.getOrganizationId());
-            deleteOrganizationPersonnelByContactTokenCommand.setContactToken(employee.getContactToken());
-            deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
-            organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
-
-        }
+        //  4.删除员工权限
+        DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
+        deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(employee.getOrganizationId());
+        deleteOrganizationPersonnelByContactTokenCommand.setContactToken(employee.getContactToken());
+        deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
+        organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
     }
 
     private ArchivesDismissEmployees processDismissEmployee(OrganizationMemberDetails employee, DismissArchivesEmployeesCommand cmd) {
@@ -1636,17 +1655,21 @@ public class ArchivesServiceImpl implements ArchivesService {
         dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                //  1.删除员工权限
+                //  1.校验是否为管理员
+                if (checkTheEmployeePrivilege(detailId, detail.getOrganizationId(), detail.getOrganizationId()))
+                    throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DELETE_ADMIN,
+                            "No rights to remove the admin.");
+                //  2.删除员工权限
                 DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
                 deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(detail.getOrganizationId());
                 deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
                 deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
                 organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
 
-                //  2.删除员工档案
+                //  3.删除员工档案
                 organizationProvider.deleteOrganizationMemberDetails(detail);
 
-                //  3.删除离职列表中对应的员工
+                //  4.删除离职列表中对应的员工
                 deleteArchivesDismissEmployees(detailId, detail.getOrganizationId());
 
             }
@@ -1716,8 +1739,9 @@ public class ArchivesServiceImpl implements ArchivesService {
                 break;
             case DISMISS:
                 DismissArchivesEmployeesCommand cmd3 = (DismissArchivesEmployeesCommand) StringHelper.fromJsonString(configuration.getAdditionalInfo(), DismissArchivesEmployeesCommand.class);
-                cmd3.setDetailIds(Collections.singletonList(configuration.getDetailId()));
-                dismissArchivesEmployees(cmd3);
+                dismissArchivesEmployee(configuration.getDetailId(), configuration.getNamespaceId(), cmd3);
+/*                cmd3.setDetailIds(Collections.singletonList(configuration.getDetailId()));
+                dismissArchivesEmployees(cmd3);*/
                 break;
         }
     }
