@@ -5446,6 +5446,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 					UserServiceErrorCode.ERROR_INVALID_PARAMS, "Invalid namespaceId");
 		}
 
+		//判断手机号的用户与当前用户是否一致
+		if (identifier.getOwnerUid() == null || !identifier.getOwnerUid().equals(UserContext.currentUserId())) {
+            LOGGER.error("identifierToken error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE,
+                    "identifierToken error");
+        }
 
 		// find user by uid
 		User user = userProvider.findUserById(identifier.getOwnerUid());
