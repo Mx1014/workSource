@@ -1053,7 +1053,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         		//根据账单id再次查询找到该账单下所有费项的楼栋门牌（可能多个）
         		//List<Long> queryAddressIds = new ArrayList<>();
         		List<String> queryAddressList = new ArrayList<>();
-            	context.selectDistinct(t2.ADDRESS_ID)
+        		context.selectDistinct(t2.ADDRESS_ID, t2.BUILDING_NAME , t2.APARTMENT_NAME)
             		.from(t2)
             		.where(t2.BILL_ID.eq(Long.parseLong(ListAllBillsForClientDTO.getBillId())))
             		.fetch()
