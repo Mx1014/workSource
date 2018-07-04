@@ -9,6 +9,10 @@
 --/yellowPage/transferLaunchPadItems
 -- 参数:1802
 
+-- AUTHOR: 邓爽
+-- REMARK: 上线完成后请调用以下两个接口做停车缴费收款方数据迁移
+-- REMARK: /parking/rechargeOrderMigration 迁移支付系统订单号到停车订单表
+
 -- AUTHOR: 杨崇鑫  20180704
 -- REMARK: 上线完成后请调用以下接口做物业缴费以前订单支付方式的数据迁移 by 杨崇鑫
 -- /asset/transferOrderPaymentType
@@ -25,6 +29,9 @@
 
 -- AUTHOR: 杨崇鑫  20180704
 -- REMARK: 物业收款账户迁移，在执行eh_payment_bill_groups语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
+
+-- AUTHOR: 邓爽
+-- REMARK: 预约收款账户迁移，在执行eh_parking_business_payee_accounts,eh_siyin_print_business_payee_accounts语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
