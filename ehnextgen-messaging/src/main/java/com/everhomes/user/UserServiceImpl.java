@@ -4685,7 +4685,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         dto.setTargetType(memberArchive.getTargetType());
         dto.setDetailId(memberArchive.getId());
         dto.setContactName(memberArchive.getContactName());
-        dto.getContactToken()
+        dto.setContactToken(memberArchive.getContactToken());
         if (!StringUtils.isEmpty(memberArchive.getEnName()))
             dto.setContactEnglishName(memberArchive.getEnName());
         dto.setGender(memberArchive.getGender());
