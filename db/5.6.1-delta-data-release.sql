@@ -246,3 +246,11 @@ update  eh_news nu ,
 	as n_c
 set nu.owner_type = 'EhCommunities', nu.owner_id = n_c.community_id 
 where nu.id = n_c.news_id;
+
+-- 20180528-huangliangming-配置项管理-#30016
+-- 初始化配置项表“是否只读”字段为“是”，值为1
+UPDATE eh_configurations s SET s.is_readonly = 1 ;
+-- 添加菜单
+INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
+VALUES(30000000 ,'后台配置项',11000000,NULL,'server-configuration',1,2,'/11000000/30000000','zuolin',50,60100,3,'system','module',NULL);
+-- 20180522-huangliangming
