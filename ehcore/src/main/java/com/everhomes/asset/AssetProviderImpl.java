@@ -851,7 +851,6 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        //final String[] dateStr = {""};
         final String[] dateStrBegin = {""};
         final String[] dateStrEnd = {""};
         final BigDecimal[] amountOwed = {new BigDecimal("0")};
@@ -862,7 +861,8 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");//滞纳金
         EhPaymentExemptionItems exemption = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("exemption");//减免/增收项
 
-        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END
+        		,t.CHARGING_ITEMS_ID)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -876,11 +876,18 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    //根据减免费项配置重新计算待收金额
+                    Long charingItemId = r.getValue(t.CHARGING_ITEMS_ID);
+                    Boolean isConfigSubtraction = isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
+                    if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
+                    	dto.setIsConfigSubtraction((byte)0);
+                    	amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                    }else {
+                    	dto.setIsConfigSubtraction((byte)1);
+                    }
                     dtos.add(dto);
-                    //dateStr[0] = r.getValue(t.DATE_STR);
                     dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
                     dateStrEnd[0] = r.getValue(t.DATE_STR_END);
-                    amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
                 });
@@ -897,8 +904,16 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivable(r.getValue(fine.AMOUNT));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    //根据减免费项配置重新计算待收金额
+                    Long charingItemId = r.getValue(t.CHARGING_ITEMS_ID);
+                    Boolean isConfigSubtraction = isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
+                    if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
+                    	dto.setIsConfigSubtraction((byte)0);
+                    	amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                    }else {
+                    	dto.setIsConfigSubtraction((byte)1);
+                    }
                     dtos.add(dto);
-                    //dateStr[0] = r.getValue(t.DATE_STR);
                     dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
                     dateStrEnd[0] = r.getValue(t.DATE_STR_END);
                     amountOwed[0] = amountOwed[0].add(r.getValue(fine.AMOUNT));
@@ -4523,14 +4538,10 @@ public class AssetProviderImpl implements AssetProvider {
                     if(value != null){
                     	Long billItemId = r.getValue(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID);
                     	//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
-                    	Long charingItemId = getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID)
-                                .from(Tables.EH_PAYMENT_BILL_ITEMS)
-                                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
-                                .and(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
-                                .fetchOne(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
+                    	Long chargingItemId = getPaymentBillItemsChargingItemID(billId,billItemId);
                     	//根据减免费项配置重新计算待收金额
-                        Boolean isConfigSubtraction = isConfigLateFineSubtraction(billId, charingItemId);//用于判断该滞纳金是否配置了减免费项
-                        if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
+                        Boolean isConfigSubtraction = isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
+                        if(!isConfigSubtraction) {//如果滞纳金没有配置减免费项，那么需要相加到待缴金额中
                         	amountOwed[0] = amountOwed[0].add(value);
                         }    
                     }
@@ -5598,6 +5609,16 @@ public class AssetProviderImpl implements AssetProvider {
             }
             return null;
         });
+	}
+	
+	//根据billId和billItemId获取费项表的charingItemId
+	public Long getPaymentBillItemsChargingItemID(Long billId, Long billItemId) {
+		Long chargingItemId = getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID)
+	            .from(Tables.EH_PAYMENT_BILL_ITEMS)
+	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+	            .and(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+	            .fetchOne(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
+		return chargingItemId;
 	}
 	
 	//取出所有的减免费项配置

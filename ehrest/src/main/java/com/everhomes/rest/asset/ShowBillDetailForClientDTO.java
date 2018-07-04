@@ -16,6 +16,7 @@ import java.math.BigDecimal;
  * <li>dateStrBegin:计费开始时间</li>
  * <li>dateStrEnd:计费结束时间</li>
  * <li>dateStr:账期</li>
+ * <li>isConfigSubtraction:1：已经配置了减免费项，0：代表没有配置减免费项</li>
  *</ul>
  */
 public class ShowBillDetailForClientDTO {
@@ -27,6 +28,7 @@ public class ShowBillDetailForClientDTO {
     private String dateStrBegin;
     private String dateStrEnd;
     private String dateStr;
+    private Byte isConfigSubtraction;
 
     @Override
     public String toString() {
@@ -100,4 +102,12 @@ public class ShowBillDetailForClientDTO {
     public void setDateStr(String dateStr) {
         this.dateStr = dateStr;
     }
+
+	public Byte getIsConfigSubtraction() {
+		return isConfigSubtraction;
+	}
+
+	public void setIsConfigSubtraction(Byte isConfigSubtraction) {
+		this.isConfigSubtraction = isConfigSubtraction;
+	}
 }
