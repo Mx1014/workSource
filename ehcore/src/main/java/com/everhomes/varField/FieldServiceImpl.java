@@ -7,6 +7,8 @@ import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.module.ServiceModuleService;
@@ -130,6 +132,9 @@ public class FieldServiceImpl implements FieldService {
     @Autowired
     private PmTaskService pmTaskService;
 
+    @Autowired
+    private EnterpriseCustomerProvider customerProvider;
+
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
         List<FieldGroup> systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
@@ -205,6 +210,7 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("27");
                 sheetNames.remove("35");
                 sheetNames.remove("36");
+                sheetNames.remove("37");
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
@@ -1031,7 +1037,9 @@ public class FieldServiceImpl implements FieldService {
                 SearchTasksByOrgCommand cmd17 = new SearchTasksByOrgCommand();
                 cmd17.setCommunityId(communityId);
                 cmd17.setNamespaceId(namespaceId);
-                cmd17.setOrganizationId(orgId);
+                EnterpriseCustomer customer = customerProvider.findById(customerId);
+                if(customer!=null)
+                cmd17.setOrganizationId(customer.getOrganizationId());
                 List<SearchTasksByOrgDTO> list = pmTaskService.listTasksByOrg(cmd17);
                 if(list == null) list = new ArrayList<>();
                 for(int j = 0; j < list.size(); j++){
@@ -1127,12 +1135,12 @@ public class FieldServiceImpl implements FieldService {
                 return String.valueOf(invoke);
             }
         }
-        if(sheetName.equalsIgnoreCase("物业报修")){
-            if(fieldName.equalsIgnoreCase("status")){
-                invoke = PmTaskFlowStatus.fromCode((byte)invoke).getDescription();
-                return String.valueOf(invoke);
-            }
-        }
+//        if(sheetName.equalsIgnoreCase("物业报修")){
+//            if(fieldName.equalsIgnoreCase("status")){
+//                invoke = PmTaskFlowStatus.fromCode((byte)invoke).getDescription();
+//                return String.valueOf(invoke);
+//            }
+//        }
         if(invoke==null){
             return "";
         }

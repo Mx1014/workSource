@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 
 public class SearchTasksByOrgDTO {
     private String taskCategoryName;
-    private Long organizationUid;
+    private String pmTaskSource;
     private String buildingName;
     private String requestorName;
     private String requestorPhone;
@@ -44,12 +44,12 @@ public class SearchTasksByOrgDTO {
         this.taskCategoryName = taskCategoryName;
     }
 
-    public Long getOrganizationUid() {
-        return organizationUid;
+    public String getPmTaskSource() {
+        return pmTaskSource;
     }
 
-    public void setOrganizationUid(Long organizationUid) {
-        this.organizationUid = organizationUid;
+    public void setPmTaskSource(String pmTaskSource) {
+        this.pmTaskSource = pmTaskSource;
     }
 
     public String getBuildingName() {
