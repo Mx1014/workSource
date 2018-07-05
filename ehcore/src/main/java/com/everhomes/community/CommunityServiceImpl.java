@@ -2764,6 +2764,9 @@ public class CommunityServiceImpl implements CommunityService {
 			if(dto.getAddressDtos() != null && dto.getAddressDtos().size() > 0){
 				for (AddressDTO addressDTO: dto.getAddressDtos()){
 					//不需要拼接ApartmentName,因为address中已经包含门牌号
+					if (addressDTO == null) {
+					    return;
+                    }
 					address.append(addressDTO.getAddress());
 					address.append("、");
 				}
