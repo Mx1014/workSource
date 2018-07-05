@@ -4716,7 +4716,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         dto.setDepartments(departments);
 
         //  4.设置岗位名称
-        dto.setJobPositions(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(dto.getDetailId())));
+		Map<Long, String> jobPositionMap =  archivesService.getEmployeeJobPosition(dto.getDetailId());
+		List<OrganizationDTO> jobPosition = new ArrayList<>();
+		if (jobPositionMap != null)
+			for (Long key : jobPositionMap.keySet()) {
+				OrganizationDTO temp = new OrganizationDTO();
+				temp.setId(key);
+				temp.setName(jobPositionMap.get(key));
+				jobPosition.add(temp);
+			}
+        dto.setJobPosition(jobPosition);
 
         //  5.设置头像(由于迁移数据detail表中可能没有头像信息，故由原始的组织架构接口获得)
         if (OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())) {

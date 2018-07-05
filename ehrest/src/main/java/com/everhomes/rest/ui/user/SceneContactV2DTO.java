@@ -19,7 +19,7 @@ import java.util.Map;
  * <li>contactEnglishName: 联系人英文名字</li>
  * <li>targetType: 用户类型</li>
  * <li>gender: 联系人性别：0-保密, 1-男性, 2-女性</li>
- * <li>jobPositions: 联系人岗位</li>
+ * <li>jobPosition: 联系人岗位 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>departments: 联系人部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>regionCode: 区号</li>
  * <li>contactToken: 联系人号码</li>
@@ -49,7 +49,8 @@ public class SceneContactV2DTO {
 
     private Byte gender;
 
-    private String jobPositions;
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobPosition;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
@@ -141,12 +142,12 @@ public class SceneContactV2DTO {
         this.gender = gender;
     }
 
-    public String getJobPositions() {
-        return jobPositions;
+    public List<OrganizationDTO> getJobPosition() {
+        return jobPosition;
     }
 
-    public void setJobPositions(String jobPositions) {
-        this.jobPositions = jobPositions;
+    public void setJobPosition(List<OrganizationDTO> jobPosition) {
+        this.jobPosition = jobPosition;
     }
 
     public List<OrganizationDTO> getDepartments() {
