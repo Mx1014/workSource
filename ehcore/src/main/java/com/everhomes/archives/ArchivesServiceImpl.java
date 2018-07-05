@@ -243,9 +243,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
-                //  1.人事删除
+                //  1.人事离职
+                DismissArchivesEmployeesCommand command = new DismissArchivesEmployeesCommand();
+                command.setDetailIds(cmd.getDetailIds());
+                command.setOrganizationId(cmd.getOrganizationId());
+                command.setDismissType(ArchivesDismissType.OTHER.getCode());
+                command.setDismissReason(ArchivesDismissReason.OTHER.getCode());
+                command.setDismissRemark(localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.CONTACT_DELETE, "zh_CN", "Delete by the admin"));
+                command.setDismissTime(String.valueOf(ArchivesUtil.currentDate()));
+                dismissArchivesEmployeesConfig(command);
+
+                /*由人事删除改为上面的人事离职
                 DeleteArchivesEmployeesCommand command = ConvertHelper.convert(cmd, DeleteArchivesEmployeesCommand.class);
-                deleteArchivesEmployees(command);
+                deleteArchivesEmployees(command);*/
 
                 //  2.置顶表删除
                 archivesProvider.deleteArchivesStickyContactsByDetailIds(namespaceId, cmd.getDetailIds());
