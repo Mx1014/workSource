@@ -840,5 +840,31 @@ public class ActivityController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /activity/exportActivity</b>
+     * <p>导出活动数据</p>
+     */
+    @RequestMapping("exportActivity")
+    public void exportActivity(ExportActivityCommand cmd, HttpServletResponse response) {
+
+    }
+
+    /**
+     * <b>URL: /activity/exportOrganization</b>
+     * <p>导出活动企业分布数据</p>
+     */
+    @RequestMapping("exportOrganization")
+    public void exportOrganization(ExportOrganizationCommand cmd, HttpServletResponse response) {
+
+    }
+
+    /**
+     * <b>URL: /activity/exportTag</b>
+     * <p>导出活动标签分布数据</p>
+     */
+    @RequestMapping("exportTag")
+    public void exportTag(ExportTagCommand cmd, HttpServletResponse response) {
+
+    }
     
 }
