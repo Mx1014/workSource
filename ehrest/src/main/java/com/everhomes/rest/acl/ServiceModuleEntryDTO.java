@@ -31,7 +31,7 @@ public class ServiceModuleEntryDTO {
 	private Byte terminalType;
 	private Byte locationType;
 	private Byte sceneType;
-	private Byte secondAppType;
+	private Integer secondAppType;
 	private Integer defaultOrder;
 	private String iconUri;
 	private String iconUrl;
@@ -93,11 +93,11 @@ public class ServiceModuleEntryDTO {
 		this.sceneType = sceneType;
 	}
 
-	public Byte getSecondAppType() {
+	public Integer getSecondAppType() {
 		return secondAppType;
 	}
 
-	public void setSecondAppType(Byte secondAppType) {
+	public void setSecondAppType(Integer secondAppType) {
 		this.secondAppType = secondAppType;
 	}
 
