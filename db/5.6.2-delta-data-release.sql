@@ -32,6 +32,12 @@
 -- AUTHOR: 邓爽
 -- REMARK: 预约收款账户迁移，在执行eh_parking_business_payee_accounts,eh_siyin_print_business_payee_accounts语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
 
+-- AUTHOR: 唐岑 2018年7月4日16:07:37
+-- REMARK: 升级后需要执行db/search/contract.sh脚本，执行脚本后，需执行接口/contract/syncContracts、/contract/syncContractsFromThirdPart，重新同步合同数据到es中
+
+-- AUTHOR: 唐岑 2018年7月4日22:38:16
+-- REMARK: 升级后需要执行db/search/pmowner.sh脚本，更改pmowner的mapping结构；执行脚本后，需执行接口/pm/syncOwnerIndex，重新同步个人客户数据到es中
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

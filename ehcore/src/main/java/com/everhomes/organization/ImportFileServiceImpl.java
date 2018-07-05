@@ -128,6 +128,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                 }
             }
         }
+        titleMap.remove("contactExtraTels");
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
             ByteArrayOutputStream out = null;
@@ -185,8 +186,13 @@ public class ImportFileServiceImpl implements ImportFileService{
                             data.put(String.valueOf(i), logList.get(i));
                         }
                     }
+                    //data.remove("contactExtraTels");
                     if(data.size() > 0){
                         for (Map.Entry<String, String> entry : data.entrySet()) {
+                        	//不显示contactExtraTels字段
+                        	if ("contactExtraTels".equals(entry.getKey())) {
+								continue;
+							}
                             titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getKey()));
                         }
                     }else{
@@ -209,10 +215,20 @@ public class ImportFileServiceImpl implements ImportFileService{
                             data.put(String.valueOf(i), logList.get(i));
                         }
                     }
+                    //把contactToken字段的值改为contactExtraTels，显示多手机号
+                    String contactExtraTels = (String) data.get("contactExtraTels");
+                    List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+                    String customerExtraTelsForExport = contactExtraTelsList.toString();
+                    data.put("contactToken", customerExtraTelsForExport.substring(1, customerExtraTelsForExport.length()-1));
+                    
                     XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
                     for (Map.Entry<String, Object> entry : data.entrySet()) {
-                        //modify by rui.jia  20180422
+                    	//不显示contactExtraTels字段
+                    	if ("contactExtraTels".equals(entry.getKey())) {
+							continue;
+						}
+                    	//modify by rui.jia  20180422
                         String entryValues = "";
                         if (entry.getValue() != null && entry.getValue() instanceof Collection) {
                             entryValues = Arrays.toString(((Collection) entry.getValue()).toArray());

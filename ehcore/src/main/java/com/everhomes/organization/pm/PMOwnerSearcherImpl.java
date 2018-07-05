@@ -149,7 +149,8 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("contactToken", 5.0f)
-                    .field("contactName", 2.0f);
+                    .field("contactName", 2.0f)
+                    .field("contactExtraTels", 2.0f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
@@ -275,6 +276,13 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	private XContentBuilder createDoc(CommunityPmOwner owner){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            //将ContactExtraTels字段加入到es索引当中
+            if (!org.springframework.util.StringUtils.isEmpty(owner.getContactExtraTels())) {
+            	String contactExtraTels = owner.getContactExtraTels();
+                List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+                b.field("contactExtraTels", contactExtraTelsList.toString());  
+			}
+                  
             b.field("contactToken", owner.getContactToken());
             b.field("contactName", owner.getContactName());
 //            b.field("communityId", owner.getCommunityId());

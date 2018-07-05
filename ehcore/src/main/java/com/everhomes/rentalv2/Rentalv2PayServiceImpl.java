@@ -320,7 +320,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         dto.setAmount(cmd.getAmount());
         List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = orderCommandResponse.getPaymentMethods();
         if (paymentMethods != null)
-             dto.setPayMethod(paymentMethods.stream().map(r->ConvertHelper.convert(r,PayMethodDTO.class)).collect(Collectors.toList()));
+             dto.setPayMethod(paymentMethods.stream().map(r->{
+                 PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                 convert.setExtendInfo(getPayMethodExtendInfo());
+                 return convert;
+             }).collect(Collectors.toList()));
         dto.setOrderId(cmd.getOrderId());
         return dto;
     }
@@ -482,7 +486,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                 cmd.getClientAppName());
         List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
         if (paymentMethods != null)
-             dto.setPayMethod(paymentMethods.stream().map(r->ConvertHelper.convert(r,PayMethodDTO.class)).collect(Collectors.toList()));
+             dto.setPayMethod(paymentMethods.stream().map(r->{
+                 PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                 convert.setExtendInfo(getPayMethodExtendInfo());
+                 return convert;
+             }).collect(Collectors.toList()));
         return dto;
     }
 
