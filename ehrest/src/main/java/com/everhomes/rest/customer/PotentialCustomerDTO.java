@@ -14,6 +14,7 @@ public class PotentialCustomerDTO {
     private String name;
     private Long sourceId;
     private String sourceType;
+    private String originSourceName;
     private Long operateUid;
     private Timestamp updateTime;
     private Timestamp createTime;
@@ -90,6 +91,14 @@ public class PotentialCustomerDTO {
 
     public void setDeleteUid(Long deleteUid) {
         this.deleteUid = deleteUid;
+    }
+
+    public String getOriginSourceName() {
+        return originSourceName;
+    }
+
+    public void setOriginSourceName(String originSourceName) {
+        this.originSourceName = originSourceName;
     }
 
     @Override

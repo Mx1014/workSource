@@ -207,4 +207,8 @@ public interface EnterpriseCustomerProvider {
     List<CustomerTalent> listPotentialTalentBySourceId(Long sourceId);
 
     void updatePotentialCustomer(Long sourceId, String name, Long aLong, Integer currentNamespaceId);
+
+    void updatePotentialCustomer(CustomerPotentialData latestPotentialCustomer);
+
+    void updateCustomerTalentRegisterStatus(String contactToken);
 }

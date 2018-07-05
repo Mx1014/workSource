@@ -5,7 +5,7 @@ package com.everhomes.rest.customer;
  */
 
 public enum PotentialCustomerType {
-    ACTIVITY((byte) 0, "activity"), SERVICE_ALLIANCE((byte) 1, "service_alliance");
+    ACTIVITY((byte) 0, "ACTIVITY"), SERVICE_ALLIANCE((byte) 1, "SERVICE_ALLIANCE");
     private byte code;
     private String value;
 

@@ -22,6 +22,7 @@ CREATE TABLE `eh_customer_potential_datas` (
   `operate_uid` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL ,
   `create_time` datetime NOT NULL ,
+  `delete_time` datetime NOT NULL ,
   `delete_uid` bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -33,3 +34,5 @@ ALTER  TABLE `eh_enterprise_customers` ADD COLUMN `source_type` VARCHAR(64) NOT 
 ALTER TABLE `eh_customer_talents` ADD COLUMN `talent_source_item_id`  BIGINT(20) NULL AFTER `age`;
 ALTER TABLE `eh_customer_talents` ADD COLUMN `origin_source_id`  bigint(20) NULL AFTER `age`;
 ALTER TABLE `eh_customer_talents` ADD COLUMN `origin_source_type`  VARCHAR(64) NULL AFTER `age`;
+ALTER TABLE `eh_customer_talents` ADD COLUMN `register_status`  TINYINT(4) NOT NULL  DEFAULT  0 AFTER `age`;
+

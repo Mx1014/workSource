@@ -1,17 +1,44 @@
 package com.everhomes.yellowPage;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
-import com.everhomes.general_approval.*;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalFormHandler;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.GeneralModuleInfo;
+import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
+import com.everhomes.rest.general_approval.GeneralFormRenderType;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -22,7 +49,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component(ServiceAllianceApprovalFormHandler.SERVICE_ALLIANCE_APPROVAL_FROM)
 public class ServiceAllianceApprovalFormHandler implements GeneralApprovalFormHandler {
@@ -80,6 +109,7 @@ public class ServiceAllianceApprovalFormHandler implements GeneralApprovalFormHa
         Long flowCaseId = flowService.getNextFlowCaseId();
 
         // 把values 存起来
+            List<GeneralApprovalVal> result = new ArrayList<>();
         for (PostApprovalFormItem val : cmd.getValues()) {
             GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
             obj.setApprovalId(ga.getId());
@@ -89,7 +119,20 @@ public class ServiceAllianceApprovalFormHandler implements GeneralApprovalFormHa
             obj.setFieldType(val.getFieldType());
             obj.setFieldStr3(val.getFieldValue());
             this.generalApprovalValProvider.createGeneralApprovalVal(obj);
+            result.add(obj);
         }
+            //add by jiarui  20180705
+            LocalEventBus.publish(event -> {
+                LocalEventContext localEventcontext = new LocalEventContext();
+                localEventcontext.setUid(UserContext.currentUserId());
+                localEventcontext.setNamespaceId(UserContext.getCurrentNamespaceId());
+                event.setContext(localEventcontext);
+                event.setEntityType(EntityType.GENERAL_APPROVAL_VAL.getCode());
+                Map<String, Object> map = new HashMap<>();
+                map.put(EntityType.GENERAL_APPROVAL_VAL.getCode(), result);
+                event.setParams(map);
+                event.setEventName(SystemEvent.SERVICE_ALLIANCE_CREATE.dft());
+            });
 
         FlowCase flowCase;
         if (null == flow) {

@@ -4213,7 +4213,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deletePotentialCustomer(DeleteEnterpriseCommand cmd) {
-        enterpriseCustomerProvider.deletePotentialCustomer(cmd.getEnterpriseId());
+        enterpriseCustomerProvider.deletePotentialCustomer(cmd.getSourceId());
     }
 
     @Override
@@ -4223,7 +4223,24 @@ public class CustomerServiceImpl implements CustomerService {
         cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
         List<CustomerPotentialData> data = enterpriseCustomerProvider.listPotentialCustomers(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType(), cmd.getPotentialName(), cmd.getPageAnchor(), cmd.getPageSize() + 1);
         if (data != null && data.size() > 0) {
-            data.forEach((r) -> dtos.add(ConvertHelper.convert(r, PotentialCustomerDTO.class)));
+            data.forEach((r) -> {
+                PotentialCustomerDTO potentialCustomerDTO =   ConvertHelper.convert(r, PotentialCustomerDTO.class);
+
+                if (r.getSourceId() != null && StringUtils.isNotBlank(r.getSourceType())) {
+                    if (PotentialCustomerType.SERVICE_ALLIANCE.getValue().equals(r.getSourceType())) {
+                        ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(r.getSourceId());
+                        if (serviceAllianceCategories != null) {
+                            potentialCustomerDTO.setOriginSourceName(serviceAllianceCategories.getName());
+                        }
+                    } else if (PotentialCustomerType.ACTIVITY.getValue().equals(r.getSourceType())) {
+                        ActivityCategories activityCategories = activityProivider.findActivityCategoriesById(r.getSourceId());
+                        if (activityCategories != null) {
+                            potentialCustomerDTO.setOriginSourceName(activityCategories.getName());
+                        }
+                    }
+                }
+                dtos.add(potentialCustomerDTO);
+            });
         }
         if (dtos.size() > cmd.getPageSize()) {
             dtos.remove(dtos.size() - 1);

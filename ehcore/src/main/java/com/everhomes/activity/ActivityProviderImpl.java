@@ -266,7 +266,8 @@ public class ActivityProviderImpl implements ActivityProivider {
         createRoster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.insert(createRoster);
         //add by RuiJia for publishing create action 20180629
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhActivityRoster.class, id);
+        //事务隔离级别原因： 不能读取未提交的记录
+//        DaoHelper.publishDaoAction(DaoAction.CREATE, EhActivityRoster.class, id);
     }
 
     @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#roster.activityId,#roster.uid}"),@CacheEvict(value="findRosterById",key="#roster.id")})

@@ -2149,6 +2149,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         CustomerPotentialData data = ConvertHelper.convert(datasDao.findById(enterpriseId), CustomerPotentialData.class);
         if(data!=null){
             data.setStatus(CommonStatus.INACTIVE.getCode());
+            data.setDeleteUid(UserContext.currentUserId());
+            data.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             datasDao.update(data);
         }
     }
@@ -2243,6 +2245,23 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .set(Tables.EH_CUSTOMER_POTENTIAL_DATAS.OPERATE_UID, userId)
                 .where(Tables.EH_CUSTOMER_POTENTIAL_DATAS.NAMESPACE_ID.eq(currentNamespaceId))
                 .and(Tables.EH_CUSTOMER_POTENTIAL_DATAS.ID.eq(sourceId))
+                .execute();
+    }
+
+
+    @Override
+    public void updatePotentialCustomer(CustomerPotentialData latestPotentialCustomer) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerPotentialDatasDao datasDao = new EhCustomerPotentialDatasDao(context.configuration());
+        datasDao.update(latestPotentialCustomer);
+    }
+
+    @Override
+    public void updateCustomerTalentRegisterStatus(String contactToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_TALENTS)
+                .set(Tables.EH_CUSTOMER_TALENTS.REGISTER_STATUS, CommonStatus.ACTIVE.getCode())
+                .where(Tables.EH_CUSTOMER_TALENTS.PHONE.eq(contactToken))
                 .execute();
     }
 }
