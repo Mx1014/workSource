@@ -12,6 +12,7 @@ import com.everhomes.parking.dashi.DashiCarLocation;
 import com.everhomes.parking.dashi.DashiEmptyPlaceFloorInfo;
 import com.everhomes.parking.dashi.DashiEmptyPlaceInfo;
 import com.everhomes.parking.dashi.DashiJsonEntity;
+import com.everhomes.parking.ketuo.KetuoCard;
 import com.everhomes.parking.ketuo.KetuoRequestConfig;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.parking.*;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,6 +61,55 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		}else {
 			return addMonthCard(order);
 		}
+	}
+
+	@Override
+	public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+		KetuoCard card = getCard(cmd.getPlateNumber());
+		if (card == null) {
+			return null;
+		}
+		List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(parkingLot, null, null);
+		if(parkingRechargeRates==null || parkingRechargeRates.size()==0){
+			return null;
+		}
+
+		ParkingRechargeRateDTO targetRateDTO = null;
+		String cardTypeId = card.getCarType();
+		for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+			if (rateDTO.getCardTypeId().equals(cardTypeId) && rateDTO.getMonthCount().intValue()==parkingLot.getExpiredRechargeMonthCount()) {
+				targetRateDTO = rateDTO;
+				break;
+			}
+		}
+
+		if (null == targetRateDTO) {
+			parkingRechargeRates.sort((r1,r2)->r1.getMonthCount().compareTo(r2.getMonthCount()));
+			for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+				if (rateDTO.getCardTypeId().equals(cardTypeId)) {
+					targetRateDTO = rateDTO;
+					break;
+				}
+			}
+		}
+		if (null == targetRateDTO) {
+			return null;
+		}
+
+		ParkingExpiredRechargeInfoDTO dto = ConvertHelper.convert(targetRateDTO,ParkingExpiredRechargeInfoDTO.class);
+		dto.setCardTypeName(targetRateDTO.getCardType());
+		if (card != null  && card.getValidTo() != null) {
+			String expireDate = card.getValidTo();
+			long newStartTime = strToLong(expireDate);
+			dto.setStartPeriod(newStartTime);
+			Timestamp rechargeEndTimestamp = Utils.getTimestampByAddDistanceMonth(newStartTime, parkingLot.getExpiredRechargeMonthCount());
+			dto.setEndPeriod(rechargeEndTimestamp.getTime());
+			dto.setMonthCount(new BigDecimal(parkingLot.getExpiredRechargeMonthCount()));
+			dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.ketuo.rateName","个月"));
+			dto.setPrice(targetRateDTO.getPrice().divide(targetRateDTO.getMonthCount(),OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP)
+					.multiply(new BigDecimal(parkingLot.getExpiredRechargeMonthCount())));
+		}
+		return dto;
 	}
 
 	@Override
