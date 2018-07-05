@@ -8,7 +8,6 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
- * <li>keyWords: 关键字(用户名或者手机号和车牌号) V6.6</li>
  * <li>plateNumber: 车牌号</li>
  * <li>plateOwnerName: 车主</li>
  * <li>payerPhone: 付款人手机号</li>
@@ -31,7 +30,6 @@ public class SearchParkingRechargeOrdersCommand {
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
-    private String keyWords;
     private String plateNumber;
     private String plateOwnerName;
     private String payerPhone;
@@ -49,74 +47,7 @@ public class SearchParkingRechargeOrdersCommand {
 	private Long currentProjectId;
 	private Long appId;
 
-    public String getKeyWords() {
-        return keyWords;
-    }
-
-    public void setKeyWords(String keyWords) {
-        this.keyWords = keyWords;
-    }
-
-    public Long getCurrentPMId() {
-		return currentPMId;
-	}
-
-	public void setCurrentPMId(Long currentPMId) {
-		this.currentPMId = currentPMId;
-	}
-
-	public Long getCurrentProjectId() {
-		return currentProjectId;
-	}
-
-	public void setCurrentProjectId(Long currentProjectId) {
-		this.currentProjectId = currentProjectId;
-	}
-	
-	public Long getAppId() {
-		return appId;
-	}
-
-	public void setAppId(Long appId) {
-		this.appId = appId;
-	}
-
-    public Byte getStatus() {
-        return status;
-    }
-
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    public String getCardNumber() {
-        return cardNumber;
-    }
-
-    public void setCardNumber(String cardNumber) {
-        this.cardNumber = cardNumber;
-    }
-
-    public SearchParkingRechargeOrdersCommand() {
-    }
-
-	public Long getStartDate() {
-		return startDate;
-	}
-
-	public void setStartDate(Long startDate) {
-		this.startDate = startDate;
-	}
-
-	public Long getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(Long endDate) {
-		this.endDate = endDate;
-	}
-
-	public String getOwnerType() {
+    public String getOwnerType() {
         return ownerType;
     }
 
@@ -140,6 +71,46 @@ public class SearchParkingRechargeOrdersCommand {
         this.parkingLotId = parkingLotId;
     }
 
+    public String getKeyWords() {
+        return keyWords;
+    }
+
+    public void setKeyWords(String keyWords) {
+        this.keyWords = keyWords;
+    }
+
+    public String getPaySource() {
+        return paySource;
+    }
+
+    public void setPaySource(String paySource) {
+        this.paySource = paySource;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
+    }
+
+    public Long getCurrentProjectId() {
+        return currentProjectId;
+    }
+
+    public void setCurrentProjectId(Long currentProjectId) {
+        this.currentProjectId = currentProjectId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
     public String getPlateNumber() {
         return plateNumber;
     }
@@ -149,19 +120,51 @@ public class SearchParkingRechargeOrdersCommand {
     }
 
     public String getPlateOwnerName() {
-		return plateOwnerName;
-	}
+        return plateOwnerName;
+    }
 
-	public void setPlateOwnerName(String plateOwnerName) {
-		this.plateOwnerName = plateOwnerName;
-	}
+    public void setPlateOwnerName(String plateOwnerName) {
+        this.plateOwnerName = plateOwnerName;
+    }
 
-	public String getPayerPhone() {
+    public String getPayerPhone() {
         return payerPhone;
     }
 
     public void setPayerPhone(String payerPhone) {
         this.payerPhone = payerPhone;
+    }
+
+    public String getPaidType() {
+        return paidType;
+    }
+
+    public void setPaidType(String paidType) {
+        this.paidType = paidType;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public Long getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Long startDate) {
+        this.startDate = startDate;
+    }
+
+    public Long getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Long endDate) {
+        this.endDate = endDate;
     }
 
     public Long getPageAnchor() {
@@ -180,40 +183,24 @@ public class SearchParkingRechargeOrdersCommand {
         this.pageSize = pageSize;
     }
 
-	@Override
+    public Byte getRechargeType() {
+        return rechargeType;
+    }
+
+    public void setRechargeType(Byte rechargeType) {
+        this.rechargeType = rechargeType;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-
-	public Byte getRechargeType() {
-		return rechargeType;
-	}
-
-	public void setRechargeType(Byte rechargeType) {
-		this.rechargeType = rechargeType;
-	}
-
-	public String getPaidType() {
-		return paidType;
-	}
-
-	public void setPaidType(String paidType) {
-		this.paidType = paidType;
-	}
-
-    public String getKeyWords() {
-        return keyWords;
-    }
-
-    public void setKeyWords(String keyWords) {
-        this.keyWords = keyWords;
-    }
-
-    public String getPaySource() {
-        return paySource;
-    }
-
-    public void setPaySource(String paySource) {
-        this.paySource = paySource;
     }
 }
