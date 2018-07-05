@@ -4808,7 +4808,7 @@ public class ForumServiceImpl implements ForumService {
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
                         }
-                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
+                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup + "&categoryId=" + activity.getCategoryId());
                 	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
                         //投票帖子用自己的分享链接 modified by yanjun 220171227
                         relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
