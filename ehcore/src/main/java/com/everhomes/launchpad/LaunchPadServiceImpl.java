@@ -2896,6 +2896,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			if(portalPublishHandler != null){
 				itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig());
 			}
+
+
+			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
 			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData);
