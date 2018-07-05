@@ -4786,15 +4786,15 @@ public class ForumServiceImpl implements ForumService {
                 if(namespaceId == null){
                     namespaceId = UserContext.getCurrentNamespaceId();
                 }
-                ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
 
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
-                    LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl 
+                    LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl
                         + ", relativeUrl=" + relativeUrl + ", postId=" + post.getId());
                 } else {
-                	//单独处理活动的分享链接 modified by xiongying 20160622
-                	if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
-                		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
+                    //单独处理活动的分享链接 modified by xiongying 20160622
+                    if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
+                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
+                        relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
 //                		ActivityTokenDTO dto = new ActivityTokenDTO();
 //                		dto.setPostId(post.getId());
 //                		dto.setForumId(post.getForumId());
@@ -4807,17 +4807,19 @@ public class ForumServiceImpl implements ForumService {
                         Byte wechatSignup = 0;
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
+                            post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup + "&categoryId=" + activity.getCategoryId());
+                        }else {
+                            post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                         }
-                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup + "&categoryId=" + activity.getCategoryId());
                 	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
                         //投票帖子用自己的分享链接 modified by yanjun 220171227
                         relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
-                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId() + "&communityId=" + communityId);
+                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId()  + "&communityId=" + communityId);
                     }else {
                 	    if (embededAppId != null && embededAppId.equals(AppConstants.APPID_LINK)) {
                             relativeUrl = configProvider.getValue(ConfigConstants.POST_LINK_SHARE_URL, "");
                         }
-                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&categoryId=" + activity.getCategoryId() + "&communityId=" + communityId + "&userId=" + userId);
+                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&communityId=" + communityId + "&userId=" + userId);
                 	}
                 }
             } catch(Exception e) {
