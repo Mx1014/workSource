@@ -8,6 +8,13 @@
 -- REMARK: /yellowPage/transferLaunchPadItems 参数:1802
 -- REMARK: 上线后清一下redis缓存。定时器有缓存问题。
 
+-- AUTHOR: 邓爽
+-- REMARK: 上线完成后请调用以下两个接口做停车缴费收款方数据迁移
+-- REMARK: /parking/rechargeOrderMigration 迁移支付系统订单号到停车订单表
+
+-- AUTHOR: 杨崇鑫  20180704
+-- REMARK: 上线完成后请调用以下接口做物业缴费以前订单支付方式的数据迁移 by 杨崇鑫
+-- /asset/transferOrderPaymentType
 
 -- AUTHOR: 梁燕龙 20180702
 -- REMARK: 活动支付订单迁移，在执行迁移语句前，将eh_activity_roster，eh_payment_order_records这两张表进行全表备份
@@ -19,6 +26,11 @@
 -- AUTHOR: 郑思挺
 -- REMARK: 预约收款账户迁移，在执行eh_rentalv2_pay_accounts语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
 
+-- AUTHOR: 杨崇鑫  20180704
+-- REMARK: 物业收款账户迁移，在执行eh_payment_bill_groups语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
+
+-- AUTHOR: 邓爽
+-- REMARK: 预约收款账户迁移，在执行eh_parking_business_payee_accounts,eh_siyin_print_business_payee_accounts语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -45,7 +57,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
 	VALUES ('pay.v2.secretKey', 'zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==', '新支付secretKey', '0');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.payHomeUrl', 'http://payv2-beta.zuolin.com/pay', '新支付payHomeUrl', '0');
+	VALUES ('pay.v2.payHomeUrl', 'https://payv2.zuolin.com/pay', '新支付payHomeUrl', '0');
 	
 -- AUTHOR: 杨崇鑫
 -- REMARK: 支付回调
@@ -207,7 +219,11 @@ SET @c_id = (SELECT IFNULL(MAX(id),1) FROM eh_developer_account_info);
 INSERT INTO `eh_developer_account_info` (`id`, `bundle_ids`, `team_id`, `authkey_id`, `authkey`, `create_time`, `create_name`) 
 VALUES(@c_id:= @c_id +1,'com.ios','4H44DAN2YD','Q77V8W78L2','MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgexxG8QrtsI2+Xuwf75baYuZBQYBDzSBfEPijhC2GOmagCgYIKoZIzj0DAQehRANCAAT4qnM82JvBxnJ/R3ESPFgylVgU4st8QlQdf1QEYQtU3lVNStrg8W6DcLvYyL/7I/Tc0HFXm+8YQijz7ayWDOp7','2018-06-12 16:11:41','');
 
-	
+-- AUTHOR: 梁燕龙 20180704
+-- REMARK: 活动模块分享链接修改
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('post.link.share.url', '/mobile/static/share_post/share_post.html#', 'the relative path for sharing topic link', '0');
+UPDATE `eh_configurations` SET value = '/forum/build/index.html#/detail' WHERE NAME = 'post.share.url';
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -335,10 +351,6 @@ set @account_id = 4526;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
-set @namespace_id = 999971;
-set @account_id = 1000;
-INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
-SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
 set @namespace_id = 999973;
 set @account_id = 1004;
@@ -355,11 +367,16 @@ set @account_id = 4443;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
+set @namespace_id = 999954;
+set @account_id = 4691;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
 
 
 -- AUTHOR: 郑思挺
 -- REMARK: 收款账户迁移 eh_rentalv2_pay_accounts
-SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),0);
+SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),10000);
 set @namespace_id = 999973;
 set @account_id = 1004;
 INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
@@ -445,6 +462,10 @@ set @account_id = 4592;
 INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
 SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 
+set @namespace_id = 999993;
+set @account_id = 4443;
+INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
+SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 
 -- AUTHOR: 邓爽  20180703
 -- REMARK: 基线停车支付收款方迁移
@@ -666,6 +687,13 @@ INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_t
 INSERT INTO `eh_parking_business_payee_accounts` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `parking_lot_name`, `business_type`, `payee_id`, `payee_user_type`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) 
 	VALUES (@id:=@id+1, @ns, 'community', @communityid, @parkinglotId, @parkingLotName, 'monthRecharge', @payeeId, 'EhOrganizations', '2', '1', now(), '1', now());
 
+-- AUTHOR: 郑思挺
+-- REMARK: 收款账户迁移 eh_rentalv2_pay_accounts
+SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),10000);
+set @namespace_id = 999979;
+set @account_id = 4422;
+INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
+SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -735,7 +763,13 @@ SET @c_id = (SELECT IFNULL(MAX(id),1) FROM eh_developer_account_info);
 INSERT INTO `eh_developer_account_info` (`id`, `bundle_ids`, `team_id`, `authkey_id`, `authkey`, `create_time`, `create_name`) 
 	VALUES(@c_id:= @c_id +1,'com.mybay.ios','2PRZ3336PJ','UT7B95V928','MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgOj5WmRF9x4eO3CASZUYBKv56BTkf1ZyhJJPhGcSJxC2gCgYIKoZIzj0DAQehRANCAATX2Qw+DzB3IocGXaVDfxX17WJ8D9PT8jaj7rRwKeHDXS1IXDidOVxAnhxedwNcP9UKqLu0zpqUIGvCvyC83hU0','2018-06-13 17:11:34','');
 
-	
+-- AUTHOR: 郑思挺
+-- REMARK: 收款账户迁移 eh_rentalv2_pay_accounts
+SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),10000);
+set @namespace_id = 999966;
+set @account_id = 1129;
+INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
+SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -757,9 +791,16 @@ INSERT INTO `eh_developer_account_info` (`id`, `bundle_ids`, `team_id`, `authkey
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: anbang
 -- DESCRIPTION: 此SECTION只在安邦物业-999949执行的脚本
--- AUTHOR:
--- REMARK:
+-- AUTHOR: 杨崇鑫
+-- REMARK: 物业缴费新支付数据迁移
+update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4692' where namespace_id=999949; -- 安邦物业
 
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动收款方账号迁移；
+set @namespace_id = 999949;
+set @account_id = 4692;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
