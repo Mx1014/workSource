@@ -495,7 +495,14 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
+        EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.AMOUNT_OWED,t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVABLE,t.STATUS,t.NOTICETEL,t.NOTICE_TIMES,
+                t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
+                t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
+        		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"));
+        query.addFrom(t, t2);
+        query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
 
@@ -505,7 +512,6 @@ public class AssetProviderImpl implements AssetProvider {
 
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         if(!org.springframework.util.StringUtils.isEmpty(status)){
-
             query.addConditions(t.SWITCH.eq(status));
         }
         if(billGroupId != null) {
@@ -533,13 +539,6 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
             query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
         }
-        //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
-        /*if(!org.springframework.util.StringUtils.isEmpty(buildingName)){
-            query.addConditions(t.BUILDING_NAME.eq(buildingName));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(apartmentName)){
-            query.addConditions(t.APARTMENT_NAME.eq(apartmentName));
-        }*/
         if(!org.springframework.util.StringUtils.isEmpty(customerTel)){
             query.addConditions(t.CUSTOMER_TEL.like("%"+customerTel+"%"));
         }
@@ -551,42 +550,23 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addConditions(t.IS_UPLOAD_CERTIFICATE.eq(isUploadCertificate));
         }
         query.addOrderBy(t.DATE_STR.desc());
+        query.addGroupBy(t.ID);
+        //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
+        if(!org.springframework.util.StringUtils.isEmpty(buildingName) || !org.springframework.util.StringUtils.isEmpty(apartmentName)) {
+        	buildingName = buildingName != null ? buildingName : "";
+        	apartmentName = apartmentName != null ? apartmentName : "";
+        	String queryAddress = buildingName + "/" + apartmentName;
+        	query.addHaving(DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).like("%"+queryAddress+"%"));
+        }
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
-            ListBillsDTO dto = new ListBillsDTO();
-            //根据账单id查找所有的收费细项，并且拼装楼栋门牌
-            dto.setAddresses("");//初始化
-            EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
-            SelectQuery<Record> queryAddr = context.selectQuery();
-            queryAddr.addSelect(o.BUILDING_NAME,o.APARTMENT_NAME);
-            queryAddr.addFrom(o);
-            queryAddr.addConditions(o.BILL_ID.eq(r.getValue(t.ID)));
-            queryAddr.fetch()
-            	.map(f -> {
-            		String newAddr = f.getValue(o.BUILDING_NAME) + "/" + f.getValue(o.APARTMENT_NAME);
-            		if(f.getValue(o.BUILDING_NAME) != null && f.getValue(o.APARTMENT_NAME) != null && !dto.getAddresses().contains(newAddr)) {
-            			String addresses = dto.getAddresses() + newAddr + ",";
-            			dto.setAddresses(addresses);
-            		}
-            		return null;
-            });
-            String addresses = dto.getAddresses();
-            if(addresses != null && addresses.length() > 0) {
-            	addresses = addresses.substring(0, addresses.length() - 1);//去掉最后一个逗号 
-            	dto.setAddresses(addresses);
-            }
-            //需根据收费项的楼栋门牌进行查询，不能直接根据账单的楼栋门牌进行查询
-            if(!org.springframework.util.StringUtils.isEmpty(buildingName) && !org.springframework.util.StringUtils.isEmpty(apartmentName)) {
-            	String queryAddress = buildingName + "/" + apartmentName;
-            	if(!addresses.contains(queryAddress)) {
-            		return null;
-            	}
-            }
-            dto.setBuildingName(r.getBuildingName());
-            dto.setApartmentName(r.getApartmentName());
-            dto.setAmountOwed(r.getAmountOwed());
-            dto.setAmountReceivable(r.getAmountReceivable());
-            dto.setAmountReceived(r.getAmountReceived());
+        	ListBillsDTO dto = new ListBillsDTO();
+            dto.setAddresses(r.getValue("addresses", String.class));
+            dto.setBuildingName(r.getValue(t.BUILDING_NAME));
+            dto.setApartmentName(r.getValue(t.APARTMENT_NAME));
+            dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
+            dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+            dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
             if(!org.springframework.util.StringUtils.isEmpty(billGroupName)) {
                 dto.setBillGroupName(billGroupName);
             }else{
@@ -596,24 +576,24 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setBillId(String.valueOf(r.getValue(t.ID)));
             dto.setBillStatus(r.getValue(t.STATUS));
             dto.setNoticeTel(r.getValue(t.NOTICETEL));
-            dto.setNoticeTimes(r.getNoticeTimes());
-            dto.setDateStr(r.getDateStr());
-            dto.setTargetName(r.getTargetName());
-            dto.setTargetId(String.valueOf(r.getTargetId()));
-            dto.setTargetType(r.getTargetType());
-            dto.setOwnerId(String.valueOf(r.getOwnerId()));
-            dto.setOwnerType(r.getOwnerType());
-            dto.setContractNum(r.getContractNum());
-            dto.setContractId(String.valueOf(r.getContractId()));
+            dto.setNoticeTimes(r.getValue(t.NOTICE_TIMES));
+            dto.setDateStr(r.getValue(t.DATE_STR));
+            dto.setTargetName(r.getValue(t.TARGET_NAME));
+            dto.setTargetId(r.getValue(t.TARGET_ID, String.class));
+            dto.setTargetType(r.getValue(t.TARGET_TYPE));
+            dto.setOwnerId(r.getValue(t.OWNER_ID, String.class));
+            dto.setOwnerType(r.getValue(t.OWNER_TYPE));
+            dto.setContractNum(r.getValue(t.CONTRACT_NUM));
+            dto.setContractId(r.getValue(t.CONTRACT_ID, String.class));
             // 增加发票编号
-            dto.setInvoiceNum(r.getInvoiceNumber());
+            dto.setInvoiceNum(r.getValue(t.INVOICE_NUMBER));
             //添加支付方式
-            dto.setPaymentType(r.getPaymentType());
+            dto.setPaymentType(r.getValue(t.PAYMENT_TYPE));
             //增加账单时间
-            dto.setDateStrBegin(r.getDateStrBegin());
-            dto.setDateStrEnd(r.getDateStrEnd());
+            dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+            dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
             //增加客户手机号
-            dto.setCustomerTel(r.getCustomerTel());
+            dto.setCustomerTel(r.getValue(t.CUSTOMER_TEL));
             list.add(dto);
             return null;});
         return list;
@@ -979,12 +959,13 @@ public class AssetProviderImpl implements AssetProvider {
 
         ShowCreateBillDTO response = new ShowCreateBillDTO();
         List<BillItemDTO> list = new ArrayList<>();
-
+        Long categoryId = findCategoryIdFromBillGroup(billGroupId);
         context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID)
                 .from(rule,ci)
                 .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
                 .and(rule.OWNERID.eq(ci.OWNER_ID))
                 .and(rule.BILL_GROUP_ID.eq(billGroupId))
+                .and(ci.CATEGORY_ID.eq(categoryId))
                 .fetch()
                 .map(r -> {
                     BillItemDTO dto = new BillItemDTO();
@@ -2991,7 +2972,7 @@ public class AssetProviderImpl implements AssetProvider {
             List<Long> fetch = context.select(standardScope.CHARGING_STANDARD_ID)
                     .from(standardScope)
                     .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
-                    .or(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                    .or(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))//修复issue-29576 收费项计算规则-标准名称不能修改
                     .fetch(standardScope.CHARGING_STANDARD_ID);
             UpdateQuery<EhPaymentChargingStandardsRecord> query = context.updateQuery(t);
             query.addValue(t.NAME, chargingStandardName);
@@ -4490,6 +4471,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(billGroupId))
                 .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
+        Long categoryId = findCategoryIdFromBillGroup(billGroupId);
         List<Long> chosenId = context.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID)
                 .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
                 .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME.eq(projectLevelName))
@@ -4497,6 +4479,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CATEGORY_ID.eq(categoryId))
                 .fetch(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.CHARGING_ITEM_ID);
         if(chosenId.size() != 1){
             return null;

@@ -15,4 +15,5 @@ public interface ContractErrorCode {
     int ERROR_CONTRACT_APARTMENT_IS_NOT_FREE = 10007;  //合同关联的资产不是待租状态
     
     int ERROR_NO_DATA = 800000;
+    int ERROR_ORGIDORCOMMUNITYID_IS_EMPTY = 10008;  //合同查询参数错误
 }

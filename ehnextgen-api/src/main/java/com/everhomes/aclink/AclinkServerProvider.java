@@ -16,6 +16,9 @@ public interface AclinkServerProvider {
 
 	List<AclinkServer> listLocalServers(CrossShardListingLocator locator, Long ownerId, DoorAccessOwnerType ownerType, String uuid,
 			int count);
+	
+	List<AclinkServer> listLocalServersByUserAuth(CrossShardListingLocator locator, Long userId, Integer namespaceId,
+			int count);
 
 	List<AclinkServer> queryAclinkServer(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);

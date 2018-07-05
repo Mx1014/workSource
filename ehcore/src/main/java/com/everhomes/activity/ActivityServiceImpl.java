@@ -5400,14 +5400,14 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         Post post = this.forumProvider.findPostById(activity.getPostId());
         FilterWordsCommand command = new FilterWordsCommand();
         if (post != null) {
-            command.setCommunityId(post.getCommunityId());
+            command.setCommunityId(post.getVisibleRegionId());
             command.setModuleType(post.getModuleType());
         }
-        if (!StringUtils.isEmpty(cmd.getAchievement()) && "link".equals(cmd.getAchievementType())) {
-            List<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<>();
+        if (!StringUtils.isEmpty(cmd.getAchievement()) && !"link".equals(cmd.getAchievementType())) {
             list.add(cmd.getAchievement());
-            command.setTextList(list);
         }
+        command.setTextList(list);
         this.sensitiveWordService.filterWords(command);
         // 敏感词过滤 end
         activity.setAchievement(cmd.getAchievement());
