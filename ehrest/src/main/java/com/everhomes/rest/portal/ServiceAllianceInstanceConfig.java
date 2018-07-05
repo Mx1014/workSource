@@ -15,6 +15,7 @@ import java.util.List;
  * <li>enableComment: 是否允许评论 0-不允许 1-允许</li>
  * <li>enableProvider: 是否开启服务商的功能 0-不开启 1-开启</li>
  * <li>enableCustomerService: 是否开启客服会话查看和导出功能 0-不开启 1-开启</li>
+ * <li>appType: web-跳转web链接  native-原生 这个参数用于生成web化的actionData还是原生的actionData</li>
  * </ul>
  */
 public class ServiceAllianceInstanceConfig {
@@ -32,6 +33,8 @@ public class ServiceAllianceInstanceConfig {
 	private Byte enableProvider;
 	
 	private Byte enableCustomerService;
+	
+	private String appType;
 
 	@ItemType(ServiceAllianceJump.class)
 	private List<ServiceAllianceJump> jumps;
@@ -131,6 +134,14 @@ public class ServiceAllianceInstanceConfig {
 		} 
 		
 		this.enableCustomerService = enableCustomerService;
+	}
+
+	public String getAppType() {
+		return appType;
+	}
+
+	public void setAppType(String appType) {
+		this.appType = appType;
 	}
 
 }
