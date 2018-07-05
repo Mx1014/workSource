@@ -19,6 +19,8 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.techpark.expansion.EnterpriseApplyEntryServiceImpl;
+import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -81,6 +83,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
         return handler.getTemplateBySourceId(cmd);
     }
+
+
 
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormValCommand cmd) {
@@ -670,6 +674,21 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
         return handler.getGeneralFormReminder(cmd);
+    }
+
+    @Override
+    public SearchFormValDTO searchGeneralFormVals(SearchFormValsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<GeneralFormFieldDTO> getDefaultFieldsByModuleId(ListDefaultFieldsCommand cmd) {
+
+
+        GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(),cmd.getNamespaceId(),
+                cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getOwnerType());
+
+        return JSONObject.parseArray(request.getTemplateText(), GeneralFormFieldDTO.class);
     }
 }
 

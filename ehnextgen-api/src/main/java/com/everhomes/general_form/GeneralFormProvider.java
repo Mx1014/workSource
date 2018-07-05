@@ -43,4 +43,15 @@ public interface GeneralFormProvider {
 	GeneralForm getGeneralFormByTemplateId(Long moduleId, Long ownerId, String ownerType, Long templateId);
 
 	GeneralForm getGeneralFormByTag1(Integer namespaceId, String moduleType, Long moduleId, String stringTag1);
+
+    /**
+     * 根据moduleId默认字段
+     * @param moduleId
+     * @param namespaceId
+     * @param organizationId
+     * @param ownerId
+     * @param ownerType
+     * @return
+     */
+    GeneralFormTemplate getDefaultFieldsByModuleId(Long moduleId,Integer namespaceId, Long organizationId, Long ownerId, String ownerType);
 }

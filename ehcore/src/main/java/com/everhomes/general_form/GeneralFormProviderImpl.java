@@ -13,6 +13,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
+import com.everhomes.server.schema.tables.pojos.EhGeneralFormTemplates;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.records.EhGeneralFormGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
@@ -277,4 +278,26 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			return results.get(0);
 		return null;
     }
+
+	@Override
+	public GeneralFormTemplate getDefaultFieldsByModuleId(Long moduleId,Integer namespaceId, Long organizationId, Long ownerId, String ownerType) {
+		try {
+			GeneralFormTemplate[] result = new GeneralFormTemplate[1];
+			DSLContext context = this.dbProvider.getDslContext(AccessSpec
+					.readWriteWith(EhGeneralFormTemplates.class));
+			result[0] = context.select().from(Tables.EH_GENERAL_FORM_TEMPLATES)
+					.where(Tables.EH_GENERAL_FORM_TEMPLATES.MODULE_ID.eq(moduleId))
+					.and(Tables.EH_GENERAL_FORM_TEMPLATES.NAMESPACE_ID.eq(namespaceId))
+					.and(Tables.EH_GENERAL_FORM_TEMPLATES.ORGANIZATION_ID.eq(organizationId))
+					.and(Tables.EH_GENERAL_FORM_TEMPLATES.OWNER_ID.eq(ownerId))
+					.and(Tables.EH_GENERAL_FORM_TEMPLATES.OWNER_TYPE.eq(ownerType))
+					.orderBy(Tables.EH_GENERAL_FORM_TEMPLATES.VERSION.desc()).fetchAny().map((r) -> {
+						return ConvertHelper.convert(r, GeneralFormTemplate.class);
+					});
+			return result[0];
+		} catch (Exception ex) {
+			// fetchAny() maybe return null
+			return null;
+		}
+	}
 }

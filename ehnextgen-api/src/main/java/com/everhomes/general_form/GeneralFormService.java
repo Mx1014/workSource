@@ -60,4 +60,8 @@ public interface GeneralFormService {
 	PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd);
 
 	GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd);
+
+	SearchFormValDTO searchGeneralFormVals(SearchFormValsCommand cmd);
+
+	List<GeneralFormFieldDTO> getDefaultFieldsByModuleId(ListDefaultFieldsCommand cmd);
 }

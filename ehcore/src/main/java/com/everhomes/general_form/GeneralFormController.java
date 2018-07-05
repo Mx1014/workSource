@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestDoc(value="General form controller", site="core")
 @RestController
@@ -81,4 +82,33 @@ public class GeneralFormController extends ControllerBase {
         return response;
     }
 
+	/**
+	 * <b>URL: /general_form/searchGeneralFormVals</b>
+	 * <p>表单值搜索</p>
+	 */
+	@RequestMapping("searchGeneralFormVals")
+	@RestReturn(value=SearchFormValDTO.class)
+	public RestResponse searchGeneralFormVals(SearchFormValsCommand cmd) {
+		SearchFormValDTO dto = generalFormService.searchGeneralFormVals(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/listDefaultFields</b>
+	 * <p>根據模块获取默认字段	</p>
+	 */
+	@RequestMapping("listDefaultFields")
+	@RestReturn(value=GeneralFormFieldDTO.class)
+	public RestResponse listDefaultFields(ListDefaultFieldsCommand cmd){
+		List<GeneralFormFieldDTO> dtos = generalFormService.getDefaultFieldsByModuleId(cmd);
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
 }
