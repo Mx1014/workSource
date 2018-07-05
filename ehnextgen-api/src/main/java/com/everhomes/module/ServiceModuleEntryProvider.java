@@ -13,4 +13,8 @@ import java.util.Map;
 
 public interface ServiceModuleEntryProvider {
     List<ServiceModuleEntry> listServiceModuleEntries(Long moduleId, Byte terminalType, Byte locationType, Byte sceneType);
+
+    void delete(Long id);
+
+    void create(ServiceModuleEntry serviceModuleEntry);
 }

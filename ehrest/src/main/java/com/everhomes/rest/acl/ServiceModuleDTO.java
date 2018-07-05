@@ -26,6 +26,7 @@ import java.util.List;
  *     <li>multipleFlag: multipleFlag</li>
  *     <li>moduleControlType: moduleControlType</li>
  *     <li>systemAppFlag: 是否为系统应用，例如“系统管理员”是系统应用。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>appType: 应用类型0-OA，1-园区，2-服务应用 {@link com.everhomes.rest.module.ServiceModuleAppType}</li>
  * </ul>
  */
 public class ServiceModuleDTO implements Serializable {
@@ -66,6 +67,8 @@ public class ServiceModuleDTO implements Serializable {
 	private String moduleControlType;
 
 	private String systemAppFlag;
+
+	private Byte appType;
 
 	public Long getId() {
 		return id;
@@ -209,5 +212,13 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setSystemAppFlag(String systemAppFlag) {
 		this.systemAppFlag = systemAppFlag;
+	}
+
+	public Byte getAppType() {
+		return appType;
+	}
+
+	public void setAppType(Byte appType) {
+		this.appType = appType;
 	}
 }

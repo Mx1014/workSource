@@ -15,15 +15,15 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.WebMenuService;
-import com.everhomes.module.ServiceModule;
-import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.module.ServiceModuleService;
+import com.everhomes.module.*;
 import com.everhomes.namespace.NamespacesService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
+import com.everhomes.rest.acl.ListServiceModuleEntriesCommand;
+import com.everhomes.rest.acl.ListServiceModuleEntriesResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
@@ -399,20 +399,26 @@ public class PortalServiceImpl implements PortalService {
 			dto.setMobileUrls(mobileUrls);
 		}
 
-		if(moduleApp.getDependentAppIds() != null){
-			List<Long> dependentAppIds = GsonUtil.fromJson(moduleApp.getDependentAppIds(), new TypeToken<List<Long>>(){}.getType());
-			List<String> dependentAppNames = new ArrayList<>();
-			if(dependentAppIds != null && dependentAppIds.size() > 0){
-				for (Long id: dependentAppIds){
-					ServiceModuleApp moduleAppByOriginId = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(id);
-					if(moduleAppByOriginId != null){
-						dependentAppNames.add(moduleAppByOriginId.getName());
-					}
-				}
-			}
-			dto.setDependentAppNames(dependentAppNames);
-			dto.setDependentAppIds(dependentAppIds);
-		}
+//		if(moduleApp.getDependentAppIds() != null){
+//			List<Long> dependentAppIds = GsonUtil.fromJson(moduleApp.getDependentAppIds(), new TypeToken<List<Long>>(){}.getType());
+//			List<String> dependentAppNames = new ArrayList<>();
+//			if(dependentAppIds != null && dependentAppIds.size() > 0){
+//				for (Long id: dependentAppIds){
+//					ServiceModuleApp moduleAppByOriginId = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(id);
+//					if(moduleAppByOriginId != null){
+//						dependentAppNames.add(moduleAppByOriginId.getName());
+//					}
+//				}
+//			}
+//			dto.setDependentAppNames(dependentAppNames);
+//			dto.setDependentAppIds(dependentAppIds);
+//		}
+
+		ListServiceModuleEntriesCommand cmd = new ListServiceModuleEntriesCommand();
+		cmd.setModuleId(moduleApp.getModuleId());
+		ListServiceModuleEntriesResponse response = serviceModuleService.listServiceModuleEntries(cmd);
+		dto.setServiceModuleEntryDtos(response.getDtos());
+
 
 		if(moduleApp.getAppEntryInfos() != null){
 			//List<AppEntryInfoDTO> entryInfos = (ArrayList<AppEntryInfoDTO>)StringHelper.fromJsonString(moduleApp.getConfigAppIds(), List.class);

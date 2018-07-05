@@ -1,6 +1,7 @@
 package com.everhomes.rest.portal;
 
 import com.everhomes.rest.acl.AppEntryInfoDTO;
+import com.everhomes.rest.acl.ServiceModuleEntryDTO;
 
 import java.util.List;
 
@@ -34,11 +35,11 @@ import java.util.List;
  *     <li>dependentAppIds: 配置应用id</li>
  *     <li>dependentAppNames: 配置应用name</li>
  *     <li>supportThirdFlag: 支持第三方对接</li>
- *     <li>defaultFlag: 默认flag</li>
  *     <li>iconUri: iconUri</li>
  *     <li>iconUrl: iconUrl</li>
  *     <li>systemAppFlag: 是否为系统应用，例如“系统管理员”是系统应用，是模块的属性。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>defaultAppFlag: 是否为默认安装应用，可以动态设置。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>serviceModuleEntryDtos: 应用入口信息参考{@link ServiceModuleEntryDTO}</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -75,6 +76,7 @@ public class ServiceModuleAppDTO {
     private String iconUrl;
     private Byte systemAppFlag;
     private Byte defaultAppFlag;
+    private List<ServiceModuleEntryDTO> serviceModuleEntryDtos;
 
     public Long getId() {
         return id;
@@ -330,5 +332,13 @@ public class ServiceModuleAppDTO {
 
     public void setDefaultAppFlag(Byte defaultAppFlag) {
         this.defaultAppFlag = defaultAppFlag;
+    }
+
+    public List<ServiceModuleEntryDTO> getServiceModuleEntryDtos() {
+        return serviceModuleEntryDtos;
+    }
+
+    public void setServiceModuleEntryDtos(List<ServiceModuleEntryDTO> serviceModuleEntryDtos) {
+        this.serviceModuleEntryDtos = serviceModuleEntryDtos;
     }
 }

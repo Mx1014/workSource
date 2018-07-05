@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,15 +62,15 @@ public class OPPushBizHandler implements OPPushHandler {
                 OPPushCard card = new OPPushCard();
 
                 card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
+                card.setRouterPath("/detail");
 
                 try {
                     HashMap<String, Object> hashMap = new ObjectMapper().readValue(dto.getMetadata(), HashMap.class);
-                    card.setRouterPath(hashMap.get("url").toString());
+                    card.setRouterQuery("url=" + URLEncoder.encode(hashMap.get("url").toString(), "UTF-8"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                card.setRouterPath(dto.getMetadata());
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());
                 properties.add(dto.getSubject());
