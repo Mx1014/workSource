@@ -38,8 +38,6 @@ public class RentalCancelOrderJob extends QuartzJobBean {
                 rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
                 rentalProvider.updateRentalBill(rentalBill);
 
-                RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(rentalBill.getResourceType());
-                orderHandler.releaseOrderResourceStatus(rentalBill);
                 return null;
             });
             //发消息
