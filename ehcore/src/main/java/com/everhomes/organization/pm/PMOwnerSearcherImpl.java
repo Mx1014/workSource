@@ -276,7 +276,7 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 	private XContentBuilder createDoc(CommunityPmOwner owner){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            //TODO
+            //将ContactExtraTels字段加入到es索引当中
             if (!org.springframework.util.StringUtils.isEmpty(owner.getContactExtraTels())) {
             	String contactExtraTels = owner.getContactExtraTels();
                 List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);

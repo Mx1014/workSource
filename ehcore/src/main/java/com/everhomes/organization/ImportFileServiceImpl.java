@@ -128,6 +128,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                 }
             }
         }
+        titleMap.remove("contactExtraTels");
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
             ByteArrayOutputStream out = null;
@@ -185,6 +186,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                             data.put(String.valueOf(i), logList.get(i));
                         }
                     }
+                    data.remove("contactExtraTels");
                     if(data.size() > 0){
                         for (Map.Entry<String, String> entry : data.entrySet()) {
                             titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getKey()));
@@ -209,6 +211,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                             data.put(String.valueOf(i), logList.get(i));
                         }
                     }
+                    data.remove("contactExtraTels");
                     XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
                     for (Map.Entry<String, Object> entry : data.entrySet()) {

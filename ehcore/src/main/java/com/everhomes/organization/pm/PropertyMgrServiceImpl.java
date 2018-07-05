@@ -6799,9 +6799,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 owner.setBirthday(date);
             }
 
-
             // 检查手机号的唯一性
-            CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
+            //CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
+            CommunityPmOwner exist = null;
+            List<String> extraTels = (List<String>)StringHelper.fromJsonString(dto.getContactExtraTels(), ArrayList.class);
+            for(String tel : extraTels){
+        		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(currentNamespaceId(),communityId, tel);
+        		if (pmOwners != null && pmOwners.size() > 0) {
+        			exist = pmOwners.get(0);
+        			break;
+                }
+        	}
             if (exist != null) {
                 // 支持同一个人导入多行，但只能生成一个业主信息，add by tt, 170427
                 // remove new data which is blank
