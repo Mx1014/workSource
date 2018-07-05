@@ -2210,8 +2210,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
-        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_EXTRA_TELS.like("%"+tel+"%"));
-        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
+        if (!StringUtils.isEmpty(tel)) {
+        	query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_EXTRA_TELS.like("%"+tel+"%"));
+		}
+        if (communityId != null) {
+        	query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
+		}
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listCommunityPmOwnersByTel, sql = {}" , query.getSQL());

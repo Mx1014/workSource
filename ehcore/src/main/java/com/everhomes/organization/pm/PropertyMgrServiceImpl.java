@@ -5350,8 +5350,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void processUserForOwner(UserIdentifier identifier) {
         // TODO Auto-generated method stub
-        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
-                identifier.getNamespaceId(), identifier.getIdentifierToken());
+//        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
+//                identifier.getNamespaceId(), identifier.getIdentifierToken());
+        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByTel(identifier.getNamespaceId(), null, identifier.getIdentifierToken());
         LOGGER.debug("processUserForOwner: user identifier: {}, owners: {}", identifier.getIdentifierToken(), StringHelper.toJsonString(owners));
         if (null != owners && owners.size() > 0) {
             for (CommunityPmOwner owner : owners) {
@@ -5867,10 +5868,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     "9、客户类型为：业主、租户、亲属、朋友、保姆、地产中介、其他、无；\n" +
                     "10、是否在户：是、否\n" +
                     "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
-            String[] propertyNames = {"contactName", "orgOwnerType", "contactToken", "gender","building","address", "livingStatus","livingDate", "birthdayDate", "maritalStatus", "job", "company",
+            String[] propertyNames = {"contactName", "orgOwnerType", "customerExtraTelsForExport", "gender","building","address", "livingStatus","livingDate", "birthdayDate", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
+            
+            
             String[] titleNames = {"姓名", "客户类型", "手机号码", "性别","楼栋","门牌", "是否在户", "迁入日期","生日", "婚姻状况", "职业", "单位", "证件号码", "户口所在地"};
-            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40,40, 30, 30, 40, 40};
+            int[] titleSizes = {20, 10, 40, 30, 20, 10, 20, 30, 40,40, 30, 30, 40, 40};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, owners);
         } else {
             // LOGGER.error("Organization owner are not exist.");
@@ -6796,9 +6799,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 owner.setBirthday(date);
             }
 
-
             // 检查手机号的唯一性
-            CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
+            //CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
+            CommunityPmOwner exist = null;
+            List<String> extraTels = (List<String>)StringHelper.fromJsonString(dto.getContactExtraTels(), ArrayList.class);
+            for(String tel : extraTels){
+        		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(namespaceId,communityId, tel);
+        		if (pmOwners != null && pmOwners.size() > 0) {
+        			exist = pmOwners.get(0);
+        			break;
+                }
+        	}
             if (exist != null) {
                 // 支持同一个人导入多行，但只能生成一个业主信息，add by tt, 170427
                 // remove new data which is blank
