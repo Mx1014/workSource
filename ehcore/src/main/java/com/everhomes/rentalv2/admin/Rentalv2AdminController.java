@@ -66,40 +66,6 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/createResourceType</b>
-//	 * <p>
-//	 * 添加资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("createResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse createResourceType(@Valid CreateResourceTypeCommand cmd) {
-//		this.rentalService.createResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/deleteResourceType</b>
-//	 * <p>
-//	 * 删除资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("deleteResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse deleteResourceType(@Valid DeleteResourceTypeCommand cmd) {
-//		this.rentalService.deleteResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
 	
 	
 	/**
@@ -118,57 +84,6 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/closeResourceType</b>
-//	 * <p>
-//	 * 关闭资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("closeResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse closeResourceType(@Valid CloseResourceTypeCommand cmd) {
-//		this.rentalService.closeResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/openResourceType</b>
-//	 * <p>
-//	 * 开启资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("openResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse openResourceType(@Valid OpenResourceTypeCommand cmd) {
-//		this.rentalService.openResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/updateResourceType</b>
-//	 * <p>
-//	 * 修改资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("updateResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse updateResourceType(@Valid UpdateResourceTypeCommand cmd) {
-//		this.rentalService.updateResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
 
 	
 	/**
@@ -549,73 +464,6 @@ public class Rentalv2AdminController extends ControllerBase {
 		rentalService.exportRentalBills(cmd, response );
 	}
 
-//	/**
-//	 * <b>URL: /rental/admin/findRentalSitesStatus</b>
-//	 * <p>
-//	 * 批量完成预约- 状态置为已完成
-//	 * </p>
-//	 */
-//
-//	@RequestMapping("batchCompleteBill")
-//	@RestReturn(value = BatchCompleteBillCommandResponse.class )
-//	public RestResponse batchCompleteBill(@Valid BatchCompleteBillCommand cmd) {
-//		BatchCompleteBillCommandResponse res= rentalService.batchCompleteBill(cmd);
-//		RestResponse response = new RestResponse(res);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-
-//	/**
-//	 * <b>URL: /rental/admin/completeBill</b>
-//	 * <p>
-//	 * 完成预约- 状态置为已完成
-//	 * </p>
-//	 */
-//
-//	@RequestMapping("completeBill")
-//	@RestReturn(value = RentalBillDTO.class)
-//	public RestResponse completeBill(@Valid CompleteBillCommand cmd) {
-//		RentalBillDTO bill = rentalService.completeBill(cmd);
-//		RestResponse response = new RestResponse(bill);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	/**
-//	 * <b>URL: /rental/admin/batchIncompleteBill</b>
-//	 * <p>
-//	 * 批量未完成预约- 状态置为未完成
-//	 * </p>
-//	 */
-//
-//	@RequestMapping("batchIncompleteBill")
-//	@RestReturn(value = BatchCompleteBillCommandResponse.class)
-//	public RestResponse batchIncompleteBill(@Valid BatchIncompleteBillCommand cmd) {
-//		BatchCompleteBillCommandResponse res = rentalService.batchIncompleteBill(cmd);
-//		RestResponse response = new RestResponse(res);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-
-//	/**
-//	 * <b>URL: /rental/admin/incompleteBill</b>
-//	 * <p>
-//	 * 未完成预约- 状态置为未完成
-//	 * </p>
-//	 */
-//
-//	@RequestMapping("incompleteBill")
-//	@RestReturn(value = RentalBillDTO.class)
-//	public RestResponse incompleteBill(@Valid IncompleteBillCommand cmd) {
-//		RentalBillDTO bill = rentalService.incompleteBill(cmd);
-//		RestResponse response = new RestResponse(bill);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-
 	
 	/**
 	 * <b>URL: /rental/admin/getRefundOrderList</b>
@@ -667,39 +515,7 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 
-//	/**
-//	 * <b>URL: /rental/admin/addCheckOperator</b>
-//	 * <p>
-//	 * 新增签到的管理员
-//	 * </p>
-//	 */
-//	@RequestMapping("addCheckOperator")
-//	@RestReturn(value = String.class)
-//	public RestResponse addCheckOperator(@Valid AddCheckOperatorCommand cmd) {
-//		rentalService.addCheckOperator(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /rental/admin/deleteCheckOperator</b>
-//	 * <p>
-//	 * 删除签到的管理员
-//	 * </p>
-//	 */
-//	@RequestMapping("deleteCheckOperator")
-//	@RestReturn(value = String.class)
-//	public RestResponse deleteCheckOperator(@Valid AddCheckOperatorCommand cmd) {
-//		rentalService.deleteCheckOperator(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
 
 	/*-------------------------------------------新的更新资源规则接口---------------------------------- */
 
