@@ -138,6 +138,7 @@ CREATE TABLE `eh_service_module_entries` (
   `scene_type` tinyint(4) NOT NULL COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType',
   `second_app_type` int(11) NOT NULL DEFAULT '0',
   `default_order` int(11) NOT NULL DEFAULT '0',
+  `icon_uri` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

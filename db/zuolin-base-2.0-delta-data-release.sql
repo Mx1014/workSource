@@ -219,17 +219,17 @@ update eh_launch_pad_items set action_data = replace(action_data,'#/newsList#sig
 
 -- #issue-26479 迁移原新闻从organization属性至community属性
 update  eh_news nu ,
-	(select news.id as news_id,  com.community_id as community_id from eh_news news 
-	left join 	(select n.namespace_id as namespace_id, n.resource_id as community_id   
-					from eh_namespace_resources n 
+	(select news.id as news_id,  com.community_id as community_id from eh_news news
+	left join 	(select n.namespace_id as namespace_id, n.resource_id as community_id
+					from eh_namespace_resources n
 					where n.resource_type  = 'COMMUNITY'
 					group by n.namespace_id
-					order by n.namespace_id,n.default_order,n.resource_id) 
-					as com 
+					order by n.namespace_id,n.default_order,n.resource_id)
+					as com
 	on com.namespace_id = news.namespace_id
-	where news.owner_type = 'organization' and news.owner_id > 0) 
+	where news.owner_type = 'organization' and news.owner_id > 0)
 	as n_c
-set nu.owner_type = 'EhCommunities', nu.owner_id = n_c.community_id 
+set nu.owner_type = 'EhCommunities', nu.owner_id = n_c.community_id
 where nu.id = n_c.news_id;
 
 -- 增加电商模块，用于运营板块 add by yanjun 201807041725
