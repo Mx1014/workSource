@@ -3908,8 +3908,8 @@ public class AssetProviderImpl implements AssetProvider {
                 response.setFailCause(AssetPaymentConstants.DELTE_GROUP_UNSAFE);
                 return response;
             }
-//             删除不用导致其他同伴解耦，先这么试试
-//            Long nullId = null;
+            //删除会导致其他同伴解耦
+            Long nullId = null;
             this.dbProvider.execute((TransactionStatus status) -> {
                 context.delete(t)
                         .where(t.BILL_GROUP_ID.eq(billGroupId))
@@ -3917,11 +3917,11 @@ public class AssetProviderImpl implements AssetProvider {
                 context.delete(t1)
                         .where(t1.ID.eq(billGroupId))
                         .execute();
-//                context.update(t1)
-//                        .set(t1.BROTHER_GROUP_ID,nullId)
-//                        .where(t1.OWNER_ID.eq(ownerId))
-//                        .and(t1.OWNER_TYPE.eq(ownerType))
-//                        .execute();
+                context.update(t1)
+                        .set(t1.BROTHER_GROUP_ID,nullId)
+                        .where(t1.OWNER_ID.eq(ownerId))
+                        .and(t1.OWNER_TYPE.eq(ownerType))
+                        .execute();
                 return null;
             });
         }
