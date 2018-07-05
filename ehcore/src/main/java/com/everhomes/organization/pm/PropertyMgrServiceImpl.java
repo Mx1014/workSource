@@ -6804,7 +6804,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             CommunityPmOwner exist = null;
             List<String> extraTels = (List<String>)StringHelper.fromJsonString(dto.getContactExtraTels(), ArrayList.class);
             for(String tel : extraTels){
-        		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(currentNamespaceId(),communityId, tel);
+        		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(namespaceId,communityId, tel);
         		if (pmOwners != null && pmOwners.size() > 0) {
         			exist = pmOwners.get(0);
         			break;
