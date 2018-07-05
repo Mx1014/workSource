@@ -3816,7 +3816,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 			rentalv2Provider.updateRentalBill(order);
 
-			handler.releaseOrderResourceStatus(order);
+			//handler.releaseOrderResourceStatus(order);
 			//只要退款就给管理员发消息,不管是退款中还是已退款
 			onOrderCancel(order, ifAbsordFlow);
 			if (!StringUtils.isEmpty(order.getDoorAuthId())) {//解除门禁授权
