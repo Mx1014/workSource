@@ -25,6 +25,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.namespace.NamespacesService;
 import com.everhomes.point.PointService;
 import com.everhomes.poll.ProcessStatus;
@@ -65,6 +68,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +85,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -166,6 +179,9 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Autowired
     private PointService pointService;
+
+    @Autowired
+    private NamespaceProvider namespaceProvider;
 
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
@@ -547,7 +563,80 @@ public class UserActivityServiceImpl implements UserActivityService {
     	return response;
     }
 
-	@Override
+    @Override
+    public void exportFeedbacks(ExportFeedbacksCommand cmd, HttpServletResponse response) {
+        List<Feedback> results = userActivityProvider.ListFeedbacksByNamespaceId(UserContext.getCurrentNamespaceId());
+        Workbook wb = new XSSFWorkbook();
+
+        Font font = wb.createFont();
+        font.setFontName("黑体");
+        font.setFontHeightInPoints((short) 16);
+        CellStyle style = wb.createCellStyle();
+        style.setFont(font);
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityTagList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        if (namespace != null) {
+            fileName = namespace.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_举报管理_" + fileNameSdf.format(new Date());
+        Sheet sheet = wb.createSheet(fileName);
+        sheet.setDefaultColumnWidth(20);
+        sheet.setDefaultRowHeightInPoints(20);
+        Row row = sheet.createRow(0);
+        row.createCell(0).setCellValue("举报原因");
+        row.createCell(1).setCellValue("标题");
+        row.createCell(2).setCellValue("举报人");
+        row.createCell(3).setCellValue("举报时间");
+        row.createCell(4).setCellValue("状态");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        List<FeedbackDTO> feedbackDtos = new ArrayList<FeedbackDTO>();
+        results.forEach(r -> {
+            FeedbackDTO feedbackDto = ConvertHelper.convert(r, FeedbackDTO.class);
+            User user = userProvider.findUserById(feedbackDto.getOwnerUid());
+            if(user != null){
+                feedbackDto.setOwnerNickName(user.getNickName());
+            }
+
+            FeedbackContentCategoryType contentCategory = FeedbackContentCategoryType.fromStatus(feedbackDto.getContentCategory().byteValue());
+            feedbackDto.setContentCategoryText(contentCategory.getText());
+
+            FeedbackHandler handler = getFeedBackHandler(feedbackDto.getTargetType());
+            if(handler != null){
+                //业务实现
+                handler.populateFeedbackDTO(feedbackDto);
+            }
+
+            feedbackDtos.add(feedbackDto);
+        });
+
+        int size = feedbackDtos.size();
+        for(int i = 0; i < size; i++){
+            Row tempRow = sheet.createRow(i + 1);
+            FeedbackDTO dto = feedbackDtos.get(i);
+
+            tempRow.createCell(0).setCellValue(dto.getContentCategoryText());
+            tempRow.createCell(1).setCellValue(dto.getTargetSubject());
+            tempRow.createCell(2).setCellValue(dto.getOwnerNickName());
+            tempRow.createCell(3).setCellValue(sdf.format(dto.getCreateTime()));
+            tempRow.createCell(4).setCellValue(dto.getStatus()==(byte)0?"未处理":"已处理");
+        }
+        ByteArrayOutputStream out = null;
+        try {
+            out = new ByteArrayOutputStream();
+            wb.write(out);
+            DownloadUtils.download(out, response,fileName);
+        } catch (IOException e) {
+            LOGGER.error("exportFeeds is fail. {}",e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "exportFeeds is fail.");
+        }
+    }
+
+    @Override
 	public void updateFeedback(UpdateFeedbackCommand cmd) {
         Feedback feedback = userActivityProvider.findFeedbackById(cmd.getId());
         if (feedback == null) {

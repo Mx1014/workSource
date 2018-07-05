@@ -846,7 +846,7 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("exportActivity")
     public void exportActivity(ExportActivityCommand cmd, HttpServletResponse response) {
-
+        this.activityService.exportActivity(cmd,response);
     }
 
     /**
@@ -855,7 +855,7 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("exportOrganization")
     public void exportOrganization(ExportOrganizationCommand cmd, HttpServletResponse response) {
-
+        this.activityService.exportOrganization(cmd,response);
     }
 
     /**
@@ -864,7 +864,7 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("exportTag")
     public void exportTag(ExportTagCommand cmd, HttpServletResponse response) {
-
+        this.activityService.exportTag(cmd, response);
     }
     
 }
