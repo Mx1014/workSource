@@ -5448,11 +5448,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
 		//判断手机号的用户与当前用户是否一致
 		if (identifier.getOwnerUid() == null || !identifier.getOwnerUid().equals(UserContext.currentUserId())) {
-            LOGGER.error("identifierToken error");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE,
-                    "identifierToken error");
+            LOGGER.error("phone not match user error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+                    "phone not match user error");
         }
 
+		if (cmd.getRegionCode() != null && identifier.getRegionCode() != null && !cmd.getRegionCode().equals(identifier.getRegionCode())) {
+            LOGGER.error("phone not match user error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+                    "phone not match user error");
+        }
 		// find user by uid
 		User user = userProvider.findUserById(identifier.getOwnerUid());
 		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
