@@ -746,17 +746,12 @@ public class ParkingServiceImpl implements ParkingService {
 		String paySource = ParkingPaySourceType.APP.getCode();
 		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
 			paySource = ParkingPaySourceType.QRCODE.getCode();
-			createOrderCommand.setPayerUserId(configProvider.getLongValue("parking.order.defaultpayer",1041));
-		}else {
-			ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
-					sNamespaceId, userTarget.getUserIdentifier(), null, null, null);
-			createOrderCommand.setPayerUserId(payerDto.getAccountId());
+//			createOrderCommand.setPayerUserId(configProvider.getLongValue("parking.order.defaultpayer",1041));
 		}
+		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
+				sNamespaceId, (userTarget==null||userTarget.getUserIdentifier()==null)?"12000001802":userTarget.getUserIdentifier(), null, null, null);
+		createOrderCommand.setPayerUserId(payerDto.getAccountId());
 		//保存支付方id
-		parkingRechargeOrder.setPayeeId(createOrderCommand.getPayerUserId());
-		parkingRechargeOrder.setInvoiceStatus((byte)0);
-		parkingRechargeOrder.setPaySource(paySource);
-		parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
 		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
 				parkingLot.getOwnerType(), parkingLot.getOwnerId(), parkingLot.getId(),bussinessType.getCode());
 		if(payeeAccounts==null || payeeAccounts.size()==0){
@@ -769,6 +764,11 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setClientAppName(clientAppName);//todoed
 
 		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
+		
+		parkingRechargeOrder.setPayeeId(createOrderCommand.getPayeeUserId());
+		parkingRechargeOrder.setInvoiceStatus((byte)0);
+		parkingRechargeOrder.setPaySource(paySource);
+		parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
 		createOrderCommand.setAmount(amount);
 		createOrderCommand.setExtendInfo(extendInfo);
 		createOrderCommand.setGoodsName(extendInfo);
