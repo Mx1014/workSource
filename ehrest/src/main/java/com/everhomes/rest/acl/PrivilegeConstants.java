@@ -290,6 +290,9 @@ public interface PrivilegeConstants {
     long CONTRACT_FLOW = 21212L;//合同工作流
     long CONTRACT_SYNC = 21213L;//从第三方同步合同
     long CONTRACT_DENUNCIATION = 21214L;//退约
+    
+    long CONTRACT_PREVIEW = 21215L;//打印预览 
+    long CONTRACT_PRINT = 21216L;//打印
 
 
     long PAYMENT_CONTRACT_CREATE = 21215L;//新增付款合同

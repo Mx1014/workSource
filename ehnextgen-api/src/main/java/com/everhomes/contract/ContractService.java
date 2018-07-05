@@ -64,4 +64,6 @@ public interface ContractService {
 
 	void deleteContractTemplate(DeleteContractTemplateCommand cmd);
 
+	List<Long> checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd);
+
 }

@@ -38,6 +38,7 @@ import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.contract.ListCustomerContractsCommand;
 import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
 import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
+import com.everhomes.rest.contract.PrintPreviewPrivilegeCommand;
 import com.everhomes.rest.contract.ReviewContractCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.contract.SetContractParamCommand;
@@ -441,4 +442,15 @@ public class ContractController extends ControllerBase {
 		return new RestResponse();
 	}
 	
+	/**
+	 * <p>校验打印预览权限</p>
+	 * <b>URL: /contract/checkPrintPreviewprivilege</b>
+	 */
+	@RequestMapping("checkPrintPreviewprivilege")
+	@RestReturn(value = Long.class, collection = true)
+	public RestResponse checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		return new RestResponse(contractService.checkPrintPreviewprivilege(cmd));
+	}
 }

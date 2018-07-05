@@ -141,6 +141,7 @@ import com.everhomes.rest.contract.ListCustomerContractsCommand;
 import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
 import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
 import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.contract.PrintPreviewPrivilegeCommand;
 import com.everhomes.rest.contract.ReviewContractCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.contract.SetContractParamCommand;
@@ -2761,4 +2762,27 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contractProvider.updateContractTemplate(contractTemplateParent);
 	}
 
+	@Override
+	public List<Long> checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd) {
+		List<Long> functionIds = new ArrayList<>();
+		try{
+			//打印  checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PRINT, cmd.getOrgId(), cmd.getCommunityId());
+			Boolean print = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.CONTRACT_PRINT, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+			if (print) {
+				functionIds.add(PrivilegeConstants.CONTRACT_PRINT);
+			}
+		}catch (Exception e) {
+			// TODO: 只用作判断权限用，暂不处理
+		}
+		try{
+			//打印预览 checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PREVIEW, cmd.getOrgId(), cmd.getCommunityId());
+			Boolean preview = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.CONTRACT_PREVIEW, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+			if (preview) {
+				functionIds.add(PrivilegeConstants.CONTRACT_PREVIEW);
+			}
+		}catch (Exception e) {
+			// TODO: 只用作判断权限用，暂不处理
+		}
+		return functionIds;
+	}
 }

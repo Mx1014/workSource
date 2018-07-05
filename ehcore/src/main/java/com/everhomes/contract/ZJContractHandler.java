@@ -64,6 +64,7 @@ import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.contract.ListCustomerContractsCommand;
 import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
 import com.everhomes.rest.contract.ListIndividualCustomerContractsCommand;
+import com.everhomes.rest.contract.PrintPreviewPrivilegeCommand;
 import com.everhomes.rest.contract.ReviewContractCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.contract.SetContractParamCommand;
@@ -796,5 +797,12 @@ public class ZJContractHandler implements ContractService{
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public List<Long> checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }
