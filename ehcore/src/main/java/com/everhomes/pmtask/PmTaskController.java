@@ -868,4 +868,31 @@ public class PmTaskController extends ControllerBase {
         return response;
     }
 
+/*------------------------------- 3.7 -------------------------------*/
+    /**
+     * <b>URL: /pmtask/admin/setPmTaskConfig</b>
+     * <p>管理-通用设置</p>
+     */
+    @RequestMapping("admin/setPmTaskConfig")
+    @RestReturn(value=PmTaskConfigDTO.class)
+    public RestResponse setPmTaskConfig(SetPmTaskConfigCommand cmd) {
+        RestResponse response = new RestResponse(PmTaskConfigService.setPmTaskConfig(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/admin/getPmTaskConfig</b>
+     * <p>管理-通用设置查询</p>
+     */
+    @RequestMapping("admin/getRelocationConfig")
+    @RestReturn(value=PmTaskConfigDTO.class)
+    public RestResponse getPmTaskConfig(GetPmTaskConfigCommand cmd) {
+        PmTaskConfigDTO dto = PmTaskConfigService.searchPmTaskConfigById(cmd);
+        RestResponse response = new RestResponse(dto == null ? new PmTaskConfigDTO() : dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

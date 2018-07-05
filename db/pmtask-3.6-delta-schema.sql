@@ -1,3 +1,19 @@
+CREATE TABLE `eh_pm_task_configs` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
+  `payment_flag` tinyint(4) DEFAULT '0' COMMENT '0: inactive, 1: active',
+  `payment_account` bigint(20) DEFAULT NULL COMMENT '收款方账号',
+  `payment_account_type` tinyint(4) DEFAULT NULL COMMENT '收款方类型',
+  `content_hint` varchar(64) DEFAULT '请描述服务具体内容' COMMENT '服务内容提示文本',
+  `creator_id` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `operator_id` bigint(20) NOT NULL DEFAULT '0',
+  `operate_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修通用配置表';
+
 CREATE TABLE `eh_pm_task_orders` (
   `id`  bigint(20) NOT NULL ,
   `namespace_id`  int NULL ,
