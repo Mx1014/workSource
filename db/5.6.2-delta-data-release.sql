@@ -4,10 +4,9 @@
 -- AUTHOR: 黄明波  20180703
 -- REMARK: 服务联盟v3.4 issue-29989
 -- REMARK: 更新服务的封面图，迁移服务广场的item
--- /yellowPage/transferPosterUriToAttachment
--- 参数:1802
---/yellowPage/transferLaunchPadItems
--- 参数:1802
+-- REMARK: /yellowPage/transferPosterUriToAttachment  参数:1802
+-- REMARK: /yellowPage/transferLaunchPadItems 参数:1802
+-- REMARK: 上线后清一下redis缓存。定时器有缓存问题。
 
 -- AUTHOR: 邓爽
 -- REMARK: 上线完成后请调用以下两个接口做停车缴费收款方数据迁移
@@ -166,6 +165,8 @@ update eh_locale_strings set text = 'USER_NAME,USER_PHONE,USER_COMPANY' where sc
 update eh_service_modules set action_type = 14 where id = 40500;
 update eh_service_module_apps set action_type = 14 where module_id = 40500;
 
+update eh_flow_predefined_params set namespace_id = 0 where module_id = 40500 and entity_type = 'flow_button';
+
 
 
 -- AUTHOR: wentian integrated by jiarui  20180703
@@ -177,7 +178,7 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 	VALUES (@field_id := @field_id + 1, 'enterprise_customer', 'taskCategoryName', '服务类型', 'String', '37', '/37/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
-	VALUES (@field_id := @field_id + 1, 'enterprise_customer', 'organizationUid', '来源', 'Long', '37', '/37/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+	VALUES (@field_id := @field_id + 1, 'enterprise_customer', 'pmTaskSource', '来源', 'Long', '37', '/37/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
 	VALUES (@field_id := @field_id + 1, 'enterprise_customer', 'buildingName', '服务区域', 'String', '37', '/37/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
@@ -193,6 +194,11 @@ INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field
 
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
 	VALUES (@field_id := @field_id + 1, 'enterprise_customer', 'status', '状态', 'datetime', '37', '/37/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES
+	(@field_id := @field_id + 1, 'enterprise_customer', 'content', '服务内容', 'datetime', '37', '/37/', '1', NULL, '2', '1', NOW(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+
 
 
 -- REMARK: app模板
@@ -218,7 +224,11 @@ SET @c_id = (SELECT IFNULL(MAX(id),1) FROM eh_developer_account_info);
 INSERT INTO `eh_developer_account_info` (`id`, `bundle_ids`, `team_id`, `authkey_id`, `authkey`, `create_time`, `create_name`) 
 VALUES(@c_id:= @c_id +1,'com.ios','4H44DAN2YD','Q77V8W78L2','MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgexxG8QrtsI2+Xuwf75baYuZBQYBDzSBfEPijhC2GOmagCgYIKoZIzj0DAQehRANCAAT4qnM82JvBxnJ/R3ESPFgylVgU4st8QlQdf1QEYQtU3lVNStrg8W6DcLvYyL/7I/Tc0HFXm+8YQijz7ayWDOp7','2018-06-12 16:11:41','');
 
-	
+-- AUTHOR: 梁燕龙 20180704
+-- REMARK: 活动模块分享链接修改
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('post.link.share.url', '/mobile/static/share_post/share_post.html#', 'the relative path for sharing topic link', '0');
+UPDATE `eh_configurations` SET value = '/forum/build/index.html#/detail' WHERE NAME = 'post.share.url';
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -346,10 +356,6 @@ set @account_id = 4526;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
-set @namespace_id = 999971;
-set @account_id = 1000;
-INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
-SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
 set @namespace_id = 999973;
 set @account_id = 1004;
@@ -363,6 +369,11 @@ SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM e
 
 set @namespace_id = 999993;
 set @account_id = 4443;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+set @namespace_id = 999954;
+set @account_id = 4691;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 
@@ -793,6 +804,13 @@ SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@accou
 -- AUTHOR: 杨崇鑫
 -- REMARK: 物业缴费新支付数据迁移
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='4692' where namespace_id=999949; -- 安邦物业
+
+-- AUTHOR: 梁燕龙 20180702
+-- REMARK: 活动收款方账号迁移；
+set @namespace_id = 999949;
+set @account_id = 4692;
+INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
+SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

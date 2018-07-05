@@ -2600,25 +2600,30 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public List<SearchTasksByOrgDTO> listTasksByOrg(SearchTasksByOrgCommand cmd17) {
 		List<SearchTasksByOrgDTO> ret = new ArrayList<>();
-		List<PmTask> list = pmTaskProvider.listPmTasksByOrgId(cmd17.getNamespaceId(), cmd17.getCommunityId(), cmd17.getOrganizationId());
+		List<PmTask> list = pmTaskProvider.findTasksByOrg(cmd17.getCommunityId(), cmd17.getNamespaceId(), cmd17.getOrganizationId(),null);
 		for(PmTask task : list){
 			SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
 			dto.setBuildingName(task.getBuildingName());
 			dto.setCreateTime(task.getCreateTime());
-			dto.setOrganizationUid(task.getOrganizationUid());
 			dto.setRequestorName(task.getRequestorName());
 			dto.setRequestorPhone(task.getRequestorPhone());
 			if(task.getStatus()==1){
 				dto.setStatus("待处理");
 			}else if(task.getStatus()==2){
 				dto.setStatus("处理中");
-			}else if(task.getStatus()==3){
+			} else if (task.getStatus() == 3) {
 				dto.setStatus("已取消");
-			}else if(task.getStatus()==4){
+			} else if (task.getStatus() == 4) {
 				dto.setStatus("已完成");
 			}
 			dto.setTaskCategoryName(categoryProvider.findCategoryById(task.getTaskCategoryId()).getName());
 			dto.setContent(task.getContent());
+			if (task.getOrganizationUid() == null || task.getOrganizationUid() == 0) {
+				dto.setPmTaskSource("用户发起");
+			} else {
+				dto.setPmTaskSource("员工代发");
+			}
+
 			ret.add(dto);
 		}
 		return ret;
@@ -2643,7 +2648,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 				dto.setRequestorPhone(r.getRequestorPhone());
 				dto.setRequestorName(r.getRequestorName());
-				dto.setOrganizationUid(r.getOrganizationUid());
+				if (r.getOrganizationUid() == null || r.getOrganizationUid() == 0) {
+					dto.setPmTaskSource("用户发起");
+				} else {
+					dto.setPmTaskSource("员工代发");
+				}
 				dto.setCreateTime(r.getCreateTime());
 				dto.setBuildingName(r.getBuildingName());
 				Category category = categoryProvider.findCategoryById(r.getCategoryId());

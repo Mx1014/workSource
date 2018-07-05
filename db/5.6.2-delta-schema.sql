@@ -136,7 +136,7 @@ CREATE TABLE `eh_alliance_online_service` (
 	`id` BIGINT(20) NOT NULL,
 	`owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'id of eh_service_alliances',
 	`user_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'id of eh_users',
-	`user_name` VARCHAR(64) NOT NULL DEFAULT '""' COMMENT 'organization_members\'s contact name',
+	`user_name` VARCHAR(64) NOT NULL DEFAULT '""' COMMENT 'organization_members contact name',
 	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0-inactive 1-active  currently not used',
 	`update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'last update time',

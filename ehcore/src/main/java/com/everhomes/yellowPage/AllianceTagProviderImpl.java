@@ -96,7 +96,7 @@ public class AllianceTagProviderImpl implements AllianceTagProvider{
 			ListingQueryBuilderCallback callback) {
 		
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
-        int realPageSize = null == pageSize ? 0 : pageSize;
+        int realPageSize = null == pageSize ? 1000 : pageSize;
         
         SelectQuery<EhAllianceTagRecord> query = context.selectQuery(Tables.EH_ALLIANCE_TAG);
         if(callback != null)
