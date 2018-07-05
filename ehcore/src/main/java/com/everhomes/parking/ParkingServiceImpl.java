@@ -3272,4 +3272,14 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		return token;
 	}
+
+	@Override
+	public void getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp) {
+		
+	}
+
+	@Override
+	public GetParkingBussnessStatusResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd) {
+		return null;
+	}
 }
