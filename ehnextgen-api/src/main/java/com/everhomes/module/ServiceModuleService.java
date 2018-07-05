@@ -52,4 +52,8 @@ public interface ServiceModuleService {
 	Byte checkUserRelatedProjectAllFlag(ListUserRelatedProjectByModuleCommand cmd);
 
 	ServiceModuleAppDTO findServiceModuleAppById(Long id);
+
+	ListServiceModuleEntriesResponse listServiceModuleEntries(ListServiceModuleEntriesCommand cmd);
+
+	void updateServiceModuleEntries(UpdateServiceModuleEntriesCommand cmd);
 }
