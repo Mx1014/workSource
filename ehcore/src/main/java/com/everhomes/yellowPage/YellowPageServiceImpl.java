@@ -3796,6 +3796,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		JSONObject json = new JSONObject();
 		json.put("working", "working");
 		List<Long> empty = new ArrayList<Long>(100);
+		List<Long> ignore = new ArrayList<Long>(100);
 		Map<Long, String> failed = new HashMap<Long, String>(100);
 		int success = 0;
 		int total = 0;
@@ -3804,6 +3805,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 		for (LaunchPadItem item : items) {
 			
 			total++;
+			
+			//对现网的标签页做忽略
+			if("/secondhome".equals(item.getItemLocation()) && "Gallery".equals(item.getItemGroup())) {
+				ignore.add(item.getId());
+				continue;
+			}
 			
 			String actionData = item.getActionData();
 			if (StringUtils.isEmpty(actionData)) {
@@ -3826,6 +3833,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 		
 		json.put("empty", empty.toString());
+		json.put("ignore", ignore.toString());
 		json.put("failed", failed.toString());
 		json.put("success", success);
 		json.put("total", total);

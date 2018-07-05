@@ -117,14 +117,29 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     @Override
 	public String getItemActionData(Integer namespaceId, String instanceConfig) {
     	
-		ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = (ServiceAllianceInstanceConfig) StringHelper
+		ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
 				.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
 		
+		if ("native".equals(config.getAppType())) {
+			return buildNativeActionData(namespaceId, config);
+		}
+		
 		JSONObject json = new JSONObject();
-		json.put("url", buildRenderUrl(namespaceId, serviceAllianceInstanceConfig));
+		json.put("url", buildRenderUrl(namespaceId, config));
 		return json.toJSONString();
 	}
     
+    
+	private String buildNativeActionData(Integer namespaceId, ServiceAllianceInstanceConfig config) {
+		
+		ServiceAllianceActionData serviceAllianceActionData = new ServiceAllianceActionData();
+		serviceAllianceActionData.setType(config.getType());
+		serviceAllianceActionData.setParentId(config.getType());
+		serviceAllianceActionData.setDisplayType(config.getDisplayType());
+		serviceAllianceActionData.setEnableComment(config.getEnableComment());
+		return StringHelper.toJsonString(serviceAllianceActionData);
+	}
+
 	private String buildRenderUrl(Integer namespaceId, ServiceAllianceInstanceConfig config) {
 
 		// 服务联盟v3.4 web化之后，直接设置为跳转链接即可
