@@ -563,7 +563,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         LocalEventBus.publish(event -> {
             LocalEventContext localEventcontext = new LocalEventContext();
             localEventcontext.setUid(UserContext.currentUserId());
-            localEventcontext.setNamespaceId(UserContext.getCurrentNamespaceId());
+            localEventcontext.setNamespaceId(activity.getNamespaceId());
             event.setContext(localEventcontext);
             Map<String, Object> map = new HashMap<>();
             map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
@@ -1173,7 +1173,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
                 LocalEventBus.publish(event -> {
                     LocalEventContext localEventcontext = new LocalEventContext();
                     localEventcontext.setUid(UserContext.currentUserId());
-                    localEventcontext.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    localEventcontext.setNamespaceId(activity.getNamespaceId());
                     event.setContext(localEventcontext);
                     Map<String, Object> map = new HashMap<>();
                     map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
@@ -1394,7 +1394,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
                         LocalEventBus.publish(event -> {
                             LocalEventContext localEventcontext = new LocalEventContext();
                             localEventcontext.setUid(UserContext.currentUserId());
-                            localEventcontext.setNamespaceId(UserContext.getCurrentNamespaceId());
+                            localEventcontext.setNamespaceId(activity.getNamespaceId());
                             event.setContext(localEventcontext);
                             Map<String, Object> map = new HashMap<>();
                             map.put(EntityType.ACTIVITY_ROSTER.getCode(), r);

@@ -24,6 +24,8 @@ public class DeleteEnterpriseCommand {
 
 	private String name;
 
+	private Long orgId;
+
 	private Integer pageSize;
 
 	private Long pageAnchor;
@@ -99,6 +101,14 @@ public class DeleteEnterpriseCommand {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Long getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
 	}
 
 	@Override

@@ -16,6 +16,8 @@ public class PotentialCustomerDTO {
     private String sourceType;
     private String originSourceName;
     private Long operateUid;
+    private String contactPhone;
+    private String contactName;
     private Timestamp updateTime;
     private Timestamp createTime;
     private Long deleteUid;
@@ -99,6 +101,22 @@ public class PotentialCustomerDTO {
 
     public void setOriginSourceName(String originSourceName) {
         this.originSourceName = originSourceName;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
     }
 
     @Override

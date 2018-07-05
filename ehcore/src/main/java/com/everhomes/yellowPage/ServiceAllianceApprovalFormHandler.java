@@ -125,7 +125,7 @@ public class ServiceAllianceApprovalFormHandler implements GeneralApprovalFormHa
             LocalEventBus.publish(event -> {
                 LocalEventContext localEventcontext = new LocalEventContext();
                 localEventcontext.setUid(UserContext.currentUserId());
-                localEventcontext.setNamespaceId(UserContext.getCurrentNamespaceId());
+                localEventcontext.setNamespaceId(ga.getNamespaceId());
                 event.setContext(localEventcontext);
                 event.setEntityType(EntityType.GENERAL_APPROVAL_VAL.getCode());
                 Map<String, Object> map = new HashMap<>();

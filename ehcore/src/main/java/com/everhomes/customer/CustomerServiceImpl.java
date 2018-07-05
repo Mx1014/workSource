@@ -588,6 +588,7 @@ public class CustomerServiceImpl implements CustomerService {
                 customer.setTrackingName(user.getNickName());
             }
         }
+        customer.setSourceId(cmd.getSourceItemId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
@@ -600,8 +601,10 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void syncPotentialTalentToCustomer(Long customerId, Long sourceId) {
-        // source id is potential customer data primary key
+        // sourceItemId id is potential customer data primary key
         enterpriseCustomerProvider.updatePotentialTalentsToCustomer(customerId, sourceId);
+        // delete origin source potential data
+        enterpriseCustomerProvider.deletePotentialCustomer(sourceId);
     }
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
@@ -1496,6 +1499,21 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setTechnicalTitleItemName(scopeFieldItem.getItemDisplayName());
             }
         }
+        if (talent.getTalentSourceItemId() != null && StringUtils.isNotBlank(dto.getOriginSourceType())) {
+            if (PotentialCustomerType.SERVICE_ALLIANCE.getValue().equals(talent.getOriginSourceType())) {
+                ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(talent.getTalentSourceItemId());
+                if (serviceAllianceCategories != null) {
+                    dto.setTalentSourceItemName(serviceAllianceCategories.getName());
+                }
+            } else if (PotentialCustomerType.ACTIVITY.getValue().equals(talent.getOriginSourceType())) {
+                ActivityCategories entryCategory = activityProivider.findActivityCategoriesByEntryId(talent.getTalentSourceItemId(), talent.getNamespaceId());
+                if (entryCategory != null) {
+                    dto.setTalentSourceItemName(entryCategory.getName());
+                }
+            }
+        }else {
+            dto.setTalentSourceItemName("手动添加");
+        }
         return dto;
     }
 
@@ -1504,9 +1522,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerTalent> talents = enterpriseCustomerProvider.listCustomerTalentsByCustomerId(cmd.getCustomerId());
         if (talents != null && talents.size() > 0) {
-            return talents.stream().map(talent -> {
-                return convertCustomerTalentDTO(talent, cmd.getCommunityId());
-            }).collect(Collectors.toList());
+            return talents.stream().map(talent -> convertCustomerTalentDTO(talent, cmd.getCommunityId())).collect(Collectors.toList());
         }
         return null;
     }
@@ -4213,18 +4229,31 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deletePotentialCustomer(DeleteEnterpriseCommand cmd) {
+        if(cmd.getNamespaceId()==null || cmd.getNamespaceId()!=999954){
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PRIVILGE_ERROR,
+                    "permission denied");
+        }
         enterpriseCustomerProvider.deletePotentialCustomer(cmd.getSourceId());
     }
 
     @Override
     public CustomerPotentialResponse listPotentialCustomers(DeleteEnterpriseCommand cmd) {
+        if(cmd.getNamespaceId()==null || cmd.getNamespaceId()!=999954){
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PRIVILGE_ERROR,
+                    "permission denied");
+        }
         List<PotentialCustomerDTO> dtos = new ArrayList<>();
         CustomerPotentialResponse response = new CustomerPotentialResponse();
         cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
         List<CustomerPotentialData> data = enterpriseCustomerProvider.listPotentialCustomers(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType(), cmd.getPotentialName(), cmd.getPageAnchor(), cmd.getPageSize() + 1);
         if (data != null && data.size() > 0) {
             data.forEach((r) -> {
-                PotentialCustomerDTO potentialCustomerDTO =   ConvertHelper.convert(r, PotentialCustomerDTO.class);
+                PotentialCustomerDTO potentialCustomerDTO = ConvertHelper.convert(r, PotentialCustomerDTO.class);
+                CustomerTalent talent = enterpriseCustomerProvider.findPotentialTalentBySourceId(r.getId());
+                if (talent != null) {
+                    potentialCustomerDTO.setContactPhone(talent.getPhone());
+                    potentialCustomerDTO.setContactName(talent.getName());
+                }
 
                 if (r.getSourceId() != null && StringUtils.isNotBlank(r.getSourceType())) {
                     if (PotentialCustomerType.SERVICE_ALLIANCE.getValue().equals(r.getSourceType())) {
@@ -4233,7 +4262,7 @@ public class CustomerServiceImpl implements CustomerService {
                             potentialCustomerDTO.setOriginSourceName(serviceAllianceCategories.getName());
                         }
                     } else if (PotentialCustomerType.ACTIVITY.getValue().equals(r.getSourceType())) {
-                        ActivityCategories activityCategories = activityProivider.findActivityCategoriesById(r.getSourceId());
+                        ActivityCategories activityCategories = activityProivider.findActivityCategoriesByEntryId(r.getSourceId(),cmd.getNamespaceId());
                         if (activityCategories != null) {
                             potentialCustomerDTO.setOriginSourceName(activityCategories.getName());
                         }
@@ -4277,7 +4306,7 @@ public class CustomerServiceImpl implements CustomerService {
                 CustomerExpandItemDTO activityItem = new CustomerExpandItemDTO();
                 activityItem.setSourceType(PotentialCustomerType.ACTIVITY.getValue());
                 activityItem.setDisplayName(a.getName());
-                activityItem.setSourceId(a.getId());
+                activityItem.setSourceId(a.getEntryId());
                 items.add(activityItem);
             });
         }
@@ -4288,7 +4317,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
             serviceAllianceCategories.forEach((r) -> {
                 CustomerExpandItemDTO allianceItem = new CustomerExpandItemDTO();
-                allianceItem.setSourceId(r.getId());
+                allianceItem.setSourceId((long) r.getEntryId());
                 allianceItem.setDisplayName(r.getName());
                 allianceItem.setSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
                 items.add(allianceItem);
@@ -4304,19 +4333,21 @@ public class CustomerServiceImpl implements CustomerService {
         if(dtos!=null && dtos.size()>0){
             dtos.forEach((r)->{
                 CustomerTalentDTO dto = ConvertHelper.convert(r, CustomerTalentDTO.class);
+                dto.setRegisterStatus(r.getRegisterStatus().toString());
                 if (r.getTalentSourceItemId() != null && StringUtils.isNotBlank(r.getOriginSourceType())) {
                     if (PotentialCustomerType.SERVICE_ALLIANCE.getValue().equals(r.getOriginSourceType())) {
                         ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(r.getTalentSourceItemId());
                         if (serviceAllianceCategories != null) {
-                            dto.setTalentSourceItemId(serviceAllianceCategories.getName());
+                            dto.setTalentSourceItemName(serviceAllianceCategories.getName());
                         }
                     } else if (PotentialCustomerType.ACTIVITY.getValue().equals(r.getOriginSourceType())) {
-                        ActivityCategories activityCategories = activityProivider.findActivityCategoriesById(r.getTalentSourceItemId());
-                        if (activityCategories != null) {
-                            dto.setTalentSourceItemId(activityCategories.getName());
+                        ActivityCategories entryCategory = activityProivider.findActivityCategoriesByEntryId(r.getTalentSourceItemId(), cmd.getNamespaceId());
+                        if (entryCategory != null) {
+                            dto.setTalentSourceItemName(entryCategory.getName());
                         }
                     }
                 }
+                result.add(dto);
             });
         }
         return result;
@@ -4324,6 +4355,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updatePotentialCustomer(DeleteEnterpriseCommand cmd) {
+       if(cmd.getNamespaceId()==null || cmd.getNamespaceId()!=999954){
+           throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PRIVILGE_ERROR,
+                   "permission denied");
+       }
         CustomerPotentialData data = enterpriseCustomerProvider.findPotentialCustomerByName(cmd.getName());
         if (data != null) {
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,

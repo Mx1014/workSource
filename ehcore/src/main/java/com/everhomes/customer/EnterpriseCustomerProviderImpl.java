@@ -551,7 +551,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTalents.class));
         talent.setId(id);
         talent.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        talent.setCreatorUid(UserContext.current().getUser().getId());
+        talent.setCreatorUid(UserContext.currentUserId());
         talent.setStatus(CommonStatus.ACTIVE.getCode());
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, id));
@@ -603,7 +603,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, talent.getId()));
         EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
 
-        talent.setOperatorUid(UserContext.current().getUser().getId());
+        talent.setOperatorUid(UserContext.currentUserId());
         talent.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(talent);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTalents.class, talent.getId());
@@ -2223,7 +2223,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public List<CustomerTalent> listPotentialTalentBySourceId(Long sourceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerTalentsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TALENTS);
-        query.addConditions(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID.eq(0L));
+//        query.addConditions(Tables.EH_CUSTOMER_TALENTS.CUSTOMER_ID.eq(0L));
         query.addConditions(Tables.EH_CUSTOMER_TALENTS.ORIGIN_SOURCE_ID.eq(sourceId));
         query.addConditions(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
@@ -2263,5 +2263,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .set(Tables.EH_CUSTOMER_TALENTS.REGISTER_STATUS, CommonStatus.ACTIVE.getCode())
                 .where(Tables.EH_CUSTOMER_TALENTS.PHONE.eq(contactToken))
                 .execute();
+    }
+
+    @Override
+    public CustomerTalent findPotentialTalentBySourceId(Long sourceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_CUSTOMER_TALENTS)
+                .where(Tables.EH_CUSTOMER_TALENTS.ORIGIN_SOURCE_ID.eq(sourceId))
+                .and(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchAnyInto(CustomerTalent.class);
     }
 }

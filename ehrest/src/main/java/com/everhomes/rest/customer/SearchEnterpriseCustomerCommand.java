@@ -81,7 +81,7 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long addressId;
 
-    private Long sourceId;
+    private Long sourceItemId;
 
     private String sourceType;
 
@@ -279,12 +279,12 @@ public class SearchEnterpriseCustomerCommand {
         this.addressId = addressId;
     }
 
-    public Long getSourceId() {
-        return sourceId;
+    public Long getSourceItemId() {
+        return sourceItemId;
     }
 
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
+    public void setSourceItemId(Long sourceItemId) {
+        this.sourceItemId = sourceItemId;
     }
 
     public String getSourceType() {

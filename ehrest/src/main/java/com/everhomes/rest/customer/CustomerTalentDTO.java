@@ -76,7 +76,9 @@ public class CustomerTalentDTO {
 
     private String originSourceType;
 
-    private String  talentSourceItemId;
+    private String  talentSourceItemName;
+
+    private String registerStatus;
 
     public Long getMemberId() {
         return memberId;
@@ -390,16 +392,26 @@ public class CustomerTalentDTO {
         this.originSourceType = originSourceType;
     }
 
-    public String getTalentSourceItemId() {
-        return talentSourceItemId;
+    public String getTalentSourceItemName() {
+        return talentSourceItemName;
     }
 
-    public void setTalentSourceItemId(String talentSourceItemId) {
-        this.talentSourceItemId = talentSourceItemId;
+    public void setTalentSourceItemName(String talentSourceItemName) {
+        this.talentSourceItemName = talentSourceItemName;
+    }
+
+    public String getRegisterStatus() {
+        return registerStatus;
+    }
+
+    public void setRegisterStatus(String registerStatus) {
+        this.registerStatus = registerStatus;
     }
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
 }

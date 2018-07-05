@@ -101,6 +101,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                 if (existPotentialCustomer == null) {
                     CustomerPotentialData data = new CustomerPotentialData();
                     data.setName(activityRoster.getOrganizationName());
+                    data.setNamespaceId(activityNamespaceId);
                     Long sourceId = (Long) localEvent.getParams().get("categoryId");
                     data.setSourceId(sourceId);
                     data.setSourceType(PotentialCustomerType.ACTIVITY.getValue());
@@ -117,11 +118,14 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                 talent.setName(activityRoster.getRealName());
                 talent.setPhone(activityRoster.getPhone());
                 talent.setOriginSourceId(dataId);
+                talent.setOriginSourceType(PotentialCustomerType.ACTIVITY.getValue());
+                talent.setTalentSourceItemId((Long) localEvent.getParams().get("categoryId"));
                 if (userIdentifier != null) {
                     talent.setRegisterStatus(CommonStatus.ACTIVE.getCode());
                 } else {
                     talent.setRegisterStatus(CommonStatus.INACTIVE.getCode());
                 }
+                talent.setNamespaceId(activityNamespaceId);
                 customerProvider.createCustomerTalent(talent);
             }
         }
@@ -188,11 +192,15 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                             talent.setName(userName.getText());
                             talent.setPhone(userPhone.getText());
                             talent.setOriginSourceId(dataId);
+                            talent.setOriginSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                            talent.setTalentSourceItemId(serviceAlliance.getParentId());
                             if(userIdentifier!=null){
                                 talent.setRegisterStatus(CommonStatus.ACTIVE.getCode());
                             }else {
                                 talent.setRegisterStatus(CommonStatus.INACTIVE.getCode());
                             }
+                            talent.setNamespaceId(namespaceId);
+                            talent.setTalentSourceItemId((Long) localEvent.getParams().get("categoryId"));
                             customerProvider.createCustomerTalent(talent);
 //                        }
                     }

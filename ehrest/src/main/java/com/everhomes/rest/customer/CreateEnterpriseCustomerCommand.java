@@ -168,9 +168,12 @@ public class CreateEnterpriseCustomerCommand {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> banner;
     private String hotline;
-
+    //potential data primary key
     private Long sourceId;
+    //service alliance activity
     private String sourceType;
+
+    private Long originPotentialSourceId;
 
 
     public Long getOrgId() {

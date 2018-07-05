@@ -211,4 +211,6 @@ public interface EnterpriseCustomerProvider {
     void updatePotentialCustomer(CustomerPotentialData latestPotentialCustomer);
 
     void updateCustomerTalentRegisterStatus(String contactToken);
+
+    CustomerTalent findPotentialTalentBySourceId(Long sourceId);
 }

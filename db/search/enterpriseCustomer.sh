@@ -32,6 +32,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 			"categoryItemId": {"type":"long"},
 			"levelItemId": {"type":"long"},
 			"trackingUid": {"type":"long"},
+			"sourceItemId": {"type":"long"},
 			"propertyType": {"type":"long"},
 			"trackingUid": {"type":"long"},
             "status":{"type":"byte"},
