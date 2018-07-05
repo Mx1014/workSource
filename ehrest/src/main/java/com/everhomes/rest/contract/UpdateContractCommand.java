@@ -58,6 +58,8 @@ import java.util.List;
  *     <li>denunciationName: 退约人姓名</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
+ *     <li>categoryId: 合同类型多入口</li>
+ *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/5.
  */
@@ -109,8 +111,18 @@ public class UpdateContractCommand {
     private Long createUid;
     private String layout;
     private String settled;
+    private Long categoryId;
+    private Byte contractApplicationScene = 0;
 
-    @ItemType(BuildingApartmentDTO.class)
+    public Byte getContractApplicationScene() {
+		return contractApplicationScene;
+	}
+
+	public void setContractApplicationScene(Byte contractApplicationScene) {
+		this.contractApplicationScene = contractApplicationScene;
+	}
+
+	@ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
 
     @ItemType(ContractChargingItemDTO.class)
@@ -124,7 +136,15 @@ public class UpdateContractCommand {
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
 
-    public List<ContractChargingChangeDTO> getAdjusts() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;
     }
 

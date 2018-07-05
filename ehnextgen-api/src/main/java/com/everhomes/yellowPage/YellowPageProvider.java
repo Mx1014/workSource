@@ -24,10 +24,10 @@ public interface YellowPageProvider {
 	
 	
 	List<ServiceAlliances> queryServiceAllianceAdmin(CrossShardListingLocator locator, int pageSize,
-												String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords,  Byte displayFlag);
+												String ownerType, Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords,  Byte displayFlag);
 
 	List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords);
+			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords);
 
 	void createYellowPage(YellowPage yellowPage);
 
@@ -97,7 +97,7 @@ public interface YellowPageProvider {
 	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
 
 
-	List<JumpModuleDTO> jumpModules(Integer namespaceId);
+	List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString);
 	
 	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
 
@@ -149,4 +149,5 @@ public interface YellowPageProvider {
 
 
 	List<ServiceAlliances> findOldFormServiceAlliance();
+
 }

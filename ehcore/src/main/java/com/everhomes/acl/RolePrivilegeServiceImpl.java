@@ -573,7 +573,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			superAdminRoleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 		}
 
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getUserId(), cmd.getOrganizationId());
 		if(null != member){
 			member.setContactName(cmd.getContactName());
 			member.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -613,7 +613,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			superAdminRoleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 		}
 
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getUserId(), cmd.getOrganizationId());
 		if(null != member){
 			member.setContactName(cmd.getContactName());
 			member.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1308,7 +1308,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		Long childrenOrgId = organizationId;
 		if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, org.getId());
 			if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
 				childrenOrgId = member.getGroupId();
 			}
@@ -1516,6 +1516,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
         String organizationName = getOrganizationDisplayName(contactDTO.getOrganizationId());
 
+        //add by huanglm ,如果organizationName为NotFound，那就不发推送。
+        //往后找到原因后再去掉
+        if("NotFound".equals(organizationName)){
+        	//打印堆栈，方便定位－－－start
+        	Throwable ex = new Throwable();
+            StackTraceElement[] stackElements = ex.getStackTrace();
+            if (stackElements != null) {
+            	LOGGER.info("--------the stackTeace for---organizationName is NotFound---start---------------------");
+                for (int i = 0; i < stackElements.length; i++) {
+                	LOGGER.info(stackElements[i].toString());           	
+                }
+                LOGGER.info("--------the stackTeace for---organizationName is NotFound---end---------------------");
+            }
+          //打印堆栈，方便定位－－－end
+        	return ;
+        }
+
+        
+
         Map<String, String> model = new HashMap<>();
         model.put("userName", defaultIfNull(contactDTO.getContactName(), ""));
         model.put("contactToken", defaultIfNull(contactDTO.getContactToken(), ""));
@@ -1524,7 +1543,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toOtherTemplateCode,
+                toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1552,7 +1571,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toTargetTemplateCode,
+                toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1937,7 +1956,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					OrganizationContactDTO dto = new OrganizationContactDTO();
 					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(roleassignment.getTargetId(), IdentifierType.MOBILE.getCode());
 					User user = userProvider.findUserById(roleassignment.getTargetId());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
+					OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(roleassignment.getTargetId(), organizationId);
 					if(user != null){
 						dto.setId(user.getId());
 						dto.setNickName(user.getNickName());
@@ -1976,7 +1995,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					OrganizationContactDTO dto = new OrganizationContactDTO();
 					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(roleassignment.getTargetId(), IdentifierType.MOBILE.getCode());
 					User user = userProvider.findUserById(roleassignment.getTargetId());
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
+					OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(roleassignment.getTargetId(), organizationId);
 					if(user != null){
 						dto.setId(user.getId());
 						dto.setNickName(user.getNickName());
@@ -2037,7 +2056,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	private void deleteOrganizationAdmin(Long organizationId, String contactToken, Long adminPrivilegeId){
 		User user = UserContext.current().getUser();
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId);
+		//仅获取管理员的 member
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId, OrganizationMemberGroupType.MANAGER.getCode());
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(null == member) {
 			LOGGER.error("User is not in the organization.");
@@ -2046,6 +2066,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(null != userIdentifier){
 				member.setTargetType(OrganizationMemberTargetType.USER.getCode());
 				member.setTargetId(userIdentifier.getOwnerUid());
+				//update by huanglm ,fix 缺陷 #31483 .添加userName、contactToken、organizationId等后续消息使用到的字段，
+				//要不然在发送的消息内容中这些字段会为空		
+				member.setContactToken(contactToken);
+				member.setOrganizationId(organizationId);
+				User deleteuser = userProvider.findUserById(userIdentifier.getOwnerUid());
+				if(deleteuser != null){
+					member.setContactName(deleteuser.getNickName());					
+				}				
 			}
 		}else{
 			//从公司人员里面把管理员的标识去掉
@@ -3817,7 +3845,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(EntityType.USER == EntityType.fromCode(dto.getTargetType())){
 			OrganizationMember member = null;
 			if(EntityType.fromCode(dto.getOwnerType()) == EntityType.ORGANIZATIONS){
-				member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getTargetId(), dto.getOwnerId());
+				member = organizationProvider.findOrganizationMemberByUIdAndOrgId(dto.getTargetId(), dto.getOwnerId());
 			}
 
 			//设置昵称

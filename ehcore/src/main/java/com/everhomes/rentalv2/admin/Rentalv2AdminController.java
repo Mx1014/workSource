@@ -3,6 +3,9 @@ package com.everhomes.rentalv2.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rentalv2.Rentalv2PayService;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
@@ -16,6 +19,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.RestResponse;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -32,6 +37,8 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	@Autowired
 	private Rentalv2Service rentalService;
+	@Autowired
+	private Rentalv2PayService  rentalv2PayService;
 
 	/**
 	 * 
@@ -950,4 +957,102 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	//====================================================企业账户设置================================================
+
+	/**
+	 * <b>URL: /rental/admin/listPayeeAccounts</b>
+	 * <p>
+	 * 查询企业账户信息
+	 * </p>
+	 */
+	@RequestMapping("listPayeeAccounts")
+	@RestReturn(value = ListBizPayeeAccountDTO.class,collection = true)
+	public RestResponse listPayeeAccounts( ListPayeeAccountsCommand cmd) {
+		List<ListBizPayeeAccountDTO> list =  rentalv2PayService.listPayeeAccounts(cmd);
+		RestResponse response = new RestResponse(list);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/getGeneralAccountSetting</b>
+	 * <p>
+	 * 获取通用支付账户设定
+	 * </p>
+	 */
+	@RequestMapping("getGeneralAccountSetting")
+	@RestReturn(value = ListBizPayeeAccountDTO.class)
+	public RestResponse getGeneralAccountSetting( GetGeneralAccountSettingCommand cmd) {
+		ListBizPayeeAccountDTO dto = rentalv2PayService.getGeneralAccountSetting(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateGeneralAccountSetting</b>
+	 * <p>
+	 * 更新通用支付账户设定
+	 * </p>
+	 */
+	@RequestMapping("updateGeneralAccountSetting")
+	@RestReturn(value = String.class)
+	public RestResponse updateGeneralAccountSetting( UpdateGeneralAccountSettingCommand cmd) {
+		rentalv2PayService.updateGeneralAccountSetting(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/getResourceAccountSetting</b>
+	 * <p>
+	 * 获取资源支付账户设定
+	 * </p>
+	 */
+	@RequestMapping("getResourceAccountSetting")
+	@RestReturn(value = GetResourceAccountSettingResponse.class)
+	public RestResponse getResourceAccountSetting( GetResourceAccountSettingCommand cmd) {
+        GetResourceAccountSettingResponse res = rentalv2PayService.getResourceAccountSetting(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+    /**
+     * <b>URL: /rental/admin/deleteResourceAccountSetting</b>
+     * <p>
+     * 删除资源支付账户
+     * </p>
+     */
+    @RequestMapping("deleteResourceAccountSetting")
+    @RestReturn(value = String.class)
+    public RestResponse deleteResourceAccountSetting( UpdateResourceAccountSettingCommand cmd) {
+		rentalv2PayService.deleteResourceAccountSetting(cmd.getId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /rental/admin/updateResourceAccountSetting</b>
+     * <p>
+     * 新增/更新资源支付账户
+     * </p>
+     */
+    @RequestMapping("updateResourceAccountSetting")
+    @RestReturn(value = String.class)
+    public RestResponse updateResourceAccountSetting( UpdateResourceAccountSettingCommand cmd) {
+		rentalv2PayService.updateResourceAccountSetting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

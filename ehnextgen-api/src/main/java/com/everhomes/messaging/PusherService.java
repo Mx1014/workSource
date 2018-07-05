@@ -17,4 +17,8 @@ public interface PusherService {
     Map<String, Long> requestDevices(Map<String, Long> deviceMap);
     void checkAndPush(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg);
     void sendXiaomiMessage();
+    /**
+     * 停止bundleId对应的连接端，add by huanglm
+     */
+    void  stophttp2Client(String bundleId);
 }

@@ -41,15 +41,25 @@ public interface ArchivesProvider {
 
     ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId);
 
-    void createArchivesConfigurations(ArchivesConfigurations configuration);
+    void createOperationalConfiguration(ArchivesOperationalConfiguration config);
 
-    void updateArchivesConfigurations(ArchivesConfigurations configuration);
+    void deleteLastConfiguration(Integer namespaceId, List<Long> detailIds, Byte operationType);
 
-    List<ArchivesConfigurations> listArchivesConfigurations(Date date);
+    void updateOperationalConfiguration(ArchivesOperationalConfiguration config);
 
-    void createArchivesLogs(ArchivesLogs log);
+    ArchivesOperationalConfiguration findConfigurationByDetailId(Integer namespaceId, Long organizationId, Byte type, Long detailId);
 
-    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
+    ArchivesOperationalConfiguration findPendingConfigurationByDetailId(Integer namespaceId, Long detailId, Byte operationType);
+
+    List<ArchivesOperationalConfiguration> listPendingConfigurationsInDetailIds(Integer namespaceId, List<Long> detailIds, Byte operationType);
+
+    List<ArchivesOperationalConfiguration> listPendingConfigurations(Date date);
+
+    void createOperationalLog(ArchivesOperationalLog log);
+
+//    void createArchivesLogs(ArchivesLogs log);
+
+    List<ArchivesOperationalLog> listArchivesLogs(Long organizationId, Long detailId);
 
     void createArchivesNotifications(ArchivesNotifications archivesNotification);
 
@@ -58,4 +68,9 @@ public interface ArchivesProvider {
     void updateArchivesNotifications(ArchivesNotifications archivesNotification);
 
     List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time);
+
+    List<ArchivesLogs> listAllArchivesLogs();
+
+    List<ArchivesConfigurations> listAllPendingConfigs();
+
 }

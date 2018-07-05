@@ -70,8 +70,22 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 		params.put("trade_code", trade_code);
 		params.put("car_no", plateNumber);
 		params.put("signature", ZhongBaiChangSignatureUtil.getSign(params, secretKey));
-		String result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
-				StandardCharsets.UTF_8);
+		String result = "";
+		int maxTryPosts = configProvider.getIntValue("parking.max.trypost",3);
+		int i=0;
+		while(i<maxTryPosts) {
+			try {
+				result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
+						StandardCharsets.UTF_8);
+				break;
+			} catch (Exception e) {
+				LOGGER.error("The request error,", e);
+				if(i==maxTryPosts-1) {
+					return null;
+				}
+			}
+			i++;
+		}
 
 		ZhongBaiChangCardInfo<ZhongBaiChangData> entity = JSONObject.parseObject(result,
 				new TypeReference<ZhongBaiChangCardInfo<ZhongBaiChangData>>() {
@@ -159,12 +173,20 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 			order.setStartPeriod(new Timestamp(newStartTime));
 			order.setEndPeriod(rechargeEndTimestamp);
 			String result = null;
-			try{
-				result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
-					StandardCharsets.UTF_8);
-			}catch (Exception e) {
-				LOGGER.error("The request error,", e);
-				return false;
+			int maxTryPosts = configProvider.getIntValue("parking.max.trypost",3);
+			int i=0;
+			while(i<maxTryPosts) {
+				try {
+					result = Utils.post(url + url_context, JSONObject.parseObject(StringHelper.toJsonString(params)),
+							StandardCharsets.UTF_8);
+					break;
+				} catch (Exception e) {
+					LOGGER.error("The request times{} error,", i+1, e);
+					if(i==maxTryPosts-1){
+						return false;
+					}
+				}
+				i++;
 			}
 			//将充值信息存入订单
 			order.setErrorDescriptionJson(result);
@@ -196,7 +218,20 @@ public class ZhongBaiChangParkingVendorHandler extends DefaultParkingVendorHandl
 		if(parkingRechargeRates==null || parkingRechargeRates.size()==0){
 			return null;
 		}
-		ParkingRechargeRateDTO rate = parkingRechargeRates.get(configProvider.getIntValue("parking.recharge.rateseq",0));
+		Integer expiredRechargeMonthCount = parkingLot.getExpiredRechargeMonthCount();
+		if(expiredRechargeMonthCount==null){
+			expiredRechargeMonthCount=REQUEST_MONTH_COUNT;
+		}
+		ParkingRechargeRateDTO rate = null;
+		for (ParkingRechargeRateDTO parkingRechargeRate : parkingRechargeRates) {
+			if(parkingRechargeRate.getMonthCount().intValue()==expiredRechargeMonthCount){
+				rate = parkingRechargeRate;
+				break;
+			}
+		}
+		if(rate==null) {
+			rate = parkingRechargeRates.get(configProvider.getIntValue("parking.recharge.rateseq", 0));
+		}
 		ParkingExpiredRechargeInfoDTO dto = ConvertHelper.convert(rate,ParkingExpiredRechargeInfoDTO.class);
 		dto.setCardTypeName(rate.getCardType());
 		ZhongBaiChangCardInfo<ZhongBaiChangData> card = getCardInfo(cmd.getPlateNumber());

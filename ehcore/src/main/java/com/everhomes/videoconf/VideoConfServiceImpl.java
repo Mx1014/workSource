@@ -48,20 +48,14 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.activity.ActivityTimeResponse;
-import com.everhomes.rest.activity.GetActivityTimeCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -174,7 +168,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.mysql.jdbc.StringUtils;
 
 
@@ -186,8 +179,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private final String BIZCONFPATH = "http://api.bizvideo.cn/openapi";
 
 
-	@Autowired
-	private PayService payService;
+	//@Autowired
+	//private PayService payService;
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
@@ -1040,7 +1033,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			accountDto.setUserId(r.getOwnerId());
 			Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
 			if(org != null) {
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOwnerId(), org.getId());
+				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getOwnerId(), org.getId());
 				if (member != null) {
 					accountDto.setUserName(member.getContactName());
 					accountDto.setMobile(member.getContactToken());
@@ -2759,11 +2752,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 		UpdateConfAccountPeriodCommand cmd1 = ConvertHelper.convert(cmd, UpdateConfAccountPeriodCommand.class);
 		ConfOrders confOrder = createUpdateConfAccountPeriodOrder(cmd1);
  
-		Long amount = payService.changePayAmount(confOrder.getAmount()); 
-
-		PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
-				OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
-		return callBack;
+		// 使用新支付SDK，PayService被废弃，由于经王重纲确认视频会议不支持支付，故支付SDK对接时并没有对接，
+		// 若需要支持则需要另外安排时间对接 by lqs 20180613
+		//Long amount = payService.changePayAmount(confOrder.getAmount()); 
+		//PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
+		//		OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
+		//return callBack;
+		return null;
 	}
 
 	@Override
@@ -2822,12 +2817,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 		CreateConfAccountOrderOnlineCommand cmd1 = ConvertHelper.convert(cmd,CreateConfAccountOrderOnlineCommand.class);
 		ConfOrders confOrder = createConfOnline(cmd1); 
 		 
-		Long amount = payService.changePayAmount(confOrder.getAmount()); 
-
-		PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
-				OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
-		return callBack;
-
+	    // 使用新支付SDK，PayService被废弃，由于经王重纲确认视频会议不支持支付，故支付SDK对接时并没有对接，
+        // 若需要支持则需要另外安排时间对接 by lqs 20180613
+		//Long amount = payService.changePayAmount(confOrder.getAmount()); 
+		//PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
+		//		OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
+		//return callBack;
+		return null;
 	}
 	
 	@Override

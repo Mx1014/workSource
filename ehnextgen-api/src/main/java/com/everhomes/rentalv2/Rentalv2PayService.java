@@ -1,0 +1,37 @@
+package com.everhomes.rentalv2;
+
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.rentalv2.admin.*;
+
+import java.util.List;
+
+public interface Rentalv2PayService {
+
+    List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
+
+    ListBizPayeeAccountDTO getGeneralAccountSetting(GetGeneralAccountSettingCommand cmd);
+
+    void updateGeneralAccountSetting(UpdateGeneralAccountSettingCommand cmd);
+
+    GetResourceAccountSettingResponse getResourceAccountSetting(GetResourceAccountSettingCommand cmd);
+
+    void deleteResourceAccountSetting(Long id);
+
+    void updateResourceAccountSetting(UpdateResourceAccountSettingCommand cmd);
+
+    Long getRentalOrderPayeeAccount(Long rentalBillId);
+
+    Long checkAndCreatePaymentUser(Long payerId, Integer namespaceId);
+
+    PreOrderDTO createPreOrder(PreOrderCommand cmd,RentalOrder order);
+
+    void refundOrder (RentalOrder order,Long amount);
+
+    void payNotify(OrderPaymentNotificationCommand cmd);
+
+    void refundNotify(OrderPaymentNotificationCommand cmd);
+}

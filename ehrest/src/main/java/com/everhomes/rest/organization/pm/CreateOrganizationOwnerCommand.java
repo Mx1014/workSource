@@ -37,7 +37,7 @@ public class CreateOrganizationOwnerCommand {
     private Long communityId;
     @NotNull @Size(max = 20)
     private String contactName;
-    @NotNull @Size(max = 20)
+//    @NotNull @Size(max = 20)
     private String contactToken;
     @NotNull
     private Long orgOwnerTypeId;
@@ -65,6 +65,15 @@ public class CreateOrganizationOwnerCommand {
     private String ownerType;
     private Long ownerId;
     private Integer namespaceId;
+    private List<String> customerExtraTels;
+
+    public List<String> getCustomerExtraTels() {
+        return customerExtraTels;
+    }
+
+    public void setCustomerExtraTels(List<String> customerExtraTels) {
+        this.customerExtraTels = customerExtraTels;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

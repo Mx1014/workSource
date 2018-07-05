@@ -1,7 +1,11 @@
 package com.everhomes.rest.yellowPage;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.common.TagSearchItem;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -17,6 +21,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageAnchor: 下一页锚点（新版本使用）</li>
  *  <li>pageSize: 每页的数量</li>
  *  <li>sourceRequestType: 客户端或者web端 ,web端请务必传值。 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType}</li>
+ *  <li>tagItems: 传过来的筛选列表（list）。 参考 {@link com.everhomes.rest.common.TagSearchItem}</li>
  * </ul>
  */
 public class GetServiceAllianceEnterpriseListCommand {
@@ -44,6 +49,11 @@ public class GetServiceAllianceEnterpriseListCommand {
 	private Long type;
 	
 	private Byte sourceRequestType;
+	
+	@ItemType(TagSearchItem.class)
+	private List<TagSearchItem> tagItems;
+	
+	
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
@@ -169,6 +179,7 @@ public class GetServiceAllianceEnterpriseListCommand {
 		this.displayFlag = displayFlag;
 	}
 
+
 	public Long getPageAnchor() {
 		if (null == pageAnchor) {
 			return nextPageAnchor;
@@ -178,5 +189,14 @@ public class GetServiceAllianceEnterpriseListCommand {
 
 	public void setPageAnchor(Long pageAnchor) {
 		this.pageAnchor = pageAnchor;
+	}
+
+	public List<TagSearchItem> getTagItems() {
+		return tagItems;
+	}
+
+	public void setTagItems(List<TagSearchItem> tagItems) {
+		this.tagItems = tagItems;
+
 	}
 }

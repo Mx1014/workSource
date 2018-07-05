@@ -15,6 +15,8 @@ import com.everhomes.rest.parking.*;
 import com.everhomes.rest.parking.clearance.ParkingActualClearanceLogDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.poi.ss.usermodel.Row;
@@ -61,6 +63,8 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
     FlowCaseProvider flowCaseProvider;
     @Autowired
     private DbProvider dbProvider;
+    @Autowired
+    UserService userService;
 
     void setCardStatus(ParkingLot parkingLot, long expireTime, ParkingCardDTO parkingCardDTO) {
         long now = System.currentTimeMillis();
@@ -282,7 +286,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
             dto.setPlateNumber(cmd.getPlateNumber());
             long now = System.currentTimeMillis();
             dto.setOpenDate(now);
-            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
             if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
                 dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
             }else {
@@ -376,10 +380,17 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
                 }
             }
             tempRow.createCell(11).setCellValue(String.valueOf(order.getPrice().doubleValue()));
+            tempRow.createCell(12).setCellValue(order.getOriginalPrice()==null?
+                    String.valueOf(order.getPrice().doubleValue())
+                    :String.valueOf(order.getOriginalPrice().doubleValue()));
             VendorType type = VendorType.fromCode(order.getPaidType());
-            tempRow.createCell(12).setCellValue(null==type?"":type.getDescribe());
+            tempRow.createCell(13).setCellValue(null==type?"":type.getDescribe());
             ParkingRechargeType parkingRechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
-            tempRow.createCell(13).setCellValue(parkingRechargeType==null?"":parkingRechargeType.getDescribe());
+            tempRow.createCell(14).setCellValue(parkingRechargeType==null?"":parkingRechargeType.getDescribe());
+            ParkingRechargeOrderStatus orderStatus = ParkingRechargeOrderStatus.fromCode(order.getStatus());
+            tempRow.createCell(15).setCellValue(orderStatus==null?"":orderStatus.getDescription());
+            ParkingPaySourceType sourceType = ParkingPaySourceType.fromCode(order.getPaySource());
+            tempRow.createCell(16).setCellValue(sourceType==null?"":sourceType.getDesc());
         }
     }
     @Override

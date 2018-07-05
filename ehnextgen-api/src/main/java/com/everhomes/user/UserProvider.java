@@ -40,7 +40,7 @@ public interface UserProvider {
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
-
+    UserIdentifier findClaimingIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus);
 
     void createUserGroup(UserGroup userGroup);
@@ -176,4 +176,6 @@ public interface UserProvider {
 
     UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
             String identifierToken, Integer namespaceId);
+
+    String getNickNameByUid(Long creatorUid);
 }

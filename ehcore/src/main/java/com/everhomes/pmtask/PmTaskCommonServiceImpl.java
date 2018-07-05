@@ -232,6 +232,9 @@ class PmTaskCommonServiceImpl {
         task.setReferType(cmd.getReferType());
         task.setReferId(cmd.getReferId());
 
+//      新增需求人企业Id用于物业线根据企业查询报修任务
+        task.setEnterpriseId(cmd.getEnterpriseId());
+
         //设置门牌地址,楼栋地址,服务地点
 
 //        String handle = configProvider.getValue(PmTaskServiceImpl.HANDLER + namespaceId, PmTaskHandle.FLOW);

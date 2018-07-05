@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>bindPhoneType: 绑定方式 0-微信用户绑定到已有手机用户，1-手机绑定到微信用户，2-微信用户已经和手机绑定过将更新手机  参考{@link BindPhoneType}</li>
  *     <li>password: password，不填则后台随机生成一个</li>
  *     <li>oldPhone: oldPhone</li>
+ *     <li>userId: 用户ID，第三方登录使用</li>
  * </ul>
  */
 public class BindPhoneCommand {
@@ -26,7 +27,38 @@ public class BindPhoneCommand {
 
 	private String oldPhone;
 
-	public String getPassword() {
+	private Long userId;
+
+	private String deviceIdentifier;
+
+	private String pusherIdentify;
+
+	public String getPusherIdentify() {
+		return pusherIdentify;
+	}
+
+	public void setPusherIdentify(String pusherIdentify) {
+		this.pusherIdentify = pusherIdentify;
+	}
+
+	public String getDeviceIdentifier() {
+
+		return deviceIdentifier;
+	}
+
+	public void setDeviceIdentifier(String deviceIdentifier) {
+		this.deviceIdentifier = deviceIdentifier;
+	}
+
+	public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getPassword() {
 		return password;
 	}
 

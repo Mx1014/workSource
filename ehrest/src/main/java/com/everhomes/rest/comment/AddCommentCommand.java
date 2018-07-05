@@ -13,6 +13,7 @@ import java.util.List;
  * <li>parentCommentId: 父评论的ID</li>
  * <li>content: 帖子内容</li>
  * <li>contentType: 评论类型，参考{@link com.everhomes.rest.comment.ContentType}</li>
+ * <li>communityId: 项目ID</li>
  * <li>attachments: 图片、语音、视频等附件信息，参考{@link com.everhomes.rest.comment.AttachmentDescriptor}</li>
  * </ul>
  */
@@ -22,6 +23,7 @@ public class AddCommentCommand {
 	private Long parentCommentId;
 	private String content;
 	private String contentType;
+	private Long communityId;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
 
@@ -57,7 +59,15 @@ public class AddCommentCommand {
 		this.contentType = contentType;
 	}
 
-	public List<AttachmentDescriptor> getAttachments() {
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public List<AttachmentDescriptor> getAttachments() {
 		return attachments;
 	}
 

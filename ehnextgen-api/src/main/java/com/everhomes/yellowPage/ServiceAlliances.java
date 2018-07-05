@@ -3,6 +3,8 @@ package com.everhomes.yellowPage;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.yellowPage.AllianceTagGroupDTO;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.util.StringHelper;
 
@@ -11,9 +13,15 @@ public class ServiceAlliances extends EhServiceAlliances {
 	private static final long serialVersionUID = -1568787873947269540L;
 
 	private String posterUrl;
+	private String startDate;
+	private String endDate;
 	
+	private List<ServiceAllianceAttachment> coverAttachments =  new ArrayList<ServiceAllianceAttachment>(10);
 	private List<ServiceAllianceAttachment> attachments =  new ArrayList<ServiceAllianceAttachment>();
 	private List<ServiceAllianceAttachment> fileAttachments =  new ArrayList<ServiceAllianceAttachment>();
+	
+	
+	private List<AllianceTagGroupDTO> tagGroups;
 
 	public String getPosterUrl() {
 		return posterUrl;
@@ -92,4 +100,36 @@ public class ServiceAlliances extends EhServiceAlliances {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public List<ServiceAllianceAttachment> getCoverAttachments() {
+		return coverAttachments;
+	}
+
+	public void setCoverAttachments(List<ServiceAllianceAttachment> coverAttachments) {
+		this.coverAttachments = coverAttachments;
+	}
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+
+	public List<AllianceTagGroupDTO> getTagGroups() {
+		return tagGroups;
+	}
+
+	public void setTagGroups(List<AllianceTagGroupDTO> tagGroups) {
+		this.tagGroups = tagGroups;
+	}
 }

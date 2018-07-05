@@ -25,6 +25,15 @@ public class AutoNoticeConfigCommand {
 //    private List<Integer> configDays;
     private Long organizationId;
     private List<NoticeConfig> configs;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

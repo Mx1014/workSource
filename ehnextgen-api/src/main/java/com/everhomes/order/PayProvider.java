@@ -18,7 +18,7 @@ public interface PayProvider {
 
     PaymentUser findPaymentUserByOwner(String ownerType, Long ownerId);
 
-    PaymentAccount findPaymentAccountBySystemId(Integer systemId);
+    PaymentAccount findPaymentAccountBySystemId(Long systemId);
 
     void createPaymentOrderRecord(PaymentOrderRecord orderRecord);
 

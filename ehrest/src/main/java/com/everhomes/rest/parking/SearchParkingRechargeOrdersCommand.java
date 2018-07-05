@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * <li>rechargeType: 充值类型 {@link ParkingRechargeType}</li>
  * <li>cardNumber: 卡号</li>
+ * <li>keyWords: 关键字</li>
+ * <li>paySource: 缴费来源， 参考{@link com.everhomes.rest.parking.ParkingPaySourceType}</li>
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
@@ -39,6 +41,8 @@ public class SearchParkingRechargeOrdersCommand {
     private Integer pageSize;
     private Byte rechargeType;
     private String cardNumber;
+    private String keyWords;
+    private String paySource;
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
@@ -187,4 +191,19 @@ public class SearchParkingRechargeOrdersCommand {
 		this.paidType = paidType;
 	}
 
+    public String getKeyWords() {
+        return keyWords;
+    }
+
+    public void setKeyWords(String keyWords) {
+        this.keyWords = keyWords;
+    }
+
+    public String getPaySource() {
+        return paySource;
+    }
+
+    public void setPaySource(String paySource) {
+        this.paySource = paySource;
+    }
 }

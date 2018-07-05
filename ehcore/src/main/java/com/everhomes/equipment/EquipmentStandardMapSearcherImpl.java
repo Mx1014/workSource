@@ -233,7 +233,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 				dto.setReviewTime(map.getReviewTime());*/
 
 				/*if(map.getReviewerUid() != null && map.getReviewerUid() != 0L) {
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(map.getReviewerUid(), equipment.getOwnerId());
+					OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(map.getReviewerUid(), equipment.getOwnerId());
 					if(member != null) {
 						dto.setReviewer(member.getContactName());
 					}

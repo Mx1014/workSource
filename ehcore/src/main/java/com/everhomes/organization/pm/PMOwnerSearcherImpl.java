@@ -4,6 +4,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.rest.address.AddressDTO;
@@ -21,6 +22,7 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
 import org.apache.commons.lang.StringUtils;
@@ -92,17 +94,24 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         feedDoc(owner.getId().toString(), source);
 	}
 
-	@Override
-	public void syncFromDb() {
+    @Override
+    public void syncFromDb() {
         this.deleteAll();
-        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwners(null, null);
-        if(owners.size() > 0) {
-            this.bulkUpdate(owners);
+        Integer pageSize = 200;
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        for (; ; ) {
+            List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersWithLocator(locator, pageSize);
+            if (owners.size() > 0) {
+                this.bulkUpdate(owners);
+            }
+            if (locator.getAnchor() == null) {
+                break;
+            }
         }
         this.optimize(1);
         this.refresh();
         LOGGER.info("sync for organization owner ok");
-	}
+    }
 
 	@Override
 	public ListOrganizationOwnersResponse query(SearchOrganizationOwnersCommand cmd) {
@@ -225,7 +234,19 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                     }
                 	return d;
                 }).collect(Collectors.toList()));
-                
+                //客户额外手机号添加
+                List<String> contractExtraTels = new ArrayList<>();
+                try{
+                    List<String> extraTelsField = (List<String>)StringHelper.fromJsonString(r.getContactExtraTels(), ArrayList.class);
+                    contractExtraTels.addAll(extraTelsField);
+                }catch (Exception e){
+                    LOGGER.error("failed to convert contact extra tels json to list, pmowner id ={}", r.getId());
+                }
+                //add by tangcen
+                if (!contractExtraTels.contains(dto.getContactToken())) {
+                	contractExtraTels.add(dto.getContactToken());
+				}
+                dto.setCustomerExtraTels(contractExtraTels);
                 return dto;
             }).collect(Collectors.toList()));
 

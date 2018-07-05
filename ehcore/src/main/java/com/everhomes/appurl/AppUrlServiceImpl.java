@@ -1,5 +1,6 @@
 package com.everhomes.appurl;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,10 @@ public class AppUrlServiceImpl implements AppUrlService {
 		}
 		AppUrlDTO dto = ConvertHelper.convert(appUrls, AppUrlDTO.class);
 		dto.setLogoUrl(null);
-		
+
+		if (StringUtils.isBlank(dto.getDownloadUrl())) {
+		    dto.setDownloadUrl(null);
+        }
 		String logoUri = appUrls.getLogoUrl();
 		if(logoUri != null && logoUri.length() > 0) {
             try{

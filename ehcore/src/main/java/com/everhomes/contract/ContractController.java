@@ -16,6 +16,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -89,10 +91,9 @@ public class ContractController extends ControllerBase {
 	 */
 	@RequestMapping("generateContractNumber")
 	@RestReturn(String.class)
-	public RestResponse generateContractNumber(){
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		ContractService contractService = getContractService(namespaceId);
-		return new RestResponse(contractService.generateContractNumber());
+	public RestResponse generateContractNumber(GenerateContractNumberCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		return new RestResponse(contractService.generateContractNumber(cmd));
 	}
 
 	/**
@@ -315,5 +316,20 @@ public class ContractController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+	
+	//查看合同日志  by tangcen
+	/**
+	 * <b>URL: /contract/listContractEvents</b>
+	 * <p>查看合同日志</p>
+	 */
+	@RequestMapping("listContractEvents")
+	@RestReturn(value = ContractEventDTO.class,collection=true)
+	public RestResponse listContractEvents(ListContractEventsCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		List<ContractEventDTO> result = contractService.listContractEvents(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

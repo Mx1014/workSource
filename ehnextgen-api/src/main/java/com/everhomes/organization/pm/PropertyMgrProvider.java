@@ -1,18 +1,23 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
+import com.everhomes.rest.organization.pm.ReservationStatus;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
+import com.everhomes.server.schema.tables.pojos.EhPmResoucreReservations;
+
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -490,6 +495,8 @@ public interface PropertyMgrProvider {
 
 	public Map<Long, CommunityAddressMapping> mapAddressMappingByAddressIds(List<Long> addressIds);
 
+	Map<Long, CommunityAddressMapping> mapAddressMappingByAddressIds(List<Long> addressIds, Byte livingStatus);
+
 	public Map<Long, CommunityPmBill> mapNewestBillByAddressIds(List<Long> addressIds);
 
 	public OrganizationOwner findOrganizationOwnerById(Long organizationOwnerId);
@@ -497,4 +504,33 @@ public interface PropertyMgrProvider {
 	List<CommunityAddressMapping> listCommunityAddressMappingByAddressIds(List<Long> addressIds);
 
 	List<OrganizationOwnerAddress> listOrganizationOwnerAuthAddressByAddressId(Integer namespaceId, Long addressId);
+
+	List<CommunityPmOwner> listCommunityPmOwnersByTel(Integer currentNamespaceId, Long communityId, String tel);
+
+	OrganizationOwnerBehavior findOrganizationOwnerBehaviorByOwnerAndAddressId(Long id, Long id1);
+
+    void insertResourceReservation(PmResourceReservation resourceReservation);
+
+    List<PmResourceReservation> listReservationsByAddresses(List<Long> ids);
+
+    boolean isInvolvedWithReservation(Long addressId);
+
+    List<PmResourceReservation> findReservationByAddress(Long addressId, ReservationStatus status);
+
+	void updateReservation(Long reservationId, Timestamp startTime, Timestamp endTime,Long enterpriseCustomerId,Long addressId);
+
+	Long changeReservationStatus(Long reservationId, Byte newStatus);
+
+	List<ReservationInfo> listRunningReservations();
+
+	Byte getReservationPreviousLivingStatusById(Long reservationId);
+
+
+    List<CommunityPmOwner> listCommunityPmOwnersWithLocator(CrossShardListingLocator locator, Integer pageSize);
+
+	//add by tangcen 2018年7月2日11:11:43
+	PmResourceReservation findReservationById(Long reservationId);
+
+	void updateReservation(PmResourceReservation oldReservation);
+
 }
