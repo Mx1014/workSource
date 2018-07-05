@@ -164,4 +164,8 @@ public interface ParkingService {
     ParkingLotDTO getParkingLotByToken(GetParkingLotByTokenCommand cmd);
 
     String transformToken(TransformTokenCommand cmd);
+
+    void getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp);
+
+    GetParkingBussnessStatusResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd);
 }

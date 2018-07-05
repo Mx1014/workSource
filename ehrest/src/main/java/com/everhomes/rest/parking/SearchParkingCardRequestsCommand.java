@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>plateNumber: 车牌号</li>
  * <li>plateOwnerName: 车主名称</li>
  * <li>plateOwnerPhone: 车主手机号</li>
+ * <li>ownerKeyWords: 车主关键字(名称或者手机号) V6.6</li>
  * <li>plateOwnerEntperiseName: plateOwnerEntperiseName</li>
  * <li>startDate: 开始时间</li>
  * <li>endDate: 结束时间</li>
@@ -33,6 +34,7 @@ public class SearchParkingCardRequestsCommand {
     private String plateNumber;
     private String plateOwnerName;
     private String plateOwnerPhone;
+    private String ownerKeyWords;
     private String plateOwnerEntperiseName;
     private Long startDate;
     private Long endDate;
@@ -49,7 +51,15 @@ public class SearchParkingCardRequestsCommand {
 	private Long currentProjectId;
 	private Long appId;
 
-	public Long getCurrentPMId() {
+    public String getOwnerKeyWords() {
+        return ownerKeyWords;
+    }
+
+    public void setOwnerKeyWords(String ownerKeyWords) {
+        this.ownerKeyWords = ownerKeyWords;
+    }
+
+    public Long getCurrentPMId() {
 		return currentPMId;
 	}
 

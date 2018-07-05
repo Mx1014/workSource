@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
+ * <li>keyWords: 关键字(用户名或者手机号和车牌号) V6.6</li>
  * <li>plateNumber: 车牌号</li>
  * <li>plateOwnerName: 车主</li>
  * <li>payerPhone: 付款人手机号</li>
@@ -30,6 +31,7 @@ public class SearchParkingRechargeOrdersCommand {
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
+    private String keyWords;
     private String plateNumber;
     private String plateOwnerName;
     private String payerPhone;
@@ -47,7 +49,15 @@ public class SearchParkingRechargeOrdersCommand {
 	private Long currentProjectId;
 	private Long appId;
 
-	public Long getCurrentPMId() {
+    public String getKeyWords() {
+        return keyWords;
+    }
+
+    public void setKeyWords(String keyWords) {
+        this.keyWords = keyWords;
+    }
+
+    public Long getCurrentPMId() {
 		return currentPMId;
 	}
 

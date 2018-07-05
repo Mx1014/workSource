@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
  * <li>plateNumber: 车牌</li>
  * <li>plateOwnerName: 车主名称</li>
  * <li>plateOwnerPhone: 车数手机号</li>
+ * <li>ownerKeyWords: 车主关键字(名称或者手机号) V6.6</li>
  * <li>requestorEnterpriseName: 申请人公司名称</li>
  * <li>startTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
@@ -35,6 +36,7 @@ public class SearchParkingCarVerificationsCommand {
     private String plateNumber;
     private String plateOwnerName;
     private String plateOwnerPhone;
+    private String ownerKeyWords;
     private String requestorEnterpriseName;
 
     private Long startTime;
@@ -47,7 +49,15 @@ public class SearchParkingCarVerificationsCommand {
 	private Long currentProjectId;
 	private Long appId;
 
-	public Long getCurrentPMId() {
+    public String getOwnerKeyWords() {
+        return ownerKeyWords;
+    }
+
+    public void setOwnerKeyWords(String ownerKeyWords) {
+        this.ownerKeyWords = ownerKeyWords;
+    }
+
+    public Long getCurrentPMId() {
 		return currentPMId;
 	}
 

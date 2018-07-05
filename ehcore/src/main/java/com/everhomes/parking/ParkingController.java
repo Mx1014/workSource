@@ -1107,4 +1107,38 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /parking/getWxParkingQrcode</b>
+     * <p>
+     * 点击下载临时车二维码，扫码支付临时车费用 V6.6
+     * </p>
+     */
+    @RequestMapping("getWxParkingQrcode")
+    @RestReturn(String.class)
+    public RestResponse getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp) {
+        parkingService.getWxParkingQrcode(cmd,resp);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getParkingBussnessStatus</b>
+     * <p>
+     * 获取停车场对接功能，以及对外开放的功能集合 V6.6
+     * </p>
+     */
+    @RequestMapping("getParkingBussnessStatus")
+    @RestReturn(GetParkingBussnessStatusResponse.class)
+    public RestResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd) {
+        GetParkingBussnessStatusResponse baseResponse =  parkingService.getParkingBussnessStatus(cmd);
+
+        RestResponse response = new RestResponse(baseResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
