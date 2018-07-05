@@ -12,12 +12,12 @@ import java.util.Map;
 /**
  * <ul>
  * <li>userId: 通讯录关联的用户ID</li>
+ * <li>targetType: 用户类型</li>
  * <li>detailId: 联系人档案id</li>
  * <li>contactAvatar: 联系人头像</li>
  * <li>enterpriseName: 公司名称</li>
  * <li>contactName: 联系人名字</li>
  * <li>contactEnglishName: 联系人英文名字</li>
- * <li>targetType: 用户类型</li>
  * <li>gender: 联系人性别：0-保密, 1-男性, 2-女性</li>
  * <li>jobPosition: 联系人岗位 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>departments: 联系人部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
@@ -27,6 +27,7 @@ import java.util.Map;
  * <li>email: 个人邮箱</li>
  * <li>workEmail: 工作邮箱</li>
  * <li>visibleFlag: 隐私保护: 0-显示(不受保护) 1-隐藏(保护) 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
+ * <li>adminFlag: 管理员标志: 0-普通用户 1-管理员</li>
  * </ul>
  */
 public class SceneContactV2DTO {
@@ -34,6 +35,8 @@ public class SceneContactV2DTO {
     private Long organizationId;
 
     private Long userId;
+
+    private String targetType;
 
     private Long detailId;
 
@@ -44,8 +47,6 @@ public class SceneContactV2DTO {
     private String contactName;
 
     private String contactEnglishName;
-
-    private String targetType;
 
     private Byte gender;
 
@@ -66,6 +67,8 @@ public class SceneContactV2DTO {
     private String workEmail;
 
     private Byte visibleFlag;
+
+    private Byte adminFlag;
 
     public SceneContactV2DTO() {
     }
@@ -204,6 +207,14 @@ public class SceneContactV2DTO {
 
     public void setVisibleFlag(Byte visibleFlag) {
         this.visibleFlag = visibleFlag;
+    }
+
+    public Byte getAdminFlag() {
+        return adminFlag;
+    }
+
+    public void setAdminFlag(Byte adminFlag) {
+        this.adminFlag = adminFlag;
     }
 
     @Override
