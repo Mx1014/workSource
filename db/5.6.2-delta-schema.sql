@@ -5,8 +5,9 @@ ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_type` VARCHAR(128) CO
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_id` BIGINT COMMENT '收款方账户id';
 -- END BY 杨崇鑫
 
-
+-- 通用脚本
 -- st.zheng
+-- 新增表保存支付订单信息
 CREATE TABLE `eh_rentalv2_order_records` (
 `id`  bigint(20) NOT NULL ,
 `namespace_id`  int NULL ,
@@ -41,6 +42,9 @@ CREATE TABLE `eh_rentalv2_pay_accounts` (
 `create_time`  datetime  ,
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_rentalv2_resource_types`
+MODIFY COLUMN `pay_mode`  tinyint(4) DEFAULT 0 COMMENT 'pay mode :0-online pay 1-offline' AFTER `namespace_id`;
 
 -- yanlong.liang 发起活动的企业与收款方账户映射表
 CREATE TABLE `eh_activity_biz_payee` (

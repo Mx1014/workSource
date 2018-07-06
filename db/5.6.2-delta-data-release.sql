@@ -56,6 +56,10 @@ INSERT INTO `eh_rentalv2_order_records` (`id`,`order_no`,`biz_order_num`,`pay_or
 
 update `eh_rentalv2_order_records` t1 right join `eh_rentalv2_orders` t2 on t1.`order_no` = t2.`order_no` set t1.order_id = t2.id,t1.amount = t2.pay_total_money,t1.status = IF(t2.status in (2,7,9,10,14,20),1,0) ;
 
+-- AUTHOR: 郑思挺
+-- REMARK: 资源类型表空值覆盖
+update `eh_rentalv2_resource_types` set pay_mode = 0 where pay_mode is null;
+
 -- AUTHOR: 杨崇鑫
 -- REMARK: 新支付的配置
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
