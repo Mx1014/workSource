@@ -2214,6 +2214,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				useDetailSB.append(f.apply(firstRsr));
 				if (!firstRsr.getId().equals(lastRsr.getId())){
 					useDetailSB.append("至");
+					useDetailSB.append(beginDateSF.format(lastRsr.getResourceRentalDate())).append(" ");
 					useDetailSB.append(f.apply(lastRsr));
 				}
 			}
