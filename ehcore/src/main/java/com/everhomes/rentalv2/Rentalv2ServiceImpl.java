@@ -4728,7 +4728,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	private String getResourceOpenTime(String resourceType, Long rentalSiteId,Byte rentalType,String separate){
 
-		if (rentalType.equals(RentalType.HOUR.getCode())){
 			if (rentalType.equals(RentalType.HALFDAY.getCode()) || rentalType.equals(RentalType.THREETIMEADAY.getCode())){
 				List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(resourceType,
 						RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rentalSiteId);
@@ -4751,7 +4750,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				if (dayopenTimes != null && dayopenTimes.size()>0)
 					return parseTimeInterval(dayopenTimes.get(0).getOpenTime())+"-"+parseTimeInterval(dayopenTimes.get(0).getCloseTime());
 			}
-		}
 
 		return null;
 	}
