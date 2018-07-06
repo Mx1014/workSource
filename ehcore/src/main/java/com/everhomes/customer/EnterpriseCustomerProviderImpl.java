@@ -1616,6 +1616,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerEventsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_EVENTS);
         query.addConditions(Tables.EH_CUSTOMER_EVENTS.CUSTOMER_ID.eq(customerId));
+        query.addOrderBy(Tables.EH_CUSTOMER_EVENTS.ID.desc());
         List<CustomerEvent> result = new ArrayList<CustomerEvent>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerEvent.class));
