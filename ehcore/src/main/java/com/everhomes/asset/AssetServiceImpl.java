@@ -4958,5 +4958,95 @@ public class AssetServiceImpl implements AssetService {
 	public void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
 		assetProvider.batchModifyBillSubItem(cmd);
 	}
+	
+	/**
+     * 手动修改系统时间，从而触发滞纳金产生（仅用于测试）
+     */
+    public void testLateFine(TestLateFineCommand cmd){
+    	if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+    		/**
+             * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
+             * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
+             * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据,update bill, 不用锁，一条一条走
+             */
+            //获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = new Date();
+            coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
+                Long nextPageAnchor = 0l;
+                while(nextPageAnchor != null){
+                    List<Long> overdueBillIds = new ArrayList<>();
+                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+                    List<PaymentBills> bills = res.getBills();
+                    //更新账单
+                    for(PaymentBills bill : bills){
+                        String dueDayDeadline = bill.getDueDayDeadline();
+                        try{
+                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+//                        if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
+                            if(deadline.compareTo(today) != 1) {
+                                assetProvider.changeBillToDue(bill.getId());
+                                bill.setChargeStatus((byte)1);
+                            }
+                            if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
+                        } catch (Exception e){ continue; };
+                    }
+                    nextPageAnchor = res.getNextPageAnchor();
+                    //这10000个账单中欠费的billItem
+                    List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
+                    for(int i = 0; i < billItems.size(); i++){
+                        PaymentBillItems item = billItems.get(i);
+                        //没有关联滞纳金标准的不计算，剔除出更新队列
+                        if(item.getLateFineStandardId() == null){
+                            billItems.remove(i--);
+                            continue;
+                        }
+                        //计算滞纳金金额
+                        //获得欠费的钱
+                        BigDecimal amountOwed = new BigDecimal("0");
+                        if(item.getAmountOwed() !=null){
+                            amountOwed = amountOwed.add(item.getAmountOwed());
+                        }else{
+                            item.setAmountOwed(new BigDecimal("0"));
+                            assetProvider.updatePaymentItem(item);
+                        }
+                        amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
+                        List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
+                        if(formulas.size() != 1) {
+                            LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
+                        }
+                        String formulaJson = formulas.get(0).getFormulaJson();
+                        formulaJson = formulaJson.replace("qf",amountOwed.toString());
+                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+                        //开始构造一条滞纳金记录
+                        //查看item是否已经有滞纳金产生了
+                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+                        boolean isInsert = false;
+                        if(fine == null){
+                            isInsert = true;
+                            fine = new PaymentLateFine();
+                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+                            fine.setId(nextSequence);
+                            fine.setName(item.getChargingItemName() + "滞纳金");
+                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            fine.setBillId(item.getBillId());
+                            fine.setBillItemId(item.getId());
+                            fine.setCommunityId(item.getOwnerId());
+                            fine.setNamespaceId(item.getNamespaceId());
+                            fine.setCustomerId(item.getTargetId());
+                            fine.setCustomerType(item.getTargetType());
+                        }
+                        fine.setAmount(fineAmount);
+                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
+                        // 重新计算下账单
+                        assetProvider.reCalBillById(item.getBillId());
+                    }
+                }
+            });
+    	}
+    }
 
 }

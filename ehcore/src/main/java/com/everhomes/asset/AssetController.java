@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1491,6 +1492,20 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     @RestReturn(value = String.class)
     public RestResponse batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
         assetService.batchModifyBillSubItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
+     * <b>URL: /asset/testLateFine</b>
+     */
+    @RequestMapping("testLateFine")
+    @RestReturn(value = String.class)
+    public RestResponse testLateFine(TestLateFineCommand cmd) {
+        assetService.testLateFine(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
