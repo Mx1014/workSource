@@ -44,7 +44,7 @@ PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_rentalv2_resource_types`
-MODIFY COLUMN `pay_mode`  tinyint(4) NOT NULL DEFAULT 0 COMMENT 'pay mode :0-online pay 1-offline' AFTER `namespace_id`;
+MODIFY COLUMN `pay_mode`  tinyint(4) DEFAULT 0 COMMENT 'pay mode :0-online pay 1-offline' AFTER `namespace_id`;
 
 -- yanlong.liang 发起活动的企业与收款方账户映射表
 CREATE TABLE `eh_activity_biz_payee` (
