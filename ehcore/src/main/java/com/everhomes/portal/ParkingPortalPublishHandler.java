@@ -1,8 +1,11 @@
 package com.everhomes.portal;
 
+import com.everhomes.parking.ParkingLot;
+import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.parking.ParkingLotFuncConfig;
 import com.everhomes.rest.portal.ParkingInstanceConfig;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
@@ -15,7 +18,8 @@ import org.springframework.stereotype.Component;
  */
 @Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.PARKING_MODULE)
 public class ParkingPortalPublishHandler implements PortalPublishHandler {
-
+    @Autowired
+    private ParkingProvider parkingProvider;
     @Autowired
     private Rentalv2Provider rentalv2Provider;
     @Override
@@ -31,7 +35,15 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
                     (byte)0,RentalV2ResourceType.VIP_PARKING.getCode());
             parkingInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         }
-        return StringHelper.toJsonString(parkingInstanceConfig);
+
+        for (ParkingLotFuncConfig parkingLotFuncConfig : parkingInstanceConfig.getParkingLotFuncConfigs()) {
+            ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotFuncConfig.getParkingLotId());
+//            if(parkingLot.)
+        }
+
+        ParkingInstanceConfig newparkingInstanceConfig = new ParkingInstanceConfig();
+        newparkingInstanceConfig.setResourceTypeId(parkingInstanceConfig.getResourceTypeId());
+        return StringHelper.toJsonString(newparkingInstanceConfig);
     }
 
     @Override

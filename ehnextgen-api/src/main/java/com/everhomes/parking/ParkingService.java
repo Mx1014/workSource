@@ -168,4 +168,6 @@ public interface ParkingService {
     void getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp);
 
     GetParkingBussnessStatusResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd);
+
+    void initFuncLists(GetParkingBussnessStatusCommand cmd);
 }

@@ -283,5 +283,5 @@ ALTER TABLE `eh_organization_owners` ADD COLUMN `contact_extra_tels` VARCHAR(102
 -- ADD BY 邓爽 2018年7月5日22:04:25
 -- issue-26616
 -- 停车缴费V6.6（UE优化）
-ALTER TABLE `eh_parking_lots` ADD COLUMN `func_list` TEXT COMMENT '此停车场对接的功能列表';
+ALTER TABLE `eh_parking_lots` ADD COLUMN `func_list` TEXT COMMENT '此停车场对接的功能列表Json,如["tempfee","monthRecharge"]';
 -- END BY 邓爽

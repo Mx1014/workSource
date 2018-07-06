@@ -1141,4 +1141,18 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /parking/initFuncLists </b>
+     * <p>初始化停车场对接功能表</p>
+     */
+    @RequestMapping("initFuncLists")
+    @RestReturn(value=String.class)
+    public RestResponse initFuncLists(GetParkingBussnessStatusCommand cmd) {
+        parkingService.initFuncLists(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

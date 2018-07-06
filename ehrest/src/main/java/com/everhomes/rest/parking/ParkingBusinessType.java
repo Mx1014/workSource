@@ -10,6 +10,7 @@ package com.everhomes.rest.parking;
  * <li>SEARCH_CAR("searchCar"),: 寻车 V6.6</li>
  * <li>CAR_NUM("carNum"),: 显示在场车数量 V6.6</li>
  * <li>FREE_PLACE("freePlace"),: 显示空余车位数量 V6.6</li>
+ * <li> MONTH_CARD_APPLY("monthCardApply"),: 在线月卡申请 V6.6</li>
  * </ul>
  */
 public enum ParkingBusinessType {
@@ -19,7 +20,8 @@ public enum ParkingBusinessType {
     LOCK_CAR("lockCar","锁车/解锁"),
     SEARCH_CAR("searchCar","寻车"),
     CAR_NUM("carNum","在场车数量"),
-    FREE_PLACE("freePlace","空余车位数量");
+    FREE_PLACE("freePlace","空余车位数量"),
+    MONTH_CARD_APPLY("monthCardApply","在线月卡申请");
     private String code;
     private String desc;
 

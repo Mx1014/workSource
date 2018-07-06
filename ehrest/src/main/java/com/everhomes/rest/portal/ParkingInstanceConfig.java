@@ -1,6 +1,7 @@
 package com.everhomes.rest.portal;
 
 import com.everhomes.rest.parking.ParkingFuncDTO;
+import com.everhomes.rest.parking.ParkingLotFuncConfig;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -9,23 +10,14 @@ import java.util.List;
  *
  * <ul>
  * <li>resourceTypeId: 资源类型id</li>
- * <li>dockingFuncLists: 对接功能列表，{@link com.everhomes.rest.parking.ParkingFuncDTO}</li>
- * <li>funcLists: 非对接功能列表，{@link com.everhomes.rest.parking.ParkingFuncDTO}</li>
- * <li>enableMonthCard:  月卡申请功能是否启用, 0：不启用，1：启用 {@link com.everhomes.rest.parking.ParkingConfigFlag}</li>
- * <li>monthCardFlow:  当前月卡工作流标识，参考 {@link com.everhomes.rest.parking.ParkingRequestFlowType}</li>
+ * <li>parkingLotFuncConfigs: 各个停车场对接的功能列表，{@link com.everhomes.rest.parking.ParkingLotFuncConfig}</li>
  * </ul>
  */
 public class ParkingInstanceConfig {
 
     private Long resourceTypeId;
 
-    private List<ParkingFuncDTO> dockingFuncLists;
-
-    private List<ParkingFuncDTO> funcLists;
-
-    private Byte enableMonthCard;
-
-    private Byte monthCardFlow;
+    private List<ParkingLotFuncConfig> parkingLotFuncConfigs;
 
     public Long getResourceTypeId() {
         return resourceTypeId;
@@ -35,36 +27,12 @@ public class ParkingInstanceConfig {
         this.resourceTypeId = resourceTypeId;
     }
 
-    public List<ParkingFuncDTO> getDockingFuncLists() {
-        return dockingFuncLists;
+    public List<ParkingLotFuncConfig> getParkingLotFuncConfigs() {
+        return parkingLotFuncConfigs;
     }
 
-    public void setDockingFuncLists(List<ParkingFuncDTO> dockingFuncLists) {
-        this.dockingFuncLists = dockingFuncLists;
-    }
-
-    public List<ParkingFuncDTO> getFuncLists() {
-        return funcLists;
-    }
-
-    public void setFuncLists(List<ParkingFuncDTO> funcLists) {
-        this.funcLists = funcLists;
-    }
-
-    public Byte getEnableMonthCard() {
-        return enableMonthCard;
-    }
-
-    public void setEnableMonthCard(Byte enableMonthCard) {
-        this.enableMonthCard = enableMonthCard;
-    }
-
-    public Byte getMonthCardFlow() {
-        return monthCardFlow;
-    }
-
-    public void setMonthCardFlow(Byte monthCardFlow) {
-        this.monthCardFlow = monthCardFlow;
+    public void setParkingLotFuncConfigs(List<ParkingLotFuncConfig> parkingLotFuncConfigs) {
+        this.parkingLotFuncConfigs = parkingLotFuncConfigs;
     }
 
     @Override

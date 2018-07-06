@@ -1,8 +1,12 @@
 // @formatter:off
 package com.everhomes.parking;
 
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -11,11 +15,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -3245,14 +3251,18 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public String transformToken(TransformTokenCommand cmd) {
+		return transformToken(cmd.getId());
+	}
+
+	public String transformToken(String strId) {
 		Long id = null;
 		try {
-			id = Long.valueOf(cmd.getId());
+			id = Long.valueOf(strId);
 		}catch (Exception e){
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
 					"no long");
 		}
-		String token = WebTokenGenerator.getInstance().toWebToken(cmd.getId());
+		String token = WebTokenGenerator.getInstance().toWebToken(strId);
 		int tokenlen = configProvider.getIntValue("parking.token.maxlen", 20);
 		if(token!=null && token.length()>tokenlen){
 			token = token.substring(0,tokenlen);
@@ -3275,11 +3285,153 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void getWxParkingQrcode(GetWxParkingQrcodeCommand cmd, HttpServletResponse resp) {
-		
+		String parkingUrlFormat = configProvider.getValue("parking.wxparking.urlformat","%s/parking-payment-web/build/index.html#/home?token=%s&ns=%s");
+		String parkingUrl = String.format(parkingUrlFormat, configProvider.getValue("home.url",""),transformToken(cmd.getParkingLotId()+""),UserContext.getCurrentNamespaceId());
+		BufferedOutputStream bos = null;
+		ByteArrayOutputStream out = null;
+		try {
+			Integer width = configProvider.getIntValue("parking.wxparking.qrcodewidth",300);
+			Integer height = configProvider.getIntValue("parking.wxparking.qrcodeheight",300);
+			BufferedImage image = QRCodeEncoder.createQrCodeWithOutWhite(parkingUrl, QRCodeConfig.CHARSET_UTF8,
+					width, height, null,QRCodeConfig.FORMAT_PNG,QRCodeConfig.BLACK,0xEEFFFFFF);
+			out = new ByteArrayOutputStream();
+			ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
+
+			String fileName = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + "." + QRCodeConfig.FORMAT_PNG;
+			resp.setContentType("application/octet-stream;");
+			resp.setHeader("Content-disposition", "attachment; filename="
+					+ new String(fileName.getBytes("utf-8"), "ISO8859-1"));
+			resp.setHeader("Content-Length", String.valueOf(out.size()));
+
+			bos = new BufferedOutputStream(resp.getOutputStream());
+			ImageIO.write(image, QRCodeConfig.FORMAT_PNG, bos);
+		} catch (Exception e) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Failed to download the package file");
+		} finally {
+			FileHelper.closeOuputStream(out);
+			FileHelper.closeOuputStream(bos);
+		}
+
 	}
 
 	@Override
 	public GetParkingBussnessStatusResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd) {
-		return null;
+		GetParkingBussnessStatusResponse response  = new GetParkingBussnessStatusResponse();
+		List<ParkingFuncDTO> dockingFuncLists = new ArrayList<>();
+		ArrayList<Byte> flowModeList = new ArrayList<>(Arrays.asList((byte) 1, (byte) 2));
+		ParkingLot lot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+		if(lot.getFuncList()!=null && lot.getFuncList().contains("[")){
+			JSONArray array = JSONObject.parseArray(lot.getFuncList());
+			for (Object o : array) {
+				ParkingFuncDTO dto = new ParkingFuncDTO();
+				dto.setCode(o.toString());
+				try {
+					Method method = ParkingLot.class.getMethod("get"+o.toString().substring(0,1).toUpperCase()+o.toString().substring(1) + "Flag");
+					Byte enbaleFlag = (Byte)method.invoke(lot);
+					dto.setEnableFlag(enbaleFlag);
+				} catch (NoSuchMethodException e) {
+					ParkingBusinessType parkingBusinessType = ParkingBusinessType.fromCode(o.toString());
+					ParkingCurrentInfoType parkingCurrentInfoType = ParkingCurrentInfoType.fromCode(lot.getCurrentInfoType());
+					if(parkingBusinessType == ParkingBusinessType.CAR_NUM && parkingCurrentInfoType == ParkingCurrentInfoType.CAR_NUM){
+						dto.setEnableFlag(ParkingConfigFlag.SUPPORT.getCode());
+					}
+					if(parkingBusinessType == ParkingBusinessType.FREE_PLACE && parkingCurrentInfoType == ParkingCurrentInfoType.FREE_PLACE){
+						dto.setEnableFlag(ParkingConfigFlag.SUPPORT.getCode());
+					}
+					if(parkingBusinessType == ParkingBusinessType.MONTH_CARD_APPLY){
+						flowModeList.add(Byte.valueOf(ParkingRequestFlowType.INTELLIGENT.getCode()+""));
+						break;
+					}
+				} catch (IllegalAccessException e) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"IllegalAccessException e",e);
+				} catch (InvocationTargetException e) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"InvocationTargetException e",e);
+				}
+				dockingFuncLists.add(dto);
+			}
+		}
+		response.setDockingFuncLists(dockingFuncLists);
+
+		List<ParkingFuncDTO> funcLists = new ArrayList<>();
+		ParkingFuncDTO dto = new ParkingFuncDTO();
+		dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
+		dto.setEnableFlag(lot.getVipParkingFlag());
+		funcLists.add(dto);
+		response.setFuncLists(funcLists);
+
+		response.setEnableMonthCard(lot.getMonthCardFlag());
+		if(lot.getMonthCardFlag()!=null && ParkingConfigFlag.fromCode(lot.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
+			response.setMonthCardFlow(Byte.valueOf(lot.getFlowMode() == null? (ParkingRequestFlowType.FORBIDDEN.getCode()+""):(lot.getFlowMode() + "")));
+		}
+
+		response.setFlowModeList(flowModeList);
+
+		return response;
+	}
+
+	@Override
+	public void initFuncLists(GetParkingBussnessStatusCommand cmd) {
+		List<ParkingLot> parkingLots = parkingProvider.listParkingLots(null, null);
+		if(parkingLots==null || parkingLots.size()==0){
+			return;
+		}
+		for (ParkingLot parkingLot : parkingLots) {
+			if(parkingLot.getFuncList()==null || parkingLot.getFuncList().trim().length()==0){
+				JSONArray array = new JSONArray();
+				if(parkingLot.getTempfeeFlag()==1){
+					array.add(ParkingBusinessType.TEMPFEE.getCode());
+				}
+				if(parkingLot.getMonthRechargeFlag()==1){
+					array.add(ParkingBusinessType.MONTH_RECHARGE.getCode());
+				}
+				if(parkingLot.getVipParkingFlag()==1){
+					array.add(ParkingBusinessType.VIP_PARKING.getCode());
+				}
+				if(parkingLot.getSearchCarFlag()==1){
+					array.add(ParkingBusinessType.SEARCH_CAR.getCode());
+				}
+				if(parkingLot.getLockCarFlag()==1){
+					array.add(ParkingBusinessType.LOCK_CAR.getCode());
+				}
+				if(parkingLot.getCurrentInfoType()==1){
+					array.add(ParkingBusinessType.CAR_NUM.getCode());
+				}else if(parkingLot.getCurrentInfoType()==2){
+					array.add(ParkingBusinessType.FREE_PLACE.getCode());
+				}
+
+				Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
+				Flow flow = flowService.getEnabledFlow(community==null?parkingLot.getNamespaceId():community.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+						FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), FlowOwnerType.PARKING.getCode());
+				//当没有设置工作流的时候，表示是禁用模式
+				ParkingLotConfig parkingLotConfig = JSONObject.parseObject(parkingLot.getConfigJson(),new TypeReference<ParkingLotConfig>() {});
+				if(null == flow) {
+					parkingLotConfig.setMonthCardFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+				}else {
+					parkingLotConfig.setMonthCardFlag(ParkingConfigFlag.SUPPORT.getCode());
+					String tag1 = flow.getStringTag1();
+					ParkingRequestFlowType flowType = ParkingRequestFlowType.fromCode(Integer.valueOf(tag1));
+					parkingLotConfig.setFlowMode(flowType.getCode());
+					if(flowType==ParkingRequestFlowType.INTELLIGENT){
+						array.add(ParkingBusinessType.MONTH_CARD_APPLY.getCode());
+					}
+
+					LOGGER.info("parking enabled flow, flow={}", flow);
+					Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
+					LOGGER.info("parking main flow, flow={}", mainFlow);
+					//当获取到的工作流与 main工作流中的版本不一致时，表示获取到的工作流不是编辑后最新的工作流（工作流没有启用），是禁用模式
+					if (null != mainFlow) {
+						if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
+							parkingLotConfig.setMonthCardFlag(ParkingConfigFlag.SUPPORT.getCode());
+						}
+					}
+				}
+				parkingLot.setFuncList(array.toString());
+				parkingLot.setConfigJson(parkingLotConfig.toString());
+				parkingProvider.updateParkingLot(parkingLot);
+			}
+		}
 	}
 }
