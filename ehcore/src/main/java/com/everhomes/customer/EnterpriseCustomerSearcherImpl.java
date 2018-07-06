@@ -418,6 +418,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     }
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
+        LOGGER.debug("convertToDTO start time :{}",System.currentTimeMillis());
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
         Integer result = 0;
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
@@ -565,6 +566,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
 
+        LOGGER.debug("switch items name end time :{}",System.currentTimeMillis());
+
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
@@ -574,6 +577,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setTrackingPhone(members.get(0).getContactToken());
             dto.setTrackingName(dto.getTrackingName());
         }
+        LOGGER.debug("search trackingName from organization  members end time  :{}",System.currentTimeMillis());
         if (customer.getLastTrackingTime() != null) {
             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
             dto.setTrackingPeriod(result);
@@ -585,6 +589,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command.setCommunityId(customer.getCommunityId());
         List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
         dto.setEnterpriseAdmins(admins);
+        LOGGER.debug("list organization admins  end time  :{}",System.currentTimeMillis());
         //楼栋门牌
         ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
         command1.setCommunityId(customer.getCommunityId());
@@ -596,6 +601,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
+        LOGGER.debug("customer entry info list end time  :{}",System.currentTimeMillis());
         return dto;
     }
 
