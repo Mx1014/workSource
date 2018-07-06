@@ -1,0 +1,97 @@
+package com.everhomes.rest.pmtask;
+
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>id: 主键</li>
+ * <li>namespaceId: 域空间Id</li>
+ * <li>ownerType: 归属的类型</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>paymentFlag: 费用清单在线支付启用标识 0:禁用 1:启用</li>
+ * <li>paymentAccount: 收款方账号</li>
+ * <li>paymentAccountType: 收款方类型</li>
+ * <li>contentHint: 服务内容提示文本</li>
+ * </ul>
+ */
+public class PmTaskConfigDTO {
+
+    private Long id;
+    private Integer namespaceId;
+    private String ownerType;
+    private Long ownerId;
+    private Byte paymentFlag;
+    private Long paymentAccount;
+    private Byte paymentAccountType;
+    private String contentHint;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Byte getPaymentFlag() {
+        return paymentFlag;
+    }
+
+    public void setPaymentFlag(Byte paymentFlag) {
+        this.paymentFlag = paymentFlag;
+    }
+
+    public Long getPaymentAccount() {
+        return paymentAccount;
+    }
+
+    public void setPaymentAccount(Long paymentAccount) {
+        this.paymentAccount = paymentAccount;
+    }
+
+    public Byte getPaymentAccountType() {
+        return paymentAccountType;
+    }
+
+    public void setPaymentAccountType(Byte paymentAccountType) {
+        this.paymentAccountType = paymentAccountType;
+    }
+
+    public String getContentHint() {
+        return contentHint;
+    }
+
+    public void setContentHint(String contentHint) {
+        this.contentHint = contentHint;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

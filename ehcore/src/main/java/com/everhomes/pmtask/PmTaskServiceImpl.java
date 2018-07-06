@@ -51,6 +51,7 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -59,6 +60,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.BuildingDTO;
@@ -70,6 +72,8 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrgAddressDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -3162,6 +3166,39 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 		});
 		return dtos;
+	}
+
+//	----------------------------------------- 3.7 -----------------------------------------
+
+
+	@Override
+	public PmTaskConfigDTO setPmTaskConfig(SetPmTaskConfigCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public PmTaskConfigDTO searchPmTaskConfigByProject(GetPmTaskConfigCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public List<PmTaskOrderDetailDTO> searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public PreOrderDTO payBills(CreatePmTaskOrderCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void payNotify(OrderPaymentNotificationCommand cmd) {
+
 	}
 
 	private void exportTaskStatByCategory(GetTaskStatCommand cmd, Sheet sheet){

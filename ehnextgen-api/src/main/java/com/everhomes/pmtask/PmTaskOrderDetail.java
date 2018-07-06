@@ -1,9 +1,10 @@
 package com.everhomes.pmtask;
 
-import com.everhomes.server.schema.tables.pojos.EhPmTaskConfigs;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskOrderDetails;
 import com.everhomes.util.StringHelper;
 
-public class PmTaskConfig extends EhPmTaskConfigs {
+public class PmTaskOrderDetail extends EhPmTaskOrderDetails {
+
     private static final long serialVersionUID = 1L;
 
     @Override
