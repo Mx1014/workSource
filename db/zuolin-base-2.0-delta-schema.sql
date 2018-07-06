@@ -292,3 +292,14 @@ CREATE TABLE `eh_archives_operational_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- end
+
+
+-- 下载中心 搬迁代码  by yanjun start
+-- 注意：core已经上线过了，此处是搬迁代码过来的。以后合并分支的时候要注意
+
+-- 任务中心添加执行开始时间和上传开始时间  add by yanjun 201805241345
+ALTER TABLE `eh_tasks` ADD COLUMN `execute_start_time`  datetime NULL;
+ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
+ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
+
+-- 下载中心 搬迁代码  by yanjun end
