@@ -805,6 +805,20 @@ public class UserController extends ControllerBase {
 		return new RestResponse("OK");
 	}
 
+	/**
+	 * <b>URL: /user/sendCodeWithPictureValidateByApp</b>
+	 * <p></p>
+	 * @return OK
+	 */
+	@RequestMapping("sendCodeWithPictureValidateByApp")
+	@RestReturn(String.class)
+	public RestResponse sendCodeWithPictureValidateByApp(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request){
+		assert StringUtils.isNotEmpty(cmd.getIdentifier());
+
+		userService.sendCodeWithPictureValidateByApp(cmd, request);
+		return new RestResponse("OK");
+	}
+
 
 
 	/**

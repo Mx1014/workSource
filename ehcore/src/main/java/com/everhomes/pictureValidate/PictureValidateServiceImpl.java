@@ -6,6 +6,9 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class PictureValidateServiceImpl implements PictureValidateService {
@@ -49,6 +54,17 @@ public class PictureValidateServiceImpl implements PictureValidateService {
     }
 
     @Override
+    public String newPictureByApp() {
+        User user = UserContext.current().getUser();
+        if (user == null) {
+            LOGGER.error("cannot find user");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user");
+        }
+        String sessionId = user.getId().toString();
+        return this.newPicture(sessionId);
+    }
+
+    @Override
     public String newPicture(String sessionId) {
 
         int length = Integer.parseInt(configProvider.getValue("picture.validate.length", "6"));
@@ -68,6 +84,17 @@ public class PictureValidateServiceImpl implements PictureValidateService {
     public Boolean validateCode(HttpServletRequest request, String code) {
         String sessionId = request.getSession().getId();
         return this.validateCode(sessionId, code);
+    }
+
+    @Override
+    public Boolean validateCodeByApp(String code) {
+        User user = UserContext.current().getUser();
+        if (user == null) {
+            LOGGER.error("cannot find user");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user");
+        }
+        String sessionId = user.getId().toString();
+        return this.validateCode(sessionId,code);
     }
 
     @Override

@@ -72,6 +72,8 @@ public interface UserService {
 
     void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
 
+    void sendCodeWithPictureValidateByApp(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
+
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
 
     void assumePortalRole(AssumePortalRoleCommand cmd);

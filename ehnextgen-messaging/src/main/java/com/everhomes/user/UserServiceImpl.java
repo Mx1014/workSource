@@ -1967,6 +1967,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	}
 
 	@Override
+	public void sendCodeWithPictureValidateByApp(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request) {
+		//校验图片验证码
+		Boolean validateFlag = pictureValidateService.validateCodeByApp(cmd.getPictureCode());
+		if(!validateFlag){
+			LOGGER.error("invalid picture code, validate fail");
+			throw errorWith(PictureValidateServiceErrorCode.SCOPE,
+					PictureValidateServiceErrorCode.ERROR_INVALID_CODE, "invalid picture code");
+		}
+
+		//发送手机验证码
+		ResendVerificationCodeByIdentifierCommand sendcmd = new ResendVerificationCodeByIdentifierCommand();
+		sendcmd.setNamespaceId(cmd.getNamespaceId());
+		sendcmd.setIdentifier(cmd.getIdentifier());
+		sendcmd.setRegionCode(cmd.getRegionCode());
+		resendVerficationCode(sendcmd, request);
+	}
+
+	@Override
 	public UserInvitationsDTO createInvatation(CreateInvitationCommand cmd) {
 		// validate
 		assert cmd.getInviteType()!=null;

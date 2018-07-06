@@ -32,6 +32,18 @@ public class PictureValidateController extends ControllerBase {
 
     }
 
+    @RequestMapping("newPictureByApp")
+    @RestReturn(value=String.class)
+    public RestResponse newPictureByApp() {
+
+        String pictureStr = pictureValidateService.newPictureByApp();
+        RestResponse response = new RestResponse(pictureStr);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
     @RequestMapping("validateCode")
     @RestReturn(value=Boolean.class)
     @RequireAuthentication(false)
