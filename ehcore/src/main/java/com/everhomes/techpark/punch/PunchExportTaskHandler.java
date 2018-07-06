@@ -98,7 +98,7 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         } else if (reportType.equals("exportPunchScheduling")) {
             outputStream = punchService.getPunchSchedulingOutputStream(queryTime, employees, timeRules, taskId);
         }
-        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 

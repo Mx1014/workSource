@@ -77,7 +77,7 @@ public class GeneralApprovalExportTaskHandler implements FileDownloadTaskHandler
         Long taskId = (Long) params.get("taskId");
 //        OutputStream outputStream = null;
         OutputStream outputStream = generalApprovalService.getGeneralApprovalOutputStream(cmd, taskId);
-        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream);
+        CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }
 
