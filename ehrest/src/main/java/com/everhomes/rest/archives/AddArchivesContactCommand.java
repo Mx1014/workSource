@@ -19,6 +19,7 @@ import java.util.List;
  * <li>jobPositionIds: 岗位 id</li>
  * <li>jobLevelIds: 职级 id</li>
  * <li>visibleFlag: 隐私设置: 0-显示, 1-隐藏</li>
+ * <li>updateFlag: 编辑标志: 0-否, 1-是</li>
  * </ul>
  */
 public class AddArchivesContactCommand {
@@ -51,6 +52,8 @@ public class AddArchivesContactCommand {
     private List<Long> jobLevelIds;
 
     private Byte visibleFlag;
+
+    private Byte updateFlag;
 
     public AddArchivesContactCommand() {
     }
@@ -149,6 +152,14 @@ public class AddArchivesContactCommand {
 
     public void setVisibleFlag(Byte visibleFlag) {
         this.visibleFlag = visibleFlag;
+    }
+
+    public Byte getUpdateFlag() {
+        return updateFlag;
+    }
+
+    public void setUpdateFlag(Byte updateFlag) {
+        this.updateFlag = updateFlag;
     }
 
     @Override

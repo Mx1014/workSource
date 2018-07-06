@@ -24,7 +24,7 @@ public enum CoordinationLocks {
 	SCHEDULE_EQUIPMENT_TASK("equipment.task.schedule"),
     CREATE_EQUIPMENT_TASK("equipment.task.create"),
 	WANKE_LOGIN("wanke.login"),
-    
+
     UPDATE_ACTIVITY("activity.update"),
     UPDATE_ACTIVITY_ROSTER("activity.update.roster"),
     CREATE_NEW_ORG("org.create"),
@@ -39,13 +39,13 @@ public enum CoordinationLocks {
 
     UPDATE_ORGANIZATION_OWNER("organization.owner.update"),
     UPDATE_ORGANIZATION_OWNER_CAR("organization.owner.car.update"),
-    
+
     WARNING_ACTIVITY_SCHEDULE("warning.activity.schedule"),
     CONTRACT_SCHEDULE("contract.schedule"),
 
     PMTASK_STATISTICS("pmtask.statistics"),
     PMTASK_TARGET_STATISTICS("pmtask.target.statistics"),
-    
+
     PARKING_STATISTICS("parking.statistics"),
     PARKING_UPDATE_ORDER_STATUS("parking.update.order.status"),
 
@@ -69,7 +69,7 @@ public enum CoordinationLocks {
 
     OS_OBJECT("os.object"),
     ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),
- 
+
     UPDATE_EXPRESS_ORDER("update.express.order"),
 
     USER_NOTIFICATION_SETTING("user.notification.setting"),
@@ -85,8 +85,8 @@ public enum CoordinationLocks {
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
-	SALARY_GROUP_LOCK("salary.group"), 
-	SALARY_NEWMONTH_LOCK("salary.newmonth"), 
+	SALARY_GROUP_LOCK("salary.group"),
+	SALARY_NEWMONTH_LOCK("salary.newmonth"),
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
@@ -96,7 +96,7 @@ public enum CoordinationLocks {
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
 
     TRACKING_PLAN_WARNING_SCHEDULE("tracking.plan.warning.schedule"),
- 
+
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
     ORGANIZATION_ORDER_LOCK("organization.order.lock"),
 
@@ -119,8 +119,10 @@ public enum CoordinationLocks {
 
     SOCIAL_SECURITY_LIST_PAYMENTS("social_security_list_payments"),
     SOCIAL_SECURITY_INCRESE("social_security_increse"),
-    SOCIAL_SECURITY_ADD("social_security_add")
+    SOCIAL_SECURITY_ADD("social_security_add"),
 
+    ARCHIVES_CONFIGURATION("archives_configuration"),
+    ARCHIVES_NOTIFICATION("archives_notification")
     ;
 
     private String code;
@@ -128,11 +130,11 @@ public enum CoordinationLocks {
     CoordinationLocks(String code) {
         this.code = code;
     }
-    
+
     public String getCode() {
         return this.code;
     }
-    
+
     public static CoordinationLocks fromCode(String code) {
         for(CoordinationLocks coordinationLock:CoordinationLocks.values()){
             if(coordinationLock.code.equalsIgnoreCase(code)){

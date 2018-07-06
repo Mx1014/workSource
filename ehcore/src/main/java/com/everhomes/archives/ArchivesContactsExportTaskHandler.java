@@ -13,7 +13,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 @Component
-public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandler{
+public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandler {
 
     @Autowired
     private FileDownloadTaskService fileDownloadTaskService;

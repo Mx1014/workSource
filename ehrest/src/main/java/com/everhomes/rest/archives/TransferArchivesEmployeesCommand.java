@@ -3,7 +3,6 @@ package com.everhomes.rest.archives;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.sql.Date;
 import java.util.List;
 
 /**

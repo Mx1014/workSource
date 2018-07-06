@@ -3,7 +3,6 @@ package com.everhomes.rest.archives;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.sql.Date;
 import java.util.List;
 
 
@@ -17,6 +16,7 @@ import java.util.List;
  * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 {@link com.everhomes.rest.organization.EmployeeType}</li>
  * <li>employeeStatus: 工状态, 0: 试用 1: 在职 2: 离职 {@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>employmentTime: 转正时间</li>
+ * <li>month: 试用月份</li>
  * <li>departmentIds: 部门 ids</li>
  * <li>jobPositionIds: 岗位 ids</li>
  * <li>jobLevelIds: 职级 ids</li>
@@ -47,6 +47,8 @@ public class AddArchivesEmployeeCommand {
     private Byte employeeStatus;
 
     private String employmentTime;
+
+    private Integer month;
 
     @ItemType(Long.class)
     private List<Long> departmentIds;
@@ -131,6 +133,14 @@ public class AddArchivesEmployeeCommand {
 
     public void setEmploymentTime(String employmentTime) {
         this.employmentTime = employmentTime;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public void setMonth(Integer month) {
+        this.month = month;
     }
 
     public List<Long> getDepartmentIds() {
