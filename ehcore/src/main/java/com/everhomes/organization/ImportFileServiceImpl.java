@@ -128,7 +128,10 @@ public class ImportFileServiceImpl implements ImportFileService{
                 }
             }
         }
-        titleMap.remove("contactExtraTels");
+        //在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
+        if (titleMap.containsKey("contactExtraTels")) {
+        	titleMap.remove("contactExtraTels");
+		}
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
             ByteArrayOutputStream out = null;
@@ -186,10 +189,9 @@ public class ImportFileServiceImpl implements ImportFileService{
                             data.put(String.valueOf(i), logList.get(i));
                         }
                     }
-                    //data.remove("contactExtraTels");
                     if(data.size() > 0){
                         for (Map.Entry<String, String> entry : data.entrySet()) {
-                        	//不显示contactExtraTels字段
+                        	////在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
                         	if ("contactExtraTels".equals(entry.getKey())) {
 								continue;
 							}
@@ -215,11 +217,14 @@ public class ImportFileServiceImpl implements ImportFileService{
                             data.put(String.valueOf(i), logList.get(i));
                         }
                     }
+                    //在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
                     //把contactToken字段的值改为contactExtraTels，显示多手机号
-                    String contactExtraTels = (String) data.get("contactExtraTels");
-                    List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
-                    String customerExtraTelsForExport = contactExtraTelsList.toString();
-                    data.put("contactToken", customerExtraTelsForExport.substring(1, customerExtraTelsForExport.length()-1));
+                    if (data.containsKey("contactExtraTels")) {
+                    	String contactExtraTels = (String) data.get("contactExtraTels");
+                        List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+                        String customerExtraTelsForExport = contactExtraTelsList.toString();
+                        data.put("contactToken", customerExtraTelsForExport.substring(1, customerExtraTelsForExport.length()-1));
+					}
                     
                     XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
