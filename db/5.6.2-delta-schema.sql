@@ -278,3 +278,35 @@ ALTER TABLE `eh_pm_tasks` ADD COLUMN `enterprise_id`  bigint(20) NOT NULL DEFAUL
 -- 个人客户管理V2.1
 ALTER TABLE `eh_organization_owners` ADD COLUMN `contact_extra_tels` VARCHAR(1024) DEFAULT NULL COMMENT '客户多手机号，以jsonarray方式存储';
 -- END BY 唐岑
+
+
+-- 通用脚本
+-- ADD BY 严军  2018年7月6日
+-- 增加索引，优化新能 issue 无
+
+alter table eh_portal_layouts add index version_id_index(`version_id`);
+
+alter table eh_portal_item_groups add index layout_id_index(`layout_id`);
+
+alter table eh_portal_content_scopes add index content_id_index(`content_id`);
+
+alter table eh_portal_launch_pad_mappings add index portal_content_id_index(`portal_content_id`);
+
+alter table eh_portal_item_categories add index item_group_id_index(`item_group_id`);
+
+alter table eh_portal_items add index item_group_id_index(`item_group_id`);
+
+alter table eh_portal_items add index item_category_id_index(`item_category_id`);
+
+alter table eh_service_module_apps add index version_id_index(`version_id`);
+
+alter table eh_portal_item_groups add index version_id_index(`version_id`);
+
+alter table eh_portal_item_categories add index version_id_index(`version_id`);
+
+alter table eh_portal_items add index version_id_index(`version_id`);
+
+alter table eh_portal_content_scopes add index version_id_index(`version_id`);
+
+alter table eh_portal_launch_pad_mappings add index version_id_index(`version_id`);
+-- END BY 严军
