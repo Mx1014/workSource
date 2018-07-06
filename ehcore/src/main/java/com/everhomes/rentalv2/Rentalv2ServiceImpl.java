@@ -1815,10 +1815,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		Set<Long> defaultDateSet = new HashSet<>(defaultDate);
 		Set<Long> settingDateSet = new HashSet<>(settingDate);
 		defaultDateSet.removeAll(settingDateSet);
-		billDTO.setSpecialCloseDate(new ArrayList<>(defaultDateSet));
+		billDTO.setSpecialOpenDate(new ArrayList<>(defaultDateSet));
 		defaultDateSet = new HashSet<>(defaultDate);
 		settingDateSet.removeAll(defaultDateSet);
-		billDTO.setSpecialOpenDate(new ArrayList<>(settingDateSet));
+		billDTO.setSpecialCloseDate(new ArrayList<>(settingDateSet));
 		//退款提示
 		if (null != rule.getRefundStrategy()) {
 			if (rule.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
@@ -4667,7 +4667,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 			rentalv2Provider.updateRentalBill(bill);
 		}
-		return response;
+		return response;in
 	}
 
 	@Override
