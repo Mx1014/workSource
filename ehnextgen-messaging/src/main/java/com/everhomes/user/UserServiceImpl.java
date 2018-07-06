@@ -4734,36 +4734,27 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             dto.setContactShortToken(memberArchive.getContactShortToken());
 
         //  2.设置公司名称
-        Organization directlyEnterprise = this.organizationProvider.findOrganizationById(dto.getOrganizationId());
-        List<String> groupTypes = new ArrayList<>();
-        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-        OrganizationDetail directlyEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(dto.getOrganizationId());
-        if (directlyEnterpriseDetail != null)
-            dto.setEnterpriseName(directlyEnterpriseDetail.getDisplayName());
+        Organization topEnterprise = this.organizationProvider.findOrganizationById(dto.getOrganizationId());
+        OrganizationDetail topEnterpriseDetail = this.organizationProvider.findOrganizationDetailByOrganizationId(dto.getOrganizationId());
+        if (topEnterpriseDetail != null)
+            dto.setEnterpriseName(topEnterpriseDetail.getDisplayName());
         else
-            dto.setEnterpriseName(directlyEnterprise.getName());
+            dto.setEnterpriseName(topEnterprise.getName());
 
         //	3.设置部门
-        List<OrganizationDTO> departments = getContactDepartments(directlyEnterprise.getPath(), groupTypes, dto.getContactToken());
+        /*
+        List<OrganizationDTO> departments = getContactDepartments(topEnterprise.getPath(), groupTypes, dto.getContactToken());
         //	对于 belongTo 的数据再做处理, add by lei.lv 2017/11/30
         if (departments == null || departments.size() < 1) {
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-            departments = getContactDepartments(directlyEnterprise.getPath(), groupTypes, dto.getContactToken());
+            departments = getContactDepartments(topEnterprise.getPath(), groupTypes, dto.getContactToken());
         }
         dto.setDepartments(departments);
+        */
+        dto.setDepartments(getContactDepartment(dto.getDetailId()));
 
         //  4.设置岗位名称
-        Map<Long, String> jobPositionMap = archivesService.getEmployeeJobPosition(dto.getDetailId());
-        List<OrganizationDTO> jobPosition = new ArrayList<>();
-        if (jobPositionMap != null)
-            for (Long key : jobPositionMap.keySet()) {
-                OrganizationDTO temp = new OrganizationDTO();
-                temp.setId(key);
-                temp.setName(jobPositionMap.get(key));
-                jobPosition.add(temp);
-            }
-        dto.setJobPosition(jobPosition);
+        dto.setJobPosition(getContactJobPosition(dto.getDetailId()));
 
         //  5.设置头像(由于迁移数据detail表中可能没有头像信息，故由原始的组织架构接口获得)
         if (OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())) {
@@ -4791,6 +4782,47 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
     /* 查询部门的方法 */
+    private List<OrganizationDTO> getContactDepartment(Long detailId) {
+        OrganizationMember member = organizationProvider.findMemberDepartmentByDetailId(detailId);
+        if(member == null)
+            return null;
+        Organization dep = organizationProvider.findOrganizationById(member.getOrganizationId());
+        if(dep == null)
+            return null;
+
+        Organization parentDep = organizationProvider.findOrganizationById(dep.getParentId());
+        OrganizationDTO dto = new OrganizationDTO();
+        if(OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.DIRECT_UNDER_ENTERPRISE){
+            dto.setId(parentDep.getId());
+            dto.setParentId(parentDep.getId());
+            dto.setName(parentDep.getName());
+            dto.setParentName(parentDep.getName());
+            dto.setPath(parentDep.getPath());
+        }else{
+            dto.setId(dep.getId());
+            dto.setParentId(dep.getParentId());
+            dto.setPath(dep.getPath());
+            dto.setName(dep.getName());
+            dto.setParentName(parentDep.getName());
+        }
+        return Collections.singletonList(dto);
+    }
+
+    private List<OrganizationDTO> getContactJobPosition(Long detailId) {
+        List<OrganizationMember> members = organizationProvider.findMemberJobPositionByDetailId(detailId);
+        if (members == null || members.size() == 0)
+            return null;
+        return members.stream().map(r -> {
+            OrganizationDTO dto = new OrganizationDTO();
+            Organization org = organizationProvider.findOrganizationById(r.getOrganizationId());
+            if (org != null) {
+                dto.setId(org.getId());
+                dto.setName(org.getName());
+            }
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
     private List<OrganizationDTO> getContactDepartments(String path, List<String> groupTypes, String contactToken) {
         List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(path, groupTypes, contactToken);
         List<OrganizationDTO> departments = new ArrayList<>();
