@@ -2650,7 +2650,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize);
 		
 		ListContractTemplatesResponse response = new ListContractTemplatesResponse();
-		
+
 		if(list.size() > 0){
 			List<ContractTemplateDTO> resultList = list.stream().map((c) -> {
 				ContractTemplateDTO dto = ConvertHelper.convert(c, ContractTemplateDTO.class);
@@ -2661,7 +2661,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						dto.setCreatorName(user.getNickName());
 					}
 				}
-				
 				if (!dto.getOwnerId().equals(0L)) {
 					Community community = communityProvider.findCommunityById(dto.getOwnerId());
 					if(null == community){
@@ -2674,6 +2673,30 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 				if (dto.getCreateTime() != null) {
 					dto.setCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dto.getCreateTime()));
+				}
+				//查询模板是否已被绑定
+				if (null != cmd.getOwnerId() && cmd.getOwnerId() != -1) {
+					//园区获得模板 通用模板都不能删除 
+					if (!dto.getOwnerId().equals(0L)) {
+						//获取是否关联合同
+						Boolean deleteFlag = contractProvider.getContractTemplateById(dto.getId());
+						if (deleteFlag) {
+							dto.setDeleteFlag((byte) 1);
+						}else {
+							dto.setDeleteFlag((byte) 0);
+						}
+						
+					}else {
+						dto.setDeleteFlag((byte) 1);
+					}
+				}else {
+					//全部的时候 只有关联合同的模板不能删除
+					Boolean deleteFlag = contractProvider.getContractTemplateById(dto.getId());
+					if (deleteFlag) {
+						dto.setDeleteFlag((byte) 1);
+					}else {
+						dto.setDeleteFlag((byte) 0);
+					}
 				}
 				return dto;
 			}).collect(Collectors.toList());

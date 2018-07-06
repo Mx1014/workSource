@@ -18,6 +18,7 @@ import java.sql.Timestamp;
  * <li>creatorUid: 创建者uid</li>
  * <li>createTime: 创建时间</li>
  * <li>createDate: 创建时间界面显示</li>
+ * <li>deleteFlag: 控制按钮是否可以删除 1表示关联合同不能删除，0表示可以删除</li>
  * </ul>
  * Created by jm.ding on 2018/6/27.
  */
@@ -39,7 +40,14 @@ public class ContractTemplateDTO {
 	private String creatorName;
 	private String templateOwner;
 	private String createDate;
+	private Byte deleteFlag;
 	
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
 	public String getCreateDate() {
 		return createDate;
 	}

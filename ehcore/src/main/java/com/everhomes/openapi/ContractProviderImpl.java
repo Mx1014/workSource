@@ -885,4 +885,18 @@ public class ContractProviderImpl implements ContractProvider {
 		return dbProvider.getDslContext(accessSpec);
 	}
 
+	@Override
+	public Boolean getContractTemplateById(Long id) {
+		List<Byte> cids = getReadOnlyContext().select(Tables.EH_CONTRACTS.STATUS)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.TEMPLATE_ID.eq(id))
+				.fetch(Tables.EH_CONTRACTS.STATUS);
+		if(cids == null || cids.size() < 1){
+			//模板没有关联合同
+			return false;
+		}
+		
+		return true;
+	}
+
 }

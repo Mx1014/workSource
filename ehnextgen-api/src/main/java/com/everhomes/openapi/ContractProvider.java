@@ -98,4 +98,6 @@ public interface ContractProvider {
 
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber,
 			Long ownerId, Long templateId);
+
+	Boolean getContractTemplateById(Long id);
 }
