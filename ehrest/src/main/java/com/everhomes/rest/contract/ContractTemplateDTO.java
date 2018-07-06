@@ -41,7 +41,14 @@ public class ContractTemplateDTO {
 	private String templateOwner;
 	private String createDate;
 	private Byte deleteFlag;
+	private String lastCommit;
 	
+	public String getLastCommit() {
+		return lastCommit;
+	}
+	public void setLastCommit(String lastCommit) {
+		this.lastCommit = lastCommit;
+	}
 	public Byte getDeleteFlag() {
 		return deleteFlag;
 	}
@@ -144,5 +151,9 @@ public class ContractTemplateDTO {
 	public void setCreatorUid(Long creatorUid) {
 		this.creatorUid = creatorUid;
 	}
+	
+	public String gogsPath() {
+        return this.getName() + ".js";
+    }
 
 }

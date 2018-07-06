@@ -3,6 +3,7 @@ package com.everhomes.contract;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -61,6 +62,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
+import com.everhomes.gogs.GogsCommit;
+import com.everhomes.gogs.GogsRawFileParam;
+import com.everhomes.gogs.GogsRepo;
+import com.everhomes.gogs.GogsRepoType;
+import com.everhomes.gogs.GogsService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -158,6 +164,7 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.module.ServiceModuleType;
 import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -165,6 +172,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.scheduler.RunningFlag;
@@ -181,6 +189,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
@@ -319,6 +328,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Autowired
 	private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+	
+	@Autowired
+    private GogsService gogsService;
+	
+	@Autowired
+    private UserService userService;
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -2614,9 +2629,61 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contractTemplate.setVersion(0);
 			contractTemplate.setParentId(0L);
 		}
+		
+		//使用gogs存储合同内容
+		//1.建仓库
+		GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), "newContractTemplate", 21200L, contractTemplate.getOwnerType(), contractTemplate.getOwnerId());
+		//2.提交脚本
+        GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), "", contractTemplate.getContents(), true);
+        //3.存储提交脚本返回的id
+        contractTemplate.setLastCommit(commit.getId());
+		
 		contractProvider.createContractTemplate(contractTemplate);
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
 	}
+	
+    private GogsCommit gogsCommitScript(GogsRepo repo, String path, String lastCommit, String content, boolean isNewFile) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setNewFile(isNewFile);
+        param.setContent(content);
+        param.setLastCommit(lastCommit);
+        return gogsService.commitFile(repo, path, param);
+    }
+
+    private GogsCommit gogsDeleteScript(GogsRepo repo, String path, String lastCommit) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setLastCommit(lastCommit);
+        return gogsService.deleteFile(repo, path, param);
+    }
+
+    private String gogsGetScript(GogsRepo repo, String path, String lastCommit) {
+        byte[] file = gogsService.getFile(repo, path, lastCommit);
+        return new String(file, Charset.forName("UTF-8"));
+    }
+
+    private String gogsCommitMessage() {
+        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.currentUserId());
+        return String.format(
+                "Author: %s\n UID: %s\n Identifier: %s", userInfo.getNickName(), userInfo.getId(), userInfo.getPhones());
+    }
+
+    private GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
+        GogsRepo repo = gogsService.getAnyRepo(namespaceId, moduleType, moduleId, ownerType, ownerId);
+        if (repo == null) {
+            repo = new GogsRepo();
+            repo.setName("contractTemplate");
+            repo.setNamespaceId(namespaceId);
+            repo.setModuleType(moduleType);
+            repo.setModuleId(moduleId);
+            repo.setOwnerType(ownerType);
+            repo.setOwnerId(ownerId);
+            repo.setRepoType(GogsRepoType.NORMAL.name());
+            repo = gogsService.createRepo(repo);
+        }
+        return repo;
+    }
 
 	@Override
 	public ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd) {
@@ -2698,6 +2765,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						dto.setDeleteFlag((byte) 0);
 					}
 				}
+				GogsRepo repo = gogsRepo(dto.getNamespaceId(), "newContractTemplate", 21200L, dto.getOwnerType(), dto.getOwnerId());
+				
+		        dto.setContents(gogsGetScript(repo, dto.gogsPath(), dto.getLastCommit()));
+				
+				
 				return dto;
 			}).collect(Collectors.toList());
     		response.setRequests(resultList);

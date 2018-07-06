@@ -20,6 +20,7 @@ CREATE TABLE `eh_contract_templates` (
   `update_uid` bigint(20) DEFAULT '0' COMMENT 'record update user id',
   `delete_time` datetime DEFAULT NULL COMMENT '删除时间',
   `delete_uid` bigint(20) DEFAULT '0' COMMENT 'record deleter user id',
+  `last_commit` varchar(40) DEFAULT NULL COMMENT 'repository last commit id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='合同模板打印表';
 

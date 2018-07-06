@@ -12,4 +12,8 @@ public class ContractTemplate extends EhContractTemplates {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+	
+	public String gogsPath() {
+        return this.getName() + ".js";
+    }
 }
