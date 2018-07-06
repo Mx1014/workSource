@@ -236,8 +236,3 @@ where nu.id = n_c.news_id;
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92000', '电商', '0', '/92000', '1', '1', '2', '0', '2018-07-04 17:22:11', NULL, NULL, '2018-07-04 17:22:20', '0', '0', '0', '0', NULL, '1', '0', NULL);
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92100', '微商城', '92000', '/92000/92100', '1', '2', '2', '0', '2018-07-04 17:23:28', '{\"url\":\"${stat.biz.server.url}zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=${stat.biz.server.url}nar/biz/web/app/user/index.html?clientrecommend=1#/recommend?_k=zlbiz#sign_suffix\"}', NULL, '2018-07-04 17:23:33', '0', '0', '0', '0', NULL, '1', '2', NULL);
 
-
--- 设置一部分未上线的功能跳转至“敬请期待”页面  add by yanjun 201807052140
-UPDATE eh_service_modules set client_handler_type = 2, instance_config = '{"url":"http://core.zuolin.com/mobile/static/coming_soon/index.html"}' WHERE id in (21200,22000,40100,40800,41700,56100,56200,57000, 20800, 20600);
-
-UPDATE eh_service_module_apps set instance_config = '{"url":"http://core.zuolin.com/mobile/static/coming_soon/index.html"}' WHERE module_id in (21200,22000,40100,40800,41700,56100,56200,57000, 20800, 20600);
