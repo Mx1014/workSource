@@ -1073,15 +1073,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("secondCategoryId", request.getSecondCategoryId());
             b.field("secondCategoryName", request.getSecondCategoryName());
             b.field("workflowStatus", request.getWorkflowStatus());
-           
-            
-			Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-          
-			if(org != null) {
-			    b.field("creatorOrganization", org.getName());
-            } else {
-                b.field("creatorOrganization", request.getCreatorOrganization()==null?"":request.getCreatorOrganization());
-            }
+            b.field("creatorOrganization", request.getCreatorOrganization()==null?"":request.getCreatorOrganization());
             
 			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
             if(sa != null) {

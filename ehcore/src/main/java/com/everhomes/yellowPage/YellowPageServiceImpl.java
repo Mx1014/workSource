@@ -817,10 +817,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if (cmd.getAppId() != null) {
 			checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
 		}
-		if (null != cmd.getCommunityId()) {
-			cmd.setOwnerId(cmd.getCommunityId());
-			cmd.setOwnerType("community");
+		
+		//检验项目id的正确性。
+		if ("community".equals(cmd.getOwnerType()) && (null == cmd.getOwnerId() || cmd.getOwnerId() < 1)) {
+			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
 		}
+
+		cmd.setOwnerId(cmd.getCommunityId());
+		cmd.setOwnerType(cmd.getOwnerType());
 
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
@@ -1233,6 +1237,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		// 校验权限
 		checkPrivilege(PrivilegeType.SERVICE_MANAGE, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getOwnerId());
+		
+		//检验项目id的正确性。
+		if (null == cmd.getOwnerId() || cmd.getOwnerId() < 1) {
+			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
+		}
 
 		ServiceAlliances serviceAlliance = ConvertHelper.convert(cmd, ServiceAlliances.class);
 

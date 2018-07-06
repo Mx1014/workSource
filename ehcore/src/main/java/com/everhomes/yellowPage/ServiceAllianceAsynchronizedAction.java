@@ -315,11 +315,11 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 			}
 		}
 
-		// 获取公司名称
-		String organizationName = organizationProvider.getOrganizationNameById(applierOrganizationId);
-		if (!StringUtils.isBlank(organizationName)) {
-			notifyMap.put("creatorOrganization", organizationName);
-		}
+		// 获取公司名称 这里不做处理了。直接使用表单提供的值，见buildDefaultField
+//		String organizationName = organizationProvider.getOrganizationNameById(applierOrganizationId);
+//		if (!StringUtils.isBlank(organizationName)) {
+//			notifyMap.put("creatorOrganization", organizationName);
+//		}
 
 		// 获取服务机构名称
 		notifyMap.put("serviceOrgName", serviceName);
