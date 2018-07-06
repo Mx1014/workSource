@@ -33,7 +33,7 @@
 -- REMARK: 预约收款账户迁移，在执行eh_parking_business_payee_accounts,eh_siyin_print_business_payee_accounts语句前，请与 陈毅峰 对照一下域空间是否有遗漏；
 
 -- AUTHOR: 唐岑 2018年7月4日16:07:37
--- REMARK: 升级后需要执行db/search/contract.sh脚本，执行脚本后，需执行接口/contract/syncContracts、/contract/syncContractsFromThirdPart，重新同步合同数据到es中
+-- REMARK: 升级后需要执行db/search/contract.sh脚本，执行脚本后，需执行接口/contract/syncContracts，重新同步数据库中的合同数据到es中
 
 -- AUTHOR: 唐岑 2018年7月4日22:38:16
 -- REMARK: 升级后需要执行db/search/pmowner.sh脚本，更改pmowner的mapping结构；执行脚本后，需执行接口/pm/syncOwnerIndex，重新同步个人客户数据到es中
@@ -55,6 +55,10 @@ INSERT INTO `eh_rentalv2_order_records` (`id`,`order_no`,`biz_order_num`,`pay_or
     SELECT (@id := @id + 1), order_id,order_num,payment_order_id,payment_order_type,0,create_time,create_time  FROM eh_payment_order_records where order_type = 'rentalOrder';
 
 update `eh_rentalv2_order_records` t1 right join `eh_rentalv2_orders` t2 on t1.`order_no` = t2.`order_no` set t1.order_id = t2.id,t1.amount = t2.pay_total_money,t1.status = IF(t2.status in (2,7,9,10,14,20),1,0) ;
+
+-- AUTHOR: 郑思挺
+-- REMARK: 资源类型表空值覆盖
+update `eh_rentalv2_resource_types` set pay_mode = 0 where pay_mode is null;
 
 -- AUTHOR: 杨崇鑫
 -- REMARK: 新支付的配置

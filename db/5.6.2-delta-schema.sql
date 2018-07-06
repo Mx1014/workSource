@@ -5,8 +5,9 @@ ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_type` VARCHAR(128) CO
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `biz_payee_id` BIGINT COMMENT '收款方账户id';
 -- END BY 杨崇鑫
 
-
+-- 通用脚本
 -- st.zheng
+-- 新增表保存支付订单信息
 CREATE TABLE `eh_rentalv2_order_records` (
 `id`  bigint(20) NOT NULL ,
 `namespace_id`  int NULL ,
@@ -41,6 +42,9 @@ CREATE TABLE `eh_rentalv2_pay_accounts` (
 `create_time`  datetime  ,
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_rentalv2_resource_types`
+MODIFY COLUMN `pay_mode`  tinyint(4) DEFAULT 0 COMMENT 'pay mode :0-online pay 1-offline' AFTER `namespace_id`;
 
 -- yanlong.liang 发起活动的企业与收款方账户映射表
 CREATE TABLE `eh_activity_biz_payee` (
@@ -278,3 +282,35 @@ ALTER TABLE `eh_pm_tasks` ADD COLUMN `enterprise_id`  bigint(20) NOT NULL DEFAUL
 -- 个人客户管理V2.1
 ALTER TABLE `eh_organization_owners` ADD COLUMN `contact_extra_tels` VARCHAR(1024) DEFAULT NULL COMMENT '客户多手机号，以jsonarray方式存储';
 -- END BY 唐岑
+
+
+-- 通用脚本
+-- ADD BY 严军  2018年7月6日
+-- 增加索引，优化新能 issue 无
+
+alter table eh_portal_layouts add index i_eh_version_id_index(`version_id`);
+
+alter table eh_portal_item_groups add index i_eh_layout_id_index(`layout_id`);
+
+alter table eh_portal_content_scopes add index i_eh_content_id_index(`content_id`);
+
+alter table eh_portal_launch_pad_mappings add index i_eh_portal_content_id_index(`portal_content_id`);
+
+alter table eh_portal_item_categories add index i_eh_item_group_id_index(`item_group_id`);
+
+alter table eh_portal_items add index i_eh_item_group_id_index(`item_group_id`);
+
+alter table eh_portal_items add index i_eh_item_category_id_index(`item_category_id`);
+
+alter table eh_service_module_apps add index i_eh_version_id_index(`version_id`);
+
+alter table eh_portal_item_groups add index i_eh_version_id_index(`version_id`);
+
+alter table eh_portal_item_categories add index i_eh_version_id_index(`version_id`);
+
+alter table eh_portal_items add index i_eh_version_id_index(`version_id`);
+
+alter table eh_portal_content_scopes add index i_eh_version_id_index(`version_id`);
+
+alter table eh_portal_launch_pad_mappings add index i_eh_version_id_index(`version_id`);
+-- END BY 严军

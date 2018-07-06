@@ -3325,7 +3325,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         //验证操作者权限 by liuyilin 20180615
         User user = UserContext.current().getUser();
-        DoorAuth AprovAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(cmd.getDoorId(), user.getId());
+        DoorAuth AprovAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), user.getId());
         if(AprovAuth == null || AprovAuth.getRightVisitor() != (byte) 1){
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
 					AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR,

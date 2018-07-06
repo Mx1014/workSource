@@ -2444,7 +2444,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
 
         if (!StringUtils.isEmpty(cmd.getApartmentName())) {
-            Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
+            //Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
+            Address other = addressProvider.findNotInactiveAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
             if (other != null && !other.getId().equals(cmd.getId())) {
                 throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
             }

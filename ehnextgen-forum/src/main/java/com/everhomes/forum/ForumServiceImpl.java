@@ -963,7 +963,9 @@ public class ForumServiceImpl implements ForumService {
         Long postId = cmd.getTopicId();
         Post post = checkPostParameter(userId, null, postId, "getTopic");
         cmd.setForumId(post.getForumId());
-        cmd.setCommunityId(post.getCommunityId());
+        if (cmd.getCommunityId() == null) {
+            cmd.setCommunityId(post.getCommunityId());
+        }
 
         //先查帖子再查论坛，可能没有forumId  edit by yanjun 20170830
         checkForumParameter(userId, cmd.getForumId(), "getTopic");
@@ -4792,7 +4794,7 @@ public class ForumServiceImpl implements ForumService {
                         + ", relativeUrl=" + relativeUrl + ", postId=" + post.getId());
                 } else {
                     //单独处理活动的分享链接 modified by xiongying 20160622
-                    if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
+                    if((post.getCategoryId() != null && post.getCategoryId() == 1010) || (post.getEmbeddedAppId() != null && post.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY))) {
                         ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
                         relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
 //                		ActivityTokenDTO dto = new ActivityTokenDTO();
