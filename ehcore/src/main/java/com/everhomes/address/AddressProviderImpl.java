@@ -799,4 +799,24 @@ public class AddressProviderImpl implements AddressProvider {
                 .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(addressName))
                 .execute();
 	}
+
+	@Override
+	public Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId,String buildingName, String apartmentName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ADDRESSES)
+	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+	        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
+			.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+			.and(Tables.EH_ADDRESSES.STATUS.ne((byte)0));
+			
+	    Record record = step.fetchAny();
+
+        LOGGER.debug("findAddressByBuildingApartmentName, sql=" + step.getSQL());
+        LOGGER.debug("findAddressByBuildingApartmentName, bindValues=" + step.getBindValues());
+		if (record != null) {
+			return ConvertHelper.convert(record, Address.class);
+		}
+		return null;
+	}
 }
