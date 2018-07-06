@@ -76,6 +76,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
@@ -3048,12 +3049,22 @@ public class AssetServiceImpl implements AssetService {
         List<ShowBillForClientV2DTO> ret = handler.showBillForClientV2(cmd);
         for(ShowBillForClientV2DTO dto : ret){
             try{
-                //获得contract的categoryId
-                if(!StringUtils.isBlank(dto.getContractId())){
-                    Long categoryId = contractService.findContractCategoryIdByContractId(Long.valueOf(dto.getContractId()));
-                    LOGGER.error("issue32639 categoryId={}",categoryId);
+            	if(UserContext.getCurrentNamespaceId().equals(999966)) {//深圳湾APP的物业缴费账单是对接的第三方，需要特殊处理
+            		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+                    EhContractCategories t = Tables.EH_CONTRACT_CATEGORIES.as("t");
+                    Long categoryId = context.select(t.ID)
+                            .from(t)
+                            .where(t.NAMESPACE_ID.eq(999966))
+                            .fetchOne(0, Long.class);
                     dto.setCategoryId(categoryId);
-                }
+            	}else {
+            		//获得contract的categoryId
+                    if(!StringUtils.isBlank(dto.getContractId())){
+                        Long categoryId = contractService.findContractCategoryIdByContractId(Long.valueOf(dto.getContractId()));
+                        LOGGER.error("issue32639 categoryId={}",categoryId);
+                        dto.setCategoryId(categoryId);
+                    }
+            	}
             }catch (Exception e){
                 LOGGER.error("issue32639 failed to get category id, contractId is={}",dto.getContractId(), e);
             }
