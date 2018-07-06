@@ -1691,6 +1691,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		// 用户当前选择的实体（可能有小区、家庭、机构）
 		List<UserCurrentEntity> entityList = listUserCurrentEntity(user.getId());
 		if(entityList.size() > 0) {
+			//在返回前排个序
+			sortCurrentEntity(entityList);
 			info.setEntityList(entityList);
 		}
 
@@ -2944,8 +2946,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				}
 			}
 		}
-		//在返回前排个序
-		sortSceneDTO(sceneList);
+		//在返回前排个序,上一次改错位置了，这次注释掉
+		//sortSceneDTO(sceneList);
 		return sceneList;
 	}
 
@@ -6348,17 +6350,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	 * @param sceneDTO
 	 * @return
 	 */
-	private List<SceneDTO> sortSceneDTO(List<SceneDTO> sceneDTOList){
+	private List<UserCurrentEntity> sortCurrentEntity(List<UserCurrentEntity> sceneDTOList){
 		//传入数组为空或数据小于2（即没数据或数据只有一条时），是没必要排序的，直接返回。
 		if(sceneDTOList ==null || sceneDTOList.size()<2)return sceneDTOList ;
 		//排序
-		sceneDTOList.sort(new Comparator<SceneDTO>(){
+		sceneDTOList.sort(new Comparator<UserCurrentEntity>(){
 			@Override
-			public int compare(SceneDTO o1, SceneDTO o2) {
-				if(o1.getCommunityId()==null || o2.getCommunityId()==null){
+			public int compare(UserCurrentEntity o1, UserCurrentEntity o2) {
+				if(o1.getEntityId()==null || o2.getEntityId()==null){
 					return 0;
 				}
-		        return o1.getCommunityId().compareTo(o2.getCommunityId());
+		        return o1.getEntityId().compareTo(o2.getEntityId());
 			}			
 		});
 		return sceneDTOList ;
