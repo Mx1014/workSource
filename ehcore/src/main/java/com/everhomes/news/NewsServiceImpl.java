@@ -32,6 +32,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.news.*;
 import com.everhomes.user.*;
@@ -1426,10 +1427,17 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		SceneTokenDTO sceneTokenDTO = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
-		Integer namespaceId = sceneTokenDTO.getNamespaceId();
+//		SceneTokenDTO sceneTokenDTO = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+//		Integer namespaceId = sceneTokenDTO.getNamespaceId();
+//
+//		Long communityId = userService.getCommunityIdBySceneToken(sceneTokenDTO);
 
-		Long communityId = userService.getCommunityIdBySceneToken(sceneTokenDTO);
+
+		AppContext appContext = UserContext.current().getAppContext();
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		Long communityId = appContext.getCommunityId();
 
 		List<Long> communityIds = new ArrayList<Long>(1);
 		communityIds.add(communityId);
