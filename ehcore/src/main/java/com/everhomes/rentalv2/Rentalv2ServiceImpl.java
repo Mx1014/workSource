@@ -4668,7 +4668,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 			rentalv2Provider.updateRentalBill(bill);
 		}
-		return response;in
+		return response;
 	}
 
 	@Override
