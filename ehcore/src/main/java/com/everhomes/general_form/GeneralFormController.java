@@ -111,4 +111,48 @@ public class GeneralFormController extends ControllerBase {
 
 		return response;
 	}
+
+
+	/**
+	 * <b>URL: /general_form/updateGeneralFormVal</b>
+	 * <p> 删除表单值 </p>
+	 */
+	@RequestMapping("deleteGeneralFormVal")
+	@RestReturn(value=String.class)
+	public RestResponse deleteGeneralFormVal(PostGeneralFormValCommand cmd) {
+		generalFormService.deleteGeneralFormVal(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/getGeneralFormVal</b>
+	 * <p> 获取表单值 </p>
+	 */
+	@RequestMapping("getGeneralFormVal")
+	@RestReturn(value=GeneralFormValDTO.class, collection = true)
+	public RestResponse getGeneralFormVal(GetGeneralFormValCommand cmd) {
+		generalFormService.getGeneralFormVal(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /general_form/saveGeneralFormVal</b>
+	 * <p> 只是保存,区别于 postGeneralForm</p>
+	 */
+	@RequestMapping("saveGeneralFormVal")
+	@RestReturn(value=String.class)
+	public RestResponse saveGeneralFormVal(PostGeneralFormValCommand cmd) {
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

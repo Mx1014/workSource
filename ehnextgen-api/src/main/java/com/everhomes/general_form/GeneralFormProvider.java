@@ -2,6 +2,8 @@ package com.everhomes.general_form;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
+import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
 
 import java.util.List;
 
@@ -54,4 +56,25 @@ public interface GeneralFormProvider {
      * @return
      */
     GeneralFormTemplate getDefaultFieldsByModuleId(Long moduleId,Integer namespaceId, Long organizationId, Long ownerId, String ownerType);
+
+    /**
+     * 根据sourceId删除某个字段
+     * @param namespaceId
+     * @param currentOrganizationId
+     * @param ownerId
+     * @param sourceId
+     */
+    void deleteGeneralFormVal(String ownerType, String sourceType, Integer namespaceId, Long currentOrganizationId, Long ownerId, Long sourceId);
+
+    /**
+     * 获取
+     * @param namespaceId
+     * @param sourceType
+     * @param ownerType
+     * @param ownerId
+     * @param sourceId
+     * @return
+     */
+    GeneralFormVal getGeneralFormVal(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId);
+
 }

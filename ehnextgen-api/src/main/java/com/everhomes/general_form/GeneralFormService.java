@@ -63,5 +63,14 @@ public interface GeneralFormService {
 
 	SearchFormValDTO searchGeneralFormVals(SearchFormValsCommand cmd);
 
+	/**
+	 * 根据所进入的模块选择对应的模板列表
+	 * @param cmd
+	 * @return
+	 */
 	List<GeneralFormFieldDTO> getDefaultFieldsByModuleId(ListDefaultFieldsCommand cmd);
+
+	void deleteGeneralFormVal(PostGeneralFormValCommand cmd);
+
+	GeneralFormValDTO getGeneralFormVal(GetGeneralFormValCommand cmd);
 }

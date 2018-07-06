@@ -10,6 +10,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
@@ -17,6 +18,7 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralFormTemplates;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.records.EhGeneralFormGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralFormValsRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -283,8 +285,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	public GeneralFormTemplate getDefaultFieldsByModuleId(Long moduleId,Integer namespaceId, Long organizationId, Long ownerId, String ownerType) {
 		try {
 			GeneralFormTemplate[] result = new GeneralFormTemplate[1];
-			DSLContext context = this.dbProvider.getDslContext(AccessSpec
-					.readWriteWith(EhGeneralFormTemplates.class));
+			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormTemplates.class));
 			result[0] = context.select().from(Tables.EH_GENERAL_FORM_TEMPLATES)
 					.where(Tables.EH_GENERAL_FORM_TEMPLATES.MODULE_ID.eq(moduleId))
 					.and(Tables.EH_GENERAL_FORM_TEMPLATES.NAMESPACE_ID.eq(namespaceId))
@@ -297,7 +298,40 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			return result[0];
 		} catch (Exception ex) {
 			// fetchAny() maybe return null
+			ex.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public void deleteGeneralFormVal(String ownerType, String sourceType, Integer namespaceId, Long currentOrganizationId, Long ownerId, Long sourceId){
+		try {
+			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+			context.delete(Tables.EH_GENERAL_FORM_VALS)
+					.where(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
+					.and(Tables.EH_GENERAL_FORM_VALS.ORGANIZATION_ID.eq(currentOrganizationId))
+					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId))
+					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
+					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType))
+					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_TYPE.eq(ownerType))
+					.execute();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	public GeneralFormVal getGeneralFormVal(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormVals.class));
+
+		SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.OWNER_TYPE.eq(ownerType));
+		return (GeneralFormVal)query.fetch().map(r -> {
+			return ConvertHelper.convert(r, GeneralFormVal.class);
+		});
 	}
 }

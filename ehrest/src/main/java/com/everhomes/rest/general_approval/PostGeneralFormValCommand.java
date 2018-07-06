@@ -10,6 +10,8 @@ import java.util.List;
  * <li>namespaceId：域空间id</li>
  * <li>ownerType：ownerType</li>
  * <li>ownerId：ownerId</li>
+ * <li>sourceId：sourceId</li>
+ * <li>sourceType：sourceType</li>
  * <li>currentOrganizationId：用户当前公司id</li>
  * <li>values: 审批项中，每项对应的值{@link PostApprovalFormItem} </li>
  * </ul>

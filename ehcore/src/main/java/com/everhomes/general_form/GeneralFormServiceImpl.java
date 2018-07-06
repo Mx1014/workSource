@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -101,7 +101,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public void addGeneralFormValues(addGeneralFormValuesCommand cmd) {
         // 把values 存起来
         if (null != cmd.getValues()) {
-            GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getGeneralFormId());
+                GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getGeneralFormId());
 
             dbProvider.execute(status -> {
                 if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
@@ -684,11 +684,49 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public List<GeneralFormFieldDTO> getDefaultFieldsByModuleId(ListDefaultFieldsCommand cmd) {
 
+        GeneralFormTemplate request;
 
-        GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(),cmd.getNamespaceId(),
-                cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getOwnerType());
+        if(StringUtils.isNotBlank(cmd.getOwnerType()) && cmd.getModuleId() != null && cmd.getNamespaceId() != null &&
+                cmd.getOrganizationId() != null && cmd.getOwnerId() != null) {
+            request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId(),
+                    cmd.getOrganizationId(), cmd.getOwnerId(), cmd.getOwnerType());
+        }else{
+            LOGGER.error("getDefaultFieldsByModuleId false: All param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", organizationId: " + cmd.getOrganizationId() + ", ownerId: " +
+                        cmd.getOwnerId() + "ownerType: " + cmd.getOwnerType() + ", moduleId: " + cmd.getModuleId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"All param cannot be null.");
+        }
 
         return JSONObject.parseArray(request.getTemplateText(), GeneralFormFieldDTO.class);
     }
+
+    @Override
+    public void deleteGeneralFormVal(PostGeneralFormValCommand cmd){
+        if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
+            generalFormProvider.deleteGeneralFormVal(cmd.getOwnerType(), cmd.getSourceType(), cmd.getNamespaceId(), cmd.getCurrentOrganizationId(), cmd.getOwnerId(), cmd.getSourceId());
+        }else{
+            LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", currentOrganizationId: "
+                    + cmd.getCurrentOrganizationId() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "namespaceId,currentOrganizationId,ownerId,sourceId cannot be null.");
+        }
+
+    }
+
+    @Override
+    public GeneralFormValDTO getGeneralFormVal(GetGeneralFormValCommand cmd){
+        GeneralFormVal request;
+
+        if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null && StringUtils.isNotBlank(cmd.getSourceType()) && StringUtils.isNotBlank(cmd.getOwnerType())){
+            request = generalFormProvider.getGeneralFormVal(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
+            return ConvertHelper.convert(request, GeneralFormValDTO.class);
+        }else{
+            LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
+                    + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "namespaceId,currentOrganizationId,ownerId,sourceId cannot be null.");
+        }
+    }
+
+
 }
 
