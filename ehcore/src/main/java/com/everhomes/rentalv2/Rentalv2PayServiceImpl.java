@@ -447,12 +447,12 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         String backUrl = homeUrl + contextPath + backUri;
         createOrderCmd.setBackUrl(backUrl);
         createOrderCmd.setExtendInfo(cmd.getExtendInfo());
-        createOrderCmd.setGoodsName("资源预约");
+        createOrderCmd.setGoodsName("资源预订");
         createOrderCmd.setGoodsDescription(null);
         createOrderCmd.setIndustryCode(null);
         createOrderCmd.setIndustryName(null);
         createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
-        createOrderCmd.setOrderRemark1(String.valueOf(cmd.getOrderType()));
+        createOrderCmd.setOrderRemark1("资源预订");
         createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
         createOrderCmd.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
         createOrderCmd.setOrderRemark4(null);
