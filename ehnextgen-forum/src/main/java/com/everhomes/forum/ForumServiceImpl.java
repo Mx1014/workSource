@@ -33,6 +33,8 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.hotTag.HotTagService;
 import com.everhomes.hotTag.HotTag;
+import com.everhomes.link.Link;
+import com.everhomes.link.LinkProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -68,6 +70,7 @@ import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.hotTag.*;
+import com.everhomes.rest.link.LinkContentType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -222,6 +225,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private SensitiveWordService sensitiveWordService;
+
+    @Autowired
+    private LinkProvider linkProvider;
 
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -4819,7 +4825,10 @@ public class ForumServiceImpl implements ForumService {
                 	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId()  + "&communityId=" + communityId);
                     }else {
                 	    if (embededAppId != null && embededAppId.equals(AppConstants.APPID_LINK)) {
-                            relativeUrl = configProvider.getValue(ConfigConstants.POST_LINK_SHARE_URL, "");
+                            Link link = linkProvider.findLinkByPostId(post.getId());
+                            if(link != null && LinkContentType.FORWARD.getCode().equals(link.getContentType())){
+                                relativeUrl = configProvider.getValue(ConfigConstants.POST_LINK_SHARE_URL, "");
+                            }
                         }
                 		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&communityId=" + communityId + "&userId=" + userId);
                 	}
