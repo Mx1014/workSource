@@ -788,6 +788,7 @@ public class ParkingServiceImpl implements ParkingService {
 			createOrderCommand.setCommitFlag(1);
 			createOrderCommand.setOrderType(3);
 		}
+		createOrderCommand.setOrderRemark1(configProvider.getValue("parking.pay.OrderRemark1","停车缴费"));
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
 		CreateOrderRestResponse purchaseOrder = null;
 		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
