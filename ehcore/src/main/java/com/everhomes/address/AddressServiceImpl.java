@@ -2388,11 +2388,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
            // results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize + 1);
             //update by huanglm ,#22488【iOS&安卓】左上角地址切换不是按照距离最近来排序的 
         	List<Community> communities = this.listMixCommunitiesByDistanceWithNamespaceId(cmd, locator, pageSize);
-        	communities.stream().map(r->{
-				CommunityDTO dto = ConvertHelper.convert(r,CommunityDTO.class);					
-				results.add(dto);
-				return null;
-			}).collect(Collectors.toList());
+        	//issue-33014,communities可能为空，会导致app报开小差，需要做非空判断
+        	if (communities!=null) {
+        		communities.stream().map(r->{
+    				CommunityDTO dto = ConvertHelper.convert(r,CommunityDTO.class);					
+    				results.add(dto);
+    				return null;
+    			}).collect(Collectors.toList());
+			}
         	
             if (results != null && results.size() > pageSize) {
                 results.remove(results.size() - 1);
@@ -2524,7 +2527,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             communityIds = resources.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         }
         List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
-
+        //issue-33013,
         if(communityIds != null){
             List<CommunityGeoPoint> pointList = this.communityProvider.listCommunityGeoPointByGeoHashInCommunities(cmd.getLatigtue(), cmd.getLongitude(), 5, communityIds);
             if(pointList != null && pointList.size() > 0){
