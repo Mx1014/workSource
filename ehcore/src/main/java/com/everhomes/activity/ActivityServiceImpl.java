@@ -914,10 +914,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         createOrderCommand.setSourceType(1);
         createOrderCommand.setClientAppName(cmd.getClientAppName());
         createOrderCommand.setOrderRemark1("活动报名");
-        Community community = this.communityProvider.findCommunityById(activity.getVisibleRegionId());
-        if (community != null) {
-            createOrderCommand.setExtendInfo("项目名称："+community.getName()+"；活动名称："+activity.getSubject());
-        }
+        createOrderCommand.setExtendInfo("应用名称："+activityCategories.getName()+"；活动名称："+activity.getSubject());
         createOrderCommand.setExtendInfo(activityCategories.getName());
         //微信公众号支付，重新设置ClientName，设置支付方式和参数
         if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
