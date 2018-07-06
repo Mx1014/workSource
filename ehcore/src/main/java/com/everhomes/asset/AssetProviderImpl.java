@@ -5421,4 +5421,13 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID.eq(mappingId))
                 .execute();
     }
+    
+    public String getProjectNameByBillID(Long billId) {
+		String projectName = getReadOnlyContext().select(Tables.EH_COMMUNITIES.NAME)
+	        .from(Tables.EH_COMMUNITIES,Tables.EH_PAYMENT_BILLS)
+	        .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
+	        .and(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_PAYMENT_BILLS.OWNER_ID))
+	        .fetchOne(Tables.EH_COMMUNITIES.NAME);
+		return projectName;
+	}
 }
