@@ -3653,6 +3653,7 @@ public class CommunityServiceImpl implements CommunityService {
                                           //由于一个人可能重复认证（认证了某公司通过后，退出了再重新认证，这时，会有两条认证信息，最极限的情况是除了主键与创建时间，其他信息全相同）
                                             //所以这种情况没法准备对应信息，但为了ID唯一，不能取没法把握的信息的ID（搞不好他就弄同一个ID了） update by huanglm 20180706
                                             member.setId(r.getId());
+                                            LOGGER.debug("orgmemberlogId is：{}" , orgIds);
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
