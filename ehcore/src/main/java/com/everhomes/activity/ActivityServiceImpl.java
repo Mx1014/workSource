@@ -847,10 +847,33 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
         setPreOrder(cmd,createOrderCommand,roster,activity);
 
-        PreOrderDTO callBack = this.createPreOrder(createOrderCommand);
-        roster.setPayOrderId(callBack.getOrderId());
+        PreOrderDTO callback = new PreOrderDTO();
+        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
+        callback = ConvertHelper.convert(response, PreOrderDTO.class);
+        callback.setExpiredIntervalTime(response.getExpirationMillis());
+
+        //组装支付方式
+        List<PayMethodDTO> list = new ArrayList<>();
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
+            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+            payMethodDTO.setPaymentName(p.getPaymentName());
+            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
+            payMethodDTO.setPaymentLogo(paymentLogo);
+            payMethodDTO.setPaymentType(p.getPaymentType());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
+            if(bizPaymentParamsDTO != null) {
+                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+            }
+            payMethodDTO.setPaymentParams(paymentParamsDTO);
+            list.add(payMethodDTO);
+        }
+        callback.setPayMethod(list);
+        roster.setPayOrderId(callback.getOrderId());
         activityProvider.updateRoster(roster);
-        return callBack;
+        return callback;
     }
 
     private void setPreOrder(CreateSignupOrderV2Command cmd, CreateOrderCommand createOrderCommand, ActivityRoster roster, Activity activity) {
@@ -890,7 +913,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         createOrderCommand.setGoodsName("活动报名");
         createOrderCommand.setSourceType(1);
         createOrderCommand.setClientAppName(cmd.getClientAppName());
-
+        createOrderCommand.setOrderRemark1("活动报名");
+        Community community = this.communityProvider.findCommunityById(activity.getVisibleRegionId());
+        if (community != null) {
+            createOrderCommand.setExtendInfo("项目名称："+community.getName()+"；活动名称："+activity.getSubject());
+        }
+        createOrderCommand.setExtendInfo(activityCategories.getName());
         //微信公众号支付，重新设置ClientName，设置支付方式和参数
         if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
             if(createOrderCommand.getClientAppName() == null){
@@ -941,7 +969,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         return payUserDTO;
     }
 
-    private PreOrderDTO createPreOrder(CreateOrderCommand cmd) {
+    private OrderCommandResponse createPreOrder(CreateOrderCommand cmd) {
         CreateOrderRestResponse createOrderRestResponse = this.payServiceV2.createPurchaseOrder(cmd);
         PreOrderDTO callback = new PreOrderDTO();
         if (createOrderRestResponse.getErrorCode() != 200) {
@@ -950,38 +978,15 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     "create order fail");
         }
         OrderCommandResponse response = createOrderRestResponse.getResponse();
-        callback = ConvertHelper.convert(response, PreOrderDTO.class);
-        callback.setExpiredIntervalTime(response.getExpirationMillis());
 
-        //组装支付方式
-        List<PayMethodDTO> list = new ArrayList<>();
-        String format = "{\"getOrderInfoUrl\":\"%s\"}";
-        for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
-            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
-            payMethodDTO.setPaymentName(p.getPaymentName());
-            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
-            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
-            payMethodDTO.setPaymentLogo(paymentLogo);
-            payMethodDTO.setPaymentType(p.getPaymentType());
-            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
-            if(bizPaymentParamsDTO != null) {
-                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
-            }
-            payMethodDTO.setPaymentParams(paymentParamsDTO);
-            list.add(payMethodDTO);
-        }
-        callback.setPayMethod(list);
-        return callback;
+        return response;
     }
 
     @Override
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
-//		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
         CreateSignupOrderV2Command createSignupOrderV2Command = new CreateSignupOrderV2Command();
         createSignupOrderV2Command.setActivityId(cmd.getActivityId());
         createSignupOrderV2Command.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
-
         ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
         if(roster == null){
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
@@ -1001,43 +1006,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
                     "no activity.");
         }
-
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
         setPreOrder(createSignupOrderV2Command,createOrderCommand,roster,activity);
-
-
-        CreateOrderRestResponse createOrderRestResponse = this.payServiceV2.createPurchaseOrder(createOrderCommand);
+        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
         CreateWechatJsPayOrderResp callback = new CreateWechatJsPayOrderResp();
-        if (createOrderRestResponse.getErrorCode() != 200) {
-            LOGGER.error("create order fail");
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
-                    "create order fail");
-        }
-        OrderCommandResponse response = createOrderRestResponse.getResponse();
         callback = ConvertHelper.convert(response,CreateWechatJsPayOrderResp.class);
         callback.setPayNo(response.getOrderId().toString());
         return callback;
-//		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
-//
-//		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
-//		orderCmdBody.setBody(orderCmd);
-//
-//		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
-//
-//		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
-//
-//		if(response.getResult()){
-//			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
-//					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
-//			return response.getBody();
-//		}
-//		else{
-//			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
-//					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
-//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-//					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
-//					"CreateWechatJsPayOrder error");
-//		}
 	}
 
 
