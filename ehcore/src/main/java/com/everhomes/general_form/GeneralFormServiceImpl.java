@@ -720,11 +720,17 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             request = generalFormProvider.getGeneralFormVal(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
             return ConvertHelper.convert(request, GeneralFormValDTO.class);
         }else{
-            LOGGER.error("deleteGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
+            LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
                     + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "namespaceId,currentOrganizationId,ownerId,sourceId cannot be null.");
+                    "namespaceId,ownerType,sourceType,ownerId,sourceId cannot be null.");
         }
+    }
+
+    @Override
+    public void saveGeneralForm(PostGeneralFormValCommand cmd) {
+        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
+        handler.saveGeneralFormVal(cmd);
     }
 
 

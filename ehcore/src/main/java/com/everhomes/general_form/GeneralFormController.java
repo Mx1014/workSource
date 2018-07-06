@@ -134,8 +134,8 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("getGeneralFormVal")
 	@RestReturn(value=GeneralFormValDTO.class, collection = true)
 	public RestResponse getGeneralFormVal(GetGeneralFormValCommand cmd) {
-		generalFormService.getGeneralFormVal(cmd);
-		RestResponse response = new RestResponse();
+		GeneralFormValDTO dto = generalFormService.getGeneralFormVal(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -149,7 +149,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("saveGeneralFormVal")
 	@RestReturn(value=String.class)
 	public RestResponse saveGeneralFormVal(PostGeneralFormValCommand cmd) {
-
+		generalFormService.saveGeneralForm(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

@@ -19,4 +19,12 @@ public interface GeneralFormModuleHandler {
     default GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd){
         return new GeneralFormReminderDTO(TrueOrFalseFlag.FALSE.getCode());
     }
+
+    /**
+     * 只保存表单数据但不提交工作流
+     * @param cmd
+     */
+    default PostGeneralFormDTO saveGeneralFormVal(PostGeneralFormValCommand cmd){
+        return new PostGeneralFormDTO();
+    }
 }
