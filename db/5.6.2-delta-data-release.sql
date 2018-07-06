@@ -168,6 +168,7 @@ UPDATE  eh_launch_pad_items  SET access_control_type = 0;
 -- REMARK: 服务联盟v3.4 issue-29989
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11100', 'zh_CN', '需要更新的筛选为空');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '11101', 'zh_CN', '筛选的类型不合法');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10010', 'zh_CN', '未选择项目或项目不合法');
 
 update eh_locale_templates set text = '<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\"><html><head><style>img{height: 200px;width: 200px;}</style><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>${title}</title></head><body><p>预订人：${creatorName}</p><p>手机号：${creatorMobile}</p><p>公司名称：${creatorOrganization}</p><p>服务名称：${serviceOrgName}</p>${note}</body></html>' where scope = 'serviceAlliance.request.notification' and code = 4;
 update eh_locale_strings set text = 'USER_NAME,USER_PHONE,USER_COMPANY' where scope = 'serviceAlliance.request.notification' and code = '10006';
