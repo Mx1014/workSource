@@ -22,7 +22,7 @@ import java.util.List;
  * <li>subItemDTOList:减免费项的集合，参考{@link com.everhomes.rest.asset.SubItemDTO}</li>
  *</ul>
  */
-public class BatchModifyNotSettledBillCommand {
+public class BatchModifyBillSubItemCommand {
 	private Long categoryId;
     private String ownerType;
     private Long ownerId;

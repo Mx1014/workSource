@@ -4952,11 +4952,11 @@ public class AssetServiceImpl implements AssetService {
 		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        return handler.showCreateBillSubItemList(cmd.getBillGroupId());
+        return handler.showCreateBillSubItemList(cmd);
 	}
 
-	public void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd) {
-		assetProvider.batchModifyNotSettledBill(cmd);
+	public void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+		assetProvider.batchModifyBillSubItem(cmd);
 	}
 
 }

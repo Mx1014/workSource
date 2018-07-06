@@ -5516,7 +5516,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
     }
     
-    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId) {
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	//卸载参数
+    	Long billGroupId = cmd.getBillGroupId();
+    	Long categoryId = cmd.getCategoryId();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroupsRules rule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("rule");
         EhPaymentChargingItemScopes ci = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("ci");
@@ -5529,6 +5532,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
                 .and(rule.OWNERID.eq(ci.OWNER_ID))
                 .and(rule.BILL_GROUP_ID.eq(billGroupId))
+                .and(ci.CATEGORY_ID.eq(categoryId))
                 .fetch()
                 .map(r -> {
                 	//减免费项
@@ -5550,6 +5554,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<String> fetch = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
                 .from(Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId))
                 .fetch(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
         if(fetch.size() > 0){
             response.setBillGroupName(fetch.get(0));
@@ -5557,7 +5562,7 @@ public class AssetProviderImpl implements AssetProvider {
         return response;
 	}
 
-	public void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd) {
+	public void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
 		//卸载参数
 		Long billGroupId = cmd.getBillGroupId();
 		Long categoryId = cmd.getCategoryId();

@@ -376,8 +376,8 @@ public interface AssetProvider {
     
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
     
-    ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId);
+    ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 	
-	void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd);
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 	
 }

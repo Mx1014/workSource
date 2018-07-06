@@ -218,5 +218,5 @@ public interface AssetService {
 	
 	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 
-	void batchModifyNotSettledBill(BatchModifyNotSettledBillCommand cmd);
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 }

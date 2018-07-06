@@ -1940,8 +1940,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	assetPayService.payNotify(cmd, handler);
     }
     
-    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(Long billGroupId) {
-    	return assetProvider.showCreateBillSubItemList(billGroupId);
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	return assetProvider.showCreateBillSubItemList(cmd);
     }
     
 }
