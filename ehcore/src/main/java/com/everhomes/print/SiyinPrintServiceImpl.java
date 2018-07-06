@@ -574,8 +574,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		createOrderCommand.setGoodsName(OrderType.OrderTypeEnum.PRINT_ORDER.getMsg());
 		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
 		String homeurl = configProvider.getValue("home.url", "");
-		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/siyinprint/notifySiyinprintOrderPaymentV2"), homeurl);
+		String callbackurl = String.format(configProvider.getValue("siyinprint.pay.callBackUrl", "%s/evh/siyinprint/notifySiyinprintOrderPaymentV2"), homeurl);
 		createOrderCommand.setBackUrl(callbackurl);
+		createOrderCommand.setOrderRemark1(configProvider.getValue("siyinprint.pay.OrderRemark1","云打印"));
+
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
 		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
 		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
