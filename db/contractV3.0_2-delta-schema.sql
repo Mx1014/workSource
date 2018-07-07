@@ -2,8 +2,6 @@
 -- 通用脚本  
 -- ADD BY 丁建民 
 -- # 合同管理 合同模板及打印
-DROP TABLE IF EXISTS `eh_contract_templates`;
-
 CREATE TABLE `eh_contract_templates` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0' COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
@@ -12,7 +10,7 @@ CREATE TABLE `eh_contract_templates` (
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
   `name` varchar(64) NOT NULL COMMENT '合同模板名称',
   `status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 1: confirming, 2: active',
-  `contents_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'gogs:存储gogs的commitId txt:存储文本内容' 
+  `content_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'gogs:存储gogs的commitId txt:存储文本内容',
   `contents` longtext COMMENT '模板内容',
   `last_commit` varchar(40) DEFAULT NULL COMMENT 'repository last commit id',
   `parent_id` bigint(20) DEFAULT '0' COMMENT '复制于哪个合同模板',
