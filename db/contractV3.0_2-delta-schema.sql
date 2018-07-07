@@ -9,18 +9,19 @@ CREATE TABLE `eh_contract_templates` (
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
   `name` varchar(64) NOT NULL COMMENT '合同模板名称',
-  `contract_template_type` tinyint(2) DEFAULT '0' COMMENT '0 收款合同模板 1付款合同模板',
   `status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 1: confirming, 2: active',
+  `contents_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'gogs:存储gogs的commitId txt:存储文本内容' 
   `contents` longtext COMMENT '模板内容',
+  `last_commit` varchar(40) DEFAULT NULL COMMENT 'repository last commit id',
   `parent_id` bigint(20) DEFAULT '0' COMMENT '复制于哪个合同模板',
   `version` int(11) DEFAULT '0' COMMENT '版本记录',
-  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `contract_template_type` tinyint(2) DEFAULT '0' COMMENT '0 收款合同模板 1付款合同模板',
   `creator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record creator user id',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `update_uid` bigint(20) DEFAULT '0' COMMENT 'record update user id',
-  `delete_time` datetime DEFAULT NULL COMMENT '删除时间',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
   `delete_uid` bigint(20) DEFAULT '0' COMMENT 'record deleter user id',
-  `last_commit` varchar(40) DEFAULT NULL COMMENT 'repository last commit id',
+  `delete_time` datetime DEFAULT NULL COMMENT '删除时间',
+  `update_uid` bigint(20) DEFAULT '0' COMMENT 'record update user id',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='合同模板打印表';
 

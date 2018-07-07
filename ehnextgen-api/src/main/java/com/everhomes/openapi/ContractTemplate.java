@@ -14,6 +14,6 @@ public class ContractTemplate extends EhContractTemplates {
 	}
 	
 	public String gogsPath() {
-        return this.getName() + ".js";
+        return this.getName() + ".txt";
     }
 }

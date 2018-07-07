@@ -153,7 +153,7 @@ public class ContractTemplateDTO {
 	}
 	
 	public String gogsPath() {
-        return this.getName() + ".js";
+		return this.getName() + ".txt";
     }
 
 }

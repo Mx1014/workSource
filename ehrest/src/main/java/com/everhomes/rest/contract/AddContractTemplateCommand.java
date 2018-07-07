@@ -24,7 +24,7 @@ public class AddContractTemplateCommand {
 	private Integer namespaceId;
 	@NotNull
 	private Long categoryId;
-	private Long ownerId;
+	private Long ownerId = 0L;
 	private String ownerType;
 	private String name;
 	private String contents;

@@ -2612,6 +2612,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
 		
 		ContractTemplate contractTemplateParent = null;
+		
+		//是否是新增的文件 默认不是新文件
+		Boolean isNewFile = false;
+		String lastCommit = "";
+		String contentsType = "gogs";
+		
 		//新增的模板需要进行判断，是属于新增的还是复制的，如果存在id则表示是复制模板来的，需要添加parentId,id不为空，通用修改，小区复制模板
 		if(cmd.getId() != null) {
 			//添加父节点，版本号+1
@@ -2623,67 +2629,32 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}else {
 				contractTemplate.setVersion(0);
 			}
+			if (contractTemplateParent.getLastCommit() == null) {
+				isNewFile = true;
+			}else {
+				lastCommit = contractTemplateParent.getLastCommit();
+			}
 		}
 		//新增通用，新增园区模板
 		if(cmd.getId() == null) {
 			contractTemplate.setVersion(0);
 			contractTemplate.setParentId(0L);
+			isNewFile = true;
 		}
 		
 		//使用gogs存储合同内容
-		//1.建仓库
-		GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), "newContractTemplate", 21200L, contractTemplate.getOwnerType(), contractTemplate.getOwnerId());
+		//1.建仓库 不同应用建立不同仓库
+		GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplate.getCategoryId());
 		//2.提交脚本
-        GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), "", contractTemplate.getContents(), true);
+        GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), lastCommit, contractTemplate.getContents(), isNewFile);
         //3.存储提交脚本返回的id
         contractTemplate.setLastCommit(commit.getId());
+        contractTemplate.setContents(commit.getId());
+        
 		
 		contractProvider.createContractTemplate(contractTemplate);
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
 	}
-	
-    private GogsCommit gogsCommitScript(GogsRepo repo, String path, String lastCommit, String content, boolean isNewFile) {
-        GogsRawFileParam param = new GogsRawFileParam();
-        param.setCommitMessage(gogsCommitMessage());
-        param.setNewFile(isNewFile);
-        param.setContent(content);
-        param.setLastCommit(lastCommit);
-        return gogsService.commitFile(repo, path, param);
-    }
-
-    private GogsCommit gogsDeleteScript(GogsRepo repo, String path, String lastCommit) {
-        GogsRawFileParam param = new GogsRawFileParam();
-        param.setCommitMessage(gogsCommitMessage());
-        param.setLastCommit(lastCommit);
-        return gogsService.deleteFile(repo, path, param);
-    }
-
-    private String gogsGetScript(GogsRepo repo, String path, String lastCommit) {
-        byte[] file = gogsService.getFile(repo, path, lastCommit);
-        return new String(file, Charset.forName("UTF-8"));
-    }
-
-    private String gogsCommitMessage() {
-        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.currentUserId());
-        return String.format(
-                "Author: %s\n UID: %s\n Identifier: %s", userInfo.getNickName(), userInfo.getId(), userInfo.getPhones());
-    }
-
-    private GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
-        GogsRepo repo = gogsService.getAnyRepo(namespaceId, moduleType, moduleId, ownerType, ownerId);
-        if (repo == null) {
-            repo = new GogsRepo();
-            repo.setName("contractTemplate");
-            repo.setNamespaceId(namespaceId);
-            repo.setModuleType(moduleType);
-            repo.setModuleId(moduleId);
-            repo.setOwnerType(ownerType);
-            repo.setOwnerId(ownerId);
-            repo.setRepoType(GogsRepoType.NORMAL.name());
-            repo = gogsService.createRepo(repo);
-        }
-        return repo;
-    }
 
 	@Override
 	public ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd) {
@@ -2692,6 +2663,12 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter in the command");
 		}
+		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
+		
+		//是否是新增的文件 默认不是新文件
+		Boolean isNewFile = false;
+		String lastCommit = "";
+		
 		//根据id查询数据，
 		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
 		if (cmd.getName() != null) {
@@ -2702,6 +2679,20 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		contractTemplateParent.setParentId(cmd.getId());
 		contractTemplateParent.setVersion(contractTemplateParent.getVersion()+1);
+		
+		if (contractTemplateParent.getLastCommit() == null) {
+			isNewFile = true;
+		}else {
+			lastCommit = contractTemplateParent.getLastCommit();
+		}
+		
+		//使用gogs存储合同内容
+		//1.建仓库
+		GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplateParent.getCategoryId());
+		//2.提交脚本
+        GogsCommit commit = gogsCommitScript(repo, contractTemplateParent.gogsPath(), lastCommit, contractTemplateParent.getContents(), isNewFile);
+        //3.存储提交脚本返回的id
+        contractTemplateParent.setLastCommit(commit.getId());
 		
 		contractProvider.createContractTemplate(contractTemplateParent);
 		//contractProvider.updateContractTemplate(contractTemplateParent);
@@ -2765,10 +2756,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						dto.setDeleteFlag((byte) 0);
 					}
 				}
-				GogsRepo repo = gogsRepo(dto.getNamespaceId(), "newContractTemplate", 21200L, dto.getOwnerType(), dto.getOwnerId());
 				
+				//查询gogs上面的数据
+				GogsRepo repo = gogsRepo(dto.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", dto.getCategoryId());
 		        dto.setContents(gogsGetScript(repo, dto.gogsPath(), dto.getLastCommit()));
-				
 				
 				return dto;
 			}).collect(Collectors.toList());
@@ -2840,6 +2831,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contractTemplatedto.setCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(contractTemplatedto.getCreateTime()));
 			}
 			
+			/*if ("gogs".equals(contractTemplatedto.getContents())) {
+				
+			}*/
+			//查询gogs上面的数据
+			GogsRepo repo = gogsRepo(contractTemplatedto.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplatedto.getCategoryId());
+			contractTemplatedto.setContents(gogsGetScript(repo, contractTemplatedto.gogsPath(), contractTemplatedto.getLastCommit()));
+			
 			dto.setContractTemplate(contractTemplatedto);
 		}
 		
@@ -2866,24 +2864,71 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Override
 	public List<Long> checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd) {
 		List<Long> functionIds = new ArrayList<>();
-		try{
-			//打印  checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PRINT, cmd.getOrgId(), cmd.getCommunityId());
-			Boolean print = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.CONTRACT_PRINT, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+		try {
+			// 打印
+			Boolean print = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(),
+					PrivilegeConstants.CONTRACT_PRINT, ServiceModuleConstants.CONTRACT_MODULE,
+					ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
 			if (print) {
 				functionIds.add(PrivilegeConstants.CONTRACT_PRINT);
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			// TODO: 只用作判断权限用，暂不处理
 		}
-		try{
-			//打印预览 checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PREVIEW, cmd.getOrgId(), cmd.getCommunityId());
-			Boolean preview = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.CONTRACT_PREVIEW, ServiceModuleConstants.CONTRACT_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+		try {
+			// 打印预览
+			Boolean preview = userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(),
+					PrivilegeConstants.CONTRACT_PREVIEW, ServiceModuleConstants.CONTRACT_MODULE,
+					ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
 			if (preview) {
 				functionIds.add(PrivilegeConstants.CONTRACT_PREVIEW);
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			// TODO: 只用作判断权限用，暂不处理
 		}
 		return functionIds;
 	}
+
+    private GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
+        GogsRepo repo = gogsService.getAnyRepo(namespaceId, moduleType, moduleId, ownerType, ownerId);
+        if (repo == null) {
+            repo = new GogsRepo();
+            repo.setName("contractTemplate");
+            repo.setNamespaceId(namespaceId);
+            repo.setModuleType(moduleType);
+            repo.setModuleId(moduleId);
+            repo.setOwnerType(ownerType);
+            repo.setOwnerId(ownerId);
+            repo.setRepoType(GogsRepoType.NORMAL.name());
+            repo = gogsService.createRepo(repo);
+        }
+        return repo;
+    }
+	
+    private GogsCommit gogsCommitScript(GogsRepo repo, String path, String lastCommit, String content, boolean isNewFile) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setNewFile(isNewFile);
+        param.setContent(content);
+        param.setLastCommit(lastCommit);
+        return gogsService.commitFile(repo, path, param);  
+    }
+
+    private GogsCommit gogsDeleteScript(GogsRepo repo, String path, String lastCommit) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setLastCommit(lastCommit);
+        return gogsService.deleteFile(repo, path, param);
+    }
+
+    private String gogsGetScript(GogsRepo repo, String path, String lastCommit) {
+        byte[] file = gogsService.getFile(repo, path, lastCommit);
+        return new String(file, Charset.forName("UTF-8"));
+    }
+
+    private String gogsCommitMessage() {
+        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.currentUserId());
+        return String.format(
+                "Author: %s\n UID: %s\n Identifier: %s", userInfo.getNickName(), userInfo.getId(), userInfo.getPhones());
+    }
 }
