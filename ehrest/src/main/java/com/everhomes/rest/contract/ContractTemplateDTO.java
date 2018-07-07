@@ -2,6 +2,8 @@ package com.everhomes.rest.contract;
 
 import java.sql.Timestamp;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>id: id</li>
@@ -12,6 +14,7 @@ import java.sql.Timestamp;
  * <li>name: 模板名称</li>
  * <li>contracttemplateType: 0 收款合同模板 1付款合同模板</li>
  * <li>status: 0: inactive, 1: confirming, 2: active</li>
+ * <li>contentType: gogs:存储gogs的commitId txt:存储文本内容</li>
  * <li>contents: 模板内容</li>
  * <li>parentId: 复制于哪个合同模板</li>
  * <li>version: 版本记录</li>
@@ -29,20 +32,26 @@ public class ContractTemplateDTO {
 	private Long ownerId;
 	private String ownerType;
 	private String name;
-	private Byte contracttemplateType;
 	private Byte status;
+	private String contentType;
 	private String contents;
+	private String lastCommit;
 	private Long parentId;
 	private Integer version;
 	private Timestamp createTime;
 	private Long creatorUid;
-	
+	private Byte contracttemplateType;
 	private String creatorName;
 	private String templateOwner;
 	private String createDate;
 	private Byte deleteFlag;
-	private String lastCommit;
 	
+	public String getContentType() {
+		return contentType;
+	}
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
 	public String getLastCommit() {
 		return lastCommit;
 	}
@@ -150,6 +159,10 @@ public class ContractTemplateDTO {
 	}
 	public void setCreatorUid(Long creatorUid) {
 		this.creatorUid = creatorUid;
+	}
+	
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 	
 	public String gogsPath() {

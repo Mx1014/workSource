@@ -2610,13 +2610,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Override
 	public ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd) {
 		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
+		contractTemplate.setContentType("gogs");
 		
 		ContractTemplate contractTemplateParent = null;
 		
 		//是否是新增的文件 默认不是新文件
 		Boolean isNewFile = false;
 		String lastCommit = "";
-		String contentsType = "gogs";
 		
 		//新增的模板需要进行判断，是属于新增的还是复制的，如果存在id则表示是复制模板来的，需要添加parentId,id不为空，通用修改，小区复制模板
 		if(cmd.getId() != null) {
@@ -2641,16 +2641,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contractTemplate.setParentId(0L);
 			isNewFile = true;
 		}
-		
-		//使用gogs存储合同内容
-		//1.建仓库 不同应用建立不同仓库
-		GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplate.getCategoryId());
-		//2.提交脚本
-        GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), lastCommit, contractTemplate.getContents(), isNewFile);
-        //3.存储提交脚本返回的id
-        contractTemplate.setLastCommit(commit.getId());
-        contractTemplate.setContents(commit.getId());
-        
+		if ("gogs".equals(contractTemplate.getContentType())) {
+			//使用gogs存储合同内容
+			//1.建仓库 不同应用建立不同仓库
+			GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplate.getCategoryId());
+			//2.提交脚本
+	        GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), lastCommit, contractTemplate.getContents(), isNewFile);
+	        //3.存储提交脚本返回的id
+	        contractTemplate.setLastCommit(commit.getId());
+	        contractTemplate.setContents(commit.getId());
+		}
 		
 		contractProvider.createContractTemplate(contractTemplate);
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
@@ -2664,6 +2664,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					"Invalid id parameter in the command");
 		}
 		ContractTemplate contractTemplate = ConvertHelper.convert(cmd, ContractTemplate.class);
+		contractTemplate.setContentType("gogs");
 		
 		//是否是新增的文件 默认不是新文件
 		Boolean isNewFile = false;
@@ -2686,13 +2687,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			lastCommit = contractTemplateParent.getLastCommit();
 		}
 		
-		//使用gogs存储合同内容
-		//1.建仓库
-		GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplateParent.getCategoryId());
-		//2.提交脚本
-        GogsCommit commit = gogsCommitScript(repo, contractTemplateParent.gogsPath(), lastCommit, contractTemplateParent.getContents(), isNewFile);
-        //3.存储提交脚本返回的id
-        contractTemplateParent.setLastCommit(commit.getId());
+		if ("gogs".equals(contractTemplate.getContentType())) {
+			//使用gogs存储合同内容
+			//1.建仓库
+			GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplateParent.getCategoryId());
+			//2.提交脚本
+	        GogsCommit commit = gogsCommitScript(repo, contractTemplateParent.gogsPath(), lastCommit, contractTemplateParent.getContents(), isNewFile);
+	        //3.存储提交脚本返回的id
+	        contractTemplateParent.setLastCommit(commit.getId());
+	        contractTemplateParent.setContents(commit.getId());
+		}
 		
 		contractProvider.createContractTemplate(contractTemplateParent);
 		//contractProvider.updateContractTemplate(contractTemplateParent);
@@ -2756,10 +2760,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						dto.setDeleteFlag((byte) 0);
 					}
 				}
-				
-				//查询gogs上面的数据
-				GogsRepo repo = gogsRepo(dto.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", dto.getCategoryId());
-		        dto.setContents(gogsGetScript(repo, dto.gogsPath(), dto.getLastCommit()));
+				if ("gogs".equals(dto.getContentType())) {
+					//查询gogs上面的数据
+					GogsRepo repo = gogsRepo(dto.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", dto.getCategoryId());
+			        dto.setContents(gogsGetScript(repo, dto.gogsPath(), dto.getLastCommit()));
+				}
 				
 				return dto;
 			}).collect(Collectors.toList());
@@ -2831,12 +2836,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contractTemplatedto.setCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(contractTemplatedto.getCreateTime()));
 			}
 			
-			/*if ("gogs".equals(contractTemplatedto.getContents())) {
-				
-			}*/
-			//查询gogs上面的数据
-			GogsRepo repo = gogsRepo(contractTemplatedto.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplatedto.getCategoryId());
-			contractTemplatedto.setContents(gogsGetScript(repo, contractTemplatedto.gogsPath(), contractTemplatedto.getLastCommit()));
+			if ("gogs".equals(contractTemplatedto.getContentType())) {
+				//查询gogs上面的数据
+				GogsRepo repo = gogsRepo(contractTemplatedto.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplatedto.getCategoryId());
+				contractTemplatedto.setContents(gogsGetScript(repo, contractTemplatedto.gogsPath(), contractTemplatedto.getLastCommit()));
+			}
 			
 			dto.setContractTemplate(contractTemplatedto);
 		}
