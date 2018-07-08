@@ -54,11 +54,13 @@ public class ImportFileServiceImpl implements ImportFileService{
         task.setStatus(ImportFileTaskStatus.CREATED.getCode());
         organizationProvider.createImportFileTask(task);
         User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
                 try{
                     UserContext.setCurrentUser(user);
+                    UserContext.setCurrentNamespaceId(namespaceId);
                     task.setStatus(ImportFileTaskStatus.EXECUTING.getCode());
                     organizationProvider.updateImportFileTask(task);
                     ImportFileResponse response = callback.importFile();
