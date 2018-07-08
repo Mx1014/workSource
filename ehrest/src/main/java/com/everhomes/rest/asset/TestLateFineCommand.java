@@ -8,7 +8,7 @@ package com.everhomes.rest.asset;
 
 /**
  *<ul>
- * <li>categoryId:多应用入口区分标识</li>
+ * <li>date: 你想要的测试滞纳金的未来日期，如：2019-07-08</li>
  *</ul>
  */
 public class TestLateFineCommand {

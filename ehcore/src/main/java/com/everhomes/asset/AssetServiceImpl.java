@@ -4973,79 +4973,84 @@ public class AssetServiceImpl implements AssetService {
             int pageSize = 10000;
             long pageAnchor = 1l;
             SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-            Date today = new Date();
-            coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
-                Long nextPageAnchor = 0l;
-                while(nextPageAnchor != null){
-                    List<Long> overdueBillIds = new ArrayList<>();
-                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
-                    List<PaymentBills> bills = res.getBills();
-                    //更新账单
-                    for(PaymentBills bill : bills){
-                        String dueDayDeadline = bill.getDueDayDeadline();
-                        try{
-                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
-//                        if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
-                            if(deadline.compareTo(today) != 1) {
-                                assetProvider.changeBillToDue(bill.getId());
-                                bill.setChargeStatus((byte)1);
-                            }
-                            if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
-                        } catch (Exception e){ continue; };
-                    }
-                    nextPageAnchor = res.getNextPageAnchor();
-                    //这10000个账单中欠费的billItem
-                    List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
-                    for(int i = 0; i < billItems.size(); i++){
-                        PaymentBillItems item = billItems.get(i);
-                        //没有关联滞纳金标准的不计算，剔除出更新队列
-                        if(item.getLateFineStandardId() == null){
-                            billItems.remove(i--);
-                            continue;
-                        }
-                        //计算滞纳金金额
-                        //获得欠费的钱
-                        BigDecimal amountOwed = new BigDecimal("0");
-                        if(item.getAmountOwed() !=null){
-                            amountOwed = amountOwed.add(item.getAmountOwed());
-                        }else{
-                            item.setAmountOwed(new BigDecimal("0"));
-                            assetProvider.updatePaymentItem(item);
-                        }
-                        amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
-                        List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
-                        if(formulas.size() != 1) {
-                            LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
-                        }
-                        String formulaJson = formulas.get(0).getFormulaJson();
-                        formulaJson = formulaJson.replace("qf",amountOwed.toString());
-                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
-                        //开始构造一条滞纳金记录
-                        //查看item是否已经有滞纳金产生了
-                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
-                        boolean isInsert = false;
-                        if(fine == null){
-                            isInsert = true;
-                            fine = new PaymentLateFine();
-                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
-                            fine.setId(nextSequence);
-                            fine.setName(item.getChargingItemName() + "滞纳金");
-                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            fine.setBillId(item.getBillId());
-                            fine.setBillItemId(item.getId());
-                            fine.setCommunityId(item.getOwnerId());
-                            fine.setNamespaceId(item.getNamespaceId());
-                            fine.setCustomerId(item.getTargetId());
-                            fine.setCustomerType(item.getTargetType());
-                        }
-                        fine.setAmount(fineAmount);
-                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
-                        // 重新计算下账单
-                        assetProvider.reCalBillById(item.getBillId());
-                    }
-                }
-            });
+            //Date today = new Date();
+			try {
+				Date today = yyyyMMdd.parse(cmd.getDate());
+				coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
+	                Long nextPageAnchor = 0l;
+	                while(nextPageAnchor != null){
+	                    List<Long> overdueBillIds = new ArrayList<>();
+	                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+	                    List<PaymentBills> bills = res.getBills();
+	                    //更新账单
+	                    for(PaymentBills bill : bills){
+	                        String dueDayDeadline = bill.getDueDayDeadline();
+	                        try{
+	                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+//	                        if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
+	                            if(deadline.compareTo(today) != 1) {
+	                                assetProvider.changeBillToDue(bill.getId());
+	                                bill.setChargeStatus((byte)1);
+	                            }
+	                            if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
+	                        } catch (Exception e){ continue; };
+	                    }
+	                    nextPageAnchor = res.getNextPageAnchor();
+	                    //这10000个账单中欠费的billItem
+	                    List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
+	                    for(int i = 0; i < billItems.size(); i++){
+	                        PaymentBillItems item = billItems.get(i);
+	                        //没有关联滞纳金标准的不计算，剔除出更新队列
+	                        if(item.getLateFineStandardId() == null){
+	                            billItems.remove(i--);
+	                            continue;
+	                        }
+	                        //计算滞纳金金额
+	                        //获得欠费的钱
+	                        BigDecimal amountOwed = new BigDecimal("0");
+	                        if(item.getAmountOwed() !=null){
+	                            amountOwed = amountOwed.add(item.getAmountOwed());
+	                        }else{
+	                            item.setAmountOwed(new BigDecimal("0"));
+	                            assetProvider.updatePaymentItem(item);
+	                        }
+	                        amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
+	                        List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
+	                        if(formulas.size() != 1) {
+	                            LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
+	                        }
+	                        String formulaJson = formulas.get(0).getFormulaJson();
+	                        formulaJson = formulaJson.replace("qf",amountOwed.toString());
+	                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+	                        //开始构造一条滞纳金记录
+	                        //查看item是否已经有滞纳金产生了
+	                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+	                        boolean isInsert = false;
+	                        if(fine == null){
+	                            isInsert = true;
+	                            fine = new PaymentLateFine();
+	                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+	                            fine.setId(nextSequence);
+	                            fine.setName(item.getChargingItemName() + "滞纳金");
+	                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                            fine.setBillId(item.getBillId());
+	                            fine.setBillItemId(item.getId());
+	                            fine.setCommunityId(item.getOwnerId());
+	                            fine.setNamespaceId(item.getNamespaceId());
+	                            fine.setCustomerId(item.getTargetId());
+	                            fine.setCustomerType(item.getTargetType());
+	                        }
+	                        fine.setAmount(fineAmount);
+	                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
+	                        // 重新计算下账单
+	                        assetProvider.reCalBillById(item.getBillId());
+	                    }
+	                }
+	            });
+			} catch (ParseException e1) {
+				LOGGER.error("please input yyyy-MM-dd");
+			}
     	}
     }
 
