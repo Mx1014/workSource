@@ -870,6 +870,10 @@ public class AssetServiceImpl implements AssetService {
         		propertyNames.add(billItemDTO.getBillItemId().toString());
                 titleName.add(billItemDTO.getBillItemName()+"(元)");
                 titleSize.add(20);
+                //增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "LateFine");
+                titleName.add(billItemDTO.getBillItemName()+"滞纳金"+"(元)");
+                titleSize.add(30);
         	}
         }
         propertyNames.add("addresses");
@@ -914,13 +918,22 @@ public class AssetServiceImpl implements AssetService {
     		}
             for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
             	BigDecimal amountRecivable = BigDecimal.ZERO;
+            	BigDecimal lateFineAmount = BigDecimal.ZERO;
         		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
+        			//如果费项ID相等
         			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
-        				//如果费项是一样的，那么导出的时候，对费项做相加
-        				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+        				//如果费项ID相等，并且费项名称相等，那么说明是费项本身，如果不相等，则说明是费项产生的滞纳金
+        				if(billItemDTO.getBillItemName() != null && billItemDTO.getBillItemName().equals(billItemDTO2.getBillItemName())) {
+        					//如果费项是一样的，那么导出的时候，对费项做相加
+            				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+        				}else {
+        					lateFineAmount = lateFineAmount.add(billItemDTO2.getAmountReceivable());
+        				}
         			}
         		}
         		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
+        		//导出增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
+        		detail.put(billItemDTO.getBillItemId().toString() + "LateFine", lateFineAmount.toString());
             }
             detail.put("addresses", dto.getAddresses());
             //导出增加减免（总和）、减免备注、增收（总和）、增收备注
