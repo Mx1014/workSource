@@ -1942,7 +1942,11 @@ public class CommunityServiceImpl implements CommunityService {
 				cond = cond.or(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + cmd.getKeywords() + "%"));
 				query.addConditions(cond);
 			}
+			if (cmd.getStartTime() != null && cmd.getEndTime() != null) {
+                query.addConditions(Tables.EH_GROUP_MEMBERS.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
+                query.addConditions(Tables.EH_GROUP_MEMBERS.CREATE_TIME.le(new Timestamp(cmd.getEndTime())));
 
+            }
             if(null != locator.getAnchor())
             	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
             //query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
