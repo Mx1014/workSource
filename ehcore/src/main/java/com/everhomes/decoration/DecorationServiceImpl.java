@@ -549,7 +549,7 @@ public class DecorationServiceImpl implements  DecorationService {
                 dto.setDecorationFee(new ArrayList<>());
                 for (DecorationFee fee:fees)
                     if (fee.getTotalPrice()!=null)
-                        dto.setTotalAmount(fee.getTotalPrice().setScale(2));
+                        dto.setTotalAmount(fee.getTotalPrice().setScale(2).toString());
                     else{
                         DecorationFeeDTO dto2 = ConvertHelper.convert(fee,DecorationFeeDTO.class);
                         dto.getDecorationFee().add(dto2);

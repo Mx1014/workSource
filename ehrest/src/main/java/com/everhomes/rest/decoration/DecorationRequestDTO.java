@@ -48,7 +48,7 @@ public class DecorationRequestDTO {
     private String decoratorCompany;
     private List<DecorationFlowCaseDTO> flowCasees;
     private List<DecorationFeeDTO> decorationFee;
-    private BigDecimal totalAmount;
+    private String totalAmount;
     private BigDecimal refoundAmount;
     private String refoundComment;
 
@@ -166,11 +166,11 @@ public class DecorationRequestDTO {
         this.decorationFee = decorationFee;
     }
 
-    public BigDecimal getTotalAmount() {
+    public String getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
+    public void setTotalAmount(String totalAmount) {
         this.totalAmount = totalAmount;
     }
 
