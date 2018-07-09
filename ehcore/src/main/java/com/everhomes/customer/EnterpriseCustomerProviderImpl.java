@@ -123,6 +123,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1714,6 +1715,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                                 Timestamp newTime = (Timestamp) objNew;
                                 newData = newTime.toLocalDateTime().format(formatter);
                             }
+                        }
+                        if (fieldType.equals("Double")) {
+                            DecimalFormat decimalFormat = new DecimalFormat("###################.###########");
+                            if (objNew != null && objNew != "空")
+                                objNew = decimalFormat.format(oldData);
+                            if (objNew != null && objNew != "空")
+                                objOld = decimalFormat.format(objOld);
                         }
                         Map<String,Object> map = new HashMap<String,Object>();
 						map.put("display", field.getFieldDisplayName());
