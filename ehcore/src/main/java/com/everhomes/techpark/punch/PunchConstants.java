@@ -1,6 +1,12 @@
 package com.everhomes.techpark.punch;
 
 public class PunchConstants {
+	
+
+	public static final Long ONE_DAY_MS = 24 * 3600 * 1000L;
+	public static final Long DEFAULT_SPLIT_TIME = 4 * 3600 * 1000L;
+	public static final Long MILLISECONDGMT = 8 * 3600 * 1000L;
+	
 	/** module id 50600L */
 	public static final Long PUNCH_MODULE_ID = 50600L;
 	/** PUNCH_STATUS_SCOPE ="punch.status" */
@@ -62,4 +68,21 @@ public class PunchConstants {
 	/** REDIS monthReport Process*/
 	public static final String MONTH_REPORT_PROCESS ="MONTH.REPORT.PROCESS";
 
+	
+	/**考勤加班规则不同加班类型的提示文案初始化scope:"overtime.rule.tip.info"*/
+	public static final String OVERTIME_INFO_SCOPE ="overtime.rule.tip.info";
+	/**未设置打卡规则*/
+	public static final String OVERTIME_INFO_NORULE ="-1";
+	/**未开启*/
+	public static final String OVERTIME_INFO_CLOSE ="0";
+	/**需要申请和打卡，时长按打卡时间计算，但不能超过申请的时间*/
+	public static final String OVERTIME_INFO_BOTH ="1";
+	/**需要申请，时长按申请单时间计算*/
+	public static final String OVERTIME_INFO_REQUEST ="2";
+	/**不需要申请，时长按打卡时间计算*/
+	public static final String OVERTIME_INFO_PUNCH ="3";
+	/**工作日加班：*/
+	public static final String OVERTIME_INFO_WORKDAY ="4";
+	/**休息日/节假日加班：*/
+	public static final String OVERTIME_INFO_HOLIDAY ="5";
 }

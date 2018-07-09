@@ -27,6 +27,12 @@ import java.util.List;
  * <li>timeIntervals: 上下班时间，参考{@link com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO}</li>
  * <li>punchLogs：打卡记录列表 参照{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
  * <li>approvalRecords：列表 参照{@link EnterpriseApprovalRecordDTO}</li>
+ * <li>overtimeTotalWorkday: 工作日加班时长（毫秒数）</li>
+ * <li>overtimeTotalWorkdayDisplay: 工作日加班时长,格式化：xx小时xx分钟</li>
+ * <li>overtimeTotalRestday: 休息日加班时长（毫秒数）</li>
+ * <li>overtimeTotalRestdayDisplay: 休息日加班时长,格式化：xx小时xx分钟</li>
+ * <li>overtimeTotalLegalHoliday: 节假日日加班时长（毫秒数）</li>
+ * <li>overtimeTotalLegalHolidayDisplay: 节假日日加班时长,格式化：xx小时xx分钟</li>
  * </ul>
  */
 public class PunchDayDetailDTO {
@@ -56,6 +62,12 @@ public class PunchDayDetailDTO {
     private String statuString;
 	private String approvalStatuString;
 	private List<PunchTimeIntervalDTO> timeIntervals;
+	private Long overtimeTotalWorkday;
+	private String overtimeTotalWorkdayDisplay;
+	private Long overtimeTotalRestday;
+	private String overtimeTotalRestdayDisplay;
+	private Long overtimeTotalLegalHoliday;
+	private String overtimeTotalLegalHolidayDisplay;
 	@ItemType(PunchLogDTO.class)
 	private List<PunchLogDTO> punchLogs;
 	@ItemType(EnterpriseApprovalRecordDTO.class)
@@ -290,5 +302,53 @@ public class PunchDayDetailDTO {
 
 	public void setDeptId(Long deptId) {
 		this.deptId = deptId;
+	}
+
+	public Long getOvertimeTotalWorkday() {
+		return overtimeTotalWorkday;
+	}
+
+	public void setOvertimeTotalWorkday(Long overtimeTotalWorkday) {
+		this.overtimeTotalWorkday = overtimeTotalWorkday;
+	}
+
+	public String getOvertimeTotalWorkdayDisplay() {
+		return overtimeTotalWorkdayDisplay;
+	}
+
+	public void setOvertimeTotalWorkdayDisplay(String overtimeTotalWorkdayDisplay) {
+		this.overtimeTotalWorkdayDisplay = overtimeTotalWorkdayDisplay;
+	}
+
+	public Long getOvertimeTotalRestday() {
+		return overtimeTotalRestday;
+	}
+
+	public void setOvertimeTotalRestday(Long overtimeTotalRestday) {
+		this.overtimeTotalRestday = overtimeTotalRestday;
+	}
+
+	public String getOvertimeTotalRestdayDisplay() {
+		return overtimeTotalRestdayDisplay;
+	}
+
+	public void setOvertimeTotalRestdayDisplay(String overtimeTotalRestdayDisplay) {
+		this.overtimeTotalRestdayDisplay = overtimeTotalRestdayDisplay;
+	}
+
+	public Long getOvertimeTotalLegalHoliday() {
+		return overtimeTotalLegalHoliday;
+	}
+
+	public void setOvertimeTotalLegalHoliday(Long overtimeTotalLegalHoliday) {
+		this.overtimeTotalLegalHoliday = overtimeTotalLegalHoliday;
+	}
+
+	public String getOvertimeTotalLegalHolidayDisplay() {
+		return overtimeTotalLegalHolidayDisplay;
+	}
+
+	public void setOvertimeTotalLegalHolidayDisplay(String overtimeTotalLegalHolidayDisplay) {
+		this.overtimeTotalLegalHolidayDisplay = overtimeTotalLegalHolidayDisplay;
 	}
 }

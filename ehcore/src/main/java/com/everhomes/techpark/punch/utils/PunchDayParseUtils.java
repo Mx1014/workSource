@@ -3,13 +3,22 @@ package com.everhomes.techpark.punch.utils;
 import java.math.BigDecimal;
 
 public final class PunchDayParseUtils {
+    private static final Long MILLISECOND_OF_ONE_DAY = 8 * 3600 * 1000L;
     private static final int MILLISECOND_OF_ONE_HOUR = 60 * 60 * 1000;
     private static final int MILLISECOND_OF_ONE_MINUTE = 60 * 1000;
 
     private PunchDayParseUtils() {
     }
 
+    public static String parseHourMinuteDisplayString(Double dayCount, String hourUnit, String minuteUnit) {
+        Long milliSecond = new BigDecimal(String.valueOf(dayCount)).multiply(new BigDecimal(MILLISECOND_OF_ONE_DAY)).setScale(0).longValue();
+        return parseHourMinuteDisplayString(milliSecond, hourUnit, minuteUnit);
+    }
+
     public static String parseHourMinuteDisplayString(Long milliSecond, String hourUnit, String minuteUnit) {
+        if (milliSecond == null) {
+            return "0";
+        }
         long h = Math.abs(milliSecond) / MILLISECOND_OF_ONE_HOUR;
         long m = (Math.abs(milliSecond) % MILLISECOND_OF_ONE_HOUR) / MILLISECOND_OF_ONE_MINUTE;
         StringBuffer s = new StringBuffer();

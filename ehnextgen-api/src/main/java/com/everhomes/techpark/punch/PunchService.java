@@ -17,6 +17,8 @@ import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
 import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
+import com.everhomes.rest.techpark.punch.GetOvertimeInfoCommand;
+import com.everhomes.rest.techpark.punch.GetOvertimeInfoResponse;
 import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
 import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
@@ -101,11 +103,13 @@ import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Time;
@@ -396,5 +400,7 @@ public interface PunchService {
 	ListOrganizationPunchLogsResponse listOrganizationPunchLogs(ListOrganizationPunchLogsCommand cmd);
 
 	Date parseDateTimeByTimeSelectType(Long organizationId, Long userId, String day, ApprovalCategoryTimeSelectType type);
+
+	GetOvertimeInfoResponse getOvertimeInfo(GetOvertimeInfoCommand cmd);
 
 }

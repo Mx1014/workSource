@@ -14,6 +14,11 @@ import com.everhomes.util.StringHelper;
  * <li>nickName: 姓名</li>
  * <li>reason: 申请理由</li>
  * <li>punchStatusName: 打卡状态</li>
+ * <li>beginTime: 申请开始时间</li> 
+ * <li>endTime: 申请结束时间</li> 
+ * <li>duration: 申请时长</li> 
+ * <li>flowCaseId: 申请工作流id</li> 
+ * <li>approvalAttribute: 申请类型 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li> 
  * </ul>
  */
 public class ExceptionRequestDTO {
@@ -23,7 +28,12 @@ public class ExceptionRequestDTO {
 	private String nickName;
 	private String reason;
 	private String punchStatusName;
-
+    private Long beginTime;
+    private Long endTime;
+    private Double duration;
+    private Long flowCaseId;
+    private String approvalAttribute; 
+	
 	public Byte getExceptionRequestType() {
 		return exceptionRequestType;
 	}
@@ -70,6 +80,46 @@ public class ExceptionRequestDTO {
 
 	public void setPunchStatusName(String punchStatusName) {
 		this.punchStatusName = punchStatusName;
+	}
+
+	public Long getBeginTime() {
+		return beginTime;
+	}
+
+	public void setBeginTime(Long beginTime) {
+		this.beginTime = beginTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+	public Double getDuration() {
+		return duration;
+	}
+
+	public void setDuration(Double duration) {
+		this.duration = duration;
+	}
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+
+	public String getApprovalAttribute() {
+		return approvalAttribute;
+	}
+
+	public void setApprovalAttribute(String approvalAttribute) {
+		this.approvalAttribute = approvalAttribute;
 	}
 
 	@Override

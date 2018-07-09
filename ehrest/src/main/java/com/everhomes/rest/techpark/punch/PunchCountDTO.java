@@ -35,7 +35,10 @@ import java.util.List;
  * <li>belateTime：迟到时长</li>
  * <li>leaveEarlyTime：早退时长</li>
  * <li>forgotCount：缺卡次数</li>
- * <li>statusList：每天状态列表 参考{@link com.everhomes.rest.techpark.punch.DayStatusDTO}</li> 
+ * <li>overtimeTotalWorkdayDisplay: 工作日加班时长，格式：xx小时xx分钟</li>
+ * <li>overtimeTotalRestdayDisplay: 休息日加班时长，格式：xx小时xx分钟</li>
+ * <li>overtimeTotalLegalHolidayDisplay: 节假日加班时长，格式：xx小时xx分钟</li>
+ * <li>statusList：每天状态列表 参考{@link com.everhomes.rest.techpark.punch.DayStatusDTO}</li>
  * </ul>
  */
 public class PunchCountDTO {
@@ -74,7 +77,10 @@ public class PunchCountDTO {
     private Integer exceptionRequestCounts;
     private String belateTime;
     private String leaveEarlyTime;
-    private Integer forgotCount;
+	private Integer forgotCount;
+	private String overtimeTotalWorkdayDisplay;
+	private String overtimeTotalRestdayDisplay;
+	private String overtimeTotalLegalHolidayDisplay;
     private List<DayStatusDTO> statusList;
 
 	public Integer getExceptionDayCount() {
@@ -317,5 +323,29 @@ public class PunchCountDTO {
 
 	public void setDeptId(Long deptId) {
 		this.deptId = deptId;
+	}
+
+	public String getOvertimeTotalWorkdayDisplay() {
+		return overtimeTotalWorkdayDisplay;
+	}
+
+	public void setOvertimeTotalWorkdayDisplay(String overtimeTotalWorkdayDisplay) {
+		this.overtimeTotalWorkdayDisplay = overtimeTotalWorkdayDisplay;
+	}
+
+	public String getOvertimeTotalRestdayDisplay() {
+		return overtimeTotalRestdayDisplay;
+	}
+
+	public void setOvertimeTotalRestdayDisplay(String overtimeTotalRestdayDisplay) {
+		this.overtimeTotalRestdayDisplay = overtimeTotalRestdayDisplay;
+	}
+
+	public String getOvertimeTotalLegalHolidayDisplay() {
+		return overtimeTotalLegalHolidayDisplay;
+	}
+
+	public void setOvertimeTotalLegalHolidayDisplay(String overtimeTotalLegalHolidayDisplay) {
+		this.overtimeTotalLegalHolidayDisplay = overtimeTotalLegalHolidayDisplay;
 	}
 }

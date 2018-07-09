@@ -33,6 +33,7 @@ import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchOvertimeRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
 import com.everhomes.server.schema.tables.daos.EhPunchSpecialDaysDao;
@@ -49,6 +50,7 @@ import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhPunchHolidays;
 import com.everhomes.server.schema.tables.pojos.EhPunchLocationRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
+import com.everhomes.server.schema.tables.pojos.EhPunchOvertimeRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchRuleOwnerMap;
 import com.everhomes.server.schema.tables.pojos.EhPunchRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchSpecialDays;
@@ -66,6 +68,7 @@ import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchHolidaysRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchOvertimeRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchSpecialDaysRecord;
@@ -76,10 +79,13 @@ import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRulesRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.DeleteWhereStep;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
@@ -105,6 +111,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -2919,7 +2926,7 @@ public class PunchProviderImpl implements PunchProvider {
 	                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayStart))));
         if(null != userId)
         	condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
-        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
+        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.ne(ApprovalStatus.REJECTION.getCode()));
 
         List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
                 .orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
@@ -2941,7 +2948,8 @@ public class PunchProviderImpl implements PunchProvider {
         Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
         condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(punchDate));
         condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
-
+        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.ne(ApprovalStatus.REJECTION.getCode()));
+        
         List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
                 .orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
                 .map(new EhPunchExceptionRequestMapper());
@@ -2960,6 +2968,7 @@ public class PunchProviderImpl implements PunchProvider {
         SelectJoinStep<Record> step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
         Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
         condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate, endDate));
+        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.ne(ApprovalStatus.REJECTION.getCode()));
         if(null != userId)
         	condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 
@@ -3356,6 +3365,9 @@ public class PunchProviderImpl implements PunchProvider {
     		    Tables.EH_PUNCH_DAY_LOG_FILES.APPROVAL_STATUS_LIST,
                 Tables.EH_PUNCH_DAY_LOG_FILES.BELATE_TIME_TOTAL,
                 Tables.EH_PUNCH_DAY_LOG_FILES.LEAVE_EARLY_TIME_TOTAL,
+                Tables.EH_PUNCH_DAY_LOG_FILES.OVERTIME_TOTAL_WORKDAY,
+                Tables.EH_PUNCH_DAY_LOG_FILES.OVERTIME_TOTAL_RESTDAY,
+                Tables.EH_PUNCH_DAY_LOG_FILES.OVERTIME_TOTAL_LEGAL_HOLIDAY,
     		    Tables.EH_PUNCH_DAY_LOG_FILES.SMART_ALIGNMENT)
     	.select(context.select(Tables.EH_PUNCH_DAY_LOGS.ID,
     		    Tables.EH_PUNCH_DAY_LOGS.USER_ID,
@@ -3384,6 +3396,9 @@ public class PunchProviderImpl implements PunchProvider {
     		    Tables.EH_PUNCH_DAY_LOGS.APPROVAL_STATUS_LIST,
                 Tables.EH_PUNCH_DAY_LOGS.BELATE_TIME_TOTAL,
                 Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_TIME_TOTAL,
+                Tables.EH_PUNCH_DAY_LOGS.OVERTIME_TOTAL_WORKDAY,
+                Tables.EH_PUNCH_DAY_LOGS.OVERTIME_TOTAL_RESTDAY,
+                Tables.EH_PUNCH_DAY_LOGS.OVERTIME_TOTAL_LEGAL_HOLIDAY,
     		    Tables.EH_PUNCH_DAY_LOGS.SMART_ALIGNMENT )
     		    .from(Tables.EH_PUNCH_DAY_LOGS)
     			.where(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(ownerId)
@@ -3446,6 +3461,9 @@ public class PunchProviderImpl implements PunchProvider {
     		    Tables.EH_PUNCH_STATISTIC_FILES.BELATE_TIME,
     		    Tables.EH_PUNCH_STATISTIC_FILES.LEAVE_EARLY_TIME,
     		    Tables.EH_PUNCH_STATISTIC_FILES.FORGOT_COUNT,
+                Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_TOTAL_WORKDAY,
+                Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_TOTAL_RESTDAY,
+                Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_TOTAL_LEGAL_HOLIDAY,
     		    Tables.EH_PUNCH_STATISTIC_FILES.STATUS_LIST )
     	.select(context.select(Tables.EH_PUNCH_STATISTICS.ID,
     		    Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH,
@@ -3483,6 +3501,9 @@ public class PunchProviderImpl implements PunchProvider {
     		    Tables.EH_PUNCH_STATISTICS.BELATE_TIME,
     		    Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_TIME,
     		    Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT,
+                Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_WORKDAY,
+                Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_RESTDAY,
+                Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_LEGAL_HOLIDAY,
     		    Tables.EH_PUNCH_STATISTICS.STATUS_LIST).from(Tables.EH_PUNCH_STATISTICS)
     			.where(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId)
 				.and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth))))
@@ -3511,5 +3532,69 @@ public class PunchProviderImpl implements PunchProvider {
     	
 		return record.map(r->{ return ConvertHelper.convert(r, PunchLog.class);});
 	}
+
+    @Override
+    public PunchOvertimeRule getPunchOvertimeRuleById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPunchOvertimeRulesRecord> query = context.selectQuery(Tables.EH_PUNCH_OVERTIME_RULES);
+        query.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.ID.eq(id));
+        query.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.STATUS.ne((byte) 0));
+
+        EhPunchOvertimeRulesRecord record = query.fetchOne();
+        return ConvertHelper.convert(record, PunchOvertimeRule.class);
+    }
+
+    @Override
+    public Long createPunchOvertimeRule(PunchOvertimeRule punchOvertimeRule) {
+        String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchOvertimeRules.class);
+        long id = sequenceProvider.getNextSequence(key);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchOvertimeRules.class));
+        punchOvertimeRule.setId(id);
+        punchOvertimeRule.setCreateTime(DateUtils.currentTimestamp());
+        punchOvertimeRule.setCreatorUid(UserContext.currentUserId());
+        EhPunchOvertimeRulesDao dao = new EhPunchOvertimeRulesDao(context.configuration());
+        dao.insert(punchOvertimeRule);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchOvertimeRules.class, null);
+        return id;
+    }
+
+    @Override
+    public Long updatePunchOvertimeRule(PunchOvertimeRule punchOvertimeRule) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchOvertimeRules.class));
+        punchOvertimeRule.setUpdateTime(DateUtils.currentTimestamp());
+        punchOvertimeRule.setOperatorUid(UserContext.currentUserId());
+        EhPunchOvertimeRulesDao dao = new EhPunchOvertimeRulesDao(context.configuration());
+        dao.update(punchOvertimeRule);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchOvertimeRules.class, punchOvertimeRule.getId());
+        return punchOvertimeRule.getId();
+    }
+
+    @Override
+    public List<PunchOvertimeRule> findPunchOvertimeRulesByPunchRuleId(Long punchRuleId, Byte status) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPunchOvertimeRulesRecord> query = context.selectQuery(Tables.EH_PUNCH_OVERTIME_RULES);
+        query.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.PUNCH_RULE_ID.eq(punchRuleId));
+        query.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.STATUS.eq(status));
+
+        Result<EhPunchOvertimeRulesRecord> result = query.fetch();
+
+        if (result == null || result.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return result.map((r) -> {
+            return ConvertHelper.convert(r, PunchOvertimeRule.class);
+        });
+    }
+
+    @Override
+    public void deletePunchOvertimeRulesByPunchRuleId(Long punchRuleId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchOvertimeRules.class));
+        DeleteQuery<EhPunchOvertimeRulesRecord> deleteQuery = context.deleteQuery(Tables.EH_PUNCH_OVERTIME_RULES);
+        deleteQuery.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.PUNCH_RULE_ID.eq(punchRuleId));
+        deleteQuery.execute();
+    }
 }
 

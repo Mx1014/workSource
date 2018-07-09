@@ -1,12 +1,11 @@
 package com.everhomes.rest.techpark.punch;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 
  * <li>expiryTime：状态终止时间(APP在超过这个时间之后要重新请求数据更新页面)</li> 
+ * <li>punchDayType：工作日/休息日/节假日  参考{@link com.everhomes.rest.techpark.punch.PunchDayType}</li>
  * <li>punchIntervalNo：第几个打卡时间段</li> 
  * <li>punchType：上班还是下班 0-上班 1-下班 2-不打卡 参考 {@link PunchType}</li> 
  * <li>ruleTime： 规则时间(设置上下班打卡时间)</li> 
@@ -22,7 +21,8 @@ import com.everhomes.util.StringHelper;
  * <li>userName： 用户姓名 </li>
  * <li>deptName：部门名 </li>
  * <li>ruleName：规则名称 </li>
- * <li>locationInfo：打卡地点信息 </li>
+ * <li>locationInfo：打卡地点信息(有地点以地点打卡为准,没有地点才是wifi打卡) </li>
+ * <li>wifiInfo：打卡Wifi信息(有地点以地点打卡为准,没有地点才是wifi打卡) </li>
  * <li>deviceChangeFlag：设备异常 0-否 1-是 </li>
  * </ul>
  */
@@ -50,7 +50,9 @@ public class PunchLogDTO {
     private String deptName;
     private String ruleName;
 
+    private Byte punchDayType;
     private String locationInfo;
+    private String wifiInfo;
 
     private Byte deviceChangeFlag;
     
@@ -229,5 +231,21 @@ public class PunchLogDTO {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public Byte getPunchDayType() {
+		return punchDayType;
+	}
+
+	public void setPunchDayType(Byte punchDayType) {
+		this.punchDayType = punchDayType;
+	}
+
+	public String getWifiInfo() {
+		return wifiInfo;
+	}
+
+	public void setWifiInfo(String wifiInfo) {
+		this.wifiInfo = wifiInfo;
 	}
 }

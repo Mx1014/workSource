@@ -387,4 +387,15 @@ public interface PunchProvider {
 
 	public List<PunchLog> listPunchLogs(List<Long> userIds, Long ownerId, String startDay,
 			String endDay, Byte exceptionStatus, Integer pageOffset, Integer pageSize);
+
+	PunchOvertimeRule getPunchOvertimeRuleById(Long id);
+
+	Long createPunchOvertimeRule(PunchOvertimeRule punchOvertimeRule);
+
+	Long updatePunchOvertimeRule(PunchOvertimeRule punchOvertimeRule);
+
+	List<PunchOvertimeRule> findPunchOvertimeRulesByPunchRuleId(Long punchRuleId, Byte status);
+
+	void deletePunchOvertimeRulesByPunchRuleId(Long punchRuleId);
+
 }

@@ -16,6 +16,8 @@ import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
 import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
+import com.everhomes.rest.techpark.punch.GetOvertimeInfoCommand;
+import com.everhomes.rest.techpark.punch.GetOvertimeInfoResponse;
 import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
 import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
@@ -41,6 +43,7 @@ import com.everhomes.rest.techpark.punch.PunchLogsDay;
 import com.everhomes.rest.techpark.punch.RefreshMonthReportCommand;
 import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -533,6 +536,16 @@ public class PunchController extends ControllerBase {
 	public RestResponse refreshMonthReport(RefreshMonthReportCommand cmd){
 		punchService.refreshMonthReport(cmd.getMonth());
 		return new RestResponse();
+	}
+	/**
+	 * <p>获取加班文案信息</p>
+	 * <b>URL: /techpark/punch/getOvertimeInfo</b>
+	 */
+	@RequestMapping("getOvertimeInfo")
+	@RestReturn(GetOvertimeInfoResponse.class)
+	public RestResponse getOvertimeInfo(GetOvertimeInfoCommand cmd){
+		GetOvertimeInfoResponse resp = punchService.getOvertimeInfo(cmd);
+		return new RestResponse(resp);
 	}
 
 }
