@@ -955,10 +955,10 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
             payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), "NS"+namespaceId.toString());
+            String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         }else {
             payUserDTO = payUserDTOs.get(0);
         }
-        String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         return payUserDTO;
     }
 
