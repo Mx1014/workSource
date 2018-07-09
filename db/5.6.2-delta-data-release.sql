@@ -822,6 +822,14 @@ set @namespace_id = 999949;
 set @account_id = 4692;
 INSERT INTO `eh_activity_biz_payee` (`id`,`namespace_id`,`owner_id`,`biz_payee_id`,`biz_payee_type`)
 SELECT (@id := @id + 1), @namespace_id,t.id,@account_id,'EhOrganizations' FROM eh_activity_categories t where t.namespace_id = @namespace_id;
+
+-- AUTHOR: 郑思挺
+-- REMARK: 收款账户迁移 eh_rentalv2_pay_accounts
+SET @id = ifnull((SELECT MAX(id) FROM `eh_rentalv2_pay_accounts`),10000);
+set @namespace_id = 999949;
+set @account_id = 4692;
+INSERT INTO `eh_rentalv2_pay_accounts` (`id`,`namespace_id`,`community_id`,`resource_type`,`source_type`,`source_id`,`account_id`,`create_time`)
+SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@account_id,now() FROM eh_rentalv2_resource_types b LEFT JOIN eh_communities c on b.namespace_id = c.namespace_id where b.namespace_id = @namespace_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
