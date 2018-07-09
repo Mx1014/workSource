@@ -165,10 +165,11 @@ public class ArchivesServiceImpl implements ArchivesService {
             addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
 
-        //  1.进行校验
-        if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
-            throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
-                    "Duplicate work email");
+        //  1.进行校验(例如: 邮箱)
+        if (cmd.getWorkEmail() != null)
+            if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
+                throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
+                        "Duplicate work email");
 
         //  2.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
@@ -825,10 +826,11 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setContactToken(cmd.getContactToken());
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
 
-        //  1.进行校验
-        if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
-            throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
-                    "Duplicate work email");
+        //  1.进行校验(例如: 邮箱)
+        if (cmd.getWorkEmail() != null)
+            if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
+                throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
+                        "Duplicate work email");
 
         //  2.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);

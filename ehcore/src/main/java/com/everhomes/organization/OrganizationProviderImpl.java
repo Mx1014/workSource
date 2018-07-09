@@ -226,8 +226,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public OrganizationMemberDetails findOrganizationPersonnelByWorkEmail(Long orgId, String workEmail) {
-        if (workEmail == null)
-            return null;
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(orgId));
