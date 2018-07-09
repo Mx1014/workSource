@@ -9,14 +9,14 @@ package com.everhomes.rest.service_agreement;
  * </ul>
  */
 public class ServiceAgreementDTO {
-	private Long id;
+	private Integer id;
 	private Integer namespaceId;
 	private String agreementContent;
 	
-	public Long getId() {
+	public Integer getId() {
 		return id;
 	}
-	public void setId(Long id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	public Integer getNamespaceId() {
