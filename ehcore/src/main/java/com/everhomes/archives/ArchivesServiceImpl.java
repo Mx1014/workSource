@@ -638,10 +638,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                     "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
             excelUtils.setNeedSequenceColumn(false);
             //  5.处理导出变量的值并导出
-            List<ArchivesContactDTO> contacts = response.getContacts().stream().map(r -> {
-                convertArchivesContactForExcel(r);
-                return r;
-            }).collect(Collectors.toList());
+            List<ArchivesContactDTO> contacts = response.getContacts().stream().peek(this::convertArchivesContactForExcel).collect(Collectors.toList());
             taskService.updateTaskProcess(taskId, 60);
             outputStream = excelUtils.getOutputStream(propertyNames, titleNames, cellSizes, contacts);
             taskService.updateTaskProcess(taskId, 90);
@@ -1026,7 +1023,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private String getArchivesEmployeeCase(OrganizationMemberDetails employee) {
-        String employeeCase = "";
+        String employeeCase;
         Map<String, Object> map = new LinkedHashMap<>();
         switch (EmployeeStatus.fromCode(employee.getEmployeeStatus())) {
             case PROBATION:
@@ -1289,15 +1286,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setLogs(map);
     }
 
-    /********************    assistant function for Archives start    ********************/
+    /* *******************    assistant function for Archives start    ******************* */
     /**
      * 解析系统字段，便于存入档案表
      */
     private OrganizationMemberDetails convertToEmployeeDetail(OrganizationMemberDetails employee, List<PostApprovalFormItem> itemValues) {
         for (PostApprovalFormItem itemValue : itemValues) {
-            if (!GeneralFormFieldAttribute.DEFAULT.getCode().equals(itemValue.getFieldAttribute()))
-                continue;
-            else {
+            if (GeneralFormFieldAttribute.DEFAULT.getCode().equals(itemValue.getFieldAttribute())) {
                 switch (itemValue.getFieldName()) {
                     case ArchivesParameter.BIRTHDAY:
                         employee.setBirthday(ArchivesUtil.parseDate(itemValue.getFieldValue()));
@@ -1404,6 +1399,9 @@ public class ArchivesServiceImpl implements ArchivesService {
                         employee.setContactShortToken(itemValue.getFieldValue());
                         break;
                     case ArchivesParameter.WORK_EMAIL:
+                        if (organizationProvider.findOrganizationPersonnelByWorkEmail(employee.getOrganizationId(), itemValue.getFieldValue()) != null)
+                            throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
+                                    "Duplicate work email");
                         employee.setWorkEmail(itemValue.getFieldValue());
                         break;
                     case ArchivesParameter.WORK_START_TIME:
@@ -1516,7 +1514,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
         return valueMap;
     }
-    /********************    assistant function for Archives end    ********************/
+    /* *******************    assistant function for Archives end    ******************* */
 
     /**
      * 员工转正(配置)
@@ -1838,10 +1836,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 nextPageOffset = cmd.getPageAnchor() + 1;
             }
             response.setNextPageAnchor(nextPageOffset);
-            response.setDismissEmployees(results.stream().map(r -> {
-                ArchivesDismissEmployeeDTO dto = ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+            response.setDismissEmployees(results.stream().map(r -> ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class)).collect(Collectors.toList()));
             return response;
         }
 
