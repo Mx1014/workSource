@@ -7,11 +7,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.pmtask.PmTaskHistoryAddressStatus;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskOrderDetails;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskOrders;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskConfigs;
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jooq.JooqAutoConfiguration;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -25,11 +30,6 @@ import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.schema.tables.records.EhNamespacesRecord;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhPmTaskAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTaskHistoryAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhPmTaskLogsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTaskStatisticsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskHistoryAddresses;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskLogs;
@@ -548,5 +548,80 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		if(null != flowCaseId)
 			query.addConditions(Tables.EH_PM_TASKS.FLOW_CASE_ID.eq(flowCaseId));
 		return query.fetchOne().map(record -> ConvertHelper.convert(record, PmTask.class));
+	}
+
+	@Override
+	public PmTaskConfig createPmTaskConfig(PmTaskConfig bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskConfigs.class));
+		EhPmTaskConfigsDao dao = new EhPmTaskConfigsDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmTaskConfigs.class));
+		bean.setId(id);
+		bean.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(bean);
+		return bean;
+	}
+
+	@Override
+	public PmTaskConfig updatePmTaskConfig(PmTaskConfig bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskConfigs.class));
+		EhPmTaskConfigsDao dao = new EhPmTaskConfigsDao(context.configuration());
+		bean.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(bean);
+		return bean;
+	}
+
+	@Override
+	public PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskConfigs.class));
+		SelectQuery query = context.selectQuery(Tables.EH_PM_TASK_CONFIGS);
+		if(null != namespaceId)
+			query.addConditions(Tables.EH_PM_TASK_CONFIGS.NAMESPACE_ID.eq(namespaceId));
+		if(StringUtils.isNotEmpty(ownerType))
+			query.addConditions(Tables.EH_PM_TASK_CONFIGS.OWNER_TYPE.eq(ownerType));
+		if(null != ownerId)
+			query.addConditions(Tables.EH_PM_TASK_CONFIGS.OWNER_ID.eq(ownerId));
+		return ConvertHelper.convert(query.fetchOne(),PmTaskConfig.class);
+	}
+
+	@Override
+	public List<PmTaskOrderDetail> findOrderDetailsByTaskId(Integer namespaceId, String ownerType, Long ownerId, Long taskId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskOrderDetails.class));
+		SelectQuery query = context.selectQuery(Tables.EH_PM_TASK_ORDER_DETAILS);
+		if(null != namespaceId)
+			query.addConditions(Tables.EH_PM_TASK_ORDER_DETAILS.NAMESPACE_ID.eq(namespaceId));
+		if(StringUtils.isNotEmpty(ownerType))
+			query.addConditions(Tables.EH_PM_TASK_ORDER_DETAILS.OWNER_TYPE.eq(ownerType));
+		if(null != ownerId)
+			query.addConditions(Tables.EH_PM_TASK_ORDER_DETAILS.OWNER_ID.eq(ownerId));
+		if(null != taskId)
+			query.addConditions(Tables.EH_PM_TASK_ORDER_DETAILS.TASK_ID.eq(taskId));
+		return query.fetch().map(record -> ConvertHelper.convert(record,PmTaskOrderDetail.class));
+	}
+
+
+	@Override
+	public PmTaskOrder createPmTaskOrder(PmTaskOrder bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskOrders.class));
+		EhPmTaskOrdersDao dao = new EhPmTaskOrdersDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmTaskOrders.class));
+		bean.setId(id);
+		bean.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(bean);
+	}
+
+	@Override
+	public PmTaskOrder updatePmTaskOrder(PmTaskOrder bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskOrders.class));
+		EhPmTaskOrdersDao dao = new EhPmTaskOrdersDao(context.configuration());
+		bean.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(bean);
+		return bean;
+	}
+
+	@Override
+	public PmTaskOrder findPmTaskOrderById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskOrders.class));
+		EhPmTaskOrdersDao dao = new EhPmTaskOrdersDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), PmTaskOrder.class);
 	}
 }

@@ -891,7 +891,7 @@ public class PmTaskController extends ControllerBase {
      * <b>URL: /pmtask/admin/getPmTaskConfig</b>
      * <p>管理-通用设置查询</p>
      */
-    @RequestMapping("admin/getRelocationConfig")
+    @RequestMapping("admin/getPmTaskConfig")
     @RestReturn(value=PmTaskConfigDTO.class)
     public RestResponse getPmTaskConfig(GetPmTaskConfigCommand cmd) {
         PmTaskConfigDTO dto = pmTaskService.searchPmTaskConfigByProject(cmd);

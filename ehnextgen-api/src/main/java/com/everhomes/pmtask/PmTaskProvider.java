@@ -67,4 +67,18 @@ public interface PmTaskProvider {
     List<PmTask> findTasksByOrg(Long communityId, Integer namespaceId, Long organizationId, Long taskCategoryId);
 
 	PmTask findTaskByFlowCaseId(Long flowCaseId);
+
+	PmTaskConfig createPmTaskConfig(PmTaskConfig bean);
+	PmTaskConfig updatePmTaskConfig(PmTaskConfig bean);
+	PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId);
+
+	List<PmTaskOrderDetail> findOrderDetailsByTaskId(Integer namespaceId, String ownerType, Long ownerId, Long taskId);
+
+//	订单CRUD
+	PmTaskOrder createPmTaskOrder(PmTaskOrder bean);
+
+	PmTaskOrder updatePmTaskOrder(PmTaskOrder bean);
+
+	PmTaskOrder findPmTaskOrderById(Long id);
+
 }

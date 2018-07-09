@@ -34,7 +34,7 @@ CREATE TABLE `eh_pm_task_orders` (
   `order_commit_timestamp`  bigint(20) NULL  ,
   `pay_info` text NULL,
   `create_time`  datetime  ,
-  `update_time`  datetime  ,
+  `operate_time`  datetime  ,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修订单表';
 
@@ -52,7 +52,7 @@ CREATE TABLE `eh_pm_task_order_details` (
   `product_price` decimal(16) NULL COMMENT '产品单价' ,
 
   `create_time`  datetime  ,
-  `update_time`  datetime  ,
+  `operate_time`  datetime  ,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修订单明细表';
 

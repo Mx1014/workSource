@@ -51,7 +51,13 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.user.ListBusinessUsersCommand;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -72,8 +78,7 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.order.ListBizPayeeAccountDTO;
-import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.OrgAddressDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -227,6 +232,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private FlowEvaluateProvider flowEvaluateProvider;
 	@Autowired
 	private FlowEvaluateItemProvider flowEvaluateItemProvider;
+	@Autowired
+	private PayService payService;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -3170,29 +3177,154 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 //	----------------------------------------- 3.7 -----------------------------------------
 
-
 	@Override
 	public PmTaskConfigDTO setPmTaskConfig(SetPmTaskConfigCommand cmd) {
-		return null;
+		User user = UserContext.current().getUser();
+		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		if(null != result){
+			if(StringUtils.isNotEmpty(cmd.getContentHint()))
+				result.setContentHint(cmd.getContentHint());
+			if(null != cmd.getPaymentFlag())
+				result.setPaymentFlag(cmd.getPaymentFlag());
+			if(null != cmd.getPaymentAccount())
+				result.setPaymentAccount(cmd.getPaymentAccount());
+			if(null != cmd.getPaymentAccountType()){
+				result.setPaymentAccountType(cmd.getPaymentAccountType());
+			}
+			result.setOperatorId(user.getId());
+			pmTaskProvider.updatePmTaskConfig(result);
+		} else {
+			result = ConvertHelper.convert(cmd, PmTaskConfig.class);
+			result.setCreatorId(user.getId());
+			pmTaskProvider.createPmTaskConfig(result);
+		}
+		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
 	}
 
 	@Override
 	public PmTaskConfigDTO searchPmTaskConfigByProject(GetPmTaskConfigCommand cmd) {
-		return null;
+		if(null == cmd.getId() && (null == cmd.getNamespaceId() && null == cmd.getOwnerId())){
+			LOGGER.error("Invalid parameter, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter.");
+		}
+		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
 	}
 
 	@Override
 	public List<PmTaskOrderDetailDTO> searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd) {
-		return null;
+		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTaskId());
+		return result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList());
 	}
 
 	@Override
 	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
-		return null;
+		ListBusinessUsersCommand cmdPay = new ListBusinessUsersCommand();
+		if(null == cmd.getOrganizationId()){
+			LOGGER.error("Invalid OrganizationId, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid OrganizationId.");
+		}
+		// 给支付系统的bizUserId的形式：EhOrganizations1037001
+		String userPrefix = "EhOrganizations";
+		cmdPay.setBizUserId(userPrefix + cmd.getOrganizationId());
+		List<String> tags = new ArrayList<>();
+		tags.add("0");
+		if(null == cmd.getCommunityId() || cmd.getCommunityId().equals(-1L)) {
+			cmdPay.setTag1s(tags);
+		} else {
+			tags.add(String.valueOf(cmd.getCommunityId()));
+			cmdPay.setTag1s(tags);
+		}
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("List biz payee accounts(request), orgnizationId={}, tags={}, cmd={}", cmd.getOrganizationId(), tags, cmdPay);
+		}
+		List<PayUserDTO> payUserDTOs = payService.getPayUserList(cmdPay.getBizUserId(), cmdPay.getTag1s());
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("List biz payee accounts(response), orgnizationId={}, tags={}, response={}", cmd.getOrganizationId(), tags, GsonUtil.toJson(payUserDTOs));
+		}
+		List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();
+		if(payUserDTOs != null){
+			for(PayUserDTO payUserDTO : payUserDTOs) {
+				ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+				// 支付系统中的用户ID
+				dto.setAccountId(payUserDTO.getId());
+				// 用户向支付系统注册帐号时填写的帐号名称
+				dto.setAccountName(payUserDTO.getRemark());
+				dto.setAccountAliasName(payUserDTO.getUserAliasName());//企业名称（认证企业）
+				// 帐号类型，1-个人帐号、2-企业帐号
+				Integer userType = payUserDTO.getUserType();
+				if(userType != null && userType.equals(2)) {
+					dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+				} else {
+					dto.setAccountType(OwnerType.USER.getCode());
+				}
+				// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+				Integer registerStatus = payUserDTO.getRegisterStatus();
+				if(registerStatus != null && registerStatus.intValue() == 1) {
+					dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+				} else {
+					dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+				}
+				result.add(dto);
+			}
+		}
+		return result;
 	}
 
 	@Override
 	public PreOrderDTO payBills(CreatePmTaskOrderCommand cmd) {
+
+		PreOrderDTO preOrderDTO = null;
+		//1、检查买方（付款方）是否有会员，无则创建
+		User userById = userProvider.findUserById(UserContext.currentUserId());
+		UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
+		String userIdenify = null;
+		if(userIdentifier != null) {
+			userIdenify = userIdentifier.getIdentifierToken();
+		}
+		PayUserDTO payUserDTO = checkAndCreatePaymentUser(cmd.getPayerId().toString(), "NS" + cmd.getNamespaceId().toString(), userIdenify, null, null, null);
+		if(payUserDTO != null) {
+			cmd.setPayerId(payUserDTO.getId());
+		}else {
+			LOGGER.error("payerUserId no find, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+					"payerUserId no find");
+		}
+
+		//2、收款方是否有会员，无则报错
+		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		Long payeeUserId = pmTaskConfig.getPaymentAccount();
+		if(payeeUserId == null) {
+			LOGGER.error("payeeUserId no find, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+					"payeeUserId no find");
+		}
+
+		//3、组装报文，发起下单请求
+//		OrderCommandResponse orderCommandResponse = createOrder(cmd);
+		pmTaskProvider.findOrderbyId();
+		CreateOrderCommand cmdPay = new CreateOrderCommand();
+		cmdPay.setAmount(amountsInCents);
+		cmdPay.setCommunityId(cmd.getCommunityId());
+		cmdPay.setClientAppName(cmd.getClientAppName());
+		cmdPay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
+		cmdPay.setNamespaceId(cmd.getNamespaceId());
+		cmdPay.setOpenid(cmd.getOpenid());
+		cmdPay.setOrderId(orderId);
+		cmdPay.setOrderType(OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+		cmdPay.setPayerId(payerId);
+		CreateOrderRestResponse response = payService.createPurchaseOrder(cmdPay);
+
+		//4、组装支付方式
+		preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
+
+		//5、保存订单信息
+		saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+
+		//6、返回
+		return preOrderDTO;
 		return null;
 	}
 
@@ -3414,6 +3546,33 @@ public class PmTaskServiceImpl implements PmTaskService {
 			ownerIds.add(cmd.getOwnerId());
 		}
 		return ownerIds;
+	}
+
+	//检查买方（付款方）会员，无则创建
+	private PayUserDTO checkAndCreatePaymentUser(String userId, String accountCode,String userIdenify, String tag1, String tag2, String tag3){
+		PayUserDTO payUserDTO = new PayUserDTO();
+		String payerid = OwnerType.USER.getCode()+userId;
+		//根据tag查询支付帐号
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("getPayUserList payerid={}", payerid);
+		}
+		List<PayUserDTO> payUserDTOs = payService.getPayUserList(payerid);
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("getPayUserList response={}", payUserDTOs);
+		}
+		if(payUserDTOs == null || payUserDTOs.size() == 0){
+			//创建个人账号
+			LOGGER.info("createPersonalPayUserIfAbsent payerid = {}, accountCode = {}, userIdenify={}",payerid,accountCode,userIdenify);
+			payUserDTO = payService.createPersonalPayUserIfAbsent(payerid, accountCode);
+			if(payUserDTO==null){
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_USER_ACCOUNT,
+						"创建个人付款账户失败");
+			}
+			String s = payService.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
+		}else {
+			payUserDTO = payUserDTOs.get(0);
+		}
+		return payUserDTO;
 	}
 
 }

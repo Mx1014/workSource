@@ -27,7 +27,7 @@ public class CreatePmTaskOrderCommand {
     private String clientAppName;
     private Integer paymentType;
     private String payerType;
-    private String payerId;
+    private Long payerId;
     private String payerName;
     private String openid;
     private Integer namespaceId;
@@ -74,11 +74,11 @@ public class CreatePmTaskOrderCommand {
         this.payerType = payerType;
     }
 
-    public String getPayerId() {
+    public Long getPayerId() {
         return payerId;
     }
 
-    public void setPayerId(String payerId) {
+    public void setPayerId(Long payerId) {
         this.payerId = payerId;
     }
 
