@@ -164,10 +164,16 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getJobLevelIds() != null)
             addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
-        //  1.添加人员到组织架构
+
+        //  1.进行校验
+        if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
+            throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
+                    "Duplicate work email");
+
+        //  2.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
-        //  2.获得 detailId 然后处理其它信息
+        //  3.获得 detailId 然后处理其它信息
         Long detailId = null;
         if (memberDTO != null)
             detailId = memberDTO.getDetailId();
@@ -183,12 +189,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setDetailId(employee.getId());
         dto.setContactName(employee.getContactName());
         dto.setContactToken(employee.getContactToken());
-        //  3-1.编辑则直接更新信息
+        //  4-1.编辑则直接更新信息
         if (TrueOrFalseFlag.fromCode(cmd.getUpdateFlag()) == TrueOrFalseFlag.TRUE) {
             organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
             return dto;
         }
-        //  3-2.新增则初始化部分信息
+        //  4-2.新增则初始化部分信息
         employee.setCheckInTime(ArchivesUtil.currentDate());
         employee.setCheckInTimeIndex(ArchivesUtil.getMonthAndDay(employee.getCheckInTime()));
         employee.setEmploymentTime(ArchivesUtil.currentDate());
@@ -196,10 +202,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         employee.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
         organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
 
-        //  4.查询若存在于离职列表则删除
+        //  5.查询若存在于离职列表则删除
         deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
-        //  5.增加入职记录
+        //  6.增加入职记录
         AddArchivesEmployeeCommand logCommand = ConvertHelper.convert(cmd, AddArchivesEmployeeCommand.class);
         logCommand.setCheckInTime(String.valueOf(employee.getCheckInTime()));
         logCommand.setEmploymentTime(logCommand.getCheckInTime());
@@ -818,10 +824,16 @@ public class ArchivesServiceImpl implements ArchivesService {
             addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
         addCommand.setContactToken(cmd.getContactToken());
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
-        //  1.添加人员到组织架构
+
+        //  1.进行校验
+        if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
+            throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
+                    "Duplicate work email");
+
+        //  2.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
-        //  2.获得 detailId 然后处理其它信息
+        //  3.获得 detailId 然后处理其它信息
         Long detailId = null;
         if (memberDTO != null)
             detailId = memberDTO.getDetailId();
@@ -860,10 +872,10 @@ public class ArchivesServiceImpl implements ArchivesService {
             employee.setContractPartyId(cmd.getOrganizationId());
         organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
 
-        //  3.查询若存在于离职列表则删除
+        //  4.查询若存在于离职列表则删除
         deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
 
-        //  4.增加入职记录
+        //  5.增加入职记录
         addCheckInLogs(detailId, cmd);
 
         dto.setDetailId(employee.getId());

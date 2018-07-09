@@ -221,6 +221,8 @@ public interface OrganizationProvider {
 
     OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 
+    OrganizationMemberDetails findOrganizationPersonnelByWorkEmail(Long orgId, String workEmail);
+
     /**
      * Create enterprise details
      *
