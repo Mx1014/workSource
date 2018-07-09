@@ -378,4 +378,6 @@ public interface AssetProvider {
     void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
     
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
+    
+    String getProjectNameByBillID(Long billId);
 }

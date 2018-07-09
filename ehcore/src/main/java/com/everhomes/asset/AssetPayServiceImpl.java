@@ -319,7 +319,8 @@ public class AssetPayServiceImpl implements AssetPayService{
         createOrderCmd.setIndustryName(null);
         createOrderCmd.setIndustryCode(null);
         createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
-        createOrderCmd.setOrderRemark1(String.valueOf(cmd.getOrderType()));
+        //createOrderCmd.setOrderRemark1(String.valueOf(cmd.getOrderType()));
+        createOrderCmd.setOrderRemark1("物业缴费");
 	    createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
 	    createOrderCmd.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
 	    createOrderCmd.setOrderRemark4(null);

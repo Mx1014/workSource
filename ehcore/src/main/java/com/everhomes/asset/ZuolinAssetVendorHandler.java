@@ -754,12 +754,21 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 //        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
 //        cmd2pay.setPaymentParams(paymentParamsDTO);
 
+        //通过账单ID找到ownerID，再通过ownerID找到项目名称
+        String projectName = "";
+        if(billIds != null) {
+        	Long billId = Long.parseLong(billIds.get(0));
+        	projectName = assetProvider.getProjectNameByBillID(billId);
+        }
         //通过账单组获取到账单组的bizPayeeType（收款方账户类型）和bizPayeeId（收款方账户id）
+        String billGroupName = "";
         PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
         if(paymentBillGroup != null) {
         	cmd2pay.setBizPayeeId(paymentBillGroup.getBizPayeeId());
         	cmd2pay.setBizPayeeType(paymentBillGroup.getBizPayeeType());
+        	billGroupName = paymentBillGroup.getName();
         }
+        cmd2pay.setExtendInfo("项目名称:" + projectName + ", " + "账单组名称:" + billGroupName);
         PreOrderDTO preOrder = assetPayService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
 //        response.setExpiredIntervalTime(15l*60l);
