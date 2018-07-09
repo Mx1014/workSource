@@ -601,7 +601,9 @@ public class CustomerServiceImpl implements CustomerService {
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
         //add potential data transfer to customer
-        saveCustomerTransferEvent(UserContext.currentUserId(),customer, cmd.getSourceId(),cmd.getDeviceType());
+        if (cmd.getSourceId() != null) {
+            saveCustomerTransferEvent(UserContext.currentUserId(), customer, cmd.getSourceId(), cmd.getDeviceType());
+        }
         syncPotentialTalentToCustomer(customer.getId(),cmd.getSourceId());
         enterpriseCustomerSearcher.feedDoc(customer);
         return convertToDTO(customer);
@@ -634,10 +636,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void syncPotentialTalentToCustomer(Long customerId, Long sourceId) {
-        // source id is potential customer data primary key
-        enterpriseCustomerProvider.updatePotentialTalentsToCustomer(customerId, sourceId);
-        // delete origin source potential data
-        enterpriseCustomerProvider.deletePotentialCustomer(sourceId);
+        if (sourceId != null) {
+            // source id is potential customer data primary key
+            enterpriseCustomerProvider.updatePotentialTalentsToCustomer(customerId, sourceId);
+            // delete origin source potential data
+            enterpriseCustomerProvider.deletePotentialCustomer(sourceId);
+        }
     }
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
