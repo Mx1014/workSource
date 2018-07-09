@@ -14,7 +14,7 @@
 
 -- AUTHOR: 杨崇鑫  20180704
 -- REMARK: 上线完成后请调用以下接口做物业缴费以前订单支付方式的数据迁移 by 杨崇鑫
--- /asset/transferOrderPaymentType
+-- REMARK: /asset/transferOrderPaymentType
 
 -- AUTHOR: 梁燕龙 20180702
 -- REMARK: 活动支付订单迁移，在执行迁移语句前，将eh_activity_roster，eh_payment_order_records这两张表进行全表备份
