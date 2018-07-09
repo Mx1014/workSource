@@ -32,7 +32,7 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
 		}
 		//主要用于对传入的 nameSpaceId 为空时的处理，为空则从当前环境中获取
 		 namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
-		return serviceAgreementprovider.getServiceAgreementByNamespaceId(namespaceId);
+		return serviceAgreementprovider.getByNamespaceIdAndDef2Null(namespaceId);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
 			 ConvertHelper.convert(dto, ServiceAgreement.class);
 			 serviceAgreementprovider.updateServiceAgreement(ConvertHelper.convert(dto, ServiceAgreement.class));
 		 }else{
-			 serviceAgreementprovider.crteateServiceAgreement(ConvertHelper.convert(dto, ServiceAgreement.class));
+			 serviceAgreementprovider.crteateServiceAgreement(ConvertHelper.convert(cmd, ServiceAgreement.class));
 		 }
 
 	}

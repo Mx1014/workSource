@@ -18,6 +18,12 @@ public interface ServiceAgreementProvider {
 	 */ 
 	ServiceAgreementDTO getServiceAgreementByNamespaceId(Integer namespaceId);
 	
+	/**
+	 * 通过域空间查询服务协议查不到则取默认模板
+	 * @param cmd
+	 * @return ServiceAgreementDTO
+	 */ 
+	ServiceAgreementDTO getByNamespaceIdAndDef2Null(Integer namespaceId) ;
 
 	/**
 	 * 创建配置项信息
