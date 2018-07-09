@@ -1304,6 +1304,23 @@ public class AssetServiceImpl implements AssetService {
                 item.setContractNum(cmd.getContractNum());
                 item.setTargetName(cmd.getTargetName());
                 item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                
+                //保存用量 ：物业缴费6.1 add by 杨崇鑫
+                //创建费项的时候，根据"chargingItemId": 是否相等，判断是否该费项是否有用量数据！
+                for(int i = 0; i < feesRules.size(); i++) {
+                	//获取单一包裹
+                    FeeRules rule = feesRules.get(i);
+                    if(rule != null && rule.getChargingItemId() != null && rule.getChargingItemId().equals(item.getChargingItemsId())) {
+                    	List<VariableIdAndValue> variableIdAndValueList = rule.getVariableIdAndValueList();
+                    	for ( int k = 0; k < variableIdAndValueList.size(); k++){
+                    		VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                    		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("yl")) {
+                    			item.setEnergyConsume(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : null);
+                    		}
+                    	}
+                    }
+                }
+                	
                 //放到数组中去
                 billItemsList.add(item);
             }
