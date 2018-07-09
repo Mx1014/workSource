@@ -2388,7 +2388,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
            // results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize + 1);
             //update by huanglm ,#22488【iOS&安卓】左上角地址切换不是按照距离最近来排序的 
         	List<Community> communities = this.listMixCommunitiesByDistanceWithNamespaceId(cmd, locator, pageSize);
-        	//issue-33014,communities可能为空，会导致app报开小差，需要做非空判断
+        	//issue-33013(部分解决),communities可能为空，会导致app报开小差，需要做非空判断
         	if (communities!=null) {
         		communities.stream().map(r->{
     				CommunityDTO dto = ConvertHelper.convert(r,CommunityDTO.class);					
