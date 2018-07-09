@@ -2953,8 +2953,7 @@ public class ParkingServiceImpl implements ParkingService {
 	public List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getCommunityId());
 		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
-//		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
-		String key = OwnerType.ORGANIZATION.getCode() + "1039387";
+		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
 		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
 		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
 		if(payUserList==null || payUserList.size() == 0){
