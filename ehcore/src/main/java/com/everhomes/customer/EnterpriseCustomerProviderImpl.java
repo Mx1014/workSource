@@ -1719,7 +1719,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                         if (fieldType.equals("Double")) {
                             DecimalFormat decimalFormat = new DecimalFormat("###################.###########");
                             if (objNew != null && objNew != "空")
-                                objNew = decimalFormat.format(oldData);
+                                objNew = decimalFormat.format(objNew);
                             if (objNew != null && objNew != "空")
                                 objOld = decimalFormat.format(objOld);
                         }
