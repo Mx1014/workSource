@@ -2879,7 +2879,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (dto.getFlowCaseId() != null){
 			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(dto.getFlowCaseId());
 			FlowCase flowCase = tree.getLeafNodes().get(0).getFlowCase();
-			dto.setFlowCaseId(flowCase.getId());
+			if (flowCase != null)
+				dto.setFlowCaseId(flowCase.getId());
 		}
 		return dto;
 	}
