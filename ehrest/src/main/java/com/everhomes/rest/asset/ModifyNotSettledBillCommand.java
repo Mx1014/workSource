@@ -18,6 +18,7 @@ import java.util.List;
  * <li>invoiceNum:发票编号</li>
  * <li>noticeTel:催缴联系号码</li>
  * <li>customerTel:客户手机号</li>
+ * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
@@ -31,6 +32,8 @@ public class ModifyNotSettledBillCommand {
     private String invoiceNum;
     private String noticeTel;
     private String customerTel;
+    //新增附件
+    private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -111,5 +114,13 @@ public class ModifyNotSettledBillCommand {
 
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
+	}
+
+	public List<AssetPaymentBillAttachment> getAssetPaymentBillAttachmentList() {
+		return assetPaymentBillAttachmentList;
+	}
+
+	public void setAssetPaymentBillAttachmentList(List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList) {
+		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
 	}
 }
