@@ -6810,6 +6810,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             // 检查手机号的唯一性
             //CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
             CommunityPmOwner exist = null;
+            
             List<String> extraTels = (List<String>)StringHelper.fromJsonString(dto.getContactExtraTels(), ArrayList.class);
             for(String tel : extraTels){
         		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(namespaceId,communityId, tel);
@@ -6824,10 +6825,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 compareOwnerInfo(exist, owner);
                 owner.setId(exist.getId());
             }
-            if (!contactTokenList.contains(dto.getContactToken()) && exist!=null) {
-                propertyMgrProvider.deleteOrganizationOwnerAddressByOwnerId(namespaceId, exist.getId());
-            }
-            contactTokenList.add(dto.getContactToken());
+            for(String tel : extraTels){
+            	if (!contactTokenList.contains(tel) && exist!=null) {
+                    propertyMgrProvider.deleteOrganizationOwnerAddressByOwnerId(namespaceId, exist.getId());
+                    break;
+            	}
+        	}
+            
+            contactTokenList.addAll(extraTels);
             owner.setNamespaceId(namespaceId);
             owner.setCreatorUid(UserContext.currentUserId());
             owner.setOrganizationId(organizationId);
