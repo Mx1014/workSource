@@ -5573,9 +5573,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         return ownerAddressList.stream().map(r -> {
             Address address = addressProvider.findAddressById(r.getAddressId());
-            OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
-            String locale = currentLocale();
             if (address != null) {
+            	OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
+                String locale = currentLocale();
                 dto.setBuilding(address.getBuildingName());
                 dto.setAddress(address.getAddress());
                 dto.setAddressId(address.getId());
@@ -5591,21 +5591,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     }
                 }
                 dto.setApartmentLivingStatus(address.getLivingStatus());
-
-
+                
+                LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
+                        String.valueOf(r.getAuthType()), locale);
+                if (addressStatusLocale != null) {
+                    dto.setAuthType(addressStatusLocale.getText());
+                }
+                LocaleString livingStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE,
+                        String.valueOf(r.getLivingStatus()), locale);
+                if (livingStatusLocale != null) {
+                    dto.setLivingStatus(livingStatusLocale.getText());
+                }
+                return dto;
             }
-
-            LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
-                    String.valueOf(r.getAuthType()), locale);
-            if (addressStatusLocale != null) {
-                dto.setAuthType(addressStatusLocale.getText());
-            }
-            LocaleString livingStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE,
-                    String.valueOf(r.getLivingStatus()), locale);
-            if (livingStatusLocale != null) {
-                dto.setLivingStatus(livingStatusLocale.getText());
-            }
-            return dto;
+            return null;
         }).collect(Collectors.toList());
     }
 
