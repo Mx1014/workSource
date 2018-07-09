@@ -205,8 +205,8 @@ public class UserActivityController extends ControllerBase {
      * <p>导出举报数据</p>
      */
     @RequestMapping("exportFeedbacks")
-    public void exportFeedbacks(ExportFeedbacksCommand cmd, HttpServletResponse response) {
-        this.userActivityService.exportFeedbacks(cmd, response);
+    public void exportFeedbacks(ExportFeedbacksCommand cmd) {
+        this.userActivityService.exportFeedbacks(cmd);
     }
     
     /**

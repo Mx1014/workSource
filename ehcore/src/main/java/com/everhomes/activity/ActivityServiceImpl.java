@@ -23,6 +23,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.forum.*;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
@@ -52,6 +53,8 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
@@ -265,6 +268,9 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 
     @Autowired
     private SensitiveWordService sensitiveWordService;
+
+    @Autowired
+    private TaskService taskService;
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -6087,17 +6093,24 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 	}
 
     @Override
-    public void exportActivity(ExportActivityCommand cmd, HttpServletResponse response) {
-        StatisticsActivityCommand statisticsActivityCommand = ConvertHelper.convert(cmd,StatisticsActivityCommand.class);
-        StatisticsActivityResponse result = this.statisticsActivity(statisticsActivityCommand);
-        List<StatisticsActivityDTO> dtos = result.getList();
-        Workbook wb = new XSSFWorkbook();
+    public void exportActivity(ExportActivityCommand cmd) {
 
-        Font font = wb.createFont();
-        font.setFontName("黑体");
-        font.setFontHeightInPoints((short) 16);
-        CellStyle style = wb.createCellStyle();
-        style.setFont(font);
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if(cmd.getStartTime() != null){
+            params.put("startTime", cmd.getStartTime());
+        }
+        if(cmd.getEndTime() != null){
+            params.put("endTime", cmd.getEndTime());
+        }
+
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         String fileName = "activityList";
         Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
@@ -6107,49 +6120,23 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         }
         SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
         fileName += "_活动报名_" + fileNameSdf.format(cmd.getStartTime()) + "_" +fileNameSdf.format(cmd.getEndTime());
-        Sheet sheet = wb.createSheet(fileName);
-        sheet.setDefaultColumnWidth(20);
-        sheet.setDefaultRowHeightInPoints(20);
-        Row row = sheet.createRow(0);
-        row.createCell(0).setCellValue("活动标题");
-        row.createCell(1).setCellValue("报名人数");
-        row.createCell(2).setCellValue("发布时间");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
-        int size = dtos.size();
-        for(int i = 0; i < size; i++){
-            Row tempRow = sheet.createRow(i + 1);
-            StatisticsActivityDTO dto = dtos.get(i);
-
-            tempRow.createCell(0).setCellValue(dto.getSubject());
-            tempRow.createCell(1).setCellValue(dto.getEnrollUserCount());
-            tempRow.createCell(2).setCellValue(sdf.format(dto.getCreateTime()));
-        }
-        ByteArrayOutputStream out = null;
-        try {
-            out = new ByteArrayOutputStream();
-            wb.write(out);
-            DownloadUtils.download(out, response,fileName);
-        } catch (IOException e) {
-            LOGGER.error("exportActivity is fail. {}",e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "exportActivity is fail.");
-        }
     }
 
     @Override
-    public void exportOrganization(ExportOrganizationCommand cmd, HttpServletResponse response) {
-        StatisticsOrganizationCommand statisticsOrganizationCommand = ConvertHelper.convert(cmd,StatisticsOrganizationCommand.class);
-        StatisticsOrganizationResponse result = this.statisticsOrganization(statisticsOrganizationCommand);
-        List<StatisticsOrganizationDTO> dtos = result.getList();
-        Workbook wb = new XSSFWorkbook();
+    public void exportOrganization(ExportOrganizationCommand cmd) {
 
-        Font font = wb.createFont();
-        font.setFontName("黑体");
-        font.setFontHeightInPoints((short) 16);
-        CellStyle style = wb.createCellStyle();
-        style.setFont(font);
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         String fileName = "activityOrganizationList";
         Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
@@ -6159,47 +6146,24 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         }
         SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
         fileName += "_企业报名_" + fileNameSdf.format(new Date());
-        Sheet sheet = wb.createSheet(fileName);
-        sheet.setDefaultColumnWidth(20);
-        sheet.setDefaultRowHeightInPoints(20);
-        Row row = sheet.createRow(0);
-        row.createCell(0).setCellValue("企业名称");
-        row.createCell(1).setCellValue("报名总人次");
-        row.createCell(2).setCellValue("报名活动场数");
 
-        int size = dtos.size();
-        for(int i = 0; i < size; i++){
-            Row tempRow = sheet.createRow(i + 1);
-            StatisticsOrganizationDTO dto = dtos.get(i);
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityOrganizationExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
-            tempRow.createCell(0).setCellValue(dto.getOrgName());
-            tempRow.createCell(1).setCellValue(dto.getSignPeopleCount());
-            tempRow.createCell(2).setCellValue(dto.getSignActivityCount());
-        }
-        ByteArrayOutputStream out = null;
-        try {
-            out = new ByteArrayOutputStream();
-            wb.write(out);
-            DownloadUtils.download(out, response,fileName);
-        } catch (IOException e) {
-            LOGGER.error("exportOrganizationActivity is fail. {}",e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "exportOrganizationActivity is fail.");
-        }
     }
 
     @Override
-    public void exportTag(ExportTagCommand cmd, HttpServletResponse response) {
-        StatisticsTagCommand statisticsTagCommand = ConvertHelper.convert(cmd,StatisticsTagCommand.class);
-        StatisticsTagResponse result = this.statisticsTag(statisticsTagCommand);
-        List<StatisticsTagDTO> dtos = result.getList();
-        Workbook wb = new XSSFWorkbook();
+    public void exportTag(ExportTagCommand cmd) {
 
-        Font font = wb.createFont();
-        font.setFontName("黑体");
-        font.setFontHeightInPoints((short) 16);
-        CellStyle style = wb.createCellStyle();
-        style.setFont(font);
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         String fileName = "activityTagList";
         Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
@@ -6209,37 +6173,9 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         }
         SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
         fileName += "_标签统计_" + fileNameSdf.format(new Date());
-        Sheet sheet = wb.createSheet(fileName);
-        sheet.setDefaultColumnWidth(20);
-        sheet.setDefaultRowHeightInPoints(20);
-        Row row = sheet.createRow(0);
-        row.createCell(0).setCellValue("标签");
-        row.createCell(1).setCellValue("活动数目");
-        row.createCell(2).setCellValue("活动数目占比");
-        row.createCell(3).setCellValue("报名人次");
-        row.createCell(4).setCellValue("报名人次占比");
 
-        int size = dtos.size();
-        for(int i = 0; i < size; i++){
-            Row tempRow = sheet.createRow(i + 1);
-            StatisticsTagDTO dto = dtos.get(i);
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityTagExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
-            tempRow.createCell(0).setCellValue(dto.getTagName());
-            tempRow.createCell(1).setCellValue(dto.getCreateActivityCount());
-            tempRow.createCell(2).setCellValue(dto.getCreateActivityRate());
-            tempRow.createCell(3).setCellValue(dto.getSignPeopleCount());
-            tempRow.createCell(4).setCellValue(dto.getSignPeopleRate());
-        }
-        ByteArrayOutputStream out = null;
-        try {
-            out = new ByteArrayOutputStream();
-            wb.write(out);
-            DownloadUtils.download(out, response,fileName);
-        } catch (IOException e) {
-            LOGGER.error("exportActivityFromTag is fail. {}",e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "exportActivityFromTag is fail.");
-        }
     }
 
 //	@Override

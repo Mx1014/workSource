@@ -207,11 +207,11 @@ public interface ActivityService {
 	 */
 	void syncActivitySignupAttendeeCount();
 
-	void exportActivity(ExportActivityCommand cmd, HttpServletResponse response);
+	void exportActivity(ExportActivityCommand cmd);
 
-	void exportOrganization(ExportOrganizationCommand cmd, HttpServletResponse response);
+	void exportOrganization(ExportOrganizationCommand cmd);
 
-	void exportTag(ExportTagCommand cmd, HttpServletResponse response);
+	void exportTag(ExportTagCommand cmd);
 
 //	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }

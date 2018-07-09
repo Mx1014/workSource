@@ -37,7 +37,7 @@ public interface UserActivityService {
     
     ListFeedbacksResponse listFeedbacks(ListFeedbacksCommand cmd);
 
-    void exportFeedbacks(ExportFeedbacksCommand cmd, HttpServletResponse response);
+    void exportFeedbacks(ExportFeedbacksCommand cmd);
 
     void updateFeedback(UpdateFeedbackCommand cmd);
     

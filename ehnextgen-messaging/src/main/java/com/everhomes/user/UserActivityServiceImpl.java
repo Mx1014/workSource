@@ -16,6 +16,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.FlowService;
 import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
@@ -39,6 +40,8 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
 import com.everhomes.rest.common.ActivityListStyleFlag;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
@@ -182,6 +185,9 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Autowired
     private NamespaceProvider namespaceProvider;
+
+    @Autowired
+    private TaskService taskService;
 
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
@@ -564,15 +570,14 @@ public class UserActivityServiceImpl implements UserActivityService {
     }
 
     @Override
-    public void exportFeedbacks(ExportFeedbacksCommand cmd, HttpServletResponse response) {
-        List<Feedback> results = userActivityProvider.ListFeedbacksByNamespaceId(UserContext.getCurrentNamespaceId());
-        Workbook wb = new XSSFWorkbook();
+    public void exportFeedbacks(ExportFeedbacksCommand cmd) {
+        Map<String, Object> params = new HashMap();
 
-        Font font = wb.createFont();
-        font.setFontName("黑体");
-        font.setFontHeightInPoints((short) 16);
-        CellStyle style = wb.createCellStyle();
-        style.setFont(font);
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         String fileName = "activityTagList";
         Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
@@ -581,59 +586,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
         SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
         fileName += "_举报管理_" + fileNameSdf.format(new Date());
-        Sheet sheet = wb.createSheet(fileName);
-        sheet.setDefaultColumnWidth(20);
-        sheet.setDefaultRowHeightInPoints(20);
-        Row row = sheet.createRow(0);
-        row.createCell(0).setCellValue("举报原因");
-        row.createCell(1).setCellValue("标题");
-        row.createCell(2).setCellValue("举报人");
-        row.createCell(3).setCellValue("举报时间");
-        row.createCell(4).setCellValue("状态");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), FeedbackApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
-        List<FeedbackDTO> feedbackDtos = new ArrayList<FeedbackDTO>();
-        results.forEach(r -> {
-            FeedbackDTO feedbackDto = ConvertHelper.convert(r, FeedbackDTO.class);
-            User user = userProvider.findUserById(feedbackDto.getOwnerUid());
-            if(user != null){
-                feedbackDto.setOwnerNickName(user.getNickName());
-            }
-
-            FeedbackContentCategoryType contentCategory = FeedbackContentCategoryType.fromStatus(feedbackDto.getContentCategory().byteValue());
-            feedbackDto.setContentCategoryText(contentCategory.getText());
-
-            FeedbackHandler handler = getFeedBackHandler(feedbackDto.getTargetType());
-            if(handler != null){
-                //业务实现
-                handler.populateFeedbackDTO(feedbackDto);
-            }
-
-            feedbackDtos.add(feedbackDto);
-        });
-
-        int size = feedbackDtos.size();
-        for(int i = 0; i < size; i++){
-            Row tempRow = sheet.createRow(i + 1);
-            FeedbackDTO dto = feedbackDtos.get(i);
-
-            tempRow.createCell(0).setCellValue(dto.getContentCategoryText());
-            tempRow.createCell(1).setCellValue(dto.getTargetSubject());
-            tempRow.createCell(2).setCellValue(dto.getOwnerNickName());
-            tempRow.createCell(3).setCellValue(sdf.format(dto.getCreateTime()));
-            tempRow.createCell(4).setCellValue(dto.getStatus()==(byte)0?"未处理":"已处理");
-        }
-        ByteArrayOutputStream out = null;
-        try {
-            out = new ByteArrayOutputStream();
-            wb.write(out);
-            DownloadUtils.download(out, response,fileName);
-        } catch (IOException e) {
-            LOGGER.error("exportFeeds is fail. {}",e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "exportFeeds is fail.");
-        }
     }
 
     @Override

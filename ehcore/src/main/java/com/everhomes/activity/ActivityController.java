@@ -845,8 +845,8 @@ public class ActivityController extends ControllerBase {
      * <p>导出活动数据</p>
      */
     @RequestMapping("exportActivity")
-    public void exportActivity(ExportActivityCommand cmd, HttpServletResponse response) {
-        this.activityService.exportActivity(cmd,response);
+    public void exportActivity(ExportActivityCommand cmd) {
+        this.activityService.exportActivity(cmd);
     }
 
     /**
@@ -854,8 +854,8 @@ public class ActivityController extends ControllerBase {
      * <p>导出活动企业分布数据</p>
      */
     @RequestMapping("exportOrganization")
-    public void exportOrganization(ExportOrganizationCommand cmd, HttpServletResponse response) {
-        this.activityService.exportOrganization(cmd,response);
+    public void exportOrganization(ExportOrganizationCommand cmd) {
+        this.activityService.exportOrganization(cmd);
     }
 
     /**
@@ -863,8 +863,8 @@ public class ActivityController extends ControllerBase {
      * <p>导出活动标签分布数据</p>
      */
     @RequestMapping("exportTag")
-    public void exportTag(ExportTagCommand cmd, HttpServletResponse response) {
-        this.activityService.exportTag(cmd, response);
+    public void exportTag(ExportTagCommand cmd) {
+        this.activityService.exportTag(cmd);
     }
     
 }
