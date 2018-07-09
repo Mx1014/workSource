@@ -506,6 +506,8 @@ public class AssetProviderImpl implements AssetProvider {
         String buildingName = cmd.getBuildingName();//楼栋名称
         String apartmentName = cmd.getApartmentName();//门牌名称
         String customerTel = cmd.getCustomerTel();//客户手机号
+        
+        Integer namespaceId = cmd.getNamespaceId();
 
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
@@ -521,6 +523,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
 
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
@@ -5429,5 +5432,14 @@ public class AssetProviderImpl implements AssetProvider {
 	        .and(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_PAYMENT_BILLS.OWNER_ID))
 	        .fetchOne(Tables.EH_COMMUNITIES.NAME);
 		return projectName;
+	}
+
+	public void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd) {
+		//status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
+		
+		
+		
+		
+		
 	}
 }

@@ -4956,4 +4956,8 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return response;
 	}
+
+	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+		assetProvider.updatePaymentBillSwitch(cmd);
+	}
 }

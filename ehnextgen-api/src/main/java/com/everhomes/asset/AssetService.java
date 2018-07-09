@@ -215,4 +215,6 @@ public interface AssetService {
 	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
     
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
+
+	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
 }

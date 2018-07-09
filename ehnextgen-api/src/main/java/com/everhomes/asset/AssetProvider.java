@@ -380,4 +380,6 @@ public interface AssetProvider {
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
     
     String getProjectNameByBillID(Long billId);
+    
+	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
 }

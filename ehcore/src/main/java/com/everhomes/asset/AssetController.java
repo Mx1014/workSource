@@ -1483,5 +1483,20 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    /**
+     * <p>未出账单一键转成已出账单功能</p>
+     * <b>URL: /asset/batchUpdateBillsToSettled</b>
+     */
+    @RequestMapping("batchUpdateBillsToSettled")
+    @RestReturn(value = String.class)
+    public RestResponse batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+        assetService.batchUpdateBillsToSettled(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    
 }
 
