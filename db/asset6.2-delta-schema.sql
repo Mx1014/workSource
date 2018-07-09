@@ -1,6 +1,8 @@
--- 通用脚本  
--- ADD BY 杨崇鑫
--- 物业缴费6.2 增加减免费项
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+-- AUTHOR: 杨崇鑫
+-- REMARK:物业缴费6.2 增加减免费项
 CREATE TABLE `eh_payment_subtraction_items` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER,
@@ -17,4 +19,4 @@ CREATE TABLE `eh_payment_subtraction_items` (
   `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
    PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='减免费项配置表';
--- EＮＤ BY 杨崇鑫
+-- --------------------- SECTION END ---------------------------------------------------------
