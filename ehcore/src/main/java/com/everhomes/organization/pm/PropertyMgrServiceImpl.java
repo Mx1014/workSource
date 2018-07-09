@@ -462,12 +462,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+    
+    boolean isRunning = false;
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
     public void setup() {
-        workerPoolFactory.getWorkerPool().addQueue(queueName);
+    	synchronized (this) {
+			if(!isRunning) {
+				workerPoolFactory.getWorkerPool().addQueue(queueName);
+				isRunning = true;
+			}
+		}
+        
     }
 
     @Override
