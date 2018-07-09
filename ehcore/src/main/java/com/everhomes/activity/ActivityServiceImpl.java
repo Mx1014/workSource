@@ -964,7 +964,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
     private OrderCommandResponse createPreOrder(CreateOrderCommand cmd) {
         CreateOrderRestResponse createOrderRestResponse = new CreateOrderRestResponse();
-        if (PaymentType.WECHAT_JS_ORG_PAY.getCode() == cmd.getPaymentType()) {
+        if (cmd.getPaymentType() != null && PaymentType.WECHAT_JS_ORG_PAY.getCode() == cmd.getPaymentType()) {
             createOrderRestResponse = this.payServiceV2.createCustomOrder(cmd);
         }else {
             createOrderRestResponse = this.payServiceV2.createPurchaseOrder(cmd);
