@@ -48,6 +48,7 @@ import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -1301,6 +1302,7 @@ public class AssetProviderImpl implements AssetProvider {
                     }
                     item.setTargetName(targetName);
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setEnergyConsume(dto.getEnergyConsume());//增加用量
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
@@ -1317,13 +1319,33 @@ public class AssetProviderImpl implements AssetProvider {
                 billItemsDao.insert(billItemsList);
             }
             //新增附件
-            
-            
-            
-            
-            
-            
-            
+            List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList = cmd.getAssetPaymentBillAttachmentList();
+            if(assetPaymentBillAttachmentList != null) {
+          	  	  List<com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments> paymentBillAttachmentsList = new ArrayList<>();
+	              for(int i = 0; i < assetPaymentBillAttachmentList.size() ; i++) {
+	                  long currentSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments.class));
+	                  if(currentSeq == 0){
+	                      this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments.class));
+	                  }
+	                  AssetPaymentBillAttachment dto = assetPaymentBillAttachmentList.get(i);
+	                  PaymentBillAttachments paymentBillAttachments = new PaymentBillAttachments();
+	                  paymentBillAttachments.setId(currentSeq);
+	                  paymentBillAttachments.setNamespaceId(UserContext.getCurrentNamespaceId());
+	                  paymentBillAttachments.setCategoryId(categoryId);
+	                  paymentBillAttachments.setOwnerId(ownerId);
+	                  paymentBillAttachments.setOwnerType(ownerType);
+	                  paymentBillAttachments.setBillId(nextBillId);
+	                  paymentBillAttachments.setBillGroupId(billGroupId);
+	                  paymentBillAttachments.setCreatorUid(UserContext.currentUserId());
+	                  paymentBillAttachments.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                  paymentBillAttachments.setFilename(dto.getFilename());
+	                  paymentBillAttachments.setContentUri(dto.getUri());
+	                  paymentBillAttachments.setContentUrl(dto.getUrl());
+	                  paymentBillAttachmentsList.add(paymentBillAttachments);
+	              }
+	              EhPaymentBillAttachmentsDao paymentBillAttachmentsDao = new EhPaymentBillAttachmentsDao(context.configuration());
+	              paymentBillAttachmentsDao.insert(paymentBillAttachmentsList);
+            }
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
