@@ -3,7 +3,7 @@
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 -- AUTHOR: 杨崇鑫
 -- REMARK: 物业缴费V6.1（展示能耗数据）
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `energy_consume` BIGINT COMMENT '能耗用量';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `energy_consume` VARCHAR(1024) COMMENT '能耗用量';
 
 -- AUTHOR: 杨崇鑫
 -- REMARK: 物业缴费V6.1 新增账单上传附件

@@ -18,7 +18,8 @@ import java.math.BigDecimal;
  * <li>buildingName:门牌</li>
  * <li>billGroupRuleId:计价标准id</li>
  * <li>lateFineAmount:滞纳金</li>
- * <li>chargingItemsId:收费项目对应的账单组费项字典id
+ * <li>chargingItemsId:收费项目对应的账单组费项字典id</li>
+ * <li>energyConsume: 费项的用量</li>
  *</ul>
  */
 public class BillItemDTO {
@@ -33,6 +34,8 @@ public class BillItemDTO {
     private Long billGroupRuleId;
     private BigDecimal lateFineAmount;
     private Long chargingItemsId;
+    //费项增加用量字段
+    private String energyConsume;
 
     @Override
     public String toString() {
@@ -130,5 +133,13 @@ public class BillItemDTO {
 
 	public void setChargingItemsId(Long chargingItemsId) {
 		this.chargingItemsId = chargingItemsId;
+	}
+
+	public String getEnergyConsume() {
+		return energyConsume;
+	}
+
+	public void setEnergyConsume(String energyConsume) {
+		this.energyConsume = energyConsume;
 	}
 }
