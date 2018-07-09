@@ -62,6 +62,7 @@ import org.springframework.transaction.TransactionStatus;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -548,7 +549,7 @@ public class DecorationServiceImpl implements  DecorationService {
                 dto.setDecorationFee(new ArrayList<>());
                 for (DecorationFee fee:fees)
                     if (fee.getTotalPrice()!=null)
-                        dto.setTotalAmount(fee.getTotalPrice());
+                        dto.setTotalAmount(fee.getTotalPrice().setScale(2));
                     else{
                         DecorationFeeDTO dto2 = ConvertHelper.convert(fee,DecorationFeeDTO.class);
                         dto.getDecorationFee().add(dto2);
