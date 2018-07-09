@@ -1929,6 +1929,19 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
         }
 
+        //判断手机号的用户与当前用户是否一致
+        if (userIdentifier.getOwnerUid() == null || !userIdentifier.getOwnerUid().equals(UserContext.currentUserId())) {
+            LOGGER.error("phone not match user error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+                    "phone not match user error");
+        }
+
+        if (cmd.getRegionCode() != null && userIdentifier.getRegionCode() != null && !cmd.getRegionCode().equals(userIdentifier.getRegionCode())) {
+            LOGGER.error("phone not match user error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+                    "phone not match user error");
+        }
+
         this.verifySmsTimes("fogotPasswd", userIdentifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
 
         String verificationCode = RandomGenerator.getRandomDigitalString(6);
