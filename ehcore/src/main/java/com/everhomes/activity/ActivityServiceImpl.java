@@ -1006,10 +1006,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }
         CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
         setPreOrder(createSignupOrderV2Command,createOrderCommand,roster,activity);
+        LOGGER.info("createPreOrder createOrderCommand={}",createOrderCommand);
         OrderCommandResponse response = this.createPreOrder(createOrderCommand);
         CreateWechatJsPayOrderResp callback = new CreateWechatJsPayOrderResp();
         callback = ConvertHelper.convert(response,CreateWechatJsPayOrderResp.class);
         callback.setPayNo(response.getOrderId().toString());
+        roster.setPayOrderId(response.getOrderId());
+        activityProvider.updateRoster(roster);
         return callback;
 	}
 
