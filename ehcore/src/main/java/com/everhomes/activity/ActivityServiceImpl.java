@@ -963,7 +963,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     }
 
     private OrderCommandResponse createPreOrder(CreateOrderCommand cmd) {
-        CreateOrderRestResponse createOrderRestResponse = this.payServiceV2.createPurchaseOrder(cmd);
+        CreateOrderRestResponse createOrderRestResponse = new CreateOrderRestResponse();
+        if (PaymentType.WECHAT_JS_ORG_PAY.getCode() == cmd.getPaymentType()) {
+            createOrderRestResponse = this.payServiceV2.createCustomOrder(cmd);
+        }else {
+            createOrderRestResponse = this.payServiceV2.createPurchaseOrder(cmd);
+        }
         PreOrderDTO callback = new PreOrderDTO();
         if (createOrderRestResponse.getErrorCode() != 200) {
             LOGGER.error("create order fail");
