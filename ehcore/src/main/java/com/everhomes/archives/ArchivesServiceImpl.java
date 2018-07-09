@@ -166,7 +166,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
 
         //  1.进行校验(例如: 邮箱)
-        if (cmd.getWorkEmail() != null)
+        if (!StringUtils.isEmpty(cmd.getWorkEmail()))
             if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                         "Duplicate work email");
@@ -827,7 +827,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
 
         //  1.进行校验(例如: 邮箱)
-        if (cmd.getWorkEmail() != null)
+        if (!StringUtils.isEmpty(cmd.getWorkEmail()))
             if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                         "Duplicate work email");
