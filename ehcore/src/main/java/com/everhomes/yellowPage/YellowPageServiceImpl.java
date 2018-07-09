@@ -823,7 +823,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
 		}
 
-		cmd.setOwnerId(cmd.getCommunityId());
+		cmd.setOwnerId(cmd.getOwnerId());
 		cmd.setOwnerType(cmd.getOwnerType());
 
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
