@@ -25,11 +25,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowAutoStepDTO;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowService;
+import com.everhomes.flow.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -2878,6 +2874,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setOfflinePayPhone(userIdentifier.getIdentifierToken());
 			}
 		}
+
+		//获取真正的工作流
+		if (dto.getFlowCaseId() != null){
+			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(dto.getFlowCaseId());
+			FlowCase flowCase = tree.getLeafNodes().get(0).getFlowCase();
+			dto.setFlowCaseId(flowCase.getId());
+		}
 		return dto;
 	}
 
@@ -3398,8 +3401,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		List<RentalCell> result = new ArrayList<>();
 
 		List<RentalCell> cells = cellList.get();
-		List<Long> ids = cells.stream().map(RentalCell::getId).collect(Collectors.toList());
-		List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
+
 
 		for(RentalCell cell : cells){
 			if (null != rentalSiteId && !rentalSiteId.equals(cell.getRentalResourceId()))
@@ -3453,13 +3455,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					}
 				}
 			}
-			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
-			for (RentalCell c: dbCells) {
-				if (c.getId().equals(cell.getId())) {
-					cell = c;
-				}
-			}
 			result.add(cell);
+		}
+
+		//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
+		List<Long> ids = result.stream().map(r->r.getId()).collect(Collectors.toList());
+		if (!ids.isEmpty()) {
+			List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
+			for (RentalCell c1 : result)
+				for (RentalCell c2 : dbCells) {
+					if (c2.getId().equals(c1.getId())) {
+						c1 = c2;
+					}
+				}
 		}
 		return result;
 	} 
