@@ -7,8 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +32,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -55,6 +55,7 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
 import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -85,6 +86,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
@@ -103,6 +105,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DownloadUtils;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -118,6 +121,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -234,6 +238,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private FlowEvaluateItemProvider flowEvaluateItemProvider;
 	@Autowired
 	private PayService payService;
+	@Autowired
+	private ContentServerService contentServerService;
+
+
+	@Value("${server.contextPath:}")
+	private String CONTEXT_PATH;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -3303,29 +3313,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		//3、组装报文，发起下单请求
-//		OrderCommandResponse orderCommandResponse = createOrder(cmd);
-		pmTaskProvider.findOrderbyId();
-		CreateOrderCommand cmdPay = new CreateOrderCommand();
-		cmdPay.setAmount(amountsInCents);
-		cmdPay.setCommunityId(cmd.getCommunityId());
-		cmdPay.setClientAppName(cmd.getClientAppName());
-		cmdPay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
-		cmdPay.setNamespaceId(cmd.getNamespaceId());
-		cmdPay.setOpenid(cmd.getOpenid());
-		cmdPay.setOrderId(orderId);
-		cmdPay.setOrderType(OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-		cmdPay.setPayerId(payerId);
+		PmTaskOrder order = pmTaskProvider.findPmTaskOrderById(cmd.getOrderId());
+		CreateOrderCommand cmdPay = this.CreateOrderCommand(cmd);
+		cmdPay.setPayeeUserId(payeeUserId);
+		cmdPay.setAmount(order.getAmount());
 		CreateOrderRestResponse response = payService.createPurchaseOrder(cmdPay);
+		if(!response.getErrorCode().equals(200)) {
+			LOGGER.error("create order fail");
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+					"create order fail");
+		}
 
 		//4、组装支付方式
-		preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
+		preOrderDTO = orderCommandResponseToDto(response.getResponse());
+		preOrderDTO.setAmount(order.getAmount());
+		preOrderDTO.setOrderId(order.getId());
 
 		//5、保存订单信息
-		saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+		saveOrderRecord(response.getResponse(), cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
 
 		//6、返回
 		return preOrderDTO;
-		return null;
 	}
 
 	@Override
@@ -3574,5 +3582,73 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		return payUserDTO;
 	}
+	private CreateOrderCommand CreateOrderCommand(CreatePmTaskOrderCommand cmd){
+
+		CreateOrderCommand createOrderCmd = new CreateOrderCommand();
+		//业务系统中的订单号，请在整个业务系统中约定好唯一规则；
+		String BizOrderNum  = getOrderNum(cmd.getOrderId(),OrderType.OrderTypeEnum.PMTASK_CODE.getPycode());
+		LOGGER.info("BizOrderNum is = {} "+BizOrderNum);
+		createOrderCmd.setBizOrderNum(BizOrderNum);
+		createOrderCmd.setClientAppName(cmd.getClientAppName());
+		createOrderCmd.setPayerUserId(cmd.getPayerId());//付款方ID
+//		createOrderCmd.setPaymentParams(flattenMap);
+		createOrderCmd.setPaymentType(cmd.getPaymentType());
+//		设置回调地址
+		String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+		String backUri = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.pmtask", "");
+		String backUrl = homeUrl + CONTEXT_PATH + backUri;
+		createOrderCmd.setBackUrl(backUrl);
+//		createOrderCmd.setExtendInfo(cmd.getExtendInfo());
+		createOrderCmd.setGoodsName("物业缴费");
+		createOrderCmd.setGoodsDescription(null);
+		createOrderCmd.setIndustryName(null);
+		createOrderCmd.setIndustryCode(null);
+		createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
+		createOrderCmd.setOrderRemark1(String.valueOf(OrderType.OrderTypeEnum.PMTASK_CODE.getPycode()));
+		createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+		createOrderCmd.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
+		createOrderCmd.setOrderRemark4(null);
+		createOrderCmd.setOrderRemark5(null);
+		if(UserContext.getCurrentNamespaceId() != null) {
+			createOrderCmd.setAccountCode("NS" + UserContext.getCurrentNamespaceId().toString());
+		}
+		return createOrderCmd;
+	}
+	private String getOrderNum(Long orderId, String orderType) {
+		String v2code = OrderType.OrderTypeEnum.getV2codeByPyCode(orderType);
+		DecimalFormat df = new DecimalFormat("00000000000000000");
+		String orderIdStr = df.format(orderId);
+		if(orderIdStr!=null && orderIdStr.length()>17){
+			orderIdStr = orderIdStr.substring(2);
+		}
+		return v2code+orderIdStr;
+	}
+
+	private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse){
+		PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+		List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
+		List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
+			PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+			payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+			payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
+			String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+			payMethodDTO.setPaymentLogo(paymentLogo);
+			payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+			com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+			if(bizPaymentParamsDTO != null) {
+				paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+			}
+			payMethodDTO.setPaymentParams(paymentParamsDTO);
+			payMethods.add(payMethodDTO);
+		}
+		dto.setPayMethod(payMethods);
+		dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
+		return dto;
+	}
+
+
 
 }
