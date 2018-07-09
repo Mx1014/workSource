@@ -1469,5 +1469,19 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return restResponse;
     }
     
+    /**
+     * <p>仅用于手动测试能耗数据</p>
+     * <b>URL: /asset/testEnergy</b>
+     */
+    @RequestMapping("testEnergy")
+    @RestReturn(value = String.class)
+    public RestResponse testEnergy(PaymentExpectanciesCommand cmd) {
+        assetService.paymentExpectanciesCalculate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
 }
 
