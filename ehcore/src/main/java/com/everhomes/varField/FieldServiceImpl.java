@@ -454,11 +454,16 @@ public class FieldServiceImpl implements FieldService {
             } else if (namespaceFlag) {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+    			}
+                if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
                 }
-                
                 if (scopeItems != null && scopeItems.size() < 1) {
-                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
+    			}
+                if (scopeItems != null && scopeItems.size() < 1) {
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
     			}
                 
             } else {
