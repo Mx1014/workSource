@@ -188,8 +188,8 @@ public class DecorationServiceImpl implements  DecorationService {
             }else{
                 setting = decorationProvider.getDecorationSettingById(cmd.getId());
                 if (setting == null)
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                            ErrorCodes.ERROR_INVALID_PARAMETER, "setting not found");
+                    throw RuntimeErrorException.errorWith("decoration",
+                            1001, "setting not found");
                 org.springframework.beans.BeanUtils.copyProperties(cmd,setting);
                 setting.setNamespaceId(namespaceId);
                 decorationProvider.updateDecorationSetting(setting);
@@ -216,8 +216,8 @@ public class DecorationServiceImpl implements  DecorationService {
     @Override
     public DecorationWorkerDTO updateWorker(UpdateWorkerCommand cmd) {
         if (cmd.getRequestId() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "request id can not be null");
+            throw RuntimeErrorException.errorWith("decoration",
+                    1001, "request id can not be null");
         DecorationWorkerDTO dto = null;
         if (cmd.getId()!=null){
             DecorationWorker worker = decorationProvider.getDecorationWorkerById(cmd.getId());
@@ -229,16 +229,16 @@ public class DecorationServiceImpl implements  DecorationService {
         }else{
             DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
             if (request.getDecoratorPhone().equals(cmd.getPhone()))
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                        ErrorCodes.ERROR_INVALID_PARAMETER, "不可添加装修负责人");
+                throw RuntimeErrorException.errorWith("decoration",
+                        1001, "不可添加装修负责人");
             Long companyId = request.getDecoratorCompanyId();
             if (companyId == null)
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                        ErrorCodes.ERROR_INVALID_PARAMETER, "不存在的装修公司");
+                throw RuntimeErrorException.errorWith("decoration",
+                        1001, "不存在的装修公司");
             DecorationWorker worker = this.decorationProvider.queryDecorationWorker(request.getId(),cmd.getPhone());
             if (worker != null)
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                        ErrorCodes.ERROR_INVALID_PARAMETER, "不可重复添加已有员工");
+                throw RuntimeErrorException.errorWith("decoration",
+                        1001, "不可重复添加已有员工");
             DecorationCompany dc = decorationProvider.getDecorationCompanyById(companyId);
             worker = ConvertHelper.convert(cmd,DecorationWorker.class);
             VerifyPersonnelByPhoneCommand cmd1 = new VerifyPersonnelByPhoneCommand();
@@ -352,8 +352,8 @@ public class DecorationServiceImpl implements  DecorationService {
         if (request.getDecoratorCompanyId() == null){
             Organization org = organizationProvider.findOrganizationByName(request.getDecoratorCompany(), UserContext.getCurrentNamespaceId());
             if (org!=null)
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                        ErrorCodes.ERROR_INVALID_PARAMETER, "公司名已被占用");
+                throw RuntimeErrorException.errorWith("decoration",
+                        1001, "公司名已被占用");
         }
         this.dbProvider.execute((TransactionStatus status) -> {
             decorationProvider.createDecorationRequest(request);
@@ -724,8 +724,8 @@ public class DecorationServiceImpl implements  DecorationService {
     public void confirmRefound(RequestIdCommand cmd) {
         DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
         if (request.getStatus() != DecorationRequestStatus.REFOUND.getCode())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+            throw RuntimeErrorException.errorWith("decoration",
+                    1001, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.COMPLETE.getCode());
         this.decorationProvider.updateDecorationRequest(request);
         //短信通知
@@ -736,8 +736,8 @@ public class DecorationServiceImpl implements  DecorationService {
     public void confirmFee(RequestIdCommand cmd) {
         DecorationRequest request = decorationProvider.getRequestById(cmd.getRequestId());
         if (request.getStatus() != DecorationRequestStatus.PAYMENT.getCode())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+            throw RuntimeErrorException.errorWith("decoration",
+                    1001, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.CONSTRACT.getCode());
         this.decorationProvider.updateDecorationRequest(request);
         //短信通知
@@ -829,8 +829,8 @@ public class DecorationServiceImpl implements  DecorationService {
     public void DecorationApplySuccess(Long requestId) {
         DecorationRequest request = this.decorationProvider.getRequestById(requestId);
         if (DecorationRequestStatus.APPLY.getCode() != request.getStatus())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+            throw RuntimeErrorException.errorWith("decoration",
+                    1001, "错误的节点状态");
         try{
             //注册公司
             if (request.getDecoratorCompanyId() == null){
@@ -931,8 +931,8 @@ public class DecorationServiceImpl implements  DecorationService {
     public void FileApprovalSuccess(Long requestId) {
         DecorationRequest request = this.decorationProvider.getRequestById(requestId);
         if (DecorationRequestStatus.FILE_APPROVAL.getCode() != request.getStatus())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+            throw RuntimeErrorException.errorWith("decoration",
+                    1001, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.PAYMENT.getCode());
         this.decorationProvider.updateDecorationRequest(request);
         //短信通知
@@ -943,8 +943,8 @@ public class DecorationServiceImpl implements  DecorationService {
     public void DecorationCheckSuccess(Long requestId) {
         DecorationRequest request = this.decorationProvider.getRequestById(requestId);
         if (DecorationRequestStatus.CHECK.getCode() != request.getStatus())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+            throw RuntimeErrorException.errorWith("decoration",
+                    1001, "错误的节点状态");
         request.setStatus(DecorationRequestStatus.REFOUND.getCode());
         this.decorationProvider.updateDecorationRequest(request);
         //短信通知
@@ -955,8 +955,8 @@ public class DecorationServiceImpl implements  DecorationService {
     public DecorationFlowCaseDTO completeDecoration(RequestIdCommand cmd) {
         DecorationRequest request = this.decorationProvider.getRequestById(cmd.getRequestId());
         if (DecorationRequestStatus.CONSTRACT.getCode() != request.getStatus())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "错误的节点状态");
+            throw RuntimeErrorException.errorWith("decoration",
+                    1001, "错误的节点状态");
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(),EntityType.COMMUNITY.getCode(),request.getCommunityId(),
                 DecorationController.moduleId, DecorationController.moduleType, request.getCommunityId(), DecorationRequestStatus.CHECK.getFlowOwnerType());
         if (flow == null) {
