@@ -5443,11 +5443,11 @@ public class AssetProviderImpl implements AssetProvider {
 
 	public void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd) {
 		//对应到eh_payment_bills表中的switch字段账单属性，0:未出账单;1:已出账单
-		
-		
-		
-		
-		
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        dslContext.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.SWITCH, new Byte("1"))
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(cmd.getBillIdList()))
+                .execute();
 	}
 
 	public void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd) {
