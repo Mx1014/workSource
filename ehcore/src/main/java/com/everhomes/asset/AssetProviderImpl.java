@@ -5452,13 +5452,11 @@ public class AssetProviderImpl implements AssetProvider {
 
 	public void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd) {
 		//对应到eh_payment_bills表中的status字段账单属性，0:未缴;1:已缴
-		
-		
-		
-		
-		
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        dslContext.update(Tables.EH_PAYMENT_BILLS)
+                .set(Tables.EH_PAYMENT_BILLS.STATUS, new Byte("1"))
+                .where(Tables.EH_PAYMENT_BILLS.ID.in(cmd.getBillIdList()))
+                .execute();
 	}
-	
-	
 	
 }
