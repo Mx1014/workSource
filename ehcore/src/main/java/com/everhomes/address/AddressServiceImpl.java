@@ -2527,7 +2527,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             communityIds = resources.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         }
         List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
-        //issue-33013,
+        
         if(communityIds != null){
             List<CommunityGeoPoint> pointList = this.communityProvider.listCommunityGeoPointByGeoHashInCommunities(cmd.getLatigtue(), cmd.getLongitude(), 5, communityIds);
             if(pointList != null && pointList.size() > 0){
