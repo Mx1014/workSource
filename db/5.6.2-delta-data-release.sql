@@ -60,14 +60,6 @@ update `eh_rentalv2_order_records` t1 right join `eh_rentalv2_orders` t2 on t1.`
 -- REMARK: 资源类型表空值覆盖
 update `eh_rentalv2_resource_types` set pay_mode = 0 where pay_mode is null;
 
--- AUTHOR: 杨崇鑫
--- REMARK: 新支付的配置
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.appKey', '6caa8584-c723-4b7b-9aec-071b4e31418f', '新支付appKey', '0');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.secretKey', 'zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==', '新支付secretKey', '0');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
-	VALUES ('pay.v2.payHomeUrl', 'https://payv2.zuolin.com/pay', '新支付payHomeUrl', '0');
 	
 -- AUTHOR: 杨崇鑫
 -- REMARK: 支付回调
@@ -250,6 +242,15 @@ UPDATE `eh_configurations` SET value = '/forum/build/index.html#/detail' WHERE N
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 新支付的配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('pay.v2.appKey', '69ee0cb3-5afb-4d83-ae12-ef493de48de2', '新支付appKey', '0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('pay.v2.secretKey', 'T6PEjA9GBAVMBmlBYDs9RkoQMurrH5XQjFoP1v+oGomKeIdsqVhwpTVv8AHPLWo/I09IudgxR4/zjvM9YYwxzg==', '新支付secretKey', '0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('pay.v2.payHomeUrl', 'https://payv2.zuolin.com/pay', '新支付payHomeUrl', '0');
 
 -- AUTHOR: 杨崇鑫
 -- REMARK: 支付回调
@@ -724,6 +725,17 @@ SELECT (@id := @id + 1), @namespace_id,c.id,'default','default_rule',b.id,@accou
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: szbay
 -- DESCRIPTION: 此SECTION只在深圳湾-999966执行的脚本
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 新支付的配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('pay.v2.appKey', '2ecedecc-3592-4edd-bfff-205b71fde95c', '新支付appKey', '0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('pay.v2.secretKey', 'T1nIY3vNMK83dkJNcD/DIk9xx2rZup9KDjGwITiUnVFMVGVVwnmk5XHBHSe7BOm5Ex4TKflryC5IEURNQWHDIg==', '新支付secretKey', '0');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`)
+	VALUES ('pay.v2.payHomeUrl', 'https://payv2.zuolin.com/pay', '新支付payHomeUrl', '0');
+
+	
 -- AUTHOR: 杨崇鑫 
 -- REMARK: 新支付数据迁移
 update eh_payment_bill_groups set biz_payee_type="EhOrganizations",biz_payee_id='1005' where namespace_id=999966; -- 深圳湾
