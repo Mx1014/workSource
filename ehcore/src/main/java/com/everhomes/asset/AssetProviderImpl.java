@@ -2069,8 +2069,19 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum, String noticeTel) {
+    public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+    	//卸载参数
+    	Long billId = cmd.getBillId();
+    	BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
+    	String targetType = cmd.getTargetType();
+    	Long targetId = cmd.getTargetId();
+    	String targetName = cmd.getTargetName();
+    	String invoiceNum = cmd.getInvoiceNum();
+    	String noticeTel = cmd.getNoticeTel();
+    	Long categoryId = cmd.getCategoryId();
+    	String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+        
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -2153,6 +2164,40 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(t2)
                     .where(t2.ID.notIn(includeExemptionIds))
                     .execute();
+            
+            
+            //更新附件（先删除原来的附件）
+            context.delete(Tables.EH_PAYMENT_BILL_ATTACHMENTS)
+	            .where(Tables.EH_PAYMENT_BILL_ATTACHMENTS.BILL_ID.eq(billId))
+	            .execute();
+            List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList = cmd.getAssetPaymentBillAttachmentList();
+            if(assetPaymentBillAttachmentList != null) {
+          	  	  List<com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments> paymentBillAttachmentsList = new ArrayList<>();
+	              for(int i = 0; i < assetPaymentBillAttachmentList.size() ; i++) {
+	                  long currentSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments.class));
+	                  if(currentSeq == 0){
+	                      this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillAttachments.class));
+	                  }
+	                  AssetPaymentBillAttachment dto = assetPaymentBillAttachmentList.get(i);
+	                  PaymentBillAttachments paymentBillAttachments = new PaymentBillAttachments();
+	                  paymentBillAttachments.setId(currentSeq);
+	                  paymentBillAttachments.setNamespaceId(UserContext.getCurrentNamespaceId());
+	                  paymentBillAttachments.setCategoryId(categoryId);
+	                  paymentBillAttachments.setOwnerId(ownerId);
+	                  paymentBillAttachments.setOwnerType(ownerType);
+	                  paymentBillAttachments.setBillId(billId);
+	                  paymentBillAttachments.setBillGroupId(billGroupId);
+	                  paymentBillAttachments.setCreatorUid(UserContext.currentUserId());
+	                  paymentBillAttachments.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                  paymentBillAttachments.setFilename(dto.getFilename());
+	                  paymentBillAttachments.setContentUri(dto.getUri());
+	                  paymentBillAttachments.setContentUrl(dto.getUrl());
+	                  paymentBillAttachmentsList.add(paymentBillAttachments);
+	              }
+	              EhPaymentBillAttachmentsDao paymentBillAttachmentsDao = new EhPaymentBillAttachmentsDao(context.configuration());
+	              paymentBillAttachmentsDao.insert(paymentBillAttachmentsList);
+            }
+            
             reCalBillById(billId);//重新计算账单
             // 更新发票
             context.update(Tables.EH_PAYMENT_BILLS)
