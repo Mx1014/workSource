@@ -4960,4 +4960,8 @@ public class AssetServiceImpl implements AssetService {
 	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
 		assetProvider.updatePaymentBillSwitch(cmd);
 	}
+
+	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+		assetProvider.updatePaymentBillStatus(cmd);
+	}
 }

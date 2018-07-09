@@ -217,4 +217,6 @@ public interface AssetService {
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
 
 	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
+
+	void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd);
 }

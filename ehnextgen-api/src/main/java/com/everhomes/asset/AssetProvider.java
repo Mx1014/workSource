@@ -382,4 +382,6 @@ public interface AssetProvider {
     String getProjectNameByBillID(Long billId);
     
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
+	
+	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);
 }

@@ -5435,11 +5435,23 @@ public class AssetProviderImpl implements AssetProvider {
 	}
 
 	public void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd) {
-		//status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
+		//对应到eh_payment_bills表中的switch字段账单属性，0:未出账单;1:已出账单
 		
 		
 		
 		
 		
 	}
+
+	public void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd) {
+		//对应到eh_payment_bills表中的status字段账单属性，0:未缴;1:已缴
+		
+		
+		
+		
+		
+	}
+	
+	
+	
 }

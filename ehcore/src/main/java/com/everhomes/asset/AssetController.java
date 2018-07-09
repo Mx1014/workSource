@@ -1497,6 +1497,20 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    /**
+     * <p>增加批量将账单转换为已缴的功能</p>
+     * <b>URL: /asset/batchUpdateBillsToPaid</b>
+     */
+    @RequestMapping("batchUpdateBillsToPaid")
+    @RestReturn(value = String.class)
+    public RestResponse batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+        assetService.batchUpdateBillsToPaid(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
     
 }
 
