@@ -2,9 +2,7 @@ package com.everhomes.rest.service_agreement;
 
 
 /**
- * create by huanglm 20180709 
  * <ul>
- * 返回值
  * <li>id: 主键</li>
  * <li>namespaceId: 域空间ID</li>
  * <li>agreementContent: 协议内容</li>

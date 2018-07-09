@@ -3,7 +3,6 @@ package com.everhomes.rest.service_agreement.admin;
 import com.everhomes.util.StringHelper;
 
 /**
- * create by huanglm 20180709 
  * <ul> 
  * <li>namespaceId: 域空间</li>  
  * <li>agreementContent: 协议内容</li>  
