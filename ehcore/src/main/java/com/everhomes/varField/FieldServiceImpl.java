@@ -599,7 +599,7 @@ public class FieldServiceImpl implements FieldService {
                     FieldItemDTO allianceItem = new FieldItemDTO();
                     allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
                     allianceItem.setFieldId(dto.getId());
-                    allianceItem.setItemId((long)r.getEntryId());
+                    allianceItem.setItemId(r.getId());
                     allianceItem.setItemDisplayName(r.getName());
                     allianceItem.setFieldId(r.getId());
                     items.add(allianceItem);

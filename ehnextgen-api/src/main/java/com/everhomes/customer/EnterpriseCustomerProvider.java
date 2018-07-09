@@ -213,4 +213,8 @@ public interface EnterpriseCustomerProvider {
     void updateCustomerTalentRegisterStatus(String contactToken);
 
     CustomerTalent findPotentialTalentBySourceId(Long sourceId);
+
+    void createCustomerEvent(CustomerEvent event);
+
+    CustomerTalent findPotentialCustomerById(Long sourceId);
 }

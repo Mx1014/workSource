@@ -28,8 +28,8 @@ CREATE TABLE `eh_customer_potential_datas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 客户管理增加信息来源  by jiarui 20180622
-ALTER  TABLE `eh_enterprise_customers` ADD COLUMN `source_id` BIGINT(20) NOT NULL  DEFAULT 0;
-ALTER  TABLE `eh_enterprise_customers` ADD COLUMN `source_type` VARCHAR(64) NOT NULL  DEFAULT 0;
+ALTER  TABLE `eh_enterprise_customers` ADD COLUMN `source_id` BIGINT(20)  NULL ;
+ALTER  TABLE `eh_enterprise_customers` ADD COLUMN `source_type` VARCHAR(64)  NULL;
 -- 人才团队增加系统内来源  by jiarui 20180622
 ALTER TABLE `eh_customer_talents` ADD COLUMN `talent_source_item_id`  BIGINT(20) NULL COMMENT 'categoryId' AFTER `age`;
 ALTER TABLE `eh_customer_talents` ADD COLUMN `origin_source_id` bigint(20) NULL COMMENT 'origin potential data primary key' AFTER `age`;

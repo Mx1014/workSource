@@ -80,6 +80,8 @@ public class CustomerTalentDTO {
 
     private String registerStatus;
 
+    private String createTime;
+
     public Long getMemberId() {
         return memberId;
     }
@@ -406,6 +408,15 @@ public class CustomerTalentDTO {
 
     public void setRegisterStatus(String registerStatus) {
         this.registerStatus = registerStatus;
+    }
+
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
     @Override

@@ -554,7 +554,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         talent.setCreatorUid(UserContext.currentUserId());
         talent.setStatus(CommonStatus.ACTIVE.getCode());
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTalents.class, id));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
         dao.insert(talent);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTalents.class, null);
@@ -2272,5 +2272,22 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .where(Tables.EH_CUSTOMER_TALENTS.ORIGIN_SOURCE_ID.eq(sourceId))
                 .and(Tables.EH_CUSTOMER_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                 .fetchAnyInto(CustomerTalent.class);
+    }
+
+    @Override
+    public void createCustomerEvent(CustomerEvent event) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
+        event.setId(id);
+        EhCustomerEventsDao dao = new EhCustomerEventsDao(context.configuration());
+        event.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.insert(event);
+    }
+
+    @Override
+    public CustomerTalent findPotentialCustomerById(Long sourceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerPotentialDatasDao dao = new EhCustomerPotentialDatasDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(sourceId), CustomerTalent.class);
     }
 }

@@ -150,7 +150,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
             builder.field("adminFlag" , customer.getAdminFlag());
-            builder.field("sourceItemId" , customer.getAdminFlag());
+            builder.field("sourceItemId" , customer.getSourceItemId());
             builder.field("sourceId" , customer.getSourceId());
             builder.field("sourceType" , customer.getSourceType());
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
@@ -335,13 +335,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (cmd.getSourceItemId() != null && StringUtils.isNotBlank(cmd.getSourceType())) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceId", cmd.getSourceItemId()));
-        }
-        if (cmd.getSourceItemId() != null && StringUtils.isNotBlank(cmd.getSourceType())) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceItemId()));
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceType", cmd.getSourceType()));
         }
+
         if(cmd.getSourceItemId()!=null && StringUtils.isBlank(cmd.getSourceType())){
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceType()));
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceItemId()));
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.existsFilter("sourceId")));
         }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

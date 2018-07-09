@@ -9,9 +9,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 			"name":{
                 "type":"string",
                 "index_analyzer":"ansj_index", 
-                "search_analyzer":"ansj_query", 
-                "similarity":"BM25", 
-                "store":"yes",
+                "index":"not_analyzed",
                 "fields": {
                     "raw": { 
                         "type":  "string",
@@ -41,7 +39,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
             "addressId":{"type":"string"},
             "adminFlag":{"type":"long"},
             "sourceId":{"type":"long"},
-            "sourceType":{"type":"string"},
+            "sourceType":{"type":"string","index":"not_analyzed"},
             "propertyArea":{"type":"double"},
 			"lastTrackingTime":{"type":"date"}
 		}

@@ -184,9 +184,6 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                     }
                     //sync requestor info to customer talent
                     if (StringUtils.isNotBlank(userPhone.getText())) {
-                        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, userPhone.getText());
-//                        List<User> users = userProvider.listUserByKeyword(userPhone.getText(), namespaceId, new CrossShardListingLocator(), 2);
-//                        if (users != null && users.size() > 0) {
                             CustomerTalent talent = new CustomerTalent();
                             talent.setCustomerId(0L);
                             talent.setName(userName.getText());
@@ -194,13 +191,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                             talent.setOriginSourceId(dataId);
                             talent.setOriginSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
                             talent.setTalentSourceItemId(serviceAlliance.getParentId());
-                            if(userIdentifier!=null){
-                                talent.setRegisterStatus(CommonStatus.ACTIVE.getCode());
-                            }else {
-                                talent.setRegisterStatus(CommonStatus.INACTIVE.getCode());
-                            }
                             talent.setNamespaceId(namespaceId);
-                            talent.setTalentSourceItemId((Long) localEvent.getParams().get("categoryId"));
                             customerProvider.createCustomerTalent(talent);
 //                        }
                     }

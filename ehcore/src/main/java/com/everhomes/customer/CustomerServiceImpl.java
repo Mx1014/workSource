@@ -304,6 +304,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -312,6 +314,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -323,6 +326,8 @@ public class CustomerServiceImpl implements CustomerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerServiceImpl.class);
 
     final String downloadDir = "\\download\\";
+
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
@@ -588,20 +593,48 @@ public class CustomerServiceImpl implements CustomerService {
                 customer.setTrackingName(user.getNickName());
             }
         }
-        customer.setSourceId(cmd.getSourceItemId());
+//        customer.setSourceId(cmd.getSourceItemId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
 
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
+        //add potential data transfer to customer
+        saveCustomerTransferEvent(UserContext.currentUserId(),customer, cmd.getSourceId(),cmd.getDeviceType());
         syncPotentialTalentToCustomer(customer.getId(),cmd.getSourceId());
         enterpriseCustomerSearcher.feedDoc(customer);
         return convertToDTO(customer);
     }
 
+    private void saveCustomerTransferEvent(Long uid, EnterpriseCustomer customer,Long sourceId,byte deeviceType) {
+        CustomerTalent potentialData = enterpriseCustomerProvider.findPotentialCustomerById(sourceId);
+        if (potentialData != null) {
+            Map<String, String> eventMap = new HashMap<>();
+            User user = userProvider.findUserById(uid);
+            if (user != null) {
+                eventMap.put("operatorName", user.getNickName());
+                eventMap.put("time", dateTimeFormatter.format(LocalDateTime.now()));
+                eventMap.put("customerName", potentialData.getName());
+                String content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.TRANSFER, UserContext.current().getUser().getLocale(), eventMap, "");
+                if (StringUtils.isNotEmpty(content)) {
+                    CustomerEvent event = new CustomerEvent();
+                    event.setCustomerType(CustomerType.ENTERPRISE.getCode());
+                    event.setCustomerId(customer.getId());
+                    event.setCustomerName(customer.getName());
+                    event.setContactName(customer.getContactName());
+                    event.setContent(content);
+                    event.setCreatorUid(UserContext.currentUserId());
+                    event.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    event.setDeviceType(deeviceType);
+                    enterpriseCustomerProvider.createCustomerEvent(event);
+                }
+            }
+        }
+    }
+
     private void syncPotentialTalentToCustomer(Long customerId, Long sourceId) {
-        // sourceItemId id is potential customer data primary key
+        // source id is potential customer data primary key
         enterpriseCustomerProvider.updatePotentialTalentsToCustomer(customerId, sourceId);
         // delete origin source potential data
         enterpriseCustomerProvider.deletePotentialCustomer(sourceId);
@@ -1431,6 +1464,10 @@ public class CustomerServiceImpl implements CustomerService {
     public void createCustomerTalent(CreateCustomerTalentCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTalent talent = ConvertHelper.convert(cmd, CustomerTalent.class);
+//        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getPhone());
+//        if (userIdentifier != null) {
+//            talent.setRegisterStatus(CommonStatus.ACTIVE.getCode());
+//        }
         enterpriseCustomerProvider.createCustomerTalent(talent);
     }
 
@@ -1514,6 +1551,7 @@ public class CustomerServiceImpl implements CustomerService {
         }else {
             dto.setTalentSourceItemName("手动添加");
         }
+        dto.setRegisterStatus(talent.getRegisterStatus().toString());
         return dto;
     }
 
@@ -3395,8 +3433,12 @@ public class CustomerServiceImpl implements CustomerService {
                 talent.setMemberId(member.getId());
                 enterpriseCustomerProvider.updateCustomerTalent(talent);
             }
-
+            // change customer talent memebers register status  20180709
+            CustomerTalent potentialTalent = enterpriseCustomerProvider.findCustomerTalentByPhone(member.getContactToken(), customer.getId());
+            potentialTalent.setRegisterStatus(CommonStatus.ACTIVE.getCode());
+            enterpriseCustomerProvider.updateCustomerTalent(talent);
         }
+
     }
 
     @Override
@@ -4229,19 +4271,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deletePotentialCustomer(DeleteEnterpriseCommand cmd) {
-        if(cmd.getNamespaceId()==null || cmd.getNamespaceId()!=999954){
-            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PRIVILGE_ERROR,
-                    "permission denied");
-        }
         enterpriseCustomerProvider.deletePotentialCustomer(cmd.getSourceId());
     }
 
     @Override
     public CustomerPotentialResponse listPotentialCustomers(DeleteEnterpriseCommand cmd) {
-        if(cmd.getNamespaceId()==null || cmd.getNamespaceId()!=999954){
-            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PRIVILGE_ERROR,
-                    "permission denied");
-        }
+
         List<PotentialCustomerDTO> dtos = new ArrayList<>();
         CustomerPotentialResponse response = new CustomerPotentialResponse();
         cmd.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize()));
@@ -4317,7 +4352,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
             serviceAllianceCategories.forEach((r) -> {
                 CustomerExpandItemDTO allianceItem = new CustomerExpandItemDTO();
-                allianceItem.setSourceId((long) r.getEntryId());
+                allianceItem.setSourceId((long) r.getId());
                 allianceItem.setDisplayName(r.getName());
                 allianceItem.setSourceType(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
                 items.add(allianceItem);
@@ -4334,6 +4369,7 @@ public class CustomerServiceImpl implements CustomerService {
             dtos.forEach((r)->{
                 CustomerTalentDTO dto = ConvertHelper.convert(r, CustomerTalentDTO.class);
                 dto.setRegisterStatus(r.getRegisterStatus().toString());
+                dto.setCreateTime(dateTimeFormatter.format(r.getCreateTime().toLocalDateTime()));
                 if (r.getTalentSourceItemId() != null && StringUtils.isNotBlank(r.getOriginSourceType())) {
                     if (PotentialCustomerType.SERVICE_ALLIANCE.getValue().equals(r.getOriginSourceType())) {
                         ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(r.getTalentSourceItemId());
@@ -4355,12 +4391,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void updatePotentialCustomer(DeleteEnterpriseCommand cmd) {
-       if(cmd.getNamespaceId()==null || cmd.getNamespaceId()!=999954){
-           throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PRIVILGE_ERROR,
-                   "permission denied");
-       }
+
         CustomerPotentialData data = enterpriseCustomerProvider.findPotentialCustomerByName(cmd.getName());
-        if (data != null) {
+        if (data != null && !Objects.equals(data.getId(), cmd.getSourceId())) {
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,
                     "potential customer name  is already exist");
         }
