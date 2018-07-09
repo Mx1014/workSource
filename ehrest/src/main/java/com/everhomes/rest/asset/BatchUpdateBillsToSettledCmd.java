@@ -1,10 +1,6 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
-
-import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
-
 import java.util.List;
 
 /**

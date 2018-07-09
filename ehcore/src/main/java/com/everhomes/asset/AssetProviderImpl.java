@@ -1316,7 +1316,14 @@ public class AssetProviderImpl implements AssetProvider {
                 EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
                 billItemsDao.insert(billItemsList);
             }
-
+            //新增附件
+            
+            
+            
+            
+            
+            
+            
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
