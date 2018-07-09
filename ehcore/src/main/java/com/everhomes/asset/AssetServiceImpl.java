@@ -4964,4 +4964,16 @@ public class AssetServiceImpl implements AssetService {
 	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
 		assetProvider.updatePaymentBillStatus(cmd);
 	}
+
+	public JudgeShowEnergyResponse judgeShowEnergy(JudgeShowEnergyCommand cmd) {
+		JudgeShowEnergyResponse judgeShowEnergyResponse = new JudgeShowEnergyResponse();
+		String showEnergy = configurationProvider.getValue(cmd.getNamespaceId(), "asset.showEnergy", ""); 
+		//如果根据域空间找不到，那么默认为0：不展示
+		if(showEnergy.isEmpty()) {
+			judgeShowEnergyResponse.setShowEnergy(new Byte("0"));
+		}else {
+			judgeShowEnergyResponse.setShowEnergy(new Byte(showEnergy));
+		}
+		return judgeShowEnergyResponse;
+	}
 }

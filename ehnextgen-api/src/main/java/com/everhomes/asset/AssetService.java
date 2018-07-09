@@ -219,4 +219,6 @@ public interface AssetService {
 	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
 
 	void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd);
+
+	JudgeShowEnergyResponse judgeShowEnergy(JudgeShowEnergyCommand cmd);
 }

@@ -1511,6 +1511,19 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return response;
     }
     
+    /**
+     * <p>根据域空间判断是否展示能耗数据</p>
+     * <b>URL: /asset/judgeShowEnergy</b>
+     */
+    @RequestMapping("judgeShowEnergy")
+    @RestReturn(value=JudgeShowEnergyResponse.class)
+    public RestResponse judgeShowEnergy(JudgeShowEnergyCommand cmd){
+    	JudgeShowEnergyResponse judgeShowEnergyResponse = assetService.judgeShowEnergy(cmd);
+        RestResponse restResponse = new RestResponse(judgeShowEnergyResponse);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
     
 }
 
