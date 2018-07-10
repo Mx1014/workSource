@@ -2625,4 +2625,34 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         }
         return dtos;
     }
+
+	@Override
+	public void createAddressArrangement(CreateAddressArrangementCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateAddressArrangement(UpdateAddressArrangementCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteAddressArrangement(DeleteAddressArrangementCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<HistoryApartmentDTO> getHistoryApartment(GetHistoryApartmentCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
