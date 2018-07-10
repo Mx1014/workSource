@@ -26,6 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>decorateStatus: 装修状态</li>
  * <li>orientation: 朝向</li>
  * <li>apartmentFloor: 楼层名称</li>
+ * <li>arrangementOperationType:房源的拆分/合并计划（0：无,1：拆分,2：合并）</li>
  * </ul>
  */
 public class GetApartmentDetailResponse {
@@ -47,6 +48,15 @@ public class GetApartmentDetailResponse {
 	@ItemType(OrganizationOwnerDTO.class)
 	private List<OrganizationOwnerDTO> owerList;
 	private Long nextPageAnchor;
+	private Byte arrangementOperationType;
+	
+	public Byte getArrangementOperationType() {
+		return arrangementOperationType;
+	}
+
+	public void setArrangementOperationType(Byte arrangementOperationType) {
+		this.arrangementOperationType = arrangementOperationType;
+	}
 
 	public String getApartmentFloor() {
 		return apartmentFloor;
