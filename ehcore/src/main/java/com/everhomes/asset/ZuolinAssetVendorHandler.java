@@ -1121,12 +1121,14 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             cur++;
             mandatoryIndex.add(1);//收费项为必填
             if(dto.getBillItemId() != null) {
-            	if(dto.getBillItemId().equals(4L) || dto.getBillItemId().equals(7L)) {
+            	if(dto.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+            			|| dto.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
             		//eh_payment_charging_items 4:自用水费  7：公摊水费
             		headList.add("用量（吨）");
                     cur++;
                     mandatoryIndex.add(0);//用量非必填
-            	}else if (dto.getBillItemId().equals(5L) || dto.getBillItemId().equals(8L)) {
+            	}else if (dto.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+            			|| dto.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
             		//eh_payment_charging_items 5:自用电费   8：公摊电费
             		headList.add("用量（度）");
                     cur++;
@@ -1467,17 +1469,17 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     cmd.setNoticeTel(data[j]);
                 }else if(j >= itemStartIndex && j <= itemEndIndex){// 收费项目
                     PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
-                    if(itemPojo == null){
+                	if(itemPojo == null){
                         log.setErrorLog("没有找到收费项目");
                         log.setCode(AssetBillImportErrorCodes.CHARGING_ITEM_NAME_ERROR);
                         datas.add(log);
                         continue bill;
                     }
-                    BigDecimal amountReceivable = null;
+                	BigDecimal amountReceivable = null;
                     if(StringUtils.isBlank(data[j])){
                         log.setErrorLog("收费项目:"+headers[j]+"必填");
                         log.setCode(AssetBillImportErrorCodes.MANDATORY_BLANK_ERROR);
-                        datas.add(log);
+                        datas.add(log); 
                         continue bill;
                     }try{
                         amountReceivable = new BigDecimal(data[j]);
@@ -1493,7 +1495,14 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     item.setBuildingName(buildingName);
                     item.setApartmentName(apartmentName);
                     item.setAddressId(addressId);
-                    billItemDTOList.add(item);
+                	//如果费项是属于自用水电费、公摊水电费，那么会有用量
+                	if(itemPojo.getId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                    		|| itemPojo.getId().equals(AssetEnergyType.personElectricItem.getCode())
+                    		|| itemPojo.getId().equals(AssetEnergyType.publicWaterItem.getCode())
+                    		|| itemPojo.getId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                		item.setEnergyConsume(data[++j]);
+                    }
+                	billItemDTOList.add(item);
                 }else if(headers[j].contains("减免金额")){
                     //减免项
                     try{
