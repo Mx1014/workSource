@@ -3381,14 +3381,12 @@ public class ParkingServiceImpl implements ParkingService {
 		for (ParkingLot parkingLot : parkingLots) {
 			if(parkingLot.getFuncList()==null || parkingLot.getFuncList().trim().length()==0){
 				JSONArray array = new JSONArray();
+				array.add(ParkingBusinessType.VIP_PARKING.getCode());
 				if(parkingLot.getTempfeeFlag()==1){
 					array.add(ParkingBusinessType.TEMPFEE.getCode());
 				}
 				if(parkingLot.getMonthRechargeFlag()==1){
 					array.add(ParkingBusinessType.MONTH_RECHARGE.getCode());
-				}
-				if(parkingLot.getVipParkingFlag()==1){
-					array.add(ParkingBusinessType.VIP_PARKING.getCode());
 				}
 				if(parkingLot.getSearchCarFlag()==1){
 					array.add(ParkingBusinessType.SEARCH_CAR.getCode());

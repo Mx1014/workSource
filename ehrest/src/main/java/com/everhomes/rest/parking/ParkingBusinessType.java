@@ -14,20 +14,24 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingBusinessType {
-    TEMPFEE("tempfee","临时车缴费"),
-    VIP_PARKING("vipParking","vip车位预约"),
-    MONTH_RECHARGE("monthRecharge","月卡充值"),
-    LOCK_CAR("lockCar","锁车/解锁"),
-    SEARCH_CAR("searchCar","寻车"),
-    CAR_NUM("carNum","在场车数量"),
-    FREE_PLACE("freePlace","空余车位数量"),
-    MONTH_CARD_APPLY("monthCardApply","在线月卡申请");
+    TEMPFEE("tempfee","临时车缴费","getTempfeeFlag","setTempfeeFlag"),
+    VIP_PARKING("vipParking","vip车位预约","getVipParkingFlag","setVipParkingFlag"),
+    MONTH_RECHARGE("monthRecharge","月卡充值","getMonthRechargeFlag","setMonthRechargeFlag"),
+    LOCK_CAR("lockCar","锁车/解锁","getLockCarFlag","setLockCarFlag"),
+    SEARCH_CAR("searchCar","寻车","getSearchCarFlag","setSearchCarFlag"),
+    CAR_NUM("carNum","在场车数量","getCurrentInfoType","setCurrentInfoType"),
+    FREE_PLACE("freePlace","空余车位数量","getCurrentInfoType","setCurrentInfoType"),
+    MONTH_CARD_APPLY("monthCardApply","在线月卡申请","getFlowMode","setFlowMode");
     private String code;
     private String desc;
+    private String getter;
+    private String setter;
 
-    ParkingBusinessType(String code, String desc) {
+    ParkingBusinessType(String code, String desc, String getter, String setter) {
         this.code = code;
         this.desc = desc;
+        this.getter = getter;
+        this.setter = setter;
     }
 
     public static ParkingBusinessType fromCode(String code) {
@@ -38,5 +42,20 @@ public enum ParkingBusinessType {
         }
         return null;
     }
-    public String getCode(){return code;}
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public String getGetter() {
+        return getter;
+    }
+
+    public String getSetter() {
+        return setter;
+    }
 }
