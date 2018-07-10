@@ -620,6 +620,7 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		bean.setId(id);
 		bean.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.insert(bean);
+		return bean;
 	}
 
 	@Override
