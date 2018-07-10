@@ -84,5 +84,10 @@ public interface AddressService {
     List<ApartmentAttachmentDTO> listApartmentAttachments(ListApartmentAttachmentsCommand cmd);
     List<EnterpriseCustomerDTO> listApartmentEnterpriseCustomers(ListApartmentEnterpriseCustomersCommand cmd);
     void downloadApartmentAttachment(DownloadApartmentAttachmentCommand cmd);
+	void createAddressArrangement(CreateAddressArrangementCommand cmd);
+	AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd);
+	void updateAddressArrangement(UpdateAddressArrangementCommand cmd);
+	void deleteAddressArrangement(DeleteAddressArrangementCommand cmd);
+	List<HistoryApartmentDTO> getHistoryApartment(GetHistoryApartmentCommand cmd);
 
 }
