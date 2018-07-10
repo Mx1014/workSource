@@ -512,7 +512,13 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
 
     @Override
     public UploadCsFileResponse uploadFileToContentServer(InputStream fileStream, String fileName, String token) {
-        String contentServerUri = getContentServer();
+        String contentServerUri;
+        try {
+            ContentServer contentServer = selectContentServer();
+            contentServerUri = contentServer.getPublicAddress();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         String fileSuffix = FilenameUtils.getExtension(fileName);
 
         // 通过文件后缀确定Content server中定义的媒体类型
@@ -523,7 +529,7 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
         }
 
         // https 默认端口443 by sfyan 20161226
-        String url = String.format("%s://%s/upload/%s?token=%s", getScheme(), contentServerUri, mediaType, token);
+        String url = String.format("%s://%s/upload/%s?token=%s", HTTP, contentServerUri, mediaType, token);
         HttpPost httpPost = new HttpPost(url);
 
         CloseableHttpResponse response = null;

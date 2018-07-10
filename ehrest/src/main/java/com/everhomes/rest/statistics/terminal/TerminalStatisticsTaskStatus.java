@@ -1,6 +1,7 @@
 package com.everhomes.rest.statistics.terminal;
 
 public enum TerminalStatisticsTaskStatus {
+	CORRECT_USER_ACTIVITY((byte)0),
 	GENERATE_APP_VERSION_CUMULATIVE((byte)10),
 	GENERATE_APP_VERSION_ACTIVE((byte)20),
 	GENERATE_DAY_STAT((byte)30),
