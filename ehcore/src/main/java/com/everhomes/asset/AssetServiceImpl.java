@@ -871,6 +871,19 @@ public class AssetServiceImpl implements AssetService {
         		propertyNames.add(billItemDTO.getBillItemId().toString());
                 titleName.add(billItemDTO.getBillItemName()+"(元)");
                 titleSize.add(20);
+                if(billItemDTO.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+            			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
+            		//eh_payment_charging_items 4:自用水费  7：公摊水费
+                    propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
+                    titleName.add("用量（吨）");
+                    titleSize.add(20);
+            	}else if (billItemDTO.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+            			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+            		//eh_payment_charging_items 5:自用电费   8：公摊电费
+            		propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
+                    titleName.add("用量（度）");
+                    titleSize.add(20);
+				}
         	}
         }
         propertyNames.add("addresses");
@@ -915,13 +928,19 @@ public class AssetServiceImpl implements AssetService {
     		}
             for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
             	BigDecimal amountRecivable = BigDecimal.ZERO;
+            	BigDecimal energyConsume = BigDecimal.ZERO;//增加用量
         		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
         			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
         				//如果费项是一样的，那么导出的时候，对费项做相加
         				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+        				//增加用量
+        				if(billItemDTO2.getEnergyConsume() != null) {
+        					energyConsume = energyConsume.add(new BigDecimal(billItemDTO2.getEnergyConsume()));
+        				}
         			}
         		}
         		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-energyConsume", energyConsume.toString());//增加用量
             }
             detail.put("addresses", dto.getAddresses());
             //导出增加减免（总和）、减免备注、增收（总和）、增收备注
