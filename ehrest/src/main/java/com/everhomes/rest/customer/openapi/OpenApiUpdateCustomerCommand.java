@@ -10,6 +10,7 @@ import java.util.List;
 public class OpenApiUpdateCustomerCommand {
 
     private Long enterpriseId;
+    private Integer namespaceId;
     private String companyName;
     private List<ContactDTO> contacts;
     private List<AddressDTO> addresses;
@@ -33,6 +34,15 @@ public class OpenApiUpdateCustomerCommand {
 
     public void setEnterpriseId(Long enterpriseId) {
         this.enterpriseId = enterpriseId;
+    }
+
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public String getCompanyName() {

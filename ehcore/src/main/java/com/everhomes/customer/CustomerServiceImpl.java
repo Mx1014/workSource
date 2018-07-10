@@ -2293,7 +2293,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
-    private void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
+    @Override
+    public void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
         Long userId = UserContext.currentUserId();
         OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
         if (address != null) {
