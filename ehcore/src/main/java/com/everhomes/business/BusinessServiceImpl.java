@@ -28,7 +28,6 @@ import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.oauth2.Clients;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
@@ -144,8 +143,10 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	@Autowired
-	private PayService payService;
+	
+	// 使用新支付SDK，PayService被废弃 by lqs 20180613
+	//@Autowired
+	//private PayService payService;
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
 		if(cmd.getUserId() == null){
@@ -1773,13 +1774,15 @@ public class BusinessServiceImpl implements BusinessService {
 		CheckPaymentUserResponse res = businessProvider.checkoutPaymentUser(cmd.getUserId());
 		if(res==null){
 			res = new CheckPaymentUserResponse();
-			PaymentUser paymentUser = payService.createPaymentUser(BusinessUserType.PERSONAL.getCode(), cmd.getOwnerType(), cmd.getUserId());
-			res.setCreateTime(paymentUser.getCreateTime());
-			res.setId(paymentUser.getId());
-			res.setOwnerId(paymentUser.getOwnerId());
-			res.setOwnerType(paymentUser.getOwnerType());
-			res.setPayment_user_id(paymentUser.getPaymentUserId());
-			res.setPaymentUserType(paymentUser.getPaymentUserType());
+			// 使用新支付SDK，PayService被废弃，由于此段代码并不知道是否还在使用，故支付SDK对接时并没有对接，
+	        // 若需要支持则需要另外安排时间对接 by lqs 20180613
+//			PaymentUser paymentUser = payService.createPaymentUser(BusinessUserType.PERSONAL.getCode(), cmd.getOwnerType(), cmd.getUserId());
+//			res.setCreateTime(paymentUser.getCreateTime());
+//			res.setId(paymentUser.getId());
+//			res.setOwnerId(paymentUser.getOwnerId());
+//			res.setOwnerType(paymentUser.getOwnerType());
+//			res.setPayment_user_id(paymentUser.getPaymentUserId());
+//			res.setPaymentUserType(paymentUser.getPaymentUserType());
 		}
 		return res;
 	}

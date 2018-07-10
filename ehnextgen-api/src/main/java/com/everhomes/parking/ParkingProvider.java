@@ -6,6 +6,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PaymentOrderRecord;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import org.jooq.SortField;
 
 public interface ParkingProvider {
@@ -31,12 +33,12 @@ public interface ParkingProvider {
     		String plateNumber, Long userId, Long pageAnchor, Integer pageSize);
     
     List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
-    		Byte rechargeType, String paidType, String cardNumber,  Byte status, Long pageAnchor, Integer pageSize);
+                                                           String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
+                                                           Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, Long pageAnchor, Integer pageSize);
     
     BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte rechargeType, String paidType);
+                                          String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
+                                          Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords);
     
     void createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder);
     
@@ -151,5 +153,15 @@ public interface ParkingProvider {
 
     void createParkingSpaceLog(ParkingSpaceLog log);
 
+    ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String userId, String accountCode,String userIdenify, String tag1, String tag2, String tag3);
+
+    List<PaymentOrderRecord> listParkingPaymentOrderRecords(Long pageAnchor, Integer pageSize);
+
+    List<ParkingRechargeOrder> listParkingRechargeOrdersByUserId(Long userId, Integer pageSize, Long pageAnchor);
+
+    Long ParkingRechargeOrdersByUserId(Long userId);
+
     List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId);
+
+    List<ParkingLot> findParkingLotByIdHash(String parkingLotToken);
 }

@@ -1,11 +1,10 @@
 package com.everhomes.rest.contract;
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+
+import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
@@ -150,16 +149,6 @@ public class ContractDetailDTO {
     private Long templateId;
     private String templateName;
 
-    private Long categoryId;
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
@@ -179,6 +168,35 @@ public class ContractDetailDTO {
 
 	public void setTemplateId(Long templateId) {
 		this.templateId = templateId;
+	}
+		
+    //add by tangcen
+    private Long communityId;
+    private Integer namespaceId;
+    private Long categoryId;
+    
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public List<ContractChargingChangeDTO> getAdjusts() {

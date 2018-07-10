@@ -29,6 +29,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.community.CommunityType;
@@ -39,6 +40,7 @@ import com.everhomes.rest.contract.CheckAdminCommand;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractEventDTO;
 import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.ContractTemplateDTO;
@@ -55,6 +57,7 @@ import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractEventsCommand;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
 import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
 import com.everhomes.rest.contract.ListContractsBySupplierCommand;
@@ -805,4 +808,8 @@ public class ZJContractHandler implements ContractService{
 	}
 
 
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

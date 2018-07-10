@@ -7,7 +7,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rentalv2.utils.RentalUtils;
@@ -63,8 +62,6 @@ public class RentalCommonServiceImpl {
     @Autowired
     private ConfigurationProvider configurationProvider;
     @Autowired
-    private PayService payService;
-    @Autowired
     private OnlinePayService onlinePayService;
     @Autowired
     private LocaleStringService localeStringService;
@@ -72,6 +69,8 @@ public class RentalCommonServiceImpl {
     private UserProvider userProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private Rentalv2PayService  rentalv2PayService;
 
     public RentalResourceHandler getRentalResourceHandler(String handlerName) {
         RentalResourceHandler handler = null;
@@ -245,20 +244,8 @@ public class RentalCommonServiceImpl {
 
         if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) {
             //新支付退款
-            Long amount = payService.changePayAmount(orderAmount);
-            CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.RENTALORDER.getPycode(),
-                    Long.valueOf(order.getOrderNo()), refundOrderNo, amount);
-
-            if(refundResponse != null || refundResponse.getErrorCode() != null
-                    && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-
-            } else{
-                LOGGER.error("Refund failed from vendor, refundOrderNo={}, order={}, response={}", refundOrderNo, order,
-                        refundResponse);
-                throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-                        RentalServiceErrorCode.ERROR_REFUND_ERROR,
-                        "bill refund error");
-            }
+            Long amount = changePayAmount(orderAmount);
+            rentalv2PayService.refundOrder(order,amount);
         } else {
             refundParkingOrderV1(order, timestamp, refundOrderNo, orderAmount);
         }
@@ -272,7 +259,7 @@ public class RentalCommonServiceImpl {
         rentalRefundOrder.setResourceType(order.getResourceType());
 
         rentalRefundOrder.setAmount(orderAmount);
-        rentalRefundOrder.setStatus(SiteBillStatus.REFUNDED.getCode());
+        rentalRefundOrder.setStatus(SiteBillStatus.REFUNDING.getCode());
         rentalRefundOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         if (UserContext.current().getUser()!=null)
              rentalRefundOrder.setCreatorUid(UserContext.current().getUser().getId());
@@ -281,6 +268,14 @@ public class RentalCommonServiceImpl {
             rentalRefundOrder.setOperatorUid(UserContext.current().getUser().getId());
 
         this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
+    }
+
+    public Long changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return 0L;
+        }
+        return  amount.multiply(new BigDecimal(100)).longValue();
     }
 
     private void refundParkingOrderV1(RentalOrder order, Long timestamp, Long refundOrderNo, BigDecimal amount) {

@@ -17,6 +17,7 @@ import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.CheckAdminCommand;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractEventDTO;
 import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.ContractTemplateDTO;
 import com.everhomes.rest.contract.CreateContractCommand;
@@ -31,6 +32,7 @@ import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractEventsCommand;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
 import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
 import com.everhomes.rest.contract.ListContractsBySupplierCommand;
@@ -291,4 +293,9 @@ public class SZWContractHandler implements ContractService{
 	}
 
 
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    
 }

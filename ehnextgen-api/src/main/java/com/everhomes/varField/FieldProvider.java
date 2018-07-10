@@ -51,6 +51,8 @@ public interface FieldProvider {
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long groupId, String fieldDisplayName);
     Field findField(Long groupId, String fieldName);
     Field findField(String moduleName, String name, String groupPath);
+    //add by tangcen
+	FieldItem findFieldItemByBusinessValue(Long fieldId, Byte businessValue);
 
     List<Field> listMandatoryFields(String moduleName, Long  groupId);
 

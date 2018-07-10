@@ -1818,5 +1818,30 @@ public class CommunityProviderImpl implements CommunityProvider {
         return l;
     }
 
+	@Override
+	public Community findCommunityByNamespaceIdAndName(Integer namespaceId, String name) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		Condition cond = Tables.EH_COMMUNITIES.NAME.eq(name);
+		cond = cond.or(Tables.EH_COMMUNITIES.ALIAS_NAME.eq(name));
+		SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+		query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(cond);
+
+        LOGGER.debug("findCommunityByNamespaceIdAndName, sql = {}" , query.getSQL());
+        LOGGER.debug("findCommunityByNamespaceIdAndName, bindValues = {}" , query.getBindValues());
+        return ConvertHelper.convert(query.fetchOne(), Community.class);
+	}
+
+	@Override
+	public Community findCommunityByNumber(String communityNumber, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+		query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_NUMBER.eq(communityNumber));
+		query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+
+        LOGGER.debug("findCommunityByNumber, sql={}", query.getSQL());
+        LOGGER.debug("findCommunityByNumber, bindValues={}", query.getBindValues());
+        return ConvertHelper.convert(query.fetchOne(), Community.class);
+	}
 
 }

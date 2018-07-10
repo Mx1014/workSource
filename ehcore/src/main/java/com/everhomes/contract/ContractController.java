@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -18,6 +20,7 @@ import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.CheckAdminCommand;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.ContractEventDTO;
 import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.DeleteContractCommand;
@@ -29,6 +32,7 @@ import com.everhomes.rest.contract.GenerateContractNumberCommand;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractEventsCommand;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
 import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
 import com.everhomes.rest.contract.ListContractsBySupplierCommand;
@@ -452,5 +456,21 @@ public class ContractController extends ControllerBase {
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.checkPrintPreviewprivilege(cmd));
+	}
+	
+	//查看合同日志  by tangcen
+	/**
+	 * <b>URL: /contract/listContractEvents</b>
+	 * <p>查看合同日志</p>
+	 */
+	@RequestMapping("listContractEvents")
+	@RestReturn(value = ContractEventDTO.class,collection=true)
+	public RestResponse listContractEvents(ListContractEventsCommand cmd) {
+		ContractService contractService = getContractService(UserContext.getCurrentNamespaceId(0));
+		List<ContractEventDTO> result = contractService.listContractEvents(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 }

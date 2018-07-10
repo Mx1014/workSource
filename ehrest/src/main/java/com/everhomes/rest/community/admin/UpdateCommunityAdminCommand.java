@@ -32,7 +32,27 @@ public class UpdateCommunityAdminCommand {
     @NotNull
     private Long areaId;
     
-    private Double areaSize;
+    private Integer namespaceId;
+    
+    private Long id;
+    
+    public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	private Double areaSize;
     
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;

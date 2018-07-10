@@ -37,7 +37,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
         Map<String,Integer> billStatuses = new HashMap<>();
         List<Long> billIds = new ArrayList<>();
         for(int i = 0; i < bills.size(); i++){
-            AssetPaymentOrderBills bill = bills.get(i);
+            AssetPaymentOrderBills bill = bills.get(i); 
             //ORDER_BILL  中 1代表成功
             billStatuses.put(bill.getBillId(),1);
             billIds.add(Long.parseLong(bills.get(i).getBillId()));
@@ -48,6 +48,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
             assetProvider.changeOrderStaus(orderId, finalOrderStatus);
             assetProvider.changeBillStatusOnOrder(billStatuses,orderId);
             assetProvider.changeBillStatusAndPaymentTypeOnPaiedOff(billIds,cmd.getPaymentType());
+            assetProvider.changeOrderPaymentType(orderId, cmd.getPaymentType());
             return null;
         });
     }

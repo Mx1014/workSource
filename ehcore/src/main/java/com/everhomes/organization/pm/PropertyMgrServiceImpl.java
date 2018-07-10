@@ -1,6 +1,67 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.jooq.Record;
+import org.jooq.RecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
@@ -19,6 +80,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.enterprise.EnterpriseCommunityMap;
@@ -47,6 +109,7 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
@@ -160,156 +223,9 @@ import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PaidType;
 import com.everhomes.rest.organization.TxType;
+import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.AddOrganizationOwnerCarUserCommand;
-import com.everhomes.rest.organization.pm.AddressMappingStatus;
-import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
-import com.everhomes.rest.organization.pm.CommunityPropMemberCommand;
-import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
-import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
-import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.DefaultChargingItemDTO;
-import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyDTO;
-import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
-import com.everhomes.rest.organization.pm.DeleteDefaultChargingItemCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAttachmentCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerBehaviorCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarAttachmentCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.DeletePmBillCommand;
-import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
-import com.everhomes.rest.organization.pm.DeletePropMemberCommand;
-import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.DeleteRelationOfOrganizationOwnerAndCarCommand;
-import com.everhomes.rest.organization.pm.ExportOrganizationOwnerCarsCommand;
-import com.everhomes.rest.organization.pm.ExportOrganizationsOwnersCommand;
-import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
-import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
-import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
-import com.everhomes.rest.organization.pm.FindPmBillByOrderNoCommand;
-import com.everhomes.rest.organization.pm.GetFamilyStatisticCommand;
-import com.everhomes.rest.organization.pm.GetFamilyStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.GetOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.GetOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommand;
-import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
-import com.everhomes.rest.organization.pm.GetRequestInfoCommand;
-import com.everhomes.rest.organization.pm.GetRequestInfoResponse;
-import com.everhomes.rest.organization.pm.ImportOrganizationOwnerCarsCommand;
-import com.everhomes.rest.organization.pm.ImportOrganizationOwnerDTO;
-import com.everhomes.rest.organization.pm.ImportOrganizationsOwnersCommand;
-import com.everhomes.rest.organization.pm.InsertPmBillCommand;
-import com.everhomes.rest.organization.pm.InsertPmBillsCommand;
-import com.everhomes.rest.organization.pm.ListApartmentOrganizationOwnerBehaviorsCommand;
-import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommand;
-import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommandResponse;
-import com.everhomes.rest.organization.pm.ListDefaultChargingItemsCommand;
-import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommand;
-import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
-import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerAddressesCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerAttachmentsCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerBehaviorsCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarAttachmentCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarByOrgOwnerCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarResponse;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarsByAddressCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticByAgeDTO;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnerTypesCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnersByCarCommand;
-import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
-import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListParkingCardCategoriesCommand;
-import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommand;
-import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropAddressMappingCommand;
-import com.everhomes.rest.organization.pm.ListPropAddressMappingCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropBillCommand;
-import com.everhomes.rest.organization.pm.ListPropBillCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropCommunityAddressCommand;
-import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropInvitedUserCommand;
-import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropMemberCommand;
-import com.everhomes.rest.organization.pm.ListPropMemberCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
-import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropPostCommandResponse;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
-import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
-import com.everhomes.rest.organization.pm.OnlinePayPmBillCommand;
-import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
-import com.everhomes.rest.organization.pm.OrganizationOwnerAddressCommand;
-import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerAttachmentDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorStatus;
-import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
-import com.everhomes.rest.organization.pm.OrganizationOwnerCarAttachmentDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerCarDTO;
-import com.everhomes.rest.organization.pm.OrganizationOwnerCarStatus;
-import com.everhomes.rest.organization.pm.OrganizationOwnerLocaleStringScope;
-import com.everhomes.rest.organization.pm.OrganizationOwnerOwnerCarPrimaryFlag;
-import com.everhomes.rest.organization.pm.OrganizationOwnerStatus;
-import com.everhomes.rest.organization.pm.OrganizationOwnerTypeDTO;
-import com.everhomes.rest.organization.pm.OweFamilyDTO;
-import com.everhomes.rest.organization.pm.OwedType;
-import com.everhomes.rest.organization.pm.ParkingCardCategoryDTO;
-import com.everhomes.rest.organization.pm.PayPmBillByAddressIdCommand;
-import com.everhomes.rest.organization.pm.PmBillEntityType;
-import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
-import com.everhomes.rest.organization.pm.PmBillOperLogType;
-import com.everhomes.rest.organization.pm.PmBillsDTO;
-import com.everhomes.rest.organization.pm.PmMemberStatus;
-import com.everhomes.rest.organization.pm.PropAddressMappingDTO;
-import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
-import com.everhomes.rest.organization.pm.PropBillDTO;
-import com.everhomes.rest.organization.pm.PropBillItemDTO;
-import com.everhomes.rest.organization.pm.PropCommunityBillDateCommand;
-import com.everhomes.rest.organization.pm.PropCommunityBillIdCommand;
-import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
-import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
-import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
-import com.everhomes.rest.organization.pm.PropFamilyDTO;
-import com.everhomes.rest.organization.pm.PropInvitedUserDTO;
-import com.everhomes.rest.organization.pm.PropOwnerDTO;
-import com.everhomes.rest.organization.pm.PropertyMemberDTO;
-import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
-import com.everhomes.rest.organization.pm.QueryPropTopicByCategoryCommand;
-import com.everhomes.rest.organization.pm.SearchOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.SearchOrganizationOwnersByconditionCommand;
-import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
-import com.everhomes.rest.organization.pm.SendNoticeCommand;
-import com.everhomes.rest.organization.pm.SendNoticeMode;
-import com.everhomes.rest.organization.pm.SendNoticeToPmAdminCommand;
-import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
-import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
-import com.everhomes.rest.organization.pm.SetOrganizationOwnerAsCarPrimaryCommand;
-import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
-import com.everhomes.rest.organization.pm.UpdateDefaultChargingItemCommand;
-import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressAuthTypeCommand;
-import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressStatusCommand;
-import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCarCommand;
-import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
-import com.everhomes.rest.organization.pm.UpdatePmBillsDto;
-import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
-import com.everhomes.rest.organization.pm.UploadOrganizationOwnerCarAttachmentCommand;
-import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.IdentifierType;
@@ -321,11 +237,15 @@ import com.everhomes.rest.user.UserLocalStringCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationOwnerCarSearcher;
 import com.everhomes.search.PMOwnerSearcher;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.EhPmResoucreReservations;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwnerCars;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -352,12 +272,11 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
+import jdk.nashorn.internal.parser.JSONParser;
 import net.greghaines.jesque.Job;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -372,19 +291,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -395,21 +308,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.everhomes.util.RuntimeErrorException.errorWith;
+import net.greghaines.jesque.Job;
 
 /**
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
@@ -539,10 +442,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     private AssetProvider assetProvider;
 
     @Autowired
-    private DefaultChargingItemProvider defaultChargingItemProvider;
-
-    @Autowired
     private ImportFileService importFileService;
+
+	@Autowired
+	private DefaultChargingItemProvider defaultChargingItemProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
+	@Autowired
+	private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+   	@Autowired
+    private ScheduleProvider scheduleProvider;
 
     private String queueName = "property-mgr-push";
 
@@ -550,12 +462,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+    
+    boolean isRunning = false;
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
     public void setup() {
-        workerPoolFactory.getWorkerPool().addQueue(queueName);
+    	synchronized (this) {
+			if(!isRunning) {
+				workerPoolFactory.getWorkerPool().addQueue(queueName);
+				isRunning = true;
+			}
+		}
+        
     }
 
     @Override
@@ -2532,7 +2452,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
 
         if (!StringUtils.isEmpty(cmd.getApartmentName())) {
-            Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
+            //Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
+            Address other = addressProvider.findNotInactiveAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
             if (other != null && !other.getId().equals(cmd.getId())) {
                 throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
             }
@@ -2799,180 +2720,200 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             response.setApartments(apartments);
         }
 
-        return response;
-    }
+		return response;
+	}
 
-    @Override
-    public ListPropApartmentsResponse listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
-        //检查参数
-        checkListPropApartmentByKeywordParamters(cmd);
+	@Override
+	public ListPropApartmentsResponse listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
+		//检查参数
+		checkListPropApartmentByKeywordParamters(cmd);
+		
+		//取得门牌列表
+		List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(cmd).second();
+		
+		//门牌转化成门牌id列表
+		List<Long> aptIdList = aptList.stream().map(a->a.getAddressId()).collect(Collectors.toList());
+		
+		//处理family
+		Map<Long, Family> familyMap = familyProvider.mapFamilyByAddressIds(aptIdList);
+		
+		//处理每个门牌入住的人数
+		Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), aptIdList);
+		
+		//处理小区地址关联表
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+//		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList, cmd.getLivingStatus());
 
-        //取得门牌列表
-        List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(cmd).second();
-
-        //门牌转化成门牌id列表
-        List<Long> aptIdList = aptList.stream().map(a -> a.getAddressId()).collect(Collectors.toList());
-
-        //处理family
-        Map<Long, Family> familyMap = familyProvider.mapFamilyByAddressIds(aptIdList);
-
-        //处理每个门牌入住的人数
-        Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), aptIdList);
-
-        //处理小区地址关联表
-        Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
-
-        //判断是否欠费
-        Map<Long, Byte> billOwedMap = mapBillOwedFlag(aptIdList);
-
-        //门牌转化成要返回的列表
-        List<PropFamilyDTO> resultList = aptList.stream().map(apartmentDTO -> convertToPropFamilyDTO(cmd, apartmentDTO, familyMap, ownerCountMap,
-                communityAddressMappingMap, billOwedMap)).collect(Collectors.toList());
-
-        PropAptStatisticDTO statistics = getStatistics(resultList);
-
-        ListPropApartmentsResponse response = ConvertHelper.convert(statistics, ListPropApartmentsResponse.class);
-        response.setResultList(resultList);
-
-        return response;
-    }
-
-    private PropAptStatisticDTO getStatistics(List<PropFamilyDTO> resultList) {
-        PropAptStatisticDTO statistics = new PropAptStatisticDTO();
-        int userCount = 0;
-        Map<Byte, Integer> map = new HashMap<>();
-        map.put(AddressMappingStatus.DEFAULT.getCode(), 0);
-        map.put(AddressMappingStatus.LIVING.getCode(), 0);
-        map.put(AddressMappingStatus.RENT.getCode(), 0);
-        map.put(AddressMappingStatus.FREE.getCode(), 0);
-        map.put(AddressMappingStatus.SALED.getCode(), 0);
-        map.put(AddressMappingStatus.UNSALE.getCode(), 0);
-        map.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
-
-        for (PropFamilyDTO propFamilyDTO : resultList) {
-            map.put(propFamilyDTO.getLivingStatus(), map.get(propFamilyDTO.getLivingStatus()) + 1);
-            userCount += propFamilyDTO.getMemberCount();
-        }
-
-        statistics.setDefaultCount(map.get(AddressMappingStatus.DEFAULT.getCode()));
-        statistics.setLiveCount(map.get(AddressMappingStatus.LIVING.getCode()));
-        statistics.setRentCount(map.get(AddressMappingStatus.RENT.getCode()));
-        statistics.setFreeCount(map.get(AddressMappingStatus.FREE.getCode()));
-        statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
-        statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
-        statistics.setOccupiedCount(map.get(AddressMappingStatus.OCCUPIED.getCode()));
-        statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount() + statistics.getOccupiedCount());
-        statistics.setUserCount(userCount);
-        statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
-        statistics.setNoOwnerCount(statistics.getFreeCount() + statistics.getUnsaleCount());
-
-        return statistics;
-    }
-
-    private PropFamilyDTO convertToPropFamilyDTO(ListPropApartmentsByKeywordCommand cmd, ApartmentDTO apartmentDTO, Map<Long, Family> familyMap,
-                                                 Map<Long, Integer> ownerCountMap, Map<Long, CommunityAddressMapping> communityAddressMappingMap, Map<Long, Byte> billOwedMap) {
-        Long addressId = apartmentDTO.getAddressId();
-
-        PropFamilyDTO dto = new PropFamilyDTO();
-        dto.setAddress(cmd.getBuildingName() + "-" + apartmentDTO.getApartmentName());
-        dto.setName(apartmentDTO.getApartmentName());
-        dto.setAddressId(addressId);
-        dto.setAreaSize(apartmentDTO.getAreaSize());
-        dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
-        dto.setApartmentFloor(apartmentDTO.getApartmentFloor());
-
-        //设置家庭信息
-        setFamilyInfo(dto, familyMap);
-        //设置门牌入住的人数
-        setOwnerCount(dto, ownerCountMap);
-        //设置门牌的入住状态
-        setLivingStatus(dto, communityAddressMappingMap, apartmentDTO.getLivingStatus());
-        //设置公寓是否欠费
-        setOwedFlag(dto, billOwedMap);
-
-        return dto;
-    }
-
-    private void checkListPropApartmentByKeywordParamters(ListPropApartmentsByKeywordCommand cmd) {
-        if (null == cmd.getCommunityId()) {
-            checkOrganization(cmd.getOrganizationId());
-
-            OrganizationCommunity orgCom = this.propertyMgrProvider.findPmCommunityByOrgId(cmd.getOrganizationId());
-            if (orgCom == null) {
-                LOGGER.error("Unable to find the community by organizationId=" + cmd.getOrganizationId());
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "Unable to find the community by organizationId");
-            }
-            cmd.setCommunityId(orgCom.getCommunityId());
-        }
-    }
-
-    private void setOwedFlag(PropFamilyDTO dto, Map<Long, Byte> billOwedMap) {
-        Byte owedFlag = billOwedMap.get(dto.getAddressId());
-        if (owedFlag == null) {
-            dto.setOwed(OwedType.NO_OWED.getCode());
-        } else {
-            dto.setOwed(owedFlag);
-        }
-    }
-
-    private void setLivingStatus(PropFamilyDTO dto, Map<Long, CommunityAddressMapping> communityAddressMappingMap, Byte addressLivingStatus) {
-        if (addressLivingStatus != null) {
-            dto.setLivingStatus(addressLivingStatus);
-        } else {
-            CommunityAddressMapping mapping = communityAddressMappingMap.get(dto.getAddressId());
-            if (mapping != null) {
-                dto.setLivingStatus(mapping.getLivingStatus());
-            } else {
-                dto.setLivingStatus(AddressMappingStatus.LIVING.getCode());
-            }
-        }
-    }
-
-    private void setOwnerCount(PropFamilyDTO dto, Map<Long, Integer> ownerCountMap) {
-        Integer ownerCount = ownerCountMap.get(dto.getAddressId());
-        if (ownerCount == null) {
-            dto.setMemberCount(0L);
-        } else {
-            dto.setMemberCount(ownerCount.longValue());
-        }
-    }
-
-    private void setFamilyInfo(PropFamilyDTO dto, Map<Long, Family> familyMap) {
-        Family family = familyMap.get(dto.getAddressId());
-        if (family == null) {
-            dto.setId(0L);
-        } else {
-            dto.setId(family.getId());
-        }
-    }
-
-    //判断是否欠费
-    private Map<Long, Byte> mapBillOwedFlag(List<Long> addressIds) {
-        Map<Long, Byte> map = new HashMap<>();
-        Map<Long, CommunityPmBill> billMap = propertyMgrProvider.mapNewestBillByAddressIds(addressIds);
-        if (!billMap.isEmpty()) {
-            List<Long> billIds = billMap.entrySet().stream().map(r -> r.getValue().getId()).collect(Collectors.toList());
-            Map<Long, BigDecimal> paidMap = organizationProvider.mapOrgOrdersByBillIdAndStatus(billIds, OrganizationOrderStatus.PAID.getCode());
-            billMap.forEach((addressId, bill) -> {
-                BigDecimal paidMoney = paidMap.get(bill.getId());
-                if (paidMoney == null) {
-                    paidMoney = BigDecimal.ZERO;
+		//判断是否欠费
+		Map<Long, Byte> billOwedMap = mapBillOwedFlag(aptIdList);
+		
+		//门牌转化成要返回的列表
+		List<PropFamilyDTO> resultList = aptList.stream().map(apartmentDTO->convertToPropFamilyDTO(cmd, apartmentDTO, familyMap, ownerCountMap, 
+				communityAddressMappingMap, billOwedMap)).collect(Collectors.toList());
+		
+		PropAptStatisticDTO statistics = getStatistics(resultList);
+		
+		ListPropApartmentsResponse response = ConvertHelper.convert(statistics, ListPropApartmentsResponse.class);
+		List<PropFamilyDTO>  filterEdResult = new ArrayList<>();
+		for(PropFamilyDTO dto : resultList){
+		    filterEdResult.add(dto);
+			if(cmd.getLivingStatus() != null){
+                Byte livingStatus = cmd.getLivingStatus();
+                if(dto.getLivingStatus() != livingStatus){
+                    filterEdResult.remove(dto);
+                    continue;
                 }
-                BigDecimal waitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(paidMoney);
-                if (waitPayAmount.compareTo(BigDecimal.ZERO) > 0)
-                    map.put(addressId, OwedType.OWED.getCode());
-                else
-                    map.put(addressId, OwedType.NO_OWED.getCode());
-            });
-        }
-        return map;
-    }
+			}
+			dto.setReservationInvolved((byte)0);
+			if(AddressLivingStatus.OCCUPIED.getCode() == dto.getLivingStatus()){
+				if(propertyMgrProvider.isInvolvedWithReservation(dto.getAddressId())){
+					dto.setReservationInvolved((byte)1);
+				}
+			}
+		}
+//		response.setResultList(resultList);
+		response.setResultList(filterEdResult);
 
-    @Override
-    public List<PropFamilyDTO> listPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
-        // 优化门牌性能，by tt, 20170428
-        return listNewPropApartmentsByKeyword(cmd).getResultList();
+		return response;
+	}
+	
+	private PropAptStatisticDTO getStatistics(List<PropFamilyDTO> resultList) {
+		PropAptStatisticDTO statistics = new PropAptStatisticDTO();
+		int userCount = 0;
+		Map<Byte, Integer> map = new HashMap<>();
+		map.put(AddressMappingStatus.DEFAULT.getCode(), 0);
+		map.put(AddressMappingStatus.LIVING.getCode(), 0);
+		map.put(AddressMappingStatus.RENT.getCode(), 0);
+		map.put(AddressMappingStatus.FREE.getCode(), 0);
+		map.put(AddressMappingStatus.SALED.getCode(), 0);
+		map.put(AddressMappingStatus.UNSALE.getCode(), 0);
+		map.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
+
+		for (PropFamilyDTO propFamilyDTO : resultList) {
+			map.put(propFamilyDTO.getLivingStatus(), map.get(propFamilyDTO.getLivingStatus()) + 1);
+			userCount += propFamilyDTO.getMemberCount();
+		}
+		
+		statistics.setDefaultCount(map.get(AddressMappingStatus.DEFAULT.getCode()));
+		statistics.setLiveCount(map.get(AddressMappingStatus.LIVING.getCode()));
+		statistics.setRentCount(map.get(AddressMappingStatus.RENT.getCode()));
+		statistics.setFreeCount(map.get(AddressMappingStatus.FREE.getCode()));
+		statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
+		statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
+		statistics.setOccupiedCount(map.get(AddressMappingStatus.OCCUPIED.getCode()));
+		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount() + statistics.getOccupiedCount());
+		statistics.setUserCount(userCount);
+		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
+		statistics.setNoOwnerCount(statistics.getFreeCount() + statistics.getUnsaleCount());
+		
+		return statistics;
+	}
+
+	private PropFamilyDTO convertToPropFamilyDTO(ListPropApartmentsByKeywordCommand cmd, ApartmentDTO apartmentDTO, Map<Long, Family> familyMap,
+			Map<Long, Integer> ownerCountMap, Map<Long, CommunityAddressMapping> communityAddressMappingMap, Map<Long, Byte> billOwedMap) {
+		Long addressId = apartmentDTO.getAddressId();
+		
+		PropFamilyDTO dto = new PropFamilyDTO();
+		dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
+		dto.setName(apartmentDTO.getApartmentName());
+		dto.setAddressId(addressId);
+		dto.setAreaSize(apartmentDTO.getAreaSize());
+		dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
+		dto.setApartmentFloor(apartmentDTO.getApartmentFloor());
+		
+		//设置家庭信息
+		setFamilyInfo(dto, familyMap);
+		//设置门牌入住的人数
+		setOwnerCount(dto, ownerCountMap);
+		//设置门牌的入住状态
+		setLivingStatus(dto, communityAddressMappingMap, apartmentDTO.getLivingStatus());
+		//设置公寓是否欠费
+		setOwedFlag(dto, billOwedMap);
+		
+		return dto;
+	}
+
+	private void checkListPropApartmentByKeywordParamters(ListPropApartmentsByKeywordCommand cmd) {
+		if(null == cmd.getCommunityId()){
+			checkOrganization(cmd.getOrganizationId());
+
+			OrganizationCommunity  orgCom = this.propertyMgrProvider.findPmCommunityByOrgId(cmd.getOrganizationId());
+			if(orgCom == null){
+				LOGGER.error("Unable to find the community by organizationId="+cmd.getOrganizationId());
+				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Unable to find the community by organizationId");
+			}
+			cmd.setCommunityId(orgCom.getCommunityId());
+		}
+	}
+
+	private void setOwedFlag(PropFamilyDTO dto, Map<Long, Byte> billOwedMap) {
+		Byte owedFlag = billOwedMap.get(dto.getAddressId());
+		if (owedFlag == null) {
+			dto.setOwed(OwedType.NO_OWED.getCode());
+		}else {
+			dto.setOwed(owedFlag);
+		}
+	}
+
+	private void setLivingStatus(PropFamilyDTO dto, Map<Long, CommunityAddressMapping> communityAddressMappingMap, Byte addressLivingStatus) {
+		if (addressLivingStatus != null) {
+			dto.setLivingStatus(addressLivingStatus);
+		}else {
+			CommunityAddressMapping mapping = communityAddressMappingMap.get(dto.getAddressId());
+			if(mapping != null){
+				dto.setLivingStatus(mapping.getLivingStatus());
+			}
+			else{
+				dto.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+			}
+		}
+	}
+
+	private void setOwnerCount(PropFamilyDTO dto, Map<Long, Integer> ownerCountMap) {
+		Integer ownerCount = ownerCountMap.get(dto.getAddressId());
+		if (ownerCount == null) {
+			dto.setMemberCount(0L);
+		}else {
+			dto.setMemberCount(ownerCount.longValue());
+		}
+	}
+
+	private void setFamilyInfo(PropFamilyDTO dto, Map<Long, Family> familyMap) {
+		Family family = familyMap.get(dto.getAddressId());
+		if (family == null) {
+			dto.setId(0L);
+		}else {
+			dto.setId(family.getId());
+		}
+	}
+
+	//判断是否欠费
+	private Map<Long, Byte> mapBillOwedFlag(List<Long> addressIds) {
+		Map<Long, Byte> map = new HashMap<>(); 
+		Map<Long, CommunityPmBill> billMap =  propertyMgrProvider.mapNewestBillByAddressIds(addressIds);
+		if (!billMap.isEmpty()) {
+			List<Long> billIds = billMap.entrySet().stream().map(r->r.getValue().getId()).collect(Collectors.toList());
+			Map<Long, BigDecimal> paidMap = organizationProvider.mapOrgOrdersByBillIdAndStatus(billIds, OrganizationOrderStatus.PAID.getCode());
+			billMap.forEach((addressId, bill)->{
+				BigDecimal paidMoney = paidMap.get(bill.getId());
+				if (paidMoney == null) {
+					paidMoney = BigDecimal.ZERO;
+				}
+				BigDecimal waitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(paidMoney);
+				if(waitPayAmount.compareTo(BigDecimal.ZERO) > 0)
+					map.put(addressId, OwedType.OWED.getCode());
+				else
+					map.put(addressId, OwedType.NO_OWED.getCode());
+			});
+		}
+		return map;
+	}
+	
+	@Override
+	public List<PropFamilyDTO> listPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
+		// 优化门牌性能，by tt, 20170428
+		return listNewPropApartmentsByKeyword(cmd).getResultList();
 //		List<PropFamilyDTO> list = new ArrayList<PropFamilyDTO>();
 //		User user  = UserContext.current().getUser();
 //
@@ -4978,61 +4919,77 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         Tuple<CommunityPmOwner, Boolean> tuple =
                 coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ORGANIZATION_OWNER.getCode() + cmd.getId()).enter(() -> {
-                    CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
-                    if (owner == null) {
-                        LOGGER.error("Organization owner are not exist, id = {}", cmd.getId());
-                        throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
-                                "Organization owner are not exist, id = %s", cmd.getId());
-                    }
-                    boolean needUpdateDoc = false;
-                    Boolean flag = false;
-                    if (cmd.getContactName() != null && !owner.getContactName().equals(cmd.getContactName())) {
-                        flag = true;
-                    }
-                    if (cmd.getContactName() != null) {
-                        owner.setContactName(cmd.getContactName());
-                        needUpdateDoc = true;
-                    }
-                    if (cmd.getAvatar() != null)
-                        owner.setAvatar(cmd.getAvatar());
-                    if (cmd.getBirthday() != null) {
-                        owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
-                    } else {
-                        owner.setBirthday(null);
-                    }
-                    if (cmd.getOrgOwnerTypeId() != null)
-                        owner.setOrgOwnerTypeId(cmd.getOrgOwnerTypeId());
-                    if (cmd.getMaritalStatus() != null)
-                        owner.setMaritalStatus(cmd.getMaritalStatus());
-                    if (cmd.getJob() != null)
-                        owner.setJob(cmd.getJob());
-                    if (cmd.getCompany() != null)
-                        owner.setCompany(cmd.getCompany());
-                    if (cmd.getIdCardNumber() != null)
-                        owner.setIdCardNumber(cmd.getIdCardNumber());
-                    if (cmd.getRegisteredResidence() != null)
-                        owner.setRegisteredResidence(cmd.getRegisteredResidence());
-                    UserGender gender = UserGender.fromCode(cmd.getGender());
-                    if (gender != null) {
-                        owner.setGender(gender.getCode());
-                    }
-                    propertyMgrProvider.updatePropOwner(owner);
-                    if (needUpdateDoc) {
-                        pmOwnerSearcher.feedDoc(owner);
-                    }
-                    //修改了客户名称则要同步修改合同里面的客户名称
-                    if (flag) {
-                        List<Contract> contracts = contractProvider.listContractByCustomerId(null, owner.getId(), CustomerType.INDIVIDUAL.getCode());
-                        if (contracts != null && contracts.size() > 0) {
-                            contracts.forEach(contract -> {
-                                contract.setCustomerName(owner.getContactName());
-                                contractProvider.updateContract(contract);
-                                contractSearcher.feedDoc(contract);
-                            });
-                        }
-                    }
-                    return owner;
-                });
+            CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
+            if (owner == null) {
+                LOGGER.error("Organization owner are not exist, id = {}", cmd.getId());
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
+                        "Organization owner are not exist, id = %s", cmd.getId());
+            }
+            boolean needUpdateDoc = false;
+			Boolean flag = false;
+			if(cmd.getContactName() != null && !owner.getContactName().equals(cmd.getContactName())) {
+				flag = true;
+			}
+            if (cmd.getContactName() != null) {
+                owner.setContactName(cmd.getContactName());
+                needUpdateDoc = true;
+            }
+            if (cmd.getAvatar() != null)
+                owner.setAvatar(cmd.getAvatar());
+            if (cmd.getBirthday() != null) {
+				owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
+			}else {
+            	owner.setBirthday(null);
+			}
+            if (cmd.getOrgOwnerTypeId() != null)
+                owner.setOrgOwnerTypeId(cmd.getOrgOwnerTypeId());
+            if (cmd.getMaritalStatus() != null)
+                owner.setMaritalStatus(cmd.getMaritalStatus());
+            if (cmd.getJob() != null)
+                owner.setJob(cmd.getJob());
+            if (cmd.getCompany() != null)
+                owner.setCompany(cmd.getCompany());
+            if (cmd.getIdCardNumber() != null)
+                owner.setIdCardNumber(cmd.getIdCardNumber());
+            if (cmd.getRegisteredResidence() != null)
+                owner.setRegisteredResidence(cmd.getRegisteredResidence());
+            //added mutiple tels for customer by wentian 2016/6/11
+//            if (cmd.getCustomerExtraTels() != null){
+//				JsonArray array = new JsonParser().parse(StringHelper.toJsonString(cmd.getCustomerExtraTels())).getAsJsonArray();
+//				owner.setContactExtraTels(array.toString());
+//			}
+            //modify mutiple tels for customer by tangcen 2016/6/29
+            if(cmd.getCustomerExtraTels() != null && cmd.getCustomerExtraTels().size() > 0){
+	            try{
+	                owner.setContactExtraTels(StringHelper.toJsonString(cmd.getCustomerExtraTels()));
+	                //set owner's contact token for possible unknown uses
+					owner.setContactToken(cmd.getCustomerExtraTels().get(0));
+	            }catch (Exception e){
+	                LOGGER.error("failed to convert customerExtraTels into jsonarray, custoemrExtratel is={}", cmd.getCustomerExtraTels());
+	            }
+			}
+            UserGender gender = UserGender.fromCode(cmd.getGender());
+            if (gender != null) {
+                owner.setGender(gender.getCode());
+            }
+            propertyMgrProvider.updatePropOwner(owner);
+            if (needUpdateDoc) {
+                pmOwnerSearcher.feedDoc(owner);
+            }
+			//修改了客户名称则要同步修改合同里面的客户名称
+			if(flag) {
+				List<Contract> contracts = contractProvider.listContractByCustomerId(null, owner.getId(), CustomerType.INDIVIDUAL.getCode());
+				if(contracts != null && contracts.size() > 0) {
+					contracts.forEach(contract -> {
+						contract.setCustomerName(owner.getContactName());
+						contractProvider.updateContract(contract);
+						contractSearcher.feedDoc(contract);
+					});
+				}
+			}
+            return owner;
+        });
+
 
         List<OrganizationOwnerAddress> ownerAddressList = propertyMgrProvider.listOrganizationOwnerAddressByOwnerId(cmd.getNamespaceId(), cmd.getId());
         for (OrganizationOwnerAddressCommand addressCmd : cmd.getAddresses()) {
@@ -5132,7 +5089,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (ownerType == null) {
             invalidParameterException("orgOwnerTypeId", cmd.getOrgOwnerTypeId());
         }
-        checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
+        //checkContactTokenUnique(cmd.getCommunityId(), cmd.getContactToken());
 
         CommunityPmOwner owner = ConvertHelper.convert(cmd, CommunityPmOwner.class);
         if (cmd.getBirthday() != null) {
@@ -5142,6 +5099,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         owner.setOrgOwnerTypeId(ownerType.getId());
         owner.setNamespaceId(cmd.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
+        if(cmd.getCustomerExtraTels() != null && cmd.getCustomerExtraTels().size() > 0){
+        	checkContactExtraTels(cmd.getCommunityId(), cmd.getCustomerExtraTels());
+        	try{
+                owner.setContactExtraTels(StringHelper.toJsonString(cmd.getCustomerExtraTels()));
+                //set owner's contact token for possible unknown uses
+				owner.setContactToken(cmd.getCustomerExtraTels().get(0));
+            }catch (Exception e){
+                LOGGER.error("failed to convert customerExtraTels into jsonarray, custoemrExtratel is={}", cmd.getCustomerExtraTels());
+            }
+		}
         UserGender gender = UserGender.fromCode(cmd.getGender());
         if (gender != null) {
             owner.setGender(gender.getCode());
@@ -5183,8 +5150,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         });
         return convertOwnerToDTO(owner);
     }
+	
+    private void checkContactExtraTels(Long communityId, List<String> customerExtraTels) {
+    	for(String tel : customerExtraTels){
+    		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(currentNamespaceId(),communityId, tel);
+    		if (pmOwners != null && pmOwners.size() > 0) {
+                LOGGER.error("OrganizationOwner are already exist, tel = {}.", tel);
+                throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_EXIST,
+                        "OrganizationOwner are already exist, tel = %s.", tel);
+            }
+    	}
+	}
 
-    // 如果小区里有该手机号的用户, 则自动审核当前客户
+	// 如果小区里有该手机号的用户, 则自动审核当前客户
     private void autoApprovalOrganizationOwnerAddress(Long communityId, String contactToken, OrganizationOwnerAddress ownerAddress) {
         GroupMember member = getGroupMemberByContactToken(communityId, contactToken, ownerAddress);
         if (member != null) {
@@ -5381,8 +5359,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void processUserForOwner(UserIdentifier identifier) {
         // TODO Auto-generated method stub
-        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
-                identifier.getNamespaceId(), identifier.getIdentifierToken());
+//        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
+//                identifier.getNamespaceId(), identifier.getIdentifierToken());
+        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByTel(identifier.getNamespaceId(), null, identifier.getIdentifierToken());
         LOGGER.debug("processUserForOwner: user identifier: {}, owners: {}", identifier.getIdentifierToken(), StringHelper.toJsonString(owners));
         if (null != owners && owners.size() > 0) {
             for (CommunityPmOwner owner : owners) {
@@ -5602,9 +5581,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         return ownerAddressList.stream().map(r -> {
             Address address = addressProvider.findAddressById(r.getAddressId());
-            OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
-            String locale = currentLocale();
             if (address != null) {
+            	OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
+                String locale = currentLocale();
                 dto.setBuilding(address.getBuildingName());
                 dto.setAddress(address.getAddress());
                 dto.setAddressId(address.getId());
@@ -5620,21 +5599,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     }
                 }
                 dto.setApartmentLivingStatus(address.getLivingStatus());
-
-
+                
+                LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
+                        String.valueOf(r.getAuthType()), locale);
+                if (addressStatusLocale != null) {
+                    dto.setAuthType(addressStatusLocale.getText());
+                }
+                LocaleString livingStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE,
+                        String.valueOf(r.getLivingStatus()), locale);
+                if (livingStatusLocale != null) {
+                    dto.setLivingStatus(livingStatusLocale.getText());
+                }
+                return dto;
             }
-
-            LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
-                    String.valueOf(r.getAuthType()), locale);
-            if (addressStatusLocale != null) {
-                dto.setAuthType(addressStatusLocale.getText());
-            }
-            LocaleString livingStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.LIVING_STATUS_SCOPE,
-                    String.valueOf(r.getLivingStatus()), locale);
-            if (livingStatusLocale != null) {
-                dto.setLivingStatus(livingStatusLocale.getText());
-            }
-            return dto;
+            return null;
         }).collect(Collectors.toList());
     }
 
@@ -5885,6 +5863,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
             String fileName = String.format("客户信息_%s_%s", community.getName(), DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
+
             excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                     "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照提示输入。\n" +
                     "2、请在表格里面逐行录入数据，建议一次导入不超过500条信息。\n" +
@@ -5897,10 +5876,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     "9、客户类型为：业主、租户、亲属、朋友、保姆、地产中介、其他、无；\n" +
                     "10、是否在户：是、否\n" +
                     "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
-            String[] propertyNames = {"contactName", "orgOwnerType", "contactToken", "gender","building","address", "livingStatus","livingDate", "birthdayDate", "maritalStatus", "job", "company",
+            String[] propertyNames = {"contactName", "orgOwnerType", "customerExtraTelsForExport", "gender","building","address", "livingStatus","livingDate", "birthdayDate", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
+            
+            
             String[] titleNames = {"姓名", "客户类型", "手机号码", "性别","楼栋","门牌", "是否在户", "迁入日期","生日", "婚姻状况", "职业", "单位", "证件号码", "户口所在地"};
-            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40,40, 30, 30, 40, 40};
+            int[] titleSizes = {20, 10, 40, 30, 20, 10, 20, 30, 40,40, 30, 30, 40, 40};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, owners);
         } else {
             // LOGGER.error("Organization owner are not exist.");
@@ -5921,6 +5902,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         if (genderLocale != null) {
             dto.setGender(genderLocale.getText());
         }
+        //如果用户支持多手机号，则导出customerExtraTelsForExport的值
+        if(owner.getContactExtraTels() != null){
+            String contactExtraTels = owner.getContactExtraTels();
+            List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+            dto.setCustomerExtraTels(contactExtraTelsList);
+            //用在导出Excel时
+            String customerExtraTelsForExport = contactExtraTelsList.toString();
+            dto.setCustomerExtraTelsForExport(customerExtraTelsForExport.substring(1, customerExtraTelsForExport.length()-1));
+        }else {
+        	//如果不支持多手机号，则导出ContactToken的值
+        	dto.setCustomerExtraTelsForExport(dto.getContactToken());
+        	List<String> contactExtraTelsList = new ArrayList<>();
+        	contactExtraTelsList.add(dto.getContactToken());
+        	dto.setCustomerExtraTels(contactExtraTelsList);
+		}
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(owner.getOrgOwnerTypeId());
         if (ownerType != null) {
             dto.setOrgOwnerType(ownerType.getDisplayName());
@@ -6811,19 +6807,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 owner.setBirthday(date);
             }
 
-
             // 检查手机号的唯一性
-            CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
+            //CommunityPmOwner exist = propertyMgrProvider.findOrganizationOwnerByCommunityIdAndContactToken(namespaceId, communityId, dto.getContactToken());
+            CommunityPmOwner exist = null;
+            
+            List<String> extraTels = (List<String>)StringHelper.fromJsonString(dto.getContactExtraTels(), ArrayList.class);
+            for(String tel : extraTels){
+        		List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByTel(namespaceId,communityId, tel);
+        		if (pmOwners != null && pmOwners.size() > 0) {
+        			exist = pmOwners.get(0);
+        			break;
+                }
+        	}
             if (exist != null) {
                 // 支持同一个人导入多行，但只能生成一个业主信息，add by tt, 170427
                 // remove new data which is blank
                 compareOwnerInfo(exist, owner);
                 owner.setId(exist.getId());
             }
-            if (!contactTokenList.contains(dto.getContactToken()) && exist!=null) {
-                propertyMgrProvider.deleteOrganizationOwnerAddressByOwnerId(namespaceId, exist.getId());
-            }
-            contactTokenList.add(dto.getContactToken());
+            for(String tel : extraTels){
+            	if (!contactTokenList.contains(tel) && exist!=null) {
+                    propertyMgrProvider.deleteOrganizationOwnerAddressByOwnerId(namespaceId, exist.getId());
+                    break;
+            	}
+        	}
+            
+            contactTokenList.addAll(extraTels);
             owner.setNamespaceId(namespaceId);
             owner.setCreatorUid(UserContext.currentUserId());
             owner.setOrganizationId(organizationId);
@@ -6932,7 +6941,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             ImportOrganizationOwnerDTO owner = new ImportOrganizationOwnerDTO();
             owner.setContactName(RowResult.trimString(result.getA()) == null ? "" : RowResult.trimString(result.getA()));
             owner.setContactType(RowResult.trimString(result.getB()) == null ? "" : RowResult.trimString(result.getB()));
-            owner.setContactToken(RowResult.trimString(result.getC()) == null ? "" : RowResult.trimString(result.getC()));
+            //fix conflict by tangcen
+            //owner.setContactToken(RowResult.trimString(result.getC()) == null ? "" : RowResult.trimString(result.getC()));
+            String contactExtraTelsString = RowResult.trimString(result.getC());
+            List<String> contactExtraTels = Arrays.asList(contactExtraTelsString.split(","));
+            owner.setContactToken(contactExtraTels.get(0));
+            owner.setContactExtraTels(StringHelper.toJsonString(contactExtraTels));
+            
             owner.setGender(RowResult.trimString(result.getD()) == null ? "" : RowResult.trimString(result.getD()));
             owner.setBuilding(RowResult.trimString(result.getE()) == null ? "" : RowResult.trimString(result.getE()));
             owner.setAddress(RowResult.trimString(result.getF()) == null ? "" : RowResult.trimString(result.getF()));
@@ -7050,7 +7065,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
 
     private Address parseAddress(Integer namespaceId, Long communityId, String building, String apartment) {
-        Address address = addressProvider.findApartmentAddress(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+        Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
                 StringUtils.trimAllWhitespace(apartment));
         if (address == null) {
             String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);
@@ -7132,69 +7147,240 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("getRequestInfo new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode())");
-        return new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode());
+		return new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode());
+	}
+
+	@Override
+	public void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd) {
+		DefaultChargingItem item = findDefaultChargingItem(cmd.getId());
+		item.setStatus(CommonStatus.INACTIVE.getCode());
+		item.setDeleteUid(UserContext.currentUserId());
+		item.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		defaultChargingItemProvider.updateDefaultChargingItem(item);
+	}
+
+	private DefaultChargingItem findDefaultChargingItem(Long id) {
+		DefaultChargingItem item = defaultChargingItemProvider.findById(id);
+		if(item == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(item.getStatus()))) {
+			LOGGER.error("DefaultChargingItem id: {} is not exist or active!", id);
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"DefaultChargingItem id is not exist or active.");
+		}
+		return item;
+	}
+
+	@Override
+	public DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd) {
+		DefaultChargingItem defaultChargingItem = ConvertHelper.convert(cmd, DefaultChargingItem.class);
+		if(cmd.getChargingStartTime() != null) {
+			defaultChargingItem.setChargingStartTime(new Timestamp(cmd.getChargingStartTime()));
+		}
+		if(cmd.getChargingExpiredTime() != null) {
+			defaultChargingItem.setChargingExpiredTime(new Timestamp(cmd.getChargingExpiredTime()));
+		}
+		defaultChargingItem.setStatus(CommonStatus.ACTIVE.getCode());
+		if(cmd.getId() == null) {
+			defaultChargingItemProvider.createDefaultChargingItem(defaultChargingItem);
+			dealDefaultChargingItemProperty(defaultChargingItem, cmd.getApartments());
+		} else {
+			DefaultChargingItem exist = findDefaultChargingItem(cmd.getId());
+			defaultChargingItem.setCreateUid(exist.getCreateUid());
+			defaultChargingItem.setCreateTime(exist.getCreateTime());
+			defaultChargingItemProvider.updateDefaultChargingItem(defaultChargingItem);
+			dealDefaultChargingItemProperty(defaultChargingItem, cmd.getApartments());
+		}
+		return toDefaultChargingItemDTO(defaultChargingItem);
+	}
+
+	@Override
+	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
+		List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(items != null && items.size() > 0) {
+			return items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+		}
+		return null;
+	}
+
+	@Override
+	public void createReservation(CreateReservationCommand cmd) {
+		PmResourceReservation resourceReservation = new PmResourceReservation();
+		List<PmResourceReservation> existReservations = propertyMgrProvider.findReservationByAddress(cmd.getAddressId(), ReservationStatus.ACTIVE);
+		Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
+		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
+		for(PmResourceReservation r : existReservations){
+			if(DateUtil.hasIntersection(r.getStartTime(), r.getEndTime(), start, end)){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "in this period of time, there had been" +
+						"valid reservations exist");
+			}
+		}
+		long nextId = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmResoucreReservations.class));
+		resourceReservation.setId(nextId);
+		resourceReservation.setCommunityId(cmd.getCommunityId());
+		resourceReservation.setNamespaceId(cmd.getNamespaceId());
+		resourceReservation.setCreatorUid(UserContext.currentUserId());
+		resourceReservation.setEndTime(end);
+		resourceReservation.setStartTime(start);
+		resourceReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
+		resourceReservation.setStatus((byte)2);
+		resourceReservation.setAddressId(cmd.getAddressId());
+		//add by tangcen 解决EH_ORGANIZATION_ADDRESS_MAPPINGS表中，一个address_id会对应两条数据的问题，实际应该是脏数据导致的。
+		Address address = addressProvider.findAddressById(cmd.getAddressId());
+		Byte livingStatus = addressProvider.getAddressLivingStatus(address.getId(),address.getAddress());
+        //Byte livingStatus = addressProvider.getAddressLivingStatus(cmd.getAddressId());
+        resourceReservation.setPreviousLivingStatus(livingStatus);
+//		this.dbProvider.execute((status) -> {
+
+			// living status的完整枚举记录在前端，后端和数据库没有
+        	// add by tangcen 
+			//int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
+        	int effectedRow = addressProvider.changeAddressLivingStatus(address.getId(),address.getAddress(), AddressLivingStatus.OCCUPIED.getCode());
+			if(effectedRow != 1){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
+						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
+			}
+			propertyMgrProvider.insertResourceReservation(resourceReservation);
+            // 未来1小时内结束的开启一个任务
+            if(end.toLocalDateTime().minusHours(1l).isBefore(LocalDateTime.now()) || end.toLocalDateTime().minusHours(1l).equals(LocalDateTime.now())){
+                HashMap<String, Object> param = new HashMap<>();
+                param.put("addressId", cmd.getAddressId());
+                param.put("reservationId", nextId);
+                scheduleProvider.scheduleSimpleJob("Address Reservation"+System.currentTimeMillis(),
+                        "Address Reservation", Date.from(end.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant())
+                        , ReservationJob.class, param);
+            }
+//			return null;
+//		});
+        System.out.println("done");
     }
 
-    @Override
-    public void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd) {
-        DefaultChargingItem item = findDefaultChargingItem(cmd.getId());
-        item.setStatus(CommonStatus.INACTIVE.getCode());
-        item.setDeleteUid(UserContext.currentUserId());
-        item.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	@Override
+	public List<ListReservationsDTO> listReservations(ListReservationsCommand cmd) {
+        List<ListReservationsDTO> ret = new ArrayList<>();
+        List<Long> ids = new ArrayList<>();
+        if(cmd.getAddressId() != null){
+        	//find a specific reservation
+			ids.add(cmd.getAddressId());
+		}else{
+			ListPropApartmentsByKeywordCommand temp = new ListPropApartmentsByKeywordCommand();
+			temp.setNamespaceId(cmd.getNamespaceId());
+			temp.setCommunityId(cmd.getCommunityId());
+			temp.setBuildingName(cmd.getBuildingName());
+			temp.setOrganizationId(cmd.getOrganizationId());
+			//取得门牌列表
+			List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(temp).second();
 
-        defaultChargingItemProvider.updateDefaultChargingItem(item);
-    }
+			//门牌转化成门牌id列表
+			List<Long> aptIdList = aptList.stream().map(a->a.getAddressId()).collect(Collectors.toList());
 
-    private DefaultChargingItem findDefaultChargingItem(Long id) {
-        DefaultChargingItem item = defaultChargingItemProvider.findById(id);
-        if (item == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(item.getStatus()))) {
-            LOGGER.error("DefaultChargingItem id: {} is not exist or active!", id);
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "DefaultChargingItem id is not exist or active.");
+			ids.addAll(aptIdList);
+		}
+		List<PmResourceReservation> list = propertyMgrProvider.listReservationsByAddresses(ids);
+        for(PmResourceReservation r : list){
+        	ListReservationsDTO dto = new ListReservationsDTO();
+        	dto.setAddressName(addressProvider.getAddressNameById(r.getAddressId()));
+        	dto.setAddressId(r.getAddressId());
+        	dto.setCreateUname(userProvider.getNickNameByUid(r.getCreatorUid()));
+        	dto.setEndTime(r.getEndTime());
+        	dto.setStartTime(r.getStartTime());
+        	dto.setEnterpriseCustomerName(enterpriseCustomerProvider.getEnterpriseCustomerNameById(r.getEnterpriseCustomerId()));
+        	dto.setEnterpriseCustomerId(r.getEnterpriseCustomerId());
+        	dto.setReservationId(r.getId());
+        	dto.setReservationStatus(r.getStatus());
+        	ret.add(dto);
         }
-        return item;
-    }
+        return ret;
+	}
 
-    @Override
-    public DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd) {
-        DefaultChargingItem defaultChargingItem = ConvertHelper.convert(cmd, DefaultChargingItem.class);
-        if (cmd.getChargingStartTime() != null) {
-            defaultChargingItem.setChargingStartTime(new Timestamp(cmd.getChargingStartTime()));
-        }
-        if (cmd.getChargingExpiredTime() != null) {
-            defaultChargingItem.setChargingExpiredTime(new Timestamp(cmd.getChargingExpiredTime()));
-        }
-        defaultChargingItem.setStatus(CommonStatus.ACTIVE.getCode());
-        if (cmd.getId() == null) {
-            defaultChargingItemProvider.createDefaultChargingItem(defaultChargingItem);
-            dealDefaultChargingItemProperty(defaultChargingItem, cmd.getApartments());
-        } else {
-            DefaultChargingItem exist = findDefaultChargingItem(cmd.getId());
-            defaultChargingItem.setCreateUid(exist.getCreateUid());
-            defaultChargingItem.setCreateTime(exist.getCreateTime());
-            defaultChargingItemProvider.updateDefaultChargingItem(defaultChargingItem);
-            dealDefaultChargingItemProperty(defaultChargingItem, cmd.getApartments());
-        }
-        return toDefaultChargingItemDTO(defaultChargingItem);
-    }
+	@Override
+	public void updateReservation(UpdateReservationCommand cmd) {
+    	Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
+		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
+		PmResourceReservation oldReservation = propertyMgrProvider.findReservationById(cmd.getReservationId());
+		
+		if (cmd.getAddressId()!=null && !cmd.getAddressId().equals(oldReservation.getAddressId())) {
+			//如果修改了预定的地址，则需要将以前的资源释放
+			addressProvider.changeAddressLivingStatus(oldReservation.getAddressId(), oldReservation.getPreviousLivingStatus());
+    		//修改新的资源的状态
+    		Address address = addressProvider.findAddressById(cmd.getAddressId());
+    		Byte livingStatus = addressProvider.getAddressLivingStatus(address.getId(),address.getAddress());
+    		oldReservation.setPreviousLivingStatus(livingStatus);
+    		int effectedRow = addressProvider.changeAddressLivingStatus(address.getId(),address.getAddress(), AddressLivingStatus.OCCUPIED.getCode());
+			if(effectedRow != 1){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
+						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
+			}
+		}
+		PmResourceReservation resourceReservation = new PmResourceReservation();
+		oldReservation.setStatus((byte)2);
+		oldReservation.setEndTime(end);
+		oldReservation.setStartTime(start);
+		oldReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
+		oldReservation.setAddressId(cmd.getAddressId());
+		propertyMgrProvider.updateReservation(oldReservation);
+    	//propertyMgrProvider.updateReservation(cmd.getReservationId(), start, end, cmd.getEnterpriseCustomerId(),cmd.getAddressId());
+	}
 
-    @Override
-    public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
-        List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId());
-        if (items != null && items.size() > 0) {
-            return items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
-        }
-        return null;
-    }
+	/**
+	 * delete Reservations and release address
+	 * @param cmd contains id of reservation
+	 */
+	@Override
+	public void deleteReservation(DeleteReservationCommand cmd) {
+		this.dbProvider.execute((status) -> {
+			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.DELTED.getCode());
+//			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
+			return null;
+		});
 
-    private void dealDefaultChargingItemProperty(DefaultChargingItem item, List<DefaultChargingItemPropertyDTO> apartments) {
-        List<DefaultChargingItemProperty> existItemProperties = defaultChargingItemProvider.findByItemId(item.getId());
-        Map<Long, DefaultChargingItemProperty> map = new HashMap<>();
-        if (existItemProperties != null && existItemProperties.size() > 0) {
-            existItemProperties.forEach(address -> {
-                map.put(address.getId(), address);
-            });
+	}
+
+	@Override
+	public void cancelReservation(CancelReservationCommand cmd) {
+	    Byte previousStatus = propertyMgrProvider.getReservationPreviousLivingStatusById(cmd.getReservationId());
+		this.dbProvider.execute((status) -> {
+			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.INACTIVE.getCode());
+			addressProvider.changeAddressLivingStatus(addressId, previousStatus);
+			return null;
+		});
+	}
+
+	@Scheduled(cron = "0 0 */1 * * ?")
+	private void ReservationExpireCheck(){
+        if (scheduleProvider.getRunningFlag() == RunningFlag.FALSE.getCode()) {
+            return;
         }
+		List<ReservationInfo> list = propertyMgrProvider.listRunningReservations();
+		for(ReservationInfo info : list){
+			//if it will expire in the future 1 hour
+			try{
+				LocalDateTime expireTime = info.getEndTime().toLocalDateTime();
+				LocalDateTime timing = LocalDateTime.now(ZoneId.systemDefault()).plusHours(1l);
+				if(expireTime.isBefore(timing)){
+					Map<String,Object> param = new HashMap<String,Object>(){{
+						put("addressId", info.getAddressId());
+						put("reservationId", info.getReservationId());
+					}};
+				    scheduleProvider.scheduleSimpleJob("Address Reservation"+System.currentTimeMillis(),
+							"Address Reservation", Date.from(expireTime.atZone(ZoneId.systemDefault()).toInstant())
+							, ReservationJob.class, param);
+				}
+			}catch (Exception e){
+				LOGGER.error("failed to check reservation one time",e);
+			}
+		}
+
+	}
+
+
+	private void dealDefaultChargingItemProperty(DefaultChargingItem item, List<DefaultChargingItemPropertyDTO> apartments) {
+		List<DefaultChargingItemProperty> existItemProperties = defaultChargingItemProvider.findByItemId(item.getId());
+		Map<Long, DefaultChargingItemProperty> map = new HashMap<>();
+		if(existItemProperties != null && existItemProperties.size() > 0) {
+			existItemProperties.forEach(address -> {
+				map.put(address.getId(), address);
+			});
+		}
 
         if (apartments != null && apartments.size() > 0) {
             apartments.forEach(itemProperty -> {
