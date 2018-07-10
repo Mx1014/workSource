@@ -164,7 +164,6 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.module.ServiceModuleType;
 import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -2644,7 +2643,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if ("gogs".equals(contractTemplate.getContentType())) {
 			//使用gogs存储合同内容
 			//1.建仓库 不同应用建立不同仓库
-			GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplate.getCategoryId());
+			String moduleType = "ContractTemplate_" + contractTemplate.getCategoryId();
+			GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", contractTemplate.getOwnerId());
 			//2.提交脚本
 	        GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), lastCommit, contractTemplate.getContents(), isNewFile);
 	        //3.存储提交脚本返回的id
@@ -2690,7 +2690,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if ("gogs".equals(contractTemplate.getContentType())) {
 			//使用gogs存储合同内容
 			//1.建仓库
-			GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplateParent.getCategoryId());
+			String moduleType = "ContractTemplate_" + contractTemplate.getCategoryId();
+			GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", contractTemplateParent.getOwnerId());
 			//2.提交脚本
 	        GogsCommit commit = gogsCommitScript(repo, contractTemplateParent.gogsPath(), lastCommit, contractTemplateParent.getContents(), isNewFile);
 	        //3.存储提交脚本返回的id
@@ -2762,7 +2763,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 				if ("gogs".equals(dto.getContentType())) {
 					//查询gogs上面的数据
-					GogsRepo repo = gogsRepo(dto.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", dto.getCategoryId());
+					String moduleType = "ContractTemplate_" + dto.getCategoryId();
+					GogsRepo repo = gogsRepo(dto.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", dto.getOwnerId());
 			        dto.setContents(gogsGetScript(repo, dto.gogsPath(), dto.getLastCommit()));
 				}
 				
@@ -2838,7 +2840,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			
 			if ("gogs".equals(contractTemplatedto.getContentType())) {
 				//查询gogs上面的数据
-				GogsRepo repo = gogsRepo(contractTemplatedto.getNamespaceId(), "ContractTemplate", 21200L, "EhContractTemplate", contractTemplatedto.getCategoryId());
+				String moduleType = "ContractTemplate_" + contractTemplatedto.getCategoryId();
+				GogsRepo repo = gogsRepo(contractTemplatedto.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", contractTemplatedto.getOwnerId());
 				contractTemplatedto.setContents(gogsGetScript(repo, contractTemplatedto.gogsPath(), contractTemplatedto.getLastCommit()));
 			}
 			
