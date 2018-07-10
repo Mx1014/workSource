@@ -134,6 +134,8 @@ public interface PmTaskService {
 
 	PmTaskConfigDTO searchPmTaskConfigByProject(GetPmTaskConfigCommand cmd);
 
+	void createOrderDetails(CreateOrderDetailsCommand cmd);
+
 	List<PmTaskOrderDetailDTO> searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd);
 
 	List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);

@@ -902,6 +902,20 @@ public class PmTaskController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /pmtask/createOrderDetails</b>
+     * <p>新增物品费清单</p>
+     */
+    @RequestMapping("createOrderDetails")
+    @RestReturn(value=String.class)
+    public RestResponse createOrderDetails(CreateOrderDetailsCommand cmd) {
+        pmTaskService.createOrderDetails(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /pmtask/getOrderDetails</b>
      * <p>查询物品费明细</p>
      */

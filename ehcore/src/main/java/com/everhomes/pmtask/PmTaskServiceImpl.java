@@ -3223,6 +3223,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
+	public void createOrderDetails(CreateOrderDetailsCommand cmd) {
+		if(cmd.getOrderDetails().size() <= 0){
+			LOGGER.info("Invalid parameter, cmd={}", cmd);
+			return;
+		}
+		List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->ConvertHelper.convert(r,PmTaskOrderDetail.class)).collect(Collectors.toList());
+		this.pmTaskProvider.createOrderDetails(details);
+	}
+
+	@Override
 	public List<PmTaskOrderDetailDTO> searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd) {
 		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTaskId());
 		return result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList());

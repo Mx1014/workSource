@@ -584,6 +584,19 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	}
 
 	@Override
+	public void createOrderDetails(List<PmTaskOrderDetail> beans) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskOrderDetails.class));
+		EhPmTaskOrderDetailsDao dao = new EhPmTaskOrderDetailsDao(context.configuration());
+		PmTaskOrderDetail[] beansArry = (PmTaskOrderDetail[]) beans.stream().map(r->{
+			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmTaskOrderDetails.class));
+			r.setId(id);
+			r.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			return r;
+		}).toArray();
+		dao.insert(beansArry);
+	}
+
+	@Override
 	public List<PmTaskOrderDetail> findOrderDetailsByTaskId(Integer namespaceId, String ownerType, Long ownerId, Long taskId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskOrderDetails.class));
 		SelectQuery query = context.selectQuery(Tables.EH_PM_TASK_ORDER_DETAILS);

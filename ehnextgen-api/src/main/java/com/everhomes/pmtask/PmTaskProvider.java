@@ -72,6 +72,8 @@ public interface PmTaskProvider {
 	PmTaskConfig updatePmTaskConfig(PmTaskConfig bean);
 	PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId);
 
+//	订单明细CRUD
+	void createOrderDetails(List<PmTaskOrderDetail> beans);
 	List<PmTaskOrderDetail> findOrderDetailsByTaskId(Integer namespaceId, String ownerType, Long ownerId, Long taskId);
 
 //	订单CRUD
