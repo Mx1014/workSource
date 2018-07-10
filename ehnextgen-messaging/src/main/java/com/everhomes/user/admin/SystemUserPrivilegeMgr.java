@@ -19,6 +19,7 @@ import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.acl.ServiceModuleCategory;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.IncludeChildFlagType;
@@ -39,10 +40,12 @@ import org.springframework.stereotype.Component;
 
 
 
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.springframework.util.StringUtils;
 
 @Component("SystemUser")
@@ -127,6 +130,24 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         }
         return aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors);
     }
+    
+    private ServiceModule findPrefixServiceModule(Long subModuleId, int cnt) {
+    	ServiceModule module = serviceModuleProvider.findServiceModuleById(subModuleId);
+    	if(module == null) {
+    		return null;
+    	} else if(ServiceModuleCategory.MODULE.getCode().equals(module.getCategory())) {
+    		return module;
+    	} else if(cnt > 50 || module.getId().equals(subModuleId) || module.getParentId() == null || module.getParentId().equals(0l)) {
+    		//loop detach
+    		return null;
+    	} else {
+    		return findPrefixServiceModule(module.getParentId(), cnt+1);
+    	}
+    }
+    
+    private ServiceModule findPrefixServiceModule(Long subModuleId) {
+    	return findPrefixServiceModule(subModuleId, 0);
+    }
 
     @Override
     public boolean checkModuleAdmin(Long userId, String ownerType, Long ownerId, Long privilegeId){
@@ -136,8 +157,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             //校验是否拥有模块管理权限
             ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
             Long moduleId = module.getId();
-            if(module.getLevel() > 3){
-                moduleId = module.getParentId();
+            if(!ServiceModuleCategory.MODULE.getCode().equals(module.getCategory())){
+            	ServiceModule pmodule = findPrefixServiceModule(module.getParentId());
+            	if(pmodule != null) {
+            		moduleId = pmodule.getId();
+            	}
             }
             return checkModuleAdmin(ownerType, ownerId, userId, moduleId);
         }
@@ -217,8 +241,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         if(0 < serviceModules.size()){
             ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
             p_moduleId = module.getId();
-            if(module.getLevel() > 3){
-                p_moduleId = module.getParentId();
+            if(!ServiceModuleCategory.MODULE.getCode().equals(module.getCategory())){
+            	ServiceModule pmodule = findPrefixServiceModule(module.getParentId());
+            	if(pmodule != null) {
+            		p_moduleId = pmodule.getId();
+            	}
             }
         }
         // 查询app关联的moduleId
