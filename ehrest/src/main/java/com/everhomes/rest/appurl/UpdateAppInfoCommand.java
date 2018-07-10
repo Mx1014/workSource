@@ -28,8 +28,14 @@ public class UpdateAppInfoCommand {
 	private String description;
 	
 	public UpdateAppInfoCommand() {
+		super();
 	}
 
+	public UpdateAppInfoCommand(Integer namespaceId, Byte osType) {
+		super();
+		this.namespaceId = namespaceId;
+		this.osType = osType;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
