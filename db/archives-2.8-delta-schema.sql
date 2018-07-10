@@ -1,0 +1,1 @@
+RENAME TABLE eh_archives_forms TO eh_archives_form_navigation;
