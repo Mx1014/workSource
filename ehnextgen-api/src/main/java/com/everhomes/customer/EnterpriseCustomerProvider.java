@@ -186,6 +186,14 @@ public interface EnterpriseCustomerProvider {
 
     void updateEnterpriseCustomerAdminRecordByCustomerId(Long customerId,Integer namespaceId);
 
+    String getEnterpriseCustomerNameById(Long enterpriseCustomerId);
+
+    List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomerNameAndId(List<Long> ids);
+
+    List<EasySearchEnterpriseCustomersDTO> listCommunityEnterpriseCustomers(Long communityId, Integer namespaceId);
+
+    void deleteCustomerEntryInfoByBuildingId(Long id);
+
     void createCustomerAttachements(CustomerAttachment attachment);
 
     void deleteAllCustomerAttachements(Long customerId);

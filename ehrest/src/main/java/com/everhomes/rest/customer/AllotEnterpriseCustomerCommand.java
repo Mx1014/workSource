@@ -10,14 +10,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AllotEnterpriseCustomerCommand {
-
     private Long id;
-
-    
     private  Long trackingUid;
-
+    private Long orgId;
     private  Byte deviceType ;
-
 
     public Long getId() {
         return id;
@@ -26,8 +22,6 @@ public class AllotEnterpriseCustomerCommand {
     public void setId(Long id) {
         this.id = id;
     }
-    
-    
 
     public Long getTrackingUid() {
 		return trackingUid;
@@ -43,6 +37,14 @@ public class AllotEnterpriseCustomerCommand {
 
     public void setDeviceType(Byte deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     @Override

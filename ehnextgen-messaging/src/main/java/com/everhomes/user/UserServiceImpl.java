@@ -1691,6 +1691,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		// 用户当前选择的实体（可能有小区、家庭、机构）
 		List<UserCurrentEntity> entityList = listUserCurrentEntity(user.getId());
 		if(entityList.size() > 0) {
+			//在返回前排个序
+			sortCurrentEntity(entityList);
 			info.setEntityList(entityList);
 		}
 
@@ -2944,8 +2946,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				}
 			}
 		}
-		//在返回前排个序
-		sortSceneDTO(sceneList);
+		//在返回前排个序,上一次改错位置了，这次注释掉
+		//sortSceneDTO(sceneList);
 		return sceneList;
 	}
 
@@ -3868,6 +3870,43 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	}
 
 	@Override
+    public UserLogin logonBythirdPartAppUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response) {
+        List<User> userList = this.userProvider.findThirdparkUserByTokenAndType(namespaceId, userType, userToken);
+        if(userList == null || userList.size() == 0) {
+            LOGGER.error("Unable to find the thridpark user, namespaceId={}, userType={}, userToken={}", namespaceId, userType, userToken);
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+        }
+
+        User user = userList.get(0);
+        if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED,
+                    "User account has not been activated yet");
+        }
+
+        UserLogin login = createLogin(namespaceId, user, request.getParameter("deviceIdentifier"), request.getParameter("pusherIdentify"));
+        login.setStatus(UserLoginStatus.LOGGED_IN);
+
+        //added by Janson, mark as disconnected
+        unregisterLoginConnection(login);
+
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("User logon succeed, namespaceId={}, userType={}, userToken={}, userLogin={}", namespaceId, userType, userToken, login);
+        }
+
+        LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+
+        LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
+
+        //微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+        //防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+        WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+
+        WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(namespaceId), request, response);
+        return login;
+    }
+
+	@Override
 	public boolean signupByThirdparkUser(User user, HttpServletRequest request) {
 		String ip = request.getHeader("x-forwarded-for");
 
@@ -3915,7 +3954,55 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		}
 	}
 
-	@Override
+    @Override
+    public User signupByThirdparkUserByApp(User user, HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+
+        String regIp = ip;
+        user.setRegIp(regIp);
+        user.setStatus(UserStatus.ACTIVE.getCode());
+
+        Integer namespaceId = user.getNamespaceId();
+        String namespaceUserType = user.getNamespaceUserType();
+        String namespaceUserToken = user.getNamespaceUserToken();
+        List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
+        if(userList == null || userList.size() == 0) {
+
+            //将微信头像下载下来
+            CsFileLocationDTO fileLocationDTO = contentServerService.uploadFileByUrl("avatar.jpg", user.getAvatar());
+            if(fileLocationDTO != null && fileLocationDTO.getUri() != null){
+                user.setAvatar(fileLocationDTO.getUri());
+            }
+
+            userProvider.createUser(user);
+
+            //设定默认园区  add by  yanjun 20170915
+            setDefaultCommunity(user.getId(), namespaceId);
+
+            return user;
+        } else {
+            LOGGER.warn("User already existed, namespaceId={}, userType={}, userToken={}", namespaceId, namespaceUserType, namespaceUserToken);
+            return userList.get(0);
+        }
+    }
+
+    @Override
 	public Boolean validateUserPass(ValidatePassCommand cmd) {
 		if(cmd.getUserId() == null) {
 			LOGGER.error("userId is null");
@@ -5304,9 +5391,50 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	}
 
 	@Override
+	public void verificationCodeForBindPhoneByApp(VerificationCodeForBindPhoneCommand cmd) {
+
+		verifySmsTimes("verificationCodeForWechat", cmd.getPhone(), "");
+		User user = this.userProvider.findUserById(cmd.getUserId());
+        if(user == null){
+            LOGGER.error("user is null, userId={}", cmd.getUserId());
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "user not exists, userId=" + cmd.getUserId());
+        }
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		String verificationCode = RandomGenerator.getRandomDigitalString(6);
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+
+
+		//查看该手机是否已经注册
+		UserIdentifier userIdentifier = userProvider.findClaimingIdentifierByToken(namespaceId, cmd.getPhone());
+		if(userIdentifier != null){
+
+			//手机注册过的或者发过验证码的，更新验证码
+			userIdentifier.setVerificationCode(verificationCode);
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userProvider.updateIdentifier(userIdentifier);
+		}else {
+			//用户没发送过验证码的，新建一条验证状态的userIdentifier
+			userIdentifier = new UserIdentifier();
+			userIdentifier.setOwnerUid(user.getId());
+			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+			userIdentifier.setIdentifierToken(cmd.getPhone());
+			userIdentifier.setNamespaceId(namespaceId);
+
+			userIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+			userIdentifier.setVerificationCode(verificationCode);
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userIdentifier.setRegionCode(cmd.getRegionCode());
+			userProvider.createIdentifier(userIdentifier);
+		}
+		smsProvider.sendSms(namespaceId, cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VERIFICATION_CODE, user.getLocale(), variables);
+
+	}
+
+	@Override
 	public UserLogin bindPhone(BindPhoneCommand cmd){
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 
 		if( cmd.getPhone() == null){
@@ -5340,6 +5468,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				user.setStatus(UserStatus.INACTIVE.getCode());
 				user.setNamespaceUserToken("");
 				user.setNamespaceUserType(null);
+                LOGGER.info("user={}",user);
 				userProvider.updateUser(user);
 			}
 //
@@ -5408,7 +5537,76 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
 	}
 
-	private void verificationCode(UserIdentifier userIdentifier, String code){
+    @Override
+    public UserLogin bindPhoneByApp(BindPhoneCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        if( cmd.getPhone() == null){
+            LOGGER.error("phoneNumber param error");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "phone param error");
+        }
+        if( cmd.getUserId() == null){
+            LOGGER.error("UserId is null");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "UserId is null");
+        }
+        User user = this.userProvider.findUserById(cmd.getUserId());
+        UserIdentifier userIdentifier = userProvider.findClaimingIdentifierByToken(namespaceId,cmd.getPhone());
+
+        UserLogin login = new UserLogin();
+        verificationCode(userIdentifier, cmd.getVerificationCode());
+        //查看该手机是否已经注册
+        if(userIdentifier.getClaimStatus() == IdentifierClaimStatus.CLAIMED.getCode()){
+
+            //如果手机已经注册过，则校验验证码，更新微信信息到该手机用户
+
+
+            User existUser = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if (StringUtils.isBlank(existUser.getAvatar())) {
+                existUser.setAvatar(user.getAvatar());
+            }
+            existUser.setGender(user.getGender());
+            existUser.setNamespaceUserToken(user.getNamespaceUserToken());
+            existUser.setNamespaceUserType(user.getNamespaceUserType());
+
+            userProvider.updateUser(existUser);
+            userProvider.deleteUser(user);
+            login = createLogin(namespaceId, existUser, cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+            login.setStatus(UserLoginStatus.LOGGED_IN);
+
+        }else{
+
+            //发验证码的手机和绑定的的手机是否相等，检查手机是否被篡改
+            if(!cmd.getPhone().equals(userIdentifier.getIdentifierToken())){
+                LOGGER.error("phoneNumber param error");
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "phone param error");
+            }
+            userIdentifier.setOwnerUid(user.getId());
+            userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+            userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            userIdentifier.setRegionCode(cmd.getRegionCode());
+            String salt=EncryptionUtils.createRandomSalt();
+            user.setSalt(salt);
+            try {
+                String randomCode = RandomGenerator.getRandomDigitalString(6);
+                if(cmd.getPassword() != null && cmd.getPassword().length() > 0){
+                    randomCode = cmd.getPassword();
+                }
+                user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",randomCode,salt)));
+            } catch (Exception e) {
+                LOGGER.error("encode password failed", e);
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+            }
+
+            userProvider.updateUser(user);
+            userProvider.updateIdentifier(userIdentifier);
+            login = createLogin(namespaceId, user, cmd.getDeviceIdentifier(), cmd.getPusherIdentify());
+            login.setStatus(UserLoginStatus.LOGGED_IN);
+        }
+        return login;
+    }
+
+    private void verificationCode(UserIdentifier userIdentifier, String code){
 		if(userIdentifier == null || code == null || userIdentifier.getVerificationCode() == null || !userIdentifier.getVerificationCode().equals(code)){
 			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
 		}
@@ -6152,17 +6350,17 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	 * @param sceneDTO
 	 * @return
 	 */
-	private List<SceneDTO> sortSceneDTO(List<SceneDTO> sceneDTOList){
+	private List<UserCurrentEntity> sortCurrentEntity(List<UserCurrentEntity> sceneDTOList){
 		//传入数组为空或数据小于2（即没数据或数据只有一条时），是没必要排序的，直接返回。
 		if(sceneDTOList ==null || sceneDTOList.size()<2)return sceneDTOList ;
 		//排序
-		sceneDTOList.sort(new Comparator<SceneDTO>(){
+		sceneDTOList.sort(new Comparator<UserCurrentEntity>(){
 			@Override
-			public int compare(SceneDTO o1, SceneDTO o2) {
-				if(o1.getCommunityId()==null || o2.getCommunityId()==null){
+			public int compare(UserCurrentEntity o1, UserCurrentEntity o2) {
+				if(o1.getEntityId()==null || o2.getEntityId()==null){
 					return 0;
 				}
-		        return o1.getCommunityId().compareTo(o2.getCommunityId());
+		        return o1.getEntityId().compareTo(o2.getEntityId());
 			}			
 		});
 		return sceneDTOList ;

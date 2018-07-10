@@ -2121,6 +2121,59 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+
+    public String getEnterpriseCustomerNameById(Long enterpriseCustomerId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ENTERPRISE_CUSTOMERS.NAME)
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS).where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(enterpriseCustomerId))
+                .fetchOne(Tables.EH_ENTERPRISE_CUSTOMERS.NAME);
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomerNameAndId(List<Long> ids) {
+        List<EasySearchEnterpriseCustomersDTO> ret = new ArrayList<>();
+        this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .select(Tables.EH_ENTERPRISE_CUSTOMERS.NAME, Tables.EH_ENTERPRISE_CUSTOMERS.ID)
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(ids))
+                .fetch()
+                .forEach(r -> {
+                    EasySearchEnterpriseCustomersDTO dto = new EasySearchEnterpriseCustomersDTO();
+                    dto.setId(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+                    dto.setName(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.NAME));
+                    ret.add(dto);
+                });
+        return ret;
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listCommunityEnterpriseCustomers(Long communityId, Integer namespaceId) {
+        List<EasySearchEnterpriseCustomersDTO> dtos = new ArrayList<>();
+        this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .select()
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.notEqual(CommonStatus.INACTIVE.getCode()))
+                .fetch()
+                .forEach(r -> {
+                    EasySearchEnterpriseCustomersDTO dto = new EasySearchEnterpriseCustomersDTO();
+                    dto.setName(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.NAME));
+                    dto.setId(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+                    dtos.add(dto);
+                });
+        return dtos;
+    }
+
+    public void deleteCustomerEntryInfoByBuildingId(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .set(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS,CommonStatus.INACTIVE.getCode())
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.BUILDING_ID.eq(id))
+                .execute();
+
+    }
+
+    @Override
     public void createCustomerAttachements(CustomerAttachment attachment) {
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerAttachments.class));
         attachment.setId(id);

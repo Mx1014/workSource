@@ -22,6 +22,7 @@ import java.util.List;
  * <li>createTime: 创建时间</li>
  * <li>operatorUName: 操作人</li>
  * <li>instanceConfig: 参数，比如第三方链接值就是{"url":"http......."}</li>
+ * <li>accessControlType: 权限控制类型 参考{@link com.everhomes.rest.module.AccessControlType}</li>
  * </ul>
  */
 public class ServiceModuleDTO implements Serializable {
@@ -60,6 +61,8 @@ public class ServiceModuleDTO implements Serializable {
 	private Byte multipleFlag;
 
 	private String moduleControlType;
+
+	private Byte accessControlType;
 
 	public Long getId() {
 		return id;
@@ -195,5 +198,13 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setModuleControlType(String moduleControlType) {
 		this.moduleControlType = moduleControlType;
+	}
+
+	public Byte getAccessControlType() {
+		return accessControlType;
+	}
+
+	public void setAccessControlType(Byte accessControlType) {
+		this.accessControlType = accessControlType;
 	}
 }

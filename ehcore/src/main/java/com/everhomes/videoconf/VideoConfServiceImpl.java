@@ -48,7 +48,6 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -180,8 +179,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private final String BIZCONFPATH = "http://api.bizvideo.cn/openapi";
 
 
-	@Autowired
-	private PayService payService;
+	//@Autowired
+	//private PayService payService;
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
@@ -2753,11 +2752,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 		UpdateConfAccountPeriodCommand cmd1 = ConvertHelper.convert(cmd, UpdateConfAccountPeriodCommand.class);
 		ConfOrders confOrder = createUpdateConfAccountPeriodOrder(cmd1);
  
-		Long amount = payService.changePayAmount(confOrder.getAmount()); 
-
-		PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
-				OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
-		return callBack;
+		// 使用新支付SDK，PayService被废弃，由于经王重纲确认视频会议不支持支付，故支付SDK对接时并没有对接，
+		// 若需要支持则需要另外安排时间对接 by lqs 20180613
+		//Long amount = payService.changePayAmount(confOrder.getAmount()); 
+		//PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
+		//		OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
+		//return callBack;
+		return null;
 	}
 
 	@Override
@@ -2816,12 +2817,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 		CreateConfAccountOrderOnlineCommand cmd1 = ConvertHelper.convert(cmd,CreateConfAccountOrderOnlineCommand.class);
 		ConfOrders confOrder = createConfOnline(cmd1); 
 		 
-		Long amount = payService.changePayAmount(confOrder.getAmount()); 
-
-		PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
-				OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
-		return callBack;
-
+	    // 使用新支付SDK，PayService被废弃，由于经王重纲确认视频会议不支持支付，故支付SDK对接时并没有对接，
+        // 若需要支持则需要另外安排时间对接 by lqs 20180613
+		//Long amount = payService.changePayAmount(confOrder.getAmount()); 
+		//PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
+		//		OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
+		//return callBack;
+		return null;
 	}
 	
 	@Override

@@ -170,4 +170,6 @@ public class ContractChargingItemDTO {
     public void setChargingVariables(String chargingVariables) {
         this.chargingVariables = chargingVariables;
     }
+    
+    
 }
