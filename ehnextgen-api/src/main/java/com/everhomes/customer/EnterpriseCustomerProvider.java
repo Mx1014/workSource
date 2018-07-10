@@ -190,4 +190,5 @@ public interface EnterpriseCustomerProvider {
 
     void deleteCustomerEntryInfoByBuildingId(Long id);
 
+    void deleteCustomerEntryInfoByAddessId(Long id);
 }
