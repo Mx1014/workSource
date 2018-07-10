@@ -35,12 +35,6 @@ public interface ArchivesProvider {
 
     List<Long> listDismissEmployeeDetailIdsByDepartmentId(Long departmentId);
 
-    void createArchivesForm(ArchivesFroms form);
-
-    void updateArchivesForm(ArchivesFroms form);
-
-    ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId);
-
     void createOperationalConfiguration(ArchivesOperationalConfiguration config);
 
     void deleteLastConfiguration(Integer namespaceId, List<Long> detailIds, Byte operationType);

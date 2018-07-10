@@ -193,38 +193,6 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public void createArchivesForm(ArchivesFroms form) {
-        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesForms.class));
-        form.setId(id);
-        form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhArchivesFormsDao dao = new EhArchivesFormsDao(context.configuration());
-        dao.insert(form);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesForms.class, null);
-    }
-
-    @Override
-    public void updateArchivesForm(ArchivesFroms form){
-        form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhArchivesFormsDao dao = new EhArchivesFormsDao(context.configuration());
-        dao.update(form);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesForms.class, form.getId());
-
-    }
-
-    @Override
-    public ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhArchivesFormsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_FORMS);
-        query.addConditions(Tables.EH_ARCHIVES_FORMS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_ARCHIVES_FORMS.ORGANIZATION_ID.eq(organizationId));
-        return query.fetchOneInto(ArchivesFroms.class);
-    }
-
-    @Override
     public void createOperationalConfiguration(ArchivesOperationalConfiguration config) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesOperationalConfigurations.class));
         config.setId(id);
