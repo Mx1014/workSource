@@ -3330,7 +3330,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		preOrderDTO.setOrderId(order.getId());
 
 		//5、保存订单信息
-		saveOrderRecord(response.getResponse(), cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+		saveOrderRecord(order.getId(), response.getResponse());
 
 		//6、返回
 		return preOrderDTO;
@@ -3647,6 +3647,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		dto.setPayMethod(payMethods);
 		dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
 		return dto;
+	}
+
+	private void saveOrderRecord(Long orderId, OrderCommandResponse orderCommandResponse) {
+		PmTaskOrder record = this.pmTaskProvider.findPmTaskOrderById(orderId);
+		record.setBizOrderNum(orderCommandResponse.getBizOrderNum());
+		record.setOrderCommitNonce(orderCommandResponse.getOrderCommitNonce());
+		record.setOrderCommitTimestamp(orderCommandResponse.getOrderCommitTimestamp());
+		record.setOrderCommitToken(orderCommandResponse.getOrderCommitToken());
+		record.setOrderCommitUrl(orderCommandResponse.getOrderCommitUrl());
+		record.setPayInfo(orderCommandResponse.getPayInfo());
+		this.pmTaskProvider.updatePmTaskOrder(record);
 	}
 
 

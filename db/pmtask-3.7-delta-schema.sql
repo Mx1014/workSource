@@ -18,8 +18,6 @@ CREATE TABLE `eh_pm_task_orders` (
   `id`  bigint(20) NOT NULL ,
   `namespace_id`  int NULL ,
   `task_id` bigint(20) NOT NULL COMMENT '报修单Id',
-  `order_id`  bigint(20) NULL COMMENT '资源预订订单id' ,
-  `order_no`  bigint(20) NULL COMMENT '资源预订订单号' ,
   `biz_order_num`  varchar(64) NULL COMMENT '处理过的资源预订订单号' ,
   `pay_order_id`  bigint(20) NULL COMMENT '支付系统订单号' ,
   `payment_order_type`  tinyint(8) NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单' ,
