@@ -1455,7 +1455,8 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setBillStatus(f.getValue(r.STATUS));
                     return null;
                 });
-        context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID)
+        context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
+        		, o.ENERGY_CONSUME)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -1479,6 +1480,7 @@ public class AssetProviderImpl implements AssetProvider {
                         itemDTO.setBuildingName(f.getValue(o.BUILDING_NAME));
                     }
                     itemDTO.setChargingItemsId(f.getValue(o.CHARGING_ITEMS_ID));
+                    itemDTO.setEnergyConsume(f.getValue(o.ENERGY_CONSUME));//费项增加用量字段
                     list1.add(itemDTO);
                     return null;
                 });
@@ -1513,6 +1515,22 @@ public class AssetProviderImpl implements AssetProvider {
         dto.setBillItemDTOList(list1);
         dto.setExemptionItemDTOList(list2);
         vo.setBillGroupDTO(dto);
+        //增加附件信息
+        com.everhomes.server.schema.tables.EhPaymentBillAttachments attachments = Tables.EH_PAYMENT_BILL_ATTACHMENTS.as("attachments");
+        List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList = new ArrayList<>();
+        context.select(attachments.ID, attachments.FILENAME, attachments.CONTENT_URI, attachments.CONTENT_URL)
+	        .from(attachments)
+	        .where(attachments.BILL_ID.eq(billId))
+	        .fetch()
+	        .map(f -> {
+	        	AssetPaymentBillAttachment assetPaymentBillAttachment = new AssetPaymentBillAttachment();
+	        	assetPaymentBillAttachment.setFilename(f.getValue(attachments.FILENAME));
+	        	assetPaymentBillAttachment.setUri(f.getValue(attachments.CONTENT_URI));
+	        	assetPaymentBillAttachment.setUrl(f.getValue(attachments.CONTENT_URL));
+	        	assetPaymentBillAttachmentList.add(assetPaymentBillAttachment);
+	            return null;
+	        });
+        vo.setAssetPaymentBillAttachmentList(assetPaymentBillAttachmentList);
         return vo;
     }
     

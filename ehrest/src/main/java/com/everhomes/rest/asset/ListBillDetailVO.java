@@ -4,6 +4,7 @@ package com.everhomes.rest.asset;
 import com.everhomes.discover.ItemType;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Created by Wentian Wang on 2017/8/18.
@@ -29,6 +30,7 @@ import java.math.BigDecimal;
  * <li>amountSupplement:增收(元)</li>
  * <li>billGroupDTO:账单组，包括减免项和收费项目的集合，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
  * <li>billGroupName:账单组名称</li>
+ * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
  *</ul>
  */
 public class ListBillDetailVO {
@@ -51,6 +53,8 @@ public class ListBillDetailVO {
     private String contractNum;
     private String invoiceNum;
     private Byte billStatus;
+    //新增附件
+    private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
     
     public Byte getBillStatus() {
 		return billStatus;
@@ -233,5 +237,13 @@ public class ListBillDetailVO {
 
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
+	}
+
+	public List<AssetPaymentBillAttachment> getAssetPaymentBillAttachmentList() {
+		return assetPaymentBillAttachmentList;
+	}
+
+	public void setAssetPaymentBillAttachmentList(List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList) {
+		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
 	}
 }
