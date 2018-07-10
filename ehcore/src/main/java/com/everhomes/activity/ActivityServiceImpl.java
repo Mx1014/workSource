@@ -2,14 +2,9 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.paySDK.api.PayService;
-import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
@@ -42,14 +37,20 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -67,6 +68,8 @@ import com.everhomes.rest.activity.ActivityListResponse;
 import com.everhomes.rest.activity.ActivityLocalStringCode;
 import com.everhomes.rest.activity.ActivityMemberDTO;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
+import com.everhomes.rest.activity.ActivityPayeeDTO;
+import com.everhomes.rest.activity.ActivityPayeeStatusType;
 import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.activity.ActivityRejectCommand;
 import com.everhomes.rest.activity.ActivityRosterPayFlag;
@@ -82,8 +85,11 @@ import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.ActivityVideoDTO;
 import com.everhomes.rest.activity.ActivityVideoRoomType;
 import com.everhomes.rest.activity.ActivityWarningResponse;
+import com.everhomes.rest.activity.CheckPayeeIsUsefulCommand;
+import com.everhomes.rest.activity.CheckPayeeIsUsefulResponse;
 import com.everhomes.rest.activity.CreateActivityAttachmentCommand;
 import com.everhomes.rest.activity.CreateActivityGoodsCommand;
+import com.everhomes.rest.activity.CreateOrUpdateActivityPayeeCommand;
 import com.everhomes.rest.activity.CreateSignupOrderCommand;
 import com.everhomes.rest.activity.CreateSignupOrderV2Command;
 import com.everhomes.rest.activity.CreateWechatJsSignupOrderCommand;
@@ -98,6 +104,8 @@ import com.everhomes.rest.activity.GetActivityAchievementResponse;
 import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
 import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.GetActivityGoodsCommand;
+import com.everhomes.rest.activity.GetActivityPayeeCommand;
+import com.everhomes.rest.activity.GetActivityPayeeDTO;
 import com.everhomes.rest.activity.GetActivityTimeCommand;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.GetActivityWarningCommand;
@@ -119,6 +127,7 @@ import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
 import com.everhomes.rest.activity.ListActivityGoodsCommand;
 import com.everhomes.rest.activity.ListActivityGoodsResponse;
+import com.everhomes.rest.activity.ListActivityPayeeCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
@@ -195,14 +204,17 @@ import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.CreateWechatJsPayOrderBody;
 import com.everhomes.rest.order.CreateWechatJsPayOrderCmd;
 import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
+import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayZuolinCreateWechatJsPayOrderResp;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PayServiceErrorCode;
 import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -306,6 +318,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -1051,7 +1064,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     "no activity.");
         }
 
-        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
         setPreOrder(cmd,createOrderCommand,roster,activity);
 
         PreOrderDTO callback = new PreOrderDTO();
@@ -6668,7 +6681,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                         //支付成功
                         handler.paySuccess(srvCmd);
                     }
-                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.FAILED.getCode()){
                         //支付失败
                         handler.payFail(srvCmd);
                     }
