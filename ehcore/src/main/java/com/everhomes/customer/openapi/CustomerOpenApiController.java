@@ -12,6 +12,8 @@ import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
 import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +55,7 @@ public class CustomerOpenApiController extends ControllerBase {
         return response;
     }
     /**
-     * <b>URL: i/asset/listBuildings</b>
+     * <b>URL: /asset/listBuildings</b>
      * <p>查看楼栋列表</p>
      */
     @RequestMapping("listBuildings")
@@ -61,6 +63,19 @@ public class CustomerOpenApiController extends ControllerBase {
     public RestResponse listBuildings( ListBuildingCommand cmd) {
         ListBuildingCommandResponse buildings = communityService.listBuildings(cmd);
         RestResponse response = new RestResponse(buildings);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /asset/createEnterprise</b>
+     * <p>查看楼栋列表</p>
+     */
+    @RequestMapping("createEnterprise")
+    @RestReturn(value = String.class)
+    public RestResponse createEnterprise(CreateEnterpriseCustomerCommand cmd) {
+        EnterpriseCustomerDTO enterpriseCustomerDTO = customerService.createEnterpriseCustomer(cmd);
+        RestResponse response = new RestResponse(enterpriseCustomerDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
