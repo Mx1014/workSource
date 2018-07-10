@@ -52,6 +52,8 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 	private SmsProvider smsProvider;
 	@Autowired
 	private RentalCommonServiceImpl rentalCommonService;
+	@Autowired
+	private Rentalv2AccountProvider rentalv2AccountProvider;
 
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
@@ -82,6 +84,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 				if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
 					//判断支付金额与订单金额是否相同
 					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+						onOrderRecordSuccess(order);
 						onOrderSuccess(order);
 					} else {
 						LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
@@ -96,6 +99,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 						else
 							rentalService.renewOrderSuccess(order,order.getRentalCount());
 						rentalProvider.updateRentalBill(order);
+						onOrderRecordSuccess(order);
 					}else{
 						LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
 					}
@@ -110,6 +114,14 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 	public void payFail(PayCallbackCommand cmd) {
 		// TODO Auto-generated method stub
 
+	}
+
+	private void onOrderRecordSuccess(RentalOrder order){
+		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
+		if (record != null){
+			record.setStatus((byte)1);
+			this.rentalv2AccountProvider.updateOrderRecord(record);
+		}
 	}
 
 	public void onOrderSuccess(RentalOrder order){

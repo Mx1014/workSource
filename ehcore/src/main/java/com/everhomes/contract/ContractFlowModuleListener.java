@@ -15,6 +15,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
 import com.everhomes.rest.contract.ContractType;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.flow.*;
@@ -148,6 +149,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         }
         FlowCase flowCase = ctx.getFlowCase();
         Contract contract = contractProvider.findContractById(flowCase.getReferId());
+        Contract exist = contractProvider.findContractById(flowCase.getReferId());
         //因为异常终止也会进FlowCaseEnd，所以需要再判断一下是不是正常结束 by xiongying20170908
         //查询合同适用场景，物业合同不修改资产状态。
         ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
@@ -157,6 +159,8 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
                 contractProvider.updateContract(contract);
                 contractSearcher.feedDoc(contract);
+                //记录合同事件日志，by tangcen
+        		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
             } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
                 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
               //查询企业客户信息，客户状态会由已成交客户变为历史客户

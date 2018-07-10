@@ -4,11 +4,9 @@ package com.everhomes.address;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.rest.address.ApartmentAbstractDTO;
+import com.everhomes.rest.address.*;
 
 import com.everhomes.asset.AddressIdAndName;
-import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
-import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 
 import org.jooq.Record2;
 import org.jooq.Result;
@@ -17,8 +15,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ApartmentDTO;
 
 public interface AddressProvider {
     void createAddress(Address address);
@@ -83,4 +79,15 @@ public interface AddressProvider {
     
 	List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId);
 	void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping);
+
+    String getAddressNameById(Long addressId);
+
+    int changeAddressLivingStatus(Long addressId, Byte status);
+
+    //add by tangcen
+  //Byte getAddressLivingStatus(Long addressId);
+    Byte getAddressLivingStatus(Long addressId,String addressName);
+	int changeAddressLivingStatus(Long id, String address, byte code);
+	Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName,
+			String apartmentName);
 }

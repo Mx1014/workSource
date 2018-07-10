@@ -132,6 +132,7 @@ public interface UserService {
     boolean isValid(LoginToken token);
     LoginToken getLoginToken(HttpServletRequest request);
     UserLogin logonBythirdPartUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response);
+    UserLogin logonBythirdPartAppUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response);
     /**
      * 注册第三方用户
      * @param user
@@ -139,6 +140,7 @@ public interface UserService {
      * @return 如果创建了新用户则返回true，否则返回false
      */
     boolean signupByThirdparkUser(User user, HttpServletRequest request);
+    User signupByThirdparkUserByApp(User user, HttpServletRequest request);
 	Boolean validateUserPass(ValidatePassCommand passCmd);
 
     List<SceneDTO> listTouristRelatedScenes();
@@ -268,7 +270,11 @@ public interface UserService {
 
     VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
 
+    void verificationCodeForBindPhoneByApp(VerificationCodeForBindPhoneCommand cmd);
+
     UserLogin bindPhone(BindPhoneCommand cmd);
+
+    UserLogin bindPhoneByApp(BindPhoneCommand cmd);
 
     void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
 

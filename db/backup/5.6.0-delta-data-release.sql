@@ -1301,3 +1301,15 @@ SET @id = (SELECT MAX(id) from eh_locale_strings);
 
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10008', 'zh_CN', '合同查询参数错误');
 -- END BY 丁建民 
+
+-- 通用脚本 合同管理（科技园）  注：上现网后期补充数据
+-- ADD BY 丁建民 
+-- #28874  合同管理（多应用） 合同旧数据迁移
+-- 生成categoryid
+INSERT INTO `eh_contract_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_uri`, `entry_id`, `contract_application_scene`) VALUES  (1000, '0', '0', '0', '合同管理【科技园对接】', NULL, NULL, '2', '1', NOW(), '1', NULL, '1000000', NULL, NULL, '0');
+-- 更新eh_service_module_apps表的instance_config
+UPDATE `eh_service_module_apps` SET  `instance_config`='{\"categoryId\":1000,\"contractApplicationScene\":0}', `action_type`='13',`custom_tag`='1000' WHERE module_id='32500' and namespace_id='1000000';
+-- 更新旧合同的categoryid
+UPDATE `eh_contracts` SET `category_id`='1000' WHERE namespace_id='1000000';
+
+-- END BY 丁建民

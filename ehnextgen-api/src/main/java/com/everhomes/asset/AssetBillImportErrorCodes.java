@@ -17,4 +17,9 @@ public interface AssetBillImportErrorCodes {
     Integer AMOUNT_INCORRECT = 1006;
     Integer USER_CUSTOMER_TEL_ERROR = 1007;
     Integer MANDATORY_BLANK_ERROR = 1008;
+    
+    Integer DATE_STR_BEGIN_EMPTY_ERROR = 1009;
+    Integer DATE_STR_END_EMPTY_ERROR = 1010;
+    Integer ADDRESS_EMPTY_ERROR = 1011;
+    Integer ADDRESS_INCORRECT = 1012;
 }

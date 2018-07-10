@@ -23,8 +23,18 @@ public class FindContractCommand {
     private Long partyAId;
 
     private Long organizationId;
+    
+    private Long categoryId;
+    
+    public Long getCategoryId() {
+		return categoryId;
+	}
 
-    public FindContractCommand() {
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public FindContractCommand() {
     }
 
     public FindContractCommand(Long id, String contractNumber, Integer namespaceId, Long communityId, Long partyAId) {

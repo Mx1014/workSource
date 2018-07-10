@@ -1,21 +1,27 @@
 package com.everhomes.mail;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.annotation.PostConstruct;
+import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +30,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component(MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP)
 public class JMailHandler implements MailHandler, ApplicationListener<ContextRefreshedEvent> {
@@ -89,10 +96,26 @@ public class JMailHandler implements MailHandler, ApplicationListener<ContextRef
      * modify by dengs, 20170424 以字符串"<!DOCTYPE html"开头，且包含 "<html>"  "</html>"标签的，做html邮件处理
      * 否则 就是文字邮件
      */ 
-    private MimeMessage createMessage(Session session, String from, String to, String subject, String body, List<String> attachmentList) throws Exception {  
+    private MimeMessage createMessage(Session session, String from, List<String> toList, List<String> ccList,
+			List<String> bccList, String subject, String body, List<String> attachmentList) throws Exception {  
         MimeMessage msg = new MimeMessage(session); 
         msg.setFrom(new InternetAddress(from));
-        msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));  
+        
+        //添加发送列表
+        if(!CollectionUtils.isEmpty(toList)) {
+        	msg.setRecipients(Message.RecipientType.TO, getInternetAddrsByMails(toList));
+        }
+        
+        // 添加抄送列表
+        if(!CollectionUtils.isEmpty(ccList)) {
+        	msg.setRecipients(Message.RecipientType.CC, getInternetAddrsByMails(ccList));
+        } 
+        
+        // 添加密送列表
+        if(!CollectionUtils.isEmpty(bccList)) {
+        	msg.setRecipients(Message.RecipientType.BCC, getInternetAddrsByMails(bccList));
+        } 
+        
         
         subject = (subject == null) ? "" : subject;
         msg.setSubject(MimeUtility.decodeText(subject));
@@ -115,13 +138,15 @@ public class JMailHandler implements MailHandler, ApplicationListener<ContextRef
             for(String filePath : attachmentList) {
                 File file = new File(filePath);
                 if(!file.exists()) {
-                    LOGGER.error("File not found, from=" + from  + ", to=" + to + ", filePath=" + filePath);
+                    LOGGER.error("File not found, filePath=" + filePath);
                     continue;
                 }
+                
                 if(file.isFile()){
 	                MimeBodyPart attachmentPart = createAttachment(filePath);
 	                multiPart.addBodyPart(attachmentPart);
                 }
+                
             }
         }
  
@@ -184,4 +209,51 @@ public class JMailHandler implements MailHandler, ApplicationListener<ContextRef
             LOGGER.error("Ignore to send mail for the mail account name or password is empty, namespaceId=" + namespaceId);
         }
     }
+
+	@Override
+	public void sendMails(Integer namespaceId, String from, List<String> toList, List<String> ccList,
+			List<String> bccList, String subject, String body, List<String> attachmentList) {
+		
+        int attachSize = (attachmentList == null) ? 0 : attachmentList.size();
+        boolean isBodyEmpty = (body == null || body.trim().length() == 0) ? true : false;
+        if (StringUtils.isBlank(from)) {
+        	from = configurationProvider.getValue(namespaceId, "mail.smtp.account", "zuolin@zuolin.com");
+        }
+        
+        try {
+        	
+            MimeMessage message = createMessage(session, from, toList, ccList, bccList, subject, body, attachmentList);
+            sendMessage(namespaceId, session, message);
+            
+        } catch (Exception e) {
+        	
+            LOGGER.error("Failed to send mail, namespaceId=" + namespaceId + ", from=" + from 
+                + ", to=" + toList  + ", ccList=" + ccList + ", bccList=" + bccList + ", subject=" + subject + ", isBodyEmpty=" + isBodyEmpty + ", attachSize=" + attachSize, e);
+        }
+    }
+
+	private MimeMessage createMessage(Session session, String from, String to, String subject, String body, List<String> attachmentList) throws Exception {
+		
+		return createMessage(session, from, Arrays.asList(to), null, null, subject, body, attachmentList);
+	}
+	
+	private Address[] getInternetAddrsByMails(List<String> mailAddrs) {
+
+		if (CollectionUtils.isEmpty(mailAddrs)) {
+			return null;
+		}
+
+		return mailAddrs.stream().map(r -> {
+
+			try {
+				return new InternetAddress(r);
+			} catch (AddressException e) {
+				LOGGER.error("not valid mail addr:" + r);
+				return new InternetAddress();
+			}
+			
+		}).toArray(Address[]::new);
+	}
+	
+	
 }
