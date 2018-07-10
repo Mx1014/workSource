@@ -2114,7 +2114,10 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal amountReceivable = new BigDecimal("0");
             BigDecimal amountChange = new BigDecimal("0");
             BigDecimal zero = new BigDecimal("0");
-//            //list1为billItem的列表
+            //更新收费项（更新费项之前先删除原来的）
+//            context.delete(Tables.EH_PAYMENT_BILL_ATTACHMENTS)
+//	            .where(Tables.EH_PAYMENT_BILL_ATTACHMENTS.BILL_ID.eq(billId))
+//	            .execute();
 //            if(list1!=null){
 //                for(int i = 0; i < list1.size() ; i++) {
 //                    BillItemDTO dto = list1.get(i);
