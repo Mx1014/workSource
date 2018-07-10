@@ -14,6 +14,10 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
                     "raw": { 
                         "type":  "string",
                         "analyzer": "pinyin_first_letter_analyzer"
+                    },
+                    "baidu": {
+                        "type": "string",
+                        index": "not_analyzed"
                     }
                 }
             },

@@ -2,7 +2,6 @@
 package com.everhomes.activity;
 
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
@@ -23,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 
 @Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE )
@@ -35,18 +35,12 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
     
     @Autowired
     private ActivityService activityService;
-    
-	@Autowired
-	private CoordinationProvider coordinationProvider;
-
-	@Autowired
-	private PayService payService;
 
 	@Override
 	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess start cmd = {}", StringHelper.toJsonString(cmd));
 
-		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
+		ActivityRoster roster = activityProvider.findRosterByPayOrderId(cmd.getOrderId());
 		if(roster == null){
 			LOGGER.info("can not find roster by orderno = {}", cmd.getOrderId());
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
@@ -69,11 +63,14 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 		roster.setVendorType(String.valueOf(cmd.getPaymentType()));
 		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
 
-		BigDecimal amount = payService.changePayAmount(cmd.getAmount());
-		roster.setPayAmount(amount);
+		Long amount  = cmd.getAmount();
+		if(amount == null){
+			roster.setPayAmount(new BigDecimal(0));
+		}
+		roster.setPayAmount(new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 		roster.setVendorType(String.valueOf(cmd.getPaymentType()));
 		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
-		roster.setPayVersion(ActivityRosterPayVersionFlag.V2.getCode());
+		roster.setPayVersion(ActivityRosterPayVersionFlag.V3.getCode());
 
 		activityProvider.updateRoster(roster);
 
@@ -85,7 +82,7 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("onlinePayBillFail");
-		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
+		ActivityRoster roster = activityProvider.findRosterByPayOrderId(cmd.getOrderId());
 		if(roster == null){
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
 					"no roster.");

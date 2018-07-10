@@ -46,6 +46,8 @@ INSERT INTO `eh_service_module_app_mappings` (`id`, `app_origin_id_male`, `app_m
 
 
 -- 请执行在es上执行db/search/contract.sh add by 丁建民
+--- 注：上现网，后补充数据
+-- 需要调用的接口：/contract/syncContracts
 
 -- 5.6.0 上线时需要部署 Gogs 程序, 部署文档：http://s.a.com/docs/faq/baseline-21529636264 ADD BY xq.tian  2018/06/28
 

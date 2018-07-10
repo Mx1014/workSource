@@ -46,6 +46,7 @@ import com.everhomes.util.StringHelper;
 import org.elasticsearch.common.cli.CliToolConfig.Cmd;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -849,6 +850,19 @@ public class FieldProviderImpl implements FieldProvider {
 
         return item.get(0);
     }
+    
+    //add by tangcen
+	@Override
+	public FieldItem findFieldItemByBusinessValue(Long fieldId, Byte businessValue) {
+		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		 Record record = context.select()
+		 						.from(Tables.EH_VAR_FIELD_ITEMS)
+		 						.where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.eq(fieldId))
+		 						.and(Tables.EH_VAR_FIELD_ITEMS.BUSINESS_VALUE.eq(businessValue))
+		 						.fetchOne();
+		 return ConvertHelper.convert(record, FieldItem.class);
+	}
+    
 
     @Override
     public List<Long> checkCustomerField(Integer namespaceId, Long communityId, String moduleName) {
@@ -877,4 +891,5 @@ public class FieldProviderImpl implements FieldProvider {
                 .unionAll(context.select(Tables.EH_VAR_FIELD_GROUP_SCOPES.ID).from(Tables.EH_VAR_FIELD_GROUP_SCOPES).where(groupCondition))
                 .fetchInto(Long.class);
     }
+
 }

@@ -268,6 +268,13 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
 		Long expireTime = strToLong(oldValidEnd);
+		boolean baseNewestTime = configProvider.getBooleanValue("parking.ketuo.baseNewestTime." + order.getParkingLotId(), false);
+		if(baseNewestTime){
+			Long now = System.currentTimeMillis();
+			if(now>expireTime){
+				expireTime=now;
+			}
+		}
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		Timestamp tempStart = Utils.addSecond(expireTime, 1);
@@ -477,7 +484,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 			dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
 
 			dto.setPlateNumber(cmd.getPlateNumber());
-			long now = System.currentTimeMillis();
+			long now = configProvider.getLongValue("parking.opencard.now",System.currentTimeMillis());
 			dto.setOpenDate(now);
 			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
 			if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
@@ -488,9 +495,13 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 				int today = calendar.get(Calendar.DAY_OF_MONTH);
 
+				BigDecimal firstMonthPrice = dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
+						.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP);
+				if(firstMonthPrice.compareTo(dto.getPrice())>0){
+					firstMonthPrice = dto.getPrice();
+				}
 				BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
-						.add(dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
-								.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+						.add(firstMonthPrice);
 				dto.setPayMoney(price);
 			}
 			if(configProvider.getBooleanValue("parking.ketuo.debug",false)){

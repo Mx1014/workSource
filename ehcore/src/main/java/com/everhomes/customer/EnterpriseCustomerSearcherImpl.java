@@ -12,11 +12,7 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.customer.CustomerEntryInfoDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -389,7 +385,49 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         return response;
     }
 
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> easyQueryEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb = null;
+        String keyWord = cmd.getKeyWord();
+        if(org.jooq.tools.StringUtils.isBlank(keyWord)) {
+            return new ArrayList<>();
+        } else {
+            qb = QueryBuilders.wildcardQuery("name.baidu", keyWord+"*");
+        }
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
+        fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        qb = QueryBuilders.filteredQuery(qb, fb);
+
+        int pageSize = 10;
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setSize(pageSize);
+        builder.setQuery(qb);
+
+        SearchResponse rsp = builder.execute().actionGet();
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("EnterpriseCustomerSearcherImpl query builder: {}, rsp: {}", builder, rsp);
+
+        List<Long> ids = getIds(rsp);
+        if(ids.size() < 1) {
+            return new ArrayList<>();
+        }
+        List<EasySearchEnterpriseCustomersDTO> list = new ArrayList<>();
+
+        return  enterpriseCustomerProvider.listEnterpriseCustomerNameAndId(ids);
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+         return enterpriseCustomerProvider.listCommunityEnterpriseCustomers(cmd.getCommunityId(), cmd.getNamespaceId());
+    }
+
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
+        LOGGER.debug("convertToDTO start time :{}",System.currentTimeMillis());
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
         Integer result = 0;
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
@@ -537,6 +575,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
 
+        LOGGER.debug("switch items name end time :{}",System.currentTimeMillis());
+
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
@@ -546,6 +586,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setTrackingPhone(members.get(0).getContactToken());
             dto.setTrackingName(dto.getTrackingName());
         }
+        LOGGER.debug("search trackingName from organization  members end time  :{}",System.currentTimeMillis());
         if (customer.getLastTrackingTime() != null) {
             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
             dto.setTrackingPeriod(result);
@@ -557,6 +598,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command.setCommunityId(customer.getCommunityId());
         List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
         dto.setEnterpriseAdmins(admins);
+        LOGGER.debug("list organization admins  end time  :{}",System.currentTimeMillis());
         //楼栋门牌
         ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
         command1.setCommunityId(customer.getCommunityId());
@@ -568,6 +610,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
+        LOGGER.debug("customer entry info list end time  :{}",System.currentTimeMillis());
         return dto;
     }
 

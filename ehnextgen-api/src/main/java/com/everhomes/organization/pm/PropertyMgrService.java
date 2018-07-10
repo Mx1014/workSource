@@ -150,6 +150,10 @@ import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
 import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
 import com.everhomes.rest.organization.pm.UploadOrganizationOwnerCarAttachmentCommand;
 import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+
+import com.everhomes.rest.organization.UpdateReservationCommand;
+import com.everhomes.rest.organization.pm.*;
+
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
@@ -611,4 +615,14 @@ public interface PropertyMgrService {
     void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd);
     DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd);
     List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
+
+    void createReservation(CreateReservationCommand cmd);
+
+    List<ListReservationsDTO> listReservations(ListReservationsCommand cmd);
+
+    void updateReservation(UpdateReservationCommand cmd);
+
+    void deleteReservation(DeleteReservationCommand cmd);
+
+    void cancelReservation(CancelReservationCommand cmd);
 }

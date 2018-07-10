@@ -203,7 +203,7 @@ public class GroupServiceImpl implements GroupService {
             textList.add(cmd.getDescription());
         }
         command.setTextList(textList);
-        command.setCommunityId(cmd.getCommunityId());
+        command.setCommunityId(cmd.getVisibleRegionId());
         this.sensitiveWordService.filterWords(command);
     }
 
@@ -3409,15 +3409,10 @@ public class GroupServiceImpl implements GroupService {
     private void deleteActiveGroupMember(Long operatorUid, GroupMember member, String reason) {
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
             this.dbProvider.execute((status) -> {
+                //deleteGroupMember已经减了成员数，不需要再次减
                 this.groupProvider.deleteGroupMember(member);
                 this.userProvider.deleteUserGroup(operatorUid, member.getGroupId());
                 deleteUserGroupOpRequest(member.getGroupId(), member.getMemberId(), operatorUid, reason);
-                
-                Group group = this.groupProvider.findGroupById(member.getGroupId());
-                long memberCount = group.getMemberCount() - 1;
-                memberCount = (memberCount < 0) ? 0 : memberCount;
-                group.setMemberCount(memberCount);
-                this.groupProvider.updateGroup(group);
                 return null;
             });
             return null;

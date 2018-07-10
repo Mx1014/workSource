@@ -627,22 +627,23 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 gf = convertFormFromTemplate(gf, form, cmd);
                 generalFormProvider.updateGeneralForm(gf);
             } else {
+                //  更新版本时需要保存原版本及id信息
                 Long version = gf.getFormVersion();
+                Long formOriginId = gf.getFormOriginId();
                 gf.setStatus(GeneralFormStatus.INVALID.getCode());
                 generalFormProvider.updateGeneralForm(gf);
                 gf = ConvertHelper.convert(form, GeneralForm.class);
                 gf = convertFormFromTemplate(gf, form, cmd);
                 gf.setStatus(GeneralFormStatus.CONFIG.getCode());
+                gf.setFormOriginId(formOriginId);
                 gf.setFormVersion(version + 1);
                 generalFormProvider.createGeneralForm(gf);
             }
-//            return gf.getFormOriginId();
         } else {
             gf = ConvertHelper.convert(form, GeneralForm.class);
             gf = convertFormFromTemplate(gf, form, cmd);
             gf.setStatus(GeneralFormStatus.CONFIG.getCode());
             gf.setFormVersion(0L);
-//            return generalFormProvider.createGeneralForm(gf);
             generalFormProvider.createGeneralForm(gf);
         }
         return ConvertHelper.convert(gf, GeneralFormDTO.class);
@@ -653,7 +654,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         gf.setNamespaceId(UserContext.getCurrentNamespaceId());
         gf.setFormTemplateId(form.getId());
         gf.setFormTemplateVersion(form.getVersion());
-        gf.setOwnerId(cmd.getOwnerId());
         gf.setOwnerId(cmd.getOwnerId());
         gf.setOwnerType(cmd.getOwnerType());
         gf.setOrganizationId(cmd.getOrganizationId());

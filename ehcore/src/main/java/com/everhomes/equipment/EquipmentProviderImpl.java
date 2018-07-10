@@ -2515,7 +2515,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (inspectionCategoryId != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         }
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(offset));
 
         if (AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
             Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode());
@@ -2555,8 +2554,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         // 只显示离创建时间三个月的任务
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(addMonths(new Timestamp(System.currentTimeMillis()), -3)));
-        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.asc());
-        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(offset));
+        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.asc());
+        // now just require inactive and waitingExcecute status by jiarui 20180630
+//        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.asc());
+//        query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
         query.addLimit(pageSize);
 
         if (LOGGER.isDebugEnabled()) {

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.openapi.OrganizationDTO;
 
@@ -51,4 +52,7 @@ public interface ContractService {
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
 
     ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
+    //add by tangcen
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd);
+   
 }

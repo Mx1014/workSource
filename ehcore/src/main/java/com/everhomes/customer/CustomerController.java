@@ -289,6 +289,32 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+     /**
+     * <b>URL: /customer/easySearchEnterpriseCustomers</b>
+     * <p>快速检出列出企业客户（不进行权限校验）</p>
+     */
+    @RequestMapping("easySearchEnterpriseCustomers")
+    @RestReturn(value = EasySearchEnterpriseCustomersDTO.class, collection = true)
+    public RestResponse easySearchEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+        List<EasySearchEnterpriseCustomersDTO> dtos = enterpriseCustomerSearcher.easyQueryEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /customer/listEnterpriseCustomers</b>
+     * <p>列出所有企业客户）</p>
+     */
+    @RequestMapping("listEnterpriseCustomers")
+    @RestReturn(value = EasySearchEnterpriseCustomersDTO.class, collection = true)
+    public RestResponse listEnterpriseCustomer(EasySearchEnterpriseCustomersCommand cmd) {
+        List<EasySearchEnterpriseCustomersDTO> dtos = enterpriseCustomerSearcher.listEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /customer/syncEnterpriseCustomerIndex</b>

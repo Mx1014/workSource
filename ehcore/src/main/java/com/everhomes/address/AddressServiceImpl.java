@@ -711,6 +711,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     if (cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
                     }
+                    // living status没有在java文件和数据库中维护；
+                    // 此处获得的living status不是直接返回前的living status，address表的living status并不是唯一性的资产的‘居住状态’的记录者，
+                    // EH_ORGANIZATION_ADDRESS_MAPPINGS中的living status才是真的living status <- by wentian
+//                    if(cmd.getLivingStatus() != null){
+//                        selectSql = selectSql.and(Tables.EH_ADDRESSES.LIVING_STATUS.eq(cmd.getLivingStatus()));
+//                    }
 
                     selectSql.fetch().map((r) -> {
                         ApartmentDTO apartment = new ApartmentDTO();
@@ -2379,8 +2385,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             resp = listMixCommunitiesByDistance(cmd, locator, pageSize);
             return resp;
         } else {
-            results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize + 1);
-
+           // results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize + 1);
+            //update by huanglm ,#22488【iOS&安卓】左上角地址切换不是按照距离最近来排序的 
+        	List<Community> communities = this.listMixCommunitiesByDistanceWithNamespaceId(cmd, locator, pageSize);
+        	//issue-33013(部分解决),communities可能为空，会导致app报开小差，需要做非空判断
+        	if (communities!=null) {
+        		communities.stream().map(r->{
+    				CommunityDTO dto = ConvertHelper.convert(r,CommunityDTO.class);					
+    				results.add(dto);
+    				return null;
+    			}).collect(Collectors.toList());
+			}
+        	
             if (results != null && results.size() > pageSize) {
                 results.remove(results.size() - 1);
                 resp.setNextPageAnchor(results.get(results.size() - 1).getId());
@@ -2511,7 +2527,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             communityIds = resources.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         }
         List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
-
+        
         if(communityIds != null){
             List<CommunityGeoPoint> pointList = this.communityProvider.listCommunityGeoPointByGeoHashInCommunities(cmd.getLatigtue(), cmd.getLongitude(), 5, communityIds);
             if(pointList != null && pointList.size() > 0){

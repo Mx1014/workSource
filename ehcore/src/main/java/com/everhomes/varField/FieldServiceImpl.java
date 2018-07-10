@@ -9,12 +9,15 @@ import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.PmTaskService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -60,6 +63,7 @@ import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -188,6 +192,12 @@ public class FieldServiceImpl implements FieldService {
     private ServiceModuleService serviceModuleService;
 
     @Autowired
+    private PmTaskService pmTaskService;
+
+    @Autowired
+    private EnterpriseCustomerProvider customerProvider;
+
+    @Autowired
     private YellowPageProvider yellowPageProvider;
 
     @Autowired
@@ -271,6 +281,7 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("27");
                 sheetNames.remove("35");
                 sheetNames.remove("36");
+                sheetNames.remove("37");
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
@@ -507,7 +518,7 @@ public class FieldServiceImpl implements FieldService {
         if (scopeFields != null && scopeFields.size() < 1) {
         	scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), null);
 		}
-        
+
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
             Map<Long, FieldDTO> dtoMap = new HashMap<>();
@@ -532,11 +543,11 @@ public class FieldServiceImpl implements FieldService {
                 if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
                 }
-                
+
                 if (scopeItems != null && scopeItems.size() < 1) {
                 	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
     			}
-                
+
             } else {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
@@ -621,7 +632,7 @@ public class FieldServiceImpl implements FieldService {
             if (fieldItems != null && fieldItems.size() < 1) {
             	fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
 			}
-            
+
             if(fieldItems != null && fieldItems.size() > 0) {
                 namespaceFlag = false;
                 globalFlag = false;
@@ -1132,6 +1143,20 @@ public class FieldServiceImpl implements FieldService {
                     setMutilRowDatas(fields,data,requestInfoDTOS.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
+            case "物业报修":
+                SearchTasksByOrgCommand cmd17 = new SearchTasksByOrgCommand();
+                cmd17.setCommunityId(communityId);
+                cmd17.setNamespaceId(namespaceId);
+                EnterpriseCustomer customer = customerProvider.findById(customerId);
+                if(customer!=null)
+                cmd17.setOrganizationId(customer.getOrganizationId());
+                List<SearchTasksByOrgDTO> list = pmTaskService.listTasksByOrg(cmd17);
+                if(list == null) list = new ArrayList<>();
+                for(int j = 0; j < list.size(); j++){
+                    LOGGER.info("物业报修"+j+":"+list.get(j));
+                    setMutilRowDatas(fields,data,list.get(j),communityId,namespaceId,moduleName,sheetName);
+                }
+                break;
         }
         return data;
     }
@@ -1220,6 +1245,12 @@ public class FieldServiceImpl implements FieldService {
                 return String.valueOf(invoke);
             }
         }
+//        if(sheetName.equalsIgnoreCase("物业报修")){
+//            if(fieldName.equalsIgnoreCase("status")){
+//                invoke = PmTaskFlowStatus.fromCode((byte)invoke).getDescription();
+//                return String.valueOf(invoke);
+//            }
+//        }
         if(invoke==null){
             return "";
         }
@@ -1801,7 +1832,7 @@ public class FieldServiceImpl implements FieldService {
                 scopeField.setNamespaceId(cmd.getNamespaceId());
                 scopeField.setCommunityId(cmd.getCommunityId());
                 scopeField.setCategoryId(cmd.getCategoryId());
-                
+
                 if (scopeField.getId() == null) {
                     scopeField.setGroupPath(scopeField.getGroupPath());
                     scopeField.setCreatorUid(userId);
@@ -1831,9 +1862,9 @@ public class FieldServiceImpl implements FieldService {
         if(scopeFields.size() > 0) {
             scopeFields.forEach((id, field) -> {
                 field.setStatus(VarFieldStatus.INACTIVE.getCode());
-                
+
                 field.setCategoryId(categoryId);
-                
+
                 fieldProvider.updateScopeField(field);
                 //删除字段的选项 如果有
                 List<ScopeFieldItem> scopeFieldItems = fieldProvider.listScopeFieldItems(field.getFieldId(), field.getNamespaceId(), field.getCommunityId(), field.getCategoryId());
@@ -1859,9 +1890,9 @@ public class FieldServiceImpl implements FieldService {
                 ScopeFieldGroup scopeFieldGroup = ConvertHelper.convert(group, ScopeFieldGroup.class);
                 scopeFieldGroup.setNamespaceId(cmd.getNamespaceId());
                 scopeFieldGroup.setCommunityId(cmd.getCommunityId());
-                
+
                 scopeFieldGroup.setCategoryId(cmd.getCategoryId());
-                
+
                 if(scopeFieldGroup.getId() == null) {
                     scopeFieldGroup.setCreatorUid(userId);
                     fieldProvider.createScopeFieldGroup(scopeFieldGroup);

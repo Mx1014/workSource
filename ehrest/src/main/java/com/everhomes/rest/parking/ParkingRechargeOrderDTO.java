@@ -43,6 +43,7 @@ import com.everhomes.util.StringHelper;
  * <li>delayTime: 剩余免费总时间</li>
  * <li>originalPrice: 原价</li>
  * <li>invoiceName: 发票名称</li>
+ * <li>paySource: 缴费来源， 参考{@link com.everhomes.rest.parking.ParkingPaySourceType}</li>
  * </ul>
  */
 public class ParkingRechargeOrderDTO {
@@ -82,6 +83,7 @@ public class ParkingRechargeOrderDTO {
 
     private BigDecimal originalPrice;
     private String invoiceName;
+    private String paySource;
 
     public BigDecimal getOriginalPrice() {
         return originalPrice;
@@ -369,5 +371,13 @@ public class ParkingRechargeOrderDTO {
 
     public void setRechargeType(Byte rechargeType) {
         this.rechargeType = rechargeType;
+    }
+
+    public String getPaySource() {
+        return paySource;
+    }
+
+    public void setPaySource(String paySource) {
+        this.paySource = paySource;
     }
 }
