@@ -303,3 +303,7 @@ ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
 ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
 
 -- 下载中心 搬迁代码  by yanjun end
+
+-- 修复 workplace 的问题 janson TODO 这里需要弄新的分支
+ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
+-- by janson end
