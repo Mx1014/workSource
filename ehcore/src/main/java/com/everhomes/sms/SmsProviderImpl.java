@@ -2,6 +2,9 @@
 package com.everhomes.sms;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.util.Tuple;
 import com.everhomes.whitelist.WhiteListProvider;
 import org.apache.commons.lang.StringUtils;
@@ -62,6 +65,9 @@ public class SmsProviderImpl implements SmsProvider {
 
     @Autowired
     private WhiteListProvider whiteListProvider;
+
+    @Autowired
+    protected LocaleTemplateService localeTemplateService;
 
     @Autowired
     public void setHandlers(Map<String, SmsHandlerResolver> resolverMap) {
@@ -287,6 +293,9 @@ public class SmsProviderImpl implements SmsProvider {
                 if (allPhoneNumbers.contains(phoneNumber)) {
                     whiteListPhones.add(phoneNumber);
                 }else {
+                    String signScope = SmsTemplateCode.SCOPE + ".sign";
+                    LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(
+                            namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
                     SmsLog smsLog = new SmsLog();
                     smsLog.setHandler("not_in_whitelist");
                     smsLog.setMobile(phoneNumber);
@@ -294,8 +303,11 @@ public class SmsProviderImpl implements SmsProvider {
                     smsLog.setScope(templateScope);
                     smsLog.setCode(templateId);
                     smsLog.setLocale(templateLocale);
-                    smsLog.setStatus((byte)2);
+                    smsLog.setStatus(SmsLogStatus.SEND_FAILED.getCode());
                     smsLog.setResult("手机号码不在白名单中");
+                    if (sign != null) {
+                        smsLog.setText(sign.getText());
+                    }
                     smsLogProvider.createSmsLog(smsLog);
                 }
             }

@@ -7061,6 +7061,9 @@ public class ForumServiceImpl implements ForumService {
 		    list.forEach(r ->{
 		        //更新帖子
                 r.setStatus(PostStatus.ACTIVE.getCode());
+                //编辑后发布需要重新设置创建时间.
+                Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+                r.setCreateTime(ts);
                 ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(r.getEmbeddedJson(),
                         ActivityPostCommand.class);
                 tempCmd.setStatus(PostStatus.ACTIVE.getCode());
@@ -7070,6 +7073,7 @@ public class ForumServiceImpl implements ForumService {
                 //更新活动
                 Activity r_activity = activityProvider.findSnapshotByPostId(r.getId());
                 r_activity.setStatus(PostStatus.ACTIVE.getCode());
+                r_activity.setCreateTime(ts);
                 activityProvider.updateActivity(r_activity);
 
                 //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
