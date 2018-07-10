@@ -65,6 +65,8 @@ import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
 import com.everhomes.rest.customer.DeleteCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
 import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.EasySearchEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.EasySearchEnterpriseCustomersDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerStatisticsDTO;
 import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
