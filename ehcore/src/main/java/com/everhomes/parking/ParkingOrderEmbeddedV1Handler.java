@@ -51,20 +51,6 @@ public class ParkingOrderEmbeddedV1Handler implements OrderEmbeddedHandler{
 
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
-//		//TODO:ceshi
-//		if (configProvider.getBooleanValue("parking.order.amount", false)) {
-//			Long orderId = Long.parseLong(cmd.getOrderNo());
-//			Long payTime = System.currentTimeMillis();
-//			Timestamp payTimeStamp = new Timestamp(payTime);
-//			ParkingRechargeOrder order = checkOrder(orderId);
-//			order.setPaidTime(payTimeStamp);
-//			order.setPaidType(cmd.getVendorType());
-//			order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
-//			order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-//			parkingProvider.updateParkingRechargeOrder(order);
-//			return;
-//		}
-
 		LOGGER.info("Parking pay info, cmd={}", cmd);
 
 		this.checkOrderNoIsNull(cmd.getOrderNo());
