@@ -1120,6 +1120,19 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             headList.add(dto.getBillItemName()+"(元)");
             cur++;
             mandatoryIndex.add(1);//收费项为必填
+            if(dto.getBillItemId() != null) {
+            	if(dto.getBillItemId().equals(4L) || dto.getBillItemId().equals(7L)) {
+            		//eh_payment_charging_items 4:自用水费  7：公摊水费
+            		headList.add("用量（吨）");
+                    cur++;
+                    mandatoryIndex.add(0);//用量非必填
+            	}else if (dto.getBillItemId().equals(5L) || dto.getBillItemId().equals(8L)) {
+            		//eh_payment_charging_items 5:自用电费   8：公摊电费
+            		headList.add("用量（度）");
+                    cur++;
+                    mandatoryIndex.add(0);//用量非必填
+				}
+            }
         }
         headList.add("楼栋/门牌");
         cur++;
