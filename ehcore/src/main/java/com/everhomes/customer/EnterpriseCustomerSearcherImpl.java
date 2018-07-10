@@ -222,20 +222,16 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             //app端要只根据跟进人名称搜索
             if(StringUtils.isNotEmpty(cmd.getTrackingName())){
-                qb = QueryBuilders.multiMatchQuery(cmd.getTrackingName())
-                        .field("trackingName", 5.5f)
-                        .field("trackingName.pinyin_prefix", 2.0f)
-                        .field("trackingName.pinyin_gram", 1.0f);
+                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackingName");
             }else {
                 qb = QueryBuilders.matchAllQuery();
             }
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 1.5f)
-                    .field("contactName", 1.2f)
-                    .field("contactAddress", 1.2f)
-                    .field("contactPhone", 1.0f)
-                    .field("trackingName" , 1.0f);
+            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("name")
+                    .field("contactName")
+                    .field("contactAddress")
+                    .field("contactMobile")
+                    .field("trackingName");
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
