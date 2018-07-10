@@ -1429,7 +1429,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
-                , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS)
+                , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS, r.CONTRACT_ID, r.CONTRACT_NUM)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -1453,6 +1453,8 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setAmoutExemption(f.getValue(r.AMOUNT_EXEMPTION));//总减免
                     vo.setAmountSupplement(f.getValue(r.AMOUNT_SUPPLEMENT));//总增收
                     vo.setBillStatus(f.getValue(r.STATUS));
+                    vo.setContractId(f.getValue(r.CONTRACT_ID));
+                    vo.setContractNum(f.getValue(r.CONTRACT_NUM));
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
@@ -1481,6 +1483,7 @@ public class AssetProviderImpl implements AssetProvider {
                     }
                     itemDTO.setChargingItemsId(f.getValue(o.CHARGING_ITEMS_ID));
                     itemDTO.setEnergyConsume(f.getValue(o.ENERGY_CONSUME));//费项增加用量字段
+                    itemDTO.setItemFineType(AssetItemFineType.item.getCode());//增加费项类型字段
                     list1.add(itemDTO);
                     return null;
                 });
@@ -1495,6 +1498,7 @@ public class AssetProviderImpl implements AssetProvider {
                 // 左邻convert为浅拷贝，第一层字段更改不会影响之前的
                 nitem.setBillItemName(n.getName());
                 nitem.setAmountReceivable(n.getAmount());
+                nitem.setItemFineType(AssetItemFineType.lateFine.getCode());//增加费项类型字段
                 fineList.add(nitem);
             }
         }
@@ -2115,21 +2119,61 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal amountChange = new BigDecimal("0");
             BigDecimal zero = new BigDecimal("0");
             //更新收费项（更新费项之前先删除原来的）
-//            context.delete(Tables.EH_PAYMENT_BILL_ATTACHMENTS)
-//	            .where(Tables.EH_PAYMENT_BILL_ATTACHMENTS.BILL_ID.eq(billId))
+//            context.delete(Tables.EH_PAYMENT_BILL_ITEMS)
+//	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
 //	            .execute();
 //            if(list1!=null){
 //                for(int i = 0; i < list1.size() ; i++) {
 //                    BillItemDTO dto = list1.get(i);
-//                    context.update(t1)
-//                            .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
-//                            .set(t1.AMOUNT_OWED,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
-//                            .set(t1.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
-//                            .set(t1.OPERATOR_UID,UserContext.currentUserId())
-//                            .where(t1.BILL_ID.in(billId))
-//                            .and(t1.ID.eq(dto.getBillItemId()))
-//                            .execute();
-//                    amountReceivable = amountReceivable.add(dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable());
+//                    //只对常规费项做新增操作，对滞纳金费项不做处理
+//                    if(dto.getItemFineType().equals(AssetItemFineType.item.getCode())) {
+//                    	List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
+//                    	long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+//                        if(currentBillItemSeq == 0){
+//                            this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+//                        }
+//                        PaymentBillItems item = new PaymentBillItems();
+//                        item.setBillGroupRuleId(dto.getBillGroupRuleId());
+//                        item.setAddressId(dto.getAddressId());
+//                        item.setBuildingName(dto.getBuildingName());
+//                        item.setApartmentName(dto.getApartmentName());
+//                        BigDecimal var1 = dto.getAmountReceivable();
+//                        //减免项不覆盖收费项目的收付，暂时
+//                        var1 = DecimalUtils.negativeValueFilte(var1);
+//                        item.setAmountOwed(var1);
+//                        item.setAmountReceivable(var1);
+//                        item.setAmountReceived(new BigDecimal("0"));
+//                        item.setBillGroupId(billGroupId);
+//                        item.setBillId(billId);
+//                        item.setChargingItemName(dto.getBillItemName());
+//                        item.setChargingItemsId(dto.getBillItemId());
+//                        item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                        item.setCreatorUid(UserContext.currentUserId());
+//                        item.setDateStr(dateStr);
+//                        //时间假定
+//                        item.setDateStrBegin(dates.get(0));
+//                        item.setDateStrEnd(dates.get(1));
+//                        item.setId(currentBillItemSeq);
+//                        item.setNamespaceId(UserContext.getCurrentNamespaceId());
+//                        item.setOwnerType(ownerType);
+//                        item.setOwnerId(ownerId);
+//                        item.setContractId(contractId);
+//                        item.setContractNum(contractNum);
+//                        //item 也添加categoryId， 这样费用清单简单些
+//                        item.setCategoryId(categoryId);
+//                        if(targetType!=null){
+//                            item.setTargetType(targetType);
+//                        }
+//                        if(targetId != null) {
+//                            item.setTargetId(targetId);
+//                        }
+//                        item.setTargetName(targetName);
+//                        item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                        item.setEnergyConsume(dto.getEnergyConsume());//增加用量
+//                        billItemsList.add(item);
+//                    	EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
+//                    	billItemsDao.insert(billItemsList);
+//                    }
 //                }
 //            }
             List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
@@ -2170,13 +2214,6 @@ public class AssetProviderImpl implements AssetProvider {
                         exemptionItems.add(exemptionItem);
                         includeExemptionIds.add(nextId);
                     }
-//                    if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
-//                        //更新账单的增加项
-//                        amountExemption = amountExemption.add(exemptionItemDTO.getAmount().multiply(new BigDecimal("-1")));
-//                    }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
-//                        //更新账单的减免项
-//                        amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
-//                    }
                 }
             }
             EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());

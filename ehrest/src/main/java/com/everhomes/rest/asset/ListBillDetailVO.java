@@ -55,6 +55,7 @@ public class ListBillDetailVO {
     private Byte billStatus;
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
+    private Long contractId;//新增合同ID字段
     
     public Byte getBillStatus() {
 		return billStatus;
@@ -245,5 +246,13 @@ public class ListBillDetailVO {
 
 	public void setAssetPaymentBillAttachmentList(List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList) {
 		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
+	}
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
 	}
 }

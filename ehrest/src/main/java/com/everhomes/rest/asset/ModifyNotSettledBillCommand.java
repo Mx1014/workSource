@@ -22,6 +22,8 @@ import java.util.List;
  * <li>ownerType:所属者类型</li>
  * <li>ownerId:所属者ID</li>
  * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
+ * <li>contractNum: 合同编号</li>
+ * <li>contractId: 合同ID</li>
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
@@ -40,6 +42,8 @@ public class ModifyNotSettledBillCommand {
     private Long ownerId;
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
+    private String contractNum;
+    private Long contractId;
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -152,5 +156,21 @@ public class ModifyNotSettledBillCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getContractNum() {
+		return contractNum;
+	}
+
+	public void setContractNum(String contractNum) {
+		this.contractNum = contractNum;
+	}
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
 	}
 }
