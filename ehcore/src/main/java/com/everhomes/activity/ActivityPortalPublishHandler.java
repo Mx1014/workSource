@@ -250,7 +250,8 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 					categoryDtos.add(dto);
 				}else {
 					ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
-					if(oldCategory != null && oldCategory.getParentId() != null && oldCategory.getParentId().equals(config.getCategoryId())){
+					if(oldCategory != null && oldCategory.getParentId() != null && oldCategory.getParentId().equals(config.getCategoryId())
+							&& TrueOrFalseFlag.TRUE.getCode().equals(oldCategory.getEnabled())){
 						dto.setParentId(config.getCategoryId());
 						categoryDtos.add(dto);
 					}

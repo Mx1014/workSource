@@ -75,6 +75,7 @@ import java.util.List;
  *     <li>longitude: 经度</li>
  *     <li>latitude: 纬度</li>
  *     <li>contactDuty:联系人职务</li>
+ *     <li> checkAuthFlag;:企业后台不校验权限</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -167,6 +168,11 @@ public class UpdateEnterpriseCustomerCommand {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> banner;
     private String hotline;
+
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
+    private Byte checkAuthFlag;
 
     public Long getCommunityId() {
         return communityId;
@@ -838,6 +844,22 @@ public class UpdateEnterpriseCustomerCommand {
 
     public void setHotline(String hotline) {
         this.hotline = hotline;
+    }
+
+    public Byte getCheckAuthFlag() {
+        return checkAuthFlag;
+    }
+
+    public void setCheckAuthFlag(Byte checkAuthFlag) {
+        this.checkAuthFlag = checkAuthFlag;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
     }
 
     @Override

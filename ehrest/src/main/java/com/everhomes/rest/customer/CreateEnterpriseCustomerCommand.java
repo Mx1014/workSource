@@ -169,6 +169,9 @@ public class CreateEnterpriseCustomerCommand {
     private List<AttachmentDescriptor> banner;
     private String hotline;
 
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
 
     public Long getOrgId() {
         return orgId;
@@ -821,16 +824,24 @@ public class CreateEnterpriseCustomerCommand {
         this.banner = banner;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public Byte getDeviceType() {
         return deviceType;
     }
 
     public void setDeviceType(Byte deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

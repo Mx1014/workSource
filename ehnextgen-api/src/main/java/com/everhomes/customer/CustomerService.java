@@ -363,4 +363,6 @@ public interface CustomerService {
     void syncOrganizationToCustomer(SyncCustomerDataCommand cmd);
 
     HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse);
+
+    EnterpriseCustomerDTO getCustomerBasicInfoByOrgId(GetEnterpriseCustomerCommand cmd);
 }
