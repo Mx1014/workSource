@@ -4,15 +4,18 @@ package com.everhomes.activity;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.rest.activity.ExportTagDTO;
 import com.everhomes.rest.activity.StatisticsTagCommand;
 import com.everhomes.rest.activity.StatisticsTagDTO;
 import com.everhomes.rest.activity.StatisticsTagResponse;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,10 +56,19 @@ public class ActivityTagExportTaskHandler implements FileDownloadTaskHandler {
         statisticsTagCommand.setNamespaceId(namespaceId);
         statisticsTagCommand.setCategoryId(categoryId);
         StatisticsTagResponse result = this.activityService.statisticsTag(statisticsTagCommand);
-        List<StatisticsTagDTO> dtos = result.getList();
+        List<StatisticsTagDTO> statisticsTagDTOList = result.getList();
+        List<ExportTagDTO> dtos = new ArrayList<>();
+        statisticsTagDTOList.stream().forEach(r->{
+            ExportTagDTO exportTagDTO = ConvertHelper.convert(r,ExportTagDTO.class);
+            NumberFormat nt = NumberFormat.getPercentInstance();
+            nt.setMaximumFractionDigits(1);
+            exportTagDTO.setCreateActivityRateText(nt.format(r.getCreateActivityRate()));
+            exportTagDTO.setSignPeopleRateText(nt.format(r.getSignPeopleRate()));
+            dtos.add(exportTagDTO);
+        });
 
         ExcelUtils excelUtils = new ExcelUtils(fileName, "标签统计");
-        List<String> propertyNames = new ArrayList<String>(Arrays.asList("tagName", "createActivityCount", "createActivityRate", "signPeopleCount", "signPeopleRate"));
+        List<String> propertyNames = new ArrayList<String>(Arrays.asList("tagName", "createActivityCount", "createActivityRateText", "signPeopleCount", "signPeopleRateText"));
         List<String> titleNames = new ArrayList<String>(Arrays.asList("标签", "活动数目", "活动数目占比", "报名人次", "报名人次占比"));
         List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 10, 10, 10));
 
