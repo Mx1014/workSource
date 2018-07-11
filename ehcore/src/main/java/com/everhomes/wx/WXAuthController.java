@@ -132,6 +132,10 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
 
     @Autowired
     private BorderProvider borderProvider;
+
+    @Autowired
+    private WeChatService wechatService;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
@@ -560,7 +564,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         // 使用临时code从微信中换取accessToken
         String accessTokenUri = String.format(WX_ACCESS_TOKEN_URL, appId, secret, code);
         String accessTokenUriWithoutSecret = accessTokenUri.replaceAll("secret=" + secret, "secret=****");
-        String accessTokenJson = httpGet(accessTokenUri, accessTokenUriWithoutSecret);
+        String accessTokenJson = wechatService.httpGet(accessTokenUri, accessTokenUriWithoutSecret);
         WxAccessTokenInfo accessToken = (WxAccessTokenInfo)StringHelper.fromJsonString(accessTokenJson, WxAccessTokenInfo.class);
         if (accessToken.getErrcode() != null) {
             LOGGER.error("Failed to get access token from webchat, namespaceId={}, appId={}, accessToken={}, accessTokenUri={}", 
@@ -577,12 +581,12 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         String scope = request.getParameter("scope");
         //静默授权不用获取用户信息
         if(scope != null && scope.equals("snsapi_base")){
-            wxUser.setNickName("unKnow");
+            wxUser.setNickName("微信用户");
             wxUser.setGender(UserGender.UNDISCLOSURED.getCode());
         }else {
             // 获取用户信息
             String userInfoUri = String.format(WX_USER_INFO_URL, accessToken.getAccess_token(), accessToken.getOpenid());
-            String userInfoJson = httpGet(userInfoUri, userInfoUri);
+            String userInfoJson = wechatService.httpGet(userInfoUri, userInfoUri);
             WxUserInfo userInfo = (WxUserInfo)StringHelper.fromJsonString(userInfoJson, WxUserInfo.class);
             if (userInfo.getErrcode()!=null) {
                 LOGGER.error("Failed to get user information from webchat, namespaceId={}, appId={}, userInfo={}, userinfoUri={}",
@@ -648,7 +652,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         // 使用临时code从微信中换取accessToken
         String accessTokenUri = String.format(WX_ACCESS_TOKEN_URL, appId, secret, code);
         String accessTokenUriWithoutSecret = accessTokenUri.replaceAll("secret=" + secret, "secret=****");
-        String accessTokenJson = httpGet(accessTokenUri, accessTokenUriWithoutSecret);
+        String accessTokenJson = wechatService.httpGet(accessTokenUri, accessTokenUriWithoutSecret);
         WxAccessTokenInfo accessToken = (WxAccessTokenInfo)StringHelper.fromJsonString(accessTokenJson, WxAccessTokenInfo.class);
         if (accessToken.getErrcode() != null) {
             LOGGER.error("Failed to get access token from webchat, namespaceId={}, appId={}, accessToken={}, accessTokenUri={}",
@@ -665,12 +669,12 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         String scope = request.getParameter("scope");
         //静默授权不用获取用户信息
         if(scope != null && scope.equals("snsapi_base")){
-            wxUser.setNickName("unKnow");
+            wxUser.setNickName("微信用户");
             wxUser.setGender(UserGender.UNDISCLOSURED.getCode());
         }else {
             // 获取用户信息
             String userInfoUri = String.format(WX_USER_INFO_URL, accessToken.getAccess_token(), accessToken.getOpenid());
-            String userInfoJson = httpGet(userInfoUri, userInfoUri);
+            String userInfoJson = wechatService.httpGet(userInfoUri, userInfoUri);
             WxUserInfo userInfo = (WxUserInfo)StringHelper.fromJsonString(userInfoJson, WxUserInfo.class);
             if (userInfo.getErrcode()!=null) {
                 LOGGER.error("Failed to get user information from webchat, namespaceId={}, appId={}, userInfo={}, userinfoUri={}",
@@ -732,84 +736,6 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         return checkWxAuthIsBindPhoneResponse;
     }
 
-    private String httpGet(String url, String safeUrl) {
-        CloseableHttpClient httpclient = null;
-        
-        CloseableHttpResponse response = null;
-        String result = null;
-        try {
-            httpclient = HttpClients.createDefault();
-
-            HttpGet httpGet = new HttpGet(url);
-
-            //使用测试环境没有固定ip代理访问，从有外网ip的服务器访问微信，从而实现固定id
-            String wechatProxyHost = configurationProvider.getValue("wechat.proxy.host", null);
-            int wechatProxyPort = configurationProvider.getIntValue("wechat.proxy.port", 0);
-            if(wechatProxyHost != null && wechatProxyPort != 0){
-                HttpHost proxy = new HttpHost(wechatProxyHost, wechatProxyPort);
-                RequestConfig requestConfig = RequestConfig.custom().setProxy(proxy).build();
-                httpGet.setConfig(requestConfig);
-            }
-
-            response = httpclient.execute(httpGet);
-
-            int status = response.getStatusLine().getStatusCode();
-            if(status != 200){
-                LOGGER.error("Failed to get the http result, url={}, status={}", safeUrl, response.getStatusLine());
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
-                        "Failed to get the http result");
-            } else {
-                HttpEntity resEntity = response.getEntity();
-                String charset = getContentCharSet(resEntity);
-                result = EntityUtils.toString(resEntity, charset);
-                if(LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Get http result, charset={}, url={}, result={}", charset, safeUrl, result);
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed to get the http result, url={}", safeUrl, e);
-        } finally {
-            if(response != null) {
-                try {
-                    response.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            if(httpclient != null) {
-                try {
-                    httpclient.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        
-        return result;
-    }
-    
-    public static String getContentCharSet(final HttpEntity entity) throws ParseException {
-        if (entity == null) {   
-            throw new IllegalArgumentException("HTTP entity may not be null");   
-        }   
-        String charset = null;   
-        if (entity.getContentType() != null) {    
-            HeaderElement values[] = entity.getContentType().getElements();   
-            if (values.length > 0) {   
-                NameValuePair param = values[0].getParameterByName("charset" );   
-                if (param != null) {   
-                    charset = param.getValue();   
-                }   
-            }   
-        }   
-         
-        if(charset == null || charset.length() == 0){  
-            charset = "UTF-8";  
-        }
-        
-        return charset;   
-    }      
     
     @RequestMapping("cross")
     public void crossSiteRedirect(HttpServletRequest request, HttpServletResponse response) throws Exception {

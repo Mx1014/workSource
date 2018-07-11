@@ -2152,4 +2152,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .execute();
 
     }
+
+    @Override
+    public void deleteCustomerEntryInfoByAddessId(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .set(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS,CommonStatus.INACTIVE.getCode())
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.eq(id))
+                .execute();
+    }
 }
