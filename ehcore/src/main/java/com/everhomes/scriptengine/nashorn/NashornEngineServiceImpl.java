@@ -1,4 +1,4 @@
-package com.everhomes.flow;
+package com.everhomes.scriptengine.nashorn;
 
 
 import com.everhomes.util.StringHelper;
@@ -27,7 +27,7 @@ public class NashornEngineServiceImpl implements NashornEngineService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NashornEngineServiceImpl.class);
     private static final int N = 20;
 
-    private ThreadLocal<CompliedScriptHolder> scriptHolderThreadLocal;
+    private ThreadLocal<NashornCompliedScriptHolder> scriptHolderThreadLocal;
     private ExecutorService rawExecutorService;
 
     private BlockingQueue<NashornScript<?>> queue;
@@ -58,7 +58,6 @@ public class NashornEngineServiceImpl implements NashornEngineService {
         }
     }
 
-
     public NashornEngineServiceImpl() {
         threadFactory = new CustomizableThreadFactory("flow-nashorn-engine");
         this.queue = new LinkedBlockingQueue<>();
@@ -75,7 +74,7 @@ public class NashornEngineServiceImpl implements NashornEngineService {
                 engine.put("nashornObjs", this);
                 engine.put("jThreadId", String.valueOf(Thread.currentThread().getId()));
 
-                CompliedScriptHolder scriptHolder = new CompliedScriptHolder();
+                NashornCompliedScriptHolder scriptHolder = new NashornCompliedScriptHolder();
                 InputStream in = this.getClass().getResourceAsStream("/flow/jvm-npm.js");
 
                 engine.eval(new Scanner(in).useDelimiter("\\A").next());
@@ -138,10 +137,6 @@ public class NashornEngineServiceImpl implements NashornEngineService {
     private <O> void process(NashornScript<O> func) {
         Future<O> future = null;
         try {
-            if (null == func.getJSFunc()) {
-                return;
-            }
-
             future = rawExecutorService.submit(() -> func.process(this));
 
             // 超过5分钟就终止
@@ -209,7 +204,7 @@ public class NashornEngineServiceImpl implements NashornEngineService {
         }
     }
 
-    private CompliedScriptHolder getCompliedScriptHolder() {
+    private NashornCompliedScriptHolder getCompliedScriptHolder() {
         return scriptHolderThreadLocal.get();
     }
 
@@ -217,14 +212,13 @@ public class NashornEngineServiceImpl implements NashornEngineService {
      * 注意： 需要在 threads 中的线程调用,因为这里用到了 ThreadLocal
      */
     @Override
-    public ScriptObjectMirror getScriptObjectMirror(Long scriptMainId, Integer scriptVersion,
-                                                    NashornScript<?> script) {
-        CompliedScriptHolder scriptHolder = getCompliedScriptHolder();
-        ScriptObjectMirror mirror = scriptHolder.getScriptObjectMirror(scriptMainId, scriptVersion);
+    public ScriptObjectMirror getScriptObjectMirror(String key, NashornScript<?> script) {
+        NashornCompliedScriptHolder scriptHolder = getCompliedScriptHolder();
+        ScriptObjectMirror mirror = scriptHolder.getScriptObjectMirror(key);
         if (mirror == null && script.getScript() != null) {
             // lazy load
-            scriptHolder.compile(scriptMainId, scriptVersion, script.getScript());
-            mirror = scriptHolder.getScriptObjectMirror(scriptMainId, scriptVersion);
+            scriptHolder.compile(key, script.getScript());
+            mirror = scriptHolder.getScriptObjectMirror(key);
         }
         return mirror;
     }

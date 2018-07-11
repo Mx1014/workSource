@@ -1,4 +1,4 @@
-package com.everhomes.flow;
+package com.everhomes.scriptengine.nashorn;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,16 +10,16 @@ import java.util.Map;
 @Service
 public class NashornApiService {
 
-    private static Map<String, FlowModuleNashornApiService> apiServices;
+    private static Map<String, NashornModuleApiService> apiServices;
 
-    public static FlowModuleNashornApiService getService(String serviceName) {
+    public static NashornModuleApiService getService(String serviceName) {
         return apiServices.get(serviceName);
     }
 
     @Autowired(required = false)
-    public void setApiServices(List<FlowModuleNashornApiService> apiServices) {
+    public void setApiServices(List<NashornModuleApiService> apiServices) {
         NashornApiService.apiServices = new HashMap<>();
-        for (FlowModuleNashornApiService apiService : apiServices) {
+        for (NashornModuleApiService apiService : apiServices) {
             NashornApiService.apiServices.put(apiService.name(), apiService);
         }
     }

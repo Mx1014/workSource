@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NashornConfigService {
+public class FlowNashornConfigService {
 
     @Autowired
     private static FlowScriptConfigProvider flowScriptConfigProvider;
@@ -15,6 +15,6 @@ public class NashornConfigService {
 
     @Autowired
     public void setApiServices(FlowScriptConfigProvider flowScriptConfigProvider) {
-        NashornConfigService.flowScriptConfigProvider = flowScriptConfigProvider;
+        FlowNashornConfigService.flowScriptConfigProvider = flowScriptConfigProvider;
     }
 }

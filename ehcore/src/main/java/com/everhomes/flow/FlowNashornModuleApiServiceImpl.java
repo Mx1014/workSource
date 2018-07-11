@@ -1,15 +1,16 @@
 package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowEventType;
+import com.everhomes.scriptengine.nashorn.NashornModuleApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FlowNashornApiServiceImpl implements FlowModuleNashornApiService {
+public class FlowNashornModuleApiServiceImpl implements NashornModuleApiService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlowNashornApiServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowNashornModuleApiServiceImpl.class);
 
     @Autowired
     private FlowService flowService;

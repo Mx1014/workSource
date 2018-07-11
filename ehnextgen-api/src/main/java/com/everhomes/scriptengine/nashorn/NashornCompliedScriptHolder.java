@@ -1,24 +1,22 @@
-package com.everhomes.flow;
+package com.everhomes.scriptengine.nashorn;
 
+import com.everhomes.flow.FlowScriptCompileException;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.collections4.map.LRUMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.script.*;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import java.util.Map;
 
-public class CompliedScriptHolder {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompliedScriptHolder.class);
+public class NashornCompliedScriptHolder {
 
     private ScriptEngine scriptEngine;
 
-    // private Map<String, CompiledScript> compiledScriptMap;
     private Map<String, ScriptObjectMirror> scriptObjectMirrorMap;
 
-    public CompliedScriptHolder() {
-        // compiledScriptMap = new LRUMap<>(1000);
+    public NashornCompliedScriptHolder() {
         scriptObjectMirrorMap = new LRUMap<>(1000);
     }
 
@@ -26,12 +24,9 @@ public class CompliedScriptHolder {
         return scriptEngine;
     }
 
-    public void compile(Long scriptMainId, Integer scriptVersion, String script) {
+    public void compile(String key, String script) {
         try {
-            String key = String.format("%s:%s", scriptMainId, scriptVersion);
-
             CompiledScript compiledScript = getCompilable().compile(script);
-            // compiledScriptMap.put(key, compiledScript);
 
             Object eval = compiledScript.eval();
             if (eval == null) {
@@ -52,7 +47,7 @@ public class CompliedScriptHolder {
         this.scriptEngine = scriptEngine;
     }
 
-    public ScriptObjectMirror getScriptObjectMirror(Long scriptMainId, Integer scriptVersion) {
-        return scriptObjectMirrorMap.get(String.format("%s:%s", scriptMainId, scriptVersion));
+    public ScriptObjectMirror getScriptObjectMirror(String key) {
+        return scriptObjectMirrorMap.get(key);
     }
 }

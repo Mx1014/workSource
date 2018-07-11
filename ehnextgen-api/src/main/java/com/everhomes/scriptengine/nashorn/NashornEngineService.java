@@ -1,4 +1,4 @@
-package com.everhomes.flow;
+package com.everhomes.scriptengine.nashorn;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
@@ -10,5 +10,5 @@ public interface NashornEngineService {
 
     void push(NashornScript<?> script);
 
-    ScriptObjectMirror getScriptObjectMirror(Long scriptMainId, Integer scriptVersion, NashornScript<?> script);
+    ScriptObjectMirror getScriptObjectMirror(String key, NashornScript<?> script);
 }
