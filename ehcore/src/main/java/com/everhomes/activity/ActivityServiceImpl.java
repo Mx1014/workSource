@@ -6119,7 +6119,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             fileName = namespace.getName() + "_" + activityCategories.getName();
         }
         SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
-        fileName += "_活动报名_" + fileNameSdf.format(cmd.getStartTime()) + "_" +fileNameSdf.format(cmd.getEndTime());
+        fileName += "_活动报名_" + fileNameSdf.format(cmd.getStartTime()) + "_" +fileNameSdf.format(cmd.getEndTime()) +".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -6145,7 +6145,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             fileName = namespace.getName() + "_" + activityCategories.getName();
         }
         SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
-        fileName += "_企业报名_" + fileNameSdf.format(new Date());
+        fileName += "_企业报名_" + fileNameSdf.format(new Date()) +".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityOrganizationExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
@@ -6172,7 +6172,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             fileName = namespace.getName() + "_" + activityCategories.getName();
         }
         SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
-        fileName += "_标签统计_" + fileNameSdf.format(new Date());
+        fileName += "_标签统计_" + fileNameSdf.format(new Date())+".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityTagExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
