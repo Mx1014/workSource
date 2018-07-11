@@ -3,6 +3,7 @@ package com.everhomes.statistics.terminal;
 
 import com.everhomes.rest.statistics.terminal.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface StatTerminalService {
@@ -15,13 +16,13 @@ public interface StatTerminalService {
 
     List<TerminalDayStatisticsDTO> listTerminalDayStatisticsByDate(String startDate, String endDate, Integer namespaceId);
 
-    List<TerminalStatisticsTaskDTO> executeStatTask(Integer namespaceId, String startDate, String endDate);
+    List<TerminalStatisticsTaskDTO> executeStatTask(Integer namespaceId, LocalDate startDate, LocalDate endDate);
 
-    List<TerminalAppVersionStatisticsDTO> listTerminalAppVersionStatistics(String Date, Integer namespaceId);
+    List<TerminalAppVersionStatisticsDTO> listTerminalAppVersionStatistics(String date, Integer namespaceId);
 
     PieChart getTerminalAppVersionPieChart(String Date, TerminalStatisticsType type);
 
-    List<Long> executeUserSyncTask(Integer namespaceId);
+    void executeUserSyncTask(Integer namespaceId);
 
     void deleteStatTaskLog(DeleteStatTaskLogCommand cmd);
 

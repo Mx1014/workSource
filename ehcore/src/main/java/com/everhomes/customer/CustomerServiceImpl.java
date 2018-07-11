@@ -231,7 +231,6 @@ import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
@@ -3186,11 +3185,11 @@ public class CustomerServiceImpl implements CustomerService {
         if (dto.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
-                dto.setTrackingUidName(detail.getContactName());
+                dto.setTrackingUidName(detail.getContactName()+"("+detail.getContactToken()+")");
             } else {
-                UserInfo userInfo = userService.getUserInfo(dto.getTrackingUid());
-                if (userInfo != null) {
-                    dto.setTrackingUidName(userInfo.getNickName());
+                User user = userProvider.findUserById(dto.getTrackingUid());
+                if (user != null) {
+                    dto.setTrackingUidName(user.getNickName()+"("+user.getIdentifierToken()+")");
                 }
             }
         }
@@ -3773,6 +3772,7 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setContactName(s.getContactName());
                 dto.setGender(s.getGender());
                 dto.setContactToken(s.getContactToken());
+                users.add(dto);
             });
         }
         List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();

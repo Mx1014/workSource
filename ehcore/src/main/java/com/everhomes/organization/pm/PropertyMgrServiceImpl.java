@@ -2658,6 +2658,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
+        enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(cmd.getId());
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
