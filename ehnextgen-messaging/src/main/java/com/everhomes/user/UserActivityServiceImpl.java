@@ -585,7 +585,7 @@ public class UserActivityServiceImpl implements UserActivityService {
             fileName = namespace.getName();
         }
         SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
-        fileName += "_举报管理_" + fileNameSdf.format(new Date());
+        fileName += "_举报管理_" + fileNameSdf.format(new Date()) + ".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), FeedbackApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
 
