@@ -412,10 +412,10 @@ public class FieldServiceImpl implements FieldService {
         Boolean globalFlag = true;
         if(cmd.getCommunityId() != null) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
-            //查询旧数据 多入口
-            if (scopeFields != null && scopeFields.size() < 1) {
+            //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
+            /*if (scopeFields != null && scopeFields.size() < 1) {
             	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), null);
-			}
+			}*/
             if(scopeFields != null && scopeFields.size() > 0) {
                 namespaceFlag = false;
                 globalFlag = false;
@@ -423,10 +423,10 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
-          //查询旧数据 多入口
-            if (scopeFields != null && scopeFields.size() < 1) {
+            //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
+            /*if (scopeFields != null && scopeFields.size() < 1) {
             	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath(), null);
-			}
+			}*/
             if (scopeFields != null && scopeFields.size() > 0) {
                 globalFlag = false;
             }
@@ -439,6 +439,7 @@ public class FieldServiceImpl implements FieldService {
         if(globalFlag) {
             scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
         }
+        //查询表单初始化的数据
         if (scopeFields != null && scopeFields.size() < 1) {
         	scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), null);
 		}
@@ -467,12 +468,14 @@ public class FieldServiceImpl implements FieldService {
                 if (scopeItems != null && scopeItems.size() < 1) {
                 	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
     			}
-                if (scopeItems != null && scopeItems.size() < 1) {
+                //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
+                /*if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
                 }
                 if (scopeItems != null && scopeItems.size() < 1) {
                 	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
-    			}
+    			}*/
+                //查询表单初始化的数据
                 if (scopeItems != null && scopeItems.size() < 1) {
                 	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
     			}
@@ -523,10 +526,10 @@ public class FieldServiceImpl implements FieldService {
         fieldIds.add(cmd.getFieldId());
         if(cmd.getCommunityId() != null) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
-            //查询旧数据，多入口
-            if (fieldItems != null && fieldItems.size() < 1) {
+            //查询旧数据，多入口 
+            /*if (fieldItems != null && fieldItems.size() < 1) {
             	fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
-			}
+			}*/
 
             if(fieldItems != null && fieldItems.size() > 0) {
                 namespaceFlag = false;
@@ -535,10 +538,10 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
-          //查询旧数据，多入口
-            if (fieldItems != null && fieldItems.size() < 1) {
+            //查询旧数据，多入口
+            /*if (fieldItems != null && fieldItems.size() < 1) {
             	fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
-			}
+			}*/
             if(fieldItems!=null && fieldItems.size()>0){
                 globalFlag = false;
             }
