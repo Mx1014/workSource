@@ -30,6 +30,13 @@ UPDATE  eh_var_fields SET field_param = '{"fieldParamType": "text", "length": 6}
 UPDATE  eh_var_field_scopes SET  field_param = (SELECT eh_var_fields.field_param from eh_var_fields WHERE eh_var_fields.id = field_id);
 -- end
 
+-- AUTHOR:jiarui 20180625
+-- REMARK:动态表单跟进类型修改
+update eh_var_fields set field_param = '{"fieldParamType": "text", "length": 32}' where name = 'visitTimeLength';
+set @id = (select id from eh_var_fields WHERE name = 'visitTimeLength' );
+update eh_var_field_scopes set field_param = '{"fieldParamType": "text", "length": 32}' where field_id = @id ;
+-- end
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
