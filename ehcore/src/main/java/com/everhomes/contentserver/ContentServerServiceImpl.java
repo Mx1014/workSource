@@ -516,6 +516,11 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
         try {
             ContentServer contentServer = selectContentServer();
             contentServerUri = contentServer.getPublicAddress();
+
+            //add by xq.tian
+            if (contentServer.getPublicPort() != 443) {
+                contentServerUri = contentServerUri + ":" + contentServer.getPublicPort();
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -3507,7 +3507,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         resp.setPhone(auth.getPhone());
-        if(auth.getValidEndMs() < System.currentTimeMillis() || ((byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
+        if(auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
             resp.setIsValid((byte)0);    
         } else {
             resp.setIsValid((byte)1);
