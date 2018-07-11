@@ -150,4 +150,11 @@ public interface FlowModuleListener {
     default void onFlowStateChanged(Flow flow) {
 
     }
+
+    /**
+     * 工作流启用之前触发调用
+     */
+    default void onFlowStateChanging(Flow flow) {
+
+    }
 }

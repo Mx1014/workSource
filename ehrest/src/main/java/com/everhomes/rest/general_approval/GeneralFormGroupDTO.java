@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>fieldGroupName: 表单字段组名</li>
  * <li>fieldGroupDisplayName: 表单字段组显示名</li>
- * <li>fieldGroupAttribute: 字段属性 比如：系统默认字段 {@link GeneralFormFieldAttribute}</li>
+ * <li>fieldGroupAttribute: 字段组属性 比如：系统默认字段 {@link GeneralFormFieldAttribute}</li>
  * </ul>
  */
 public class GeneralFormGroupDTO {

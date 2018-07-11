@@ -13,18 +13,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
+import com.everhomes.border.Border;
+import com.everhomes.border.BorderProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.wx.CheckAuthCommand;
-import com.everhomes.rest.wx.CheckAuthResponse;
+import com.everhomes.rest.user.LogonCommandResponse;
+import com.everhomes.rest.wx.*;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import org.apache.http.*;
@@ -124,7 +128,10 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
 
     @Autowired
     private ContentServerService contentServerService;
-    
+
+
+    @Autowired
+    private BorderProvider borderProvider;
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
@@ -307,6 +314,42 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         }
 	}
 
+    /**
+     * <b>URL: /wxauth/authCallbackByApp</b>
+     * <p>微信授权后由APP调用，参数包含了code，通过code可换取access_token，通过access_token可获取用户信息。</p>
+     */
+    @RequestMapping("authCallbackByApp")
+    @RestReturn(CheckWxAuthIsBindPhoneRestResponse.class)
+    @RequireAuthentication(false)
+    public CheckWxAuthIsBindPhoneRestResponse authCallbackByApp(WxAuthCallBackCommand cmd, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(callback calculate), startTime={}", startTime);
+        }
+
+        String requestUrl = request.getRequestURL().toString();
+        Map<String, String> params = getRequestParams(request);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(callback), requestUrl={}, params={}", requestUrl, params);
+        }
+
+        String namespaceInReq = params.get("namespaceId");
+        Integer namespaceId = parseNamespace(namespaceInReq);
+
+        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = processUserInfoV2(namespaceId, request, response, cmd);
+
+        CheckWxAuthIsBindPhoneRestResponse checkWxAuthIsBindPhoneRestResponse = new CheckWxAuthIsBindPhoneRestResponse();
+        checkWxAuthIsBindPhoneRestResponse.setResponse(checkWxAuthIsBindPhoneResponse);
+        checkWxAuthIsBindPhoneRestResponse.setErrorCode(ErrorCodes.SUCCESS);
+        checkWxAuthIsBindPhoneRestResponse.setErrorDescription("OK");
+        return checkWxAuthIsBindPhoneRestResponse;
+    }
+    private List<String> listAllBorderAccessPoints() {
+        List<Border> borders = this.borderProvider.listAllBorders();
+        return borders.stream().map((Border border) -> {
+            return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+        }).collect(Collectors.toList());
+    }
 	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId, Map<String, String> params){
         LOGGER.info("checkUserIdentifier start");
 
@@ -343,7 +386,28 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         }
 
     }
-	
+
+    private CheckWxAuthIsBindPhoneResponse checkRedirectUserIdentifierV2(CheckWxAuthIsBindPhoneResponse response, User user){
+        LOGGER.info("checkUserIdentifier start");
+
+        //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+        if(user == null){
+            LOGGER.error("checkUserIdentifier exception, it should be in logon status, but it is logoff");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Failed to get usercontent");
+        }
+        UserIdentifier identifier = userService.getUserIdentifier(user.getId());
+        if( identifier == null || identifier.getIdentifierToken() == null){
+            response.setBindType(WxAuthBindPhoneType.NOT_BIND.getCode());
+        }else {
+            LOGGER.info("checkUserIdentifier success");
+            response.setBindType(WxAuthBindPhoneType.BIND.getCode());
+            response.setIdentifierToken(identifier.getIdentifierToken());
+            response.setRegionCode(identifier.getRegionCode());
+        }
+        return response;
+    }
+
 	private Map<String, String> getRequestParams(HttpServletRequest request) {
 	    Map<String, String> params = new HashMap<String, String>();
 	    Enumeration<String> em = request.getParameterNames();
@@ -481,12 +545,12 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         return namespaceId;
     }
     
-    private void processUserInfo(Integer namespaceId, HttpServletRequest request, HttpServletResponse response) {
+    private UserLogin processUserInfo(Integer namespaceId, HttpServletRequest request, HttpServletResponse response) {
         long startTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(userinfo calculate), startTime={}", startTime);
         }
-        
+
         String appId = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "");
         String secret = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_SECRET, "");
 
@@ -558,13 +622,116 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         	}
         	userService.updateUserCurrentCommunityToProfile(wxUser.getId(), Long.valueOf(communityId), wxUser.getNamespaceId());
         }
-        
+
+        LOGGER.info("UserContext user = {}", UserContext.current().getUser());
+
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(userinfo calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
+        return userLogin;
     }
-    
+
+    private CheckWxAuthIsBindPhoneResponse processUserInfoV2(Integer namespaceId, HttpServletRequest request, HttpServletResponse response, WxAuthCallBackCommand cmd) {
+        CheckWxAuthIsBindPhoneResponse checkWxAuthIsBindPhoneResponse = new CheckWxAuthIsBindPhoneResponse();
+        long startTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Process weixin auth request(userinfo calculate), startTime={}", startTime);
+        }
+
+        String appId = request.getParameter("appId");
+        String secret = request.getParameter("secret");
+
+        // 微信提供的临时code
+        String code = request.getParameter("code");
+
+        // 使用临时code从微信中换取accessToken
+        String accessTokenUri = String.format(WX_ACCESS_TOKEN_URL, appId, secret, code);
+        String accessTokenUriWithoutSecret = accessTokenUri.replaceAll("secret=" + secret, "secret=****");
+        String accessTokenJson = httpGet(accessTokenUri, accessTokenUriWithoutSecret);
+        WxAccessTokenInfo accessToken = (WxAccessTokenInfo)StringHelper.fromJsonString(accessTokenJson, WxAccessTokenInfo.class);
+        if (accessToken.getErrcode() != null) {
+            LOGGER.error("Failed to get access token from webchat, namespaceId={}, appId={}, accessToken={}, accessTokenUri={}",
+                    namespaceId, appId, accessTokenJson, accessTokenUriWithoutSecret);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Failed to get access token from webchat");
+        }
+
+        User wxUser = new User();
+        wxUser.setNamespaceId(namespaceId);
+        wxUser.setNamespaceUserType(NamespaceUserType.WX.getCode());
+        wxUser.setNamespaceUserToken(accessToken.getOpenid());
+
+        String scope = request.getParameter("scope");
+        //静默授权不用获取用户信息
+        if(scope != null && scope.equals("snsapi_base")){
+            wxUser.setNickName("unKnow");
+            wxUser.setGender(UserGender.UNDISCLOSURED.getCode());
+        }else {
+            // 获取用户信息
+            String userInfoUri = String.format(WX_USER_INFO_URL, accessToken.getAccess_token(), accessToken.getOpenid());
+            String userInfoJson = httpGet(userInfoUri, userInfoUri);
+            WxUserInfo userInfo = (WxUserInfo)StringHelper.fromJsonString(userInfoJson, WxUserInfo.class);
+            if (userInfo.getErrcode()!=null) {
+                LOGGER.error("Failed to get user information from webchat, namespaceId={}, appId={}, userInfo={}, userinfoUri={}",
+                        namespaceId, appId, userInfoJson, userInfoUri);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Failed to get user information from webchat");
+            }
+            wxUser.setNickName(userInfo.getNickname());
+            wxUser.setAvatar(userInfo.getHeadimgurl());
+            // 0: undisclosured, 1: male, 2: female 微信的值恰好与左邻的定义是一致的
+            UserGender gender = UserGender.fromCode(userInfo.getSex());
+            wxUser.setGender(gender.getCode());
+        }
+
+        wxUser = userService.signupByThirdparkUserByApp(wxUser, request);
+
+        //signupByThirdparkUser里面已经设置过一次了但是setDefaultCommunity有个问题，但是有一个问题setDefaultCommunity限定了对应的namespaceResource只能是1。
+        //add by yanjun 201805091940
+        userService.setDefaultCommunityForWx(wxUser.getId(), namespaceId);
+        checkRedirectUserIdentifierV2(checkWxAuthIsBindPhoneResponse,wxUser);
+        if (checkWxAuthIsBindPhoneResponse.getBindType() == WxAuthBindPhoneType.BIND.getCode()) {
+            UserLogin userLogin = userService.logonBythirdPartAppUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
+
+            // 添加CurrentUser用于后期，检查identifi add by yanjun 20170926
+            if(userLogin != null && userLogin.getUserId() != 0){
+                wxUser.setId(userLogin.getUserId());
+                UserContext.setCurrentUser(wxUser);
+                LoginToken token = new LoginToken(userLogin.getUserId(), userLogin.getLoginId(), userLogin.getLoginInstanceNumber(), userLogin.getImpersonationId());
+                String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+                WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response);
+                // 当从园区版登录时，有指定的namespaceId，需要对这些用户进行特殊处理
+                Integer ns = UserContext.getCurrentNamespaceId(namespaceId);
+                if(ns != null) {
+                    WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(ns), request, response);
+                    userService.setDefaultCommunity(userLogin.getUserId(), ns);
+                }
+                checkWxAuthIsBindPhoneResponse.setUid(userLogin.getUserId());
+                checkWxAuthIsBindPhoneResponse.setLoginToken(tokenString);
+                checkWxAuthIsBindPhoneResponse.setAccessPoints(listAllBorderAccessPoints());
+                checkWxAuthIsBindPhoneResponse.setContentServer(contentServerService.getContentServer());
+            }
+        }else {
+            LOGGER.info("wxUser={}",wxUser);
+            checkWxAuthIsBindPhoneResponse.setUid(wxUser.getId());
+        }
+
+        //by dengs,加个communityid参数，加到用户的eh_profiles中,2017.08.28
+        String communityId = request.getParameter(COMMUNITY);
+        if(wxUser.getId()!=null && communityId!=null){
+            try{
+                Long.valueOf(communityId);
+            }catch(Exception e){
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "unknown community = " + communityId);
+            }
+            userService.updateUserCurrentCommunityToProfile(wxUser.getId(), Long.valueOf(communityId), wxUser.getNamespaceId());
+        }
+
+        return checkWxAuthIsBindPhoneResponse;
+    }
+
     private String httpGet(String url, String safeUrl) {
         CloseableHttpClient httpclient = null;
         

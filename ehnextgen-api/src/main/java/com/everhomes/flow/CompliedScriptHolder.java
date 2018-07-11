@@ -34,6 +34,9 @@ public class CompliedScriptHolder {
             // compiledScriptMap.put(key, compiledScript);
 
             Object eval = compiledScript.eval();
+            if (eval == null) {
+                return;
+            }
             ScriptObjectMirror mirror = (ScriptObjectMirror) eval;
             scriptObjectMirrorMap.put(key, mirror);
         } catch (ScriptException e) {

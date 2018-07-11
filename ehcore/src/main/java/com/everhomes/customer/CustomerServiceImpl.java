@@ -9,6 +9,7 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -269,6 +270,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -297,6 +299,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -415,6 +418,9 @@ public class CustomerServiceImpl implements CustomerService {
     private BigCollectionProvider bigCollectionProvider;
 
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    @Value("${equipment.ip}")
+    private String equipmentIp;
 
 
     @Override
@@ -722,11 +728,18 @@ public class CustomerServiceImpl implements CustomerService {
         Organization org = organizationProvider.findOrganizationByName(customer.getName(), customer.getNamespaceId());
         if (org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo   postUri  hotline bannerUri
+            org.setStringTag1(customer.getCorpEmail());
             org.setWebsite(customer.getCorpWebsite());
             org.setUnifiedSocialCreditCode(customer.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(org);
             OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
             if (detail != null) {
+                detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
+                detail.setStringTag1(customer.getCorpEmail());
+                detail.setDescription(customer.getCorpDescription());
+                detail.setCheckinDate(customer.getCorpEntryDate());
+                detail.setPostUri(customer.getPostUri());
+                detail.setDisplayName(customer.getNickName());
                 detail.setAvatar(customer.getCorpLogoUri());
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
@@ -736,12 +749,18 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationProvider.updateOrganizationDetail(detail);
             } else {
                 detail = new OrganizationDetail();
-                detail.setOrganizationId(org.getId());
+                detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
+                detail.setStringTag1(customer.getCorpEmail());
+                detail.setDescription(customer.getCorpDescription());
+                detail.setCheckinDate(customer.getCorpEntryDate());
+                detail.setPostUri(customer.getPostUri());
+                detail.setDisplayName(customer.getNickName());
+                detail.setAvatar(customer.getCorpLogoUri());
                 detail.setAddress(customer.getContactAddress());
                 detail.setLatitude(customer.getLatitude());
                 detail.setLongitude(customer.getLongitude());
-                detail.setAvatar(customer.getCorpLogoUri());
-                detail.setCreateTime(org.getCreateTime());
+                detail.setPostUri(customer.getPostUri());
+                detail.setContact(customer.getHotline());
                 organizationProvider.createOrganizationDetail(detail);
             }
             addAttachments(org.getId(),customer.getBanner(),UserContext.currentUserId());
@@ -806,6 +825,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
         checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
+
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setCommunityId(customer.getCommunityId());
         updateCustomer.setOrganizationId(customer.getOrganizationId());
@@ -844,6 +864,13 @@ public class CustomerServiceImpl implements CustomerService {
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
+
+        // 判定跟进人是否进行了改变，如果改变了，那么应当在update操作完成后，去通知新的跟进人 by wentian at 2018/6/5
+        Long originalTrackingUid = customer.getTrackingUid();
+        String originalTrackingName = customer.getTrackingName();
+        Long currentTrackingUid = updateCustomer.getTrackingUid();
+        String currentTrackingName = updateCustomer.getTrackingName();
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, originalTrackingName, currentTrackingName, customer.getName(), null, false,cmd.getOrgId());
 
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
@@ -909,14 +936,74 @@ public class CustomerServiceImpl implements CustomerService {
         return convertToDTO(updateCustomer);
     }
 
+    private void routeMsgForTrackingChanged(Long originalTrackingUid, Long currentTrackingUid, String originalTrackingName, String currentTrackingName, String customerName, Integer namespaceId, boolean deleteCustomer,Long organizationId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("customerName", customerName);
+        map.put("originalTrackingName", originalTrackingName);
+        map.put("currentTrackingName", currentTrackingName);
+        if (deleteCustomer) {
+            routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_tracking_on_customer_delete, map, namespaceId);
+            return;
+        }
+        if (currentTrackingUid != null && !Objects.equals(currentTrackingUid, originalTrackingUid)) {
+            // to new tracking people
+            routeAppMsg(currentTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_new_tracking, map, namespaceId);
+        }
+        if (originalTrackingUid != null) {
+            if (currentTrackingUid != null && !Objects.equals(currentTrackingUid, originalTrackingUid)) {
+                // two messges should be sent to two seperate users
+                // to old tracking people
+                routeAppMsg(originalTrackingUid, CustomerNotification.scope, CustomerNotification.msg_to_old_tracking, map, namespaceId);
+            } else if (currentTrackingUid == null) {
+                // only one message sent to admin
+                // change route message to module admins modify by jiarui 20180702
+                ListServiceModuleAdministratorsCommand administratorsCommand = new ListServiceModuleAdministratorsCommand();
+                administratorsCommand.setModuleId(21100L);
+                administratorsCommand.setActivationFlag(ActivationFlag.YES.getCode());
+                administratorsCommand.setOrganizationId(organizationId);
+                administratorsCommand.setOwnerId(organizationId);
+                administratorsCommand.setOwnerType("EhOrganizations");
+                ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse = rolePrivilegeService.listServiceModuleAppsAdministrators(administratorsCommand);
+                List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
+                if (moduleAdmins != null && moduleAdmins.size() > 0) {
+                    moduleAdmins.forEach((r) -> routeAppMsg(r.getTargetId(), CustomerNotification.scope, CustomerNotification.msg_to_admin_no_candidate, map, namespaceId));
+                }
+            }
+        }
+    }
+
+    private void routeAppMsg(Long uid, String scope, Integer code, Map<String, Object> map, Integer namespaceId) {
+        try {
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), String.valueOf(uid)));
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+           String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId, scope, code, UserContext.current().getUser().getLocale(), map, "");
+            messageDto.setBody(notifyTextForApplicant);
+            messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+            if (!notifyTextForApplicant.trim().equals("")) {
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        String.valueOf(uid), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            LOGGER.error("TRACKING CHANGED SENDING APP MESSAGE FAILED");
+        }
+    }
+
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth) {
+        EnterpriseCustomer customer = new EnterpriseCustomer();
         if (checkAuth) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+            customer = checkEnterpriseCustomer(cmd.getId());
+        }else {
+            customer = enterpriseCustomerProvider.findById(cmd.getId());
+            if (customer == null) {
+                return;
+            }
         }
-
-        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
-        checkPrivilege(customer.getNamespaceId());
         //产品功能 #20796 同步过来的不能删
         if (NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
                 || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))) {
@@ -941,7 +1028,7 @@ public class CustomerServiceImpl implements CustomerService {
         //企业客户新增成功,保存客户事件
         saveCustomerEvent(2, customer, null,cmd.getDeviceType());
 
-        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
+        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0 && checkAuth) {
             Organization org = organizationProvider.findOrganizationById(customer.getOrganizationId());
             if (org != null && org.getId() != null) {
                 DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
@@ -949,6 +1036,8 @@ public class CustomerServiceImpl implements CustomerService {
                 organizationService.deleteEnterpriseById(command, false);
             }
         }
+        routeMsgForTrackingChanged(null, null, null, null
+                , customer.getName(), null, true, cmd.getOrgId());
 
     }
 
@@ -2333,6 +2422,7 @@ public class CustomerServiceImpl implements CustomerService {
                 command.setId(organization.getId());
                 command.setManageOrganizationId(cmd.getOrgId());
                 command.setEnterpriseId(cmd.getOrgId());
+                command.setCheckAuth(TrueOrFalseFlag.FALSE.getCode());
                 organizationService.deleteOrganization(command);
                 if (customer != null) {
                     customer.setOrganizationId(0L);
@@ -2443,21 +2533,26 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
-        if (entryInfos != null && entryInfos.size() > 0) {
-            return entryInfos.stream().map(entryInfo -> {
-                return convertCustomerEntryInfoDTO(entryInfo);
-            }).collect(Collectors.toList());
+        entryInfos = removeDuplicatedEntryInfo(entryInfos);
+        if (entryInfos.size() > 0) {
+            return entryInfos.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
         }
         return null;
+    }
+
+    private List<CustomerEntryInfo> removeDuplicatedEntryInfo(List<CustomerEntryInfo> entryInfos) {
+        Map<Long, CustomerEntryInfo> map = new HashMap<>();
+        if(entryInfos!=null && entryInfos.size()>0){
+            entryInfos.forEach((e)-> map.putIfAbsent(e.getAddressId(), e));
+        }
+        return new ArrayList<>(map.values());
     }
 
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         if (entryInfos != null && entryInfos.size() > 0) {
-            return entryInfos.stream().map(entryInfo -> {
-                return convertCustomerEntryInfoDTO(entryInfo);
-            }).collect(Collectors.toList());
+            return entryInfos.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
         }
         return null;
     }
@@ -2849,20 +2944,22 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     /**
-     * 每天早上2点20,自动客户合同信息
+     * 每天早上2点20,自动同步客户信息
      */
     @Scheduled(cron = "1 20 2 * * ?")
     public void customerAutoSync() {
-        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode() + System.currentTimeMillis(), "");
-        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
-        Map<String,String> runningMap  =new HashMap<>();
-        this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()).tryEnter(() -> {
-            String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
-            runningMap.put(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), runningFlag);
-            if(StringUtils.isBlank(runningFlag))
-            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), "executing", 5, TimeUnit.HOURS);
-        });
-        if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()))) {
+//        Accessor accessor = bigCollectionProvider.getMapAccessor(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode() + System.currentTimeMillis(), "");
+//        RedisTemplate redisTemplate = accessor.getTemplate(stringRedisSerializer);
+//        Map<String,String> runningMap  =new HashMap<>();
+//        this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()).tryEnter(() -> {
+//            String runningFlag = getSyncTaskToken(redisTemplate, CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode());
+//            runningMap.put(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), runningFlag);
+//            if(StringUtils.isBlank(runningFlag))
+//            redisTemplate.opsForValue().set(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode(), "executing", 5, TimeUnit.HOURS);
+//        });
+        String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+        if (taskServer.equals(equipmentIp)) {
+//        if(StringUtils.isEmpty(runningMap.get(CoordinationLocks.SYNC_THIRD_CUSTOMER.getCode()))) {
             List<Community> communities = communityProvider.listAllCommunitiesWithNamespaceToken();
             if (communities != null) {
                 for (Community community : communities) {
@@ -2872,7 +2969,6 @@ public class CustomerServiceImpl implements CustomerService {
                     syncEnterpriseCustomers(command, false);
                     syncIndividualCustomers(command);
                 }
-
             }
         }
     }
@@ -3119,6 +3215,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
         dto.setContentImgUriList(uriList);
         dto.setContentImgUrlList(urlList);
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(tracking.getTrackingUid());
+        if(members!=null && members.size()>0){
+            dto.setTrackingUidName(members.get(0).getContactName());
+        }else {
+            User user = userProvider.findUserById(tracking.getTrackingUid());
+            if(user!=null){
+                dto.setTrackingUidName(user.getNickName());
+            }
+        }
         return dto;
     }
 
@@ -3149,6 +3254,18 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_DELETE, cmd.getOrgId(), cmd.getCommunityId());
         CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
         enterpriseCustomerProvider.deleteCustomerTracking(tracking);
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        if (customer != null) {
+            List<CustomerTracking> customerTrackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(customer.getId());
+            if (customerTrackings != null && customerTrackings.size() > 0) {
+                customer.setLastTrackingTime(customerTrackings.get(0).getTrackingTime());
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+//                enterpriseCustomerSearcher.feedDoc(customer);
+            }else {
+                customer.setLastTrackingTime(null);
+                enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            }
+        }
     }
 
     @Override
@@ -3263,8 +3380,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType) {
-        enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist,deviceType);
+    public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist, Byte deviceType) {
+        enterpriseCustomerProvider.saveCustomerEvent(i, customer, exist, deviceType);
     }
 
     @Override
@@ -3313,15 +3430,19 @@ public class CustomerServiceImpl implements CustomerService {
 
         }
     }
-
     @Override
     public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
         //checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         EnterpriseCustomer exist = enterpriseCustomerProvider.findById(cmd.getId());
+        Long originalTrackingUid = exist.getTrackingUid();
+        String orignalTrackingName = exist.getTrackingName();
+        Long currentTrackingUid = cmd.getTrackingUid();
+        String currentTrackingName = null;
         customer.setTrackingUid(cmd.getTrackingUid());
         if (cmd.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
+            currentTrackingName = detail.getContactName();
             if (null != detail && null != detail.getContactName()) {
                 customer.setTrackingName(detail.getContactName());
             }
@@ -3330,11 +3451,17 @@ public class CustomerServiceImpl implements CustomerService {
         saveCustomerEvent(3, customer, exist,cmd.getDeviceType());
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, orignalTrackingName, currentTrackingName,
+                customer.getName(), null, false, cmd.getOrgId());
     }
 
     @Override
     public void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        Long originalTrackingUid = customer.getTrackingUid();
+        String orignalTrackingName = customer.getTrackingName();
+        Long currentTrackingUid = null;
+        String currentTrackingName = null;
         //查看当前用户是否和跟进人一致
         if (null == customer.getTrackingUid() || !(customer.getTrackingUid().toString()).equals(UserContext.currentUserId() == null ? "" : UserContext.currentUserId().toString())) {
             LOGGER.error("enterprise customer do not contains trackingUid or not the same uid. id: {}, customer: {} ,current:{}", cmd.getId(), customer, UserContext.currentUserId());
@@ -3345,6 +3472,8 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setTrackingName(null);
         enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+        routeMsgForTrackingChanged(originalTrackingUid, currentTrackingUid, orignalTrackingName, currentTrackingName,
+                customer.getName(), null, false, cmd.getOrgId());
     }
 
     @Override
@@ -3571,8 +3700,8 @@ public class CustomerServiceImpl implements CustomerService {
             });
         }
         Map<Long, OrganizationMemberDTO> memberDTOMap = new HashMap<>();
-        if(members!=null && members.size()>0){
-            members.forEach((r)->{
+        if (members != null && members.size() > 0) {
+            members.forEach((r) -> {
                 memberDTOMap.putIfAbsent(r.getTargetId(), r);
             });
         }
@@ -3626,7 +3755,7 @@ public class CustomerServiceImpl implements CustomerService {
                 Organization organization =  organizationProvider.findOrganizationById(r.getOrganizationId());
                 if(organization!=null){
                     r.setDepartmentName(organization.getName());
-                }else {
+                } else {
                     r.setDepartmentName("");
                 }
             });

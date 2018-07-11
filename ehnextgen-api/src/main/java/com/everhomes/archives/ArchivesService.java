@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,6 @@ public interface ArchivesService {
     void deleteArchivesContacts(DeleteArchivesContactsCommand cmd);
 
     void stickArchivesContact(StickArchivesContactCommand cmd);
-
-//    ArchivesContactDTO getArchivesContact(ArchivesIdCommand cmd);
 
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
 
@@ -44,6 +43,8 @@ public interface ArchivesService {
     void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
+
+    void addArchivesLog(AddArchivesLogCommand cmd);
 
     //  获取员工的部门
     Map<Long, String> getEmployeeDepartment(Long detailId);
@@ -66,27 +67,33 @@ public interface ArchivesService {
 
     GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd);
 
-    List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId);
+//    List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId);
 
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
+
+//    void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
+
+//    void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd);
+
+//    void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
+
+    void deleteArchivesDismissEmployees(Long detailId, Long organizationId);
+
+    void deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd);
 
     void executeArchivesConfiguration();
 
     void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd);
 
-    void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
-
     void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd);
-
-    void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd);
 
     void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd);
 
-    void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
+    CheckOperationResponse checkArchivesOperation(CheckOperationCommand cmd);
 
-    void deleteArchivesDismissEmployees(Long detailId, Long organizationId);
+    ListDismissCategoriesResponse listArchivesDismissCategories();
 
-    void deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd);
+    ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 
     GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
 
@@ -108,11 +115,12 @@ public interface ArchivesService {
 
     void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
 
-    void ArchivesNotificationConfig(ArchivesNotificationCommand cmd);
+    void setArchivesNotification(ArchivesNotificationCommand cmd);
 
-//    void initArchivesNotification();
+//    void runArchivesNotificationCycle();
 
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
-//    void syncArchivesDismissStatus();
+    void syncArchivesConfigAndLogs();
+
 }

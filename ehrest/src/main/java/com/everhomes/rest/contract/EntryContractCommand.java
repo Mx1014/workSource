@@ -4,6 +4,7 @@ package com.everhomes.rest.contract;
  * <ul>
  *     <li>id: 合同id</li>
  *     <li>partyAId: 合同甲方id</li>
+ *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/2.
  */
@@ -18,8 +19,18 @@ public class EntryContractCommand {
     private Long communityId;
 
     private Integer namespaceId;
+    
+    private Byte contractApplicationScene = 0;
 
-    public Long getId() {
+    public Byte getContractApplicationScene() {
+		return contractApplicationScene;
+	}
+
+	public void setContractApplicationScene(Byte contractApplicationScene) {
+		this.contractApplicationScene = contractApplicationScene;
+	}
+
+	public Long getId() {
         return id;
     }
 

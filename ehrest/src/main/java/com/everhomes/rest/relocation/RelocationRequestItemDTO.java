@@ -13,8 +13,10 @@ public class RelocationRequestItemDTO {
     private String itemName;
     private Integer itemQuantity;
 
-    @ItemType(AttachmentDescriptor.class)
-    private List<AttachmentDescriptor> attachments;
+//    @ItemType(AttachmentDescriptor.class)
+//    private List<AttachmentDescriptor> attachments;
+
+    private AttachmentDescriptor attachment;
 
     public String getItemName() {
         return itemName;
@@ -32,12 +34,21 @@ public class RelocationRequestItemDTO {
         this.itemQuantity = itemQuantity;
     }
 
-    public List<AttachmentDescriptor> getAttachments() {
-        return attachments;
+//    public List<AttachmentDescriptor> getAttachments() {
+//        return attachments;
+//    }
+//
+//    public void setAttachments(List<AttachmentDescriptor> attachments) {
+//        this.attachments = attachments;
+//    }
+
+
+    public AttachmentDescriptor getAttachment() {
+        return attachment;
     }
 
-    public void setAttachments(List<AttachmentDescriptor> attachments) {
-        this.attachments = attachments;
+    public void setAttachment(AttachmentDescriptor attachment) {
+        this.attachment = attachment;
     }
 
     @Override

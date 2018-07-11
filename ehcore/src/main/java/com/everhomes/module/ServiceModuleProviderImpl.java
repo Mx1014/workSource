@@ -18,11 +18,14 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhReflectionServiceModuleAppsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentRelationsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleExcludeFunctionsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
+import org.apache.tools.ant.taskdefs.condition.And;
 import org.jooq.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -809,4 +812,43 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         });
         return results;
     }
+
+	@Override
+	public void deleteServiceModuleFromBlack(Long Id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleExcludeFunctions.class));
+        EhServiceModuleExcludeFunctionsDao dao = new EhServiceModuleExcludeFunctionsDao(context.configuration());
+        //dao.deleteById(Id);
+        dao.deleteById(Id);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, ServiceModuleExcludeFunction.class, Id);
+		
+	}
+
+	@Override
+	public Long getServiceModuleFromBlackId(Integer namespaceId, Long functionId) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.ID).from(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS)
+        		.where(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.NAMESPACE_ID.eq(namespaceId).and(Tables.EH_SERVICE_MODULE_EXCLUDE_FUNCTIONS.FUNCTION_ID.eq(functionId))).fetchOne().value1();
+		
+	}
+
+	@Override
+	public void createServiceModuleExcludeFunction(ServiceModuleExcludeFunction serviceModuleExcludeFunction) {
+		
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhServiceModuleExcludeFunctions.class));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		
+		EhServiceModuleExcludeFunctionsDao dao = new EhServiceModuleExcludeFunctionsDao(context.configuration());
+
+		serviceModuleExcludeFunction.setId(id);
+		/*parkingLot.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		parkingLot.setCreatorUid(UserContext.currentUserId());*/
+
+		dao.insert(serviceModuleExcludeFunction);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleExcludeFunctions.class, id);
+		
+	}
 }

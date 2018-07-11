@@ -452,6 +452,24 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
+     * <b>URL: /aclink/listBusAccessQRKey</b>
+     * <p>列出所有巴士二维码列表 </p>
+     * @return
+     */
+    @RequestMapping("listBusAccessQRKey")
+    @RestReturn(value=ListDoorAccessQRKeyResponse.class)
+    public RestResponse listBusAccessQRKey() {
+    	RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.listBusAccessQRKey());
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
      * <b>URL: /aclink/listDoorAccessWebQRKey</b>
      * <p>列出所有二维码门禁列表 </p>
      * @return
@@ -461,12 +479,13 @@ public class AclinkController extends ControllerBase {
     public RestResponse listDoorAccessWebQRKey() {
         RestResponse response = new RestResponse();
         
-        response.setResponseObject(doorAccessService.listDoorAccessQRKeyAndGenerateQR(true));
+        response.setResponseObject(doorAccessService.listDoorAccessQRKeyAndGenerateQR(null, true));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+    
     
     /**
      * 

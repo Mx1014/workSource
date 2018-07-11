@@ -11,6 +11,4 @@ public interface NashornEngineService {
     void push(NashornScript<?> script);
 
     ScriptObjectMirror getScriptObjectMirror(Long scriptMainId, Integer scriptVersion, NashornScript<?> script);
-
-    CompliedScriptHolder getCompliedScriptHolder();
 }

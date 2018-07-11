@@ -119,7 +119,7 @@ public class UserProviderImpl implements UserProvider {
     
     public UserProviderImpl() {
     }
-    
+
     @Override
     public void createUser(User user) {
         // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
@@ -480,6 +480,13 @@ public class UserProviderImpl implements UserProvider {
         return null;
     }
 
+    @Override
+    public String getNickNameByUid(Long creatorUid) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_USERS.NICK_NAME)
+                .from(Tables.EH_USERS).where(Tables.EH_USERS.ID.eq(creatorUid))
+                .fetchOne(Tables.EH_USERS.NICK_NAME);
+    }
+
 
     /**
      * 根据域空间id和注册的手机号来查询对应的注册信息
@@ -561,6 +568,34 @@ public class UserProviderImpl implements UserProvider {
             .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
             .fetchAny();
         return ConvertHelper.convert(record, UserIdentifier.class);
+    }
+
+    @Override
+    public UserIdentifier findClaimingIdentifierByToken(Integer namespaceId, String identifierToken) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())
+                            .or(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.VERIFYING.getCode())))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+
+        if(result.size() == 1)
+            return result.get(0);
+        else if(result.size() > 1) {
+            LOGGER.warn(String.format("%s has been claimed by multiple users", identifierToken));
+            return result.get(0);
+        }
+
+        return null;
     }
 
     @Override
@@ -1939,24 +1974,22 @@ public class UserProviderImpl implements UserProvider {
 		com.everhomes.server.schema.tables.EhUserIdentifiers token = Tables.EH_USER_IDENTIFIERS.as("token");
 		com.everhomes.server.schema.tables.EhUsers user = Tables.EH_USERS.as("user");
 
-		TargetDTO targetDTO = new TargetDTO();
-		context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user).leftOuterJoin(token)
-				.on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID))).where(user.ID.eq(userId))
-				.fetchOne().map(r -> {
-					targetDTO.setTargetName(r.getValue(user.NICK_NAME));
-					targetDTO.setTargetType("eh_user");
-					targetDTO.setTargetId(r.getValue(user.ID));
-					targetDTO.setUserIdentifier(r.getValue(token.IDENTIFIER_TOKEN));
-					return null;
-				});
-
-		if (!userId.equals(targetDTO.getTargetId())) {
+		Record3<String, Long, String> ret = 
+				context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user)
+				.leftOuterJoin(token).on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID)))
+				.where(user.ID.eq(userId))
+				.fetchOne();
+		
+		if (null == ret) {
 			return null;
 		}
+		
+		TargetDTO targetDTO = new TargetDTO();
+		targetDTO.setTargetName(ret.getValue(user.NICK_NAME));
+		targetDTO.setTargetType("eh_user");
+		targetDTO.setTargetId(ret.getValue(user.ID));
+		targetDTO.setUserIdentifier(ret.getValue(token.IDENTIFIER_TOKEN));
 
 		return targetDTO;
 	}
-
-    
-
 }

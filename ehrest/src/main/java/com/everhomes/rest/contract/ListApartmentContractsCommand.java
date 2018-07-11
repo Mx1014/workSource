@@ -14,8 +14,17 @@ public class ListApartmentContractsCommand {
     private Long communityId;
 
     private Long addressId;
+    private Long categoryId;
 
-    public Long getAddressId() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Long getAddressId() {
         return addressId;
     }
 

@@ -44,7 +44,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final String GET_PARKINGS = "/api/find/GetParkingLotList";
 	private static final String GET_FREE_SPACE_NUM = "/api/find/GetFreeSpaceNum";
 	private static final String GET_CAR_LOCATION = "/api/find/GetCarLocInfo";
-	private static final String GET_PARKING_CAR_INFO = "/api/wec/GetParkingCarInfo";
+//	private static final String GET_PARKING_CAR_INFO = "/api/wec/GetParkingCarInfo";
+	private static final String GET_FUZZY_CAR_INFO = "/api/pay/GetFuzzyCarInfo";
 	private static final String ADD_MONTH_CARD = "/api/card/AddMonthCarCardNo_KX";
 	//科兴的需求，充值过期的月卡时，需要计算费率，标记为自定义custom的费率，其他停车场不建议做这样的功能。
 	private static final String EXPIRE_CUSTOM_RATE_TOKEN = "custom_expired";
@@ -187,8 +188,16 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 					//查询车在场信息，来判断车是否在场
 					KetuoCarInfo carInfo = getKetuoCarInfo(plateNumber);
+					Long lEntryTime = null;
 					if (null != carInfo) {
-						long entryTime = strToLong(carInfo.getEntryTime());
+						try {
+							lEntryTime = carInfo.getlEntryTime();
+						} catch (Exception e) {
+							LOGGER.error("format EntryTime failed, entryTime = {}",carInfo.getEntryTime(),e);
+							throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+									"格式转换失败");
+						}
+						long entryTime = lEntryTime;
 						//车进场时间
 						Calendar entryCalendar = Calendar.getInstance();
 						entryCalendar.setTimeInMillis(entryTime);
@@ -242,7 +251,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 					ParkingRechargeRateDTO rateDTO = convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
 					dto = ConvertHelper.convert(rateDTO, ParkingExpiredRechargeInfoDTO.class);
-
+					dto.setEntryTime(lEntryTime);
 					dto.setStartPeriod(startPeriod);
 
 					dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getLastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
@@ -285,6 +294,22 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		String plateNumber = order.getPlateNumber();
 
 		KetuoCard cardInfo = getCard(plateNumber);
+
+		//控制月卡过期超过了设定时间则不可下预付单
+		if(null == cardInfo) {
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+					"未查询到月卡");
+		}
+		String expireDate = cardInfo.getValidTo();
+		checkExpireDateIsNull(expireDate, plateNumber);
+		long expireTime = strToLong(expireDate);
+		ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
+		setCardStatus(parkingLot, expireTime, parkingCardDTO);
+		ParkingCardStatus cardStatus = ParkingCardStatus.fromCode(parkingCardDTO.getCardStatus());
+		if(cardStatus==ParkingCardStatus.EXPIRED){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+					"此月卡已超过最大过期时间，不可充值");
+		}
 
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(order.getRateToken())) {
 			List<KetuoCardType> types = getCardType();
@@ -421,7 +446,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		Long expireTime = strToLong(oldValidEnd);
 
 		//计算免费金额
-		Integer freeMoney = card.getFreeMoney() * tempOrder.getMonthCount().intValue();
+		Integer freeMoney = (card.getFreeMoney()==null?0:card.getFreeMoney()) * tempOrder.getMonthCount().intValue();
 		//充值月数
 		int ruleAmount = tempOrder.getMonthCount().intValue();
 		//计算充值  有效期的 月数，正常充值时取ruleAmount，
@@ -429,7 +454,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 //		if(expireTime < now) {
 //
 //		}
-
+		long calStarttime=expireTime;//计算传给科拓结束时间的起始时间
+		long startTime=expireTime;//传给科拓的起始时间
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(tempOrder.getRateToken())) {
 			ParkingLot parkingLot = parkingProvider.findParkingLotById(tempOrder.getParkingLotId());
 
@@ -443,14 +469,45 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 				addMonthCount -= 1;
 			}
 
-			//当卡过期时，后台设置支持充值时，充值时间从今天开始（不论当前车是否在停车场，只是计算费用不同而已，
-			// 参见 getExpiredRate方法计算过期费用，需求6.0 rp）
-			String date = sdf2.format(new Date(now)) + " 00:00:00";
+//			//当卡过期时，后台设置支持充值时，充值时间从今天开始（不论当前车是否在停车场，只是计算费用不同而已，
+//			// 参见 getExpiredRate方法计算过期费用，需求6.0 rp）
+//			String date = sdf2.format(new Date(now)) + " 00:00:00";
+			/*过期车辆续充月卡时，有效开始时间的计算逻辑有问题，导致用户交了月卡费用，又交了临时费用，按照以下逻辑修改，尽快上线：
+当月卡已过期，且没有超过最多过期时间，设置了过期需要续充1个月时（例如今天时6月15日，续充1个月到6月底，续充2个月到7月底，以下说明以设置了1个月为例）
+1.车辆在场，判断他的入场时间是早于上一个有效截止日期，补交截止日期到当前月的费用。（例：车辆从1月份一直在场，之前的有效期到3月31日，今天6月15日出场，客户补缴4－6月3个月的费用，我们传给科托的车牌有效期4.1－6.30）
+2.车辆在场，入场时间晚于截止日期，就从入场那天开始算。（例：之前的有效期到3月31日，今天6月15日，今天充值，入场时间是4月15日，那新的有效期是4月15日0点到6月30日23点59分59秒
+3.车辆不在场，过期月卡充值，从今天的0点到月底，充一个月的费用（例：今天充，从6.15日0点到6.30日23:59分）参考issue31744*/
+			//判定传给科拓的开始时间--start
+			String strStartTime = sdf2.format(new Date(now)) + " 00:00:00";
+			//查询车在场信息，来判断车是否在场
+			KetuoCarInfo carInfo = getKetuoCarInfo(plateNumber);
+			if (null != carInfo) {
+				Long lEntryTime = null;
+				try {
+					lEntryTime = carInfo.getlEntryTime();
+				} catch (Exception e) {
+					LOGGER.error("format EntryTime failed, entryTime = {}",carInfo.getEntryTime(),e);
+					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+							"格式转换失败");
+				}
+				long entryTime = lEntryTime;
+				//车进场时间
+				Calendar entryCalendar = Calendar.getInstance();
+				entryCalendar.setTimeInMillis(entryTime);
+
+				if (entryTime <= expireTime) {
+					strStartTime = sdf1.format(new Date(expireTime));
+				}else if(entryTime > expireTime) {
+					strStartTime = sdf2.format(new Date(entryTime-24*3600*1000))+ " 23:59:59";
+				}
+			}
+			//判定传给科拓的开始时间--end
 			try {
 				//下面的Utils.addSecond方法会统一加一秒，所以这里减一秒时间
-				expireTime = sdf1.parse(date).getTime() - 1000L;
+				calStarttime = sdf1.parse(sdf2.format(new Date(now)) + " 00:00:00").getTime();
+				startTime = sdf1.parse(strStartTime).getTime();
 			} catch (ParseException e) {
-				LOGGER.info("date={}, time={}", date, expireTime, e);
+				LOGGER.info("strStartTime={},now={}, expireTime={}", strStartTime,now, expireTime, e);
 			}
 
 			if(parkingLot.getExpiredRechargeType() == ParkingCardExpiredRechargeType.ACTUAL.getCode()) {
@@ -465,8 +522,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		}
 
 		//计算月卡充值有效期
-		Timestamp tempStart = Utils.addSecond(expireTime, 1);
-		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, addMonthCount);
+		Timestamp tempStart = Utils.addSecond(startTime, 1);
+		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(calStarttime, addMonthCount);
 		String validStart = sdf1.format(tempStart);
 		String validEnd = sdf1.format(tempEnd);
 
@@ -770,19 +827,26 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			String url = configProvider.getValue("parking.kexing.searchCar.url", "");
 
 			LinkedHashMap<String, Object> param = new LinkedHashMap<>();
-			param.put("parkId", parkingId);
+//			param.put("parkId", parkingId);
 			param.put("plateNo", plateNumber);
 			param.put("pageIndex", "1");
+			param.put("pageSize", "1");
 
 			JSONObject params = createRequestParam(param);
-			String json = Utils.post(url + GET_PARKING_CAR_INFO, params);
+//			String json = Utils.post(url + GET_FUZZY_CAR_INFO, params);
+			String json = post(params,GET_FUZZY_CAR_INFO);
 
 			KetuoJsonEntity<KetuoCarInfo> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCarInfo>>(){});
 
 			if(entity.isSuccess()){
 				List<KetuoCarInfo> list = entity.getData();
 				if(null != list && !list.isEmpty()) {
-					carInfo = list.get(0);
+					for (KetuoCarInfo ketuoCarInfo : list) {
+						if(plateNumber.equalsIgnoreCase(ketuoCarInfo.getPlateNo())){
+							carInfo = ketuoCarInfo;
+							break;
+						}
+					}
 				}
 			}
 		}catch (Exception e){

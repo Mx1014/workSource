@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.*;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.util.RequireAuthentication;
 
+import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Decoder;
 
 @RestDoc(value="print controller", site="print")
@@ -284,6 +287,21 @@ public class SiYinPrintController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /siyinprint/notifySiyinprintOrderPaymentV2</b>
+	 * <p>17.1.支付回调订单</p>
+	 */
+	@RequestMapping("notifySiyinprintOrderPaymentV2")
+	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
+	public RestResponse notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+		siyinPrintService.notifySiyinprintOrderPaymentV2(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	 
 	 /**
 	  * <b>URL: /siyinprint/listPrintingJobs</b>
@@ -395,4 +413,73 @@ public class SiYinPrintController extends ControllerBase {
 	     response.setErrorDescription("OK");
 	     return response;
 	 }
+
+	/**
+	 * <b>URL: /siyinprint/listPayeeAccount </b>
+	 * <p>获取收款方账号</p>
+	 */
+	@RequestMapping("listPayeeAccount")
+	@RestReturn(value=ListBizPayeeAccountDTO.class,collection = true)
+	public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
+
+		RestResponse response = new RestResponse(siyinPrintService.listPayeeAccount(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /siyinprint/createOrUpdateBusinessPayeeAccount </b>
+	 * <p>关联收款方账号到具体业务</p>
+	 */
+	@RequestMapping("createOrUpdateBusinessPayeeAccount")
+	@RestReturn(value=String.class)
+	public RestResponse createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
+
+        siyinPrintService.createOrUpdateBusinessPayeeAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /siyinprint/getBusinessPayeeAccount </b>
+	 * <p>获取已关联收款账号的业务</p>
+	 */
+	@RequestMapping("getBusinessPayeeAccount")
+	@RestReturn(value=BusinessPayeeAccountDTO.class)
+	public RestResponse getBusinessPayeeAccount(ListBusinessPayeeAccountCommand cmd) {
+
+		RestResponse response = new RestResponse(siyinPrintService.getBusinessPayeeAccount(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /siyinprint/initPayeeAccount </b>
+	 * <p>将老的账户初始化到账号表</p>
+	 */
+	@RequestMapping("initPayeeAccount")
+	@RestReturn(value=String.class)
+	public RestResponse initPayeeAccount(@RequestParam("attachment") MultipartFile[] files) {
+		siyinPrintService.initPayeeAccount(files);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 *
+	 * <b>URL: /siyinprint/mfpLogNotificationV2</b>
+	 * <p>21.司印方调用，任务日志处理</p>
+	 */
+	@RequestMapping("mfpLogNotificationV2")
+	@RequireAuthentication(false)
+	public void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response){
+		siyinPrintService.mfpLogNotificationV2(cmd,response);
+	}
 }

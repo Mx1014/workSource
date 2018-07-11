@@ -92,4 +92,6 @@ public interface FlowListenerManager {
     void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates);
 
 	void onFlowStateChanged(Flow flow);
+
+    void onFlowStateChanging(Flow flow);
 }

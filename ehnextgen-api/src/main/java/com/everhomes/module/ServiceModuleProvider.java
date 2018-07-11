@@ -108,4 +108,10 @@ public interface ServiceModuleProvider {
     List<ServiceModuleFunction> listFunctions(Long moduleId, List<Long> privilegeIds);
     List<ServiceModuleFunction> listFunctionsByIds(List<Long> ids);
     List<ServiceModuleExcludeFunction> listExcludeFunctions(Integer namespaceId, Long comunityId, Long moduleId);
+
+	void deleteServiceModuleFromBlack(Long Id);
+
+	Long getServiceModuleFromBlackId(Integer namespaceId, Long moduleId);
+
+	void createServiceModuleExcludeFunction(ServiceModuleExcludeFunction serviceModuleExcludeFunction);
 }

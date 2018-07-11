@@ -1,70 +1,150 @@
 package com.everhomes.pmtask;
 
-import java.io.*;
-import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
-import com.everhomes.core.AppConfig;
-import com.everhomes.family.Family;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
-import com.everhomes.flow.*;
+import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowNodeProvider;
+import com.everhomes.flow.FlowService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.module.ServiceModuleService;
-import com.everhomes.namespace.*;
-import com.everhomes.organization.*;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceDetail;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.*;
-import com.everhomes.rest.blacklist.BlacklistErrorCode;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
-import com.everhomes.rest.flow.*;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.officecubicle.OfficeOrderWorkFlowStatus;
-import com.everhomes.rest.organization.*;
-
-import com.everhomes.rest.pmtask.*;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.organization.OrgAddressDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.pmtask.CategoryStatisticsDTO;
+import com.everhomes.rest.pmtask.CategoryTaskStatisticsDTO;
+import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
+import com.everhomes.rest.pmtask.CreateTaskCommand;
+import com.everhomes.rest.pmtask.CreateTaskHistoryAddressCommand;
+import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
+import com.everhomes.rest.pmtask.DeleteTaskHistoryAddressCommand;
+import com.everhomes.rest.pmtask.EbeiPmTaskStatus;
+import com.everhomes.rest.pmtask.EvaluateScoreDTO;
+import com.everhomes.rest.pmtask.ExportTasksCardCommand;
+import com.everhomes.rest.pmtask.GetIfHideRepresentCommand;
+import com.everhomes.rest.pmtask.GetIfHideRepresentResponse;
+import com.everhomes.rest.pmtask.GetNamespaceHandlerCommand;
+import com.everhomes.rest.pmtask.GetStatisticsCommand;
+import com.everhomes.rest.pmtask.GetStatisticsResponse;
+import com.everhomes.rest.pmtask.GetTaskDetailCommand;
+import com.everhomes.rest.pmtask.GetTaskStatCommand;
+import com.everhomes.rest.pmtask.GetUserRelatedAddressByCommunityResponse;
+import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
+import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+import com.everhomes.rest.pmtask.ListOrganizationCommunityBySceneTokenCommand;
+import com.everhomes.rest.pmtask.ListOrganizationCommunityBySceneTokenResponse;
+import com.everhomes.rest.pmtask.ListOrganizationCommunityByUserCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
+import com.everhomes.rest.pmtask.ListUserTasksCommand;
+import com.everhomes.rest.pmtask.ListUserTasksResponse;
+import com.everhomes.rest.pmtask.NamespaceHandlerDTO;
+import com.everhomes.rest.pmtask.NotifyTaskResultCommand;
+import com.everhomes.rest.pmtask.PmTaskAddressType;
+import com.everhomes.rest.pmtask.PmTaskAppType;
+import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
+import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
+import com.everhomes.rest.pmtask.PmTaskHistoryAddressDTO;
+import com.everhomes.rest.pmtask.PmTaskHistoryAddressStatus;
+import com.everhomes.rest.pmtask.PmTaskOwnerType;
+import com.everhomes.rest.pmtask.PmTaskSourceType;
+import com.everhomes.rest.pmtask.PmTaskStatDTO;
+import com.everhomes.rest.pmtask.PmTaskStatSubDTO;
+import com.everhomes.rest.pmtask.SearchOrgTasksCommand;
+import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
+import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
+import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
+import com.everhomes.rest.pmtask.SearchTasksByOrgCommand;
+import com.everhomes.rest.pmtask.SearchTasksByOrgDTO;
+import com.everhomes.rest.pmtask.SearchTasksCommand;
+import com.everhomes.rest.pmtask.SearchTasksResponse;
+import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
+import com.everhomes.rest.pmtask.TaskRemarkSource;
+import com.everhomes.rest.pmtask.TaskStatisticsDTO;
+import com.everhomes.rest.pmtask.UpdateTaskCommand;
+import com.everhomes.rest.pmtask.UpdateTasksStatusCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.user.*;
-import com.everhomes.util.DateHelper;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,31 +153,39 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
@@ -1729,7 +1817,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //
 //		List<OrganizationMember> organizationMembers = new ArrayList<>();
 //		for(PmTaskTarget t: targets) {
-//			OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(t.getTargetId(), cmd.getOrganizationId());
+//			OrganizationMember m = organizationProvider.findOrganizationMemberByUIdAndOrgId(t.getTargetId(), cmd.getOrganizationId());
 //			if(null != m)
 //				organizationMembers.add(m);
 //		}
@@ -2191,7 +2279,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<OrgAddressDTO> addressDTOs = convertAddress(organizations, communityId);
 			//选一个公司获得通讯录名字
 			if (organizations.size()>0){
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),organizations.get(0).getId());
+				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(),organizations.get(0).getId());
 				response.setUserName(member.getContactName());
 			}
 			response.setOrganizationList(addressDTOs);
@@ -2507,6 +2595,76 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		return handler.getThirdTaskDetail(req);
+	}
+	// 查找报修公司的报修记录, 对接不查
+	@Override
+	public List<SearchTasksByOrgDTO> listTasksByOrg(SearchTasksByOrgCommand cmd17) {
+		List<SearchTasksByOrgDTO> ret = new ArrayList<>();
+		List<PmTask> list = pmTaskProvider.findTasksByOrg(cmd17.getCommunityId(), cmd17.getNamespaceId(), cmd17.getOrganizationId(),null);
+		for(PmTask task : list){
+			SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
+			dto.setBuildingName(task.getBuildingName());
+			dto.setCreateTime(task.getCreateTime());
+			dto.setRequestorName(task.getRequestorName());
+			dto.setRequestorPhone(task.getRequestorPhone());
+			if(task.getStatus()==1){
+				dto.setStatus("待处理");
+			}else if(task.getStatus()==2){
+				dto.setStatus("处理中");
+			} else if (task.getStatus() == 3) {
+				dto.setStatus("已取消");
+			} else if (task.getStatus() == 4) {
+				dto.setStatus("已完成");
+			}
+			dto.setTaskCategoryName(categoryProvider.findCategoryById(task.getTaskCategoryId()).getName());
+			dto.setContent(task.getContent());
+			if (task.getOrganizationUid() == null || task.getOrganizationUid() == 0) {
+				dto.setPmTaskSource("用户发起");
+			} else {
+				dto.setPmTaskSource("员工代发");
+			}
+
+			ret.add(dto);
+		}
+		return ret;
+	}
+
+	@Override
+	public List<SearchTasksByOrgDTO> searchOrgTasks(SearchOrgTasksCommand cmd) {
+		List<SearchTasksByOrgDTO> ret = new ArrayList<>();
+		List<PmTask> list = pmTaskProvider.findTasksByOrg(cmd.getCommunityId(),cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getTaskCategoryId());
+		if (list != null && list.size() > 0) {
+			list.forEach(r -> {
+				SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
+				if(r.getStatus()==1){
+					dto.setStatus("待处理");
+				}else if(r.getStatus()==2){
+					dto.setStatus("处理中");
+				}else if(r.getStatus()==3){
+					dto.setStatus("已取消");
+				}else if(r.getStatus()==4){
+					dto.setStatus("已完成");
+				}
+
+				dto.setRequestorPhone(r.getRequestorPhone());
+				dto.setRequestorName(r.getRequestorName());
+				if (r.getOrganizationUid() == null || r.getOrganizationUid() == 0) {
+					dto.setPmTaskSource("用户发起");
+				} else {
+					dto.setPmTaskSource("员工代发");
+				}
+				dto.setCreateTime(r.getCreateTime());
+				dto.setBuildingName(r.getBuildingName());
+				Category category = categoryProvider.findCategoryById(r.getCategoryId());
+				if (category != null) {
+					dto.setTaskCategoryName(category.getName());
+				}
+				dto.setContent(r.getContent());
+				dto.setFlowCaseId(r.getFlowCaseId());
+				ret.add(dto);
+			});
+		}
+		return ret;
 	}
 
 	public static String computeSignature(Map<String, String> params, String secretKey) {

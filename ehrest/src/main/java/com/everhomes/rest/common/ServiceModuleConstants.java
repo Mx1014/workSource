@@ -18,11 +18,12 @@ public interface ServiceModuleConstants {
     long NEWS_MODULE = 10800L;
 
     long ENTERPRISE_CUSTOMER_MODULE = 21100L;
-    long CONTRACT_MODULE = 21200L;
+    long CONTRACT_MODULE = 21200L; // 合同管理模块
     long ENERGY_MODULE = 49100L;
     long PAYMENT_APPLICATION_MODULE = 21300L;
     long ORGANIZATION_MODULE = 33000L;
     long LEASE_PROJECT_MODULE = 40100L;
     long PARKING_MODULE = 40800L;
+    long ASSET_MODULE = 20400L;
 
 }

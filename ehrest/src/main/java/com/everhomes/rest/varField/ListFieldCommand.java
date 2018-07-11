@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>communityId: 项目id</li>
  *     <li>moduleName: 模块名</li>
  *     <li>groupPath: 所属字段组在系统中的path</li>
+ *     <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -22,6 +23,16 @@ public class ListFieldCommand {
 
     private String groupPath;
 
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
     public Long getCommunityId() {
         return communityId;
     }

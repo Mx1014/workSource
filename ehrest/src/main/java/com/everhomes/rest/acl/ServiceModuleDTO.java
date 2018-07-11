@@ -26,6 +26,7 @@ import java.util.List;
  *     <li>multipleFlag: multipleFlag</li>
  *     <li>moduleControlType: moduleControlType</li>
  *     <li>category: 模块分类，参考{@link com.everhomes.rest.acl.ServiceModuleCategory}</li>
+ *     <li>accessControlType: 权限控制类型 参考{@link com.everhomes.rest.module.AccessControlType}</li>
  * </ul>
  */
 public class ServiceModuleDTO implements Serializable {
@@ -66,6 +67,8 @@ public class ServiceModuleDTO implements Serializable {
 	private String moduleControlType;
 
 	private String category;
+	
+	private Byte accessControlType;
 
 	public Long getId() {
 		return id;
@@ -209,5 +212,13 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setCategory(String category) {
 		this.category = category;
+	}
+	
+	public Byte getAccessControlType() {
+		return accessControlType;
+	}
+
+	public void setAccessControlType(Byte accessControlType) {
+		this.accessControlType = accessControlType;
 	}
 }

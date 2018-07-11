@@ -152,6 +152,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
             builder.field("paymentFlag", contract.getPaymentFlag());
+            builder.field("categoryId", contract.getCategoryId());
+            
             if(contract.getRent() != null) {
                 builder.field("rent", contract.getRent());
             } else {
@@ -238,6 +240,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Override
     public ListContractsResponse queryContracts(SearchContractCommand cmd) {
+    	if (cmd.getOrgId() == null || cmd.getCommunityId() == null) {
+    		throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+                    "OrgIdorCommunityId user privilege error");
+		}
         if(cmd.getPaymentFlag() == 1) {
             checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
         } else {
@@ -249,10 +255,15 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
-                    .field("name", 1.2f)
-                    .field("customerName", 1.2f)
-                    .field("contractNumber", 1.2f);
+//            qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
+//                    .field("name", 1.2f)
+//                    .field("customerName", 1.2f)
+//                    .field("contractNumber", 1.2f);
+        	String pattern = "*" + cmd.getKeywords() + "*";
+            qb = QueryBuilders.boolQuery()
+            					.should(QueryBuilders.wildcardQuery("name", pattern))
+            					.should(QueryBuilders.wildcardQuery("customerName", pattern))
+            					.should(QueryBuilders.wildcardQuery("contractNumber", pattern));
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
@@ -292,6 +303,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
+        
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
 
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);

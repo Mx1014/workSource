@@ -13,4 +13,8 @@ public interface ContractErrorCode {
     int ERROR_CONTRACT_PARAM_NOT_EXIST = 10005;  //合同参数已存在
     int ERROR_CONTRACT_NOT_WAITING_FOR_LAUNCH = 10006;  //只有待发起的合同可以发起
     int ERROR_CONTRACT_APARTMENT_IS_NOT_FREE = 10007;  //合同关联的资产不是待租状态
+
+    int ERROR_ORGIDORCOMMUNITYID_IS_EMPTY = 10008;  //合同查询参数错误
+    int ERROR_CONTRACT_TRACKING_NOT_EXIST = 10009; //合同日志项不存在
+
 }

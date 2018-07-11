@@ -16,6 +16,10 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
                     "raw": { 
                         "type":  "string",
                         "analyzer": "pinyin_first_letter_analyzer"
+                    },
+                    "baidu": {
+                        "type": "string",
+                        index": "not_analyzed"
                     }
                 }
             },
@@ -36,8 +40,8 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 			"trackingUid": {"type":"long"},
             "status":{"type":"byte"},
             "propertyUnitPrice":{"type":"double"},
-            "buildingId":{"type":"long"},
-            "addressId":{"type":"long"},
+            "buildingId":{"type":"string"},
+            "addressId":{"type":"string"},
             "adminFlag":{"type":"long"},
             "propertyArea":{"type":"double"},
 			"lastTrackingTime":{"type":"date"}

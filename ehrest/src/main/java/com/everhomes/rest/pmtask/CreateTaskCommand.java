@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>attachments: 附件，参考{@link com.everhomes.rest.pmtask.AttachmentDescriptor}</li>
  * <li>organizationName: 公司名称</li>
  * <li>addressType: 地址类型   1:小区家庭门牌地址 2: 园区公司地址 {@link com.everhomes.rest.pmtask.PmTaskAddressType }</li>
+ * <li>enterpriseId: 需求人公司id</li>
  * </ul>
  */
 public class CreateTaskCommand {
@@ -56,6 +57,8 @@ public class CreateTaskCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
+
+	private Long enterpriseId;
 
 	public Long getCurrentPMId() {
 		return currentPMId;
@@ -223,6 +226,14 @@ public class CreateTaskCommand {
 
 	public void setOrganizationName(String organizationName) {
 		this.organizationName = organizationName;
+	}
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	@Override

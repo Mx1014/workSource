@@ -47,6 +47,7 @@ public class ListPaymentBillCmd {
     private Integer namespaceId;
     private Long communityId;
     private Long organizationId;
+    private Long categoryId;
 
     private List<Long> orderIds;
 
@@ -111,6 +112,14 @@ public class ListPaymentBillCmd {
 
     public Long getPageAnchor() {
         return pageAnchor;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public void setPageAnchor(Long pageAnchor) {

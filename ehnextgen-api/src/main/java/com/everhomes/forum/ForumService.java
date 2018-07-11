@@ -24,6 +24,12 @@ public interface ForumService {
     PostDTO createTopic(NewTopicCommand cmd);
 
     /**
+     * 发布后，更新帖子
+     * add by yanlong.liang 2018-5-29
+     */
+    PostDTO updateTopic(NewTopicCommand cmd);
+
+    /**
      * 传入创建者的id
      * @param creatorUid    该帖的创建者
      */
@@ -141,5 +147,7 @@ public interface ForumService {
     FindDefaultForumResponse findDefaultForum(FindDefaultForumCommand cmd);
 
     ListTopicsByForumEntryIdResponse listTopicsByForumEntryId(ListTopicsByForumEntryIdCommand cmd);
+
+    PostDTO getPreviewTopic(NewTopicCommand cmd);
 
 }

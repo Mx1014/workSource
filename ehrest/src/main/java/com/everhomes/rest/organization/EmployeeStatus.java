@@ -14,7 +14,7 @@ public enum EmployeeStatus {
 
     private byte code;
 
-    private EmployeeStatus(byte code) {
+    EmployeeStatus(byte code) {
         this.code = code;
     }
 
@@ -26,7 +26,7 @@ public enum EmployeeStatus {
         if(code != null) {
             EmployeeStatus[] values = EmployeeStatus.values();
             for(EmployeeStatus value : values) {
-                if(code.byteValue() == value.code) {
+                if(code == value.code) {
                     return value;
                 }
             }
