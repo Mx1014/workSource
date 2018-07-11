@@ -713,6 +713,9 @@ public class ParkingServiceImpl implements ParkingService {
 		});
 
 		if (ActivityRosterPayVersionFlag.V1 == version) {
+			parkingRechargeOrder.setInvoiceStatus((byte)0);
+			parkingRechargeOrder.setPaySource(ParkingPaySourceType.APP.getCode());
+			parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
 			return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
 		}else {
 			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName(),parkingLot,cmd.getPaymentType());
@@ -1791,6 +1794,12 @@ public class ParkingServiceImpl implements ParkingService {
 
 		String vendor = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		Byte rechargeFlag = parkingLot.getExpiredRechargeFlag();
+		if(ParkingConfigFlag.fromCode(rechargeFlag) == ParkingConfigFlag.NOTSUPPORT){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
+					"不支持过期充值");
+		}
 
 		ParkingExpiredRechargeInfoDTO dto = handler.getExpiredRechargeInfo(parkingLot, cmd);
 
