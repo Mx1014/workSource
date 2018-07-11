@@ -865,7 +865,8 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");//滞纳金
         EhPaymentExemptionItems exemption = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("exemption");//减免/增收项
 
-        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END
+        		,t.ENERGY_CONSUME,t.CHARGING_ITEMS_ID)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -879,6 +880,14 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    dto.setEnergyConsume(r.getValue(t.ENERGY_CONSUME));//增加用量
+                    if(AssetEnergyType.personWaterItem.getCode().equals(r.getValue(t.CHARGING_ITEMS_ID))
+                    		|| AssetEnergyType.publicWaterItem.getCode().equals(r.getValue(t.CHARGING_ITEMS_ID))) {
+                    	dto.setEnergyUnit("吨");
+                    }else if(AssetEnergyType.personElectricItem.getCode().equals(r.getValue(t.CHARGING_ITEMS_ID))
+                    		|| AssetEnergyType.publicElectricItem.getCode().equals(r.getValue(t.CHARGING_ITEMS_ID))) {
+                    	dto.setEnergyUnit("度");
+                    }
                     dtos.add(dto);
                     //dateStr[0] = r.getValue(t.DATE_STR);
                     dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
@@ -937,6 +946,22 @@ public class AssetProviderImpl implements AssetProvider {
         response.setAmountOwed(amountOwed[0]);
         response.setDatestr(dateStrBegin[0] + "~" + dateStrEnd[0]);
         response.setShowBillDetailForClientDTOList(dtos);
+        //增加附件信息
+        List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList = new ArrayList<>();
+        dslContext.select(Tables.EH_PAYMENT_BILL_ATTACHMENTS.ID,Tables.EH_PAYMENT_BILL_ATTACHMENTS.FILENAME,Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URI,
+        		Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URL)
+		    .from(Tables.EH_PAYMENT_BILL_ATTACHMENTS)
+		    .where(Tables.EH_PAYMENT_BILL_ATTACHMENTS.BILL_ID.eq(billId))
+		    .fetch()
+		    .map(r -> {
+		    	AssetPaymentBillAttachment assetPaymentBillAttachment = new AssetPaymentBillAttachment();
+		    	assetPaymentBillAttachment.setFilename(r.getValue(Tables.EH_PAYMENT_BILL_ATTACHMENTS.FILENAME));
+		    	assetPaymentBillAttachment.setUri(r.getValue(Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URI));
+		    	assetPaymentBillAttachment.setUrl(r.getValue(Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URL));
+		    	assetPaymentBillAttachmentList.add(assetPaymentBillAttachment);
+		        return null;
+	    });
+        response.setAssetPaymentBillAttachmentList(assetPaymentBillAttachmentList);
         return response;
     }
 

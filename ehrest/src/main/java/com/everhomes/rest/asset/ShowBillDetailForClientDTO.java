@@ -17,6 +17,7 @@ import java.math.BigDecimal;
  * <li>dateStrEnd:计费结束时间</li>
  * <li>dateStr:账期</li>
  * <li>energyConsume: 费项的用量</li>
+ * <li>energyUnit: 费项的用量单位</li>
  *</ul>
  */
 public class ShowBillDetailForClientDTO {
@@ -30,6 +31,8 @@ public class ShowBillDetailForClientDTO {
     private String dateStr;
     //费项增加用量字段
     private String energyConsume;
+    //费项增加用量单位字段
+    private String energyUnit;
 
     @Override
     public String toString() {
@@ -110,5 +113,13 @@ public class ShowBillDetailForClientDTO {
 
 	public void setEnergyConsume(String energyConsume) {
 		this.energyConsume = energyConsume;
+	}
+
+	public String getEnergyUnit() {
+		return energyUnit;
+	}
+
+	public void setEnergyUnit(String energyUnit) {
+		this.energyUnit = energyUnit;
 	}
 }
