@@ -10,6 +10,7 @@ import com.everhomes.rest.activity.StatisticsOrganizationResponse;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.util.excel.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class ActivityOrganizationExportTaskHandler implements FileDownloadTaskHandler {
 
     @Autowired

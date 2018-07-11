@@ -13,6 +13,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.io.OutputStream;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class ActivityApplyExportTaskHandler implements FileDownloadTaskHandler {
 
     @Autowired
