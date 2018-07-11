@@ -2821,6 +2821,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		if (null == billList)
 			return response;
+		if(billList.size() > pageSize) {
+			billList.remove(billList.size() - 1);
+			response.setNextPageAnchor( billList.get(billList.size() -1).getReserveTime().getTime());
+		}
+		checkRentalBills(billList,false);
 		response.setRentalBills(new ArrayList<>());
 		for (RentalOrder bill : billList) {
 			RentalBillDTO dto = processOrderDTO(bill);
@@ -2829,6 +2834,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 		return response;
 	}
+
+	//自动取消待支付订单的定时任务会在重启后失效 每次查询都校验一下有没有漏的
+	private void checkRentalBills(List<RentalOrder> billList , boolean ifHold){
+		if (billList == null || billList.isEmpty())
+			return;
+		int i = 0;
+		while (i < billList.size()) {
+			if (SiteBillStatus.PAYINGFINAL.getCode() == billList.get(i).getStatus() && billList.get(i).getPayMode() == PayMode.ONLINE_PAY.getCode()) {
+				if (System.currentTimeMillis() > billList.get(i).getReserveTime().getTime() + ORDER_AUTO_CANCEL_TIME) {
+					billList.get(i).setStatus(SiteBillStatus.FAIL.getCode());
+					rentalv2Provider.updateRentalBill(billList.get(i));
+					if (!ifHold){
+						billList.remove(i);
+						continue;
+					}
+
+				}
+			}
+			i++;
+		}
+	}
+
 	private RentalBillDTO processOrderDTO(RentalOrder bill) {
 
 		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
@@ -4531,7 +4558,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			bills.remove(bills.size() - 1);
 			response.setNextPageAnchor( bills.get(bills.size() -1).getReserveTime().getTime());
 		}
-		
+
+		if (cmd.getBillStatus() != null)
+			checkRentalBills(bills,true);
+		else
+			checkRentalBills(bills,false);
 		response.setRentalBills(new ArrayList<>());
 		for (RentalOrder bill : bills) {
 			RentalBillDTO dto = processOrderDTO(bill);
@@ -7979,7 +8010,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 		response.setRentalBills(new ArrayList<>());
-
+		if(billList.size() > pageSize){
+			billList.remove(billList.size()-1);
+			response.setNextPageAnchor(billList.get(billList.size()-1).getId());
+		}
+		checkRentalBills(billList,true);
 		for (RentalOrder bill : billList) {
 			RentalBriefOrderDTO dto = new RentalBriefOrderDTO();
 			dto.setResourceType(bill.getResourceType());
@@ -7993,11 +8028,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 			response.getRentalBills().add(dto);
 		}
-		response.setNextPageAnchor(null);
-		if(billList.size() > pageSize){
-			billList.remove(billList.size()-1);
-			response.setNextPageAnchor(billList.get(billList.size()-1).getId());
-		}
+
 		return response;
 	}
 
