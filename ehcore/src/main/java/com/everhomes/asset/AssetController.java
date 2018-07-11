@@ -1503,7 +1503,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     @RequestMapping(value = "listPaymentBillForEnt")
     @RestReturn(ListPaymentBillRespForEnt.class)
     public RestResponse listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd, HttpServletRequest request) throws Exception {
-        ListPaymentBillRespForEnt result = paymentService.listPaymentBillForEnt(cmd);
+        ListPaymentBillRespForEnt result = assetService.listPaymentBillForEnt(cmd);
         RestResponse response = new RestResponse(result);
         return response;
     }

@@ -224,4 +224,6 @@ public interface AssetService {
     
     public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd);
     
+    ListPaymentBillRespForEnt listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd);
+    
 }

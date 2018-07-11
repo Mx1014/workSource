@@ -203,8 +203,4 @@ public class ListBillDetailResponse {
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
 	}
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> dgzz5.2

@@ -50,7 +50,6 @@ public class ListBillDetailVO {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
-<<<<<<< HEAD
     private Byte billStatus;
     
     public Byte getBillStatus() {
@@ -61,9 +60,6 @@ public class ListBillDetailVO {
 		this.billStatus = billStatus;
 	}
 
-=======
-    
->>>>>>> dgzz5.2
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
     private BigDecimal amoutExemption;
@@ -238,8 +234,4 @@ public class ListBillDetailVO {
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
 	}
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> dgzz5.2

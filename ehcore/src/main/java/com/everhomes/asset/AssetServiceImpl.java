@@ -5,6 +5,7 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
+import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -57,6 +58,7 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -5037,4 +5039,23 @@ public class AssetServiceImpl implements AssetService {
         publicTransferBillRespForEnt.setOrderAmount(BigDecimal.valueOf(amountsInCents));
         return publicTransferBillRespForEnt;
     }
+    
+    private void checkHasPaidBills(List<String> billIds) {
+        List<PaymentBills> paidBills = assetProvider.findPaidBillsByIds(billIds);
+        if( paidBills.size() >0 ) throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS,"this is bills have been paid,please refresh");
+    }
+
+	public ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd) {
+		
+		return null;
+	}
+
+	public void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd, HttpServletResponse response) {
+		
+	}
+
+	public ListPaymentBillRespForEnt listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd) {
+		
+		return null;
+	}
 }
