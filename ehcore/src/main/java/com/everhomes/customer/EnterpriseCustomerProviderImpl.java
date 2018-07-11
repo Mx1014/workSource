@@ -18,6 +18,7 @@ import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.EasySearchEnterpriseCustomersDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
