@@ -4956,4 +4956,85 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return response;
 	}
+	
+	public void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response) {
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(5000);
+        }
+        List<ListBillsDTOForEnt> dtos = new ArrayList<>();
+        dtos.addAll(listBillsForEnt(cmd).getListBillsDTOS());
+        Calendar c = newClearedCalendar();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int date = c.get(Calendar.DATE);
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        int minute = c.get(Calendar.MINUTE);
+        int second = c.get(Calendar.SECOND);
+        String fileName = "bill"+year+month+date+hour+minute+ second;
+
+        List<exportPaymentBillsDetail> dataList = new ArrayList<>();
+        //组装datalist来确定propertyNames的值
+        for(int i = 0; i < dtos.size(); i++) {
+        	ListBillsDTOForEnt dto = dtos.get(i);
+            exportPaymentBillsDetail detail = new exportPaymentBillsDetail();
+            detail.setDateStr(dto.getDateStr());
+            detail.setBillGroupName(dto.getBillGroupName());
+            detail.setTargetName(dto.getTargetName());
+            detail.setContractNum(dto.getContractNum());
+            detail.setNoticeTel(dto.getNoticeTel());
+            detail.setAmountOwed(dto.getAmountOwed().toString());
+            detail.setAmountReceivable(dto.getAmountReceivable().toString());
+            //detail.setAmountReceived(dto.getAmountReceived().toString());
+            detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
+            dataList.add(detail);
+        }
+        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountOwed","status"};
+        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","待收(元)","缴费状态"};
+        int[] titleSize = {20,20,20,20,20,20,20,20};
+        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+    }
+    
+    public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd){
+    	List<BillIdAndAmount> bills = new ArrayList<BillIdAndAmount>();
+    	List<PaymentBillRequest> paymentBillRequests = cmd.getBillList();
+        List<String> billIds = new ArrayList<>();
+        Long amountsInCents = 0l;
+        StringBuffer orderExplain = new StringBuffer();//订单说明，如：2017-06物业费、2017-06租金
+        for(PaymentBillRequest paymentBillRequest : paymentBillRequests){
+            billIds.add(String.valueOf(paymentBillRequest.getBillId()));
+            String amountOwed = String.valueOf(paymentBillRequest.getAmountOwed());
+            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
+            amountsInCents += amountOwedInCents.longValue();
+            orderExplain.append(paymentBillRequest.getDateStr() + paymentBillRequest.getBillGroupName() + "、");
+        }
+        //对左邻的用户，直接检查bill的状态即可
+        checkHasPaidBills(billIds);
+        //如果账单为新的，则进行存储
+        String payerType = cmd.getTargetType();//支付者的类型，eh_user为个人，eh_organization为企业
+        String clientAppName = "Web对公转账";
+        Long communityId = null;
+        String contactNum = cmd.getContractNum();
+        String openid = null;
+        String payerName = cmd.getPayerName();
+        AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
+        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
+        		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        assetProvider.saveOrderBills(bills,order.getId());
+        
+        PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
+        
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//定义格式，不显示毫秒
+        String date = format.format(order.getCreateTime());
+		publicTransferBillRespForEnt.setOrderCreateTime(date);
+        //paymentOrderNum：订单编号，没点“去支付”按钮之前，没有办法获取订单编号，所以此处只能展示我们业务系统的orderNo支付流水号
+        //publicTransferBillRespForEnt.setPaymentOrderNum(String.valueOf(order.getOrderNo()));
+        //publicTransferBillRespForEnt.setBusinessType("业务类型：待产品决定");
+        publicTransferBillRespForEnt.setOrderSource(cmd.getOrderSource());
+        if(orderExplain != null && orderExplain.length() != 0) {
+        	publicTransferBillRespForEnt.setOrderExplain(orderExplain.substring(0, orderExplain.length() - 1));
+        }
+        publicTransferBillRespForEnt.setOrderAmount(BigDecimal.valueOf(amountsInCents));
+        return publicTransferBillRespForEnt;
+    }
 }

@@ -5430,4 +5430,144 @@ public class AssetProviderImpl implements AssetProvider {
 	        .fetchOne(Tables.EH_COMMUNITIES.NAME);
 		return projectName;
 	}
+	
+	public List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd) {
+        //卸货
+        Long ownerId = cmd.getOwnerId();
+        String ownerType = cmd.getOwnerType();
+        String targetType = cmd.getTargetType();
+        Long targetId = cmd.getTargetId();
+        String billGroupName = cmd.getBillGroupName();
+        Long billGroupId = cmd.getBillGroupId();
+        Byte billStatus = cmd.getBillStatus();
+        String dateStrBegin = cmd.getDateStrBegin();
+        String dateStrEnd = cmd.getDateStrEnd();
+        Byte status = 1;//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
+        //卸货结束
+        List<ListBillsDTOForEnt> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
+        if(!org.springframework.util.StringUtils.isEmpty(ownerId)) {
+        	query.addConditions(t.OWNER_ID.eq(ownerId));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(ownerType)) {
+        	query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        }
+        query.addConditions(t.SWITCH.eq(status));//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
+        if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
+            query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {// 账单状态,0:未缴;1:已缴
+            query.addConditions(t.STATUS.eq(billStatus));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(targetType)){
+            query.addConditions(t.TARGET_TYPE.eq(targetType));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(targetId)){
+            query.addConditions(t.TARGET_ID.eq(targetId));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
+            query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
+            query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
+        }
+        query.addOrderBy(t.DATE_STR.desc());
+        query.addLimit(pageOffSet,pageSize+1);
+        query.fetch().map(r -> {
+        	ListBillsDTOForEnt dto = new ListBillsDTOForEnt();
+        	dto.setDateStr(r.getDateStr());
+        	dto.setDateStrBegin(r.getDateStrBegin());
+        	dto.setDateStrEnd(r.getDateStrEnd());
+        	dto.setBillId(String.valueOf(r.getValue(t.ID)));
+        	if(!org.springframework.util.StringUtils.isEmpty(billGroupName)) {
+                dto.setBillGroupName(billGroupName);
+            }else{
+                String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
+                dto.setBillGroupName(billGroupNameFound);
+            }
+        	dto.setTargetName(r.getTargetName());
+        	dto.setTargetId(String.valueOf(r.getTargetId()));
+            dto.setTargetType(r.getTargetType());
+            dto.setContractNum(r.getContractNum());
+            dto.setContractId(String.valueOf(r.getContractId()));
+            dto.setNoticeTel(r.getValue(t.NOTICETEL));
+            dto.setAmountOwed(r.getAmountOwed());
+            dto.setAmountReceivable(r.getAmountReceivable());
+            dto.setAmountReceived(r.getAmountReceived());
+            dto.setBillStatus(r.getValue(t.STATUS));
+            dto.setOwnerId(String.valueOf(r.getOwnerId()));
+            dto.setOwnerType(r.getOwnerType());
+            list.add(dto);
+            return null;});
+        return list;
+    }
+    
+    public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmdForEnt cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
+        ListBillDetailVO vo = new ListBillDetailVO();
+        BillGroupDTO dto = new BillGroupDTO();
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(r.ID,r.TARGET_ID,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM);
+        query.addFrom(r);
+        query.addConditions(r.ID.eq(billId));
+        query.fetch()
+                .map(f -> {
+                    vo.setBillId(f.getValue(r.ID));
+                    vo.setBillGroupId(f.getValue(r.BILL_GROUP_ID));
+                    vo.setTargetId(f.getValue(r.TARGET_ID));
+                    vo.setDateStr(f.getValue(r.DATE_STR));
+                    vo.setDateStrBegin(f.getValue(r.DATE_STR_BEGIN));
+                    vo.setDateStrEnd(f.getValue(r.DATE_STR_END));
+                    vo.setTargetName(f.getValue(r.TARGET_NAME));
+                    vo.setTargetType(f.getValue(r.TARGET_TYPE));
+                    vo.setContractNum(f.getValue(r.CONTRACT_NUM));
+                    String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS)
+                    		.where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(f.getValue(r.BILL_GROUP_ID))).fetchOne(0,String.class);
+                    vo.setBillGroupName(billGroupNameFound);
+                    return null;
+                });
+        vo.setBillGroupDTO(dto);
+        return vo;
+    }
+    
+    public AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
+        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class));
+        AssetPaymentOrder order = new AssetPaymentOrder();
+        order.setClientAppName(clientAppName);
+        order.setCommunityId(String.valueOf(communityId));
+        order.setContractId(contactNum);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setId(nextOrderId);
+        order.setNamespaceId(namespaceId);
+        // GET THE START TIME AND EXPIRTIME
+        Timestamp startTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+        Calendar c = Calendar.getInstance();
+        //expiretime为妙，所以乘以1000得到milliseconds
+        long l = startTime.getTime() + expireTimePeriod*1000l;
+
+        Timestamp endTime = new Timestamp(l);
+        order.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        order.setOrderExpireTime(endTime);
+        order.setOrderType(orderType);
+
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < 17; i++){
+            sb.append(r.nextInt(10));
+        }
+        order.setOrderNo(Long.parseLong(sb.toString()));
+        order.setUid(UserContext.currentUserId());
+        order.setPayAmount(new BigDecimal(amountOwed));
+        order.setPayerType(payerType);
+        order.setStatus((byte)0);
+        EhAssetPaymentOrderDao dao = new EhAssetPaymentOrderDao(context.configuration());
+        dao.insert(order);
+        return order;
+    }
 }

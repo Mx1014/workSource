@@ -244,4 +244,9 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
+    List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId,ListBillsResponseForEnt response, ListBillsCommandForEnt cmd){
+        LOGGER.error("Insufficient privilege, zuolinhandler listBillsForEnt");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
 }

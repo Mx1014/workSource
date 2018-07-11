@@ -215,4 +215,13 @@ public interface AssetService {
 	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
     
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
+    
+    ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd);
+    
+    void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
+    
+    void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response);
+    
+    public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd);
+    
 }

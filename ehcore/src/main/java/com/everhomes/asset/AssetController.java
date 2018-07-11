@@ -1469,5 +1469,71 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return restResponse;
     }
     
+    /**
+     * <p>对公转账：按照账单组展示已出账单</p>
+     * <b>URL: /asset/listSettledBillForEnt</b>
+     */
+    @RequestMapping("listSettledBillForEnt")
+    @RestReturn(value = ListBillsResponseForEnt.class)
+    public RestResponse listSettledBillForEnt(ListBillsCommandForEnt cmd) {
+    	ListBillsResponseForEnt listBillsResponseForEnt = assetService.listBillsForEnt(cmd);
+        RestResponse response = new RestResponse(listBillsResponseForEnt);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>对公转账：导出筛选过的所有账单</p>
+     * <b>URL: /asset/exportSettledBillsForEnt</b>
+     */
+    @RequestMapping("exportSettledBillsForEnt")
+    public HttpServletResponse exportSettledBillsForEnt(ListBillsCommandForEnt cmd,HttpServletResponse response) {
+        assetService.exportSettledBillsForEnt(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+    
+    /**
+     * <p>对公转账：结算-账单明细</p>
+     * <b>URL: /asset/listPaymentBillForEnt</b>
+     */
+    @RequestMapping(value = "listPaymentBillForEnt")
+    @RestReturn(ListPaymentBillRespForEnt.class)
+    public RestResponse listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd, HttpServletRequest request) throws Exception {
+        ListPaymentBillRespForEnt result = paymentService.listPaymentBillForEnt(cmd);
+        RestResponse response = new RestResponse(result);
+        return response;
+    }
+    
+    /**
+     * <p>对公转账：导出筛选过的所有交易明细</p>
+     * <b>URL: /asset/exportOrdersForEnt</b>
+     */
+    @RequestMapping("exportOrdersForEnt")
+    public HttpServletResponse exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response) {
+        assetService.exportOrdersForEnt(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+    
+    /**
+     * <p>对公转账：信息列表</p>
+     * <b>URL: /asset/publicTransferBill</b>
+     */
+    @RequestMapping("publicTransferBill")
+    @RestReturn(value = PublicTransferBillRespForEnt.class)
+    public RestResponse publicTransferBill(PublicTransferBillCmdForEnt cmd) {
+    	PublicTransferBillRespForEnt listPaymentBillResp = assetService.publicTransferBillForEnt(cmd);
+        RestResponse restResponse = new RestResponse(listPaymentBillResp);
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+    
 }
 
