@@ -11,6 +11,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.service_agreement.ServiceAgreementCommand;
 import com.everhomes.rest.service_agreement.ServiceAgreementDTO;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * 服务协议 Controller
@@ -33,6 +34,7 @@ public class ServiceAgreementController extends ControllerBase{
      * <p>通过域空间查询服务协议信息</p>
      */
 	@RequestMapping("getServiceAgreement")
+	@RequireAuthentication(false)
     @RestReturn(value=ServiceAgreementDTO.class)
 	public RestResponse getServiceAgreement(ServiceAgreementCommand  cmd) {
 		
