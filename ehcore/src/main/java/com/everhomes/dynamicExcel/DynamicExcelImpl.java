@@ -13,6 +13,8 @@ import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.varField.FieldGroup;
+import com.everhomes.varField.FieldProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -37,6 +39,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,6 +62,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
 
     @Autowired
     private ImportFileService importFileService;
+
+    @Autowired
+    private FieldProvider fieldProvider;
 
     /**
      *
@@ -115,6 +121,10 @@ public class DynamicExcelImpl implements DynamicExcelService{
                             intro.append(enumItem.toString());
                         }
                     }
+                }
+                FieldGroup group = fieldProvider.findFieldGroup(sheet.getGroupId());
+                if(group!=null && (Arrays.asList("27","35","36","37").contains(group.getId().toString())|| group.getTitle().equals("客户事件"))){
+                    intro = new StringBuilder("");
                 }
                 try {
                     DebugExcelUtil.exportExcel(workbook, dynamicSheetNum.get(), sheet.getDisplayName(), intro.toString(), fields, data);
