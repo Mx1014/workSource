@@ -5,6 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.pictureValidate.GetNewPictureValidateCodeCommand;
 import com.everhomes.rest.pictureValidate.ValidateCodeCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +35,9 @@ public class PictureValidateController extends ControllerBase {
 
     @RequestMapping("newPictureByApp")
     @RestReturn(value=String.class)
-    public RestResponse newPictureByApp() {
+    public RestResponse newPictureByApp(GetNewPictureValidateCodeCommand cmd) {
 
-        String pictureStr = pictureValidateService.newPictureByApp();
+        String pictureStr = pictureValidateService.newPictureByApp(cmd);
         RestResponse response = new RestResponse(pictureStr);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
