@@ -26,6 +26,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCustomerAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerDepartureInfosDao;
@@ -46,6 +47,7 @@ import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
 import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerAccounts;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
+import com.everhomes.server.schema.tables.pojos.EhCustomerAttachments;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
 import com.everhomes.server.schema.tables.pojos.EhCustomerDepartureInfos;
@@ -112,6 +114,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1605,6 +1608,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerEventsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_EVENTS);
         query.addConditions(Tables.EH_CUSTOMER_EVENTS.CUSTOMER_ID.eq(customerId));
+        query.addOrderBy(Tables.EH_CUSTOMER_EVENTS.ID.desc());
         List<CustomerEvent> result = new ArrayList<CustomerEvent>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerEvent.class));
@@ -1703,7 +1707,18 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                                 newData = newTime.toLocalDateTime().format(formatter);
                             }
                         }
-                        Map<String,Object> map = new HashMap<String,Object>();
+                        if (fieldType.equals("Double")) {
+                            DecimalFormat decimalFormat = new DecimalFormat("###################.###########");
+                            if (objNew != null && objNew != "空"){
+                                objNew = decimalFormat.format(objNew);
+                                newData = objNew.toString();
+                            }
+                            if (objNew != null && objNew != "空"){
+                                objOld = decimalFormat.format(objOld);
+                                oldData = objOld.toString();
+                            }
+                        }
+                        Map<String,Object> map = new HashMap<>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);
 						map.put("newData", newData);
@@ -2160,5 +2175,36 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .set(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS,CommonStatus.INACTIVE.getCode())
                 .where(Tables.EH_CUSTOMER_ENTRY_INFOS.ADDRESS_ID.eq(id))
                 .execute();
+    }
+
+    @Override
+    public void createCustomerAttachements(CustomerAttachment attachment) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerAttachments.class));
+        attachment.setId(id);
+        attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
+        attachment.setStatus(CommonStatus.ACTIVE.getCode());
+        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        attachment.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCustomerAttachmentsDao dao = new EhCustomerAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+    }
+
+    @Override
+    public void deleteAllCustomerAttachements(Long customerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_ATTACHMENTS)
+                .set(Tables.EH_CUSTOMER_ATTACHMENTS.STATUS, CommonStatus.INACTIVE.getCode())
+                .where(Tables.EH_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(customerId))
+                .execute();
+    }
+
+    @Override
+    public List<CustomerAttachment> listCustomerAttachments(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return  context.selectFrom(Tables.EH_CUSTOMER_ATTACHMENTS)
+                .where(Tables.EH_CUSTOMER_ATTACHMENTS.CUSTOMER_ID.eq(id))
+                .and(Tables.EH_CUSTOMER_ATTACHMENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchInto(CustomerAttachment.class);
     }
 }

@@ -214,7 +214,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         dynamicFields.add(df);
                     }
                 } else {
-                    if (!fieldDTO.getFieldParam().contains("image")) {//导出时 非图片字段可导出 fix 26791
+                    if (!fieldDTO.getFieldParam().contains("image")&& !fieldDTO.getFieldParam().contains("file")) {//导出时 非图片字段可导出 fix 26791
                         if (withData && fieldDTO.getFieldParam().contains("richText")) {
                             LOGGER.info("remove richText cell whern export data!");
                         } else {
