@@ -4,6 +4,14 @@
 -- AUTHOR: jiarui
 -- REMARK: 同步es /pm/syncOwnerIndex
 
+-- AUTHOR: xq.tian  20180711
+-- REMARK: 替换 ehcore.yml 里的配置项 nashorn.class.includes 为
+-- REMARK: nashorn.class.includes:
+-- REMARK:   java.lang.*, java.util.*, java.io.*,
+-- REMARK:   com.everhomes.oauth2client.handler.RestCallTemplate,
+-- REMARK:   com.everhomes.scriptengine.nashorn.NashornApiService,
+-- REMARK:   com.everhomes.flow.FlowNashornConfigService
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
