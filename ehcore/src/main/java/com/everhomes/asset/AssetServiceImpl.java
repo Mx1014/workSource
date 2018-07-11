@@ -5046,9 +5046,14 @@ public class AssetServiceImpl implements AssetService {
     }
 
 	public ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd) {
-		
-		return null;
-	}
+    	ListBillsResponseForEnt response = new ListBillsResponseForEnt();
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        List<ListBillsDTOForEnt> list = handler.listBillsForEnt(UserContext.getCurrentNamespaceId(),response, cmd);
+        response.setListBillsDTOS(list);
+        return response;
+    }
 
 	public void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd, HttpServletResponse response) {
 		
