@@ -471,7 +471,7 @@ public class AddressController extends ControllerBase {
      */
     @RequestMapping("listAddressArrangement")
     @RestReturn(value=AddressArrangementDTO.class)
-    public RestResponse createAddressArrangement(ListAddressArrangementCommand cmd) {
+    public RestResponse listAddressArrangement(ListAddressArrangementCommand cmd) {
     	AddressArrangementDTO dto = addressService.listAddressArrangement(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);

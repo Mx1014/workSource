@@ -85,6 +85,8 @@ import com.everhomes.util.file.DataProcessConstants;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 
+import javassist.expr.NewArray;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.*;
@@ -2644,14 +2646,135 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
 	@Override
 	public void createAddressArrangement(CreateAddressArrangementCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		if (cmd.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+			createSplitArrangement(cmd);
+		}else if (cmd.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+			createMergeArrangement(cmd);
+		}
 	}
-
+	
+	private void createSplitArrangement(CreateAddressArrangementCommand cmd) {
+		Address targetAddress = addressProvider.findAddressById(cmd.getAddressId());
+		List<Long> targetIds = new ArrayList<>();
+		List<Long> originalIds = new ArrayList<>();
+		originalIds.add(cmd.getAddressId());
+		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
+		for (ArrangementApartmentDTO apartment : apartments) {
+			Address address = new Address();
+			address.setAreaSize(apartment.getAreaSize());
+			address.setRentArea(apartment.getRentArea());
+			address.setFreeArea(apartment.getFreeArea());
+			address.setChargeArea(apartment.getChargeArea());
+			address.setApartmentName(apartment.getApartmentName());
+			address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+			address.setNamespaceId(targetAddress.getNamespaceId());
+			address.setCommunityId(targetAddress.getCommunityId());
+			address.setCityName(targetAddress.getCityName());
+			address.setCityId(targetAddress.getCityId());
+			address.setAreaId(targetAddress.getAreaId());
+			address.setAreaName(targetAddress.getAreaName());
+			address.setBuildingName(targetAddress.getBuildingName());
+			address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
+			
+			long addressId = addressProvider.createAddress3(address);
+			targetIds.add(addressId);
+		}
+		AddressArrangement arrangement = ConvertHelper.convert(cmd, AddressArrangement.class);
+		String targetId = StringHelper.toJsonString(targetIds);
+		arrangement.setTargetId(targetId);
+		String originalId = StringHelper.toJsonString(originalIds);
+		arrangement.setOriginalId(originalId);
+		arrangement.setOperationFlag(ArrangementOperationFlag.NOT_EXCUTED.getCode());
+		arrangement.setStatus(AddressArrangementStatus.ACTIVE.getCode());
+		User user = UserContext.current().getUser();
+		arrangement.setCreatorUid(user.getId());
+		addressProvider.createAddressArrangement(arrangement);
+	}	
+	
+	private void createMergeArrangement(CreateAddressArrangementCommand cmd) {
+		Address targetAddress = addressProvider.findAddressById(cmd.getAddressId());
+		List<Long> targetIds = new ArrayList<>();
+		List<Long> originalIds = new ArrayList<>();
+		originalIds.add(targetAddress.getId());
+		
+		Address address = new Address();
+		address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+		address.setNamespaceId(targetAddress.getNamespaceId());
+		address.setCommunityId(targetAddress.getCommunityId());
+		address.setCityName(targetAddress.getCityName());
+		address.setCityId(targetAddress.getCityId());
+		address.setAreaId(targetAddress.getAreaId());
+		address.setAreaName(targetAddress.getAreaName());
+		address.setBuildingName(targetAddress.getBuildingName());
+		address.setApartmentName(targetAddress.getApartmentName());
+		address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
+		
+		address.setAreaSize((double) 0);
+		address.setRentArea((double)0);
+		address.setFreeArea((double)0);
+		address.setChargeArea((double)0);
+		
+		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
+		for (ArrangementApartmentDTO apartment : apartments) {
+			address.setAreaSize(address.getAreaSize() + apartment.getAreaSize());
+			address.setRentArea(address.getRentArea() + apartment.getRentArea());
+			address.setFreeArea(address.getFreeArea() + apartment.getFreeArea());
+			address.setChargeArea(address.getChargeArea() + apartment.getChargeArea());
+			originalIds.add(apartment.getAddressId());
+		}
+		long newAddressId = addressProvider.createAddress3(address);
+		targetIds.add(newAddressId);
+		
+		AddressArrangement arrangement = ConvertHelper.convert(cmd, AddressArrangement.class);
+		String targetId = StringHelper.toJsonString(targetIds);
+		arrangement.setTargetId(targetId);
+		String originalId = StringHelper.toJsonString(originalIds);
+		arrangement.setOriginalId(originalId);
+		arrangement.setOperationFlag(ArrangementOperationFlag.NOT_EXCUTED.getCode());
+		arrangement.setStatus(AddressArrangementStatus.ACTIVE.getCode());
+		User user = UserContext.current().getUser();
+		arrangement.setCreatorUid(user.getId());
+		addressProvider.createAddressArrangement(arrangement);
+	}
+	
 	@Override
 	public AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByAddressId(cmd.getAddressId());
+		AddressArrangementDTO dto = ConvertHelper.convert(arrangement, AddressArrangementDTO.class);
+		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+			List<ArrangementApartmentDTO> apartments = generateSplitArrangementApartments(arrangement);
+			dto.setApartments(apartments);		
+		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+			List<ArrangementApartmentDTO> apartments = generateMergeArrangementApartments(arrangement);
+			dto.setApartments(apartments);	
+		}
+		
+		return dto;
+	}
+
+	private List<ArrangementApartmentDTO> generateSplitArrangementApartments(AddressArrangement arrangement) {
+		List<ArrangementApartmentDTO> results = new ArrayList<>();
+		List<Long> targetIds = (List<Long>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		for (Long addressId : targetIds) {
+			Address address = addressProvider.findAddressById(addressId);
+			ArrangementApartmentDTO dto = ConvertHelper.convert(address, ArrangementApartmentDTO.class);
+			dto.setAddressId(address.getId());
+			results.add(dto);
+		}
+		return results;
+	}
+	
+	private List<ArrangementApartmentDTO> generateMergeArrangementApartments(AddressArrangement arrangement) {
+		List<ArrangementApartmentDTO> results = new ArrayList<>();
+		List<Long> originalIds = (List<Long>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+		originalIds.remove(arrangement.getAddresId());
+		for (Long addressId : originalIds) {
+			Address address = addressProvider.findAddressById(addressId);
+			ArrangementApartmentDTO dto = ConvertHelper.convert(address, ArrangementApartmentDTO.class);
+			dto.setAddressId(address.getId());
+			results.add(dto);
+		}
+		return results;
 	}
 
 	@Override

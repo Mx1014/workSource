@@ -3,7 +3,7 @@
 -- # 资产管理V3.2 房源拆分/合并
 CREATE TABLE `eh_address_arrangement` (
   `id` bigint(20) NOT NULL COMMENT '主键id',
-  `addres_id` bigint(20) DEFAULT NULL COMMENT '要执行拆分/合并计划的房源id',
+  `address_id` bigint(20) DEFAULT NULL COMMENT '要执行拆分/合并计划的房源id',
   `original_id` varchar(2048) DEFAULT NULL COMMENT '被拆分的房源id或者被合并的房源id（以json数组方式存储）',
   `target_id` varchar(2048) DEFAULT NULL COMMENT '拆分后产生的房源id或者合并后产生的房源id（以json数组方式存储）',
   `operation_type` tinyint(4) DEFAULT NULL COMMENT '操作类型：拆分（0），合并（1）',

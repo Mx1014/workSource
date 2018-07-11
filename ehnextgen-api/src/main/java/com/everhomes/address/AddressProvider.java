@@ -84,10 +84,11 @@ public interface AddressProvider {
 
     int changeAddressLivingStatus(Long addressId, Byte status);
 
-    //add by tangcen
-  //Byte getAddressLivingStatus(Long addressId);
     Byte getAddressLivingStatus(Long addressId,String addressName);
 	int changeAddressLivingStatus(Long id, String address, byte code);
 	Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName,
 			String apartmentName);
+	long createAddress3(Address address);
+	void createAddressArrangement(AddressArrangement arrangement);
+	AddressArrangement findActiveAddressArrangementByAddressId(Long addressId);
 }
