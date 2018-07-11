@@ -1951,4 +1951,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	//支付模块回调接口，通知支付结果
     	assetPayService.payNotify(cmd, handler);
     }
+    
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	return assetProvider.showCreateBillSubItemList(cmd);
+    }
+    
 }

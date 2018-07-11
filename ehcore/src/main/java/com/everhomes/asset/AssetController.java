@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1467,6 +1468,48 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
+    }
+    
+    /**
+     * <p>展示账单组对应的减免费项列表</p>
+     * <b>URL: /asset/showCreateBillSubItemList</b>
+     */
+    @RequestMapping("showCreateBillSubItemList")
+    @RestReturn(value = ShowCreateBillSubItemListDTO.class)
+    public RestResponse showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	ShowCreateBillSubItemListDTO dto = assetService.showCreateBillSubItemList(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>批量减免费项</p>
+     * <b>URL: /asset/batchModifyBillSubItem</b>
+     */
+    @RequestMapping("batchModifyBillSubItem")
+    @RestReturn(value = String.class)
+    public RestResponse batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+        assetService.batchModifyBillSubItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
+     * <b>URL: /asset/testLateFine</b>
+     */
+    @RequestMapping("testLateFine")
+    @RestReturn(value = String.class)
+    public RestResponse testLateFine(TestLateFineCommand cmd) {
+        assetService.testLateFine(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
     }
     
 }
