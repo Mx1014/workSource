@@ -1719,12 +1719,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                         }
                         if (fieldType.equals("Double")) {
                             DecimalFormat decimalFormat = new DecimalFormat("###################.###########");
-                            if (objNew != null && objNew != "空")
+                            if (objNew != null && objNew != "空"){
                                 objNew = decimalFormat.format(objNew);
-                            if (objNew != null && objNew != "空")
+                                newData = objNew.toString();
+                            }
+                            if (objNew != null && objNew != "空"){
                                 objOld = decimalFormat.format(objOld);
+                                oldData = objOld.toString();
+                            }
                         }
-                        Map<String,Object> map = new HashMap<String,Object>();
+                        Map<String,Object> map = new HashMap<>();
 						map.put("display", field.getFieldDisplayName());
 						map.put("oldData", oldData);
 						map.put("newData", newData);
