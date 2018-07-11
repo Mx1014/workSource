@@ -22,6 +22,7 @@ CREATE TABLE `eh_archives_form_vals`(
 	`owner_type` VARCHAR(32),
 	`owner_id` BIGINT,
 	`form_id` BIGINT COMMENT 'the id of the archives form',
+	`source_id` BIGINT COMMENT 'the source id ',
 	`field_name` VARCHAR(128) COMMENT 'the name of the field',
 	`field_type` VARCHAR(128) COMMENT 'the type of the field',
 	`field_value` TEXT COMMENT 'the value of the field',
