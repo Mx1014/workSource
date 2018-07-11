@@ -3439,6 +3439,7 @@ public class CustomerServiceImpl implements CustomerService {
         Long currentTrackingUid = cmd.getTrackingUid();
         String currentTrackingName = null;
         customer.setTrackingUid(cmd.getTrackingUid());
+        customer.setTrackingName(null);
         if (cmd.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
             currentTrackingName = detail.getContactName();
