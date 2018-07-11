@@ -611,6 +611,17 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		return query.fetch().map(record -> ConvertHelper.convert(record,PmTaskOrderDetail.class));
 	}
 
+	@Override
+	public void deleteOrderDetailsByOrderId(Long orderId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskOrderDetails.class));
+		EhPmTaskOrderDetailsDao dao = new EhPmTaskOrderDetailsDao(context.configuration());
+		DeleteQuery query = context.deleteQuery(Tables.EH_PM_TASK_ORDER_DETAILS);
+		if(null != orderId){
+			query.addConditions(Tables.EH_PM_TASK_ORDER_DETAILS.ORDER_ID.eq(orderId));
+			query.execute();
+		}
+
+	}
 
 	@Override
 	public PmTaskOrder createPmTaskOrder(PmTaskOrder bean) {
@@ -637,5 +648,15 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskOrders.class));
 		EhPmTaskOrdersDao dao = new EhPmTaskOrdersDao(context.configuration());
 		return ConvertHelper.convert(dao.findById(id), PmTaskOrder.class);
+	}
+
+	@Override
+	public PmTaskOrder findPmTaskOrderByTaskId(Long taskId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskOrders.class));
+		SelectQuery query = context.selectQuery(Tables.EH_PM_TASK_ORDERS);
+		if(null != taskId)
+			query.addConditions(Tables.EH_PM_TASK_ORDERS.TASK_ID.eq(taskId));
+		List<PmTaskOrder> result = query.fetch().map(r->ConvertHelper.convert(r,PmTaskOrder.class));
+		return result.size() == 1 ? result.get(0) : null;
 	}
 }

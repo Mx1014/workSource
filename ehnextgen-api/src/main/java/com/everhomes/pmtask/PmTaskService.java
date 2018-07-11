@@ -136,7 +136,9 @@ public interface PmTaskService {
 
 	void createOrderDetails(CreateOrderDetailsCommand cmd);
 
-	List<PmTaskOrderDetailDTO> searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd);
+	void modifyOrderDetails(CreateOrderDetailsCommand cmd);
+
+	PmTaskOrderDTO searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd);
 
 	List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
 

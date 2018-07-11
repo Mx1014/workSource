@@ -3228,14 +3228,70 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.info("Invalid parameter, cmd={}", cmd);
 			return;
 		}
-		List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->ConvertHelper.convert(r,PmTaskOrderDetail.class)).collect(Collectors.toList());
+		Integer namespaceId = cmd.getNamespaceId();
+		String ownerType = cmd.getOwnerType();
+		Long ownerId = cmd.getOwnerId();
+		Long taskId = cmd.getTaskId();
+//		创建订单
+		PmTaskOrder order = ConvertHelper.convert(cmd,PmTaskOrder.class);
+		Long productFee = cmd.getOrderDetails().stream().collect(Collectors.summingLong(r->r.getProductAmount()*r.getProductPrice()));
+		order.setProductFee(productFee);
+		order.setAmount(order.getServiceFee() + productFee);
+		order = this.pmTaskProvider.createPmTaskOrder(order);
+		Long orderId = order.getId();
+//		创建订单明细
+		List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
+			PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
+			bean.setNamespaceId(namespaceId);
+			bean.setOwnerType(ownerType);
+			bean.setOwnerId(ownerId);
+			bean.setTaskId(taskId);
+			bean.setOrderId(orderId);
+			return bean;
+		}).collect(Collectors.toList());
 		this.pmTaskProvider.createOrderDetails(details);
 	}
 
 	@Override
-	public List<PmTaskOrderDetailDTO> searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd) {
+	public void modifyOrderDetails(CreateOrderDetailsCommand cmd) {
+		if(cmd.getOrderDetails().size() <= 0){
+			LOGGER.info("Invalid parameter, cmd={}", cmd);
+			return;
+		}
+		Integer namespaceId = cmd.getNamespaceId();
+		String ownerType = cmd.getOwnerType();
+		Long ownerId = cmd.getOwnerId();
+		Long taskId = cmd.getTaskId();
+//		修改订单
+		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(taskId);
+		if(null != cmd.getServiceFee())
+			order.setServiceFee(cmd.getServiceFee());
+		Long productFee = cmd.getOrderDetails().stream().collect(Collectors.summingLong(r->r.getProductAmount()*r.getProductPrice()));
+		order.setProductFee(productFee);
+		order.setAmount(order.getServiceFee() + productFee);
+		order = this.pmTaskProvider.updatePmTaskOrder(order);
+		Long orderId = order.getId();
+		this.pmTaskProvider.deleteOrderDetailsByOrderId(orderId);
+//		创建订单明细
+		List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
+			PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
+			bean.setNamespaceId(namespaceId);
+			bean.setOwnerType(ownerType);
+			bean.setOwnerId(ownerId);
+			bean.setTaskId(taskId);
+			bean.setOrderId(orderId);
+			return bean;
+		}).collect(Collectors.toList());
+		this.pmTaskProvider.createOrderDetails(details);
+	}
+
+	@Override
+	public PmTaskOrderDTO searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd) {
+		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
+		PmTaskOrderDTO dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
 		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTaskId());
-		return result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList());
+		dto.setProducts(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
+		return dto;
 	}
 
 	@Override

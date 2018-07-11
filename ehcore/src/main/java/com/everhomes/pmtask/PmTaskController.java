@@ -903,7 +903,7 @@ public class PmTaskController extends ControllerBase {
 
     /**
      * <b>URL: /pmtask/createOrderDetails</b>
-     * <p>新增物品费清单</p>
+     * <p>新增费用清单</p>
      */
     @RequestMapping("createOrderDetails")
     @RestReturn(value=String.class)
@@ -916,11 +916,25 @@ public class PmTaskController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /pmtask/modifyOrderDetails</b>
+     * <p>修改费用清单</p>
+     */
+    @RequestMapping("modifyOrderDetails")
+    @RestReturn(value=String.class)
+    public RestResponse modifyOrderDetails(CreateOrderDetailsCommand cmd) {
+        pmTaskService.modifyOrderDetails(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /pmtask/getOrderDetails</b>
-     * <p>查询物品费明细</p>
+     * <p>查询费用清单明细</p>
      */
     @RequestMapping("getOrderDetails")
-    @RestReturn(value=PmTaskOrderDetailDTO.class,collection = true)
+    @RestReturn(value=PmTaskOrderDTO.class)
     public RestResponse getOrderDetails(GetOrderDetailsCommand cmd) {
         RestResponse response = new RestResponse(pmTaskService.searchOrderDetailsByTaskId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

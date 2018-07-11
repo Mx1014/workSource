@@ -75,6 +75,7 @@ public interface PmTaskProvider {
 //	订单明细CRUD
 	void createOrderDetails(List<PmTaskOrderDetail> beans);
 	List<PmTaskOrderDetail> findOrderDetailsByTaskId(Integer namespaceId, String ownerType, Long ownerId, Long taskId);
+	void deleteOrderDetailsByOrderId(Long orderId);
 
 //	订单CRUD
 	PmTaskOrder createPmTaskOrder(PmTaskOrder bean);
@@ -82,5 +83,7 @@ public interface PmTaskProvider {
 	PmTaskOrder updatePmTaskOrder(PmTaskOrder bean);
 
 	PmTaskOrder findPmTaskOrderById(Long id);
+
+	PmTaskOrder findPmTaskOrderByTaskId(Long taskId);
 
 }

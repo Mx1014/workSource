@@ -189,7 +189,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setIfUseFeelist((byte)1);
 			}
 		}
-
+		pmTaskProvider.updateTask(task);
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
@@ -377,6 +377,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					e.setValue("本次服务没有产生维修费");
 					entities.add(e);
 				}
+
+		pmTaskProvider.findPmTaskOrderById(task.getId());
 		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
 		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),""+task.getId(),FlowOwnerType.PMTASK.getCode(),"","费用确认"));
 		if (flowUserType!=null)
@@ -503,7 +505,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskSearch.feedDoc(task);
 			}
 		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
-			if ("MOTIFYFEE".equals(nodeType)) {
+//			按钮参数
+			String btnParam = ctx.getFlowGraph().getGraphButton(ctx.getCurrentEvent().getFiredButtonId()).getFlowButton().getParam();
+//			发起人
+//			ctx.getFlowCase().getApplyUserId();
+//			处理人
+//			ctx.getOperator().getId();
+			if ("MOTIFYFEE".equals(btnParam)) {
 				FlowGraphEvent evt = ctx.getCurrentEvent();
 				if (FlowUserType.APPLIER.equals(evt.getUserType())){
 					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
@@ -516,7 +524,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					dto.setStepCount(flowCase.getStepCount());
 					flowService.processAutoStep(dto);
 				}
+			} else if ("CONFIRMFEE".equals(btnParam)){
+// TODO: 2018/7/11 支付 
+			} else if ("NEEDFEE".equals(btnParam)){
+
 			}
+
+
 		}
 
 	}
