@@ -220,5 +220,4 @@ public interface AssetService {
 
 	void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd);
 
-	JudgeShowEnergyResponse judgeShowEnergy(JudgeShowEnergyCommand cmd);
 }

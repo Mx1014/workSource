@@ -3155,6 +3155,7 @@ public class AssetServiceImpl implements AssetService {
         Byte hasPay = 1;
         //是否显示上传凭证按钮（add by tangcen）
         Byte hasUploadCertificate = 0;
+        Byte hasEnergy = 0;//默认不展示能耗
 
         Boolean[] remarkCheckList = new Boolean[3];
         remarkCheckList[0] = false;
@@ -3185,6 +3186,8 @@ public class AssetServiceImpl implements AssetService {
                 hasPay = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.CERTIFICATE.getCode())){
                 hasUploadCertificate = view.getHasView();
+            }else if(view.getViewItem().equals(PaymentViewItems.ENERGY.getCode())){
+            	hasEnergy = view.getHasView();
             }
         }
         //用数据库配置的方式替代了
@@ -3216,6 +3219,7 @@ public class AssetServiceImpl implements AssetService {
         dto.setHasPay(hasPay);
         dto.setHasContractView(hasContractView);
         dto.setHasUploadCertificate(hasUploadCertificate);
+        dto.setHasEnergy(hasEnergy);
         return dto;
     }
 
@@ -4999,17 +5003,5 @@ public class AssetServiceImpl implements AssetService {
 
 	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
 		assetProvider.updatePaymentBillStatus(cmd);
-	}
-
-	public JudgeShowEnergyResponse judgeShowEnergy(JudgeShowEnergyCommand cmd) {
-		JudgeShowEnergyResponse judgeShowEnergyResponse = new JudgeShowEnergyResponse();
-		String showEnergy = configurationProvider.getValue(cmd.getNamespaceId(), "asset.showEnergy", ""); 
-		//如果根据域空间找不到，那么默认为0：不展示
-		if(showEnergy.isEmpty()) {
-			judgeShowEnergyResponse.setShowEnergy(new Byte("0"));
-		}else {
-			judgeShowEnergyResponse.setShowEnergy(new Byte(showEnergy));
-		}
-		return judgeShowEnergyResponse;
 	}
 }
