@@ -1,29 +1,26 @@
 package com.everhomes.service_agreement;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.service_agreement.ServiceAgreementDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -31,10 +28,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceAgreementDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceAgreement;
 import com.everhomes.util.ConvertHelper;
-
-import freemarker.cache.StringTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 /**
  * 服务协议 ProviderImpl
@@ -146,9 +139,16 @@ public class ServiceAgreementProviderImpl implements ServiceAgreementProvider {
             //查询管理公司信息
             List<Organization> organizations = 
             		organizationProvider.listOrganizations(OrganizationType.PM.getCode(), namespaceId, 0L, null, null);
+            
             if(organizations != null && organizations.size() >0){
-            	management = organizations.get(0).getName();
             	managementFull = organizations.get(0).getName();
+            	management = organizations.get(0).getName();
+            	OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organizations.get(0).getId());
+            	//简称
+            	if(detail != null && StringUtils.isNotBlank(detail.getDisplayName())){
+            		management = detail.getDisplayName() ;
+            	}
+            	
             }			
 			String templateText = resultdto.getAgreementContent();
 
