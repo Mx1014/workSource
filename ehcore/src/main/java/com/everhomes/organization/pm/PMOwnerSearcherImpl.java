@@ -155,8 +155,8 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
             MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "buildingId");
             qb = QueryBuilders.boolQuery().must(qb).must(operatorNameQuery);
         }
-        if (cmd.getBuildingId() != null) {
-            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "buildingId");
+        if (cmd.getAddressId() != null) {
+            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
             qb = QueryBuilders.boolQuery().must(qb).must(operatorNameQuery);
         }
 
