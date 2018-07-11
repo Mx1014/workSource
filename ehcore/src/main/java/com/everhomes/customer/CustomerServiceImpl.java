@@ -2636,7 +2636,7 @@ public class CustomerServiceImpl implements CustomerService {
             command.setPageAnchor(cmd.getPageAnchor());
             return rentalv2Service.listRentalBillsByOrdId(command);
         }
-        return null;
+        return new ListRentalBillsCommandResponse();
     }
 
     @Override
@@ -2646,7 +2646,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             return yellowPageService.listSeviceAllianceAppRecordsByEnterpriseId(customer.getOrganizationId(), cmd.getPageAnchor(), cmd.getPageSize());
         }
-        return null;
+        return new SearchRequestInfoResponse();
     }
 
     @Override

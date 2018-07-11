@@ -280,6 +280,7 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("35");
                 sheetNames.remove("36");
                 sheetNames.remove("37");
+                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
@@ -538,7 +539,7 @@ public class FieldServiceImpl implements FieldService {
             } else {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
-                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
     			}
             }
 
