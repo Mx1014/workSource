@@ -32,6 +32,9 @@ public class ArchivesController extends ControllerBase{
     @Autowired
     private ArchivesService archivesService;
 
+    @Autowired
+    private ArchivesFormService archivesFormService;
+
     /**
      * <b>URL: /archives/addArchivesContact</b>
      * <p>1.添加与编辑通讯录成员</p>
@@ -342,10 +345,10 @@ public class ArchivesController extends ControllerBase{
      * <p>10-1.增加、修改档案字段</p>
      */
     @RequestMapping("updateArchivesForm")
-    @RestReturn(value = GeneralFormDTO.class)
+    @RestReturn(value = String.class)
     public RestResponse updateArchivesForm(UpdateArchivesFormCommand cmd){
-        GeneralFormDTO res = archivesService.updateArchivesForm(cmd);
-        RestResponse response = new RestResponse(res);
+        archivesFormService.updateArchivesForm(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -358,17 +361,17 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("getArchivesForm")
     @RestReturn(value = GetArchivesFormResponse.class)
     public RestResponse getArchivesForm(GetArchivesFormCommand cmd){
-        GetArchivesFormResponse res = archivesService.getArchivesForm(cmd);
+        GetArchivesFormResponse res = archivesFormService.getArchivesForm(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
-    /**
+/*    *//**
      * <b>URL: /archives/identifyArchivesForm</b>
      * <p>10-3.识别档案表单id</p>
-     */
+     *//*
     @RequestMapping("identifyArchivesForm")
     @RestReturn(value = ArchivesFromsDTO.class)
     public RestResponse identifyArchivesForm(IdentifyArchivesFormCommand cmd){
@@ -377,7 +380,7 @@ public class ArchivesController extends ControllerBase{
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /archives/importArchivesEmployees</b>
@@ -386,8 +389,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("importArchivesEmployees")
     @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importArchivesEmployees(ImportArchivesEmployeesCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
-        User user = UserContext.current().getUser();
-        RestResponse response = new RestResponse(archivesService.importArchivesEmployees(files[0], user.getId(),user.getNamespaceId(),cmd));
+        RestResponse response = new RestResponse(archivesService.importArchivesEmployees(files[0],cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

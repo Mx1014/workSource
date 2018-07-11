@@ -95,13 +95,13 @@ public interface ArchivesService {
 
     ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 
-    GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
+//    ArchivesFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
 
-    GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd);
+//
 
-    ArchivesFromsDTO identifyArchivesForm(IdentifyArchivesFormCommand cmd);
+//    ArchivesFromsDTO identifyArchivesForm(IdentifyArchivesFormCommand cmd);
 
-    ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
+    ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, ImportArchivesEmployeesCommand cmd);
 
     void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd);
 
