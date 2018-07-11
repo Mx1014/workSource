@@ -277,8 +277,10 @@ public class SZWQuery {
 					//备注
 					contractDetailDTO.setRemark(jsonObject.get("description") != null ? jsonObject.get("description").toString() : null);
 					//合同总额
-					Timestamp denunciationTime = new Timestamp(format.parse(jsonObject.get("quitRoomDate") != null ? jsonObject.get("quitRoomDate").toString() : null).getTime());
-					contractDetailDTO.setDenunciationTime(denunciationTime);
+					if(jsonObject.get("quitRoomDate") != null && !jsonObject.get("quitRoomDate").equals("")) {
+						Timestamp denunciationTime = new Timestamp(format.parse(jsonObject.get("quitRoomDate").toString()).getTime());
+						contractDetailDTO.setDenunciationTime(denunciationTime);
+					}
 				} catch (JSONException e) {
 					LOGGER.error("findContractForApp Failed to parse json response, request={}, result={}", request, result, e);
 				}

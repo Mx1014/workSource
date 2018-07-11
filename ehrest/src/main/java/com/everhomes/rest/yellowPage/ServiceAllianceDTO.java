@@ -30,6 +30,7 @@ import java.util.List;
  *  <li>contactMobile: 手机号</li>
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>serviceType: 所属服务联盟的子类别名称</li>
+ *  <li>coverAttachments: 封面图片文件 服务联盟v3.4 {@link com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO}</li>
  *  <li>attachments: banners</li>
  *  <li>fileAttachments: 附件</li>
  *  <li>serviceUrl: 服务链接</li>
@@ -55,6 +56,9 @@ import java.util.List;
  *  <li>onlineServiceUname : 在线服务用户的名称</li>
  *  <li>skipType: 只有一个企业时是否跳过列表页，0 不跳； 1 跳过</li>
  *  <li>displayMode:类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode} </li>
+ *  <li>startDate : 用于policydeclare样式 开始日期 格式yyyy-MM-dd</li>
+ *  <li>endDate : 用于policydeclare样式 结束日期 格式 yyyy-MM-dd</li>
+ *  <li>tagGroups : 该服务的筛选组列表(list) {@link com.everhomes.rest.yellowPage.AllianceTagGroupDTO}</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -102,6 +106,9 @@ public class ServiceAllianceDTO {
 	private Long     categoryId;
 	
 	private String   serviceType;
+	
+	@ItemType(ServiceAllianceAttachmentDTO.class)
+	private List<ServiceAllianceAttachmentDTO> coverAttachments;
 	
 	@ItemType(ServiceAllianceAttachmentDTO.class)
 	private List<ServiceAllianceAttachmentDTO> attachments;
@@ -156,6 +163,13 @@ public class ServiceAllianceDTO {
 	private Byte displayMode;
 	
 	private Byte skipType;
+	
+	private String startDate;
+	
+	private String endDate;
+	
+	@ItemType(AllianceTagGroupDTO.class)
+	private List<AllianceTagGroupDTO> tagGroups;
 	
 	public Byte getDisplayMode() {
 		return displayMode;
@@ -499,4 +513,36 @@ public class ServiceAllianceDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public List<ServiceAllianceAttachmentDTO> getCoverAttachments() {
+		return coverAttachments;
+	}
+
+	public void setCoverAttachments(List<ServiceAllianceAttachmentDTO> coverAttachments) {
+		this.coverAttachments = coverAttachments;
+	}
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+
+	public List<AllianceTagGroupDTO> getTagGroups() {
+		return tagGroups;
+	}
+
+	public void setTagGroups(List<AllianceTagGroupDTO> tagGroups) {
+		this.tagGroups = tagGroups;
+	}
 }

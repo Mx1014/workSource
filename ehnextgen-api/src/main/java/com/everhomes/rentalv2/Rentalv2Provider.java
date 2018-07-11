@@ -153,6 +153,8 @@ public interface Rentalv2Provider {
 
 	RentalRefundOrder getRentalRefundOrderByRefundNo(String refundOrderNo);
 
+	RentalRefundOrder getRentalRefundOrderByOrderNo(String orderNo);
+
 	RentalResourceType getRentalResourceTypeById(Long rentalResourceTypeId);
 
 	void createRentalResourceType(RentalResourceType rentalResourceType);

@@ -10,12 +10,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhDevicesDao;
-import com.everhomes.server.schema.tables.records.EhBordersRecord;
+import com.everhomes.server.schema.tables.pojos.EhDevices;
 import com.everhomes.server.schema.tables.records.EhDevicesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -48,4 +50,15 @@ public class DeviceProviderImpl implements DeviceProvider {
         return ConvertHelper.convert(dao.fetchOneByDeviceId(deviceId), Device.class);
     }
 
+    @Override
+    @CacheEvict(value = "Device", key="#device.deviceId")
+    public void updateDevice(Device device) {
+       
+    	assert(device.getId() == null);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDevicesDao dao = new EhDevicesDao(context.configuration());       
+    	dao.update(device);
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDevices.class, device.getId());
+    }
 }

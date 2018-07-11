@@ -15,6 +15,16 @@ import com.everhomes.util.StringHelper;
 public class ImportCommunityCommand {
 	@NotNull
 	private Integer namespaceId;
+	@NotNull
+	private Long organizationId;
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;

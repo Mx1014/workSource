@@ -1,0 +1,1 @@
+ALTER TABLE `eh_organization_owners` ADD COLUMN `contact_extra_tels` VARCHAR(1024) DEFAULT NULL COMMENT '客户多手机号，以jsonarray方式存储';
