@@ -12,6 +12,7 @@ public interface ConfigConstants {
     public static final String MANAGE_SHOP_URL = "manage.shop.url";
     public static final String POST_SHARE_URL = "post.share.url";
     public static final String ACTIVITY_SHARE_URL = "activity.share.url";
+    public static final String POST_LINK_SHARE_URL = "post.link.share.url";
     public static final String POLL_SHARE_URL = "poll.share.url";
     public static final String USER_COUPON_URL = "user.coupon.url";
     public static final String APP_AGREEMENTS_URL = "app.agreements.url";
@@ -178,6 +179,9 @@ public interface ConfigConstants {
     public static final String MEETING_RECORD_WORD_LIMIT = "meeting.record.word.limit";
 	public static final String ASSET_DINGFENGHUI_APPSHOWPAY = "asset.dingfenghui.appshowpay";
 	public static final String OPENAPI_LUFU_KEY = "openapi.lufu.key";
+	
+	public static final String APPLE_PUSHER_FLAG = "apple.pusher.flag";
+
 
 	
 	//<!--深圳湾携程用户对接所用配置项 start  create by huanglm-->

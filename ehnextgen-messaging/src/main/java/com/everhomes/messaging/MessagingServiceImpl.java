@@ -421,7 +421,9 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
                         restResponse.setResponseObject(response);
                         restResponse.setErrorCode(ErrorCodes.SUCCESS);
                         restResponse.setErrorDescription("OK");
+                        LOGGER.info("signal, subject={}",subject);
                         handler.handleResult(restResponse);
+                        LOGGER.info("login after signal, result={}",restResponse);
                         deferredResult.setResult(restResponse);
 //                        deferredResult.setResultHandler(handler);
                         return null;
@@ -465,6 +467,7 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
                 }
 
                 try {
+                    LOGGER.info("localBus publish, subject={}",subject);
                     localBus.publish(null, subject, StringHelper.toJsonString(message));
                     if(!REDIS_ENABLE){
                         removeEverythingWithKey(subject);

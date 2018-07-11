@@ -54,11 +54,13 @@ public class ImportFileServiceImpl implements ImportFileService{
         task.setStatus(ImportFileTaskStatus.CREATED.getCode());
         organizationProvider.createImportFileTask(task);
         User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
                 try{
                     UserContext.setCurrentUser(user);
+                    UserContext.setCurrentNamespaceId(namespaceId);
                     task.setStatus(ImportFileTaskStatus.EXECUTING.getCode());
                     organizationProvider.updateImportFileTask(task);
                     ImportFileResponse response = callback.importFile();
@@ -128,6 +130,10 @@ public class ImportFileServiceImpl implements ImportFileService{
                 }
             }
         }
+        //在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
+        if (titleMap.containsKey("contactExtraTels")) {
+        	titleMap.remove("contactExtraTels");
+		}
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
             ByteArrayOutputStream out = null;
@@ -187,6 +193,10 @@ public class ImportFileServiceImpl implements ImportFileService{
                     }
                     if(data.size() > 0){
                         for (Map.Entry<String, String> entry : data.entrySet()) {
+                        	////在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
+                        	if ("contactExtraTels".equals(entry.getKey())) {
+								continue;
+							}
                             titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getKey()));
                         }
                     }else{
@@ -209,10 +219,23 @@ public class ImportFileServiceImpl implements ImportFileService{
                             data.put(String.valueOf(i), logList.get(i));
                         }
                     }
+                    //在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
+                    //把contactToken字段的值改为contactExtraTels，显示多手机号
+                    if (data.containsKey("contactExtraTels")) {
+                    	String contactExtraTels = (String) data.get("contactExtraTels");
+                        List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+                        String customerExtraTelsForExport = contactExtraTelsList.toString();
+                        data.put("contactToken", customerExtraTelsForExport.substring(1, customerExtraTelsForExport.length()-1));
+					}
+                    
                     XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
                     for (Map.Entry<String, Object> entry : data.entrySet()) {
-                        //modify by rui.jia  20180422
+                    	//不显示contactExtraTels字段
+                    	if ("contactExtraTels".equals(entry.getKey())) {
+							continue;
+						}
+                    	//modify by rui.jia  20180422
                         String entryValues = "";
                         if (entry.getValue() != null && entry.getValue() instanceof Collection) {
                             entryValues = Arrays.toString(((Collection) entry.getValue()).toArray());

@@ -50,6 +50,24 @@ public class OrganizationOwnerDTO {
     private String authType;
 
     private String primaryFlag;
+    private List<String> customerExtraTels;
+    private String customerExtraTelsForExport;
+
+    public String getCustomerExtraTelsForExport() {
+		return customerExtraTelsForExport;
+	}
+
+	public void setCustomerExtraTelsForExport(String customerExtraTelsForExport) {
+		this.customerExtraTelsForExport = customerExtraTelsForExport;
+	}
+
+	public List<String> getCustomerExtraTels() {
+        return customerExtraTels;
+    }
+
+    public void setCustomerExtraTels(List<String> customerExtraTels) {
+        this.customerExtraTels = customerExtraTels;
+    }
 
     private String building;
 

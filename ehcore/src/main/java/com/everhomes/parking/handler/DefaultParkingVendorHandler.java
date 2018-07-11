@@ -380,10 +380,17 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
                 }
             }
             tempRow.createCell(11).setCellValue(String.valueOf(order.getPrice().doubleValue()));
+            tempRow.createCell(12).setCellValue(order.getOriginalPrice()==null?
+                    String.valueOf(order.getPrice().doubleValue())
+                    :String.valueOf(order.getOriginalPrice().doubleValue()));
             VendorType type = VendorType.fromCode(order.getPaidType());
-            tempRow.createCell(12).setCellValue(null==type?"":type.getDescribe());
+            tempRow.createCell(13).setCellValue(null==type?"":type.getDescribe());
             ParkingRechargeType parkingRechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
-            tempRow.createCell(13).setCellValue(parkingRechargeType==null?"":parkingRechargeType.getDescribe());
+            tempRow.createCell(14).setCellValue(parkingRechargeType==null?"":parkingRechargeType.getDescribe());
+            ParkingRechargeOrderStatus orderStatus = ParkingRechargeOrderStatus.fromCode(order.getStatus());
+            tempRow.createCell(15).setCellValue(orderStatus==null?"":orderStatus.getDescription());
+            ParkingPaySourceType sourceType = ParkingPaySourceType.fromCode(order.getPaySource());
+            tempRow.createCell(16).setCellValue(sourceType==null?"":sourceType.getDesc());
         }
     }
     @Override
