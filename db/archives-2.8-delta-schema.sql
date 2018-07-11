@@ -6,7 +6,7 @@ CREATE TABLE `eh_archives_forms` (
 	`owner_type` VARCHAR(32),
 	`owner_id` BIGINT,
 	`form_name` VARCHAR(64) NOT NULL COMMENT 'name of the form',
-	`static_fields` NOT NULL TEXT COMMENT 'static form fields in json format',
+	`static_fields` TEXT NOT NULL  COMMENT 'static form fields in json format',
 	`dynamic_fields` TEXT COMMENT 'dynamic form fields in json format',
 	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0. inactive, 1.active',
 	`operator_uid` BIGINT,
