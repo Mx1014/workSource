@@ -23,7 +23,8 @@ public enum LeasePromotionConfigType {
     CONSULT_FLAG("consultFlag"),
     BUILDING_INTRODUCE_FLAG("buildingIntroduceFlag"),
     DISPLAY_NAME_STR("displayNameStr"),
-    DISPLAY_ORDER_STR("displayOrderStr");
+    DISPLAY_ORDER_STR("displayOrderStr"),
+    HIDE_ADDRESS_FLAG("hideAddressFlag");
 
     private String code;
     private LeasePromotionConfigType(String code) {
