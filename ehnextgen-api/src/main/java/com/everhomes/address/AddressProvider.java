@@ -91,4 +91,7 @@ public interface AddressProvider {
 	long createAddress3(Address address);
 	void createAddressArrangement(AddressArrangement arrangement);
 	AddressArrangement findActiveAddressArrangementByAddressId(Long addressId);
+	void deleteAddressArrangement(Long id);
+	AddressArrangement findAddressArrangementById(Long id);
+	AddressArrangement findActiveAddressArrangementByTargetId(Long addressId);
 }

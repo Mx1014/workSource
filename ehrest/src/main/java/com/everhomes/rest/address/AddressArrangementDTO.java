@@ -26,6 +26,12 @@ public class AddressArrangementDTO {
 	@ItemType(ArrangementApartmentDTO.class)
     private List<ArrangementApartmentDTO> apartments;
 	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

@@ -16,6 +16,7 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressArrangementDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
+import com.everhomes.server.schema.tables.pojos.EhAddressArrangement;
 import com.everhomes.server.schema.tables.pojos.EhAddressAttachments;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
@@ -859,7 +860,36 @@ public class AddressProviderImpl implements AddressProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select()
 					.from(Tables.EH_ADDRESS_ARRANGEMENT)
-					.where(Tables.EH_ADDRESS_ARRANGEMENT.ADDRES_ID.eq(addressId))
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.ADDRESS_ID.eq(addressId))
+					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					.fetchOneInto(AddressArrangement.class);
+	}
+
+	@Override
+	public void deleteAddressArrangement(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ADDRESS_ARRANGEMENT)
+				.set(Tables.EH_ADDRESS_ARRANGEMENT.STATUS,AddressArrangementStatus.INACTIVE.getCode())
+				.execute();
+	}
+
+	@Override
+	public AddressArrangement findAddressArrangementById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AddressArrangement.class));
+        EhAddressArrangementDao dao = new EhAddressArrangementDao(context.configuration());
+        EhAddressArrangement record = dao.findById(id);
+        if (record != null) {
+			return ConvertHelper.convert(record, AddressArrangement.class);
+		}
+        return null;
+	}
+
+	@Override
+	public AddressArrangement findActiveAddressArrangementByTargetId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.TARGET_ID.like(DSL.concat("%", addressId.toString(), "%")))
 					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
 					.fetchOneInto(AddressArrangement.class);
 	}

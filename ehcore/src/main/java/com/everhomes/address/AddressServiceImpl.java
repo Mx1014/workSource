@@ -2655,9 +2655,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	
 	private void createSplitArrangement(CreateAddressArrangementCommand cmd) {
 		Address targetAddress = addressProvider.findAddressById(cmd.getAddressId());
-		List<Long> targetIds = new ArrayList<>();
-		List<Long> originalIds = new ArrayList<>();
-		originalIds.add(cmd.getAddressId());
+		List<String> targetIds = new ArrayList<>();
+		List<String> originalIds = new ArrayList<>();
+		originalIds.add(cmd.getAddressId().toString());
 		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
 		for (ArrangementApartmentDTO apartment : apartments) {
 			Address address = new Address();
@@ -2676,8 +2676,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			address.setBuildingName(targetAddress.getBuildingName());
 			address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
 			
-			long addressId = addressProvider.createAddress3(address);
-			targetIds.add(addressId);
+			Long addressId = addressProvider.createAddress3(address);
+			targetIds.add(addressId.toString());
 		}
 		AddressArrangement arrangement = ConvertHelper.convert(cmd, AddressArrangement.class);
 		String targetId = StringHelper.toJsonString(targetIds);
@@ -2693,9 +2693,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	
 	private void createMergeArrangement(CreateAddressArrangementCommand cmd) {
 		Address targetAddress = addressProvider.findAddressById(cmd.getAddressId());
-		List<Long> targetIds = new ArrayList<>();
-		List<Long> originalIds = new ArrayList<>();
-		originalIds.add(targetAddress.getId());
+		List<String> targetIds = new ArrayList<>();
+		List<String> originalIds = new ArrayList<>();
+		originalIds.add(targetAddress.getId().toString());
 		
 		Address address = new Address();
 		address.setStatus(AddressAdminStatus.INACTIVE.getCode());
@@ -2720,10 +2720,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			address.setRentArea(address.getRentArea() + apartment.getRentArea());
 			address.setFreeArea(address.getFreeArea() + apartment.getFreeArea());
 			address.setChargeArea(address.getChargeArea() + apartment.getChargeArea());
-			originalIds.add(apartment.getAddressId());
+			originalIds.add(apartment.getAddressId().toString());
 		}
-		long newAddressId = addressProvider.createAddress3(address);
-		targetIds.add(newAddressId);
+		Long newAddressId = addressProvider.createAddress3(address);
+		targetIds.add(newAddressId.toString());
 		
 		AddressArrangement arrangement = ConvertHelper.convert(cmd, AddressArrangement.class);
 		String targetId = StringHelper.toJsonString(targetIds);
@@ -2741,6 +2741,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	public AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd) {
 		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByAddressId(cmd.getAddressId());
 		AddressArrangementDTO dto = ConvertHelper.convert(arrangement, AddressArrangementDTO.class);
+		dto.setDateBegin(arrangement.getDateBegin().getTime());
 		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
 			List<ArrangementApartmentDTO> apartments = generateSplitArrangementApartments(arrangement);
 			dto.setApartments(apartments);		
@@ -2754,9 +2755,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
 	private List<ArrangementApartmentDTO> generateSplitArrangementApartments(AddressArrangement arrangement) {
 		List<ArrangementApartmentDTO> results = new ArrayList<>();
-		List<Long> targetIds = (List<Long>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
-		for (Long addressId : targetIds) {
-			Address address = addressProvider.findAddressById(addressId);
+		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		for (String addressId : targetIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
 			ArrangementApartmentDTO dto = ConvertHelper.convert(address, ArrangementApartmentDTO.class);
 			dto.setAddressId(address.getId());
 			results.add(dto);
@@ -2766,10 +2767,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	
 	private List<ArrangementApartmentDTO> generateMergeArrangementApartments(AddressArrangement arrangement) {
 		List<ArrangementApartmentDTO> results = new ArrayList<>();
-		List<Long> originalIds = (List<Long>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
-		originalIds.remove(arrangement.getAddresId());
-		for (Long addressId : originalIds) {
-			Address address = addressProvider.findAddressById(addressId);
+		List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+		originalIds.remove(arrangement.getAddressId().toString());
+		for (String addressId : originalIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
 			ArrangementApartmentDTO dto = ConvertHelper.convert(address, ArrangementApartmentDTO.class);
 			dto.setAddressId(address.getId());
 			results.add(dto);
@@ -2779,19 +2780,63 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
 	@Override
 	public void updateAddressArrangement(UpdateAddressArrangementCommand cmd) {
-		// TODO Auto-generated method stub
+		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		if (arrangement == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "the addressArrangement does not exist!");
+		}
+		if (cmd.getDateBegin()!=null && cmd.getDateBegin() != arrangement.getDateBegin().getTime()) {
+			arrangement.setDateBegin(new Timestamp(cmd.getDateBegin()));
+			arrangement.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			User user = UserContext.current().getUser();
+			arrangement.setUpdateUid(user.getId());
+		}
 		
+		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
+		for (ArrangementApartmentDTO dto : apartments) {
+			Address address = addressProvider.findAddressById(dto.getAddressId());
+			if (dto.getApartmentName() != null && !dto.getApartmentName().equals(address.getApartmentName())) {
+				address.setApartmentName(dto.getApartmentName());
+				address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
+			}
+			address.setAreaSize(dto.getAreaSize());
+			address.setChargeArea(dto.getChargeArea());
+			address.setFreeArea(dto.getFreeArea());
+			address.setRentArea(dto.getRentArea());
+			addressProvider.updateAddress(address);
+		}
 	}
 
 	@Override
 	public void deleteAddressArrangement(DeleteAddressArrangementCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		addressProvider.deleteAddressArrangement(cmd.getId());
 	}
 
 	@Override
 	public List<HistoryApartmentDTO> getHistoryApartment(GetHistoryApartmentCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		if (cmd.getAddressId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "the addressId should not be null!");
+		}
+		
+		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByTargetId(cmd.getAddressId());
+		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+		String remark = null;
+		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+			//TODO 需要获取特定的语句：101被拆分成101A,101B
+		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+			//TODO 需要获取特定的语句：101,102,103合并成101
+		}
+		List<HistoryApartmentDTO> results = new ArrayList<>();
+		for (String addressId : originalIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+			HistoryApartmentDTO dto = ConvertHelper.convert(address, HistoryApartmentDTO.class);
+			dto.setAddressId(address.getId());
+			dto.setDateBegin(arrangement.getDateBegin().getTime());
+			dto.setRemark(remark);
+			results.add(dto);
+		}
+		return results;
 	}
 }
