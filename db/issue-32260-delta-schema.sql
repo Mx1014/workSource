@@ -40,7 +40,6 @@ CREATE TABLE `eh_customer_attachments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- end
 
-
 -- 通用脚本
 -- AUTHOR liuyilin  20180712
 -- REMARK issue-32260 人脸识别V1.6 - 管理控制台 增加字段长度 
