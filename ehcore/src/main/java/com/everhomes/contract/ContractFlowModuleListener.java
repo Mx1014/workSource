@@ -1,6 +1,8 @@
 package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -77,8 +80,8 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Autowired
     private AssetService assetService;
     
-//    @Autowired
-//    private ContractService contractService;
+    @Autowired
+	private AssetProvider assetProvider;
 
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
@@ -179,7 +182,11 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             	//add by tangcen 退约合同审批通过后，对该合同未出的账单进行处理
         		if (contract.getCostGenerationMethod()!=null) {
         			assetService.deleteUnsettledBillsOnContractId(contract.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
-//=======
+        			BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId());
+        			contract.setRent(totalAmount);
+        			contractProvider.updateContract(contract);
+                    contractSearcher.feedDoc(contract);
+        			//=======
                 //记录合同事件日志，by tangcen
 //        		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 //            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {

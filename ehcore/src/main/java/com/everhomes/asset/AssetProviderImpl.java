@@ -1640,14 +1640,14 @@ public class AssetProviderImpl implements AssetProvider {
         return false;
     }
 
-    public PaymentLateFine findLastedFine(Long id) {
-         List<PaymentLateFine> list = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_LATE_FINE)
-                .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(id))
-                 .orderBy(Tables.EH_PAYMENT_LATE_FINE.ID.desc())
-                .fetchInto(PaymentLateFine.class);
-         if(list.size() < 1) return null;
-         return list.get(0);
-    }
+//    public PaymentLateFine findLastedFine(Long id) {
+//         List<PaymentLateFine> list = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_LATE_FINE)
+//                .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(id))
+//                 .orderBy(Tables.EH_PAYMENT_LATE_FINE.ID.desc())
+//                .fetchInto(PaymentLateFine.class);
+//         if(list.size() < 1) return null;
+//         return list.get(0);
+//    }
 
     @Override
     public PaymentLateFine findLastedFine(Long id) {
@@ -4924,11 +4924,6 @@ public class AssetProviderImpl implements AssetProvider {
 
 	@Override
 	public void deleteUnsettledBills(Long contractId, String endTimeStr) {
-		//SELECT bill_id 
-		//FROM eh_payment_bill_items 
-		//WHERE date_str_begin<"2018-09-10" 
-		//AND contract_id=7322 
-		//GROUP BY bill_id
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
         EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");

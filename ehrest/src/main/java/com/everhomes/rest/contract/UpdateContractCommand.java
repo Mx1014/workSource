@@ -59,11 +59,8 @@ import java.util.List;
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
  *     <li>categoryId: 合同类型多入口</li>
-<<<<<<< HEAD
  *     <li>costGenerationMethod: 费用收取方式，0：按计费周期，1：按实际天数</li>
-=======
  *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
->>>>>>> asset_contract_multiple_entry
  * </ul>
  * Created by ying.xiong on 2017/8/5.
  */

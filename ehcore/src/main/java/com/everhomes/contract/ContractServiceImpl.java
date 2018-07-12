@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -818,7 +819,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		FindContractCommand command = new FindContractCommand();
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
-		//add by tangcen
 		command.setCommunityId(contract.getCommunityId());
 		command.setNamespaceId(contract.getNamespaceId());
 		command.setCategoryId(contract.getCategoryId());
@@ -1882,12 +1882,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
-				parentContract.setStatus(ContractStatus.HISTORY.getCode());
-				contractProvider.updateContract(parentContract);
-				contractSearcher.feedDoc(parentContract);
 				//add by tangcen 变更合同入场后，要对父合同的未出账单进行处理
 				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))){
 					assetService.deleteUnsettledBillsOnContractId(parentContract.getCostGenerationMethod(),contract.getParentId(),contract.getContractStartDate());
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(parentContract.getContractNumber(),parentContract.getId());
+					parentContract.setRent(totalAmount);
 				}
 
 				if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
@@ -1916,7 +1915,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						}
 					}
 				}
-				
+				parentContract.setStatus(ContractStatus.HISTORY.getCode());
+				contractProvider.updateContract(parentContract);
+				contractSearcher.feedDoc(parentContract);
 			}
 		}
 	}
@@ -2137,22 +2138,16 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 //		}
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
-//<<<<<<< HEAD
-		//add by tangcen
+
 		dto.setCommunityId(cmd.getCommunityId());
 		dto.setNamespaceId(cmd.getNamespaceId());
 		dto.setCategoryId(cmd.getCategoryId());
 		
-//=======
-		// just in case
-//		dto.setCategoryId(contract.getCategoryId());
-//>>>>>>> 5.6.2
 		if(dto.getCreateUid() != null) {
 			User creator = userProvider.findUserById(dto.getCreateUid());
 			if(creator != null) {
 				dto.setCreatorName(creator.getNickName());
-			}
-				
+			}	
 		}
 
 		if(dto.getDenunciationUid() != null) {
@@ -2169,7 +2164,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					dto.setPartyAName(organization.getName());
 				}
 			}
-
 		}
 
 		if(contract.getApplicationId() != null) {
@@ -2203,7 +2197,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			if(owner != null) {
 				dto.setCustomerName(owner.getContactName());
 			}
-
 		}
 
 		if(contract.getParentId() != null) {
@@ -2212,6 +2205,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				dto.setParentContractNumber(parentContract.getContractNumber());
 			}
 		}
+		
 		if(contract.getRootParentId() != null) {
 			Contract rootContract = contractProvider.findContractById(contract.getRootParentId());
 			if(rootContract != null) {
@@ -2236,7 +2230,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				ContractChargingItem chargingItem = chargingItems.get(0);
 				dto.setStartTime(yyyyMMdd.format(chargingItem.getChargingStartTime()));
 			}
-			//String endTimeStr = yyyyMMdd.format(contract.getCreateTime());
 			String endTimeStr = yyyyMMdd.format(contract.getContractStartDate());
 			dto.setEndTimeByDay(endTimeStr);
 			
@@ -2254,9 +2247,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 			String endTimeStr = yyyyMMdd.format(contract.getDenunciationTime());
 			dto.setEndTimeByDay(endTimeStr);
-//			List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(contract.getId(),endTimeStr);
-//			PaymentBills bill = bills.get(bills.size()-1);
-//			dto.setEndTimeByPeriod(bill.getDateStrEnd());
 			String endTimeByPeriod = assetProvider.findEndTimeByPeriod(endTimeStr,contract.getId());
 			dto.setEndTimeByPeriod(endTimeByPeriod);
 		}

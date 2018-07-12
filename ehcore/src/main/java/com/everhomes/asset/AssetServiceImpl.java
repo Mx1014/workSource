@@ -4848,27 +4848,6 @@ public class AssetServiceImpl implements AssetService {
 			assetProvider.updatePaymentBills(bill);
 		}
 	}
-//	//计算截断后最近的一条未出账单 add by tangcen 2018年6月12日
-//	private void dealFirstUnsettledBill(PaymentBills bill,Timestamp endTime){
-//		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-//		try {
-//			Date dateBegin = yyyyMMdd.parse(bill.getDateStrBegin());
-//			Date dateEnd = yyyyMMdd.parse(bill.getDateStrEnd());
-//			int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
-//			int actualPeriod = daysBetween_date(dateBegin,endTime);
-//			bill.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceivable()));
-//			bill.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,bill.getAmountReceived()));
-//			bill.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,bill.getAmountOwed()));
-//			String actualDateStrEnd = yyyyMMdd.format(endTime);
-//			bill.setDateStrEnd(actualDateStrEnd);
-//		} catch (ParseException e) {
-//			if(LOGGER.isDebugEnabled()) {
-//	            LOGGER.error("parse date error!");
-//	        }
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//                    "parse date error once");
-//		}
-//	}
 	
 	//计算截断后最近的一条未出账单明细  add by tangcen 2018年6月12日
 	private void dealUnsettledBillItems(List<PaymentBillItems> billItems,Timestamp endTime){
