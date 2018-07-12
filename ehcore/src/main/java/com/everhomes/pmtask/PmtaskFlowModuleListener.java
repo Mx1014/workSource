@@ -683,9 +683,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
-		response.getRequests().forEach(p->{
-			dto.getOptions().add(p.getName());
-		});
+		response.getRequests().forEach(p-> dto.getOptions().add(p.getName()));
 		list.add(dto);
 		return list;
 	}
