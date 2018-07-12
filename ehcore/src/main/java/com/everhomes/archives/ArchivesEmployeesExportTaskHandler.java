@@ -57,7 +57,6 @@ public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandl
 
         ExportArchivesEmployeesCommand cmd = new ExportArchivesEmployeesCommand();
         cmd.setOrganizationId(organizationId);
-        cmd.setFormOriginId(formOriginId);
         cmd.setKeywords(keywords);
         cmd.setNamespaceId(namespaceId);
 

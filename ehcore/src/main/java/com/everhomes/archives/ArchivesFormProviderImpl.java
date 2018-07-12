@@ -17,6 +17,7 @@ import com.everhomes.server.schema.tables.records.EhArchivesFormGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhArchivesFormValsRecord;
 import com.everhomes.server.schema.tables.records.EhArchivesFormsRecord;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class ArchivesFormProviderImpl implements ArchivesFormProvider{
@@ -147,5 +149,14 @@ public class ArchivesFormProviderImpl implements ArchivesFormProvider{
         query.addConditions(Tables.EH_ARCHIVES_FORM_VALS.SOURCE_ID.eq(sourceId));
         query.addConditions(Tables.EH_ARCHIVES_FORM_VALS.FIELD_NAME.eq(fieldName));
         return query.fetchAnyInto(ArchivesFormVal.class);
+    }
+
+    @Override
+    public List<ArchivesFormVal> listArchivesFormVals(Long formId, Long sourceId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhArchivesFormVals.class));
+        SelectQuery<EhArchivesFormValsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_FORM_VALS);
+        query.addConditions(Tables.EH_ARCHIVES_FORM_VALS.FORM_ID.eq(formId));
+        query.addConditions(Tables.EH_ARCHIVES_FORM_VALS.SOURCE_ID.eq(sourceId));
+        return query.fetch().map(r -> ConvertHelper.convert(r, ArchivesFormVal.class));
     }
 }

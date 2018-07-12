@@ -12,6 +12,7 @@ import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -117,8 +118,18 @@ public class ArchivesFormServiceImpl implements ArchivesFormService{
         }
     }
 
+    @Override
     public List<GeneralFormFieldDTO> getArchivesDynamicValues(Long formId, Long detailId){
-
+        List<ArchivesFormVal> values = archivesFormProvider.listArchivesFormVals(formId, detailId);
+        if(values == null || values.size() == 0)
+            return null;
+        return values.stream().map(r ->{
+            GeneralFormFieldDTO dto = new GeneralFormFieldDTO();
+            dto.setFieldName(r.getFieldName());
+            dto.setFieldType(r.getFieldType());
+            dto.setFieldValue(r.getFieldValue());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     private List<ArchivesFormGroupDTO> getFormGroupByFormId(Integer namespaceId, Long formId){

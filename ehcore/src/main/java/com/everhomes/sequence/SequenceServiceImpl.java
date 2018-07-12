@@ -208,7 +208,6 @@ import com.everhomes.server.schema.tables.pojos.EhForumServiceTypes;
 import com.everhomes.server.schema.tables.pojos.EhForums;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalVals;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
-import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.pojos.EhGroupMemberLogs;
@@ -2502,10 +2501,6 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhArchivesDismissEmployees.class, Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ID.max()).from(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhGeneralFormGroups.class, Tables.EH_GENERAL_FORM_GROUPS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_GENERAL_FORM_GROUPS.ID.max()).from(Tables.EH_GENERAL_FORM_GROUPS).fetchOne().value1();
         });
 
         syncTableSequence(null, EhArchivesForms.class, Tables.EH_ARCHIVES_FORMS.getName(), (dbContext) -> {

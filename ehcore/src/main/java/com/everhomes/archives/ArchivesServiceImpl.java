@@ -44,6 +44,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import javafx.scene.shape.Arc;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -917,6 +918,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     public GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd) {
 
         GetArchivesEmployeeResponse response = new GetArchivesEmployeeResponse();
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        if(employee == null)
+            return response;
 
         //  1.获取表单所有字段
 /*        GeneralFormIdCommand formCommand = new GeneralFormIdCommand(getRealFormOriginId(cmd.getFormOriginId()));
@@ -924,27 +928,29 @@ public class ArchivesServiceImpl implements ArchivesService {
         ArchivesFormDTO form = getRealArchivesForm(cmd.getNamespaceId(), cmd.getOrganizationId());
 
         //  2.获取表单对应的值
-/*        GetGeneralFormValuesCommand valueCommand =
-                new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_AUTH.getCode(), cmd.getDetailId(), NormalFlag.NEED.getCode());
-        List<PostApprovalFormItem> employeeDynamicVal = generalFormService.getGeneralFormValues(valueCommand);*/
-        Map<String, String> employeeDynamicMaps = handleEmployeeDynamicVal(employeeDynamicVal);
+
+        /*
+        GetGeneralFormValuesCommand valueCommand =new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_AUTH.getCode(), cmd.getDetailId(), NormalFlag.NEED.getCode());
+        List<PostApprovalFormItem> employeeDynamicVal = generalFormService.getGeneralFormValues(valueCommand);
+        */
+        List<GeneralFormFieldDTO> dynamicVals = archivesFormService.getArchivesDynamicValues(form.getId(), cmd.getDetailId());
+        Map<String, String> dynamicMaps = handleEmployeeDynamicVal(dynamicVals);
 
         //  3.获取个人信息的值
-        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        Map<String, String> employeeDefaultMaps = handleEmployeeDefaultVal(employee);
+        Map<String, String> staticMaps = handleEmployeeDefaultVal(employee);
 
         //  4.赋值
 
         //  4-1.处理部门.岗位.职级字段
-        processEmployeeOrganization(employeeDefaultMaps, employee);
+        processEmployeeOrganization(staticMaps, employee);
         for (GeneralFormFieldDTO dto : form.getFormFields()) {
             //  4-2.赋值给系统默认字段
             if (GeneralFormFieldAttribute.DEFAULT.getCode().equals(dto.getFieldAttribute())) {
-                dto.setFieldValue(employeeDefaultMaps.get(dto.getFieldName()));
+                dto.setFieldValue(staticMaps.get(dto.getFieldName()));
             }
             //  4-3.赋值给非系统默认字段
             else {
-                dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
+                dto.setFieldValue(dynamicMaps.get(dto.getFieldName()));
             }
         }
 
@@ -1466,11 +1472,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     /**
      * 给用户自定义字段赋值，利用 map 设置 key 来存取值
      */
-    private Map<String, String> handleEmployeeDynamicVal(List<PostApprovalFormItem> employeeDynamicVals) {
+    private Map<String, String> handleEmployeeDynamicVal(List<GeneralFormFieldDTO> dynamicVals) {
         Map<String, String> valueMap = new HashMap<>();
-        if (employeeDynamicVals != null && employeeDynamicVals.size() > 0) {
-            for (PostApprovalFormItem value : employeeDynamicVals) {
-                valueMap.put(value.getFieldName(), value.getFieldValue());
+        if (dynamicVals != null && dynamicVals.size() > 0) {
+            for (GeneralFormFieldDTO val : dynamicVals) {
+                valueMap.put(val.getFieldName(), val.getFieldValue());
             }
         }
         return valueMap;
@@ -1897,7 +1903,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
 
             //  开始导入，同时设置导入结果
-            importArchivesEmployeesFiles(dataList, response, cmd.getFormOriginId(), cmd.getOrganizationId(), cmd.getDepartmentId(), form.getFormFields());
+            importArchivesEmployeesFiles(dataList, response, cmd.getOrganizationId(), cmd.getDepartmentId(), form.getFormFields());
             //  返回结果
             return response;
         }, task);
@@ -1929,7 +1935,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private void importArchivesEmployeesFiles(
-            List<ImportArchivesEmployeesDTO> datas, ImportFileResponse response, Long formOriginId, Long organizationId,
+            List<ImportArchivesEmployeesDTO> datas, ImportFileResponse response, Long organizationId,
             Long departmentId, List<GeneralFormFieldDTO> formValues) {
         ImportFileResultLog<Map> log = new ImportFileResultLog<>(ArchivesLocaleStringCode.SCOPE);
         List<ImportFileResultLog<Map>> errorDataLogs = new ArrayList<>();
@@ -1962,7 +1968,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  5.导入详细信息
             if (judge.getDetailId() == null)
                 continue;
-            saveArchivesEmployeesDetail(formOriginId, organizationId, judge.getDetailId(), itemValues);
+            saveArchivesEmployeesDetail(organizationId, judge.getDetailId(), itemValues);
             //  6.记录重复数据
             if (judge.isDuplicateFlag())
                 coverCount++;
@@ -2084,7 +2090,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         return judge;
     }
 
-    private void saveArchivesEmployeesDetail(Long formOriginId, Long organizationId, Long detailId, List<PostApprovalFormItem> itemValues) {
+    private void saveArchivesEmployeesDetail(Long organizationId, Long detailId, List<PostApprovalFormItem> itemValues) {
         UpdateArchivesEmployeeCommand updateCommand = new UpdateArchivesEmployeeCommand();
         updateCommand.setDetailId(detailId);
         updateCommand.setOrganizationId(organizationId);
@@ -2098,10 +2104,9 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  export with the file download center
         Map<String, Object> params = new HashMap<>();
         //  the value could be null if it is not exist
+        params.put("namespaceId", cmd.getNamespaceId());
         params.put("organizationId", cmd.getOrganizationId());
-        params.put("formOriginId", cmd.getFormOriginId());
         params.put("keywords", cmd.getKeywords());
-        params.put("namespaceId", UserContext.getCurrentNamespaceId());
         params.put("userId", UserContext.current().getUser().getId());
         String fileName = localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.EMPLOYEE_LIST, "zh_CN", "EmployeeList") + ".xlsx";
 
@@ -2111,9 +2116,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public OutputStream getArchivesEmployeesExportStream(ExportArchivesEmployeesCommand cmd, Long taskId) {
         //  此处的数据类型不好调用晓强哥的 ExcelUtil, 所以使用原始的导出方法
-        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
-        formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
-        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
+        /*GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
+        formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));*/
+        ArchivesFormDTO form = getRealArchivesForm(cmd.getNamespaceId(), cmd.getOrganizationId());
 
         //  1.设置导出标题
         List<String> titles = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
@@ -2127,7 +2132,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         for (Long detailId : detailIds) {
             ExportArchivesEmployeesDTO dto = new ExportArchivesEmployeesDTO();
             GetArchivesEmployeeCommand getCommand =
-                    new GetArchivesEmployeeCommand(cmd.getFormOriginId(), cmd.getOrganizationId(), detailId, 1);
+                    new GetArchivesEmployeeCommand(cmd.getOrganizationId(), detailId, 1);
             GetArchivesEmployeeResponse response = getArchivesEmployee(getCommand);
             List<String> employeeValues = response.getForm().getFormFields().stream().map(GeneralFormFieldDTO::getFieldValue).collect(Collectors.toList());
             dto.setVals(employeeValues);
@@ -2197,9 +2202,11 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd, HttpServletResponse httpResponse) {
-        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
+
+        ArchivesFormDTO form = getRealArchivesForm(cmd.getNamespaceId(), cmd.getOrganizationId());
+        /*        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
         formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
-        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
+        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);*/
         String fileName = localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.EMPLOYEE_IMPORT_MODULE, "zh_CN", "EmployeeImportModule");
         ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
         List<String> titleNames = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
@@ -2212,7 +2219,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
     }
 
-    private void excelSettings(ExcelUtils excelUtils, GeneralFormDTO form) {
+    private void excelSettings(ExcelUtils excelUtils, ArchivesFormDTO form) {
         List<Integer> mandatoryTitle = new ArrayList<>();
         for (int i = 0; i < form.getFormFields().size(); i++) {
             mandatoryTitle.add(checkMandatory(form.getFormFields().get(i).getFieldName()));

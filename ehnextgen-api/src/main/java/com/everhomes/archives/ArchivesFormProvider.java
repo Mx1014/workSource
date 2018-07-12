@@ -1,5 +1,7 @@
 package com.everhomes.archives;
 
+import java.util.List;
+
 public interface ArchivesFormProvider {
 
     Long createArchivesForm(ArchivesForm form);
@@ -22,4 +24,5 @@ public interface ArchivesFormProvider {
 
     ArchivesFormVal findArchivesFormValBySourceIdAndName(Long formId, Long sourceId, String fieldName);
 
+    List<ArchivesFormVal> listArchivesFormVals(Long formId, Long sourceId);
 }
