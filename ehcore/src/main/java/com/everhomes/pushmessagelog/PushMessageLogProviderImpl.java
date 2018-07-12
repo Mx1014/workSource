@@ -10,11 +10,19 @@ import org.jooq.SelectJoinStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configurations.Configurations;
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhConfigurationsDao;
+import com.everhomes.server.schema.tables.daos.EhPushMessageLogDao;
+import com.everhomes.server.schema.tables.pojos.EhConfigurations;
+import com.everhomes.server.schema.tables.pojos.EhPushMessageLog;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -78,25 +86,51 @@ public class PushMessageLogProviderImpl implements PushMessageLogProvider {
 
 	@Override
 	public PushMessageLog getPushMessageLogById(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPushMessageLogDao dao = new EhPushMessageLogDao(context.configuration());
+		EhPushMessageLog ehBo = dao.findById(id);
+		
+		return ConvertHelper.convert(ehBo, PushMessageLog.class);
 	}
 
 	@Override
-	public void crteatePushMessageLog(PushMessageLog bo) {
-		// TODO Auto-generated method stub
+	public Long crteatePushMessageLog(PushMessageLog bo) {
+
+			//获取主键序列
+			Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPushMessageLog.class));
+			bo.setId(id.intValue());
+						
+			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+			EhPushMessageLogDao dao = new EhPushMessageLogDao(context.configuration());
+			dao.insert(bo);
+				
+			//广播插入数据事件
+			DaoHelper.publishDaoAction(DaoAction.CREATE, EhPushMessageLog.class, null);
+			return id;
 
 	}
 
 	@Override
 	public void updatePushMessageLog(PushMessageLog bo) {
-		// TODO Auto-generated method stub
+				
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPushMessageLogDao dao = new EhPushMessageLogDao(context.configuration());
+		dao.update(bo);
+				
+		//广播更新数据事件
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPushMessageLog.class, bo.getId().longValue());
 
 	}
 
 	@Override
 	public void deletePushMessageLog(PushMessageLog bo) {
-		// TODO Auto-generated method stub
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPushMessageLogDao dao = new EhPushMessageLogDao(context.configuration());
+		dao.deleteById(bo.getId());
+				
+		//广播删除数据事件
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPushMessageLog.class, bo.getId().longValue());
 
 	}
 

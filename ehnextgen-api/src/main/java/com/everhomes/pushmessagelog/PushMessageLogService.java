@@ -1,5 +1,6 @@
 package com.everhomes.pushmessagelog;
 
+import com.everhomes.rest.organization.pm.SendNoticeCommand;
 import com.everhomes.rest.pushmessagelog.PushMessageListCommand;
 import com.everhomes.rest.pushmessagelog.PushMessageLogReturnDTO;
 
@@ -27,22 +28,36 @@ public interface PushMessageLogService {
 	
 	
 	/**
-	 * 创建推送消息记
+	 * 创建推送消息记录
 	 * @param bo	PushMessageLog
 	 */
-	void crteatePushMessageLog(PushMessageLog bo);
+	Long crteatePushMessageLog(PushMessageLog bo);
 	
 	/**
-	 * 修改推送消息记
+	 * 修改推送消息记录
 	 * @param bo	PushMessageLog
 	 */
 	void updatePushMessageLog(PushMessageLog bo);
 	
 	/**
-	 * 删除推送消息记
+	 * 删除推送消息记录
 	 * @param bo	PushMessageLog
 	 */
 	void deletePushMessageLog(PushMessageLog bo);
 	
 
+	/**
+	 * 更新推送状态
+	 * @param id
+	 * @param status
+	 */
+	 void updatePushStatus(Long id , Byte status);
+	 
+	 /**
+	  * 创建推送记录
+	  * @param cmd
+	  * @param pushTypeCode
+	  * @return
+	  */
+	 Long createfromSendNotice(SendNoticeCommand cmd ,Byte pushTypeCode);
 }

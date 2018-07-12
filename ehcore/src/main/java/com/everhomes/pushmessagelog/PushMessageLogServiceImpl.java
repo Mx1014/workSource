@@ -1,6 +1,8 @@
 package com.everhomes.pushmessagelog;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,13 +12,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.configurations.ConfigurationsServiceImpl;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.organization.pm.SendNoticeCommand;
+import com.everhomes.rest.organization.pm.SendNoticeMode;
 import com.everhomes.rest.pushmessagelog.PushMessageListCommand;
 import com.everhomes.rest.pushmessagelog.PushMessageLogDTO;
 import com.everhomes.rest.pushmessagelog.PushMessageLogReturnDTO;
+import com.everhomes.rest.pushmessagelog.PushStatusCode;
+import com.everhomes.rest.pushmessagelog.ReceiverTypeCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -33,6 +41,9 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 	
 	@Autowired
 	private PushMessageLogProvider pushMessageLogProvider;
+	
+	@Autowired
+    private CommunityProvider communityProvider;
 	
 	@Autowired
 	private UserProvider userProvider;
@@ -70,9 +81,10 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 							dto.setOperator(name );
 						}else if(StringUtils.isNotBlank(mobile)){
 							dto.setOperator(mobile );
-						}else{
-							dto.setOperator("Not Found");
 						}
+						/*else{
+							dto.setOperator("Not Found");
+						}*/
 					}
 					//转换推送对象
 					if(StringUtils.isNotBlank(r.getReceivers())){
@@ -92,25 +104,25 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 
 	@Override
 	public PushMessageLog getPushMessageLogById(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return pushMessageLogProvider.getPushMessageLogById(id);
 	}
 
 	@Override
-	public void crteatePushMessageLog(PushMessageLog bo) {
-		// TODO Auto-generated method stub
+	public Long crteatePushMessageLog(PushMessageLog bo) {
+		return pushMessageLogProvider.crteatePushMessageLog(bo);
 
 	}
 
 	@Override
 	public void updatePushMessageLog(PushMessageLog bo) {
-		// TODO Auto-generated method stub
+		pushMessageLogProvider.updatePushMessageLog(bo);
 
 	}
 
 	@Override
 	public void deletePushMessageLog(PushMessageLog bo) {
-		// TODO Auto-generated method stub
+		pushMessageLogProvider.deletePushMessageLog(bo);
 
 	}
 	
@@ -123,4 +135,72 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,msg);
 	}
 
+	public void updatePushStatus(Long id , Byte status){
+		if(id == null){
+			LOGGER.error(" update pushstatus fail, because of the id is null");
+			return ;
+		}
+		PushMessageLog bo = pushMessageLogProvider.getPushMessageLogById(id.intValue());
+		if(bo == null){
+			LOGGER.error(" update pushstatus fail,because can not find record for id = {} ",id);
+			return ;
+		}
+		bo.setPushStatus(status==null?null:status.intValue());
+		pushMessageLogProvider.updatePushMessageLog(bo);
+	}
+	
+	public Long createfromSendNotice(SendNoticeCommand cmd ,Byte pushTypeCode){
+		if(cmd == null) return null ;
+		
+		PushMessageLog  bo = new PushMessageLog(); 
+        bo.setContent(cmd.getMessage());
+        java.util.Date utilDate=new Date();
+        java.sql.Date sqlDate=new java.sql.Date(utilDate.getTime());
+        bo.setCreateTime(sqlDate);
+        bo.setNamespaceId(cmd.getNamespaceId());
+        bo.setOperatorId(UserContext.currentUserId()==null?null:UserContext.currentUserId().intValue());
+        bo.setPushStatus(new Byte(PushStatusCode.WAITING.getCode()).intValue());
+        bo.setPushType(pushTypeCode==null?null:pushTypeCode.intValue());
+        if(cmd.getSendMode() != null ){
+	        if(SendNoticeMode.NAMESPACE.getCode().equals(cmd.getSendMode())){//所有人
+	        	bo.setReceiverType(new Byte(ReceiverTypeCode.ALL.getCode()).intValue());
+	        	
+	        }else if(SendNoticeMode.MOBILE.getCode().equals(cmd.getSendMode())){//按手机号
+	        	bo.setReceiverType(new Byte(ReceiverTypeCode.PHONE.getCode()).intValue());
+	        	List<String> receiverList = cmd.getMobilePhones();
+	        	//组装推送对象
+	 	        if(receiverList !=null && receiverList.size()>0){
+	 	        	StringBuffer receivers = new StringBuffer();
+	 	        	if(receiverList !=null && receiverList.size()>0){
+	 	        		receiverList.stream().map(r->{
+	 	        			receivers.append(r).append(",");
+	 	        			return null ;
+	 	        		});
+	 	        	}
+	 	        	if(receivers.toString().length()>0){
+		        		bo.setReceivers(receivers.toString().substring(0, receivers.toString().length()-1));
+		        	}
+	 	        }
+	        	
+	        }else if(SendNoticeMode.COMMUNITY.getCode().equals(cmd.getSendMode())){//按项目
+	        	bo.setReceiverType(new Byte(ReceiverTypeCode.COMMUNITY.getCode()).intValue());
+	        	//组装推送对象
+	        	List<Long> communityIdList = cmd.getCommunityIds();
+	        	StringBuffer receivers = new StringBuffer();
+	        	communityIdList.stream().map(r->{
+	        		Community com = communityProvider.findCommunityById(r);
+	        		if(com != null && StringUtils.isNotBlank(com.getName())){
+	        			receivers.append(com.getName()).append(",");
+	        		}	        		
+        			return null ;
+        		});
+	        	if(receivers.toString().length()>0){
+	        		bo.setReceivers(receivers.toString().substring(0, receivers.toString().length()-1));
+	        	}
+	        	
+	        }	                    	
+        }
+        return  pushMessageLogProvider.crteatePushMessageLog(bo);
+        
+	}
 }

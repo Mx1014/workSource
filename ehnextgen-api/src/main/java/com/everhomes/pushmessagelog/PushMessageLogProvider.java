@@ -35,7 +35,7 @@ public interface PushMessageLogProvider {
 	 * 创建推送消息记
 	 * @param bo	PushMessageLog
 	 */
-	void crteatePushMessageLog(PushMessageLog bo);
+	Long crteatePushMessageLog(PushMessageLog bo);
 	
 	/**
 	 * 修改推送消息记

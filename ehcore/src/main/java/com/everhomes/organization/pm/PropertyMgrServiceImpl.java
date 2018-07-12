@@ -78,6 +78,8 @@ import com.everhomes.pushmessage.PushMessageResultProvider;
 import com.everhomes.pushmessage.PushMessageStatus;
 import com.everhomes.pushmessage.PushMessageTargetType;
 import com.everhomes.pushmessage.PushMessageType;
+import com.everhomes.pushmessagelog.PushMessageLog;
+import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -319,6 +321,8 @@ import com.everhomes.rest.organization.pm.UpdatePmBillsDto;
 import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
 import com.everhomes.rest.organization.pm.UploadOrganizationOwnerCarAttachmentCommand;
 import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.pushmessagelog.PushMessageTypeCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.IdentifierType;
@@ -371,6 +375,13 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
+
+import jdk.nashorn.internal.parser.JSONParser;
+import net.greghaines.jesque.Job;
+
+import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -399,6 +410,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -568,6 +581,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
    	@Autowired
     private ScheduleProvider scheduleProvider;
+   	
+   	@Autowired
+   	private PushMessageLogService pushMessageLogService;
 
     private String queueName = "property-mgr-push";
 
@@ -1461,7 +1477,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}*/
 
         LOGGER.debug("push message task scheduling, cmd = {}", cmd);
-
+        //创建消息记录
+        Long logId = pushMessageLogService.createfromSendNotice(cmd, PushMessageTypeCode.APP.getCode());
+        cmd.setLogId(logId);
         // 调度执行一键推送
         Job job = new Job(
                 SendNoticeAction.class.getName(),
@@ -1471,6 +1489,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 cmd.getNamespaceId()
         );
 
+               
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
     }
 
