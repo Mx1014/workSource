@@ -15,7 +15,7 @@ CREATE TABLE `eh_service_agreement` (
 
   `id` INT(11)  NOT NULL COMMENT '主键',
   `namespace_id` INT(11) NOT NULL  COMMENT '域空间ID',
-  `agreement_content` mediumtext  COMMENT '协议内容',
+  `agreement_content` MEDIUMTEXT  COMMENT '协议内容',
 
   PRIMARY KEY(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '服务协议信息表';
@@ -27,7 +27,7 @@ CREATE TABLE `eh_service_agreement` (
 -- AUTHOR jiarui  20180625
 -- REMARK 客户管理附件 企业信息V1.0
 CREATE TABLE `eh_customer_attachments` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `name` VARCHAR(1024) DEFAULT  NULL ,
   `namespace_id` INT(11) NOT NULL COMMENT 'namespaceId',
   `customer_id` BIGINT(20) NOT NULL DEFAULT '0',
@@ -37,5 +37,15 @@ CREATE TABLE `eh_customer_attachments` (
   `creator_uid` BIGINT(20) NOT NULL DEFAULT 0,
   `create_time` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- end
+
+
+-- 通用脚本 所有环境
+-- AUTHOR wuhan 2018-7-12
+-- REMARK issues-32611 社保bug:月份为空导致错误 先删除数据再修改表
+DELETE FROM eh_social_security_payments WHERE pay_month IS NULL;
+ALTER TABLE eh_social_security_payments CHANGE `pay_month` `pay_month` VARCHAR(8) NOT NULL COMMENT 'yyyymm'; 
+-- end
+
+
