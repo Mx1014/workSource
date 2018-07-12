@@ -19,4 +19,8 @@ CREATE TABLE `eh_payment_subtraction_items` (
   `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
    PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='减免费项配置表';
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 取消滞纳金表字段非空限制
+ALTER TABLE eh_payment_late_fine MODIFY COLUMN customer_id BIGINT COMMENT 'allows searching taking advantage of it';
 -- --------------------- SECTION END ---------------------------------------------------------
