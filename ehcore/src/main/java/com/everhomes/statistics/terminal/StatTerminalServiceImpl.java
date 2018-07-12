@@ -803,6 +803,9 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
     }
 
     private BigDecimal rate(Number num1, Number num2) {
+        if (num1.doubleValue() == 0d || num2.doubleValue() == 0d) {
+            return BigDecimal.ZERO;
+        }
         return BigDecimal.valueOf(num1.longValue())
                 .divide(BigDecimal.valueOf(num2.longValue()), 2, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
