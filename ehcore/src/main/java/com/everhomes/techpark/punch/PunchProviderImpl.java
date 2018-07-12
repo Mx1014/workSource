@@ -1033,7 +1033,16 @@ public class PunchProviderImpl implements PunchProvider {
                 });
         return resultRecord;
     }
-    
+
+    @Override
+    public Integer countpunchStatistic(String punchMonth, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectConditionStep<Record1<Integer>> step = context.select(Tables.EH_PUNCH_STATISTICS.ID.count()).from(Tables.EH_PUNCH_STATISTICS)
+                .where(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth));
+        return step.fetchAny().value1();
+    }
+
     @Override
 	public List<Long> listPunchLogEnterprise(String startDay, String endDay){
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2368,7 +2377,7 @@ public class PunchProviderImpl implements PunchProvider {
 
     @Override
     public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
-                                                     List<Long> userIds, CrossShardListingLocator locator, int i) {
+                                                     List<Long> detailIds, CrossShardListingLocator locator, int i) {
         List<PunchStatistic> result = queryPunchStatistics(locator, i, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -2377,8 +2386,8 @@ public class PunchProviderImpl implements PunchProvider {
                 query.addConditions(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq(ownerType));
                 if (null != exceptionStatus)
                     query.addConditions(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(exceptionStatus));
-                if (null != userIds)
-                    query.addConditions(Tables.EH_PUNCH_STATISTICS.USER_ID.in(userIds));
+                if (null != detailIds)
+                    query.addConditions(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.in(detailIds));
                 if (null != months)
                     query.addConditions(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.in(months));
 
@@ -2390,13 +2399,14 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId) {
+    public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId, Long detailId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         DeleteWhereStep<EhPunchStatisticsRecord> step = context
                 .delete(Tables.EH_PUNCH_STATISTICS);
         Condition condition = Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.equal(punchMonth)
                 .and(Tables.EH_PUNCH_STATISTICS.USER_ID.equal(userId))
                 .and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.in(ownerId))
+                .and(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.equal(detailId))
                 .and(Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.equal(ownerType));
         step.where(condition);
         step.execute();

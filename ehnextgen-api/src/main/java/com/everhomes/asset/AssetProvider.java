@@ -64,7 +64,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
 
-    ListBillsDTO creatPropertyBill(CreateBillCommand cmd);
+    ListBillsDTO creatPropertyBill(CreateBillCommand cmd, Long billId);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -162,7 +162,8 @@ public interface AssetProvider {
     void changeOrderStaus(Long orderId, Byte finalOrderStatus);
 
     void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId);
-
+    
+    void changeOrderPaymentType(Long orderId, Integer paymentType);
 
     PaymentUser findByOwner(String userType, Long id);
 
@@ -295,7 +296,6 @@ public interface AssetProvider {
 
     List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId);
 
-
     void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId, boolean isInsert);
 
     PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName);
@@ -312,6 +312,9 @@ public interface AssetProvider {
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
+    //add by tangcen
+	String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long categoryId, Long chargingItemId);
+
     void modifySettledBill(Long billId, String invoiceNum, String noticeTel);
 
     boolean checkBillExistById(Long billId);
@@ -327,9 +330,8 @@ public interface AssetProvider {
     void insertAssetCategory(EhAssetAppCategories c);
   
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
-    
+ 
     boolean checkBillByCategory(Long billId, Long categoryId);
-    //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
     
 	void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds, Integer paymentType);
 	
@@ -358,4 +360,34 @@ public interface AssetProvider {
 	String findEndTimeByPeriod(String endTimeStr, Long contractId);
     
     PaymentLateFine findLastedFine(Long id);
+    
+    List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
+    
+    IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+    IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+    IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+	void transferOrderPaymentType();
+
+    Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
+
+    Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+    void insertAppMapping(EhAssetModuleAppMappings relation);
+
+    void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
+
+    boolean checkExistAsset(Long assetCategoryId);
+
+    boolean checkExistContract(Long contractCategoryId);
+
+    Long checkEnergyFlag(Integer namespaceID);
+
+    void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
+    
+    void modifyBillForImport(Long billId, CreateBillCommand cmd);
+    
+    String getProjectNameByBillID(Long billId);
 }

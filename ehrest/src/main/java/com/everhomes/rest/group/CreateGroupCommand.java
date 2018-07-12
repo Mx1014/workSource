@@ -26,6 +26,7 @@ import com.everhomes.util.StringHelper;
  *     <li>touristPostPolicy: touristPostPolicy 参考{@link TouristPostPolicyFlag}</li>
  *     <li>clubType: clubType 参考{@link ClubType}</li>
  *     <li>phoneNumber: 联系电话</li>
+ *     <li>communityId: 项目ID</li>
  * </ul>
  */
 public class CreateGroupCommand {
@@ -50,6 +51,8 @@ public class CreateGroupCommand {
     private Byte touristPostPolicy;
     private Byte clubType;
     private String phoneNumber;
+
+    private Long communityId;
 
     public CreateGroupCommand() {
     }
@@ -196,6 +199,14 @@ public class CreateGroupCommand {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override

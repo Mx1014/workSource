@@ -13,16 +13,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -121,6 +112,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -150,6 +142,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     
     @Autowired
     private FieldProvider fieldProvider;
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Override
     public void createEnterpriseCustomer(EnterpriseCustomer customer) {
@@ -1496,7 +1490,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 //        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
-        query.addOrderBy(Tables.EH_CUSTOMER_TRACKINGS.CREATE_TIME.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME.desc());
         List<CustomerTracking> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerTracking.class));
@@ -1638,9 +1632,9 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 				Object objNew = null;
 				Object objOld = null;
 				try {
-					if(null != methodNew && null != exist){
-						objNew = methodNew.invoke(customer, new Object[] {});
-						objOld = methodOld.invoke(exist, new Object[] {});
+					if(null != methodNew){
+						objNew = methodNew.invoke(customer);
+						objOld = methodOld.invoke(exist);
 					}
 				} catch (Exception e) {
 					throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
@@ -1697,6 +1691,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                                 newData = "空";
                             } else {
                                 newData = customer.getTrackingName();
+                            }
+                        }
+                        if (fieldType.equals("Date")) {
+                            if (objOld != null) {
+                                Timestamp old = (Timestamp) objOld;
+                                oldData = old.toLocalDateTime().format(formatter);
+                            }
+                            if (objNew != null) {
+                                Timestamp newTime = (Timestamp) objNew;
+                                newData = newTime.toLocalDateTime().format(formatter);
                             }
                         }
                         Map<String,Object> map = new HashMap<String,Object>();
@@ -2094,5 +2098,58 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(customerId))
                 .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.NAMESPACE_ID.eq(namespaceId))
                 .execute();
+    }
+
+    @Override
+
+    public String getEnterpriseCustomerNameById(Long enterpriseCustomerId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ENTERPRISE_CUSTOMERS.NAME)
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS).where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(enterpriseCustomerId))
+                .fetchOne(Tables.EH_ENTERPRISE_CUSTOMERS.NAME);
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomerNameAndId(List<Long> ids) {
+        List<EasySearchEnterpriseCustomersDTO> ret = new ArrayList<>();
+        this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .select(Tables.EH_ENTERPRISE_CUSTOMERS.NAME, Tables.EH_ENTERPRISE_CUSTOMERS.ID)
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(ids))
+                .fetch()
+                .forEach(r -> {
+                    EasySearchEnterpriseCustomersDTO dto = new EasySearchEnterpriseCustomersDTO();
+                    dto.setId(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+                    dto.setName(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.NAME));
+                    ret.add(dto);
+                });
+        return ret;
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listCommunityEnterpriseCustomers(Long communityId, Integer namespaceId) {
+        List<EasySearchEnterpriseCustomersDTO> dtos = new ArrayList<>();
+        this.dbProvider.getDslContext(AccessSpec.readOnly())
+                .select()
+                .from(Tables.EH_ENTERPRISE_CUSTOMERS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.notEqual(CommonStatus.INACTIVE.getCode()))
+                .fetch()
+                .forEach(r -> {
+                    EasySearchEnterpriseCustomersDTO dto = new EasySearchEnterpriseCustomersDTO();
+                    dto.setName(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.NAME));
+                    dto.setId(r.getValue(Tables.EH_ENTERPRISE_CUSTOMERS.ID));
+                    dtos.add(dto);
+                });
+        return dtos;
+    }
+
+    public void deleteCustomerEntryInfoByBuildingId(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_CUSTOMER_ENTRY_INFOS)
+                .set(Tables.EH_CUSTOMER_ENTRY_INFOS.STATUS,CommonStatus.INACTIVE.getCode())
+                .where(Tables.EH_CUSTOMER_ENTRY_INFOS.BUILDING_ID.eq(id))
+                .execute();
+
     }
 }

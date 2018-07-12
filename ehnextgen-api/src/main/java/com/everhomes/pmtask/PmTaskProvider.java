@@ -1,9 +1,9 @@
 package com.everhomes.pmtask;
 
+import com.everhomes.namespace.Namespace;
+
 import java.sql.Timestamp;
 import java.util.List;
-
-import com.everhomes.namespace.Namespace;
 
 public interface PmTaskProvider {
 
@@ -61,4 +61,8 @@ public interface PmTaskProvider {
 	List<PmTask> findTaskByOrderId(String orderId);
 
 	List<PmTask> listTaskByStat(Integer namespaceId, List<Long> ownerIds, Timestamp dateStart, Timestamp dateEnd, List<Long> taskcategoryIds);
+
+    List<PmTask> listPmTasksByOrgId(Integer namespaceId, Long communityId, Long organizationId);
+
+    List<PmTask> findTasksByOrg(Long communityId, Integer namespaceId, Long organizationId, Long taskCategoryId);
 }

@@ -6,40 +6,24 @@ package com.everhomes.rest.asset;
  */
 
 public class UpdateAnAppMappingCommand {
-    private Long moduleIdRo;
-    private Long originIdRo;
-    private Long moduleIdJu;
-    private Long originIdJu;
 
-    public Long getModuleIdRo() {
-        return moduleIdRo;
+
+    private Long assetCategoryId;
+    private Long contractCategoryId;
+
+    public Long getAssetCategoryId() {
+        return assetCategoryId;
     }
 
-    public void setModuleIdRo(Long moduleIdRo) {
-        this.moduleIdRo = moduleIdRo;
+    public void setAssetCategoryId(Long assetCategoryId) {
+        this.assetCategoryId = assetCategoryId;
     }
 
-    public Long getOriginIdRo() {
-        return originIdRo;
+    public Long getContractCategoryId() {
+        return contractCategoryId;
     }
 
-    public void setOriginIdRo(Long originIdRo) {
-        this.originIdRo = originIdRo;
-    }
-
-    public Long getModuleIdJu() {
-        return moduleIdJu;
-    }
-
-    public void setModuleIdJu(Long moduleIdJu) {
-        this.moduleIdJu = moduleIdJu;
-    }
-
-    public Long getOriginIdJu() {
-        return originIdJu;
-    }
-
-    public void setOriginIdJu(Long originIdJu) {
-        this.originIdJu = originIdJu;
+    public void setContractCategoryId(Long contractCategoryId) {
+        this.contractCategoryId = contractCategoryId;
     }
 }

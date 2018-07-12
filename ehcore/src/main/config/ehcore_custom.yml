@@ -16,7 +16,7 @@ logging.level.: INFO
 #server.port:
 #server.sessionTimeout:
 
-#server.port: 8080
+#server.port: 8443
 #server.ssl.key-store:keystore.p12
 #server.ssl.key-store-password: password
 #server.ssl.keyStoreType: PKCS12
@@ -49,7 +49,7 @@ endpoint.dump: true
 endpoint.metrics: true
 endpoint.configprops: true
 endpoint.beans: true
-endpoint.trace: true
+endpoint.trace: trueN
 endpoint.mappings: true
             
 management.security.enabled: false

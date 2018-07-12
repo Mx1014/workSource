@@ -1,7 +1,7 @@
 package com.everhomes.flow.nashornfunc;
 
+import com.everhomes.flow.FlowRuntimeScript;
 import com.everhomes.flow.NashornEngineService;
-import com.everhomes.flow.FlowScript;
 import com.everhomes.flow.NashornScript;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
@@ -12,13 +12,13 @@ public class NashornScriptConfig implements NashornScript<ScriptObjectMirror> {
 
     private final static String FUNCTION_NAME = "config";
 
-    private FlowScript script;
+    private FlowRuntimeScript script;
 
     private Consumer<ScriptObjectMirror> consumer;
 
     private AtomicBoolean finished = new AtomicBoolean(false);
 
-    public NashornScriptConfig(FlowScript script, Consumer<ScriptObjectMirror> consumer) {
+    public NashornScriptConfig(FlowRuntimeScript script, Consumer<ScriptObjectMirror> consumer) {
         this.script = script;
         this.consumer = consumer;
     }

@@ -723,7 +723,7 @@ public class SalaryServiceImpl implements SalaryService {
                     }
                     saveImportEmployeeSalary(resultList, cmd.getOrganizationId(), fileLog, response, cmd.getOwnerId());
                 } else {
-                    response.setFileLog(ImportFileErrorType.TITLE_ERROE.getCode());
+                    response.setFileLog(ImportFileErrorType.TITLE_ERROR.getCode());
                 }
                 return response;
             }
@@ -1057,23 +1057,23 @@ public class SalaryServiceImpl implements SalaryService {
 //        List<String> titleList = new ArrayList<String>(titleMap.values());
         if (!"手机".equals(titleMap.get("A"))) {
             LOGGER.error("第一列不是手机而是" + titleMap.get("A"));
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (!"姓名".equals(titleMap.get("B"))) {
             LOGGER.error("第2列不是姓名而是" + titleMap.get("B"));
 
-            return ImportFileErrorType.TITLE_ERROE.getCode();
+            return ImportFileErrorType.TITLE_ERROR.getCode();
         }
         if (null != groupEntities) {
             for (int i = 0; i < groupEntities.size(); i++) {
                 try {
                     if (!groupEntities.get(i).getName().equals(titleMap.get(GetExcelLetter(i + 3)))) {
                         LOGGER.error("第{}列不是{}而是{}", (i + 1), groupEntities.get(i).getName(), titleMap.get(GetExcelLetter(i + 1)));
-                        return ImportFileErrorType.TITLE_ERROE.getCode();
+                        return ImportFileErrorType.TITLE_ERROR.getCode();
                     }
                 } catch (Exception e) {
                     LOGGER.error("检测title报错了,可能是某个数组越界 ", e);
-                    return ImportFileErrorType.TITLE_ERROE.getCode();
+                    return ImportFileErrorType.TITLE_ERROR.getCode();
                 }
             }
         }
@@ -1628,7 +1628,7 @@ public class SalaryServiceImpl implements SalaryService {
         sgf.setFilerUid(userId);
         sgf.setFilerName(findNameByOwnerAndUser(ownerId, userId));
 //        Organization organization = organizationProvider.findOrganizationById(ownerId);
-//        OrganizationMember member = punchService.findOrganizationMemberByOrgIdAndUId(userId, organization.getPath());
+//        OrganizationMember member = punchService.findOrganizationMemberByUIdAndOrgId(userId, organization.getPath());
 //        if (null != member) {
 //            sgf.setFilerName(member.getContactName());
 //        }

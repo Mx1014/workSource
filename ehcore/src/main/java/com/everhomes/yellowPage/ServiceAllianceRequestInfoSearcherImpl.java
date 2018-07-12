@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -23,6 +24,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.lang3.StringUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -42,6 +44,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
@@ -58,17 +61,19 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.common.PrivilegeType;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.user.FieldContentType;
@@ -77,7 +82,6 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.JumpType;
-import com.everhomes.rest.yellowPage.PrivilegeType;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchOrgRequestInfoCommand;
@@ -511,9 +515,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             requestInfo.setWorkflowStatus(ServiceAllianceWorkFlowStatus.NONE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
-                LOGGER.info("reserve request id:" + request.getId() + "-" + request.getTemplateType());
+                LOGGER.info("reserve request id:" + getDocIdByTemplateType(request.getId(), request.getTemplateType()));
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
-                        .id(request.getId().toString() + "-" + request.getTemplateType()).source(source));
+                        .id(getDocIdByTemplateType(request.getId(), request.getTemplateType())).source(source));
             }
 
         }
@@ -525,7 +529,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public void feedDoc(ServiceAllianceRequestInfo request) {
 		XContentBuilder source = createDoc(request);
-        feedDoc(request.getId().toString() + "-" + request.getTemplateType(), source);
+        feedDoc(getDocIdByTemplateType(request.getId(), request.getTemplateType()), source);
 	}
 
 	@Override
@@ -639,6 +643,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 			//key = templateName,Value = [requests List,templateInfos List]
 			//map存 （模板名称，[模板下申请集合，模板下附加属性集合]）
 			//如('审批',[['序号':1,'用户姓名':'邓爽'],['附加属性1':'值1','附加属性2':'值2']])
+			Integer formId = null;
 			Map<String,List[]> requestsInfoMap = new HashMap<String, List[]>();
 			GetRequestInfoCommand command = new GetRequestInfoCommand();
 			forLoop:
@@ -647,27 +652,27 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 				command.setTemplateType(requestInfo.getTemplateType());
 				Object extrasInfo = null;
 				//审批另外调用接口，返回的object，通过类型判断在生成sheet时做对应处理，参考createXSSFWorkbook(XSSFWorkbook wb, String templateName,List[] requestInfos)
-				if("flowCase".equals(command.getTemplateType())){
-					try{
-						extrasInfo=flowService.getFlowCaseDetail(requestInfo.getFlowCaseId(), UserContext.current().getUser().getId(),
-							FlowUserType.PROCESSOR, true);
-					}catch (RuntimeErrorException e) {
-						LOGGER.error("{}",e);
+				if ("flowCase".equals(command.getTemplateType())) {
+					try {
+						extrasInfo = flowService.getFlowCaseDetail(requestInfo.getFlowCaseId(),
+								UserContext.current().getUser().getId(), FlowUserType.PROCESSOR, true);
+					} catch (RuntimeErrorException e) {
+						LOGGER.error("{}", e);
 						continue forLoop;
 					}
-					if(null==templateMap.get("flowCase"+requestInfo.getFlowCaseId())){
-						GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(requestInfo.getFlowCaseId(),
-								GeneralFormDataSourceType.USER_NAME.getCode());
-						if(val!=null){
-							GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-									val.getFormOriginId(), val.getFormVersion());
-							if(form==null)
-								continue;
-							//使用表单名称+表单id作为sheet的名称 by dengs 20170510
-							requestInfo.setTemplateType("flowCase"+form.getId());
-							templateMap.put("flowCase"+form.getId(), form.getFormName()+form.getId());
-						}
+
+					GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(
+							requestInfo.getFlowCaseId(), GeneralFormDataSourceType.USER_NAME.getCode());
+					if (val != null) {
+						GeneralForm form = this.generalFormProvider
+								.getActiveGeneralFormByOriginIdAndVersion(val.getFormOriginId(), val.getFormVersion());
+						if (form == null)
+							continue;
+						// 使用表单名称+表单id作为sheet的名称 by dengs 20170510
+						requestInfo.setTemplateType("flowCase" + form.getId());
+						templateMap.put("flowCase" + form.getId(), form.getFormName() + form.getId());
 					}
+					
 				}else{
 					extrasInfo = userActivityService.getCustomRequestInfo(command);
 				}
@@ -774,9 +779,20 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         	}
         	//审批申请
         	else if(requestInfos[1].get(0) instanceof FlowCaseDetailDTO){
+        		
+        		Long formId = null;
+        		if (requestInfos[0].size() > 0) { 
+        			int templateTypePrefixLen = "flowCase".length();
+        			String templateType = ((RequestInfoDTO)requestInfos[0].get(0)).getTemplateType();
+        			formId = templateType.length() >  templateTypePrefixLen ? Long.parseLong(templateType.substring(templateTypePrefixLen)) : null;
+        		}
+        		
+        		// 判断是否要导出固定区域中姓名，手机号，企业 这三个前置字段
+        		boolean needExportUserFixedInfoField = isNeedExportUserFixedInfoField(formId);
+        		
         		//列名称-列序号 存在表单修改的情况，所以名称也有可能改，根据名称来设置值。
         		 //创建第一行
-                XSSFRow row1 = createRow1forFlowCase(sheet,style,rowNum++,(FlowCaseDetailDTO)requestInfos[1].get(0));
+                XSSFRow row1 = createRow1forFlowCase(sheet,style,rowNum++, needExportUserFixedInfoField);
         		Map<String,Integer> columnname = new HashMap<String,Integer>();
         		int nextcol = row1.getLastCellNum();
         		//值
@@ -785,7 +801,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	        		XSSFRow row = sheet.createRow(rowNum ++);
 	        		row.setRowStyle(style);
 	        		//固定一行的值
-	        		setFixedColumnToRow(row,requestInfoDTO,i+1,(FlowCaseDetailDTO)requestInfos[1].get(0));
+	        		setFixedColumnToRow(row,requestInfoDTO,i+1, needExportUserFixedInfoField);
 	        		//不定数量的值
 	        		FlowCaseDetailDTO flowCaseDetailDTO = (FlowCaseDetailDTO)requestInfos[1].get(i);
 	        		if(flowCaseDetailDTO!=null){
@@ -857,7 +873,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
      * by dengs,创建第一行，20170502
      * @param flowCaseDetailDTO 
      */
-    private XSSFRow createRow1forFlowCase(XSSFSheet sheet,XSSFCellStyle style,int rowNum, FlowCaseDetailDTO flowCaseDetailDTO) {
+    private XSSFRow createRow1forFlowCase(XSSFSheet sheet,XSSFCellStyle style,int rowNum, boolean needExportUserFixedInfo) {
     	// TODO Auto-generated method stub
     	XSSFRow row1 = sheet.createRow(rowNum);
     	row1.setRowStyle(style);
@@ -870,45 +886,19 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
     	String username_string =excelHeadArray.length>1?excelHeadArray[1]:"row2";
     	String phone_string = excelHeadArray.length>2?excelHeadArray[2]:"row3";
     	String company_string = excelHeadArray.length>3?excelHeadArray[3]:"row4";
-    	String service_alliance_string = excelHeadArray.length>4?excelHeadArray[4]:"row5";
-    	String submit_time_string = excelHeadArray.length>5?excelHeadArray[5]:"row6";
     	
     	int nextColumnNum = 0;
-    	boolean[] isExports = isExportEntity(flowCaseDetailDTO);
     	row1.createCell(nextColumnNum++).setCellValue(order_string);
-    	if(isExports[0]){
+    	
+    	if(needExportUserFixedInfo){
     		row1.createCell(nextColumnNum++).setCellValue(username_string);
-    	}
-    	if(isExports[1]){
     		row1.createCell(nextColumnNum++).setCellValue(phone_string);
-    	}
-    	if(isExports[2]){
     		row1.createCell(nextColumnNum++).setCellValue(company_string);
     	}
-    	row1.createCell(nextColumnNum++).setCellValue(service_alliance_string);
-    	row1.createCell(nextColumnNum++).setCellValue(submit_time_string);
+    	
     	return row1;
     }
     
-    private boolean[] isExportEntity(FlowCaseDetailDTO flowCaseDetailDTO){
-    	boolean showUserName = true,showPhone = true,showCompany = true;
-    	List<FlowCaseEntity> eneities = flowCaseDetailDTO.getEntities();
-    	if(eneities.size()>2){
-    		String notExportColumns = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-	  				ServiceAllianceRequestNotificationTemplateCode.EXCEL_NOTEXPORT_FIX_COLUMN_STRING, 
-	  				UserContext.current().getUser().getLocale(),"1,2,3");
-    	    String[] notExportColumnArray = notExportColumns.split(",");
-    		FlowCaseEntity entity0 = eneities.get(0);
-    		FlowCaseEntity entity1 = eneities.get(1);
-    		FlowCaseEntity entity2 = eneities.get(2);
-    		showUserName = !entity0.getKey().equals(notExportColumnArray[0]);
-    		showPhone = !(entity0.getKey().equals(notExportColumnArray[1]) || entity1.getKey().equals(notExportColumnArray[1]));
-    		showCompany = !(entity0.getKey().equals(notExportColumnArray[2]) 
-    				|| entity1.getKey().equals(notExportColumnArray[2]) 
-    				|| entity2.getKey().equals(notExportColumnArray[2]));
-    	}
-    	return new boolean[]{showUserName,showPhone,showCompany};
-    }
 
 	/**
      * by dengs,创建cell style,20170502
@@ -1083,15 +1073,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("secondCategoryId", request.getSecondCategoryId());
             b.field("secondCategoryName", request.getSecondCategoryName());
             b.field("workflowStatus", request.getWorkflowStatus());
-           
-            
-			Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-          
-			if(org != null) {
-			    b.field("creatorOrganization", org.getName());
-            } else {
-                b.field("creatorOrganization", request.getCreatorOrganization()==null?"":request.getCreatorOrganization());
-            }
+            b.field("creatorOrganization", request.getCreatorOrganization()==null?"":request.getCreatorOrganization());
             
 			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
             if(sa != null) {
@@ -1103,7 +1085,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create ServiceAllianceRequestInfo " + request.getId() + "-" + request.getTemplateType() + " error");
+            LOGGER.error("Create ServiceAllianceRequestInfo " + getDocIdByTemplateType(request.getId(), request.getTemplateType()) + " error");
             return null;
         }
     }
@@ -1147,22 +1129,19 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	/**
 	 * 固定几行的设置
 	 */
-	private void setFixedColumnToRow(XSSFRow row, RequestInfoDTO requestInfoDTO, int i, FlowCaseDetailDTO flowCaseDetailDTO){
-		if(flowCaseDetailDTO!=null){
-			boolean[] isExports = isExportEntity(flowCaseDetailDTO);
+	private void setFixedColumnToRow(XSSFRow row, RequestInfoDTO requestInfoDTO, int i, Boolean needExportUserFixedInfoField){
+		if(needExportUserFixedInfoField !=null){
 			int nextColumnNum = 0;
 			row.createCell(nextColumnNum++).setCellValue(i);
-			if(isExports[0]){
+			if(needExportUserFixedInfoField){
 				row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreatorName());
-			}
-			if(isExports[1]){
 				row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreatorMobile());
-			}
-			if(isExports[2]){
 				row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreatorOrganization());
 			}
-			row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getServiceOrganization());
-			row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreateTime());
+			
+//			row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getServiceOrganization());
+//			row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreateTime());
+			
 		}else{
 			row.createCell(0).setCellValue(i);
 //			row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
@@ -1171,5 +1150,76 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 			row.createCell(1).setCellValue(requestInfoDTO.getServiceOrganization());
 			row.createCell(2).setCellValue(requestInfoDTO.getCreateTime());
 		}
+	}
+	
+    
+	/**
+	 * 更新单个字段的值
+	 * 
+	 * @param id 记录id
+	 * @param field  字段名称 
+	 * @param reNewValue 字段值
+	 */
+	public void updateDocByField(Long flowCaseId, String templateType, String field, Object reNewValue) {
+		getClient().prepareUpdate().setIndex(getIndexName()).setType(getIndexType())
+				.setId(getDocIdByTemplateType(flowCaseId, templateType)).setDoc(field, reNewValue).execute()
+				.actionGet();
+	}
+	
+	private String getDocIdByTemplateType(Long Id, String templateType) {
+		return Id + "-" +templateType;
+	}
+	
+	
+	private List<GeneralFormFieldDTO> getFormFieldDtoList(Long formId) {
+		if (null == formId) {
+			return null;
+		}
+		
+		GeneralForm form = generalFormProvider.getGeneralFormById(formId);
+		if (null == form) {
+			return null;
+		}
+
+		return JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+	}
+	
+	/**   
+	* @Function: ServiceAllianceRequestInfoSearcherImpl.java
+	* @Description: 根据表单id判断是否要导出固定的用户姓名，手机号码，企业 这三个字段
+	*
+	* @version: v1.0.0
+	* @author:	 黄明波
+	* @date: 2018年6月30日 下午3:53:49 
+	*
+	*/
+	private boolean isNeedExportUserFixedInfoField(Long formId) {
+		
+		List<GeneralFormFieldDTO> formFieldDtos = getFormFieldDtoList(formId);
+		if (CollectionUtils.isEmpty(formFieldDtos)) { // 如果没有表单，需要显示
+			return true;
+		}
+
+		String notExportColumns = localeStringService.getLocalizedString(
+				ServiceAllianceRequestNotificationTemplateCode.SCOPE,
+				ServiceAllianceRequestNotificationTemplateCode.EXCEL_NOTEXPORT_FORM_FIELD_TYPE_STRING,
+				UserContext.current().getUser().getLocale(), null);
+		if (StringUtils.isBlank(notExportColumns)) {
+			return true;
+		}
+
+		String[] notExportColumnArray = notExportColumns.split(",");
+
+		for (GeneralFormFieldDTO dto : formFieldDtos) {
+
+			for (String colum : notExportColumnArray) {
+				if (colum.equals(dto.getDataSourceType())
+						&& !GeneralFormDataVisibleType.HIDDEN.getCode().equals(dto.getVisibleType())) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }

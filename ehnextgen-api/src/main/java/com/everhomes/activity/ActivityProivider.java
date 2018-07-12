@@ -35,6 +35,8 @@ public interface ActivityProivider {
     
     ActivityRoster findRosterByOrderNo(Long orderNo);
 
+    ActivityRoster findRosterByPayOrderId(Long payOrderId);
+
     List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId, boolean onlyConfirm);
 
     List<ActivityRoster> listRosters(Long activityId, ActivityRosterStatus status);
@@ -165,6 +167,13 @@ public interface ActivityProivider {
 	 * @param id
 	 */
 	void deleteActivityCategories(Long id);
+
+
+	ActivityBizPayee getActivityPayee(Long categoryId, Integer namespaceId);
+
+	void CreateActivityPayee(ActivityBizPayee activityBizPayee);
+
+	void updateActivityPayee(ActivityBizPayee activityBizPayee);
 	
 //	void createActivityRosterError(ActivityRosterError rosterError);
 //

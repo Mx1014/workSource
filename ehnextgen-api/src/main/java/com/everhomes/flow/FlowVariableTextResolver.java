@@ -2,7 +2,7 @@ package com.everhomes.flow;
 
 /**
  * <ul> 插入变量实现
- * <li>APPLIER_NAME: 申请者名字</li>
+ * <li>APPLIER: 申请者名字</li>
  * <li>APPLIER_PHONE: 申请者手机号</li>
  * <li>CURR_PROCESSOR_PHONE: 当前节点操作执行人</li>
  * <li>CURR_PROCESSOR_NAME: 当前节点操作执行人</li>

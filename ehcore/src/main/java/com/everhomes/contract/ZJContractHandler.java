@@ -10,6 +10,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.community.CommunityType;
@@ -714,6 +715,12 @@ public class ZJContractHandler implements ContractService{
 
 	@Override
 	public DurationParamDTO getDuration(GetDurationParamCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

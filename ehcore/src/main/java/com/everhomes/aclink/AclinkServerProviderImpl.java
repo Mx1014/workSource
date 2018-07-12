@@ -21,6 +21,8 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorAccessStatus;
+import com.everhomes.rest.aclink.DoorAccessType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAclinkServers;
@@ -136,5 +138,36 @@ public class AclinkServerProviderImpl implements AclinkServerProvider{
 		List<AclinkServer> listServers = this.listLocalServers(new CrossShardListingLocator(), null, null, uuid, 0);
 		AclinkServer server = new AclinkServer();
 		return (listServers == null || listServers.size() == 0) ? null : listServers.get(0);
+	}
+
+	@Override
+	public List<AclinkServer> listLocalServersByUserAuth(CrossShardListingLocator locator, Long userId,
+			Integer namespaceId, int count) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkServers.class));
+		return queryAclinkServer(locator,count,new ListingQueryBuilderCallback(){
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) {
+				// query.addConditions(Tables.EH_ACLINK_SERVERS.STATUS.ne((byte) 2));
+				if(namespaceId != null) {
+                    query.addConditions(Tables.EH_ACLINK_SERVERS.NAMESPACE_ID.eq(namespaceId));
+                }
+
+				//无论授权是否失效,都会通知
+                if(userId != null) {
+					query.addConditions(Tables.EH_ACLINK_SERVERS.ID
+							.in(context.select(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID).from(Tables.EH_DOOR_ACCESS)
+									.where(Tables.EH_DOOR_ACCESS.ID
+											.in(context.select(Tables.EH_DOOR_AUTH.DOOR_ID).from(Tables.EH_DOOR_AUTH)
+													.where(Tables.EH_DOOR_AUTH.USER_ID.eq(userId)))
+											.and(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode())))));
+                	
+                }
+
+                return query;
+			}
+			
+		});
 	}
 }

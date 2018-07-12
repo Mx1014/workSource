@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
@@ -208,5 +209,23 @@ public class DateUtil {
         }catch(Exception e) {
             return null;
         }
+    }
+
+    /**
+     * @author wentian
+     * 判定两个时间周期是否有重合的情况
+     * @param startTime 第一个时间周期的开始
+     * @param endTime  第一个时间周期的结束
+     * @param startTime1 第二个时间周期的开始
+     * @param endTime1 第二个时间周期的结束
+     * @return true for 有重合的请开给你，false for 无重合的情况
+     */
+    public static boolean hasIntersection(Timestamp startTime, Timestamp endTime, Timestamp startTime1, Timestamp endTime1) {
+        long maxEnd = Math.max(endTime.getTime(), endTime1.getTime());
+        long minStart = Math.min(startTime.getTime(), startTime1.getTime());
+        if((maxEnd - minStart) >= (endTime.getTime() - startTime.getTime() + endTime1.getTime() - startTime1.getTime())){
+           return false;
+        }
+        return true;
     }
 }

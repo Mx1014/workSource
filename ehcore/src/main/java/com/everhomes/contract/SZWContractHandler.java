@@ -4,6 +4,7 @@ package com.everhomes.contract;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.asset.szwwyjf.SZWQuery;
 import com.everhomes.community.Community;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
@@ -215,7 +216,11 @@ public class SZWContractHandler implements ContractService{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
+	
+	@Override
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
 }

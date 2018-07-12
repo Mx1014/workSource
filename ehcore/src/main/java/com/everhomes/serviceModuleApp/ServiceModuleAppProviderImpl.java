@@ -5,21 +5,19 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.module.ReflectionServiceModuleApp;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAppMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppMappings;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -259,72 +257,4 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		return  apps;
 	}
-
-	@Override
-	public Long getOriginIdFromMappingApp(final Long moduleId, final Long originId, long targetModuleId) {
-	    if(originId == null) return null;
-        final Long[] ret = {null};
-		getContext(AccessSpec.readOnly()).select(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE
-				, Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE, Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE,
-                Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE)
-				.from(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-				.where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(originId).and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE.eq(moduleId)))
-				.or(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(originId).and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE.eq(moduleId)))
-				.fetch()
-				.forEach(r ->{
-                    Long valueF = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE);
-                    Long moduleF = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE);
-                    Long valueM = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE);
-                    Long moduleM = r.getValue(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE);
-                    if(valueF != null && valueM != null){
-                        if(valueF.longValue() == originId.longValue() && moduleM.longValue() == targetModuleId){
-                            ret[0] = valueM;
-                        }else if(valueM.longValue() == originId.longValue() && moduleF.longValue() == targetModuleId){
-                            ret[0] = valueF;
-                        }
-                    }
-                });
-        return ret[0];
-	}
-
-    @Override
-    public void insertAppMapping(EhServiceModuleAppMappings relation) {
-        EhServiceModuleAppMappingsDao dao = new EhServiceModuleAppMappingsDao(getContext(AccessSpec.readWrite()).configuration());
-        dao.insert(relation);
-    }
-
-	@Override
-	public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
-		// 将罗密欧的对象改为新的朱丽叶 ps: 来两边，因为不知道罗密欧是男是女 是狗
-		getContext(AccessSpec.readWrite())
-				.update(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-				.set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE, cmd.getOriginIdJu())
-				.set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE, cmd.getModuleIdJu())
-                .where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(cmd.getOriginIdRo()))
-				.and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE.eq(cmd.getModuleIdRo()))
-				.execute();
-		getContext(AccessSpec.readWrite())
-				.update(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-				.set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE, cmd.getOriginIdJu())
-				.set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE, cmd.getModuleIdJu())
-				.where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(cmd.getOriginIdRo()))
-				.and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE.eq(cmd.getModuleIdRo()))
-				.execute();
-		// 将朱丽叶的对象改为新的罗密欧
-		getContext(AccessSpec.readWrite())
-				.update(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-				.set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE, cmd.getOriginIdRo())
-				.set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE, cmd.getModuleIdRo())
-				.where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE.eq(cmd.getOriginIdJu()))
-				.and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE.eq(cmd.getModuleIdJu()))
-				.execute();
-		getContext(AccessSpec.readWrite())
-				.update(Tables.EH_SERVICE_MODULE_APP_MAPPINGS)
-				.set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_MALE, cmd.getOriginIdRo())
-				.set(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_MALE, cmd.getModuleIdRo())
-				.where(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_ORIGIN_ID_FEMALE.eq(cmd.getOriginIdJu()))
-				.and(Tables.EH_SERVICE_MODULE_APP_MAPPINGS.APP_MODULE_ID_FEMALE.eq(cmd.getModuleIdJu()))
-				.execute();
-	}
-
 }

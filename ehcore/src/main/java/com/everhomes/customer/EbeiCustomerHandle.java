@@ -45,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -244,10 +243,8 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
         LOGGER.debug("syncDataToDb namespaceId: {}, myEnterpriseCustomerList size: {}, theirEnterpriseList size: {}",
                 namespaceId, myEnterpriseCustomerList.size(), mergeEnterpriseList.size());
-        dbProvider.execute(s->{
-            syncAllEnterprises(namespaceId, community.getId(), myEnterpriseCustomerList, mergeEnterpriseList);
-            return true;
-        });
+        syncAllEnterprises(namespaceId, community.getId(), myEnterpriseCustomerList, mergeEnterpriseList);
+
     }
 
     //ebei同步数据规则：两次之间所有的改动会同步过来，所以以一碑同步过来数据作为参照：
@@ -256,14 +253,14 @@ public class EbeiCustomerHandle implements CustomerHandle {
         if (theirEnterpriseList != null) {
             for (EbeiCustomer ebeiCustomer : theirEnterpriseList) {
                 if("0".equals(ebeiCustomer.getState())) {
-                        if (myEnterpriseCustomerList != null) {
-                            for (EnterpriseCustomer enterpriseCustomer : myEnterpriseCustomerList) {
-                                if (NamespaceCustomerType.EBEI.getCode().equals(enterpriseCustomer.getNamespaceCustomerType())
-                                        && enterpriseCustomer.getNamespaceCustomerToken().equals(ebeiCustomer.getOwnerId())) {
-                                    deleteEnterpriseCustomer(enterpriseCustomer);
-                                }
+                    if (myEnterpriseCustomerList != null) {
+                        for (EnterpriseCustomer enterpriseCustomer : myEnterpriseCustomerList) {
+                            if (NamespaceCustomerType.EBEI.getCode().equals(enterpriseCustomer.getNamespaceCustomerType())
+                                    && enterpriseCustomer.getNamespaceCustomerToken().equals(ebeiCustomer.getOwnerId())) {
+                                deleteEnterpriseCustomer(enterpriseCustomer);
                             }
                         }
+                    }
                 } else if("1".equals(ebeiCustomer.getState())) {
                     Boolean notdeal = true;
                     if (myEnterpriseCustomerList != null) {
@@ -280,7 +277,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
                         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, ebeiCustomer.getCompanyName());
                         if (customers == null || customers.size() == 0) {
                             insertEnterpriseCustomer(NAMESPACE_ID, communityId, ebeiCustomer);
-                        }else {
+                        } else {
                             updateEnterpriseCustomer(customers.get(0), communityId, ebeiCustomer);
                         }
                     }
@@ -306,7 +303,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
     private void insertEnterpriseCustomer(Integer namespaceId, Long communityId, EbeiCustomer ebeiCustomer) {
         LOGGER.debug("syncDataToDb insertEnterpriseCustomer namespaceId: {}, zjEnterprise: {}",
                 namespaceId, StringHelper.toJsonString(ebeiCustomer));
-        this.dbProvider.execute((TransactionStatus status) -> {
+//        this.dbProvider.execute((TransactionStatus status) -> {
             EnterpriseCustomer customer = new EnterpriseCustomer();
             customer.setCommunityId(communityId);
             customer.setNamespaceId(namespaceId);
@@ -335,8 +332,8 @@ public class EbeiCustomerHandle implements CustomerHandle {
             //项目要求不要把联系人同步为管理员 20180125
             insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
             organizationSearcher.feedDoc(organization);
-            return null;
-        });
+//            return null;
+//        });
 
     }
 
@@ -459,7 +456,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
     private void updateEnterpriseCustomer(EnterpriseCustomer customer, Long communityId, EbeiCustomer ebeiCustomer) {
         LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}, ebeiCustomer: {}",
                 StringHelper.toJsonString(customer), StringHelper.toJsonString(ebeiCustomer));
-        this.dbProvider.execute((TransactionStatus status) -> {
+//        this.dbProvider.execute((TransactionStatus status) -> {
             customer.setCommunityId(communityId);
             customer.setNamespaceCustomerType(NamespaceCustomerType.EBEI.getCode());
             customer.setNamespaceCustomerToken(ebeiCustomer.getOwnerId());
@@ -495,8 +492,8 @@ public class EbeiCustomerHandle implements CustomerHandle {
             insertOrUpdateOrganizationCommunityRequest(communityId, organization);
             insertOrUpdateOrganizationMembers(customer.getNamespaceId(), organization, customer.getContactName(), customer.getContactPhone());
             organizationSearcher.feedDoc(organization);
-            return null;
-        });
+//            return null;
+//        });
     }
 
 }

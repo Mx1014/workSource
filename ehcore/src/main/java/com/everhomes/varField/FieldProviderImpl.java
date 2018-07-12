@@ -43,9 +43,10 @@ import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-
 import org.elasticsearch.common.cli.CliToolConfig.Cmd;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -849,4 +850,46 @@ public class FieldProviderImpl implements FieldProvider {
 
         return item.get(0);
     }
+    
+    //add by tangcen
+	@Override
+	public FieldItem findFieldItemByBusinessValue(Long fieldId, Byte businessValue) {
+		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		 Record record = context.select()
+		 						.from(Tables.EH_VAR_FIELD_ITEMS)
+		 						.where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.eq(fieldId))
+		 						.and(Tables.EH_VAR_FIELD_ITEMS.BUSINESS_VALUE.eq(businessValue))
+		 						.fetchOne();
+		 return ConvertHelper.convert(record, FieldItem.class);
+	}
+    
+
+    @Override
+    public List<Long> checkCustomerField(Integer namespaceId, Long communityId, String moduleName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition itemCondition = Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName)
+                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
+                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        if (communityId != null) {
+            itemCondition = itemCondition.and(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.eq(communityId));
+        }
+        Condition fieldCondition = Tables.EH_VAR_FIELD_SCOPES.MODULE_NAME.eq(moduleName)
+                .and(Tables.EH_VAR_FIELD_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
+                .and(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        if (communityId != null) {
+            fieldCondition = fieldCondition.and(Tables.EH_VAR_FIELD_SCOPES.COMMUNITY_ID.eq(communityId));
+        }
+
+        Condition groupCondition = Tables.EH_VAR_FIELD_GROUP_SCOPES.MODULE_NAME.eq(moduleName)
+                .and(Tables.EH_VAR_FIELD_GROUP_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
+                .and(Tables.EH_VAR_FIELD_GROUP_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        if (communityId != null) {
+            groupCondition = groupCondition.and(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.eq(communityId));
+        }
+        return context.select(Tables.EH_VAR_FIELD_ITEM_SCOPES.ID).from(Tables.EH_VAR_FIELD_ITEM_SCOPES).where(itemCondition)
+                .unionAll(context.select(Tables.EH_VAR_FIELD_SCOPES.ID).from(Tables.EH_VAR_FIELD_SCOPES).where(fieldCondition))
+                .unionAll(context.select(Tables.EH_VAR_FIELD_GROUP_SCOPES.ID).from(Tables.EH_VAR_FIELD_GROUP_SCOPES).where(groupCondition))
+                .fetchInto(Long.class);
+    }
+
 }

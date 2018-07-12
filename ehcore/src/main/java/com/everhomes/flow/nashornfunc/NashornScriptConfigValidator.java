@@ -1,7 +1,7 @@
 package com.everhomes.flow.nashornfunc;
 
+import com.everhomes.flow.FlowRuntimeScript;
 import com.everhomes.flow.NashornEngineService;
-import com.everhomes.flow.FlowScript;
 import com.everhomes.flow.NashornScript;
 import com.everhomes.rest.flow.FlowScriptConfigInfo;
 import com.everhomes.rest.flow.FlowScriptConfigValidateResult;
@@ -10,9 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +23,7 @@ public class NashornScriptConfigValidator implements NashornScript<List<FlowScri
 
     private LinkedTransferQueue<List<FlowScriptConfigValidateResult>> queue;
 
-    public NashornScriptConfigValidator(FlowScript script,
+    public NashornScriptConfigValidator(FlowRuntimeScript script,
                                         List<FlowScriptConfigInfo> configs,
                                         LinkedTransferQueue<List<FlowScriptConfigValidateResult>> queue) {
 
