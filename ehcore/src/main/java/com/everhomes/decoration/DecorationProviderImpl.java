@@ -187,6 +187,10 @@ public class DecorationProviderImpl implements  DecorationProvider {
         condition = condition.or(Tables.EH_DECORATION_REQUESTS.DECORATOR_PHONE.eq(phone).and(
                 Tables.EH_DECORATION_REQUESTS.STATUS.gt(DecorationRequestStatus.APPLY.getCode())));
         condition = condition.or(Tables.EH_DECORATION_WORKERS.PHONE.eq(phone));
+        if (namespaceId != null)
+            condition.and(Tables.EH_DECORATION_REQUESTS.NAMESPACE_ID.eq(namespaceId));
+        if (communityId != null)
+            condition.and(Tables.EH_DECORATION_REQUESTS.COMMUNITY_ID.eq(communityId));
         if (locator != null)
             condition = condition.and(Tables.EH_DECORATION_REQUESTS.ID.lt(locator.getAnchor()));
         step.where(condition);
