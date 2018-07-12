@@ -2035,7 +2035,8 @@ public class ForumServiceImpl implements ForumService {
              //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
 	         Condition condition = communityCondition
                      .or(regionCondition)
-                     .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()))
+                     .or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+                             .and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())))
                      .and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
 
 	         if(null != cmd.getEmbeddedAppId()){
