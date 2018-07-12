@@ -1,12 +1,15 @@
 package com.everhomes.scriptengine;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.gogs.GogsCommit;
 import com.everhomes.gogs.GogsRepo;
 import com.everhomes.gogs.GogsService;
 import com.everhomes.scriptengine.nashorn.NashornEngineService;
 import com.everhomes.scriptengine.nashorn.NashornScript;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.springframework.util.Assert;
+
+import java.util.List;
 
 public abstract class GogsNashornScript<O> implements NashornScript<O> {
 
@@ -24,7 +27,6 @@ public abstract class GogsNashornScript<O> implements NashornScript<O> {
 
         Assert.notNull(repo, "gogs repo should be not null");
         Assert.notNull(path, "gogs script path should be not null");
-        Assert.notNull(lastCommit, "gogs script last commit should be not null");
 
         byte[] file = gogsService.getFile(repo, path, lastCommit);
         return new String(file);
@@ -38,7 +40,13 @@ public abstract class GogsNashornScript<O> implements NashornScript<O> {
 
         Assert.notNull(repo, "gogs repo should be not null");
         Assert.notNull(path, "gogs script path should be not null");
-        Assert.notNull(lastCommit, "gogs script last commit should be not null");
+
+        if (lastCommit == null) {
+            List<GogsCommit> commits = gogsService.listCommits(repo, path, 1, 1);
+            if (commits != null && commits.size() > 0) {
+                lastCommit = commits.iterator().next().getId();
+            }
+        }
 
         String key = String.format("%s:%s:%s", repo.getFullName(), path, lastCommit);
         ScriptObjectMirror objectMirror = input.getScriptObjectMirror(key, this);
