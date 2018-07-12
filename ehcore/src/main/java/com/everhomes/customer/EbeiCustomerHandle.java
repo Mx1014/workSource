@@ -333,7 +333,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(communityId, organization);
             //项目要求不要把联系人同步为管理员 20180125
-//            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
+            insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
             organizationSearcher.feedDoc(organization);
             return null;
         });
@@ -342,7 +342,10 @@ public class EbeiCustomerHandle implements CustomerHandle {
 
     // 需要把同步过来的业务人员添加为我司系统对应组织的管理员
     private void insertOrUpdateOrganizationMembers(Integer namespaceId, Organization organization, String contact, String contactPhone) {
-
+       // #31149
+        if (namespaceId == 999983) {
+            return;
+        }
         if (StringUtils.isBlank(contact) || StringUtils.isBlank(contactPhone) || organization == null) {
             return ;
         }

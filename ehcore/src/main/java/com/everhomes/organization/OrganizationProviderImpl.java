@@ -514,7 +514,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             int pageSize, ListingLocator locator) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 
         if (null != organizationId) {

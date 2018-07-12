@@ -296,7 +296,7 @@ public interface AssetProvider {
     List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId);
 
 
-    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId);
+    void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId, boolean isInsert);
 
     PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName);
 
@@ -322,14 +322,12 @@ public interface AssetProvider {
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 
-
     Long findCategoryIdFromBillGroup(Long billGroupId);
 
     void insertAssetCategory(EhAssetAppCategories c);
-
-    
+  
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
-
+    
     boolean checkBillByCategory(Long billId, Long categoryId);
     //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
     
@@ -342,14 +340,22 @@ public interface AssetProvider {
 	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
 	void setRent(Long contractId, BigDecimal rent);
-	//add by tangcen
+	
 	void deleteUnsettledBillsOnContractId(Long contractId, List<Long> billIds);
+	
 	PaymentBills getFirstUnsettledBill(Long id);
+	
 	List<PaymentBillItems> findBillItemsByBillId(Long billId);
+	
 	void updatePaymentBills(PaymentBills bill);
+	
 	List<PaymentBills> getUnsettledBillBeforeEndtime(Long contractId, String endTimeStr);
+	
 	void deleteUnsettledBills(Long contractId, String endTimeStr);
+	
 	PaymentBills findLastBill(Long contractId);
+	
 	String findEndTimeByPeriod(String endTimeStr, Long contractId);
-
+    
+    PaymentLateFine findLastedFine(Long id);
 }

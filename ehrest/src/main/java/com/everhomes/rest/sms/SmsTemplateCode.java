@@ -145,4 +145,7 @@ public interface SmsTemplateCode {
 
     //物业缴费自动催款模板SCOPE
     static final String ASSET_MSG_SCOPE = "asset.sms";
+    int VISITORSYS_VERIFICATION_CODER = 67; //访客管理发送访客验证码
+    int VISITORSYS_INVT_INVITATION_LETTER = 68; //预约访客发送访客邀请函
+    int VISITORSYS_TEMP_INVITATION_LETTER = 69; //临时访客发送访客邀请函
 }

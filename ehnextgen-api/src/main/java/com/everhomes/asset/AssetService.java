@@ -69,7 +69,7 @@ public interface AssetService {
 
 	void OneKeyNotice(OneKeyNoticeCommand cmd);
 
-	ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
+	ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd);
 
 	List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
 
@@ -188,6 +188,9 @@ public interface AssetService {
     long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
 
 	void saveInstanceConfig(long categoryId, String ret);
-	//add by tangcen
+	
 	void deleteUnsettledBillsOnContractId(Byte costGenerationMethod, Long contractId, Timestamp endTime);
+	
+	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
+
 }

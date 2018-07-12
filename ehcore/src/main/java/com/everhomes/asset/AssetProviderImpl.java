@@ -1369,6 +1369,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
         EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
         EhPaymentChargingItems k = Tables.EH_PAYMENT_CHARGING_ITEMS.as("k");
+        EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");
         EhAddresses t1 = Tables.EH_ADDRESSES.as("t1");
         ListBillDetailVO vo = new ListBillDetailVO();
         BillGroupDTO dto = new BillGroupDTO();
@@ -1426,6 +1427,22 @@ public class AssetProviderImpl implements AssetProvider {
                     list1.add(itemDTO);
                     return null;
                 });
+        // 滞纳金
+        List<BillItemDTO> fineList = new ArrayList<>();
+        for(BillItemDTO item : list1){
+            List<PaymentLateFine> fines = context.selectFrom(fine)
+                .where(fine.BILL_ITEM_ID.eq(item.getBillItemId()))
+                    .fetchInto(PaymentLateFine.class);
+            for(PaymentLateFine n : fines){
+                BillItemDTO nitem = ConvertHelper.convert(item, BillItemDTO.class);
+                // 左邻convert为浅拷贝，第一层字段更改不会影响之前的
+                nitem.setBillItemName(n.getName());
+                nitem.setAmountReceivable(n.getAmount());
+                fineList.add(nitem);
+            }
+        }
+        list1.addAll(fineList);
+
         context.select(t.AMOUNT,t.ID, t.REMARKS)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
@@ -1596,6 +1613,16 @@ public class AssetProviderImpl implements AssetProvider {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public PaymentLateFine findLastedFine(Long id) {
+         List<PaymentLateFine> list = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_LATE_FINE)
+                .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID.eq(id))
+                 .orderBy(Tables.EH_PAYMENT_LATE_FINE.ID.desc())
+                .fetchInto(PaymentLateFine.class);
+         if(list.size() < 1) return null;
+         return list.get(0);
     }
 
     @Override
@@ -4316,7 +4343,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.BILL_ID.in(billId))
                 .fetch()
                 .forEach(r ->{
-                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+//                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
                     amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
                     if(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT).compareTo(zero) == 1){
                         amountSupplement[0] = amountSupplement[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
@@ -4451,14 +4478,18 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId) {
+    public void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId, boolean isInsert) {
         DSLContext context = getReadWriteContext();
         EhPaymentLateFineDao dao = new EhPaymentLateFineDao(context.configuration());
         this.dbProvider.execute((TransactionStatus status) -> {
-            dao.insert(fine);
+            if(isInsert){
+                dao.insert(fine);
+            }else{
+                dao.update(fine);
+            }
             context.update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.add(fineAmount))
-                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE.add(fineAmount))
+//                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE.add(fineAmount))
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
             return status;

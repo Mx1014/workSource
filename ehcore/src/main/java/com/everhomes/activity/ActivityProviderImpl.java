@@ -98,11 +98,12 @@ public class ActivityProviderImpl implements ActivityProivider {
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
         //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天  add by yanjun
-    	if(activity.getOfficialFlag() == OfficialFlag.YES.getCode() && null != activity.getStartTime()){
-        	if(activity.getStartTime().before(DateHelper.currentGMTTime())){
-        		activity.setCreateTime(new Timestamp(activity.getStartTime().getTime() - 24*60*60*1000));
-        	}
-    	}
+        //去除创建时间为开始时间之前一天这个设置 add by yanlong.liang 20180614
+//    	if(activity.getOfficialFlag() == OfficialFlag.YES.getCode() && null != activity.getStartTime()){
+//        	if(activity.getStartTime().before(DateHelper.currentGMTTime())){
+//        		activity.setCreateTime(new Timestamp(activity.getStartTime().getTime() - 24*60*60*1000));
+//        	}
+//    	}
         
         activity.setUpdateTime(activity.getCreateTime());
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());

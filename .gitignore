@@ -16,6 +16,7 @@ ehrest-response/target/
 ehcore/atomikos
 ehcore/statistics
 ehcore/logs
+ehcore/transaction-logs
 ehcore/output
 ehcore/src/test/java/com/everhomes/generate
 ehrest/src/test/java/com/everhomes/generate

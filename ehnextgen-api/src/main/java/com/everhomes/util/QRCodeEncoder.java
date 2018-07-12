@@ -86,6 +86,59 @@ public class QRCodeEncoder
 	}
 
 	/**
+	 * 生成二维码图片[带logo小图片]
+	 * @param content 二维码文字内容
+	 * @param charset 对内容进行编码的字符编码形式
+	 * @param width 二维码图片宽度
+	 * @param height 二维码图片高度
+	 * @param imageSavePath 二维码保存路径
+	 * @param avatar logo小图片路径
+	 * @param format 二维码图片格式，jpg/png等等
+	 * @param fontColor 字体颜色
+	 * @param bgColor 二维码图片背景色
+	 * @throws WriterException 如果对二维码进行编码出错则抛该异常
+	 * @throws IOException 如果写文件出错则抛该异常
+	 */
+	public static BufferedImage createQrCodeWithOutWhite(String content, String charset, int width, int height, String logoPath,
+											 String format, int fontColor, int bgColor) throws IOException, WriterException {
+		Hashtable<EncodeHintType, Object> hints = new Hashtable<EncodeHintType, Object>();
+		// 设置字符编码
+		hints.put(EncodeHintType.CHARACTER_SET, charset);
+		// 指定纠错等级
+		hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
+		BitMatrix matrix = new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height, hints);
+
+		matrix = deleteWhite(matrix);
+		BufferedImage image = toBufferedImage(matrix, new QRCodeConfig(fontColor, bgColor));
+		// 添加logo图片
+		overlapImage(image, logoPath);
+
+		return image;
+	}
+
+	/**
+	 * 去除白边
+	 * @param matrix
+	 * @return
+	 */
+	public static BitMatrix deleteWhite(BitMatrix matrix){
+		int[] rec = matrix.getEnclosingRectangle();
+		int resWidth = rec[2] + 1;
+		int resHeight = rec[3] + 1;
+
+
+		BitMatrix resMatrix = new BitMatrix(resWidth, resHeight);
+		resMatrix.clear();
+		for (int i = 0; i < resWidth; i++) {
+			for (int j = 0; j < resHeight; j++) {
+				if (matrix.get(i + rec[0], j + rec[1]))
+					resMatrix.set(i, j);
+			}
+		}
+		return resMatrix;
+	}
+
+	/**
 	 * 把图片写入到磁盘文件，中间添加logo图片
 	 * @param @param matrix
 	 * @param @param format

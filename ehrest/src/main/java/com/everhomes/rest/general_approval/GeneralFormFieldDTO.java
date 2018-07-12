@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * 子表单类型：{@link com.everhomes.rest.general_approval.GeneralFormSubformDTO}
  * 企业联系人类型：{@link com.everhomes.rest.general_approval.GeneralFormContactDTO}
  * </li>
- * <li>requiredFlag: 是否必填 </li>
+ * <li>requiredFlag: 是否必填 1必填，0不填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>
  * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link com.everhomes.rest.general_approval.GeneralFormDataVisibleType}</li>
  * <li>validatorType: 校验方式 {@link com.everhomes.rest.general_approval.GeneralFormValidatorType}</li>

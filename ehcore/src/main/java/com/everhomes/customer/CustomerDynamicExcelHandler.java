@@ -903,16 +903,23 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
+            enterpriseCustomer.setId(exist.getId());
+            enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
             try {
                 createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             } catch (Exception e) {
                 //todo:接口过时 没有批量删除
                 LOGGER.error("create enterprise admin error :{}", e);
             }
-            enterpriseCustomer.setId(exist.getId());
-            enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
+
+
             if ((exist.getOrganizationId() == null || exist.getOrganizationId() == 0) && StringUtils.isNotBlank(customerAddressString)) {
                 syncCustomerInfoIntoOrganization(exist);
+            }else {
+                //单纯的保持数据一致
+                OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
+                exist.setOrganizationId(organizationDTO.getId());
+                syncCustomerBasicInfoToOrganziation(exist);
             }
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
@@ -928,9 +935,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
             }
             customerService.saveCustomerEvent(3, enterpriseCustomer, exist, (byte) 0);
-
-            customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
-            createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+            if (StringUtils.isNotBlank(customerAddressString)) {
+                customerProvider.deleteAllCustomerEntryInfo(enterpriseCustomer.getId());
+                createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+            }
 //            if (StringUtils.isEmpty(customerAddressString)) {
 //                organizationProvider.deleteOrganizationById(exist.getOrganizationId());
 //                Organization organization = organizationProvider.findOrganizationById(exist.getOrganizationId());
@@ -1095,6 +1103,24 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                    LOGGER.error("create organization admin erro :{}", e);
                }
             });
+        }
+    }
+
+    private void syncCustomerBasicInfoToOrganziation(EnterpriseCustomer exist) {
+        OrganizationDTO organizationDTO = customerService.createOrganization(exist);
+        exist.setOrganizationId(organizationDTO.getId());
+        List<EnterpriseAttachment> attachments = customerProvider.listEnterpriseCustomerPostUri(exist.getId());
+        if (attachments != null && attachments.size() > 0) {
+            List<AttachmentDescriptor> bannerUrls = new ArrayList<>();
+            attachments.forEach((a) -> {
+                AttachmentDescriptor bannerUrl = new AttachmentDescriptor();
+                bannerUrl.setContentType(a.getContentType());
+                bannerUrl.setContentUri(a.getContentUri());
+                bannerUrls.add(bannerUrl);
+            });
+            addAttachments(exist.getOrganizationId(), bannerUrls, UserContext.currentUserId());
+            Organization createOrganization = organizationProvider.findOrganizationById(exist.getOrganizationId());
+            organizationSearcher.feedDoc(createOrganization);
         }
     }
 

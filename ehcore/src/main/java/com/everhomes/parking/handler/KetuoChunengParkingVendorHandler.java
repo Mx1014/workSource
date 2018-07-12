@@ -52,9 +52,7 @@ public class KetuoChunengParkingVendorHandler extends KetuoParkingVendorHandler 
 			tempRow.createCell(4).setCellValue(datetimeSF.format(order.getCreateTime()));
 			tempRow.createCell(5).setCellValue("");
 			tempRow.createCell(6).setCellValue("");
-			if (    order.getOrderType()!=null &&
-					order.getOrderType().byteValue()==ParkingOrderType.RECHARGE.getCode() &&
-					order.getRechargeType()!=null &&
+			if (order.getRechargeType()!=null &&
 					order.getRechargeType().byteValue()==ParkingRechargeType.MONTHLY.getCode()) {
 				if(order.getStartPeriod()!=null) {
 					tempRow.createCell(5).setCellValue(datetimeSF.format(order.getStartPeriod()));
@@ -67,9 +65,7 @@ public class KetuoChunengParkingVendorHandler extends KetuoParkingVendorHandler 
 			tempRow.createCell(8).setCellValue("");
 			tempRow.createCell(9).setCellValue("");
 			tempRow.createCell(10).setCellValue("");
-			if (    order.getOrderType()!=null &&
-					order.getOrderType().byteValue()==ParkingOrderType.RECHARGE.getCode() &&
-					order.getRechargeType()!=null &&
+			if (order.getRechargeType()!=null &&
 					order.getRechargeType().byteValue()==ParkingRechargeType.TEMPORARY.getCode()) {
 				if(order.getStartPeriod()!=null) {
 					tempRow.createCell(8).setCellValue(datetimeSF.format(order.getStartPeriod()));

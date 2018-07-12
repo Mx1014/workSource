@@ -68,7 +68,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -753,8 +752,9 @@ public class FieldServiceImpl implements FieldService {
                     cmd0.setPageSize(Integer.MAX_VALUE - 1);
                     //request by get method
                     if(StringUtils.isNotEmpty(exportcmd.getTrackingUids())){
-                        Long[] trackingUids = (Long[]) StringHelper.fromJsonString(exportcmd.getTrackingUids(), Long[].class);
-                        cmd0.setTrackingUids(Arrays.asList(trackingUids));
+//                        Long[] trackingUids = (Long[]) StringHelper.fromJsonString(exportcmd.getTrackingUids(), Long[].class);
+//                        cmd0.setTrackingUids(Arrays.asList(trackingUids));
+                        cmd0.setTrackingUid(Long.valueOf(exportcmd.getTrackingUids()));
                     }
                     Boolean isAdmin = checkCustomerAdmin(cmd0.getOrgId(), cmd0.getOwnerType(), cmd0.getNamespaceId());
                     SearchEnterpriseCustomerResponse response = enterpriseCustomerSearcher.queryEnterpriseCustomers(cmd0, isAdmin);

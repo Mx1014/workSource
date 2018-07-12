@@ -1,6 +1,10 @@
 package com.everhomes.PmNotify;
 
-import com.everhomes.energy.*;
+import com.everhomes.energy.EnergyConsumptionService;
+import com.everhomes.energy.EnergyMeter;
+import com.everhomes.energy.EnergyMeterProvider;
+import com.everhomes.energy.EnergyMeterTask;
+import com.everhomes.energy.EnergyMeterTaskProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
@@ -25,8 +29,14 @@ import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagePersistType;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.pmNotify.*;
+import com.everhomes.rest.pmNotify.PmNotifyMode;
+import com.everhomes.rest.pmNotify.PmNotifyReceiver;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverType;
+import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -50,8 +60,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/9/12.
@@ -294,7 +309,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 //                if (LOGGER.isDebugEnabled()) {
 //                    LOGGER.debug("createPmNotifyLog log{}",log.toString());
 //                }
-                pmNotifyProvider.createPmNotifyLog(log);
+//                pmNotifyProvider.createPmNotifyLog(log);
             }
         }
 
@@ -322,6 +337,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.PERSIST_TYPE, String.valueOf(MessagePersistType.LOG.getCode()));
+        messageDto.setMeta(meta);
 
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());

@@ -464,3 +464,17 @@ CREATE TABLE `eh_payment_bill_certificate` (
 -- issue-31047 摄像头增加账号 by liuyilin
 ALTER TABLE `eh_aclink_cameras` ADD COLUMN `account` VARCHAR(128) NOT NULL DEFAULT 'admin' COMMENT '摄像头账号';
 -- END issue-31047
+
+-- lei.yuan 智慧银星查询应用管理员时，请求接口响应超时，所以添加表索引进行优化
+alter table eh_authorizations add index owner_type_index(`owner_type`);
+alter table eh_authorizations add index owner_id_index(`owner_id`);
+alter table eh_authorizations add index target_type_index(`target_type`);
+alter table eh_authorizations add index target_id_index(`target_id`);
+alter table eh_authorization_control_configs add index control_id_index(`control_id`);
+alter table eh_authorization_control_configs add index user_id_index(`user_id`);
+alter table eh_organization_member_details add index target_id_index(`target_id`);
+alter table eh_door_auth add index string_tag3_index (`string_tag3`);
+alter table eh_organization_members add index detail_id_index (`detail_id`);
+alter table eh_organization_members add index group_path_index (`group_path`);
+alter table eh_portal_versions add index namespace_id_index(`namespace_id`);
+alter table eh_service_module_apps add index origin_id_index(`origin_id`);

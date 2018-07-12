@@ -911,12 +911,16 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd, Boolean checkAuth) {
+        EnterpriseCustomer customer = new EnterpriseCustomer();
         if (checkAuth) {
             checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_DELETE, cmd.getOrgId(), cmd.getCommunityId());
+            customer = checkEnterpriseCustomer(cmd.getId());
+        }else {
+            customer = enterpriseCustomerProvider.findById(cmd.getId());
+            if (customer == null) {
+                return;
+            }
         }
-
-        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
-        checkPrivilege(customer.getNamespaceId());
         //产品功能 #20796 同步过来的不能删
         if (NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
                 || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))) {
@@ -941,7 +945,7 @@ public class CustomerServiceImpl implements CustomerService {
         //企业客户新增成功,保存客户事件
         saveCustomerEvent(2, customer, null,cmd.getDeviceType());
 
-        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
+        if (customer.getOrganizationId() != null && customer.getOrganizationId() != 0 && checkAuth) {
             Organization org = organizationProvider.findOrganizationById(customer.getOrganizationId());
             if (org != null && org.getId() != null) {
                 DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
@@ -3590,7 +3594,6 @@ public class CustomerServiceImpl implements CustomerService {
 
         authorizationRelations.forEach((r) -> {
             String targetJson = r.getTargetJson();
-            // String privilegeJson = r.getPrivilegeJson();
             AssignmentTarget[] targetArr = (AssignmentTarget[]) StringHelper.fromJsonString(targetJson, AssignmentTarget[].class);
             List<AssignmentTarget> targets = Arrays.asList(targetArr);
             targets.forEach((p) -> {
@@ -3617,16 +3620,12 @@ public class CustomerServiceImpl implements CustomerService {
         administratorsCommand.setOwnerType(cmd.getOwnerType());
         ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse = rolePrivilegeService.listServiceModuleAppsAdministrators(administratorsCommand);
         List<OrganizationContactDTO> superAdmins = rolePrivilegeService.listOrganizationSuperAdministrators(administratorsCommand);
-        List<Long> adminUserId = getAdminUserIds(moduleAppsAdministratorResponse,superAdmins,cmd.getCommunityId());
-        if(adminUserId!=null && adminUserId.size()>0){
-            adminUserId.forEach((r)->{
-                List<OrganizationMember> members =  organizationProvider.listOrganizationMembersByUId(r);
-                if(members!=null && members.size()>0){
-                    relatedMembers.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
-                }
-            });
+        List<OrganizationMemberDTO> admins = getAdminUsers(moduleAppsAdministratorResponse,superAdmins,cmd.getCommunityId());
+
+        if(admins!=null && admins.size()>0){
+            relatedMembers.addAll(admins);
         }
-        if (relatedMembers != null && relatedMembers.size() > 0) {
+        if (relatedMembers.size() > 0) {
             relatedMembers.forEach((r) ->{
                 Organization organization =  organizationProvider.findOrganizationById(r.getOrganizationId());
                 if(organization!=null){
@@ -3639,10 +3638,17 @@ public class CustomerServiceImpl implements CustomerService {
         return relatedMembers;
     }
 
-    private List<Long> getAdminUserIds(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
-        List<Long> userIds = new ArrayList<>();
+    private List<OrganizationMemberDTO> getAdminUsers(ListServiceModuleAppsAdministratorResponse moduleAppsAdministratorResponse, List<OrganizationContactDTO> superAdmins, Long communityId) {
+        List<OrganizationMemberDTO> users = new ArrayList<>();
         if (superAdmins != null && superAdmins.size() > 0) {
-            superAdmins.forEach(s -> userIds.add(s.getTargetId()));
+            superAdmins.forEach(s -> {
+                OrganizationMemberDTO dto = new OrganizationMemberDTO();
+                dto.setTargetId(s.getTargetId());
+                dto.setTargetType(s.getTargetType());
+                dto.setContactName(s.getContactName());
+                dto.setGender(s.getGender());
+                dto.setContactToken(s.getContactToken());
+            });
         }
         List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
         if (moduleAdmins != null && moduleAdmins.size() > 0) {
@@ -3653,11 +3659,17 @@ public class CustomerServiceImpl implements CustomerService {
                     communityControlIds = r.getCommunityControlApps().getCommunityControlIds();
                 }
                 if (AllFlag.ALL.equals(AllFlag.fromCode(r.getAllFlag())) || (communityControlIds != null && communityControlIds.contains(communityId))) {
-                    userIds.add(r.getTargetId());
+                    OrganizationMemberDTO dto = new OrganizationMemberDTO();
+                    dto.setTargetId(r.getTargetId());
+                    dto.setTargetType(r.getTargetType());
+                    dto.setContactName(r.getContactName());
+                    dto.setGender(r.getGender());
+                    dto.setContactToken(r.getIdentifierToken());
+                    users.add(dto);
                 }
             });
         }
-        return userIds;
+        return users;
     }
 
     @Override

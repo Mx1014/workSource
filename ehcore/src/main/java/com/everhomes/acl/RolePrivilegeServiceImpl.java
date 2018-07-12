@@ -43,6 +43,7 @@ import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -498,6 +499,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		resp.setPrivileges(infos);
 		return resp;
 	}
+	
+	private boolean checkTopPrivilege(long orgId) {
+        if(this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+       Organization org = organizationProvider.findOrganizationById(orgId);
+       if(org == null) {
+           throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+                "organization not find");
+        }
+      if(org.getAdminTargetId() != null && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+          return false;
+        }
+      
+      return true;
+	}
 
 	/**
 	 * 创建超级管理员
@@ -507,16 +525,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
-		
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-      if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+      if(!checkTopPrivilege(cmd.getOrganizationId())) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
                     "non-privileged.");
         }
 	      
 		dbProvider.execute((TransactionStatus status) -> {
 			//根据组织id、用户姓名、手机号、超级管理员权限代号、机构管理，超级管理员，拥有 所有权限、来创建超级管理员
-			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN);
+			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
+					PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN);
 			dtos.add(dto);
 			return null;
 		});
@@ -1507,7 +1524,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-                toTargetTemplateCode,
+				toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1535,7 +1552,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-                toOtherTemplateCode,
+				toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1748,8 +1765,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			dtos.add(processOrganizationContactDTO(member));
 		}
 
-		Long topAdminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
-		listOrganizationContectDTOResponse.setDtos(dtos.stream().filter(r-> !Objects.equals(r.getTargetId(), topAdminUserId)).collect(Collectors.toList()));
+//		Long topAdminUserId = getTopAdministratorByOrganizationId(cmd.getOrganizationId());
+		listOrganizationContectDTOResponse.setDtos(dtos);
 		listOrganizationContectDTOResponse.setNextPageAnchor(locator.getAnchor());
 		return listOrganizationContectDTOResponse;
 	}
@@ -1822,13 +1839,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void updateTopAdminstrator(CreateOrganizationAdminCommand cmd) {
-	    Organization org = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-	    if(org == null) {
-	          throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-	                    "organization not find");
-	    }
-	    
-	    if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+	    if(!checkTopPrivilege(cmd.getOrganizationId())) {
 	        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 	                "non-privileged.");
 	    }
@@ -1871,7 +1882,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			targetType = OrganizationMemberTargetType.UNTRACK.getCode();
 		}
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
-		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, OrganizationMemberGroupType.MANAGER.getCode(), targetType);
+		List<OrganizationMember> members =
+				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+						organizationId, OrganizationMemberGroupType.MANAGER.getCode(), targetType);
 		for (OrganizationMember member: members ) {
 			dtos.add(processOrganizationContactDTO(member));
 		}
@@ -1998,8 +2011,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params ownerType error.");
 		}
 		
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-      if(org.getAdminTargetId() == null || !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+      if(!checkTopPrivilege(cmd.getOrganizationId())) {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
                     "non-privileged.");
         }
@@ -2672,7 +2684,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	            } else {
 	                //设置默认超级管理员
 	                if(members != null && members.size() > 0) {
-	                    for(OrganizationMember mb : members) {
+	                    for(int i = members.size()-1; i >= 0; i--) {
+	                    	//reverse order
+	                    	OrganizationMember mb = members.get(i);
 	                        if(mb.getTargetId() != null) {
 	                            org.setAdminTargetId(mb.getTargetId());
 	                            organizationProvider.updateOrganization(org);
@@ -3095,8 +3109,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			dto.setAllFlag(module_dto.getAllFlag());
 
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(module_dto.getTargetId());
-			if(detail != null)
+			if(detail != null){
 				dto.setContactName(detail.getContactName());
+				dto.setGender(detail.getGender());
+			}
 
 			// 园区控制范围数据
 			ServiceModuleAuthorizationsDTO c_dto = processServiceModuleApps(r, ModuleManagementType.COMMUNITY_CONTROL.getCode());
