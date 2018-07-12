@@ -1,6 +1,6 @@
 CREATE TABLE `eh_pm_task_configs` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `namespace_id` int NOT NULL DEFAULT '0',
   `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
   `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
   `payment_flag` tinyint(4) DEFAULT '0' COMMENT '0: inactive, 1: active',
@@ -9,22 +9,22 @@ CREATE TABLE `eh_pm_task_configs` (
   `content_hint` varchar(64) DEFAULT '请描述服务具体内容' COMMENT '服务内容提示文本',
   `creator_id` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
-  `operator_id` bigint(20) NOT NULL DEFAULT '0',
-  `operate_time` datetime DEFAULT NULL,
+  `updater_id` bigint(20) NOT NULL DEFAULT '0',
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修通用配置表';
 
 CREATE TABLE `eh_pm_task_orders` (
   `id`  bigint(20) NOT NULL ,
-  `namespace_id`  int NULL ,
+  `namespace_id` int NULL ,
   `task_id` bigint(20) NOT NULL COMMENT '报修单Id',
   `biz_order_num`  varchar(64) NULL COMMENT '处理过的资源预订订单号' ,
   `pay_order_id`  bigint(20) NULL COMMENT '支付系统订单号' ,
   `payment_order_type`  tinyint(8) NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单' ,
   `status`  tinyint(8) NULL COMMENT '订单状态0未支付 1已支付' ,
-  `amount` decimal(16) NULL COMMENT '订单金额' ,
-  `service_fee` decimal(16) NULL COMMENT '服务费' ,
-  `product_fee` decimal(16) NULL COMMENT '产品费' ,
+  `amount` decimal(16,2) NULL COMMENT '订单金额' ,
+  `service_fee` decimal(16,2) NULL COMMENT '服务费' ,
+  `product_fee` decimal(16,2) NULL COMMENT '产品费' ,
   `account_id`  bigint(20) NULL COMMENT '收款方账号' ,
   `order_commit_url` varchar(1024) NULL,
   `order_commit_token` varchar(1024) NULL,
@@ -32,7 +32,7 @@ CREATE TABLE `eh_pm_task_orders` (
   `order_commit_timestamp`  bigint(20) NULL  ,
   `pay_info` text NULL,
   `create_time`  datetime  ,
-  `operate_time`  datetime  ,
+  `update_time`  datetime  ,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修订单表';
 
@@ -44,13 +44,11 @@ CREATE TABLE `eh_pm_task_order_details` (
   `owner_type` varchar(32),
   `task_id` bigint(20) NOT NULL COMMENT '报修单Id',
   `order_id`  bigint(20) NOT NULL COMMENT '资源预订订单id' ,
-
   `product_name` varchar(60) NULL COMMENT '产品名称',
   `product_amount` int NULL COMMENT '产品数量',
-  `product_price` decimal(16) NULL COMMENT '产品单价' ,
-
+  `product_price` decimal(16,2) NULL COMMENT '产品单价' ,
   `create_time`  datetime  ,
-  `operate_time`  datetime  ,
+  `update_time`  datetime  ,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '物业报修订单明细表';
 
