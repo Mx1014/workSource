@@ -152,7 +152,7 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
         }
         // this way depends on  analyzing ,you can use array instead
         if (cmd.getBuildingId() != null) {
-            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "buildingId");
+            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
             qb = QueryBuilders.boolQuery().must(qb).must(operatorNameQuery);
         }
         if (cmd.getAddressId() != null) {
