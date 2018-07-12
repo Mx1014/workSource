@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>taskCategoryId: 物业报修分类id 6 物业报修 9 投诉与需求</li>
  *     <li>agentSwitch: 代发开关 0 关闭 1 开启</li>
+ *     <li>feeModule: 费用清单模式 0 关闭 1 开启</li>
  *     <li>type: 样式</li>
  *     <li>url: url</li>
  * </ul>
@@ -16,6 +17,8 @@ public class PmTaskInstanceConfig {
 	private Long taskCategoryId;
 
 	private Byte agentSwitch;
+
+	private Byte feeModule;
 
 	private String type;
 
@@ -51,6 +54,14 @@ public class PmTaskInstanceConfig {
 
 	public void setAgentSwitch(Byte agentSwitch) {
 		this.agentSwitch = agentSwitch;
+	}
+
+	public Byte getFeeModule() {
+		return feeModule;
+	}
+
+	public void setFeeModule(Byte feeModule) {
+		this.feeModule = feeModule;
 	}
 
 	@Override

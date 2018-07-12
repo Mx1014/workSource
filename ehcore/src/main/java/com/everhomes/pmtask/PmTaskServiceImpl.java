@@ -39,6 +39,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
@@ -183,15 +184,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private LocaleTemplateService localeTemplateService;
-	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
 	private CommunityProvider communityProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	@Autowired
-	private SmsProvider smsProvider;
 	@Autowired
     private DbProvider dbProvider;
 	@Autowired
@@ -203,13 +200,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private NamespaceResourceProvider namespaceResourceProvider;
 	@Autowired
-	private PmTaskCommonServiceImpl pmTaskCommonService;
-	@Autowired
 	private FlowService flowService;
-	@Autowired
-	private FlowNodeProvider flowNodeProvider;
-	@Autowired
-	private BuildingProvider buildingProvider;
 	@Autowired
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
@@ -227,8 +218,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private CommunityService communityService;
 	@Autowired
-	private PortalService portalService;
-	@Autowired
 	private UserService userService;
 	@Autowired
 	private AddressService addressService;
@@ -240,6 +229,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private PayService payService;
 	@Autowired
 	private ContentServerService contentServerService;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
 
 
 	@Value("${server.contextPath:}")
@@ -3152,14 +3143,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 //		取评价项目
 		List<FlowEvaluateItem> evalItems = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getFlowMainId(),flow.getFlowVersion());
+		List<String> evalItemNameList = evalItems.stream().map(r -> r.getName()).collect(Collectors.toList());
+		List<FlowEvaluateItem> allEvalItems = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getFlowMainId(),null);
+		List<FlowEvaluateItem> tagEvalItems = allEvalItems.stream().filter(r -> evalItemNameList.contains(r.getName())).collect(Collectors.toList());
+		Map<String,List<FlowEvaluateItem>> gbName = tagEvalItems.stream().collect(Collectors.groupingBy(FlowEvaluateItem::getName));
 //		取工作流下所有评价
-		List<FlowEvaluate> evals =  flowEvaluateProvider.findEvaluatesByFlowMainId(flow.getFlowMainId(),flow.getFlowVersion(),cmd.getBeginTime(),cmd.getEndTime());
+		List<FlowEvaluate> evals =  flowEvaluateProvider.findEvaluatesByFlowMainId(flow.getFlowMainId(),null,cmd.getBeginTime(),cmd.getEndTime());
 //		根据评价项目分组
-	 	Map<Long,List<FlowEvaluate>> evalgroups = evals.stream().collect(Collectors.groupingBy(FlowEvaluate::getEvaluateItemId));
+	 	Map<Long,List<FlowEvaluate>> evalgroupsById = evals.stream().collect(Collectors.groupingBy(FlowEvaluate::getEvaluateItemId));
+	 	Map<String,List<FlowEvaluate>> evalgroupsByName = new HashMap<>();
+	 	gbName.forEach((s, flowEvaluateItems) -> {
+			List<FlowEvaluate> templist = new ArrayList<>();
+	 		flowEvaluateItems.forEach(r-> {
+	 			if(null != evalgroupsById.get(r.getId()))
+					templist.addAll(evalgroupsById.get(r.getId()));
+			});
+	 		evalgroupsByName.put(s,templist);
+		});
 //		统计运算
 	 	evalItems.forEach(item -> {
 			PmTaskEvalStatDTO stat = new PmTaskEvalStatDTO();
-			List<FlowEvaluate> evalgroup = evalgroups.get(item.getId());
+			List<FlowEvaluate> evalgroup = evalgroupsByName.get(item.getName());
 			if(null != evalgroup){
 				int total = evalgroup.size();
 				if(total > 0){
@@ -3292,6 +3296,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTaskId());
 		dto.setProducts(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
 		return dto;
+	}
+
+	@Override
+	public void syncOrderDetails() {
+//		generalFormValProvider.queryGeneralFormVals();
 	}
 
 	@Override

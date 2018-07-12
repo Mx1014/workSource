@@ -943,6 +943,20 @@ public class PmTaskController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /pmtask/syncOrderDetails</b>
+     * <p>给不同项目拷贝分类(用后删除)</p>
+     */
+    @RequestMapping("syncOrderDetails")
+    @RestReturn(value=String.class)
+    public RestResponse syncOrderDetails() {
+        pmTaskService.syncOrderDetails();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /pmtask/listPayeeAccounts</b>
      * <p>列出当前项目下所有的收款方账户</p>
      */

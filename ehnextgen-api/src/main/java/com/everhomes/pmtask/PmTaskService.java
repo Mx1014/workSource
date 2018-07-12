@@ -140,6 +140,8 @@ public interface PmTaskService {
 
 	PmTaskOrderDTO searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd);
 
+	void syncOrderDetails();
+
 	List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
 
 	PreOrderDTO payBills(CreatePmTaskOrderCommand cmd);

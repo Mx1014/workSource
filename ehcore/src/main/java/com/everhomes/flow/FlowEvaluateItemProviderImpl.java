@@ -117,8 +117,10 @@ public class FlowEvaluateItemProviderImpl implements FlowEvaluateItemProvider {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(
 					ListingLocator locator, SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_MAIN_ID.eq(flowId));
-				query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_VERSION.eq(flowVer));
+				if(null != flowId)
+			        query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_MAIN_ID.eq(flowId));
+				if(null != flowVer)
+				    query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_VERSION.eq(flowVer));
 				query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_CASE_ID.isNull());
 				return query;
 			}

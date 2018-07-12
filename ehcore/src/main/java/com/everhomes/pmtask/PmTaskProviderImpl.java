@@ -614,13 +614,11 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	@Override
 	public void deleteOrderDetailsByOrderId(Long orderId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskOrderDetails.class));
-		EhPmTaskOrderDetailsDao dao = new EhPmTaskOrderDetailsDao(context.configuration());
 		DeleteQuery query = context.deleteQuery(Tables.EH_PM_TASK_ORDER_DETAILS);
 		if(null != orderId){
 			query.addConditions(Tables.EH_PM_TASK_ORDER_DETAILS.ORDER_ID.eq(orderId));
 			query.execute();
 		}
-
 	}
 
 	@Override
