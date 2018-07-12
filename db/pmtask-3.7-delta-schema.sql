@@ -22,7 +22,7 @@ CREATE TABLE `eh_pm_task_orders` (
   `pay_order_id`  bigint(20) NULL COMMENT '支付系统订单号' ,
   `payment_order_type`  tinyint(8) NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单' ,
   `status`  tinyint(8) NULL COMMENT '订单状态0未支付 1已支付' ,
-  `amount` decimal(16,2) NULL COMMENT '订单金额' ,
+  `amount` decimal(16) NULL COMMENT '订单金额' ,
   `service_fee` decimal(16) NULL COMMENT '服务费' ,
   `product_fee` decimal(16) NULL COMMENT '产品费' ,
   `account_id`  bigint(20) NULL COMMENT '收款方账号' ,
