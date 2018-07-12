@@ -394,11 +394,6 @@ public class RentalCommonServiceImpl {
         String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
                 String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP), locale, "");
 
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。");
-//        sb.append("\r\n");
-//        sb.append("\r\n");
-//        sb.append("确认要取消订单吗？");
         return content;
     }
 

@@ -1820,7 +1820,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (rule.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
 				billDTO.setRefundTip(rentalCommonService.processResourceCustomRefundTip(rule));
 			}else if (rule.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
-				billDTO.setRefundTip(rentalCommonService.processOrderNotRefundTip());
+				String locale = UserContext.current().getUser().getLocale();
+				String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+						String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP2), locale, "");
+				billDTO.setRefundTip(content);
 			}
 		}
 		return billDTO;
@@ -6450,7 +6453,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (rule.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
 				rentalSiteDTO.setRefundTip(rentalCommonService.processResourceCustomRefundTip(rule));
 			}else if (rule.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
-				rentalSiteDTO.setRefundTip(rentalCommonService.processOrderNotRefundTip());
+				String locale = UserContext.current().getUser().getLocale();
+				String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+						String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP2), locale, "");
+				rentalSiteDTO.setRefundTip(content);
 			}
 		}
 		return rentalSiteDTO;
