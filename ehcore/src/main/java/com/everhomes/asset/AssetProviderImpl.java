@@ -2120,6 +2120,7 @@ public class AssetProviderImpl implements AssetProvider {
             //删除include进来之外的增收减免
             context.delete(t2)
                     .where(t2.ID.notIn(includeExemptionIds))
+                    .and(t2.BILL_ID.eq(billId))
                     .execute();
             reCalBillById(billId);//重新计算账单
             // 更新发票
