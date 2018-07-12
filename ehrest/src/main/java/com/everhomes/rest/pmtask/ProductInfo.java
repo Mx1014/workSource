@@ -12,7 +12,7 @@ public class ProductInfo {
 
     private String productName;
     private Integer productAmount;
-    private Long productPrice;
+    private Double productPrice;
 
     public String getProductName() {
         return productName;
@@ -30,11 +30,11 @@ public class ProductInfo {
         this.productAmount = productAmount;
     }
 
-    public Long getProductPrice() {
+    public Double getProductPrice() {
         return productPrice;
     }
 
-    public void setProductPrice(Long productPrice) {
+    public void setProductPrice(Double productPrice) {
         this.productPrice = productPrice;
     }
 }

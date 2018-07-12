@@ -21,7 +21,7 @@ public class CreateOrderDetailsCommand {
     private Long ownerId;
     private String ownerType;
     private Long taskId;
-    private Long serviceFee;
+    private Double serviceFee;
     @ItemType(ProductInfo.class)
     List<ProductInfo> orderDetails;
 
@@ -57,11 +57,11 @@ public class CreateOrderDetailsCommand {
         this.taskId = taskId;
     }
 
-    public Long getServiceFee() {
+    public Double getServiceFee() {
         return serviceFee;
     }
 
-    public void setServiceFee(Long serviceFee) {
+    public void setServiceFee(Double serviceFee) {
         this.serviceFee = serviceFee;
     }
 

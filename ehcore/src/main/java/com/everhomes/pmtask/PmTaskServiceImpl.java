@@ -3205,7 +3205,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if(null != cmd.getPaymentAccountType()){
 				result.setPaymentAccountType(cmd.getPaymentAccountType());
 			}
-			result.setOperatorId(user.getId());
+			result.setUpdaterId(user.getId());
 			pmTaskProvider.updatePmTaskConfig(result);
 		} else {
 			result = ConvertHelper.convert(cmd, PmTaskConfig.class);
@@ -3238,9 +3238,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long taskId = cmd.getTaskId();
 //		创建订单
 		PmTaskOrder order = ConvertHelper.convert(cmd,PmTaskOrder.class);
-		Long productFee = cmd.getOrderDetails().stream().collect(Collectors.summingLong(r->r.getProductAmount()*r.getProductPrice()));
-		order.setProductFee(productFee);
-		order.setAmount(order.getServiceFee() + productFee);
+		if(null != cmd.getServiceFee())
+			order.setServiceFee(BigDecimal.valueOf(cmd.getServiceFee()));
+		Double productFee = cmd.getOrderDetails().stream().mapToDouble(r -> {
+			BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+			BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+			return price.multiply(amount).doubleValue();
+		}).sum();
+		order.setProductFee(BigDecimal.valueOf(productFee));
+		order.setAmount(order.getServiceFee().add(BigDecimal.valueOf(productFee)));
 		order = this.pmTaskProvider.createPmTaskOrder(order);
 		Long orderId = order.getId();
 //		创建订单明细
@@ -3269,10 +3275,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		修改订单
 		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(taskId);
 		if(null != cmd.getServiceFee())
-			order.setServiceFee(cmd.getServiceFee());
-		Long productFee = cmd.getOrderDetails().stream().collect(Collectors.summingLong(r->r.getProductAmount()*r.getProductPrice()));
-		order.setProductFee(productFee);
-		order.setAmount(order.getServiceFee() + productFee);
+			order.setServiceFee(BigDecimal.valueOf(cmd.getServiceFee()));
+		Double productFee = cmd.getOrderDetails().stream().mapToDouble(r -> {
+			BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+			BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+			return price.multiply(amount).doubleValue();
+		}).sum();
+		order.setProductFee(BigDecimal.valueOf(productFee));
+		order.setAmount(order.getServiceFee().add(BigDecimal.valueOf(productFee)));
 		order = this.pmTaskProvider.updatePmTaskOrder(order);
 		Long orderId = order.getId();
 		this.pmTaskProvider.deleteOrderDetailsByOrderId(orderId);
@@ -3389,9 +3399,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		//3、组装报文，发起下单请求
 		PmTaskOrder order = pmTaskProvider.findPmTaskOrderById(cmd.getOrderId());
+		Long amount = order.getAmount().movePointRight(2).longValue();
 		CreateOrderCommand cmdPay = this.CreateOrderCommand(cmd);
 		cmdPay.setPayeeUserId(payeeUserId);
-		cmdPay.setAmount(order.getAmount());
+		cmdPay.setAmount(amount);
 		CreateOrderRestResponse response = payService.createPurchaseOrder(cmdPay);
 		if(!response.getErrorCode().equals(200)) {
 			LOGGER.error("create order fail");
@@ -3401,7 +3412,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		//4、组装支付方式
 		preOrderDTO = orderCommandResponseToDto(response.getResponse());
-		preOrderDTO.setAmount(order.getAmount());
+		preOrderDTO.setAmount(amount);
 		preOrderDTO.setOrderId(order.getId());
 
 		//5、保存订单信息

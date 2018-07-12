@@ -565,7 +565,7 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	public PmTaskConfig updatePmTaskConfig(PmTaskConfig bean) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskConfigs.class));
 		EhPmTaskConfigsDao dao = new EhPmTaskConfigsDao(context.configuration());
-		bean.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		bean.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(bean);
 		return bean;
 	}
@@ -636,7 +636,7 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	public PmTaskOrder updatePmTaskOrder(PmTaskOrder bean) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskOrders.class));
 		EhPmTaskOrdersDao dao = new EhPmTaskOrdersDao(context.configuration());
-		bean.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		bean.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(bean);
 		return bean;
 	}

@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -361,13 +362,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 //							.collect(Collectors.toList());
 					content += "本次服务的费用清单如下，请进行确认\n";
 //					Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
-					Long total = order.getAmount();
-					content += "总计:"+total+"元\n";
+					BigDecimal total = order.getAmount();
+					content += "总计:"+total.setScale(2)+"元\n";
 //					Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
-					Long serviceFee = order.getServiceFee();
-					content += "服务费:"+serviceFee+"元\n";
-					Long productFee = order.getProductFee();
-					content += "物品费:"+ productFee +"元\n";
+					BigDecimal serviceFee = order.getServiceFee();
+					content += "服务费:"+serviceFee.setScale(2)+"元\n";
+					BigDecimal productFee = order.getProductFee();
+					content += "物品费:"+ productFee.setScale(2) +"元\n";
 //					PostApprovalFormItem subForm = getFormItem(items,"物品");
 //					if (subForm!=null) {
 //						PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
@@ -385,12 +386,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 //							content += "如对上述费用有疑义请附言说明";
 //						}
 //					}
-					if (order.getProductFee() > 0){
+					if (order.getProductFee().doubleValue() > 0){
 						content += "物品费详情：\n";
 						for (PmTaskOrderDetail r : products) {
+							BigDecimal price = r.getProductPrice();
+							BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
 							content += r.getProductName() + ":";
-							content += r.getProductAmount() * r.getProductPrice() + "元";
-							content += "(" + r.getProductPrice() + "元*" + r.getProductAmount() + ")";
+							content += price.multiply(amount).setScale(2) + "元";
+							content += "(" + price.setScale(2) + "元*" + amount.intValue() + ")";
 						}
 					}
 					content += "如对上述费用有疑义请附言说明";
