@@ -105,6 +105,7 @@ public class ArchivesFormServiceImpl implements ArchivesFormService{
                 obj.setFieldValue(val.getFieldValue());
                 archivesFormProvider.updateArchivesFormVal(obj);
             } else {
+                obj = new ArchivesFormVal();
                 obj.setNamespaceId(form.getNamespaceId());
                 obj.setOwnerId(form.getOwnerId());
                 obj.setOwnerType(form.getOwnerType());
