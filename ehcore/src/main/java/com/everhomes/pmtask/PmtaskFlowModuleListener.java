@@ -312,18 +312,20 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setValue(dto.getRequestorPhone());
 		entities.add(e);
 
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("发起人");
-		e.setValue(name);
-		entities.add(e);
+//		代发情况才显示
+		if (task.getOrganizationUid() != null) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("发起人");
+			e.setValue(name);
+			entities.add(e);
 
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("发起人电话");
-		e.setValue(phone);
-		entities.add(e);
-
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("发起人电话");
+			e.setValue(phone);
+			entities.add(e);
+		}
 
 		//TODO:为科兴与一碑对接
 		if(dto.getNamespaceId() == 999983 &&

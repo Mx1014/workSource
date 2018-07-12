@@ -39,6 +39,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
+import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.module.ServiceModuleService;
@@ -3228,10 +3229,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void createOrderDetails(CreateOrderDetailsCommand cmd) {
-		if(cmd.getOrderDetails().size() <= 0){
-			LOGGER.info("Invalid parameter, cmd={}", cmd);
-			return;
-		}
+//		if(null != cmd.getOrderDetails() && cmd.getOrderDetails().size() <= 0){
+//			LOGGER.info("Invalid parameter, cmd={}", cmd);
+//			return;
+//		}
 		Integer namespaceId = cmd.getNamespaceId();
 		String ownerType = cmd.getOwnerType();
 		Long ownerId = cmd.getOwnerId();
@@ -3241,22 +3242,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long serviceFee = order.getServiceFee();
 		if(null != serviceFee)
 			order.setServiceFee(serviceFee);
-		Long productFee = cmd.getOrderDetails().stream().mapToLong(r -> r.getProductAmount() * r.getProductPrice()).sum();
+		Long productFee = 0L;
+		if(null != cmd.getOrderDetails()){
+			productFee = cmd.getOrderDetails().stream().mapToLong(r -> r.getProductAmount() * r.getProductPrice()).sum();
+		}
 		order.setProductFee(productFee);
 		order.setAmount(serviceFee + productFee);
 		order = this.pmTaskProvider.createPmTaskOrder(order);
 		Long orderId = order.getId();
-//		创建订单明细
-		List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
-			PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
-			bean.setNamespaceId(namespaceId);
-			bean.setOwnerType(ownerType);
-			bean.setOwnerId(ownerId);
-			bean.setTaskId(taskId);
-			bean.setOrderId(orderId);
-			return bean;
-		}).collect(Collectors.toList());
-		this.pmTaskProvider.createOrderDetails(details);
+		if(null != cmd.getOrderDetails()){
+			//		创建订单明细
+			List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
+				PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
+				bean.setNamespaceId(namespaceId);
+				bean.setOwnerType(ownerType);
+				bean.setOwnerId(ownerId);
+				bean.setTaskId(taskId);
+				bean.setOrderId(orderId);
+				return bean;
+			}).collect(Collectors.toList());
+			this.pmTaskProvider.createOrderDetails(details);
+		}
 	}
 
 	@Override
@@ -3274,23 +3280,28 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long serviceFee = order.getServiceFee();
 		if(null != serviceFee)
 			order.setServiceFee(serviceFee);
-		Long productFee = cmd.getOrderDetails().stream().mapToLong(r -> r.getProductAmount() * r.getProductPrice()).sum();
+		Long productFee = 0L;
+		if(null != cmd.getOrderDetails()){
+			productFee = cmd.getOrderDetails().stream().mapToLong(r -> r.getProductAmount() * r.getProductPrice()).sum();
+		}
 		order.setProductFee(productFee);
 		order.setAmount(serviceFee + productFee);
 		order = this.pmTaskProvider.updatePmTaskOrder(order);
 		Long orderId = order.getId();
 		this.pmTaskProvider.deleteOrderDetailsByOrderId(orderId);
+		if(null != cmd.getOrderDetails()){
 //		创建订单明细
-		List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
-			PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
-			bean.setNamespaceId(namespaceId);
-			bean.setOwnerType(ownerType);
-			bean.setOwnerId(ownerId);
-			bean.setTaskId(taskId);
-			bean.setOrderId(orderId);
-			return bean;
-		}).collect(Collectors.toList());
-		this.pmTaskProvider.createOrderDetails(details);
+			List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
+				PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
+				bean.setNamespaceId(namespaceId);
+				bean.setOwnerType(ownerType);
+				bean.setOwnerId(ownerId);
+				bean.setTaskId(taskId);
+				bean.setOrderId(orderId);
+				return bean;
+			}).collect(Collectors.toList());
+			this.pmTaskProvider.createOrderDetails(details);
+		}
 	}
 
 	@Override
@@ -3304,7 +3315,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void syncOrderDetails() {
-//		generalFormValProvider.queryGeneralFormVals();
+		Integer amount = generalFormValProvider.queryAmount("EhPmTasks",null);
+		Integer pageSize = 10000;
+		Long pageAnchor = 0L;
+		Integer loopTime = amount/pageSize + 1;
+
+		for (int i = 0 ; i <= loopTime ; i++){
+			List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals("EhPmTasks",null,pageAnchor,pageSize);
+//			list.stream().collect(Collectors.groupingBy());
+		}
 	}
 
 	@Override

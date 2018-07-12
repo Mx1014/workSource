@@ -10,6 +10,7 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
 import com.everhomes.server.schema.tables.records.EhGeneralFormValsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
@@ -121,5 +122,33 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
 
         query.execute();
 
+    }
+
+    @Override
+    public Integer queryAmount(String sourceType, Long sourceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormVals.class));
+        SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+        if(null != sourceId)
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+        if(StringUtils.isNotEmpty(sourceType))
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
+        return  query.fetchCount();
+    }
+
+    @Override
+    public List<GeneralFormVal> queryGeneralFormVals(String sourceType, Long sourceId, Long pageAnchor, Integer pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormVals.class));
+        SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+        if(null != sourceId)
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+        if(StringUtils.isNotEmpty(sourceType))
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
+        if(null != pageAnchor && pageAnchor != 0)
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.ID.gt(pageAnchor));
+        if(null != pageSize)
+            query.addLimit(pageSize);
+        query.addOrderBy(Tables.EH_PM_TASKS.ID.asc());
+        List<GeneralFormVal> objs = query.fetch().map((r) -> ConvertHelper.convert(r, GeneralFormVal.class));
+        return objs;
     }
 }
