@@ -362,13 +362,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 //							.collect(Collectors.toList());
 					content += "本次服务的费用清单如下，请进行确认\n";
 //					Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
-					BigDecimal total = order.getAmount();
-					content += "总计:"+total.setScale(2)+"元\n";
+					BigDecimal total = BigDecimal.valueOf(order.getAmount());
+					content += "总计:"+total.movePointLeft(2).toString()+"元\n";
 //					Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
-					BigDecimal serviceFee = order.getServiceFee();
-					content += "服务费:"+serviceFee.setScale(2)+"元\n";
-					BigDecimal productFee = order.getProductFee();
-					content += "物品费:"+ productFee.setScale(2) +"元\n";
+					BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+					content += "服务费:"+serviceFee.movePointLeft(2).toString()+"元\n";
+					BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+					content += "物品费:"+ productFee.movePointLeft(2) +"元\n";
 //					PostApprovalFormItem subForm = getFormItem(items,"物品");
 //					if (subForm!=null) {
 //						PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
@@ -389,11 +389,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					if (order.getProductFee().doubleValue() > 0){
 						content += "物品费详情：\n";
 						for (PmTaskOrderDetail r : products) {
-							BigDecimal price = r.getProductPrice();
+							BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
 							BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
 							content += r.getProductName() + ":";
-							content += price.multiply(amount).setScale(2) + "元";
-							content += "(" + price.setScale(2) + "元*" + amount.intValue() + ")";
+							content += price.multiply(amount).movePointLeft(2).toString() + "元";
+							content += "(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")";
 						}
 					}
 					content += "如对上述费用有疑义请附言说明";
