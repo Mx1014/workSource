@@ -2201,9 +2201,10 @@ public class AssetProviderImpl implements AssetProvider {
             EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
             exemptionItemsDao.insert(exemptionItems);
             //删除include进来之外的增收减免
-//            context.delete(t2)
-//                    .where(t2.ID.notIn(includeExemptionIds))//includeExemptionIds.add(-1l)
-//                    .execute();
+            context.delete(t2)
+                    .where(t2.ID.notIn(includeExemptionIds))
+                    .and(t2.BILL_ID.eq(billId))
+                    .execute();
             
             //修改减免费项配置
             //先删除：根据billId删除该账单原来的减免费项配置
