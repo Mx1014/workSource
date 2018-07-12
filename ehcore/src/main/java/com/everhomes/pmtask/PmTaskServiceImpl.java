@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
@@ -79,6 +81,9 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.order.*;
@@ -3320,9 +3325,59 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long pageAnchor = 0L;
 		Integer loopTime = amount/pageSize + 1;
 
-		for (int i = 0 ; i <= loopTime ; i++){
+		for (int i = 0 ; i < loopTime ; i++){
 			List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals("EhPmTasks",null,pageAnchor,pageSize);
-//			list.stream().collect(Collectors.groupingBy());
+			pageAnchor = list.get(list.size() - 1).getId();
+			Map<Long,List<GeneralFormVal>> taskMap = list.stream().collect(Collectors.groupingBy(GeneralFormVal::getSourceId));
+			taskMap.forEach((taskId,task) ->{
+				PmTaskOrder order = new PmTaskOrder();
+				order.setTaskId(taskId);
+				Long productFee = 0L;
+				List<PmTaskOrderDetail> products = new ArrayList<>();
+				for (GeneralFormVal item : task){
+					if ("USER_NAME".equals(item.getFieldName())) {
+
+					} else if ("USER_PHONE".equals(item.getFieldName())) {
+
+					} else if ("USER_COMPANY".equals(item.getFieldName())) {
+
+					} else if ("USER_ADDRESS".equals(item.getFieldName())) {
+
+					} else if ("服务费".equals(item.getFieldName())) {
+						BigDecimal serviceFee = BigDecimal.valueOf(Double.valueOf(getTextString(item.getFieldValue())));
+						order.setServiceFee(serviceFee.movePointRight(2).longValue());
+					} else if ("物品".equals(item.getFieldName())) {
+						PostApprovalFormSubformValue subFormValue = JSON.parseObject(item.getFieldValue(), PostApprovalFormSubformValue.class);
+						List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
+						if (array.size()!=0) {
+							products = new ArrayList<>();
+							for (PostApprovalFormSubformItemValue itemValue : array) {
+								PmTaskOrderDetail product = new PmTaskOrderDetail();
+								List<PostApprovalFormItem> values = itemValue.getValues();
+								product.setTaskId(taskId);
+								product.setProductName(getTextString(getFormItem(values, "物品名称").getFieldValue()));
+								product.setProductPrice(Long.valueOf(getTextString(getFormItem(values, "单价").getFieldValue())) * 100);
+								product.setProductAmount(Integer.valueOf(getTextString(getFormItem(values, "数量").getFieldValue())));
+								productFee += product.getProductPrice() * product.getProductAmount();
+								products.add(product);
+							}
+						}
+					} else if ("总计".equals(item.getFieldName())) {
+						BigDecimal totalamount = BigDecimal.valueOf(Double.valueOf(getTextString(item.getFieldValue())));
+						order.setAmount(totalamount.movePointRight(2).longValue());
+					}
+				}
+				order.setProductFee(productFee);
+				order = pmTaskProvider.createPmTaskOrder(order);
+				Long orderId = order.getId();
+				if(products.size() > 0){
+					products = products.stream().map(r->{
+						r.setOrderId(orderId);
+						return r;
+					}).collect(Collectors.toList());
+					pmTaskProvider.createOrderDetails(products);
+				}
+			});
 		}
 	}
 
@@ -3757,6 +3812,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 		record.setOrderCommitUrl(orderCommandResponse.getOrderCommitUrl());
 		record.setPayInfo(orderCommandResponse.getPayInfo());
 		this.pmTaskProvider.updatePmTaskOrder(record);
+	}
+
+	private PostApprovalFormItem getFormItem(List<PostApprovalFormItem> values,String name){
+		for (PostApprovalFormItem p:values)
+			if (p.getFieldName().equals(name))
+				return p;
+		return null;
+	}
+
+	private String getTextString(String json){
+		if (StringUtils.isEmpty(json))
+			return "";
+		return JSONObject.parseObject(json).getString("text");
 	}
 
 

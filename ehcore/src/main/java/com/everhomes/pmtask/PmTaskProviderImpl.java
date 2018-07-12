@@ -587,13 +587,12 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	public void createOrderDetails(List<PmTaskOrderDetail> beans) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskOrderDetails.class));
 		EhPmTaskOrderDetailsDao dao = new EhPmTaskOrderDetailsDao(context.configuration());
-		PmTaskOrderDetail[] beansArry = (PmTaskOrderDetail[]) beans.stream().map(r->{
+		beans.forEach(r->{
 			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmTaskOrderDetails.class));
 			r.setId(id);
 			r.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			return r;
-		}).toArray();
-		dao.insert(beansArry);
+			dao.insert(r);
+		});
 	}
 
 	@Override

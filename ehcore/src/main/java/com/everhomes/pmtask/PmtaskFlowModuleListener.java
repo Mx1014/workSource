@@ -558,7 +558,15 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			} else if ("CONFIRMFEE".equals(btnParam)){
 // TODO: 2018/7/11 支付 
 			} else if ("NEEDFEE".equals(btnParam)){
-
+				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+				FlowAutoStepDTO dto = new FlowAutoStepDTO();
+				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+				dto.setFlowCaseId(flowCase.getId());
+				dto.setFlowMainId(flowCase.getFlowMainId());
+				dto.setFlowNodeId(flowCase.getCurrentNodeId());
+				dto.setFlowVersion(flowCase.getFlowVersion());
+				dto.setStepCount(flowCase.getStepCount());
+				flowService.processAutoStep(dto);
 			}
 
 

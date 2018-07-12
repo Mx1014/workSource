@@ -147,7 +147,7 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
             query.addConditions(Tables.EH_GENERAL_FORM_VALS.ID.gt(pageAnchor));
         if(null != pageSize)
             query.addLimit(pageSize);
-        query.addOrderBy(Tables.EH_PM_TASKS.ID.asc());
+        query.addOrderBy(Tables.EH_GENERAL_FORM_VALS.ID.asc());
         List<GeneralFormVal> objs = query.fetch().map((r) -> ConvertHelper.convert(r, GeneralFormVal.class));
         return objs;
     }
