@@ -899,7 +899,8 @@ public class ArchivesServiceImpl implements ArchivesService {
             organizationService.updateOrganizationMemberInfoByDetailId(employee.getId(), employee.getContactToken(), employee.getContactName(), employee.getGender());
 
             //  3.更新自定义字段值，人事档案单独的表单值处理
-            List<PostApprovalFormItem> dynamicItems = cmd.getValues().stream().filter(r -> !GeneralFormFieldAttribute.DEFAULT.getCode().equals(r.getFieldAttribute())).collect(Collectors.toList());
+            List<PostApprovalFormItem> dynamicItems = cmd.getValues().stream().filter(
+                    r -> GeneralFormFieldAttribute.fromCode(r.getFieldAttribute()) != GeneralFormFieldAttribute.DEFAULT).collect(Collectors.toList());
             archivesFormService.addArchivesDynamicValues(employee, dynamicItems);
             return null;
         });

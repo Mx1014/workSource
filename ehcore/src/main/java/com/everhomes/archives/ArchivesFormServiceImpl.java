@@ -93,7 +93,7 @@ public class ArchivesFormServiceImpl implements ArchivesFormService{
     /* 增添人事档案动态字段值 */
     @Override
     public void addArchivesDynamicValues(OrganizationMemberDetails employee, List<PostApprovalFormItem> dynamicItems) {
-        if (dynamicItems == null)
+        if (dynamicItems == null || dynamicItems.size() == 0)
             return;
         ArchivesForm form = archivesFormProvider.findArchivesFormByOrgId(employee.getNamespaceId(), employee.getOrganizationId());
         if (form == null)
