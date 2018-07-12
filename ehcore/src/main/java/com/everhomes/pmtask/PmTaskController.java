@@ -944,7 +944,7 @@ public class PmTaskController extends ControllerBase {
 
     /**
      * <b>URL: /pmtask/syncOrderDetails</b>
-     * <p>给不同项目拷贝分类(用后删除)</p>
+     * <p>从工作流表单同步费用清单数据</p>
      */
     @RequestMapping("syncOrderDetails")
     @RestReturn(value=String.class)
