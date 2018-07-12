@@ -1506,6 +1506,7 @@ public class AssetProviderImpl implements AssetProvider {
                         itemDTO.setBuildingName(f.getValue(o.BUILDING_NAME));
                     }
                     itemDTO.setChargingItemsId(f.getValue(o.CHARGING_ITEMS_ID));
+                    itemDTO.setItemType(AssetSubtractionType.item.getCode());//费项类型
                     list1.add(itemDTO);
                     return null;
                 });
@@ -1520,6 +1521,7 @@ public class AssetProviderImpl implements AssetProvider {
                 // 左邻convert为浅拷贝，第一层字段更改不会影响之前的
                 nitem.setBillItemName(n.getName());
                 nitem.setAmountReceivable(n.getAmount());
+                nitem.setItemType(AssetSubtractionType.lateFine.getCode());//费项类型
                 fineList.add(nitem);
             }
         }
