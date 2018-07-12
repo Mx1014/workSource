@@ -239,64 +239,65 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
     @Override
     public void executeUserSyncTask(Integer namespaceId) {
-        List<Namespace> namespaces = getNamespaces(namespaceId);
+        new Thread(() -> {
+            List<Namespace> namespaces = getNamespaces(namespaceId);
+            for (Namespace namespace : namespaces) {
+                // step 1
+                statTerminalProvider.cleanTerminalAppVersionCumulativeByCondition(namespace.getId());
 
-        for (Namespace namespace : namespaces) {
-            // step 1
-            statTerminalProvider.cleanTerminalAppVersionCumulativeByCondition(namespace.getId());
+                // step 2
+                statTerminalProvider.cleanUserActivitiesWithNullAppVersion(namespace.getId());
 
-            // step 2
-            statTerminalProvider.cleanUserActivitiesWithNullAppVersion(namespace.getId());
+                // step 3
+                List<User> users = userActivityProvider.listNotInUserActivityUsers(namespace.getId());
 
-            // step 3
-            List<User> users = userActivityProvider.listNotInUserActivityUsers(namespace.getId());
+                for (User user : users) {
+                    UserActivity activity = new UserActivity();
+                    activity.setUid(user.getId());
+                    activity.setImeiNumber(String.valueOf(user.getId()));
+                    activity.setNamespaceId(user.getNamespaceId());
 
-            for (User user : users) {
-                UserActivity activity = new UserActivity();
-                activity.setUid(user.getId());
-                activity.setImeiNumber(String.valueOf(user.getId()));
-                activity.setNamespaceId(user.getNamespaceId());
+                    long threeDayMill = 3 * 24 * 60 * 60 * 1000 - 1;
+                    Date date = new Date(user.getCreateTime().getTime());
+                    long time = date.getTime();
+                    Timestamp minTime = new Timestamp(time - threeDayMill);
+                    Timestamp maxTime = new Timestamp(time + threeDayMill);
 
-                long threeDayMill = 3 * 24 * 60 * 60 * 1000 - 1;
-                Date date = new Date(user.getCreateTime().getTime());
-                long time = date.getTime();
-                Timestamp minTime = new Timestamp(time - threeDayMill);
-                Timestamp maxTime = new Timestamp(time + threeDayMill);
+                    List<UserActivity> userActivities = userActivityProvider.listUserActivetys(new ListingLocator(), 1, (locator, query) -> {
+                        query.addConditions(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+                        query.addConditions(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
+                        return query;
+                    });
 
-                List<UserActivity> userActivities = userActivityProvider.listUserActivetys(new ListingLocator(), 1, (locator, query) -> {
-                    query.addConditions(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-                    query.addConditions(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
-                    return query;
-                });
+                    String appVersion = "1.0.0";
+                    if (userActivities.size() > 0) {
+                        appVersion = userActivities.get(0).getAppVersionName();
+                    }
 
-                String appVersion = "1.0.0";
-                if (userActivities.size() > 0) {
-                    appVersion = userActivities.get(0).getAppVersionName();
-                }
+                    activity.setAppVersionName(appVersion);
+                    activity.setCreateTime(user.getCreateTime());
+                    activity.setActivityType(ActivityType.BORDER_REGISTER.getCode());
 
-                activity.setAppVersionName(appVersion);
-                activity.setCreateTime(user.getCreateTime());
-                activity.setActivityType(ActivityType.BORDER_REGISTER.getCode());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("sync user to userActivity namespaceId = {}, userId = {}", namespace.getId(), user.getId());
+                    }
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("sync user to userActivity namespaceId = {}, userId = {}", namespace.getId(), user.getId());
-                }
+                    userActivityProvider.addActivity(activity, activity.getUid());
 
-                userActivityProvider.addActivity(activity, activity.getUid());
-
-                TerminalAppVersionActives appVersionActive = statTerminalProvider
-                        .getTerminalAppVersionActive(null, null, activity.getImeiNumber(), namespaceId);
-                if (appVersionActive == null) {
-                    appVersionActive = new TerminalAppVersionActives();
-                    appVersionActive.setDate(user.getCreateTime().toLocalDateTime().format(FORMATTER));
-                    appVersionActive.setAppVersion(activity.getAppVersionName());
-                    appVersionActive.setImeiNumber(activity.getImeiNumber());
-                    appVersionActive.setNamespaceId(namespaceId);
-                    appVersionActive.setAppVersionRealm(activity.getVersionRealm());
-                    statTerminalProvider.createTerminalAppVersionActives(appVersionActive);
+                    TerminalAppVersionActives appVersionActive = statTerminalProvider
+                            .getTerminalAppVersionActive(null, null, activity.getImeiNumber(), namespaceId);
+                    if (appVersionActive == null) {
+                        appVersionActive = new TerminalAppVersionActives();
+                        appVersionActive.setDate(user.getCreateTime().toLocalDateTime().format(FORMATTER));
+                        appVersionActive.setAppVersion(activity.getAppVersionName());
+                        appVersionActive.setImeiNumber(activity.getImeiNumber());
+                        appVersionActive.setNamespaceId(namespaceId);
+                        appVersionActive.setAppVersionRealm(activity.getVersionRealm());
+                        statTerminalProvider.createTerminalAppVersionActives(appVersionActive);
+                    }
                 }
             }
-        }
+        }).start();
     }
 
     @Override
