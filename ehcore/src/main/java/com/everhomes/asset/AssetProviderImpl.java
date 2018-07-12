@@ -2206,12 +2206,12 @@ public class AssetProviderImpl implements AssetProvider {
 //                    .execute();
             
             //修改减免费项配置
+            //先删除：根据billId删除该账单原来的减免费项配置
+            context.delete(t3)
+                    .where(t3.BILL_ID.eq(billId))
+                    .execute();
             List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
             if(subItemDTOList != null) {
-            	//先删除：根据billId删除该账单原来的减免费项配置
-                context.delete(t3)
-                        .where(t3.BILL_ID.eq(billId))
-                        .execute();
                 //后插入：新增修改后的配置
             	for(int i = 0; i < subItemDTOList.size(); i++){
             		long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
