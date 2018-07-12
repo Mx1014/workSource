@@ -3,6 +3,8 @@ package com.everhomes.organization.pm;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
@@ -41,6 +43,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -62,6 +65,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
     
     @Autowired
 	private AddressProvider addressProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
 	@Override
 	public void deleteById(Long id) {
@@ -263,7 +269,16 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
 
             if(addresses!=null && addresses.size()>0){
                 List<Long> addessList = addresses.stream().map(EhOrganizationOwnerAddress::getAddressId).collect(Collectors.toList());
-                List<Long> buildingId = addresses.stream().map(EhOrganizationOwnerAddress::getAddressId).collect(Collectors.toList());
+                List<Long> buildingId = addresses.stream().map((a)->{
+                   Address address =  addressProvider.findAddressById(a.getAddressId());
+                   if(address!=null){
+                       Building building =  communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+                       if(building!=null){
+                           return building.getId();
+                       }
+                   }
+                    return null;
+                }).filter(Objects::nonNull).collect(Collectors.toList());
                 b.field("addressId", StringUtils.join(addessList, "|"));
                 b.field("buildingId", StringUtils.join(buildingId, "|"));
             }
