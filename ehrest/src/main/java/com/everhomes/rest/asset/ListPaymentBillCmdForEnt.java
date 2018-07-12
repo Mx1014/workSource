@@ -23,8 +23,7 @@ import java.util.List;
  * <li>orderType:账单类型，如：wuyeCode</li>
  * <li>userType:用户类型，如：EhOrganizations</li>
  * <li>userId:用户ID</li>
- * <li>transactionType:交易类型，如：手续费/充值/提现/退款等</li>
- * <li>transactionTypes:交易类型集合，如：手续费/充值/提现/退款等</li>
+ * <li>paymentStatus:订单状态：1：已完成，0：订单异常</li>
  *</ul>
  */
 public class ListPaymentBillCmdForEnt {
@@ -42,9 +41,7 @@ public class ListPaymentBillCmdForEnt {
     private String orderType;
     private String userType;
     private Long userId;
-    private Integer transactionType;
-    private List<Integer> transactionTypes;
-    private Boolean distributionRemarkIsNull;
+    private Integer paymentStatus;
     
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -130,22 +127,10 @@ public class ListPaymentBillCmdForEnt {
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
-	public Integer getTransactionType() {
-		return transactionType;
+	public Integer getPaymentStatus() {
+		return paymentStatus;
 	}
-	public void setTransactionType(Integer transactionType) {
-		this.transactionType = transactionType;
-	}
-	public List<Integer> getTransactionTypes() {
-		return transactionTypes;
-	}
-	public void setTransactionTypes(List<Integer> transactionTypes) {
-		this.transactionTypes = transactionTypes;
-	}
-	public Boolean getDistributionRemarkIsNull() {
-		return distributionRemarkIsNull;
-	}
-	public void setDistributionRemarkIsNull(Boolean distributionRemarkIsNull) {
-		this.distributionRemarkIsNull = distributionRemarkIsNull;
+	public void setPaymentStatus(Integer paymentStatus) {
+		this.paymentStatus = paymentStatus;
 	}
 }
