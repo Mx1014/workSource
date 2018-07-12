@@ -264,12 +264,12 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     Timestamp maxTime = new Timestamp(time + threeDayMill);
 
                     List<UserActivity> userActivities = userActivityProvider.listUserActivetys(new ListingLocator(), 1, (locator, query) -> {
-                        query.addConditions(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+                        query.addConditions(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespace.getId()));
                         query.addConditions(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
                         return query;
                     });
 
-                    String appVersion = "1.0.0";
+                    String appVersion = "5.0.0";
                     if (userActivities.size() > 0) {
                         appVersion = userActivities.get(0).getAppVersionName();
                     }
@@ -285,13 +285,13 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     userActivityProvider.addActivity(activity, activity.getUid());
 
                     TerminalAppVersionActives appVersionActive = statTerminalProvider
-                            .getTerminalAppVersionActive(null, null, activity.getImeiNumber(), namespaceId);
+                            .getTerminalAppVersionActive(null, null, activity.getImeiNumber(), namespace.getId());
                     if (appVersionActive == null) {
                         appVersionActive = new TerminalAppVersionActives();
                         appVersionActive.setDate(user.getCreateTime().toLocalDateTime().format(FORMATTER));
                         appVersionActive.setAppVersion(activity.getAppVersionName());
                         appVersionActive.setImeiNumber(activity.getImeiNumber());
-                        appVersionActive.setNamespaceId(namespaceId);
+                        appVersionActive.setNamespaceId(namespace.getId());
                         appVersionActive.setAppVersionRealm(activity.getVersionRealm());
                         statTerminalProvider.createTerminalAppVersionActives(appVersionActive);
                     }
