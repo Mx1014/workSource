@@ -12,6 +12,7 @@ package com.everhomes.rest.techpark.expansion;
  * <li>buildingIntroduceFlag: 楼栋介绍是否显示</li>
  * <li>displayNamesV2: 显示名称字符串</li>
  * <li>displayOrdersV2: 显示排序，与名称对应</li>
+ * <li>HIDE_ADDRESS_FLAG: 客户端隐藏门牌</li>
  * </ul>
  */
 public enum LeasePromotionConfigType {

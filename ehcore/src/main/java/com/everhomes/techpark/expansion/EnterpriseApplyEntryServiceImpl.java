@@ -1470,6 +1470,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					case AREA_SEARCH_FLAG: dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
 					case CONSULT_FLAG: dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
 					case BUILDING_INTRODUCE_FLAG: dto.setBuildingIntroduceFlag(Byte.valueOf(c.getConfigValue())); break;
+					case HIDE_ADDRESS_FLAG: dto.setHideAddressFlag(Byte.valueOf(c.getConfigValue()));break;
 					case DISPLAY_NAME_STR:
 						String displayNameStr = c.getConfigValue();
 						String[] names = displayNameStr.split(",");
