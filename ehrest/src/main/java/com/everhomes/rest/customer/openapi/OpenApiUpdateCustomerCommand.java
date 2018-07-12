@@ -1,8 +1,8 @@
 package com.everhomes.rest.customer.openapi;
 
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -11,8 +11,10 @@ public class OpenApiUpdateCustomerCommand {
 
     private Long enterpriseId;
     private Integer namespaceId;
+    private Long communityId;
     private String companyName;
-    private List<ContactDTO> contacts;
+    private String contactName;
+    @ItemType(AddressDTO.class)
     private List<AddressDTO> addresses;
     private String corpBusinessLicense;
     private Long corpEntryDate;
@@ -27,6 +29,15 @@ public class OpenApiUpdateCustomerCommand {
     private Long timestamp;
     private Integer nonce;
     private String crypto;
+
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getEnterpriseId() {
         return enterpriseId;
@@ -53,12 +64,12 @@ public class OpenApiUpdateCustomerCommand {
         this.companyName = companyName;
     }
 
-    public List<ContactDTO> getContacts() {
-        return contacts;
+    public String getContactName() {
+        return contactName;
     }
 
-    public void setContacts(List<ContactDTO> contacts) {
-        this.contacts = contacts;
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
     }
 
     public List<AddressDTO> getAddresses() {

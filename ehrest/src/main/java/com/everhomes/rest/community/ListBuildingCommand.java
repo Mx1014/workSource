@@ -20,6 +20,8 @@ public class ListBuildingCommand {
     
 	private Integer pageSize;
 
+	private Long buildingId;
+
 	//以下参数为openapi所需
 	private String appKey;
 	private String signature;
@@ -97,5 +99,13 @@ public class ListBuildingCommand {
 
 	public void setCrypto(String crypto) {
 		this.crypto = crypto;
+	}
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
 	}
 }
