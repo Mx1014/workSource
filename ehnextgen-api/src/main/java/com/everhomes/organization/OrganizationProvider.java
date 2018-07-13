@@ -16,6 +16,7 @@ import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.EnterprisePropertyDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.userOrganization.UserOrganizations;
+
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -627,7 +628,7 @@ public interface OrganizationProvider {
 	 * @param communityId
 	 * @return
 	 */
-	List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByCommunityId(Long communityId);
+	List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByWorkPlaceId(Long workplaceId);
 
 	/**
 	 * 根据手机号、域空间Id、组织id来查询表eh_organization_members中的id值
@@ -837,4 +838,9 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	OrganizationMember findOrganizationMemberByOrgIdAndSoOn(Long organizationId,Long targetId);
+	OrganizationWorkPlaces findWorkPlacesByOrgId(Long organizationId,
+			String siteName, Long communityId);
+	
+	void deleteOrganizationCommunityRequestByCommunityIdAndOrgId(
+			Long communityId, Long organizationId);
 }

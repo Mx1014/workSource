@@ -11,4 +11,9 @@ import java.sql.Timestamp;
  */
 public class OrganizationWorkPlaces extends EhOrganizationWorkplaces {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5482176317868711762L;
+
 }

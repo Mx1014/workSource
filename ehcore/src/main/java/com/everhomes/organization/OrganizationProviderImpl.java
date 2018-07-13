@@ -2981,6 +2981,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         return null;
     }
+    
+    @Override
+    public void deleteOrganizationCommunityRequestByCommunityIdAndOrgId(Long communityId, Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+                .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
+                .execute();
+    }
 
     @Override
     public List<OrganizationCommunityRequest> queryOrganizationCommunityRequests(CrossShardListingLocator locator, int count,
@@ -6350,17 +6360,31 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * @return
      */
     @Override
-    public List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByCommunityId(Long communityId){
+    public List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByWorkPlaceId(Long workplaceId){
         //获取上下文
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         //查询表EH_COMMUNITYANDBUILDING_RELATIONES
         SelectQuery<EhCommunityandbuildingRelationesRecord> query = context.selectQuery(Tables.EH_COMMUNITYANDBUILDING_RELATIONES);
         //添加查询条件
-        query.addConditions(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.WORKPLACE_ID.eq(workplaceId));
         //查询
        List<CommunityAndBuildingRelationes> list = query.fetch().map( r -> ConvertHelper.convert(r , CommunityAndBuildingRelationes.class));
        return list;
     }
+
+//TODO
+//    @Override
+//    public void deleteCommunityAndBuildingRelationesByCommunityId(Long communityId){
+//        //获取上下文
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+//        //查询表EH_COMMUNITYANDBUILDING_RELATIONES
+//        SelectQuery<EhCommunityandbuildingRelationesRecord> query = context.selectQuery(Tables.EH_COMMUNITYANDBUILDING_RELATIONES);
+//        //添加查询条件
+//        query.addConditions(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.COMMUNITY_ID.eq(communityId));
+//        //查询
+//       List<CommunityAndBuildingRelationes> list = query.fetch().map( r -> ConvertHelper.convert(r , CommunityAndBuildingRelationes.class));
+//       return list;
+//    }
 
 
     /**
@@ -6642,6 +6666,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(siteName))
                 .execute();
+    }
+    
+    @Override
+    public OrganizationWorkPlaces findWorkPlacesByOrgId(Long organizationId, String siteName, Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.select().from(Tables.EH_ORGANIZATION_WORKPLACES)
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(siteName))
+                .fetchAnyInto(OrganizationWorkPlaces.class);
     }
 
     /**
