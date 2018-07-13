@@ -389,7 +389,6 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			if (cmd.getCurrentProjectId()!=null) {
 				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null, cmd.getCurrentProjectId());//项目介绍权限
-				authCommunities = new HashSet<>();
 				authCommunities.add(cmd.getCurrentProjectId());
 			}else{//项目导航为全部 找出授权的项目
 				ListUserRelatedProjectByModuleCommand cmd2 = new ListUserRelatedProjectByModuleCommand();
@@ -399,8 +398,6 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				List<ProjectDTO> dtos = serviceModuleService.listUserRelatedCategoryProjectByModuleId(cmd2);
 				if (dtos!=null && dtos.size()>0)
 					authCommunities = dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toSet());
-				else
-					authCommunities = new HashSet<>();
 			}
 		}
 
@@ -413,7 +410,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		List<Community> communities = communityProvider.listCommunitiesByCityIdAndAreaId(cmd.getNamespaceId(), cmd.getCityId(),
 				cmd.getAreaId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
 		Set<Long> finalAuthCommunities = authCommunities;
-		communities = communities.stream().filter(r-> finalAuthCommunities.contains(r.getId())).collect(Collectors.toList());
+		if (!authCommunities.isEmpty())
+		    communities = communities.stream().filter(r-> finalAuthCommunities.contains(r.getId())).collect(Collectors.toList());
 		listLeaseProjectsResponse response = new listLeaseProjectsResponse();
 
 		int size = communities.size();

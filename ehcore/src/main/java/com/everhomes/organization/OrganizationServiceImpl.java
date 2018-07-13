@@ -1784,6 +1784,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             //这样的话我们拿到的是每一个楼栋以及对应的门牌
                             //创建CommunityAndBuildingRelationes对象，并且将数据封装在对象中，然后持久化到数据库
                             CommunityAndBuildingRelationes communityAndBuildingRelationes = new CommunityAndBuildingRelationes();
+                            communityAndBuildingRelationes.setWorkplaceId(organizationWorkPlaces.getId());
                             communityAndBuildingRelationes.setCommunityId(createOfficeSiteCommand.getCommunityId());
                             communityAndBuildingRelationes.setAddressId(organizationSiteApartmentDTO.getApartmentId());
                             communityAndBuildingRelationes.setBuildingId(organizationSiteApartmentDTO.getBuildingId());
@@ -3776,6 +3777,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         for (Long orgId : orgIds) {
             targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
+            
+            //普通公司也可以登录后台 modify by Janson
+            organizationIds.add(orgId);
         }
 
         //检查应用管理员+权限细化 add by lei.lv
@@ -13805,7 +13809,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     officeSiteDTO.setCommunityName(communityName);
                     //然后根据community_id来查询项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中对应的building_id和
                     //address_id,(注意一个community_id可能对应多个building_id和address_id)
-                    List<CommunityAndBuildingRelationes> communityAndBuildingRelationesList = organizationProvider.getCommunityAndBuildingRelationesByCommunityId(organizationWorkPlaces.getCommunityId());
+                    List<CommunityAndBuildingRelationes> communityAndBuildingRelationesList = organizationProvider.getCommunityAndBuildingRelationesByWorkPlaceId(organizationWorkPlaces.getId());
                     //非空校验
                     if(!CollectionUtils.isEmpty(communityAndBuildingRelationesList)){
                         //说明集合中存在值，进行遍历
@@ -14006,7 +14010,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(cmd.getOrganizationId() != null){
             //说明前端传过来的参数不为空，那么我们需要根据该organization_id来删除eh_communityAndBuilding_relationes
             //表中的关系，就表示的是将该项目下的该公司的办公地点删除了
-            organizationProvider.deleteWorkPlacesByOrgId(cmd.getOrganizationId(),cmd.getSiteName(),cmd.getCommunityId());
+        	
+        	OrganizationWorkPlaces wp = organizationProvider.findWorkPlacesByOrgId(cmd.getOrganizationId(), cmd.getSiteName(), cmd.getCommunityId());
+        	if(wp == null) {
+        		return;
+        	}
+        	
+        	EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap(); 
+        	enterpriseCommunityMap.setCommunityId(wp.getCommunityId());
+        	enterpriseCommunityMap.setMemberId(cmd.getOrganizationId());
+        	enterpriseProvider.deleteEnterpriseFromEnterpriseCommunityMapByOrgIdAndCommunityId(enterpriseCommunityMap);
+        	
+        	organizationProvider.deleteOrganizationCommunityRequestByCommunityIdAndOrgId(wp.getCommunityId(), wp.getOrganizationId());
+        	organizationProvider.deleteWorkPlacesByOrgId(cmd.getOrganizationId(), cmd.getSiteName(), cmd.getCommunityId());
+        	
         }else{
             LOGGER.info("organizationId can not be null");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "organizationId can not be null");
