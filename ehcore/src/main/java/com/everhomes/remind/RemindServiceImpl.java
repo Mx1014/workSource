@@ -512,7 +512,9 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         if (cmd.getRepeatType() == null) {
             cmd.setRepeatType(RemindRepeatType.NONE.getCode());
         }
-
+        if (cmd.getPlanDate() != null && cmd.getPlanDate() <= 0) {
+            cmd.setPlanDate(null);
+        }
         if (cmd.getId() == null) {
             return createRemind(cmd);
         }
