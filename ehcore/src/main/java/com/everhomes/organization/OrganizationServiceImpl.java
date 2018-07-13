@@ -3605,8 +3605,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (null != cmd && cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")) {
                     if (org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
                         OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
-                        //物业或业委增加小区Id和小区name信息
-                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                        //物业或业委增加小区Id和小区name信息、普通企业
+                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) 
+                        		||org.getOrganizationType().equals(OrganizationType.ENTERPRISE.getCode())
+                        		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                             this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                         }
                         orgs.add(tempSimpleOrgDTO);
@@ -3615,8 +3617,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(org.getGroupType())) {
                         OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
-                        //物业或业委增加小区Id和小区name信息
-                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                        //物业或业委增加小区Id和小区name信息、普通企业
+                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) 
+                        		||org.getOrganizationType().equals(OrganizationType.ENTERPRISE.getCode())
+                        		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                             this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                         }
                         tempSimpleOrgDTO.setContactName(member.getContactName());
