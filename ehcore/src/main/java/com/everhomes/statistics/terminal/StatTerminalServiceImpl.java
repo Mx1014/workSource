@@ -44,6 +44,8 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatTerminalServiceImpl.class);
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+
     private static final Integer versionNum = 10;
 
     @Autowired
@@ -69,7 +71,6 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
     @Autowired
     private TaskService taskService;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -227,7 +228,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
     }
 
     @Override
-    public void executeUserSyncTask(Integer namespaceId) {
+    public void executeUserSyncTask(Integer namespaceId, boolean genData, String start, String end) {
         new Thread(() -> {
             List<Namespace> namespaces = getNamespaces(namespaceId);
             for (Namespace namespace : namespaces) {
@@ -290,6 +291,11 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                 } catch (Exception e) {
                     LOGGER.error("sync user error ns = " + namespace.getId(), e);
                 }
+            }
+            if (genData) {
+                LocalDate st = LocalDate.parse(start, FORMATTER);
+                LocalDate ed = LocalDate.parse(end, FORMATTER);
+                executeStatTask(null, st, ed);
             }
         }, "term-user-syncTask-0").start();
     }

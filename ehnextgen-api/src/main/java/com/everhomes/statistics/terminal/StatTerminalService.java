@@ -22,7 +22,7 @@ public interface StatTerminalService {
 
     PieChart getTerminalAppVersionPieChart(String Date, TerminalStatisticsType type);
 
-    void executeUserSyncTask(Integer namespaceId);
+    void executeUserSyncTask(Integer namespaceId, boolean genData, String start, String end);
 
     void deleteStatTaskLog(DeleteStatTaskLogCommand cmd);
 

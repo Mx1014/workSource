@@ -54,7 +54,8 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("executeUserSyncTask")
     @RestReturn(String.class)
     public RestResponse executeUserSyncTask(@Valid ExecuteSyncUserTaskCommand cmd) {
-        statTerminalService.executeUserSyncTask(cmd.getNamespaceId());
+        statTerminalService.executeUserSyncTask(
+                cmd.getNamespaceId(), cmd.getGenData() == 1, cmd.getStart(), cmd.getEnd());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

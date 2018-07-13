@@ -482,6 +482,7 @@ public class UserProviderImpl implements UserProvider {
                             .where(t.NAMESPACE_ID.eq(namespaceId))
                             .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
                             .and(t.NAMESPACE_USER_TYPE.isNull())
+                            .and(t.NAMESPACE_USER_TOKEN.eq(""))
                             .getQuery();
 
                     if (excludeUIDs != null && excludeUIDs.size() > 0) {
@@ -510,6 +511,7 @@ public class UserProviderImpl implements UserProvider {
                             .where(t.NAMESPACE_ID.eq(namespaceId))
                             .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
                             .and(t.NAMESPACE_USER_TYPE.isNull())
+                            .and(t.NAMESPACE_USER_TOKEN.eq(""))
                             .getQuery();
 
                     if (excludeUIDs != null && excludeUIDs.size() > 0) {

@@ -1150,6 +1150,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
                 .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()))
                 .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull())
+                .and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(""))
                 .and(Tables.EH_USERS.ID.notIn(id1s))
                 .fetchInto(User.class);
     }
