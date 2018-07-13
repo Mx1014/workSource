@@ -34,7 +34,9 @@ ADD `mac_copy` VARCHAR(128) COMMENT '原mac地址';
 */
 
 -- Already delete in 5.5.1
--- ALTER TABLE `eh_organization_member_details` ADD COLUMN `profile_integrity` INTEGER NOT NULL DEFAULT '0';
+
+-- TODO 这里本来是注释的，因为后面报错了，现在先放开  201807131646
+ALTER TABLE `eh_organization_member_details` ADD COLUMN `profile_integrity` INTEGER NOT NULL DEFAULT '0';
 -- ALTER TABLE eh_organization_member_details ADD COLUMN department VARCHAR(256) COMMENT '部门';
 -- ALTER TABLE eh_organization_member_details ADD COLUMN department_ids VARCHAR(256) COMMENT '部门Id';
 -- ALTER TABLE eh_organization_member_details ADD COLUMN job_position VARCHAR(256) COMMENT '岗位';
@@ -47,8 +49,7 @@ ADD `mac_copy` VARCHAR(128) COMMENT '原mac地址';
 alter table eh_communities add index namespace_id_index(`namespace_id`);
 
 -- fix for zuolinbase only, remove this after 5.5.2
--- TODO 导致persist打包报错，先注释了
--- ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
+ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
 -- end Janson
 
 -- 通用脚本
