@@ -115,27 +115,41 @@ public class FileDownloadTaskServiceImpl implements FileDownloadTaskService  {
     }
 
     @Override
-    public CsFileLocationDTO uploadToContenServer(String fileName, OutputStream ops){
+    public CsFileLocationDTO uploadToContenServer(String fileName, OutputStream ops, Long taskId){
+        Task task = null;
+        if(taskId != null){
+            task = taskService.findById(taskId);
+        }
+
+        //更新上传文件开始时间
+        if(task != null){
+            task.setUploadFileStartTime(new Timestamp(System.currentTimeMillis()));
+            taskService.updateTask(task);
+        }
 
         ByteArrayOutputStream os = (ByteArrayOutputStream)ops;
         InputStream ins = new ByteArrayInputStream(os.toByteArray());
-        return uploadToContenServer(fileName, ins);
-    }
-
-    private CsFileLocationDTO uploadToContenServer(String fileName, InputStream ins){
 
         UserLogin userLogin = User.SYSTEM_USER_LOGIN;
         String token = WebTokenGenerator.getInstance().toWebToken(userLogin.getLoginToken());
         UploadCsFileResponse re = contentServerService.uploadFileToContentServer(ins, fileName, token);
-        CsFileLocationDTO dto = re.getResponse();
-        if(re.getErrorCode() == 0 && dto != null){
+
+        CsFileLocationDTO dto = null;
+        if(re.getErrorCode() == 0 && re.getResponse() != null){
+            dto = re.getResponse();
             ContentServerResource resourceByUri = contentServerService.findResourceByUri(dto.getUri());
             if(resourceByUri != null){
                 dto.setSize(resourceByUri.getResourceSize());
             }
-            return dto;
         }
 
-        return null;
+        //更新上传文结束始时间
+        if(task != null){
+            task.setUploadFileFinishTime(new Timestamp(System.currentTimeMillis()));
+            taskService.updateTask(task);
+        }
+
+        return dto;
+
     }
 }

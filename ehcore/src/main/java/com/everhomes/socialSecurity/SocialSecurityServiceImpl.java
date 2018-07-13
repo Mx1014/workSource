@@ -1147,7 +1147,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (module.get(i).equals(temp.get(i)))
                 continue;
             else {
-                return ImportFileErrorType.TITLE_ERROE.getCode();
+                return ImportFileErrorType.TITLE_ERROR.getCode();
             }
         }
         return null;

@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>formOriginId: 表单 id</li>
  * <li>organizationId: 公司 id</li>
  * <li>keywords: 搜索关键词</li>
+ * <li>namespaceId: 域空间id(异步导出使用)</li>
  * </ul>
  */
 public class ExportArchivesEmployeesCommand {
@@ -16,6 +17,8 @@ public class ExportArchivesEmployeesCommand {
     private Long organizationId;
 
     private String keywords;
+
+    private Integer namespaceId;
 
     public ExportArchivesEmployeesCommand() {
     }
@@ -42,6 +45,14 @@ public class ExportArchivesEmployeesCommand {
 
     public void setKeywords(String keywords) {
         this.keywords = keywords;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

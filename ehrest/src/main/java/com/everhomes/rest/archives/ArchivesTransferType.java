@@ -1,7 +1,5 @@
 package com.everhomes.rest.archives;
 
-import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
  * <li>PROMOTE((byte) 0): 晋升</li>
@@ -13,24 +11,20 @@ public enum ArchivesTransferType {
     PROMOTE((byte) 0), TRANSFER((byte) 1), OTHER((byte) 2);
     private Byte code;
 
-    private ArchivesTransferType(Byte code) {
+    private ArchivesTransferType(byte code) {
         this.code = code;
     }
 
-    public Byte getCode() {
-        return code;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
+    public byte getCode() {
+        return this.code;
     }
 
     public static ArchivesTransferType fromCode(Byte code) {
-        if (code != null) {
-            for (ArchivesTransferType a : ArchivesTransferType.values()) {
-                if (code.byteValue() == a.getCode().byteValue()) {
-                    return a;
+        if(code != null) {
+            ArchivesTransferType[] values = ArchivesTransferType.values();
+            for(ArchivesTransferType value : values) {
+                if(code.byteValue() == value.code) {
+                    return value;
                 }
             }
         }

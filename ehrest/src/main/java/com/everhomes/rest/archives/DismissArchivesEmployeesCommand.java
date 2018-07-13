@@ -3,7 +3,6 @@ package com.everhomes.rest.archives;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.sql.Date;
 import java.util.List;
 
 /**
@@ -14,16 +13,15 @@ import java.util.List;
  * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.ArchivesDismissReason}</li>
  * <li>dismissTime: 离职日期</li>
  * <li>dismissRemark: 离职备注</li>
- * <li>socialSecurityEndMonth: 社保减员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
- * <li>accumulationFundEndMonth: 离职减员月 0-本月 1-次月 参考{@link com.everhomes.rest.archives.SocialSecurityMonthType}</li>
+ * <li>logFlag: 0-无需人事记录, 1-需要人事记录</li>
  * </ul>
  */
 public class DismissArchivesEmployeesCommand {
 
-    private Long organizationId;
-
     @ItemType(Long.class)
     private List<Long> detailIds;
+
+    private Long organizationId;
 
     private Byte dismissType;
 
@@ -33,20 +31,11 @@ public class DismissArchivesEmployeesCommand {
 
     private String dismissRemark;
 
-    //  added by Rong for social security at 01.05-2018
-    private Byte socialSecurityEndMonth;
+    //  同样的操作流程，只是操作类型名称不同时传递次参数 add by ryan.
+    private Byte logFlag;
 
-    private Byte accumulationFundEndMonth;
 
     public DismissArchivesEmployeesCommand() {
-    }
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
     }
 
     public List<Long> getDetailIds() {
@@ -55,6 +44,14 @@ public class DismissArchivesEmployeesCommand {
 
     public void setDetailIds(List<Long> detailIds) {
         this.detailIds = detailIds;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Byte getDismissType() {
@@ -89,20 +86,12 @@ public class DismissArchivesEmployeesCommand {
         this.dismissRemark = dismissRemark;
     }
 
-    public Byte getSocialSecurityEndMonth() {
-        return socialSecurityEndMonth;
+    public Byte getLogFlag() {
+        return logFlag;
     }
 
-    public void setSocialSecurityEndMonth(Byte socialSecurityEndMonth) {
-        this.socialSecurityEndMonth = socialSecurityEndMonth;
-    }
-
-    public Byte getAccumulationFundEndMonth() {
-        return accumulationFundEndMonth;
-    }
-
-    public void setAccumulationFundEndMonth(Byte accumulationFundEndMonth) {
-        this.accumulationFundEndMonth = accumulationFundEndMonth;
+    public void setLogFlag(Byte logFlag) {
+        this.logFlag = logFlag;
     }
 
     @Override

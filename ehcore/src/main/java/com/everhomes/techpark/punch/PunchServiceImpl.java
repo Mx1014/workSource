@@ -3166,21 +3166,27 @@ public class PunchServiceImpl implements PunchService {
 
     }
 
+    private String objToString(Object o) {
+        if (null == o) {
+            return "";
+        }
+        return o.toString();
+    } 
     public void setNewPunchStatisticsBookRow(Sheet sheet, PunchCountDTO statistic) {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
-        row.createCell(++i).setCellValue(statistic.getPunchMonth());
-        row.createCell(++i).setCellValue(statistic.getUserName());
-        row.createCell(++i).setCellValue(statistic.getDeptName());
-        row.createCell(++i).setCellValue(statistic.getPunchOrgName());
-        row.createCell(++i).setCellValue(statistic.getWorkDayCount());
-        row.createCell(++i).setCellValue(statistic.getWorkCount());
-        row.createCell(++i).setCellValue(statistic.getExceptionDayCount());
-        row.createCell(++i).setCellValue(statistic.getExceptionRequestCount());
-        row.createCell(++i).setCellValue(statistic.getUnpunchCount());
-        row.createCell(++i).setCellValue(statistic.getBelateCount());
-        row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
-        row.createCell(++i).setCellValue(statistic.getBlandleCount());
+        row.createCell(++i).setCellValue(objToString(statistic.getPunchMonth()));
+        row.createCell(++i).setCellValue(objToString(statistic.getUserName()));
+        row.createCell(++i).setCellValue(objToString(statistic.getDeptName()));
+        row.createCell(++i).setCellValue(objToString(statistic.getPunchOrgName()));
+        row.createCell(++i).setCellValue(objToString(statistic.getWorkDayCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getWorkCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getExceptionDayCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getExceptionRequestCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getUnpunchCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getBelateCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getLeaveEarlyCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getBlandleCount()));
         row.createCell(++i).setCellValue(statistic.getOverTimeSum() == null ? "" : statistic.getOverTimeSum() + "");
         int cellNum = ++i;
         BigDecimal cellValue = new BigDecimal("0");
