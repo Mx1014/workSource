@@ -246,3 +246,6 @@ UPDATE eh_organization_member_details AS t SET birthday_index = (CONCAT(SUBSTRIN
 -- 执行 /archives/syncArchivesConfigAndLogs 接口
 
 -- 人事2.7 数据同步 end by ryan.
+
+-- #issue-31731【标准版V2.0】【园区快讯】【Android&Ios】客户端内容详情显示失败：404 not found
+update eh_configurations set  value = '/html/news_text_review.html'  where name = 'news.content.url';
