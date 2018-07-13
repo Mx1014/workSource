@@ -777,12 +777,14 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                 }   
         	}        	    	
         }
-        
-    	//优先从http2ClientMaps 中   取，如没有再创建新的连接
-        ApnsClient client = this.http2ClientMaps.get(bundleId);
-        if(client != null ){
-        	return client;
-        }
+	        if(bundleId == null){
+	        	bundleId = DEFAULT_BUNDLEID ;
+	        }
+	    	//优先从http2ClientMaps 中   取，如没有再创建新的连接
+	        ApnsClient client = this.http2ClientMaps.get(bundleId);
+	        if(client != null ){
+	        	return client;
+	        }
         		
                 //获取开发者信息
                 DeveloperAccountInfo  dlaInfo = developerAccountInfoProvider.getDeveloperAccountInfoByBundleId(bundleId);
