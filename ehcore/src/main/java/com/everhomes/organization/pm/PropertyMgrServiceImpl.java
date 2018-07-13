@@ -2333,6 +2333,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setRentArea(cmd.getRentArea());
             address.setChargeArea(cmd.getChargeArea());
             address.setSharedArea(cmd.getSharedArea());
+            address.setFreeArea(cmd.getFreeArea());
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
@@ -2363,6 +2364,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setRentArea(cmd.getRentArea());
             address.setChargeArea(cmd.getChargeArea());
             address.setSharedArea(cmd.getSharedArea());
+            address.setFreeArea(cmd.getFreeArea());
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
@@ -2419,6 +2421,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
             Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
             community.setChargeArea(communityChargeArea + address.getChargeArea());
+        }
+        if (address.getFreeArea() != null) {
+            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+            building.setFreeArea(buildingFreeArea + address.getFreeArea());
+
+            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+            community.setFreeArea(communityFreeArea + address.getFreeArea());
         }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
@@ -2511,6 +2520,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             community.setChargeArea(communityChargeArea - oldAddressChargeArea + cmd.getChargeArea());
 
             address.setChargeArea(cmd.getChargeArea());
+        }
+        
+        if (cmd.getFreeArea() != null) {
+            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+            Double oldAddressFreeArea = address.getFreeArea() == null ? 0.0 : address.getFreeArea();
+            building.setFreeArea(buildingFreeArea - oldAddressFreeArea + cmd.getFreeArea());
+            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+            community.setFreeArea(communityFreeArea - oldAddressFreeArea + cmd.getFreeArea());
+
+            address.setFreeArea(cmd.getFreeArea());
         }
 
         if (cmd.getCategoryItemId() != null) {

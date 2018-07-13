@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>sourceItemId: 资产来源：自管、业主放盘、大业主交管、其他...</li>
  * <li>decorateStatus: 装修状态</li>
  * <li>orientation: 朝向</li>
+ * <li>freeArea: 可招租面积</li>
  * </ul>
  */
 public class CreateApartmentCommand {
@@ -35,6 +36,15 @@ public class CreateApartmentCommand {
 	private Long sourceItemId;
 	private Byte decorateStatus;
 	private String orientation;
+	private Double freeArea;
+	
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
 
 	public Double getBuildArea() {
 		return buildArea;

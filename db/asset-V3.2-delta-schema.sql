@@ -19,4 +19,6 @@ CREATE TABLE `eh_address_arrangement` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='房源拆分/合并计划表';
 
 ALTER TABLE `eh_addresses` ADD COLUMN `free_area`  double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_buildings` ADD COLUMN `free_area`  double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_communities` ADD COLUMN `free_area`  double NULL DEFAULT NULL COMMENT '可招租面积';
 -- END by 唐岑
