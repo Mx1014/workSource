@@ -410,7 +410,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		List<Community> communities = communityProvider.listCommunitiesByCityIdAndAreaId(cmd.getNamespaceId(), cmd.getCityId(),
 				cmd.getAreaId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
 		Set<Long> finalAuthCommunities = authCommunities;
-		communities = communities.stream().filter(r-> finalAuthCommunities.contains(r.getId())).collect(Collectors.toList());
+		if (!authCommunities.isEmpty())
+		    communities = communities.stream().filter(r-> finalAuthCommunities.contains(r.getId())).collect(Collectors.toList());
 		listLeaseProjectsResponse response = new listLeaseProjectsResponse();
 
 		int size = communities.size();
