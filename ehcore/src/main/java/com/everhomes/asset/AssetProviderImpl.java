@@ -5436,7 +5436,7 @@ public class AssetProviderImpl implements AssetProvider {
         Long ownerId = cmd.getOwnerId();
         String ownerType = cmd.getOwnerType();
         String targetType = cmd.getTargetType();
-        Long targetId = cmd.getTargetId();
+        Long targetId = cmd.getTargetId();//对公转账是根据企业id来查询相关的所有账单，不能为空
         String billGroupName = cmd.getBillGroupName();
         Long billGroupId = cmd.getBillGroupId();
         Byte billStatus = cmd.getBillStatus();
@@ -5448,6 +5448,9 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
+        if(!org.springframework.util.StringUtils.isEmpty(currentNamespaceId)) {
+        	query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
+        }
         if(!org.springframework.util.StringUtils.isEmpty(ownerId)) {
         	query.addConditions(t.OWNER_ID.eq(ownerId));
         }
@@ -5458,14 +5461,11 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
-        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {// 账单状态,0:未缴;1:已缴
+        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {//账单状态,0:未缴;1:已缴
             query.addConditions(t.STATUS.eq(billStatus));
         }
         if(!org.springframework.util.StringUtils.isEmpty(targetType)){
             query.addConditions(t.TARGET_TYPE.eq(targetType));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(targetId)){
-            query.addConditions(t.TARGET_ID.eq(targetId));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
             query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
@@ -5473,7 +5473,11 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
             query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
         }
-        query.addOrderBy(t.DATE_STR.desc());
+        query.addConditions(t.TARGET_ID.eq(targetId));//对公转账是根据企业id来查询相关的所有账单
+        if(status!=null && status == 1){
+        	query.addOrderBy(t.STATUS);
+        }
+        query.addOrderBy(t.DATE_STR_BEGIN.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
         	ListBillsDTOForEnt dto = new ListBillsDTOForEnt();
