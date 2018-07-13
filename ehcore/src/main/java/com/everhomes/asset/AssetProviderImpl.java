@@ -1294,9 +1294,6 @@ public class AssetProviderImpl implements AssetProvider {
                     //时间假定
                     item.setDateStrBegin(dates.get(0));
                     item.setDateStrEnd(dates.get(1));
-
-
-
                     item.setId(currentBillItemSeq);
                     item.setNamespaceId(UserContext.getCurrentNamespaceId());
                     item.setOwnerType(ownerType);
@@ -1363,12 +1360,12 @@ public class AssetProviderImpl implements AssetProvider {
             }
             
             //重新判断状态，如果待缴金额为0，则设置为已缴状态
-            if(amountOwed.compareTo(new BigDecimal("0"))!=1){
-                billStatus = 1;
-            }
-            for(int i = 0; i < billItemsList.size(); i++) {
-                billItemsList.get(i).setStatus(billStatus);
-            }
+//            if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+//                billStatus = 1;
+//            }
+//            for(int i = 0; i < billItemsList.size(); i++) {
+//                billItemsList.get(i).setStatus(billStatus);
+//            }
             EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
             billItemsDao.insert(billItemsList);
 
@@ -1376,11 +1373,11 @@ public class AssetProviderImpl implements AssetProvider {
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
             amountOwed = DecimalUtils.negativeValueFilte(amountOwed);
             newBill.setAmountOwed(amountOwed);
-            if(amountOwed.compareTo(zero) == 0) {
-                newBill.setStatus((byte)1);
-            }else{
-                newBill.setStatus(billStatus);
-            }
+//            if(amountOwed.compareTo(zero) == 0) {
+//                newBill.setStatus((byte)1);
+//            }else{
+//                newBill.setStatus(billStatus);
+//            }
             amountReceivable = DecimalUtils.negativeValueFilte(amountReceivable);
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
