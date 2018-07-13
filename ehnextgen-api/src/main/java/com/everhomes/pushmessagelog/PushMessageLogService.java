@@ -1,5 +1,6 @@
 package com.everhomes.pushmessagelog;
 
+import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.organization.pm.SendNoticeCommand;
 import com.everhomes.rest.pushmessagelog.PushMessageListCommand;
 import com.everhomes.rest.pushmessagelog.PushMessageLogReturnDTO;
@@ -60,4 +61,11 @@ public interface PushMessageLogService {
 	  * @return
 	  */
 	 Long createfromSendNotice(SendNoticeCommand cmd ,Byte pushTypeCode);
+	 
+	 /**
+		 * 短信方式推送时创建消息记录
+		 * @param cmd
+		 * @return
+		 */
+	 Long createfromSendNotice(PushMessageToAdminAndBusinessContactsCommand cmd ,Byte pushTypeCode);
 }

@@ -51,6 +51,7 @@ public class SendNoticeAction implements Runnable {
         if(command !=null){
         	//更新推送记录状态
             pushMessageLogService.updatePushStatus(command.getLogId(), PushStatusCode.PUSHING.getCode());
+            LOGGER.info("update pushMessageLog status pushing .");
         }
         
         try{
@@ -60,11 +61,13 @@ public class SendNoticeAction implements Runnable {
         }catch(Exception e){
         	//在有异常的情况下也要更新推送记录状态为完成
             pushMessageLogService.updatePushStatus(command.getLogId(), PushStatusCode.FINISH.getCode());
+            LOGGER.info("update pushMessageLog status finish ,e={}",e);
             throw e ;
         }
         
         //更新推送记录状态为完成
         pushMessageLogService.updatePushStatus(command.getLogId(), PushStatusCode.FINISH.getCode());
+        LOGGER.info("update pushMessageLog status finish .");
         LOGGER.debug("End scheduling a push to push....");
 
         UserContext.setCurrentNamespaceId(null);

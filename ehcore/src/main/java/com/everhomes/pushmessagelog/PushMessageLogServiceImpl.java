@@ -1,6 +1,5 @@
 package com.everhomes.pushmessagelog;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -18,17 +17,22 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.configurations.ConfigurationsServiceImpl;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.organization.pm.SendNoticeCommand;
 import com.everhomes.rest.organization.pm.SendNoticeMode;
 import com.everhomes.rest.pushmessagelog.PushMessageListCommand;
 import com.everhomes.rest.pushmessagelog.PushMessageLogDTO;
 import com.everhomes.rest.pushmessagelog.PushMessageLogReturnDTO;
+import com.everhomes.rest.pushmessagelog.PushMessageStringCode;
 import com.everhomes.rest.pushmessagelog.PushStatusCode;
 import com.everhomes.rest.pushmessagelog.ReceiverTypeCode;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -47,6 +51,9 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 	
 	@Autowired
 	private UserProvider userProvider;
+	
+	@Autowired
+	LocaleStringService localeStringService ;
 
 	@Override
 	public PushMessageLogReturnDTO listPushMessageLogByNamespaceIdAndOperator(PushMessageListCommand cmd) {
@@ -154,7 +161,7 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 		
 		PushMessageLog  bo = new PushMessageLog(); 
         bo.setContent(cmd.getMessage());
-        java.util.Date utilDate=new Date();
+        java.util.Date utilDate=DateUtils.currentTimestamp();
         java.sql.Date sqlDate=new java.sql.Date(utilDate.getTime());
         bo.setCreateTime(sqlDate);
         bo.setNamespaceId(cmd.getNamespaceId());
@@ -172,10 +179,9 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 	 	        if(receiverList !=null && receiverList.size()>0){
 	 	        	StringBuffer receivers = new StringBuffer();
 	 	        	if(receiverList !=null && receiverList.size()>0){
-	 	        		receiverList.stream().map(r->{
-	 	        			receivers.append(r).append(",");
-	 	        			return null ;
-	 	        		});
+	 	        		for(String str : receiverList){
+	 	        			receivers.append(str).append(",");
+	 	        		}
 	 	        	}
 	 	        	if(receivers.toString().length()>0){
 		        		bo.setReceivers(receivers.toString().substring(0, receivers.toString().length()-1));
@@ -187,13 +193,12 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 	        	//组装推送对象
 	        	List<Long> communityIdList = cmd.getCommunityIds();
 	        	StringBuffer receivers = new StringBuffer();
-	        	communityIdList.stream().map(r->{
-	        		Community com = communityProvider.findCommunityById(r);
+	        	for(Long id : communityIdList){
+	        		Community com = communityProvider.findCommunityById(id);
 	        		if(com != null && StringUtils.isNotBlank(com.getName())){
 	        			receivers.append(com.getName()).append(",");
-	        		}	        		
-        			return null ;
-        		});
+	        		}
+	        	}
 	        	if(receivers.toString().length()>0){
 	        		bo.setReceivers(receivers.toString().substring(0, receivers.toString().length()-1));
 	        	}
@@ -203,4 +208,48 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
         return  pushMessageLogProvider.crteatePushMessageLog(bo);
         
 	}
+	
+	/**
+	 * 短信方式推送时创建消息记录
+	 * @param cmd
+	 * @return
+	 */
+	@Override
+	public Long createfromSendNotice(PushMessageToAdminAndBusinessContactsCommand cmd ,Byte pushTypeCode ){
+		if(cmd == null) return null ;
+		
+		PushMessageLog  bo = new PushMessageLog(); 
+        bo.setContent(cmd.getContent());
+        java.util.Date utilDate=new Date();
+        java.sql.Date sqlDate=new java.sql.Date(utilDate.getTime());
+        bo.setCreateTime(sqlDate);
+        bo.setNamespaceId(UserContext.getCurrentNamespaceId());
+        bo.setOperatorId(UserContext.currentUserId()==null?null:UserContext.currentUserId().intValue());
+        bo.setPushStatus(new Byte(PushStatusCode.WAITING.getCode()).intValue());
+        bo.setPushType(pushTypeCode==null?null:pushTypeCode.intValue());
+        bo.setReceiverType(new Byte(ReceiverTypeCode.COMMUNITY.getCode()).intValue());
+        if(cmd.getCommunityId() != null){
+        	StringBuffer receivers = new StringBuffer();
+        	if(cmd.getAdminFlag() == 1){
+        		String tex = localeStringService.getLocalizedString(PushMessageStringCode.SCOPE , PushMessageStringCode.ADMIN+"",null,null);
+        		receivers.append(tex);
+        	}
+        	if(cmd.getBusinessContactFlag() == 1){
+        		if(receivers !=null && receivers.length()>0){
+        			receivers.append("、");
+        		}
+        		String tex = localeStringService.getLocalizedString(PushMessageStringCode.SCOPE , PushMessageStringCode.BUSINESS+"",null,null);
+        		receivers.append(tex);
+        	}
+        	Community com = communityProvider.findCommunityById(cmd.getCommunityId());
+    		if(com != null && StringUtils.isNotBlank(com.getName())){
+    			receivers.append("（").append(com.getName()).append("）");
+    		}
+    		bo.setReceivers(receivers.toString());
+        }
+        
+        return  pushMessageLogProvider.crteatePushMessageLog(bo);
+        
+	}
+
 }

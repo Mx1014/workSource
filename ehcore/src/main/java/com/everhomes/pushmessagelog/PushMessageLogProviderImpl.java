@@ -10,7 +10,6 @@ import org.jooq.SelectJoinStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configurations.Configurations;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -19,9 +18,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhConfigurationsDao;
 import com.everhomes.server.schema.tables.daos.EhPushMessageLogDao;
-import com.everhomes.server.schema.tables.pojos.EhConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhPushMessageLog;
 import com.everhomes.util.ConvertHelper;
 

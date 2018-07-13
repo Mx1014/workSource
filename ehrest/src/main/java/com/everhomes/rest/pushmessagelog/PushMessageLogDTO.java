@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
 * <li>content: 推送内容</li>
 * <li>pushType: 推送方式{@link com.everhomes.rest.pushmessagelog.PushMessageTypeCode}</li>
 * <li>receiverType: 推送对象的类型{@link com.everhomes.rest.pushmessagelog.ReceiverTypeCode}</li>
-* <li>receivers: 推送对象(推送对象的类型为所有人时，该值为空或长度为0，按项目时，存的是项目名，按手机号时，存的时手机号)</li>
+* <li>receivers: 消息推送对象(推送对象的类型为所有人时，该值为空或长度为0，按项目时，存的是项目名，按手机号时，存的时手机号)</li>
 * <li>createTime: 推送创建时间,格式 yyyy-MM-dd HH:mm</li>
 * <li>pushStatus: 推送状态{@link com.everhomes.rest.pushmessagelog.PushStatusCode}</li>
 * <li>operator: 操作人</li>
@@ -29,6 +29,7 @@ public class PushMessageLogDTO {
 	private Date createTime ;
 	private Byte pushStatus ;	
     private String operator ;
+ 
     
 	public Long getId() {
 		return id;

@@ -43,6 +43,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -56,6 +57,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.Access;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -5840,4 +5842,44 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"));
         return step.fetchOneInto(Integer.class);
     }
+    
+	/**
+	 * 通过项目ID 与 认证状态来查询项目下的用户(查询过程已利用分组去重UID)
+	 * @param namespaceId
+	 * @param communityIds
+	 * @param authStatus
+	 * @param locator
+	 * @param pageSize
+	 */
+    @Override
+	public List<UserOrganizations>  findUserByCommunityIDAndAuthStatus(Integer namespaceId , List<Long> communityIds , List<Integer> authStatus ,CrossShardListingLocator locator , int pageSize){
+		
+		List<UserOrganizations> users = listUserOrganizations(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+				query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+				
+				if(null != communityIds && communityIds.size() > 0){
+					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.in(communityIds));
+				}
+
+				if(null != authStatus && authStatus.size() > 0){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.in(authStatus));
+				}
+				
+				query.addGroupBy(Tables.EH_USERS.ID);
+
+				Condition cond = Tables.EH_USERS.ID.isNotNull();
+				//
+				 if(authStatus.size() == 1 && authStatus.contains(AuthFlag.PENDING_AUTHENTICATION.getCode())){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + ")");
+				}
+				query.addHaving(cond);
+
+				return query;
+			}
+		});
+		return users;
+	}
 }
