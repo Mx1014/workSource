@@ -1649,7 +1649,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     /**
-     * 编辑单个公司的属性
+     * 编辑单个公司的属性 TODO MUST BE MODIFY !!!!!!!!!
      * @param cmd
      */
     public void updateEnterpriseDetail(UpdateEnterpriseDetailCommand cmd){
@@ -1677,6 +1677,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if(cmd.getPmFlag() == Integer.valueOf(TrueOrFalseFlag.TRUE.getCode())){
                     //更新对应的eh_organizations表中的organization_type字段为PM表示的是管理公司
                     organization.setOrganizationType(OrganizationType.PM.getCode());
+                } else {
+                    organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
                 }
             }else{
                 organization.setPmFlag(OrganizationStatus.UNTREATED.getCode());
