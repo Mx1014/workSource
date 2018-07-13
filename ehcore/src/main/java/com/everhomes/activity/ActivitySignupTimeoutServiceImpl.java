@@ -221,11 +221,13 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
         Map<String, Object> map = new HashMap<>();
         map.put("subject", activity.getSubject());
         final String content = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
-        activityRosters.forEach(r->{
-            if (r.getUid().longValue() != userId.longValue()) {
-                sendMessageToUser(r.getUid().longValue(), content, null);
-            }
-        });
+        if (activityRosters != null && activityRosters.size() > 0) {
+            activityRosters.forEach(r->{
+                if (r.getUid().longValue() != userId.longValue()) {
+                    sendMessageToUser(r.getUid().longValue(), content, null);
+                }
+            });
+        }
     }
 
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
