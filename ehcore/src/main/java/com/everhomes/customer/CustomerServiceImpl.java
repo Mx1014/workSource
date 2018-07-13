@@ -87,6 +87,7 @@ import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerEventType;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
@@ -291,6 +292,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -418,6 +420,8 @@ public class CustomerServiceImpl implements CustomerService {
     private BigCollectionProvider bigCollectionProvider;
 
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Value("${equipment.ip}")
     private String equipmentIp;
@@ -2668,7 +2672,7 @@ public class CustomerServiceImpl implements CustomerService {
             command.setPageAnchor(cmd.getPageAnchor());
             return rentalv2Service.listRentalBillsByOrdId(command);
         }
-        return null;
+        return new ListRentalBillsCommandResponse();
     }
 
     @Override
@@ -2678,7 +2682,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             return yellowPageService.listSeviceAllianceAppRecordsByEnterpriseId(customer.getOrganizationId(), cmd.getPageAnchor(), cmd.getPageSize());
         }
-        return null;
+        return new SearchRequestInfoResponse();
     }
 
     @Override
@@ -3432,14 +3436,18 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
         CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
         if (dto.getCreatorUid() != null) {
-            //用户可能不在组织架构中 所以用nickname
-//        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
-//            if(null != detail && null != detail.getContactName()){
-//        		dto.setCreatorName(detail.getContactName());
-//        	}
             User user = userProvider.findUserById(dto.getCreatorUid());
             if (user != null) {
                 dto.setCreatorName(user.getNickName());
+            }
+        }
+        if (dto.getCreateTime() != null) {
+            dto.setOperateTime(dto.getCreateTime().toLocalDateTime().format(dateSF));
+        }
+        if (dto.getDeviceType() != null) {
+            CustomerEventType type = CustomerEventType.fromCode(dto.getDeviceType());
+            if (type != null) {
+                dto.setSourceType(type.getValue());
             }
         }
         return dto;

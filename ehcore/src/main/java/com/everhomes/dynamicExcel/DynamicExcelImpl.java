@@ -13,6 +13,7 @@ import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.varField.FieldProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -30,6 +31,7 @@ import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -37,12 +39,14 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Wentian Wang on 2018/1/23.
@@ -59,6 +63,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
 
     @Autowired
     private ImportFileService importFileService;
+
+    @Autowired
+    private FieldProvider fieldProvider;
 
     /**
      *
@@ -97,6 +104,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
                 if (StringUtils.isEmpty(baseInfo)) {
                     intro = new StringBuilder(DynamicExcelStrings.baseIntro);
                 }
+                if(!withData){
+                    intro = new StringBuilder(DynamicExcelStrings.baseIntroManager);
+                }
                 if (enumSupport) {
                     intro.append(DynamicExcelStrings.enumNotice);
                     for (DynamicField df : fields) {
@@ -116,6 +126,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
                         }
                     }
                 }
+               if(Arrays.stream(params.getClass().getDeclaredFields()).map(Field::getName).collect(Collectors.toList()).contains("headerDisplay")){
+                   intro = new StringBuilder("");
+               }
                 try {
                     DebugExcelUtil.exportExcel(workbook, dynamicSheetNum.get(), sheet.getDisplayName(), intro.toString(), fields, data);
                     dynamicSheetNum.set(dynamicSheetNum.get() + 1);

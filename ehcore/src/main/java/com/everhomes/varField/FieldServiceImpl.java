@@ -3,9 +3,12 @@ package com.everhomes.varField;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contract.ContractService;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -21,7 +24,46 @@ import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
+import com.everhomes.rest.customer.CustomerAccountDTO;
+import com.everhomes.rest.customer.CustomerApplyProjectDTO;
+import com.everhomes.rest.customer.CustomerCertificateDTO;
+import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
+import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
+import com.everhomes.rest.customer.CustomerEntryInfoDTO;
+import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerEventType;
+import com.everhomes.rest.customer.CustomerInvestmentDTO;
+import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerTalentDTO;
+import com.everhomes.rest.customer.CustomerTaxDTO;
+import com.everhomes.rest.customer.CustomerTrackingDTO;
+import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
+import com.everhomes.rest.customer.CustomerTrademarkDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.ListCustomerAccountsCommand;
+import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
+import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
+import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
+import com.everhomes.rest.customer.ListCustomerDepartureInfosCommand;
+import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
+import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
+import com.everhomes.rest.customer.ListCustomerEventsCommand;
+import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
+import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
+import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
+import com.everhomes.rest.customer.ListCustomerTalentsCommand;
+import com.everhomes.rest.customer.ListCustomerTaxesCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
+import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
@@ -33,7 +75,28 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.*;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ListScopeFieldItemCommand;
+import com.everhomes.rest.varField.ListSystemFieldCommand;
+import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
+import com.everhomes.rest.varField.ListSystemFieldItemCommand;
+import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.rest.varField.ScopeFieldGroupInfo;
+import com.everhomes.rest.varField.ScopeFieldInfo;
+import com.everhomes.rest.varField.ScopeFieldItemInfo;
+import com.everhomes.rest.varField.SystemFieldDTO;
+import com.everhomes.rest.varField.SystemFieldGroupDTO;
+import com.everhomes.rest.varField.SystemFieldItemDTO;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
+import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -71,6 +134,7 @@ import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -128,6 +192,11 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private ServiceModuleService serviceModuleService;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
+    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private PmTaskService pmTaskService;
@@ -211,6 +280,7 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("35");
                 sheetNames.remove("36");
                 sheetNames.remove("37");
+                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
@@ -334,12 +404,6 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> allGroups = new ArrayList<>();
         getAllGroups(targetGroups,allGroups);
         return allGroups;
-//        if(onlyLeaf){
-//            getAllGroups(targetGroups,groups);
-//        }else{
-//            groups = targetGroups;
-//        }
-//        return groups;
     }
 
     @Override
@@ -475,7 +539,7 @@ public class FieldServiceImpl implements FieldService {
             } else {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
-                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
     			}
             }
 
@@ -1047,8 +1111,42 @@ public class FieldServiceImpl implements FieldService {
                     setMutilRowDatas(fields,data,list.get(j),communityId,namespaceId,moduleName,sheetName);
                 }
                 break;
+            case "客户合同":
+                ListEnterpriseCustomerContractsCommand contractsCommand = new ListEnterpriseCustomerContractsCommand();
+                contractsCommand.setNamespaceId(namespaceId);
+                contractsCommand.setCommunityId(communityId);
+                contractsCommand.setEnterpriseCustomerId(customerId);
+                ContractService contractService = getContractService(namespaceId);
+                List<ContractDTO>  contracts  = contractService.listEnterpriseCustomerContracts(contractsCommand);
+                if(contracts==null) contracts = new ArrayList<>();
+                for(int j = 0; j < contracts.size(); j++){
+                    LOGGER.info("客户合同 "+j+":"+contracts.get(j));
+                    setMutilRowDatas(fields,data,contracts.get(j),communityId,namespaceId,moduleName,sheetName);
+                }
+                break;
+            case "客户事件":
+                ListCustomerEventsCommand eventsCmd = new ListCustomerEventsCommand();
+                eventsCmd.setCustomerType((byte) 0);
+                eventsCmd.setCustomerId(customerId);
+                List<CustomerEventDTO> events = customerService.listCustomerEvents(eventsCmd);
+                if (events == null) events = new ArrayList<>();
+                for (int j = 0; j < events.size(); j++) {
+                    LOGGER.info("客户事件 " + j + ":" + events.get(j));
+                    events.get(j).setOperateTime(events.get(j).getCreateTime().toLocalDateTime().format(dateSF));
+                    CustomerEventType eventType = CustomerEventType.fromCode(events.get(j).getDeviceType());
+                    if (eventType != null){
+                        events.get(j).setSourceType(eventType.getValue());
+                    }
+                    setMutilRowDatas(fields, data, events.get(j), communityId, namespaceId, moduleName, sheetName);
+                }
+                break;
         }
         return data;
+    }
+
+    private ContractService getContractService(Integer namespaceId) {
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
     }
 
     private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {

@@ -2274,6 +2274,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			return contracts.stream().map(contract -> {
 				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
 				dto.setOrganizationName(contract.getCustomerName());
+				dto.setContractTypeName(ContractType.fromStatus(contract.getContractType()).getDescription());
 				if(categoryConfigMap.containsKey(contract.getCategoryId())){
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}else{
