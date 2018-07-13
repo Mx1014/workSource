@@ -3,16 +3,20 @@ package com.everhomes.pmtask;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
@@ -87,7 +91,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private PortalService portalService;
 	@Autowired
 	private OrganizationProvider organizationProvider;
-
+	@Autowired
+	private AddressProvider addressProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -236,10 +241,15 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			dto = handler.getTaskDetail(cmd);
 		}else {
 			dto = pmTaskCommonService.getTaskDetail(cmd, false);
-
 		}
 
-
+//		企业名称和楼栋门牌
+		if(null != dto.getEnterpriseId()){
+			Organization org = organizationProvider.findOrganizationById(dto.getEnterpriseId());
+			dto.setEnterpriseName(org.getName());
+			Address addr =  addressProvider.findAddressById(org.getAddressId());
+			dto.setEnterpriseAddress(addr.getAddress());
+		}
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
@@ -337,7 +347,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
-// TODO: 2018/7/11 后台物品清单
 		PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
 		List<PmTaskOrderDetail> products = pmTaskProvider.findOrderDetailsByTaskId(null,null,null,task.getId());
 		PmTaskOrderDTO orderdto = new PmTaskOrderDTO();
