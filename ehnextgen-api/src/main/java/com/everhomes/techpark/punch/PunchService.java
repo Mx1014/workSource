@@ -36,14 +36,20 @@ import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestMembersCommand;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestMembersResponse;
 import com.everhomes.rest.techpark.punch.ListPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchLogsResponse;
+import com.everhomes.rest.techpark.punch.ListPunchMembersCommand;
+import com.everhomes.rest.techpark.punch.ListPunchMembersResponse;
 import com.everhomes.rest.techpark.punch.ListPunchMonthReportsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchMonthReportsResponse;
 import com.everhomes.rest.techpark.punch.ListPunchMonthStatusCommand;
 import com.everhomes.rest.techpark.punch.ListPunchMonthStatusResponse;
 import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchStatusMembersCommand;
+import com.everhomes.rest.techpark.punch.ListPunchStatusMembersResponse;
 import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommand;
 import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommandResponse;
 import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
@@ -51,6 +57,10 @@ import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchClockResponse;
 import com.everhomes.rest.techpark.punch.PunchLogsDay;
+import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentCommand;
+import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentResponse;
+import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberCommand;
+import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
@@ -107,13 +117,11 @@ import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
-
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Time;
@@ -406,6 +414,16 @@ public interface PunchService {
 	Date parseDateTimeByTimeSelectType(Long organizationId, Long userId, String day, ApprovalCategoryTimeSelectType type);
 
 	GetOvertimeInfoResponse getOvertimeInfo(GetOvertimeInfoCommand cmd);
+
+	ListPunchStatusMembersResponse listMembersOfAPunchStatus(ListPunchStatusMembersCommand cmd);
+
+	ListPunchMembersResponse listMembersOfDepartment(ListPunchMembersCommand cmd);
+
+	ListPunchExceptionRequestMembersResponse listMembersOfAPunchExceptionRequest(ListPunchExceptionRequestMembersCommand cmd);
+
+	PunchMonthlyStatisticsByMemberResponse monthlyStatisticsByMember(PunchMonthlyStatisticsByMemberCommand cmd);
+
+	PunchMonthlyStatisticsByDepartmentResponse monthlyStatisticsByDepartment(PunchMonthlyStatisticsByDepartmentCommand cmd);
 
 	GetUserPunchRuleInfoResponse getUserPunchRuleInfo(GetUserPunchRuleInfoCommand cmd);
 

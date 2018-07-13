@@ -3,10 +3,16 @@ package com.everhomes.techpark.punch;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
+import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
+import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
+import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -81,9 +87,12 @@ public interface PunchProvider {
 
 	public void updatePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
 
-	public PunchDayLog getDayPunchLogByDate(Long userId, Long companyId,
+	public PunchDayLog getDayPunchLogByDate(Long detailId, Long userId, Long companyId,
 			String format);
 
+	public PunchDayLog getDayPunchLogByDate(Long userId, Long companyId,
+			String format);
+	
 	public void createPunchDayLog(PunchDayLog punchDayLog);
 
 	public void updatePunchDayLog(PunchDayLog punchDayLog);
@@ -265,7 +274,7 @@ public interface PunchProvider {
 
 	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
 
-	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, String startDay, String endDay,
+	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, List<Long> dptIds, String startDay, String endDay,
 			Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
 			Time workTime, Byte exceptionStatus,Integer pageOffset,Integer pageSize);
 
@@ -338,6 +347,8 @@ public interface PunchProvider {
 
 	List<PunchExceptionRequest> listPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd);
 
+	List<PunchExceptionRequestStatisticsItemDTO> countPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd);
+
 	List<PunchExceptionRequest> listpunchexceptionRequestByDate(Long userId, Long enterpriseId, Date punchDate);
 
 	Integer countExceptionRequests(Long userId, Long ownerId, String punchMonth, List<Byte> statusList);
@@ -397,5 +408,17 @@ public interface PunchProvider {
 	List<PunchOvertimeRule> findPunchOvertimeRulesByPunchRuleId(Long punchRuleId, Byte status);
 
 	void deletePunchOvertimeRulesByPunchRuleId(Long punchRuleId);
+
+	List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long orgId, List<Long> deptIds,
+			String startDay, String endDay, PunchStatusStatisticsItemType itemType, Integer pageOffset, Integer pageSize);
+
+	List<PunchStatistic> listPunchSatisticsByItemTypeAndDeptIds(Long organizationId,
+			List<Long> deptIds, String queryByMonth, PunchStatusStatisticsItemType itemType,
+			Integer pageOffset, int pageSize);
+
+	List<OrganizationMemberDetails> listExceptionMembersByDate(Long organizationId, Long departmentId, Date startDate, Date endDate, GeneralApprovalAttribute approvalAttribute, Integer pageOffset, int pageSize);
+	MonthlyStatisticsByMemberRecordMapper monthlyStatisticsByMember(Long organizationId, String punchMonth, Long detailId);
+
+	MonthlyStatisticsByDepartmentRecordMapper monthlyStatisticsByDepartment(Long organizationId, String punchMonth, List<Long> deptIds);
 
 }

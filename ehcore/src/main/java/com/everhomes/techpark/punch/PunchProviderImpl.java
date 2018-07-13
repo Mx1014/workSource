@@ -1,5 +1,6 @@
 package com.everhomes.techpark.punch;
 
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -8,6 +9,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.ListTargetType;
@@ -15,11 +17,14 @@ import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.punch.ClockCode;
 import com.everhomes.rest.techpark.punch.DateStatus;
+import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
+import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
 import com.everhomes.rest.techpark.punch.TimeCompareFlag;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
 import com.everhomes.rest.techpark.punch.ViewFlags;
@@ -79,9 +84,13 @@ import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifisRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRulesRecord;
+import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import com.hp.hpl.sparta.xpath.Step;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -90,6 +99,8 @@ import org.jooq.DeleteWhereStep;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.Record1;
+import org.jooq.Record10;
+import org.jooq.Record17;
 import org.jooq.Record2;
 import org.jooq.Record3;
 import org.jooq.Record5;
@@ -98,6 +109,8 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.SelectSelectStep;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +143,8 @@ public class PunchProviderImpl implements PunchProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Autowired
+    private ArchivesService archivesService;
     @Override
     @Caching(evict = {@CacheEvict(value = "GetPunchRuleByPunchOrgId", key = "#obj.punchOrganizationId")})
     public Long createPunchRule(PunchRule obj) {
@@ -860,7 +875,31 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public PunchDayLog getDayPunchLogByDate(Long userId, Long companyId,
+    public PunchDayLog getDayPunchLogByDate(Long detailId, Long userId, Long companyId,
+                                            String format) {
+
+        Date punchDate = Date.valueOf(format);
+        // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
+        // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(
+                Tables.EH_PUNCH_DAY_LOGS);
+        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+//        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId));
+        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(detailId));
+        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(punchDate));
+        step.where(condition);
+        List<PunchDayLog> result = step.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc())
+                .fetch().map((r) -> {
+                    return ConvertHelper.convert(r, PunchDayLog.class);
+                });
+        if (null != result && result.size() > 0)
+            return result.get(0);
+        return null;
+    }
+    
+    @Override
+    public PunchDayLog getDayPunchLogByDate( Long userId, Long companyId,
                                             String format) {
 
         Date punchDate = Date.valueOf(format);
@@ -2539,7 +2578,7 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, String startDay, String endDay,
+    public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, List<Long> dptIds, String startDay, String endDay,
                                               Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
                                               Time workTime, Byte exceptionStatus, Integer pageOffset, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2551,6 +2590,8 @@ public class PunchProviderImpl implements PunchProvider {
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
         if (userIds != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
+        if (dptIds != null)
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(dptIds));
         if (exceptionStatus != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.EXCEPTION_STATUS.eq(exceptionStatus));
         if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
@@ -2970,6 +3011,35 @@ public class PunchProviderImpl implements PunchProvider {
             return new ArrayList<>();
         }
         return new ArrayList<>(result);
+    }
+
+    @Override
+    public List<PunchExceptionRequestStatisticsItemDTO> countPunchExceptionRequestBetweenBeginAndEndTime(Long userId, Long enterpriseId, Timestamp dayStart, Timestamp dayEnd) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record2<String, Integer>> query = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE, Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.count()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+        Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(enterpriseId));
+        if (null != dayStart && null != dayEnd)
+            condition = condition.and((Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayEnd)
+                    .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.greaterOrEqual(dayStart)))
+                    .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.lessOrEqual(dayEnd)
+                            .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayStart)))
+                    .or(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.greaterOrEqual(dayEnd)
+                            .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lessOrEqual(dayStart))));
+        if (null != userId)
+            condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.ne(ApprovalStatus.REJECTION.getCode()));
+
+
+        List<PunchExceptionRequestStatisticsItemDTO> result = query.where(condition)
+                .groupBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE).fetch()
+                .map(record2 -> {
+                    PunchExceptionRequestStatisticsItemDTO dto = new PunchExceptionRequestStatisticsItemDTO();
+                    dto.setItemName(record2.value1());
+                    dto.setNum(record2.value2());
+                    return dto;
+                });
+
+        return result;
     }
 
     @Override
@@ -3399,7 +3469,19 @@ public class PunchProviderImpl implements PunchProvider {
                 Tables.EH_PUNCH_DAY_LOG_FILES.OVERTIME_TOTAL_WORKDAY,
                 Tables.EH_PUNCH_DAY_LOG_FILES.OVERTIME_TOTAL_RESTDAY,
                 Tables.EH_PUNCH_DAY_LOG_FILES.OVERTIME_TOTAL_LEGAL_HOLIDAY,
-    		    Tables.EH_PUNCH_DAY_LOG_FILES.SMART_ALIGNMENT)
+    		    Tables.EH_PUNCH_DAY_LOG_FILES.SMART_ALIGNMENT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.REST_FLAG,
+                Tables.EH_PUNCH_DAY_LOG_FILES.ABSENT_FLAG,
+                Tables.EH_PUNCH_DAY_LOG_FILES.NORMAL_FLAG,
+                Tables.EH_PUNCH_DAY_LOG_FILES.BELATE_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.LEAVE_EARLY_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.FORGOT_PUNCH_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.ASK_FOR_LEAVE_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.GO_OUT_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.BUSINESS_TRIP_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.OVERTIME_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.FORGOT_PUNCH_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.DEPT_ID)
     	.select(context.select(Tables.EH_PUNCH_DAY_LOGS.ID,
     		    Tables.EH_PUNCH_DAY_LOGS.USER_ID,
     		    Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID,
@@ -3430,7 +3512,19 @@ public class PunchProviderImpl implements PunchProvider {
                 Tables.EH_PUNCH_DAY_LOGS.OVERTIME_TOTAL_WORKDAY,
                 Tables.EH_PUNCH_DAY_LOGS.OVERTIME_TOTAL_RESTDAY,
                 Tables.EH_PUNCH_DAY_LOGS.OVERTIME_TOTAL_LEGAL_HOLIDAY,
-    		    Tables.EH_PUNCH_DAY_LOGS.SMART_ALIGNMENT )
+                Tables.EH_PUNCH_DAY_LOGS.SMART_ALIGNMENT,
+                Tables.EH_PUNCH_DAY_LOGS.REST_FLAG,
+                Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG,
+                Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG,
+                Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.ASK_FOR_LEAVE_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.GO_OUT_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.BUSINESS_TRIP_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.OVERTIME_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_REQUEST_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.DEPT_ID)
     		    .from(Tables.EH_PUNCH_DAY_LOGS)
     			.where(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(ownerId)
     					.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(monthBegin, monthEnd))))
@@ -3632,6 +3726,174 @@ public class PunchProviderImpl implements PunchProvider {
         DeleteQuery<EhPunchOvertimeRulesRecord> deleteQuery = context.deleteQuery(Tables.EH_PUNCH_OVERTIME_RULES);
         deleteQuery.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.PUNCH_RULE_ID.eq(punchRuleId));
         deleteQuery.execute();
+    }
+
+	@Override
+	public List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long orgId, List<Long> deptIds,
+		String startDay, String endDay, PunchStatusStatisticsItemType itemType, Integer pageOffset, Integer pageSize) {
+	 	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());  
+        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS); 
+        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(orgId));  
+        if (deptIds != null)
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds)); 
+        if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+            Date startDate = Date.valueOf(startDay);
+            Date endDate = Date.valueOf(endDay);
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+        }
+        if(itemType != null){
+        	switch(itemType){ 
+        		case BELATE:
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0));
+        			break;
+        		case LEAVE_EARLY:
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0));
+        			break;
+        		case NORMAL:
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
+        			break;
+        		case REST:
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
+        			break;
+        		case ABSENT:
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
+        			break;
+        		case FORGOT_PUNCH:
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT.gt(0));
+        			break;
+    			default:
+    				break;
+        	}
+        }
+
+        Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
+        if (null != pageOffset && null != pageSize)
+            step.limit(offset, pageSize);
+        List<PunchDayLog> result = new ArrayList<PunchDayLog>();
+        step.where(condition)
+                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, PunchDayLog.class));
+            return null;
+        });
+        if (result == null || result.isEmpty())
+            return null;
+        return result;
+	}
+	public List<PunchStatistic> listPunchSatisticsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth,
+                                PunchStatusStatisticsItemType itemType, Integer pageOffset, int pageSize){
+		 	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());  
+	        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_STATISTICS); 
+	        Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.equal(organizationId));  
+	        if (deptIds != null)
+	            condition = condition.and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds)); 
+	        if (!StringUtils.isEmpty(queryByMonth)) { 
+	            condition = condition.and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(queryByMonth));
+	        }
+	        if(itemType != null){
+	        	switch(itemType){ 
+	        		case BELATE:
+	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.BELATE_COUNT.gt(0));
+	        			break;
+	        		case LEAVE_EARLY:
+	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_COUNT.gt(0));
+	        			break;
+	        		case NORMAL:
+	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.EXCEPTION_STATUS.eq(ExceptionStatus.NORMAL.getCode()));
+	        			break;
+	        		case REST:
+	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.REST_DAY_COUNT.gt(0));
+	        			break;
+	        		case ABSENT:
+	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.ABSENCE_COUNT.gt(0.0));
+	        			break;
+	        		case FORGOT_PUNCH:
+	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT.gt(0));
+	        			break;
+	    			default:
+	    				break;
+	        	}
+	        }
+
+	        Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
+	        step.limit(offset, pageSize);
+	        List<PunchStatistic> result = new ArrayList<>();
+	        step.where(condition)
+	                .orderBy(Tables.EH_PUNCH_STATISTICS.USER_ID.desc()).fetch().map((r) -> {
+	            result.add(ConvertHelper.convert(r, PunchStatistic.class));
+	            return null;
+	        });
+	        if (result == null || result.isEmpty())
+	            return null;
+	        return result;
+	}
+
+    @Override
+    public List<OrganizationMemberDetails> listExceptionMembersByDate(Long organizationId, Long departmentId, Date startDate, Date endDate, GeneralApprovalAttribute approvalAttribute, Integer pageOffset, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return archivesService.queryArchivesEmployees(new ListingLocator(), organizationId, departmentId, (locator, query) -> {
+            if(null != approvalAttribute) {
+                SelectConditionStep<Record1<Long>> condition = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID)
+                        .from(Tables.EH_PUNCH_EXCEPTION_REQUESTS).where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(organizationId))
+                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_ATTRIBUTE.eq(approvalAttribute.getCode()));
+                switch(approvalAttribute){
+                    case ABNORMAL_PUNCH:
+                        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate, endDate));
+                        break;
+                    default:
+                        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(new Timestamp(endDate.getTime())))
+                                .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.gt(new Timestamp(startDate.getTime())));
+                        break;
+                }
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.in(condition));
+            }
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.desc());
+            Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
+            query.addLimit(offset, pageSize);
+            return query;
+        });
+    }
+
+    @Override
+    public MonthlyStatisticsByMemberRecordMapper monthlyStatisticsByMember(Long organizationId, String punchMonth, Long detailId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record17<Long, String, String, Long, Long, Long, Double, Integer, Integer, Integer, Double, Integer, Integer, Integer, Integer, Integer, Integer>> query = context.select(
+                Tables.EH_PUNCH_STATISTICS.ID.as("id"),
+                Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.as("punchMonth"),
+                Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.as("ownerType"),
+                Tables.EH_PUNCH_STATISTICS.OWNER_ID.as("ownerId"),
+                Tables.EH_PUNCH_STATISTICS.USER_ID.as("userId"),
+                Tables.EH_PUNCH_STATISTICS.DETAIL_ID.as("detailId"),
+                Tables.EH_PUNCH_STATISTICS.WORK_COUNT.as("workCount"),
+                Tables.EH_PUNCH_STATISTICS.REST_DAY_COUNT.as("restDayCount"),
+                Tables.EH_PUNCH_STATISTICS.BELATE_COUNT.as("belateCount"),
+                Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_COUNT.as("leaveEarlyCount"),
+                Tables.EH_PUNCH_STATISTICS.ABSENCE_COUNT.as("absenceCount"),
+                Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT.as("forgotCount"),
+                Tables.EH_PUNCH_STATISTICS.ASK_FOR_LEAVE_REQUEST_COUNT.as("askForLeaveRequestCount"),
+                Tables.EH_PUNCH_STATISTICS.GO_OUT_REQUEST_COUNT.as("goOutRequestCount"),
+                Tables.EH_PUNCH_STATISTICS.BUSINESS_TRIP_REQUEST_COUNT.as("businessTripRequestCount"),
+                Tables.EH_PUNCH_STATISTICS.OVERTIME_REQUEST_COUNT.as("overtimeRequestCount"),
+                Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_REQUEST_COUNT.as("forgotPunchRequestCount")).from(Tables.EH_PUNCH_STATISTICS);
+        Condition condition = Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq("organization").and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId)).and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth)).and(Tables.EH_PUNCH_STATISTICS.DETAIL_ID.eq(detailId));
+        return query.where(condition).fetchOne().map(new MonthlyStatisticsByMemberRecordMapper());
+    }
+
+    @Override
+    public MonthlyStatisticsByDepartmentRecordMapper monthlyStatisticsByDepartment(Long organizationId, String punchMonth, List<Long> deptIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record10<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> query = context.select(
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.ABSENCE_COUNT.gt(0D), 1).otherwise(0).sum().as("absenceMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT.gt(0), 1).otherwise(0).sum().as("forgotMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FULL_NORMAL_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("normalMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.ASK_FOR_LEAVE_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("askForLeaveRequestMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.GO_OUT_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("goOutRequestMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.BUSINESS_TRIP_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("businessTripRequestMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.OVERTIME_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("overtimeRequestMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("forgotPunchRequestMemberCount")).from(Tables.EH_PUNCH_STATISTICS);
+        Condition condition = Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq("organization").and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId)).and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth)).and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds));
+        return query.where(condition).fetchOne().map(new MonthlyStatisticsByDepartmentRecordMapper());
     }
 }
 
