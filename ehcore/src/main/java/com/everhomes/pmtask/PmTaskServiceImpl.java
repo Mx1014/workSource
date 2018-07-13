@@ -3234,10 +3234,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void createOrderDetails(CreateOrderDetailsCommand cmd) {
-//		if(null != cmd.getOrderDetails() && cmd.getOrderDetails().size() <= 0){
-//			LOGGER.info("Invalid parameter, cmd={}", cmd);
-//			return;
-//		}
 		Integer namespaceId = cmd.getNamespaceId();
 		String ownerType = cmd.getOwnerType();
 		Long ownerId = cmd.getOwnerId();
@@ -3272,21 +3268,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void modifyOrderDetails(CreateOrderDetailsCommand cmd) {
-		if(cmd.getOrderDetails().size() <= 0){
-			LOGGER.info("Invalid parameter, cmd={}", cmd);
-			return;
-		}
 		Integer namespaceId = cmd.getNamespaceId();
 		String ownerType = cmd.getOwnerType();
 		Long ownerId = cmd.getOwnerId();
 		Long taskId = cmd.getTaskId();
+		Long serviceFee = cmd.getServiceFee();
+		Long productFee = 0L;
 //		修改订单
 		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(taskId);
-		Long serviceFee = order.getServiceFee();
 		if(null != serviceFee)
 			order.setServiceFee(serviceFee);
-		Long productFee = 0L;
-		if(null != cmd.getOrderDetails()){
+		if(null != cmd.getOrderDetails() && cmd.getOrderDetails().size() > 0){
 			productFee = cmd.getOrderDetails().stream().mapToLong(r -> r.getProductAmount() * r.getProductPrice()).sum();
 		}
 		order.setProductFee(productFee);
@@ -3294,7 +3286,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		order = this.pmTaskProvider.updatePmTaskOrder(order);
 		Long orderId = order.getId();
 		this.pmTaskProvider.deleteOrderDetailsByOrderId(orderId);
-		if(null != cmd.getOrderDetails()){
+		if(null != cmd.getOrderDetails() && cmd.getOrderDetails().size() > 0){
 //		创建订单明细
 			List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
 				PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
@@ -3314,7 +3306,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
 		PmTaskOrderDTO dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
 		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTaskId());
-		dto.setProducts(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
+		if(null != result && result.size() > 0)
+			dto.setProducts(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
 		return dto;
 	}
 
