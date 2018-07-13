@@ -5499,6 +5499,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setBillStatus(r.getValue(t.STATUS));
             dto.setOwnerId(String.valueOf(r.getOwnerId()));
             dto.setOwnerType(r.getOwnerType());
+            dto.setInvoiceNum(r.getValue(t.INVOICE_NUMBER));
             list.add(dto);
             return null;});
         return list;

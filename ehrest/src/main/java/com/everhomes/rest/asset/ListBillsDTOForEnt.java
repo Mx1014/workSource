@@ -48,6 +48,8 @@ public class ListBillsDTOForEnt {
     private Byte billStatus;
     private String ownerId;
     private String ownerType;
+    private String invoiceNum;
+    
 	public Integer getDefaultOrder() {
 		return defaultOrder;
 	}
@@ -155,6 +157,12 @@ public class ListBillsDTOForEnt {
 	}
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+	public String getInvoiceNum() {
+		return invoiceNum;
+	}
+	public void setInvoiceNum(String invoiceNum) {
+		this.invoiceNum = invoiceNum;
 	}
     
 }
