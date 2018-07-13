@@ -10321,20 +10321,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
-    private List<OrganizationMember> convertPinyin(List<OrganizationMember> members) {
-
-        members = members.stream().peek((c) -> {
-            String pinyin = PinYinHelper.getPinYin(c.getContactName());
-            c.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
-            c.setFullPinyin(pinyin.replaceAll(" ", ""));
-            c.setInitial(PinYinHelper.getCapitalInitial(c.getFullPinyin()));
-        }).collect(Collectors.toList());
-
-        Collections.sort(members);
-
-        return members;
-    }
-
     @Override
     public void createOrganizationOwner(CreateOrganizationOwnerCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -11395,6 +11381,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (0 == organizationMembers.size())
             return response;
 
+        //  拼音及排序
+        organizationMembers = convertPinyin(organizationMembers);
+
         //  校验权限（管理员）
         Long enterpriseId = getTopOrganizationId(cmd.getOrganizationId());
         boolean temp;
@@ -11428,9 +11417,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMembers = this.organizationProvider.listOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
             response.setTotalCount(this.organizationProvider.countOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, cmd.getIsSignedup(), visibleFlag));
         }
-
-        //转拼音
-        organizationMembers = convertPinyin(organizationMembers);
         */
 
         List<OrganizationContactDTO> members = organizationMembers.stream().map(r -> {
@@ -11471,6 +11457,21 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setMembers(members);
         return response;
     }
+
+    private List<OrganizationMember> convertPinyin(List<OrganizationMember> members) {
+
+        members = members.stream().peek((c) -> {
+            String pinyin = PinYinHelper.getPinYin(c.getContactName());
+            c.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+            c.setFullPinyin(pinyin.replaceAll(" ", ""));
+            c.setInitial(PinYinHelper.getCapitalInitial(c.getFullPinyin()));
+        }).collect(Collectors.toList());
+
+        Collections.sort(members);
+
+        return members;
+    }
+
 
     @Override
     public OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd) {
