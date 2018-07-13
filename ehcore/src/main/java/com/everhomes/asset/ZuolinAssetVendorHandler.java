@@ -842,6 +842,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 	            .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))//账单状态，0:待缴;1:已缴
 	            .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(cmd.getOwnerType()))
 	            .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(cmd.getOwnerId()))
+	            .and(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.greaterThan(BigDecimal.ZERO))//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的
 	            .fetchInto(PaymentBills.class);
         	Iterator<PaymentBills> iter = paymentBills.iterator();  
         	while (iter.hasNext()) {
