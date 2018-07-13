@@ -384,4 +384,7 @@ public interface AssetProvider {
 	
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 	
+	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
+	
+	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
 }

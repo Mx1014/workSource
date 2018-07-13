@@ -1363,9 +1363,9 @@ public class AssetProviderImpl implements AssetProvider {
 //            if(amountOwed.compareTo(new BigDecimal("0"))!=1){
 //                billStatus = 1;
 //            }
-//            for(int i = 0; i < billItemsList.size(); i++) {
-//                billItemsList.get(i).setStatus(billStatus);
-//            }
+            for(int i = 0; i < billItemsList.size(); i++) {
+                billItemsList.get(i).setStatus(billStatus);
+            }
             EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
             billItemsDao.insert(billItemsList);
 
@@ -1378,6 +1378,7 @@ public class AssetProviderImpl implements AssetProvider {
 //            }else{
 //                newBill.setStatus(billStatus);
 //            }
+            newBill.setStatus(billStatus);
             amountReceivable = DecimalUtils.negativeValueFilte(amountReceivable);
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
