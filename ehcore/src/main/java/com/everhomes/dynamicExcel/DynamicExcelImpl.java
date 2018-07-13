@@ -104,7 +104,8 @@ public class DynamicExcelImpl implements DynamicExcelService{
                 if (StringUtils.isEmpty(baseInfo)) {
                     intro = new StringBuilder(DynamicExcelStrings.baseIntro);
                 }
-                if(!withData){
+                // remove excel header infos if sheet is not customer basic info
+                if (!withData && sheet.getGroupId() != 1) {
                     intro = new StringBuilder(DynamicExcelStrings.baseIntroManager);
                 }
                 if (enumSupport) {
