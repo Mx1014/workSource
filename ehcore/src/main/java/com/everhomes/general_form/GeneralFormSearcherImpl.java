@@ -1,21 +1,32 @@
 package com.everhomes.general_form;
 
 import com.everhomes.community.Building;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.general_approval.ListGeneralFormValResponse;
 import com.everhomes.rest.general_approval.SearchFormValsCommand;
+import com.everhomes.rest.general_approval.SearchGeneralFormItem;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GeneralFormSearcherImpl extends AbstractElasticSearch implements GeneralFormSearcher{
 
@@ -30,6 +43,9 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
     @Autowired
     GeneralFormProvider generalFormProvider;
+
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     @Override
     public void deleteById(Long id) {
@@ -61,13 +77,91 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
     @Override
     public void syncFromDb() {
+        int pageSize = 200;
+        this.deleteAll();
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+            List<GeneralFormVal> generalFormVal = generalFormProvider.listGeneralForm(locator, pageSize);
+
+            if(generalFormVal.size() > 0) {
+                this.bulkUpdate(generalFormVal);
+            }
+
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+
+        this.optimize(1);
+        this.refresh();
+        LOGGER.info("sync for contracts ok");
     }
 
     @Override
-    public ListGeneralFormValResponse queryContracts(SearchFormValsCommand cmd) {
+    public ListGeneralFormValResponse queryGeneralForm(SearchFormValsCommand cmd) {
+
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+
+
+
         QueryBuilder qb = null;
-        return null;
+
+
+        FilterBuilder fb = null;
+        FilterBuilder nfb = null;
+        fb = FilterBuilders.termFilter("formOriginId", cmd.getFormOriginId());
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("formVersion", cmd.getFormVersion()));
+
+        if(cmd.getDisplayFields().size() > 0){
+            List<String> displayFieldNames = cmd.getDisplayFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
+            List<String> displayFieldValues = cmd.getDisplayFields().stream().map(SearchGeneralFormItem::getFieldValue).collect(Collectors.toList());
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("fieldName", displayFieldNames));
+            qb = QueryBuilders.multiMatchQuery(displayFieldValues).field("fieldValues",1.2f);
+        }
+        if(cmd.getFilteredFields().size() > 0){
+            List<String> filteredFieldNames = cmd.getFilteredFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
+            nfb = FilterBuilders.notFilter(FilterBuilders.termsFilter("fieldName", filteredFieldNames));
+            fb = FilterBuilders.notFilter(nfb);
+        }
+        qb = QueryBuilders.filteredQuery(qb, fb);
+
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+        builder.addSort("id", SortOrder.DESC);
+
+        SearchResponse rsp = builder.execute().actionGet();
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("GeneralFormValSearcherImpl query builder: {}, rsp: {}", builder, rsp);
+
+        List<Long> ids = getIds(rsp);
+        ListGeneralFormValResponse response = new ListGeneralFormValResponse();
+
+        if(ids.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+        }
+
+        List<GeneralFormValDTO> dtos = new ArrayList<>();
+        List<GeneralFormVal> vals = generalFormProvider.listGeneralFormItemByIds(ids);
+        for(GeneralFormVal val : vals){
+            dtos.add(ConvertHelper.convert(val, GeneralFormValDTO.class));
+        }
+
+        response.setFieldVals(dtos);
+
+
+        return response;
     }
 
     @Override

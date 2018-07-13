@@ -1,6 +1,8 @@
 package com.everhomes.rest.general_approval;
 
 
+import java.util.List;
+
 /**
  * <ul>
  *     <li>formOriginId: 表单id</li>
@@ -13,9 +15,10 @@ package com.everhomes.rest.general_approval;
 public class SearchFormValsCommand {
     private Long formOriginId;
     private Long formVersion;
-    private SearchGeneralFormItem filteredFields;
-    private SearchGeneralFormItem displayFields;
+    private List<SearchGeneralFormItem> filteredFields;
+    private List<SearchGeneralFormItem> displayFields;
     private Long pageAnchor;
+    private Integer pageSize;
 
     public Long getFormOriginId() {
         return formOriginId;
@@ -33,19 +36,19 @@ public class SearchFormValsCommand {
         this.formVersion = formVersion;
     }
 
-    public SearchGeneralFormItem getFilteredFields() {
+    public List<SearchGeneralFormItem> getFilteredFields() {
         return filteredFields;
     }
 
-    public void setFilteredFields(SearchGeneralFormItem filteredFields) {
+    public void setFilteredFields(List<SearchGeneralFormItem> filteredFields) {
         this.filteredFields = filteredFields;
     }
 
-    public SearchGeneralFormItem getDisplayFields() {
+    public List<SearchGeneralFormItem> getDisplayFields() {
         return displayFields;
     }
 
-    public void setDisplayFields(SearchGeneralFormItem displayFields) {
+    public void setDisplayFields(List<SearchGeneralFormItem> displayFields) {
         this.displayFields = displayFields;
     }
 
@@ -57,6 +60,14 @@ public class SearchFormValsCommand {
         this.pageAnchor = pageAnchor;
     }
 
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
     @Override
     public String toString() {
         return "SearchFormValsCommand{" +
@@ -65,6 +76,7 @@ public class SearchFormValsCommand {
                 ", filteredFields=" + filteredFields +
                 ", displayFields=" + displayFields +
                 ", pageAnchor=" + pageAnchor +
+                ", pageSize=" + pageSize +
                 '}';
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
  *
  * <ul>返回值:
  * <li>nextPageAnchor: 下页锚点</li>
- * <li>contracts: 合同列表，参考{@link com.everhomes.rest.contract.ContractDTO}</li>
+ * <li>contracts: 查询值列表，参考{@link com.everhomes.rest.general_approval.GeneralFormValDTO}</li>
  * </ul>
  */
 public class ListGeneralFormValResponse {

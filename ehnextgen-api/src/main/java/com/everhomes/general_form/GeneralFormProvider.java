@@ -1,9 +1,12 @@
 package com.everhomes.general_form;
 
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
+import com.everhomes.rest.general_approval.SearchGeneralFormItem;
 
 import java.util.List;
 
@@ -69,12 +72,17 @@ public interface GeneralFormProvider {
     /**
      * 获取
      * @param namespaceId
-     * @param sourceType
-     * @param ownerType
-     * @param ownerId
      * @param sourceId
      * @return
      */
-    GeneralFormVal getGeneralFormVal(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId);
+    List<GeneralFormVal> getGeneralFormVal(Integer namespaceId, Long sourceId);
+
+    Long saveGeneralFormValsRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId);
+
+    GeneralFormValsSave getGeneralFormValsGroup(Integer namespaceId, Long sourceId);
+
+    List<GeneralFormVal> listGeneralFormItemByIds(List<Long> ids);
+
+    List<GeneralFormVal> listGeneralForm(CrossShardListingLocator locator, Integer pageSize);
 
 }

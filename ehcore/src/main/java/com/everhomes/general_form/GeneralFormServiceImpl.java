@@ -8,9 +8,7 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.general_approval.GeneralApprovalFieldProcessor;
-import com.everhomes.general_approval.GeneralApprovalVal;
-import com.everhomes.general_approval.GeneralApprovalValProvider;
+import com.everhomes.general_approval.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
@@ -63,6 +61,12 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
+
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+
+    @Autowired
+    private GeneralFormSearcher generalFormSearcher;
 
     @Override
     public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
@@ -128,6 +132,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                     obj.setFieldType(val.getFieldType());
                     obj.setFieldValue(val.getFieldValue());
                     generalFormValProvider.createGeneralFormVal(obj);
+
+                    generalFormSearcher.feedDoc(obj);
                 }
                 return null;
             });
@@ -713,12 +719,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public GeneralFormValDTO getGeneralFormVal(GetGeneralFormValCommand cmd){
-        GeneralFormVal request;
+    public List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd){
+        List<GeneralFormVal> request;
+        List<GeneralFormValDTO> result;
 
         if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null && StringUtils.isNotBlank(cmd.getSourceType()) && StringUtils.isNotBlank(cmd.getOwnerType())){
-            request = generalFormProvider.getGeneralFormVal(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
-            return ConvertHelper.convert(request, GeneralFormValDTO.class);
+
+            request = generalFormProvider.getGeneralFormVal(cmd.getNamespaceId(), cmd.getSourceId());
+            return request.stream().map(r -> ConvertHelper.convert(r, GeneralFormValDTO.class)).collect(Collectors.toList());
         }else{
             LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
                     + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
@@ -729,8 +737,24 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public void saveGeneralForm(PostGeneralFormValCommand cmd) {
-        GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
-        handler.saveGeneralFormVal(cmd);
+
+        //先新建表单字段的集合
+        Long source_id = generalFormProvider.saveGeneralFormValsRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
+        String source_type = "EhGeneralFormValsRequest";
+
+
+        addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
+        GeneralApproval generalApproval = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
+        cmd2.setGeneralFormId(generalApproval.getFormOriginId());
+        cmd2.setSourceId(source_id);
+        cmd2.setSourceType(source_type);
+        cmd2.setValues(cmd.getValues());
+
+
+
+        this.addGeneralFormValues(cmd2);
     }
+
+
 }
 

@@ -11,5 +11,5 @@ public interface GeneralFormSearcher {
     void bulkUpdate(List<GeneralFormVal> generalFormVal);
     void feedDoc(GeneralFormVal generalFormVal);
     void syncFromDb();
-    ListGeneralFormValResponse queryContracts(SearchFormValsCommand cmd);
+    ListGeneralFormValResponse queryGeneralForm(SearchFormValsCommand cmd);
 }

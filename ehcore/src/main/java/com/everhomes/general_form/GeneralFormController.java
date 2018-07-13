@@ -21,6 +21,9 @@ public class GeneralFormController extends ControllerBase {
 	@Autowired
 	private GeneralFormService generalFormService;
 
+	@Autowired
+	private GeneralFormSearcher generalFormSearcher;
+
 	/**
 	 * <b>URL: /general_form/getTemplateBySourceId</b>
 	 * <p> 根据业务获取表单 </p>
@@ -89,7 +92,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("searchGeneralFormVals")
 	@RestReturn(value=SearchFormValDTO.class)
 	public RestResponse searchGeneralFormVals(SearchFormValsCommand cmd) {
-		SearchFormValDTO dto = generalFormService.searchGeneralFormVals(cmd);
+		ListGeneralFormValResponse dto = generalFormSearcher.queryGeneralForm(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -134,7 +137,7 @@ public class GeneralFormController extends ControllerBase {
 	@RequestMapping("getGeneralFormVal")
 	@RestReturn(value=GeneralFormValDTO.class, collection = true)
 	public RestResponse getGeneralFormVal(GetGeneralFormValCommand cmd) {
-		GeneralFormValDTO dto = generalFormService.getGeneralFormVal(cmd);
+		List<GeneralFormValDTO> dto = generalFormService.getGeneralFormVal(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
