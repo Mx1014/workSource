@@ -34,6 +34,7 @@ import com.everhomes.util.StringHelper;
  *     <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
  *     <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  *     <li>maxQuantity: 限制人数</li>
+ *     <li>minQuantity: 最低限制人数</li>
  *     <li>tag: 帖子标签</li>
  *     <li>forumEntryId: 论坛应用入口Id</li>
  *     <li>moduleType: 模块类型，现在所有的帖子都要往帖子表里写，通过判断条件已经很难区分是哪里来的帖子了，现在由创建帖子的时候带来。 参考{@link ForumModuleType}</li>
@@ -93,6 +94,8 @@ public class NewTopicBySceneCommand {
 
     private Integer maxQuantity;
 
+    private Integer minQuantity;
+
     private String tag;
 
     private Long forumEntryId;
@@ -102,6 +105,14 @@ public class NewTopicBySceneCommand {
     private Long moduleCategoryId;
 
     private Long communityId;
+
+    public Integer getMinQuantity() {
+        return minQuantity;
+    }
+
+    public void setMinQuantity(Integer minQuantity) {
+        this.minQuantity = minQuantity;
+    }
 
     public Long getCommunityId() {
         return communityId;
