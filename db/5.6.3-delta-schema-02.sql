@@ -250,7 +250,11 @@ CREATE TABLE `eh_organization_workplaces` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- 增加办公地点与楼栋门牌的关系表
+DROP TABLE IF EXISTS `eh_communityandbuilding_relationes`;
+
 CREATE TABLE `eh_communityandbuilding_relationes` (
   `id` bigint(20) NOT NULL COMMENT '主键id',
   `building_id` bigint(20) DEFAULT NULL COMMENT '楼栋id',
