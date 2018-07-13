@@ -8,8 +8,12 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>organizationId: 组织id</li>
- * <li>buildingName: 楼栋号</li>
+ * <li>communityId: 园区id</li>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>apartmentFloor: 楼层</li>
  * <li>keyword: 查询关键字</li>
+ * <li>namespaceId: 域空间id</li>
+ * <li>livingStatus: 房源状态</li>
  * </ul>
  */
 public class ListPropApartmentsByKeywordCommand {

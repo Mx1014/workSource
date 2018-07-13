@@ -4,6 +4,9 @@ package com.everhomes.rest.address;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,6 +17,9 @@ import com.everhomes.util.StringHelper;
  * <li>dateBegin: 拆分/合并计划的生效日期</li>
  * <li>addressId: 要执行拆分/合并计划的房源id</li>
  * <li>apartments: 拆分后、或者待合并的房源信息，参考{@link com.everhomes.rest.address.ArrangementApartmentDTO}</li>
+ * <li>enterpriseCustomers: 和拆分出的房源或待合并的房源相关联的企业客户信息，参考{@link com.everhomes.rest.customer.EnterpriseCustomerDTO}</li>
+ * <li>individualCustomers: 和拆分出的房源或待合并的房源相关联的个人客户信息，参考{@link com.everhomes.rest.organization.OrganizationOwnerDTO}</li>
+ * <li>contracts: 和拆分出的房源或待合并的房源相关联的合同信息，参考{@link com.everhomes.rest.contract.ContractDTO}</li>
  * </ul>
  */
 public class AddressArrangementDTO {
@@ -25,6 +31,12 @@ public class AddressArrangementDTO {
 	private Long addressId;
 	@ItemType(ArrangementApartmentDTO.class)
     private List<ArrangementApartmentDTO> apartments;
+	@ItemType(EnterpriseCustomerDTO.class)
+    private List<EnterpriseCustomerDTO> enterpriseCustomers;
+	@ItemType(OrganizationOwnerDTO.class)
+    private List<OrganizationOwnerDTO> individualCustomers;
+	@ItemType(ContractDTO.class)
+    private List<ContractDTO> contracts;
 	
 	public Long getId() {
 		return id;
@@ -61,6 +73,24 @@ public class AddressArrangementDTO {
 	}
 	public void setApartments(List<ArrangementApartmentDTO> apartments) {
 		this.apartments = apartments;
+	}
+	public List<EnterpriseCustomerDTO> getEnterpriseCustomers() {
+		return enterpriseCustomers;
+	}
+	public void setEnterpriseCustomers(List<EnterpriseCustomerDTO> enterpriseCustomers) {
+		this.enterpriseCustomers = enterpriseCustomers;
+	}
+	public List<OrganizationOwnerDTO> getIndividualCustomers() {
+		return individualCustomers;
+	}
+	public void setIndividualCustomers(List<OrganizationOwnerDTO> individualCustomers) {
+		this.individualCustomers = individualCustomers;
+	}
+	public List<ContractDTO> getContracts() {
+		return contracts;
+	}
+	public void setContracts(List<ContractDTO> contracts) {
+		this.contracts = contracts;
 	}
 	
 	@Override

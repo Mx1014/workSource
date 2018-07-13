@@ -29,6 +29,7 @@ import com.everhomes.util.StringHelper;
  * <li>apartmentFloor: 楼层名称</li>
  * <li>arrangementOperationType:房源的拆分/合并计划（0：无,1：拆分,2：合并）</li>
  * <li>relatedContractEndDate:与该房源关联的合同的结束日期</li>
+ * <li>freeArea: 可招租面积</li>
  * </ul>
  */
 public class GetApartmentDetailResponse {
