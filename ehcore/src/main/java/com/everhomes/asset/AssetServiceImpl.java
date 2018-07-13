@@ -5171,4 +5171,11 @@ public class AssetServiceImpl implements AssetService {
         response.setPaymentOrderBillDTOs(list);
         return response;
 	}
+
+	public List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd) {
+		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+        }
+        return assetProvider.listBillGroupsForEnt(cmd.getOwnerId(),cmd.getOwnerType());
+	}
 }

@@ -5705,4 +5705,62 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return list;
     }
+
+	public List<ListBillGroupsDTO> listBillGroupsForEnt(Long ownerId, String ownerType) {
+        List<ListBillGroupsDTO> list = new ArrayList<>();
+        List<Long> userIds = new ArrayList<Long>();
+        ListBusinessUserByIdsCommand cmd = new ListBusinessUserByIdsCommand();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        context.select()
+                .from(t)
+                .where(t.OWNER_ID.eq(ownerId))
+                .and(t.OWNER_TYPE.eq(ownerType))
+                .orderBy(t.DEFAULT_ORDER)
+                .fetch()
+                .map(r -> {
+                    ListBillGroupsDTO dto = new ListBillGroupsDTO();
+                    dto.setBillGroupId(r.getValue(t.ID));
+                    dto.setBillGroupName(r.getValue(t.NAME));
+                    dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
+                    dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
+                    dto.setBillingDay(r.getValue(t.BILLS_DAY));
+                    dto.setDueDay(r.getValue(t.DUE_DAY));
+                    dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
+                    dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
+                    dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
+                    dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
+                    userIds.add(r.getValue(t.BIZ_PAYEE_ID));
+                    list.add(dto);
+                    return null;
+                });
+        //由于收款方账户名称可能存在修改的情况，故重新请求电商
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBillGroups(request), cmd={}", userIds);
+        }
+        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
+        }
+        if(payUserDTOs != null && payUserDTOs.size() != 0) {
+        	for(int i = 0;i < payUserDTOs.size();i++) {
+            	for(int j = 0;j < list.size();j++) {
+            		if(payUserDTOs.get(i) != null && list.get(j) != null &&
+            			payUserDTOs.get(i).getId() != null && list.get(j).getBizPayeeId() != null &&
+            			payUserDTOs.get(i).getId().equals(list.get(j).getBizPayeeId())){
+            			list.get(j).setAccountName(payUserDTOs.get(i).getRemark());// 用户向支付系统注册帐号时填写的帐号名称
+            			list.get(j).setAccountAliasName(payUserDTOs.get(i).getUserAliasName());//企业名称（认证企业）
+            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
+                        if(registerStatus != null && registerStatus.intValue() == 1) {
+                        	list.get(j).setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                        } else {
+                        	list.get(j).setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                        }
+            		}
+            	}
+            }
+        }
+        return list;
+	}
 }

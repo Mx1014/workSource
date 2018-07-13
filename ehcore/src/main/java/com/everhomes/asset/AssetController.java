@@ -1535,5 +1535,19 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return restResponse;
     }
     
+    /**
+     * <p>对公转账：展示账单组列表</p>
+     * <b>URL: /asset/listBillGroupsForEnt</b>
+     */
+    @RequestMapping("listBillGroupsForEnt")
+    @RestReturn(value = ListBillGroupsDTO.class, collection = true)
+    public RestResponse listBillGroupsForEnt(OwnerIdentityCommand cmd) {
+        List<ListBillGroupsDTO> list = assetService.listBillGroupsForEnt(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
 }
 
