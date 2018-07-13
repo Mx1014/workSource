@@ -78,9 +78,7 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
@@ -237,6 +235,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private ContentServerService contentServerService;
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	private FlowEventLogProvider flowEventLogProvider;
 
 
 	@Value("${server.contextPath:}")
@@ -3234,6 +3234,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void createOrderDetails(CreateOrderDetailsCommand cmd) {
+
+		User user = UserContext.current().getUser();
 		Integer namespaceId = cmd.getNamespaceId();
 		String ownerType = cmd.getOwnerType();
 		Long ownerId = cmd.getOwnerId();
@@ -3252,7 +3254,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		order = this.pmTaskProvider.createPmTaskOrder(order);
 		Long orderId = order.getId();
 		if(null != cmd.getOrderDetails()){
-			//		创建订单明细
+//			创建订单明细
 			List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
 				PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
 				bean.setNamespaceId(namespaceId);
@@ -3264,6 +3266,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}).collect(Collectors.toList());
 			this.pmTaskProvider.createOrderDetails(details);
 		}
+
+		this.FlowStepCreateOrderDetails(taskId,user.getId(),user.getNickName());
+//		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+//		handler.createOrderDetails(taskId,user.getId(),user.getNickName());
+
 	}
 
 	@Override
@@ -3820,6 +3828,44 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return JSONObject.parseObject(json).getString("text");
 	}
 
+	private void FlowStepCreateOrderDetails(Long taskId, Long operatorId, String operatorName){
+		FlowCase mainFlowCase = this.flowCaseProvider.findFlowCaseByReferId(taskId,"EhPmTasks",20100L);
+		FlowCaseTree flowCaseTrees = flowService.getProcessingFlowCaseTree(mainFlowCase.getId());
+		List<FlowCaseTree> flowCases = flowCaseTrees.getLeafNodes();
+		FlowCase flowCase = flowCases.get(flowCases.size() - 1).getFlowCase();
+		LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+		FlowAutoStepDTO dto = new FlowAutoStepDTO();
+		dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		dto.setEventType(FlowEventType.STEP_MODULE.getCode());
 
+		dto.setFlowCaseId(flowCase.getId());
+		dto.setFlowMainId(flowCase.getFlowMainId());
+		dto.setFlowNodeId(flowCase.getCurrentNodeId());
+		dto.setFlowVersion(flowCase.getFlowVersion());
+		dto.setStepCount(flowCase.getStepCount());
+
+		FlowEventLog log = new FlowEventLog();
+		log.setId(flowEventLogProvider.getNextId());
+		log.setFlowMainId(flowCase.getFlowMainId());
+		log.setFlowVersion(flowCase.getFlowVersion());
+		log.setNamespaceId(flowCase.getNamespaceId());
+		log.setFlowNodeId(flowCase.getCurrentNodeId());
+		log.setFlowCaseId(flowCase.getId());
+		log.setStepCount(flowCase.getStepCount());
+		log.setSubjectId(0L);
+		log.setParentId(0L);
+		log.setFlowUserId(operatorId);
+		log.setFlowUserName(operatorName);
+		log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+		log.setButtonFiredStep(FlowStepType.NO_STEP.getCode());
+		log.setTrackerApplier(1L); // 申请人可以看到此条log，为0则看不到
+		log.setTrackerProcessor(1L);// 处理人可以看到此条log，为0则看不到
+		log.setLogContent(flowCase.getCurrentNode() + "已完成");
+		List<FlowEventLog> logList = new ArrayList<>(1);
+		logList.add(log);
+		dto.setEventLogs(logList);
+
+		flowService.processAutoStep(dto);
+	}
 
 }

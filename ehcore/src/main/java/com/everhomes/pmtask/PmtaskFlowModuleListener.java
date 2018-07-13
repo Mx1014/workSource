@@ -246,9 +246,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 //		企业名称和楼栋门牌
 		if(null != dto.getEnterpriseId()){
 			Organization org = organizationProvider.findOrganizationById(dto.getEnterpriseId());
-			dto.setEnterpriseName(org.getName());
-			Address addr =  addressProvider.findAddressById(org.getAddressId());
-			dto.setEnterpriseAddress(addr.getAddress());
+			if(null != org){
+				dto.setEnterpriseName(org.getName());
+				Address addr =  addressProvider.findAddressById(org.getAddressId());
+				if(null != addr){
+					dto.setEnterpriseAddress(addr.getAddress());
+				}
+
+			}
 		}
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
