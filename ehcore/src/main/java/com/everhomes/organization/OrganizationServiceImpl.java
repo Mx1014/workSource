@@ -7112,6 +7112,14 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByWorkEmail(orgId, workEmail);
+        if (employee == null)
+            return true;
+        return employee.getId().equals(detailId);
+    }
+
+    @Override
     public void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd) {
         OrganizationMember member = organizationProvider.findOrganizationMemberById(cmd.getId());
         member.setContactName(cmd.getContactName());

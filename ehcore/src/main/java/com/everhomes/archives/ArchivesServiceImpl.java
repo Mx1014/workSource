@@ -167,7 +167,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  1.进行校验(例如: 邮箱)
         if (!StringUtils.isEmpty(cmd.getWorkEmail()))
-            if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
+            if (organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getUpdateDetailId(), cmd.getWorkEmail()))
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                         "Duplicate work email");
 
@@ -191,7 +191,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setContactName(employee.getContactName());
         dto.setContactToken(employee.getContactToken());
         //  4-1.编辑则直接更新信息
-        if (TrueOrFalseFlag.fromCode(cmd.getUpdateFlag()) == TrueOrFalseFlag.TRUE) {
+        if (cmd.getDetailId() != null) {
             organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
             return dto;
         }
@@ -825,7 +825,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  1.进行校验(例如: 邮箱)
         if (!StringUtils.isEmpty(cmd.getWorkEmail()))
-            if (organizationProvider.findOrganizationPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getWorkEmail()) != null)
+            if (organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), null, cmd.getWorkEmail()))
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                         "Duplicate work email");
 
@@ -1399,7 +1399,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                         employee.setContactShortToken(itemValue.getFieldValue());
                         break;
                     case ArchivesParameter.WORK_EMAIL:
-                        if (organizationProvider.findOrganizationPersonnelByWorkEmail(employee.getOrganizationId(), itemValue.getFieldValue()) != null)
+                        if (organizationService.verifyPersonnelByWorkEmail(employee.getOrganizationId(), employee.getId(), itemValue.getFieldValue()))
                             throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                                     "Duplicate work email");
                         employee.setWorkEmail(itemValue.getFieldValue());
