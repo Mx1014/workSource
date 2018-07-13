@@ -1126,16 +1126,31 @@ public class UserActivityProviderImpl implements UserActivityProvider {
     public List<User> listNotInUserActivityUsers(Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-        SelectConditionStep<Record1<Long>> uidCond = context
-                .selectDistinct(Tables.EH_USER_ACTIVITIES.UID)
-                .from(Tables.EH_USER_ACTIVITIES)
-                .where(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+        List<String> ids = context
+                .selectDistinct(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER)
+                .from(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
+                .where(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId))
+                .fetchInto(String.class);
 
-        return context.select(Tables.EH_USERS.fields())
+        if (ids.size() == 0) {
+            ids.add("0");
+        }
+
+        List<Long> id1s = new ArrayList<>(ids.size());
+        for (String id : ids) {
+            try {
+                id1s.add(Long.valueOf(id));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return context.select(Tables.EH_USERS.ID, Tables.EH_USERS.NAMESPACE_ID, Tables.EH_USERS.CREATE_TIME)
                 .from(Tables.EH_USERS)
                 .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()))
                 .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull())
-                .and(Tables.EH_USERS.ID.notIn(uidCond))
+                .and(Tables.EH_USERS.ID.notIn(id1s))
                 .fetchInto(User.class);
     }
 
@@ -1149,5 +1164,12 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         }
         EhUserActivitiesDao dao = new EhUserActivitiesDao(cxt.configuration());
         dao.insert(activityList.toArray(new EhUserActivities[0]));
+    }
+
+    @Override
+    public void deleteUserActivity(UserActivity activity) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserActivitiesDao dao = new EhUserActivitiesDao(context.configuration());
+        dao.delete(activity);
     }
 }

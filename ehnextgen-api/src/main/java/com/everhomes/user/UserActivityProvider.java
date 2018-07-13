@@ -123,4 +123,6 @@ public interface UserActivityProvider {
     List<User> listNotInUserActivityUsers(Integer namespaceId);
 
     void addActivities(List<UserActivity> activityList);
+
+    void deleteUserActivity(UserActivity activity);
 }

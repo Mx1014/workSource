@@ -12,6 +12,7 @@ import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.statistics.terminal.*;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhUserActivities;
 import com.everhomes.server.schema.tables.pojos.EhTerminalHourStatistics;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
@@ -175,66 +176,54 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
     @Override
     public PieChart getTerminalAppVersionPieChart(String date, TerminalStatisticsType type) {
-        PieChart pieChart = new PieChart();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<PieChartData> datas = new ArrayList<>();
-        List<TerminalAppVersionStatistics> appVersionstatistics = statTerminalProvider.listTerminalAppVersionStatisticsByDay(date, namespaceId);
-        Map<String, TerminalAppVersionStatistics> appVersionStatisticsMap = new HashMap<>();
-        for (TerminalAppVersionStatistics appVersionStatistic : appVersionstatistics) {
-            appVersionStatisticsMap.put(appVersionStatistic.getAppVersion(), appVersionStatistic);
-        }
-        List<AppVersion> appVersions = statTerminalProvider.listAppVersions(namespaceId);
-        PieChartData otherData = new PieChartData();
-        otherData.setRate(0D);
-        otherData.setAmount(0L);
-        otherData.setName("其他");
-        if (TerminalStatisticsType.ACTIVE_USER == type) {
-            for (AppVersion appVersion : appVersions) {
-                PieChartData data = new PieChartData();
-                data.setName(appVersion.getName());
-                TerminalAppVersionStatistics statistics = appVersionStatisticsMap.get(appVersion.getName());
-                if (null == statistics) {
-                    data.setRate(0d);
-                    data.setAmount(0L);
-                } else {
-                    data.setRate(statistics.getVersionActiveRate().doubleValue());
-                    data.setAmount(statistics.getActiveUserNumber());
-                }
+        List<TerminalAppVersionStatistics> versionStats =
+                statTerminalProvider.listTerminalAppVersionStatisticsByDay(date, namespaceId);
 
-                if (versionNum == datas.size()) {
-                    otherData.setRate(otherData.getRate() + data.getRate());
-                    otherData.setAmount(otherData.getAmount() + data.getAmount());
-                    continue;
+        List<PieChartData> list = new ArrayList<>(versionStats.size());;
+        switch (type) {
+            case ACTIVE_USER: {
+                for (TerminalAppVersionStatistics stat : versionStats) {
+                    PieChartData data = new PieChartData();
+                    data.setName(stat.getAppVersion());
+                    data.setAmount(stat.getCumulativeUserNumber());
+                    data.setRate(stat.getVersionCumulativeRate().doubleValue());
+                    list.add(data);
                 }
-                datas.add(data);
-
             }
-        } else if (TerminalStatisticsType.CUMULATIVE_USER == type) {
-            for (AppVersion appVersion : appVersions) {
-                PieChartData data = new PieChartData();
-                data.setName(appVersion.getName());
-                TerminalAppVersionStatistics statistics = appVersionStatisticsMap.get(appVersion.getName());
-                if (null == statistics) {
-                    data.setRate(0d);
-                    data.setAmount(0L);
-                } else {
-                    data.setRate(statistics.getVersionCumulativeRate().doubleValue());
-                    data.setAmount(statistics.getCumulativeUserNumber());
+            case CUMULATIVE_USER: {
+                for (TerminalAppVersionStatistics stat : versionStats) {
+                    PieChartData data = new PieChartData();
+                    data.setName(stat.getAppVersion());
+                    data.setAmount(stat.getActiveUserNumber());
+                    data.setRate(stat.getVersionActiveRate().doubleValue());
+                    list.add(data);
                 }
-
-                if (versionNum == datas.size()) {
-                    otherData.setRate(otherData.getRate() + data.getRate());
-                    otherData.setAmount(otherData.getAmount() + data.getAmount());
-                    continue;
-                }
-                datas.add(data);
             }
+            default:
+                LOGGER.warn("not supported type: {}", type.getCode());
         }
-        if (versionNum == datas.size()) {
-            datas.add(otherData);
+
+        if (list.size() > versionNum) {
+            list.sort(Comparator.comparingLong(PieChartData::getAmount));
+            List<PieChartData> subList = list.subList(0, versionNum - 1);
+            List<PieChartData> otherList = list.subList(versionNum, list.size() - 1);
+
+            PieChartData otherData = new PieChartData();
+            otherData.setName("其他");
+            otherData.setAmount(otherList.stream().mapToLong(PieChartData::getAmount).sum());
+            otherData.setRate(otherList.stream().mapToDouble(PieChartData::getRate).sum());
+
+            subList.add(otherData);
+            list = subList;
         }
-        pieChart.setData(datas);
-        return pieChart;
+
+        list.sort((o1, o2) -> {
+            Version v1 = Version.fromVersionString(o1.getName());
+            Version v2 = Version.fromVersionString(o2.getName());
+            return Math.toIntExact(v1.getEncodedValue() - v2.getEncodedValue());
+        });
+        return new PieChart(list);
     }
 
     @Override
@@ -242,62 +231,67 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
         new Thread(() -> {
             List<Namespace> namespaces = getNamespaces(namespaceId);
             for (Namespace namespace : namespaces) {
-                // step 1
-                statTerminalProvider.cleanTerminalAppVersionCumulativeByCondition(namespace.getId());
+                try {
+                    // step 1
+                    statTerminalProvider.cleanTerminalAppVersionCumulativeByCondition(namespace.getId());
 
-                // step 2
-                statTerminalProvider.cleanUserActivitiesWithNullAppVersion(namespace.getId());
+                    // step 2
+                    statTerminalProvider.cleanUserActivitiesWithNullAppVersion(namespace.getId());
 
-                // step 3
-                List<User> users = userActivityProvider.listNotInUserActivityUsers(namespace.getId());
+                    // step 3
+                    List<Long> uids = statTerminalProvider.listUserIdByInterval(namespaceId, null, null);
+                    List<User> users = userProvider.listUserByCreateTime(namespace.getId(), null, null, uids);
 
-                for (User user : users) {
-                    UserActivity activity = new UserActivity();
-                    activity.setUid(user.getId());
-                    activity.setImeiNumber(String.valueOf(user.getId()));
-                    activity.setNamespaceId(user.getNamespaceId());
+                    for (User user : users) {
+                        UserActivity activity = new UserActivity();
+                        activity.setUid(user.getId());
+                        activity.setImeiNumber(String.valueOf(user.getId()));
+                        activity.setNamespaceId(user.getNamespaceId());
 
-                    long threeDayMill = 3 * 24 * 60 * 60 * 1000 - 1;
-                    Date date = new Date(user.getCreateTime().getTime());
-                    long time = date.getTime();
-                    Timestamp minTime = new Timestamp(time - threeDayMill);
-                    Timestamp maxTime = new Timestamp(time + threeDayMill);
+                        long threeDayMill = 3 * 24 * 60 * 60 * 1000 - 1;
+                        Date date = new Date(user.getCreateTime().getTime());
+                        long time = date.getTime();
+                        Timestamp minTime = new Timestamp(time - threeDayMill);
+                        Timestamp maxTime = new Timestamp(time + threeDayMill);
 
-                    List<UserActivity> userActivities = userActivityProvider.listUserActivetys(new ListingLocator(), 1, (locator, query) -> {
-                        query.addConditions(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespace.getId()));
-                        query.addConditions(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
-                        return query;
-                    });
+                        List<UserActivity> userActivities = userActivityProvider.listUserActivetys(new ListingLocator(), 1, (locator, query) -> {
+                            query.addConditions(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespace.getId()));
+                            query.addConditions(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
+                            return query;
+                        });
 
-                    String appVersion = "5.0.0";
-                    if (userActivities.size() > 0) {
-                        appVersion = userActivities.get(0).getAppVersionName();
+                        String appVersion = "5.0.0";
+                        if (userActivities.size() > 0) {
+                            appVersion = userActivities.get(0).getAppVersionName();
+                        }
+
+                        activity.setAppVersionName(appVersion);
+                        activity.setCreateTime(user.getCreateTime());
+                        activity.setActivityType(ActivityType.BORDER_REGISTER.getCode());
+
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("sync user to userActivity namespaceId = {}, userId = {}", namespace.getId(), user.getId());
+                        }
+
+                        userActivityProvider.addActivity(activity, activity.getUid());
+
+                        TerminalAppVersionActives appVersionActive = statTerminalProvider
+                                .getTerminalAppVersionActive(null, null, activity.getImeiNumber(), namespace.getId());
+                        if (appVersionActive == null) {
+                            appVersionActive = new TerminalAppVersionActives();
+                            appVersionActive.setDate(user.getCreateTime().toLocalDateTime().format(FORMATTER));
+                            appVersionActive.setAppVersion(activity.getAppVersionName());
+                            appVersionActive.setImeiNumber(activity.getImeiNumber());
+                            appVersionActive.setNamespaceId(namespace.getId());
+                            appVersionActive.setAppVersionRealm(activity.getVersionRealm());
+                            statTerminalProvider.createTerminalAppVersionActives(appVersionActive);
+                        }
                     }
-
-                    activity.setAppVersionName(appVersion);
-                    activity.setCreateTime(user.getCreateTime());
-                    activity.setActivityType(ActivityType.BORDER_REGISTER.getCode());
-
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("sync user to userActivity namespaceId = {}, userId = {}", namespace.getId(), user.getId());
-                    }
-
-                    userActivityProvider.addActivity(activity, activity.getUid());
-
-                    TerminalAppVersionActives appVersionActive = statTerminalProvider
-                            .getTerminalAppVersionActive(null, null, activity.getImeiNumber(), namespace.getId());
-                    if (appVersionActive == null) {
-                        appVersionActive = new TerminalAppVersionActives();
-                        appVersionActive.setDate(user.getCreateTime().toLocalDateTime().format(FORMATTER));
-                        appVersionActive.setAppVersion(activity.getAppVersionName());
-                        appVersionActive.setImeiNumber(activity.getImeiNumber());
-                        appVersionActive.setNamespaceId(namespace.getId());
-                        appVersionActive.setAppVersionRealm(activity.getVersionRealm());
-                        statTerminalProvider.createTerminalAppVersionActives(appVersionActive);
-                    }
+                } catch (Exception e) {
+                    LOGGER.error("sync user error ns = " + namespace.getId(), e);
                 }
             }
-        }).start();
+        }, "term-user-syncTask-0").start();
     }
 
     @Override
@@ -602,7 +596,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
         dayStat.setStartNumber(startNumber);
 
         long activeNumber = hourStatistics.stream().mapToLong(TerminalHourStatistics::getActiveUserNumber).sum();
-        dayStat.setAverageActiveUserNumber(activeNumber/hourStatistics.size());
+        dayStat.setAverageActiveUserNumber(activeNumber / hourStatistics.size());
 
         dayStat.setActiveChangeRate(BigDecimal.ZERO);
         dayStat.setCumulativeChangeRate(BigDecimal.ZERO);
@@ -650,12 +644,10 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
         final LocalDateTime aWeekAgo = date.minusWeeks(1).atTime(LocalTime.MAX);
 
         Map<String, Integer> map = statTerminalProvider.statisticalByInterval(namespaceId, aWeekAgo, endOfDay);
-        // 这次查询的是虽然是新用户，但是没有记录在 userActivity 表里的用户，用于加在活跃用户和启动用户的结果里
         dayStat.setSevenActiveUserNumber(map.get("activeUserNumber").longValue());
 
         LocalDateTime aMonthAgo = date.minusMonths(1).atTime(LocalTime.MAX);
         map = statTerminalProvider.statisticalByInterval(namespaceId, aMonthAgo, endOfDay);
-        // 这次查询的是虽然是新用户，但是没有记录在 userActivity 表里的用户，用于加在活跃用户和启动用户的结果里
         dayStat.setThirtyActiveUserNumber(map.get("activeUserNumber").longValue());
 
         statTerminalProvider.createTerminalDayStatistics(dayStat);
@@ -683,7 +675,6 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
             // 时段累计日活
             Map<String, Integer> dayMap = statTerminalProvider.statisticalByInterval(namespaceId, startOfDay, dateTime.plusHours(1));
-            // 这次查询的是虽然是新用户，但是没有记录在 userActivity 表里的用户，用于加在活跃用户和启动用户的结果里
             stat.setCumulativeActiveUserNumber(dayMap.get("activeUserNumber").longValue());
 
             // 总用户数
@@ -736,6 +727,23 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             activityList.add(activity);
         }
         userActivityProvider.addActivities(activityList);
+
+        ListingLocator locator = new ListingLocator();
+        do {
+            List<UserActivity> activities = userActivityProvider.listUserActivetys(locator, 1000, (locator1, query) -> {
+                EhUserActivities t = Tables.EH_USER_ACTIVITIES;
+                query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+                if (uids.size() > 0) {
+                    query.addConditions(t.UID.notIn(uids));
+                }
+                query.addConditions(t.CREATE_TIME.between(Timestamp.valueOf(startOfDay), Timestamp.valueOf(endOfDay)));
+                return query;
+            });
+
+            for (UserActivity activity : activities) {
+                userActivityProvider.deleteUserActivity(activity);
+            }
+        } while (locator.getAnchor() != null);
     }
 
     interface Processor<T> {

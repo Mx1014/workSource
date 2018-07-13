@@ -3,6 +3,7 @@ package com.everhomes.statistics.terminal;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -352,17 +353,34 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
 
         com.everhomes.server.schema.tables.EhUsers u = Tables.EH_USERS;
         com.everhomes.server.schema.tables.EhTerminalAppVersionActives t = Tables.EH_TERMINAL_APP_VERSION_ACTIVES;
+        com.everhomes.server.schema.tables.EhUserActivities at = Tables.EH_USER_ACTIVITIES;
 
-        List<Long> ids = context.select(u.ID).from(u).where(u.NAMESPACE_ID.eq(namespaceId)).fetchInto(Long.class);
+        List<Long> ids = context.select(u.ID).from(u)
+                .where(u.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                .fetchInto(Long.class);
+
+        if (ids.size() == 0) {
+            ids.add(0L);
+        }
+
         List<String> idStrList = ids.stream().map(Object::toString).collect(Collectors.toList());
-
         List<Long> id1s = context.select(t.ID).from(t)
                 .where(t.NAMESPACE_ID.eq(namespaceId))
                 .and(t.IMEI_NUMBER.notIn(idStrList))
                 .fetchInto(Long.class);
 
+        List<Long> atids = context.select(at.ID).from(at)
+                .where(at.NAMESPACE_ID.eq(namespaceId))
+                .and(at.UID.notIn(ids))
+                .fetchInto(Long.class);
+
         for (Long id1 : id1s) {
             context.delete(t).where(t.ID.eq(id1)).execute();
+        }
+
+        for (Long id1 : atids) {
+            context.delete(at).where(at.ID.eq(id1)).execute();
         }
     }
 
