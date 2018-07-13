@@ -94,4 +94,6 @@ public interface AddressProvider {
 	void deleteAddressArrangement(Long id);
 	AddressArrangement findAddressArrangementById(Long id);
 	AddressArrangement findActiveAddressArrangementByTargetId(Long addressId);
+	String findApartmentNameById(long addressId);
+	Byte findArrangementOperationTypeByAddressId(Long addressId);
 }

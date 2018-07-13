@@ -22,17 +22,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -2580,9 +2569,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         Long organizationId = findOrganizationByCommunity(community);
         CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
 
-//		response.setBuildingName(address.getBuildingName());
-//		response.setApartmentName(address.getApartmentName());
-//		response.setAreaSize(address.getAreaSize());
         response = ConvertHelper.convert(address, GetApartmentDetailResponse.class);
         if (communityAddressMapping != null) {
             response.setStatus(communityAddressMapping.getLivingStatus());
@@ -2606,7 +2592,51 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             }
         }
         response.setCommunityType(community.getCommunityType());
+        
+        Byte operationType = addressProvider.findArrangementOperationTypeByAddressId(cmd.getId());
+        response.setArrangementOperationType(operationType);
+        
+        Contract latestEndDateContract = findLatestEndDateContract(cmd.getId());
+        response.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
+        
         return response;
+    }
+    
+    //寻找与房源关联的有效合同中，结束日期最晚的合同
+    private Contract findLatestEndDateContract(Long addressId){
+    	Contract latestEndDateContract = null;
+        List<Contract> contracts = contractProvider.listContractsByAddressId(addressId);
+        if (contracts!=null && contracts.size()>0) {
+        	Iterator<Contract> iterator = contracts.iterator();
+            while (iterator.hasNext()) {
+    			Contract contract = (Contract) iterator.next();
+    			if (ContractStatus.INACTIVE.equals(ContractStatus.fromStatus(contract.getStatus())) 
+            			|| ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))
+            			|| ContractStatus.EXPIRED.equals(ContractStatus.fromStatus(contract.getStatus()))
+            			|| ContractStatus.HISTORY.equals(ContractStatus.fromStatus(contract.getStatus()))
+            			|| ContractStatus.INVALID.equals(ContractStatus.fromStatus(contract.getStatus()))
+            			|| ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+            		contracts.remove(contract);
+    			}
+            }
+		}
+        if (contracts!=null && contracts.size()>0){
+        	//合同按结束日期降序排列
+            contracts.sort(new Comparator<Contract>() {
+    			@Override
+    			public int compare(Contract arg0, Contract arg1) {
+    				if (arg0.getContractEndDate().after(arg1.getContractEndDate())) {
+    					return -1;
+    				}else if (arg0.getContractEndDate().before(arg1.getContractEndDate())) {
+    					return 1;
+    				}else {
+    					return 0;
+    				}
+    			}
+    		});
+            latestEndDateContract = contracts.get(0);
+        }
+        return latestEndDateContract;
     }
 
     private OrganizationOwnerDTO convert(OrganizationOwnerAddress organizationOwnerAddress) {
@@ -2831,7 +2861,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	private PropFamilyDTO convertToPropFamilyDTO(ListPropApartmentsByKeywordCommand cmd, ApartmentDTO apartmentDTO, Map<Long, Family> familyMap,
 			Map<Long, Integer> ownerCountMap, Map<Long, CommunityAddressMapping> communityAddressMappingMap, Map<Long, Byte> billOwedMap) {
 		Long addressId = apartmentDTO.getAddressId();
-		
 		PropFamilyDTO dto = new PropFamilyDTO();
 		dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
 		dto.setName(apartmentDTO.getApartmentName());
@@ -2848,7 +2877,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		setLivingStatus(dto, communityAddressMappingMap, apartmentDTO.getLivingStatus());
 		//设置公寓是否欠费
 		setOwedFlag(dto, billOwedMap);
-		
+		//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
+		Contract latestEndDateContract = findLatestEndDateContract(addressId);
+		dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
 		return dto;
 	}
 

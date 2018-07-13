@@ -2,6 +2,7 @@
 package com.everhomes.address;
 
 import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.*;
@@ -9,6 +10,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.core.AppConfig;
@@ -33,6 +35,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
@@ -49,6 +52,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
@@ -56,7 +60,9 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.ListApartmentEnterpriseCustomersCommand;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.family.FamilyDTO;
@@ -66,6 +72,7 @@ import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
@@ -197,6 +204,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Autowired
     private FieldService fieldService;
+    
+    @Autowired
+	private LocaleTemplateService localeTemplateService;
     
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -2744,7 +2754,27 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		dto.setDateBegin(arrangement.getDateBegin().getTime());
 		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
 			List<ArrangementApartmentDTO> apartments = generateSplitArrangementApartments(arrangement);
-			dto.setApartments(apartments);		
+			dto.setApartments(apartments);
+			//TODO 需要显示的是所有房源关联的企业客户，个人客户，和合同信息
+			ListApartmentEnterpriseCustomersCommand listApartmentEnterpriseCustomersCommand= new ListApartmentEnterpriseCustomersCommand();
+			listApartmentEnterpriseCustomersCommand.setAddressId(cmd.getAddressId());
+			List<EnterpriseCustomerDTO> enterpriseCustomers = this.listApartmentEnterpriseCustomers(listApartmentEnterpriseCustomersCommand);
+			dto.setEnterpriseCustomers(enterpriseCustomers);
+			
+			ListOrganizationOwnersByAddressCommand listOrganizationOwnersByAddressCommand = new ListOrganizationOwnersByAddressCommand();
+			listOrganizationOwnersByAddressCommand.setAddressId(cmd.getAddressId());
+			listOrganizationOwnersByAddressCommand.setOrganizationId(cmd.getOrganizationId());
+			List<OrganizationOwnerDTO> individualCustomers = propertyMgrService.listOrganizationOwnersByAddress(listOrganizationOwnersByAddressCommand);
+			dto.setIndividualCustomers(individualCustomers);
+			
+			
+			List<Contract> contracts = contractProvider.listContractsByAddressId(cmd.getAddressId());
+			List<ContractDTO> contractDTOs = contracts.stream().map(contract -> {
+				ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
+				return contractDTO;
+			}).collect(Collectors.toList());
+			dto.setContracts(contractDTOs);
+			//TODO
 		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
 			List<ArrangementApartmentDTO> apartments = generateMergeArrangementApartments(arrangement);
 			dto.setApartments(apartments);	
@@ -2812,6 +2842,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		addressProvider.deleteAddressArrangement(cmd.getId());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<HistoryApartmentDTO> getHistoryApartment(GetHistoryApartmentCommand cmd) {
 		if (cmd.getAddressId() == null) {
@@ -2820,14 +2851,43 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		}
 		
 		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByTargetId(cmd.getAddressId());
+		
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 		List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
 		String remark = null;
-		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
-			//TODO 需要获取特定的语句：101被拆分成101A,101B
-		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
-			//TODO 需要获取特定的语句：101,102,103合并成101
+		HashMap<String, String> data = new HashMap<>();
+		StringBuffer targetIdsStringBuffer= new StringBuffer();
+		StringBuffer originalIdsStringBuffer = new StringBuffer();
+		for (String addressId : targetIds) {
+			String apartmentName = addressProvider.findApartmentNameById(Long.parseLong(addressId));
+			targetIdsStringBuffer.append(apartmentName).append(",");
 		}
+		for (String addressId : originalIds) {
+			String apartmentName = addressProvider.findApartmentNameById(Long.parseLong(addressId));
+			originalIdsStringBuffer.append(apartmentName).append(",");
+		}
+		String targetIdsString = targetIdsStringBuffer.toString().length() > 0 
+									? targetIdsStringBuffer.toString().substring(0,targetIdsStringBuffer.toString().length() -1) 
+									: targetIdsStringBuffer.toString();
+		String originalIdsString = originalIdsStringBuffer.toString().length() > 0 
+									? originalIdsStringBuffer.toString().substring(0,originalIdsStringBuffer.toString().length() -1) 
+									: originalIdsStringBuffer.toString();
+		data.put("targetIds", targetIdsString);
+		data.put("originalIds", originalIdsString);
+		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+			//需要获取特定的语句：如101被拆分成101A,101B
+            remark = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE,
+            													AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_SPLIT , 
+            													UserContext.current().getUser().getLocale(), 
+            													data, "");
+		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+			//需要获取特定的语句：如101,102,103被合并成101
+			remark = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE, 
+																AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_MERGE , 
+																UserContext.current().getUser().getLocale(), 
+																data, "");
+		}
+		
 		List<HistoryApartmentDTO> results = new ArrayList<>();
 		for (String addressId : originalIds) {
 			Address address = addressProvider.findAddressById(Long.parseLong(addressId));

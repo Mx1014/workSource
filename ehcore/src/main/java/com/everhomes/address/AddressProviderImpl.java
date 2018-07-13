@@ -893,4 +893,26 @@ public class AddressProviderImpl implements AddressProvider {
 					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
 					.fetchOneInto(AddressArrangement.class);
 	}
+
+	@Override
+	public String findApartmentNameById(long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        String apartmentName = context.select(Tables.EH_ADDRESSES.APARTMENT_NAME)
+					                .from(Tables.EH_ADDRESSES)
+					                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+					                .fetchOne(Tables.EH_ADDRESSES.APARTMENT_NAME);
+		return apartmentName;
+	}
+
+	@Override
+	public Byte findArrangementOperationTypeByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Byte operationType = context.select(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_TYPE)
+					                .from(Tables.EH_ADDRESS_ARRANGEMENT)
+					                .where(Tables.EH_ADDRESS_ARRANGEMENT.ADDRESS_ID.eq(addressId))
+					                .fetchOne(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_TYPE);
+		return operationType;
+	}
+	
+	
 }

@@ -26,6 +26,15 @@ public class PropFamilyDTO {
     private String enterpriseName;
     private Double areaSize;
     private Byte reservationInvolved;
+    private Long relatedContractEndDate;
+    
+	public Long getRelatedContractEndDate() {
+		return relatedContractEndDate;
+	}
+
+	public void setRelatedContractEndDate(Long relatedContractEndDate) {
+		this.relatedContractEndDate = relatedContractEndDate;
+	}
 
 	public Byte getReservationInvolved() {
 		return reservationInvolved;
@@ -56,7 +65,6 @@ public class PropFamilyDTO {
 		this.owed = owed;
 	}
 
-
 	public Long getId() {
         return id;
     }
@@ -73,7 +81,6 @@ public class PropFamilyDTO {
         this.name = name;
     }
 
-  
     public Long getMemberCount() {
 		return memberCount;
 	}
@@ -89,8 +96,6 @@ public class PropFamilyDTO {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-
-
 
 	public Long getAddressId() {
 		return addressId;
@@ -108,8 +113,6 @@ public class PropFamilyDTO {
 		this.livingStatus = livingStatus;
 	}
 	
-	
-
 	public String getEnterpriseName() {
 		return enterpriseName;
 	}
