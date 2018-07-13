@@ -1680,6 +1680,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }else{
                 organization.setPmFlag(OrganizationStatus.UNTREATED.getCode());
+                organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
             }
             if(cmd.getServiceSupportFlag() != null){
                 //封装是否是服务商标志
