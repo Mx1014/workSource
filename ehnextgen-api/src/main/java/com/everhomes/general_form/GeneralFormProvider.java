@@ -77,9 +77,9 @@ public interface GeneralFormProvider {
      */
     List<GeneralFormVal> getGeneralFormVal(Integer namespaceId, Long sourceId);
 
-    Long saveGeneralFormValsRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId);
+    Long saveGeneralFormValRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId);
 
-    GeneralFormValsSave getGeneralFormValsGroup(Integer namespaceId, Long sourceId);
+    GeneralFormValRequest getGeneralFormValsGroup(Integer namespaceId, Long sourceId);
 
     List<GeneralFormVal> listGeneralFormItemByIds(List<Long> ids);
 

@@ -4,21 +4,17 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.rest.general_approval.SearchGeneralFormItem;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhGeneralFormValsDao;
-import com.everhomes.server.schema.tables.daos.EhGeneralFormValsSaveDao;
-import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhGeneralFormValRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -27,7 +23,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import org.jooq.DSLContext;
-import org.jooq.Select;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -342,10 +336,10 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public Long saveGeneralFormValsRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId){
+	public Long saveGeneralFormValRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhGeneralFormValsSave.class));
-		GeneralFormValsSave generalFormValsSave = new GeneralFormValsSave();
+				.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
+		EhGeneralFormValRequests generalFormValsSave = new EhGeneralFormValRequests();
 		generalFormValsSave.setId(id);
 		generalFormValsSave.setOwnerId(ownerId);
 		generalFormValsSave.setOwnerType(ownerType);
@@ -354,24 +348,24 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		generalFormValsSave.setSourceType(sourceType);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		EhGeneralFormValsSaveDao dao = new EhGeneralFormValsSaveDao(context.configuration());
+		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
 
 		dao.insert(generalFormValsSave);
 
-		DaoHelper.publishDaoAction(DaoAction.CREATE, GeneralFormValsSave.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, GeneralFormValRequest.class, null);
 
 		return id;
 	}
 
 	@Override
-	public GeneralFormValsSave getGeneralFormValsGroup(Integer namespaceId, Long sourceId){
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValsSave.class));
+	public GeneralFormValRequest getGeneralFormValsGroup(Integer namespaceId, Long sourceId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
 
-		SelectQuery<EhGeneralFormValsSaveRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS_SAVE);
-		query.addConditions(Tables.EH_GENERAL_FORM_VALS_SAVE.SOURCE_ID.eq(sourceId));
-		query.addConditions(Tables.EH_GENERAL_FORM_VALS_SAVE.NAMESPACE_ID.eq(namespaceId));
-		return (GeneralFormValsSave)query.fetch().map(r -> {
-			return ConvertHelper.convert(r, GeneralFormValsSave.class);
+		SelectQuery<EhGeneralFormValRequestsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VAL_REQUESTS);
+		query.addConditions(Tables.EH_GENERAL_FORM_VAL_REQUESTS.SOURCE_ID.eq(sourceId));
+		query.addConditions(Tables.EH_GENERAL_FORM_VAL_REQUESTS.NAMESPACE_ID.eq(namespaceId));
+		return (GeneralFormValRequest)query.fetch().map(r -> {
+			return ConvertHelper.convert(r, GeneralFormValRequest.class);
 		});
 	}
 
