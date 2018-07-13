@@ -5,22 +5,33 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>namespaceId : namespaceId</li>
  *     <li>sourcId: 需要更新启用表单的审批项id</li>
  *     <li>formOriginId: 启用的表单formOriginId</li>
  *     <li>formVersion: 启用的表单的formVersion</li>
  * </ul>
  */
-public class updateInvitationApprovalActiveFormCommond {
-    private Long sourcId;
+public class UpdateInvitationApprovalActiveFormCommond {
+
+    private Integer namespaceId;
+    private Long sourceId;
     private Long formOriginId;
     private Long formVersion;
 
-    public Long getSourcId() {
-        return sourcId;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setSourcId(Long sourcId) {
-        this.sourcId = sourcId;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
     }
 
     public Long getFormOriginId() {
@@ -43,4 +54,6 @@ public class updateInvitationApprovalActiveFormCommond {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
 }
