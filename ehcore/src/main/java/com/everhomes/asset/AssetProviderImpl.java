@@ -5510,7 +5510,7 @@ public class AssetProviderImpl implements AssetProvider {
         return list;
     }
     
-    public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmdForEnt cmd) {
+    public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         ListBillDetailVO vo = new ListBillDetailVO();
@@ -5577,139 +5577,12 @@ public class AssetProviderImpl implements AssetProvider {
         return order;
     }
     
-    public List<PaymentOrderBillDTO> listBillsForOrderEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize,ListPaymentBillCmdForEnt cmd) {
-        //卸货
-        Long ownerId = cmd.getOwnerId();
-        String startPayTime = cmd.getStartPayTime();
-        String endPayTime = cmd.getEndPayTime();
-        Integer paymentType = 1;//2代表对公转账
-        //卸货结束
-        List<PaymentOrderBillDTO> list = new ArrayList<>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-        EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
-        SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
-        		t2.BILL_ID, t3.PAYMENT_ORDER_ID, t3.CREATE_TIME, t4.UID, t4.PAYMENT_TYPE);
-        query.addFrom(t);
-        query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-        query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
-        query.addConditions(t.OWNER_ID.eq(ownerId));
-        query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
-        //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
-        Byte status = new Byte("1");
-        query.addConditions(t.SWITCH.eq(status));
-        if(!org.springframework.util.StringUtils.isEmpty(startPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(endPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(paymentType)){
-        	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
-            //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
-            //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
-            if(paymentType.equals(0)) {//微信
-            	query.addConditions(t4.PAYMENT_TYPE.eq("1")
-            			.or(t4.PAYMENT_TYPE.eq("7"))
-            			.or(t4.PAYMENT_TYPE.eq("9"))
-            			.or(t4.PAYMENT_TYPE.eq("12"))
-            			.or(t4.PAYMENT_TYPE.eq("21"))
-            	);
-            }else if(paymentType.equals(1)) {//支付宝
-            	query.addConditions(t4.PAYMENT_TYPE.eq("8")
-            			.or(t4.PAYMENT_TYPE.eq("10"))
-            			.or(t4.PAYMENT_TYPE.eq("13"))
-            	);
-            }else if(paymentType.equals(2)){//对公转账
-            	query.addConditions(t4.PAYMENT_TYPE.eq("2"));
-            }
-        }
-        query.addConditions(t2.STATUS.eq(1));//EhAssetPaymentOrderBills中的status1代表支付成功
-        query.addOrderBy(t3.CREATE_TIME.desc());
-        query.addLimit(pageOffSet,pageSize+1);
-        query.fetch().map(r -> {
-        	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
-        	dto.setBillId(r.getValue(t.ID));//账单ID
-        	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
-        	ListBillDetailVO listBillDetailVO = listBillDetailForPaymentV2(dto.getBillId());
-        	dto.setDateStrBegin(listBillDetailVO.getDateStrBegin());
-        	dto.setDateStrEnd(listBillDetailVO.getDateStrEnd());
-        	dto.setTargetName(listBillDetailVO.getTargetName());
-        	dto.setTargetType(listBillDetailVO.getTargetType());
-        	dto.setAmountReceivable(listBillDetailVO.getAmountReceivable());
-        	dto.setAmountReceived(listBillDetailVO.getAmountReceived());
-        	dto.setAmountExemption(listBillDetailVO.getAmoutExemption());
-    		dto.setAmountSupplement(listBillDetailVO.getAmountSupplement());
-    		dto.setBuildingName(listBillDetailVO.getBuildingName());
-    		dto.setApartmentName(listBillDetailVO.getApartmentName());
-    		dto.setBillGroupName(listBillDetailVO.getBillGroupName());
-    		dto.setAddresses(listBillDetailVO.getAddresses());
-    		if(listBillDetailVO.getBillGroupDTO() != null) {
-    			dto.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
-    			dto.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
-    		}
-            SimpleDateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            //缴费时间
-            String payTime = r.getValue(t3.CREATE_TIME).toString();
-			try {
-				payTime = yyyyMMddHHmm.format(yyyyMMddHHmm.parse(payTime));
-			}catch (Exception e){
-				payTime = null;
-                LOGGER.error(e.toString());
-            }
-            dto.setPayTime(payTime);
-            //获得付款人员（缴费人名称、缴费人电话）
-            User userById = userProvider.findUserById(r.getValue(t4.UID));
-            if(userById != null) {
-            	dto.setPayerName(userById.getNickName());
-                UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
-                if(userIdentifier != null) {
-                	dto.setPayerTel(userIdentifier.getIdentifierToken());
-                }
-            }
-            try {
-            	Integer queryPaymentType = Integer.parseInt(r.getValue(t4.PAYMENT_TYPE));
-                dto.setPaymentType(convertPaymentType(queryPaymentType));//支付方式
-            }catch(Exception e){
-            	LOGGER.debug("Integer.parseInt, paymentType={}, Exception={}", r.getValue(t4.PAYMENT_TYPE), e);
-            }
-            dto.setPaymentStatus(1);//1：已完成，0：订单异常
-            list.add(dto);
-            return null;
-        });
-        //调用支付提供的接口查询订单信息
-        List<Long> payOrderIds = new ArrayList<>();
-        for(PaymentOrderBillDTO dto : list) {
-        	payOrderIds.add(Long.parseLong(dto.getPaymentOrderNum()));
-        }
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listPayOrderByIds(request), cmd={}", payOrderIds);
-        }
-        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(payOrderIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listPayOrderByIds(response), response={}", GsonUtil.toJson(payOrderDTOs));
-        }
-        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
-        	for(int i = 0;i < payOrderDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
-            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
-            			PaymentOrderBillDTO dto = list.get(j);
-            			OrderDTO orderDTO = payOrderDTOs.get(i);
-            			//dto.setAmount(AmountUtil.centToUnit(LongUtil.convert(orderDTO.getAmount())));
-            			if(orderDTO.getPaymentType() != null) {
-            				dto.setPaymentType(convertPaymentType(orderDTO.getPaymentType()));//支付方式
-            			}
-            			list.set(j, dto);
-            		}
-            	}
-            }
-        }
-        return list;
+    public List<PaymentOrderBillDTO> listBillsForOrderEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize,ListPaymentBillCmd cmd) {
+    	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
+        //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+        //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
+    	cmd.setPaymentType(2);//2代表对公转账
+        return listBillsForOrder(currentNamespaceId, pageOffSet, pageSize, cmd);
     }
 
 	public List<ListBillGroupsDTO> listBillGroupsForEnt(Long ownerId, String ownerType) {

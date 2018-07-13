@@ -1501,9 +1501,9 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * <b>URL: /asset/listPaymentBillForEnt</b>
      */
     @RequestMapping(value = "listPaymentBillForEnt")
-    @RestReturn(ListPaymentBillRespForEnt.class)
-    public RestResponse listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd, HttpServletRequest request) throws Exception {
-        ListPaymentBillRespForEnt result = assetService.listPaymentBillForEnt(cmd);
+    @RestReturn(ListPaymentBillResp.class)
+    public RestResponse listPaymentBillForEnt(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+        ListPaymentBillResp result = assetService.listPaymentBillForEnt(cmd);
         RestResponse response = new RestResponse(result);
         return response;
     }
@@ -1513,7 +1513,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * <b>URL: /asset/exportOrdersForEnt</b>
      */
     @RequestMapping("exportOrdersForEnt")
-    public HttpServletResponse exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response) {
+    public HttpServletResponse exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response) {
         assetService.exportOrdersForEnt(cmd,response);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorDescription("OK");

@@ -220,11 +220,11 @@ public interface AssetService {
     
     void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
     
-    void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response);
+    void exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response);
     
     public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd);
     
-    ListPaymentBillRespForEnt listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd);
+    ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
 	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
     

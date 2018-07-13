@@ -4937,12 +4937,12 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
 
-	public void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd, HttpServletResponse response) {
+	public void exportOrdersForEnt(ListPaymentBillCmd cmd, HttpServletResponse response) {
 
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(Long.parseLong("5000"));
         }
-        ListPaymentBillRespForEnt result;
+        ListPaymentBillResp result;
 		try {
 			result = listPaymentBillForEnt(cmd);
 			List<PaymentOrderBillDTO> dtos = result.getPaymentOrderBillDTOs();
@@ -5017,10 +5017,10 @@ public class AssetServiceImpl implements AssetService {
     
 	}
 
-	public ListPaymentBillRespForEnt listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd) {
+	public ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd) {
 		//权限校验
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getTargetId(), PrivilegeConstants.ASSET_DEAL_VIEW, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, cmd.getOwnerId());
-        ListPaymentBillRespForEnt response = new ListPaymentBillRespForEnt();
+        ListPaymentBillResp response = new ListPaymentBillResp();
         //由于目前支付那边没有办法判断支付异常的情况，但是前端的订单状态查询条件大师说保留，所以如果查询订单异常默认返回空
         if(cmd.getPaymentStatus() != null && cmd.getPaymentStatus().equals(0)) {//订单状态：1：已完成，0：订单异常
         	response.setPaymentOrderBillDTOs(new ArrayList<PaymentOrderBillDTO>());
@@ -5179,4 +5179,5 @@ public class AssetServiceImpl implements AssetService {
         ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,dataList);
 	}
+
 }
