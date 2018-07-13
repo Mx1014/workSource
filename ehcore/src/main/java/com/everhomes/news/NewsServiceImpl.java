@@ -1473,7 +1473,8 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public void setNewsLikeFlagByScene(SetNewsLikeFlagBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
+		//TODO，标准版不用校验场景了
+		//getNamespaceFromSceneToken(userId, cmd.getSceneToken());
 		setNewsLikeFlag(userId, cmd.getNewsToken());
 	}
 
