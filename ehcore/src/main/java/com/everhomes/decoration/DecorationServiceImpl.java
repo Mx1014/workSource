@@ -470,7 +470,7 @@ public class DecorationServiceImpl implements  DecorationService {
             locator.setAnchor(cmd.getPageAnchor());
         }
         List<DecorationRequest> requests =  this.decorationProvider.queryUserRelateRequests(UserContext.getCurrentNamespaceId(),
-                cmd.getConmmunityId(),cmd.getPhone(),pageSize+1,locator);
+                cmd.getCommunityId(),cmd.getPhone(),pageSize+1,locator);
         if (requests == null || requests.size() == 0)
             return null;
         if (requests.size()>pageSize){

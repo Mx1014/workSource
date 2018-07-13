@@ -12,7 +12,7 @@ package com.everhomes.rest.decoration;
 public class ListUserRequestsCommand {
 
     private Long namespaceId;
-    private Long conmmunityId;
+    private Long communityId;
     private String phone;
     private Long pageAnchor;
     private Integer pageSize;
@@ -41,12 +41,12 @@ public class ListUserRequestsCommand {
         this.pageSize = pageSize;
     }
 
-    public Long getConmmunityId() {
-        return conmmunityId;
+    public Long getCommunityId() {
+        return communityId;
     }
 
-    public void setConmmunityId(Long conmmunityId) {
-        this.conmmunityId = conmmunityId;
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public String getPhone() {
