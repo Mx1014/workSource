@@ -11,13 +11,13 @@ import java.util.List;
  */
 /**
  *<ul>
- * <li>listBillsDTOS: 已出账单的集合，参考{@link ListBillsDTOForEnt}</li>
+ * <li>listBillsDTOS: 已出账单的集合，参考{@link ListBillsDTO}</li>
  * <li>nextPageAnchor: 下一次锚点</li>
  *</ul>
  */
 public class ListBillsResponseForEnt {
-    @ItemType(ListBillsDTOForEnt.class)
-    private List<ListBillsDTOForEnt> listBillsDTOS;
+    @ItemType(ListBillsDTO.class)
+    private List<ListBillsDTO> listBillsDTOS;
     private Long nextPageAnchor;
 
     public ListBillsResponseForEnt() {
@@ -36,11 +36,11 @@ public class ListBillsResponseForEnt {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-	public List<ListBillsDTOForEnt> getListBillsDTOS() {
+	public List<ListBillsDTO> getListBillsDTOS() {
 		return listBillsDTOS;
 	}
 
-	public void setListBillsDTOS(List<ListBillsDTOForEnt> listBillsDTOS) {
+	public void setListBillsDTOS(List<ListBillsDTO> listBillsDTOS) {
 		this.listBillsDTOS = listBillsDTOS;
 	}
     

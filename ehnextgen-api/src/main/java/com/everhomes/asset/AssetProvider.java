@@ -381,7 +381,7 @@ public interface AssetProvider {
     
     String getProjectNameByBillID(Long billId);
     
-    List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd);
+    List<ListBillsDTO> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd);
     
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmdForEnt cmd);
     

@@ -5432,7 +5432,7 @@ public class AssetProviderImpl implements AssetProvider {
 		return projectName;
 	}
 	
-	public List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd) {
+	public List<ListBillsDTO> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd) {
         //卸货
         Long ownerId = cmd.getOwnerId();
         String ownerType = cmd.getOwnerType();
@@ -5445,7 +5445,7 @@ public class AssetProviderImpl implements AssetProvider {
         String dateStrEnd = cmd.getDateStrEnd();
         Byte status = 1;//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
         //卸货结束
-        List<ListBillsDTOForEnt> list = new ArrayList<>();
+        List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
@@ -5481,7 +5481,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addOrderBy(t.DATE_STR_BEGIN.desc());
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
-        	ListBillsDTOForEnt dto = new ListBillsDTOForEnt();
+        	ListBillsDTO dto = new ListBillsDTO();
         	dto.setDateStr(r.getDateStr());
         	dto.setDateStrBegin(r.getDateStrBegin());
         	dto.setDateStrEnd(r.getDateStrEnd());

@@ -353,7 +353,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         return list;
     }
     
-    public List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId,ListBillsResponseForEnt response, ListBillsCommandForEnt cmd) {
+    public List<ListBillsDTO> listBillsForEnt(Integer currentNamespaceId,ListBillsResponseForEnt response, ListBillsCommandForEnt cmd) {
         //修改传递参数为一个对象，卸货
         Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
@@ -365,7 +365,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             pageSize = 20;
         }
         Integer pageOffSet = pageAnchor.intValue();
-        List<ListBillsDTOForEnt> list = assetProvider.listBillsForEnt(currentNamespaceId,pageOffSet,pageSize, cmd);
+        List<ListBillsDTO> list = assetProvider.listBillsForEnt(currentNamespaceId,pageOffSet,pageSize, cmd);
         if(list.size() <= pageSize){
             response.setNextPageAnchor(null);
         }else {
