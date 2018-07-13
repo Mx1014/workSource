@@ -15,3 +15,7 @@ UPDATE eh_organization_member_details AS t SET birthday_index = (CONCAT(SUBSTRIN
 
 -- #issue-31731【标准版V2.0】【园区快讯】【Android&Ios】客户端内容详情显示失败：404 not found
 update eh_configurations set  value = '/html/news_text_review.html'  where name = 'news.content.url';
+
+-- 园区入驻从“敬请期待”改为“上线”
+UPDATE eh_service_modules set client_handler_type = 0, instance_config = '{}' WHERE id = 40100;
+UPDATE eh_service_module_apps set instance_config = '{}' WHERE module_id = 40100;
