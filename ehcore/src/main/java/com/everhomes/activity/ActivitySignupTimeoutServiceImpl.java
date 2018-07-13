@@ -33,6 +33,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfileContstant;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import net.greghaines.jesque.Job;
@@ -83,6 +84,9 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
 
     @Autowired
     private MessagingService messagingService;
+
+    @Autowired
+    private UserProvider userProvider;
 
     private String queueDelay = "activitysignuptimeoutdelays";
 
@@ -216,6 +220,7 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
         if (activity == null) {
             return ;
         }
+        User user = this.userProvider.findUserById(userId);
         List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId, ActivityRosterStatus.NORMAL);
         String scope = ActivityNotificationTemplateCode.SCOPE;
         int code = ActivityNotificationTemplateCode.ACTIVITY_CANCEL_NO_PAY;
@@ -224,7 +229,7 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
         }
         Map<String, Object> map = new HashMap<>();
         map.put("subject", activity.getSubject());
-        final String content = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+        final String content = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
         if (activityRosters != null && activityRosters.size() > 0) {
             activityRosters.forEach(r->{
                 if (r.getUid().longValue() != userId.longValue()) {
