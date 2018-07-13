@@ -17,14 +17,13 @@ import java.sql.Timestamp;
  *  <li>trafficDescription:交通说明</li>
  *  <li>trafficDescription:楼栋介绍</li>
  * </ul>
- * Created by ying.xiong on 2018/1/22.
- * {"contractNumber","name","contractType","contractStartDate","contractEndDate","customerId","apartments","rent","status"};
+ * Created by jm.ding on 2018/7/9.
  */
 public class ContractExportDetailDTO {
 	private String contractNumber;
 	private String name;
-	private Timestamp contractStartDate;
-	private Timestamp contractEndDate;
+	private String contractStartDate;
+	private String contractEndDate;
 	private String contractType;
 	private String customerName;
 	private String customerId;
@@ -56,16 +55,16 @@ public class ContractExportDetailDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Timestamp getContractStartDate() {
+	public String getContractStartDate() {
 		return contractStartDate;
 	}
-	public void setContractStartDate(Timestamp contractStartDate) {
+	public void setContractStartDate(String contractStartDate) {
 		this.contractStartDate = contractStartDate;
 	}
-	public Timestamp getContractEndDate() {
+	public String getContractEndDate() {
 		return contractEndDate;
 	}
-	public void setContractEndDate(Timestamp contractEndDate) {
+	public void setContractEndDate(String contractEndDate) {
 		this.contractEndDate = contractEndDate;
 	}
 	public String getContractType() {

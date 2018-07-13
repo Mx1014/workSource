@@ -54,6 +54,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.CustomerEntryInfo;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -1864,6 +1865,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 						if(individualFlag) {
 							propertyMgrService.addAddressToOrganizationOwner(contract.getNamespaceId(), mapping.getAddressId(), contract.getCustomerId());
 						}
+						//#30536 【智谷汇】后台，“客户资源管理”模块字段显示问题
+						if (contract.getCustomerType()==0) {
+							CustomerEntryInfo entryInfo = ConvertHelper.convert(contract, CustomerEntryInfo.class);
+							entryInfo.setAddressId(mapping.getAddressId());
+							entryInfo.setBuildingId(mapping.getBuildingId());
+							entryInfo.setAddress(mapping.getOrganizationAddress());
+							enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
+						}
 					});
 				}
 			}
@@ -1876,8 +1885,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 		}
 		
-		
-
 		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
@@ -1907,6 +1914,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 								if(individualFlag) {
 									propertyMgrService.deleteAddressToOrgOwner(parentContract.getNamespaceId(), mapping.getAddressId(), parentContract.getCustomerId());
+								}
+								
+								//#30536 【智谷汇】后台，“客户资源管理”模块字段显示问题
+								if (contract.getCustomerType()==0) {
+									CustomerEntryInfo entryInfo = ConvertHelper.convert(contract, CustomerEntryInfo.class);
+									entryInfo.setAddressId(mapping.getAddressId());
+									entryInfo.setBuildingId(mapping.getBuildingId());
+									entryInfo.setAddress(mapping.getOrganizationAddress());
+									enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
 								}
 							});
 						}
@@ -2797,7 +2813,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	            dto.setBuildings(apartmentDtos);
 	            
 	            for (int i = 0; i < apartmentDtos.size(); i++) {
-	            	buildings.append(apartmentDtos.get(0).getBuildingName()+"-"+apartmentDtos.get(0).getApartmentName()+" ");
+	            	buildings.append(apartmentDtos.get(0).getBuildingName()+"-"+apartmentDtos.get(0).getApartmentName()+",");
 				}
 	        }
 	        exportDetailDTO.setApartments(buildings.toString());
@@ -2807,6 +2823,13 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	        exportDetailDTO.setContractType(ContractType.getDisplayName());
 	        FieldItem ContractStatus = contractBuildingMappingProvider.listFieldItems("contract", 131L, dto.getStatus());
 	        exportDetailDTO.setStatus(ContractStatus.getDisplayName());
+	        
+			if (dto.getContractStartDate() != null) {
+				exportDetailDTO.setContractStartDate(new SimpleDateFormat("yyyy-MM-dd").format(dto.getContractStartDate()));
+			}
+			if (dto.getContractEndDate() != null) {
+				exportDetailDTO.setContractEndDate(new SimpleDateFormat("yyyy-MM-dd").format(dto.getContractEndDate()));
+			}
 		} catch (Exception e) {
 			LOGGER.error("dto : {}", dto);
 			throw e;
