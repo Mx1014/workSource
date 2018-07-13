@@ -254,6 +254,7 @@ CREATE TABLE `eh_organization_workplaces` (
 
 -- 增加办公地点与楼栋门牌的关系表
 DROP TABLE IF EXISTS `eh_communityandbuilding_relationes`;
+DROP TABLE IF EXISTS `eh_communityAndbuilding_relationes`;
 
 CREATE TABLE `eh_communityandbuilding_relationes` (
   `id` bigint(20) NOT NULL COMMENT '主键id',
