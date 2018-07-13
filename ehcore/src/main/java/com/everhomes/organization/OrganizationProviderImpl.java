@@ -219,6 +219,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
          OrganizationMember organizationMember =  context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
                 .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
                 .fetchAnyInto(OrganizationMember.class);
         return organizationMember;
     }

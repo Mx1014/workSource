@@ -24,6 +24,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.news.NewsOwnerType;
 import com.everhomes.rest.news.NewsStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -144,7 +145,7 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<News> listNews(Long communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize,Byte status) {
+	public List<News> listNews(List<Long> communityIds, Long categoryId, Integer namespaceId, Long from, Integer pageSize,  boolean isScene, Byte status) {
 		SelectJoinStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS);
 
 		Condition cond = Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId);
@@ -157,9 +158,14 @@ public class NewsProviderImpl implements NewsProvider {
 		if(null != categoryId) {
 			cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
 		}
-		if (communityId != null) {
-			step.join(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
-			cond = cond.and(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID.eq(communityId));
+		if (communityIds != null && !communityIds.isEmpty()) {
+			if (isScene) {
+				step.join(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
+				cond = cond.and(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID.eq(communityIds.get(0)));
+			} else {
+				cond = cond.and(Tables.EH_NEWS.OWNER_TYPE.eq(NewsOwnerType.COMMUNITY.getCode()));
+				cond = cond.and(Tables.EH_NEWS.OWNER_ID.in(communityIds));
+			}
 		}
 
 		return step.where(cond).orderBy(Tables.EH_NEWS.STATUS.asc(),Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())

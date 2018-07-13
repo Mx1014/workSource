@@ -7,6 +7,9 @@ import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.launchpad.CommunityBiz;
+import com.everhomes.launchpad.CommunityBizProvider;
+import com.everhomes.launchpad.CommunityBizService;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -104,6 +107,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 	@Autowired
 	private LaunchPadService launchPadService;
+
+	@Autowired
+	private CommunityBizProvider communityBizProvider;
 
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
@@ -618,6 +624,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		//查询管理公司
 		OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
 
+		// 删除自定义电商配置
+		CommunityBiz communityBiz = communityBizProvider.findCommunityBiz(null, community.getId(), null);
+		if(communityBiz != null){
+			communityBizProvider.deleteCommunityBiz(communityBiz.getId());
+		}
+
 		//自己配置则复制一份
 		if(cmd.getAppSelfConfigFlag().byteValue() == 1){
 			//管理公司安装的app
@@ -646,6 +658,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				config.setCreatorUid(UserContext.currentUserId());
 				config.setCreateTime(new Timestamp(System.currentTimeMillis()));
 				appCommunityConfigProvider.createAppCommunityConfig(config);
+			}
+
+			//园区自定义电商配置
+			CommunityBiz organizationCommunityBiz = communityBizProvider.findCommunityBiz(organization.getId(), null, null);
+			if(organizationCommunityBiz != null){
+				organizationCommunityBiz.setId(null);
+				organizationCommunityBiz.setOrganizationId(null);
+				organizationCommunityBiz.setCommunityId(community.getId());
+				communityBizProvider.createCommunityBiz(organizationCommunityBiz);
 			}
 		}
 	}

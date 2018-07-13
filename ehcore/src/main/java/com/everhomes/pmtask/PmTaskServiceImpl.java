@@ -40,6 +40,7 @@ import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.*;
 
@@ -2045,58 +2046,68 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public ListOrganizationCommunityBySceneTokenResponse listOrganizationCommunityBySceneToken(ListOrganizationCommunityBySceneTokenCommand cmd) {
-		SceneTokenDTO sceneTokenDTO = null;
-		if (null != cmd.getSceneToken()) {
-			User user = UserContext.current().getUser();
-			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-		}
-		if (sceneTokenDTO==null)
-			return null;
+//		SceneTokenDTO sceneTokenDTO = null;
+//		if (null != cmd.getSceneToken()) {
+//			User user = UserContext.current().getUser();
+//			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+//		}
+//		if (sceneTokenDTO==null)
+//			return null;
 		ListOrganizationCommunityBySceneTokenResponse response = new ListOrganizationCommunityBySceneTokenResponse();
-		SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+		//SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
 		List<Community> communities = new ArrayList<>();
 		List<CommunityDTO> result = new ArrayList<>();
-		Community community = null;
-		switch (sceneType) {
-			case DEFAULT:
-			case PARK_TOURIST:
-			case ENTERPRISE_NOAUTH:
-				community = communityProvider.findCommunityById(sceneTokenDTO.getEntityId());
-				if (community != null)
-					communities.add(community);
 
-				break;
-			case FAMILY:
-				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDTO.getEntityId());
+		//TODO 标准版没有场景的概念，直接使用园区类型
+		AppContext appContext = UserContext.current().getAppContext();
 
-				if (family != null) {
-					community = communityProvider.findCommunityById(family.getCommunityId());
-				} else {
-					if (LOGGER.isWarnEnabled()) {
-						LOGGER.warn("Family not found, sceneToken=" + sceneTokenDTO);
-					}
-				}
-				if (community != null) {
-					communities.add(community);
-				}
-
-				break;
-			case PM_ADMIN:// 无小区ID
-				communities.addAll(communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()));
-				break;
-			case ENTERPRISE: // 增加两场景，与园区企业保持一致
-				List<OrganizationDTO> organizationDTOS = organizationService.listUserRelateOrganizations(
-						UserContext.getCurrentNamespaceId(),UserContext.currentUserId(),OrganizationGroupType.ENTERPRISE);
-
-				communities.addAll(organizationDTOS.stream().map(r->{
-					Community co = communityProvider.findCommunityById(r.getCommunityId());
-					return co;
-				}).collect(Collectors.toList()));
-				break;
-			default:
-				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
-				break;
+		Community community = communityProvider.findCommunityById(appContext.getCommunityId());
+		if (community != null){
+			communities.add(community);
 		}
+
+
+//		Community community = null;
+//		switch (sceneType) {
+//			case DEFAULT:
+//			case PARK_TOURIST:
+//			case ENTERPRISE_NOAUTH:
+//				community = communityProvider.findCommunityById(sceneTokenDTO.getEntityId());
+//				if (community != null)
+//					communities.add(community);
+//
+//				break;
+//			case FAMILY:
+//				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDTO.getEntityId());
+//
+//				if (family != null) {
+//					community = communityProvider.findCommunityById(family.getCommunityId());
+//				} else {
+//					if (LOGGER.isWarnEnabled()) {
+//						LOGGER.warn("Family not found, sceneToken=" + sceneTokenDTO);
+//					}
+//				}
+//				if (community != null) {
+//					communities.add(community);
+//				}
+//
+//				break;
+//			case PM_ADMIN:// 无小区ID
+//				communities.addAll(communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()));
+//				break;
+//			case ENTERPRISE: // 增加两场景，与园区企业保持一致
+//				List<OrganizationDTO> organizationDTOS = organizationService.listUserRelateOrganizations(
+//						UserContext.getCurrentNamespaceId(),UserContext.currentUserId(),OrganizationGroupType.ENTERPRISE);
+//
+//				communities.addAll(organizationDTOS.stream().map(r->{
+//					Community co = communityProvider.findCommunityById(r.getCommunityId());
+//					return co;
+//				}).collect(Collectors.toList()));
+//				break;
+//			default:
+//				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
+//				break;
+//		}
 		communities.forEach(r->{
 			result.add(ConvertHelper.convert(r, CommunityDTO.class));
 		});
@@ -2273,17 +2284,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetIfHideRepresentResponse response = new GetIfHideRepresentResponse();
 		response.setIfHide(configProvider.getIntValue(namespaceId,"pmtask.hide.represent",0));
 
-		SceneTokenDTO sceneTokenDTO = null;
-		if (null != cmd.getSceneToken()) {
-			User user = UserContext.current().getUser();
-			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-		}
-		Integer ifAdmain = 1;
-		if (sceneTokenDTO != null) {
-			String scene = sceneTokenDTO.getScene();
-			if (SceneType.PM_ADMIN.getCode().equals(scene))
-				ifAdmain = 0;
-		}
+//		SceneTokenDTO sceneTokenDTO = null;
+//		if (null != cmd.getSceneToken()) {
+//			User user = UserContext.current().getUser();
+//			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+//		}
+//		Integer ifAdmain = 1;
+//		if (sceneTokenDTO != null) {
+//			String scene = sceneTokenDTO.getScene();
+//			if (SceneType.PM_ADMIN.getCode().equals(scene))
+//				ifAdmain = 0;
+//		}
+
+		//去除场景，按照普通用户显示
+		Integer ifAdmain = 0;
 		response.setIfHide(response.getIfHide()|ifAdmain);
 		return response;
 	}

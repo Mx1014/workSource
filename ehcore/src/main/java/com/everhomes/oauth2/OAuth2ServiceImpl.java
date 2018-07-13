@@ -3,11 +3,17 @@ package com.everhomes.oauth2;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.domain.Domain;
+import com.everhomes.domain.DomainService;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.app.AppConstants;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.user.User;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -15,9 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 
 import java.net.URI;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Component
 public class OAuth2ServiceImpl implements OAuth2Service {
@@ -36,26 +44,29 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     private AppProvider appProvider;
 
     @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+
+    @Autowired
+    private DomainService domainService;
+
+    @Autowired
     private ConfigurationProvider configurationProvider;
 
-    @Override
-    public URI confirmAuthorization(String identifier, String password, AuthorizationCommand cmd) {
-        //Added by Janson, MUST be changed when xiaoqiang comeback
-        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
-        if(cmd.getclient_id() != null && cmd.getclient_id().equals(AppConstants.APPKEY_BIZ)) {
-            namespaceId = 2;
-        }
-        if(cmd.getclient_id() != null && cmd.getclient_id().equals("f32e706e-28f6-11e8-a883-b083fe4e159f")) {
-            namespaceId = 999972;
-        }
-        if(cmd.getclient_id() != null && cmd.getclient_id().equals("d2e8e7c7-cc48-4b93-9b1b-29fcaaa967bc")) {
-            namespaceId = 999953;
-        }
-        User user = userService.logonDryrun(namespaceId, identifier, password);
-        if(user == null)
-            return null;
+    @Autowired
+    private ContentServerService contentServerService;
 
-        return confirmAuthorization(user, cmd);
+    @Override
+    public ConfirmAuthorizationVO confirmAuthorization(Integer namespaceId, String identifier, String password, AuthorizationCommand cmd) {
+        UserLogin login = userService.logonDryrun(namespaceId, identifier, password);
+        if (login == null) {
+            return null;
+        }
+        User user = userProvider.findUserById(login.getUserId());
+        URI uri = confirmAuthorization(user, cmd);
+        return new ConfirmAuthorizationVO(uri, login);
     }
    
     @Override
@@ -76,7 +87,11 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         code.setGrantorUid(user.getId());
         oAuth2Provider.createAuthorizationCode(code);
 
-        String redirectUrl = String.format("%s?code=%s&state=%s", cmd.getredirect_uri(), code.getCode(), cmd.getState());
+        String redirectUrl = String.format("%s?code=%s", cmd.getredirect_uri(), code.getCode());
+
+        if (cmd.getState() != null && cmd.getState().trim().length() > 0) {
+            redirectUrl = redirectUrl + "&state=" + cmd.getState();
+        }
 
         try {
             return new URI(redirectUrl);
@@ -93,7 +108,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         App app = this.appProvider.findAppByKey(clientId);
         if(app == null)
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "Invalid clientapp Id");
+                    OAuth2ServiceErrorCode.ERROR_INVALID_CLIENT, "Invalid clientId");
 
         if(redirectUri == null || redirectUri.isEmpty())
             redirectUri = getDefaultRedirectUri(app.getId());
@@ -101,15 +116,15 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         AuthorizationCode authorizationCode = this.oAuth2Provider.findAuthorizationCodeByCode(code);
         if(authorizationCode == null)
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "Invalid authorization code");
+                    OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid authorization code");
 
         if(authorizationCode.isExpired(DateHelper.currentGMTTime()))
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "Invalid authorization code, code offer has expired");
+                    OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid authorization code, code offer has expired");
 
         if(!authorizationCode.getRedirectUri().equals(redirectUri))
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE,
-                    OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST, "Invalid redirect URI, it is different with the one that was originally granted");
+                    OAuth2ServiceErrorCode.ERROR_INVALID_GRANT, "Invalid redirect URI, it is different with the one that was originally granted");
 
         AccessToken accessToken = new AccessToken();
         accessToken.setGrantorUid(authorizationCode.getGrantorUid());
@@ -124,6 +139,46 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         authorizationCode.setExpirationTime(accessToken.getCreateTime());
         this.oAuth2Provider.updateAuthorizationCode(authorizationCode);
         return accessToken;
+    }
+
+    @Override
+    public void addAttribute(Model model, AuthorizationCommand cmd, App app) {
+        AppNamespaceMapping nsMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(app.getAppKey());
+        if (nsMapping == null) {
+            return;
+        }
+
+        Domain domain = domainService.findDomainByNamespaceId(nsMapping.getNamespaceId());
+        if (domain == null) {
+            domain = domainService.findDomainByNamespaceId(Namespace.DEFAULT_NAMESPACE);
+        }
+
+        String loginLogoURI = null;
+        String loginBgURI = null;
+        if (domain.getLoginLogoUri() != null) {
+            loginLogoURI = domain.getLoginLogoUri();
+        }
+        if (domain.getLoginBgUri() != null) {
+            loginBgURI = domain.getLoginBgUri();
+        }
+
+        if (loginBgURI == null || loginLogoURI == null) {
+            Domain dftNs = domainService.findDomainByNamespaceId(Namespace.DEFAULT_NAMESPACE);
+            if (loginBgURI == null) {
+                loginBgURI = dftNs.getLoginBgUri();
+            }
+            if (loginLogoURI == null) {
+                loginLogoURI = dftNs.getLoginLogoUri();
+            }
+        }
+
+        String backgroundImg = contentServerService.parserUri(loginBgURI);
+        String logoImg = contentServerService.parserUri(loginLogoURI);
+
+        model.addAttribute("backgroundImg", backgroundImg);
+        model.addAttribute("logoImg", logoImg);
+        model.addAttribute("appName", domain.getName());
+        model.addAttribute("currentYear", LocalDate.now().getYear());
     }
 
     @Override

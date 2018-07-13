@@ -222,9 +222,9 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
             profile.setPcUris(StringHelper.toJsonString(cmd.getPcUris()));
         }
 
-        if(cmd.getAppEntryInfos() != null){
-            profile.setAppEntryInfos(StringHelper.toJsonString(cmd.getAppEntryInfos()));
-        }
+//        if(cmd.getAppEntryInfos() != null){
+//            profile.setAppEntryInfos(StringHelper.toJsonString(cmd.getAppEntryInfos()));
+//        }
 
         if(cmd.getDependentAppIds() != null){
             profile.setDependentAppIds(StringHelper.toJsonString(cmd.getDependentAppIds()));

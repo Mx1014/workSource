@@ -32,3 +32,34 @@ ADD `mac_copy` VARCHAR(128) COMMENT '原mac地址';
 /**
 * End by: yilin Liu
 */
+
+-- Already delete in 5.5.1
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `profile_integrity` INTEGER NOT NULL DEFAULT '0';
+-- ALTER TABLE eh_organization_member_details ADD COLUMN department VARCHAR(256) COMMENT '部门';
+-- ALTER TABLE eh_organization_member_details ADD COLUMN department_ids VARCHAR(256) COMMENT '部门Id';
+-- ALTER TABLE eh_organization_member_details ADD COLUMN job_position VARCHAR(256) COMMENT '岗位';
+-- ALTER TABLE eh_organization_member_details ADD COLUMN job_position_ids VARCHAR(256) COMMENT '岗位Id';
+-- ALTER TABLE eh_organization_member_details ADD COLUMN job_level VARCHAR(256) COMMENT '职级';
+-- ALTER TABLE eh_organization_member_details ADD COLUMN job_level_ids VARCHAR(256) COMMENT '职级Id';
+-- end Janson
+
+-- 园区表增加namespace_id索引 add by yanjun 20180615
+alter table eh_communities add index namespace_id_index(`namespace_id`);
+
+-- fix for zuolinbase only, remove this after 5.5.2
+ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
+-- end Janson
+
+-- 通用脚本
+-- ADD BY 梁燕龙
+-- issue-30013 初始化短信白名单配置项
+-- 短信白名单 #30013
+CREATE TABLE `eh_phone_white_list` (
+	`id` BIGINT NOT NULL COMMENT '主键',
+	`namespace_id` INT NOT NULL DEFAULT 0 COMMENT '域空间',
+	`phone_number` VARCHAR(128) NOT NULL COMMENT '白名单手机号码',
+	`creator_uid` BIGINT COMMENT '记录创建人userID',
+	`create_time` DATETIME COMMENT '记录创建时间',
+	PRIMARY KEY(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '短信白名单';
+-- END BY 梁燕龙

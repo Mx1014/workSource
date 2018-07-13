@@ -2892,8 +2892,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			response.setCards(opPushCards);
 
 			PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
-			String itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig());
-			//String instanceConfig = opPushHandler.getInstanceConfig(cmd.getInstanceConfig());
+			String itemActionData = serviceModuleApp.getInstanceConfig();
+			if(portalPublishHandler != null){
+				itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig());
+			}
+
+
+			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
 			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData);

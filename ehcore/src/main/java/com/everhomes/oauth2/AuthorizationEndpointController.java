@@ -4,11 +4,12 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.rest.oauth2.AuthorizationCommand;
-import com.everhomes.rest.oauth2.CommonRestResponse;
-import com.everhomes.rest.oauth2.OAuth2AccessTokenResponse;
-import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
+import com.everhomes.rest.oauth2.*;
 import com.everhomes.rest.user.DeviceIdentifierType;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserInfo;
@@ -31,17 +32,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 @RequireOAuth2Authentication(OAuth2AuthenticationType.NO_AUTHENTICATION)
 @Controller
@@ -62,13 +62,17 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 	@Autowired
 	private UserService userService;
 
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+
 	@RequestMapping("authorize")
 	public Object authorize(
 			@RequestParam(value="response_type", required = true) String responseType,
 			@RequestParam(value="client_id", required = true) String clientId,
 			@RequestParam(value="redirect_uri", required = false) String redirectUri,
 			@RequestParam(value="scope", required = false) String scope,
-			@RequestParam(value="state", required = true) String state,
+			@RequestParam(value="state", required = false) String state,
+			@RequestParam(value="redirect_type", required = false, defaultValue = "http") String redirectType,
 			HttpServletRequest httpRequest, HttpServletResponse httpResponse, Model model) {
 
 		App app = this.appProvider.findAppByKey(clientId);
@@ -77,7 +81,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 					OAuth2ServiceErrorCode.SCOPE,
 					String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
 					httpRequest.getLocale().toLanguageTag(),
-					"Invalid request client_id or unregistered redirect URI"));
+					"Invalid request client_id or unregistered redirectTo URI"));
 
 			return "oauth2-error-response";
 		}
@@ -91,7 +95,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 					OAuth2ServiceErrorCode.SCOPE,
 					String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
 					httpRequest.getLocale().toLanguageTag(),
-					"Invalid request client_id or unregistered redirect URI"));
+					"Invalid request client_id or unregistered redirectTo URI"));
 
 			return "oauth2-error-response";
 		}
@@ -104,70 +108,100 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		cmd.setState(state);
 		//has logon
 		User user = UserContext.current().getUser();
-		if(user!=null&&user.getId()!=User.ANNONYMOUS_UID){
+		if (user != null && user.getId() != User.ANNONYMOUS_UID) {
 			URI uri = oAuth2Service.confirmAuthorization(user, cmd);
 			if (uri != null) {
-				HttpHeaders httpHeaders = new HttpHeaders();
-				httpHeaders.setLocation(uri);
-				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-			} 
+                return redirectTo(uri, redirectType, model);
+			}
 		}
 		//no logon
-		model.addAttribute("viewState", WebTokenGenerator.getInstance().toWebToken(cmd));
-		return "oauth2-authorize";
+        model.addAttribute("viewState", WebTokenGenerator.getInstance().toWebToken(cmd));
+        oAuth2Service.addAttribute(model, cmd, app);
+		return "oauth2-authorize2";
 	}
 
-	@RequestMapping("confirm")
+    private Object redirectTo(URI uri, String redirectType, Model model) {
+	    // 有些浏览器不支持 302 重定向，所以采用 script 类型的跳转
+        if (Objects.equals(redirectType, "script")) {
+            model.addAttribute("redirectUrl", uri.toString());
+            return "oauth2-redirect";
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setLocation(uri);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+    }
+
+    @RequestMapping("confirm")
 	public Object confirmAuthorization(
 			@RequestParam(value="identifier", required = true) String identifier,
 			@RequestParam(value="password", required = true) String password,
 			@RequestParam(value="viewState", required = true) String viewState,
+            @RequestParam(value="redirect_type", required = false, defaultValue = "http") String redirectType,
 			HttpServletRequest httpRequest, HttpServletResponse httpResponse, Model model) throws URISyntaxException {
 
 		AuthorizationCommand cmd = WebTokenGenerator.getInstance().fromWebToken(viewState, AuthorizationCommand.class);
 
-		// double check in confirmation api to protect against tampering in confirmation callback
-		App app = this.appProvider.findAppByKey(cmd.getclient_id());
-		if(app == null) {
-			model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
+        // double check in confirmation api to protect against tampering in confirmation callback
+        App app = this.appProvider.findAppByKey(cmd.getclient_id());
+        if(app == null) {
+            model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
 					OAuth2ServiceErrorCode.SCOPE,
 					String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
 					httpRequest.getLocale().toLanguageTag(),
-					"Invalid request client_id or unregistered redirect URI"));
+					"Invalid request client_id or unregistered redirectTo URI"));
 
-			return "oauth2-error-response";
-		}
+            return "oauth2-error-response";
+        }
 
-		String redirectUri = cmd.getredirect_uri();
-		if(redirectUri == null || redirectUri.isEmpty()) {
-			redirectUri = this.oAuth2Service.getDefaultRedirectUri(app.getId());
-		}
+        String redirectUri = cmd.getredirect_uri();
+        if(redirectUri == null || redirectUri.isEmpty()) {
+            redirectUri = this.oAuth2Service.getDefaultRedirectUri(app.getId());
+        }
 
-		if(!this.oAuth2Service.validateRedirectUri(app.getId(), redirectUri)) {
-			model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
+        if(!this.oAuth2Service.validateRedirectUri(app.getId(), redirectUri)) {
+            model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
 					OAuth2ServiceErrorCode.SCOPE,
 					String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
 					httpRequest.getLocale().toLanguageTag(),
-					"Invalid request client_id or unregistered redirect URI"));
+					"Invalid request client_id or unregistered redirectTo URI"));
 
-			return "oauth2-error-response";
-		}
+            return "oauth2-error-response";
+        }
 
-		LOGGER.info("Confirm OAuth2 authorization: {}", cmd);
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        AppNamespaceMapping namespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(app.getAppKey());
+        if (namespaceMapping != null) {
+            namespaceId = namespaceMapping.getNamespaceId();
+        }
 
-		try {
-			URI uri = oAuth2Service.confirmAuthorization(identifier, password, cmd);
-			if (uri != null) {
-				HttpHeaders httpHeaders = new HttpHeaders();
-				httpHeaders.setLocation(uri);
-				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        LOGGER.info("Confirm OAuth2 authorization: {}", cmd);
+        try {
+            ConfirmAuthorizationVO confirmAuthorization = oAuth2Service.confirmAuthorization(namespaceId, identifier, password, cmd);
+            if (confirmAuthorization != null) {
+                UserLogin login = confirmAuthorization.getUserLogin();
+                LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+                String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
+
+                int age = 7 * 24 * 60 * 60; // 一周的有效时间
+                WebRequestInterceptor.setCookieInResponse("token", tokenString, httpRequest, httpResponse, age);
+                WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(namespaceId), httpRequest, httpResponse, age);
+
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.setLocation(confirmAuthorization.getUri());
+                return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 			} else {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("confirmAuthorization return uri is null");
-                }
+                // 登录失败
                 // make sure we always carry the view state back to front end for next round of submission
-				model.addAttribute("viewState", viewState);
-				return "oauth2-authorize";
+                String localizedString = localeStringService.getLocalizedString(
+                        OAuth2LocalStringCode.SCOPE,
+                        OAuth2LocalStringCode.ERROR_LOGIN,
+                        Locale.CHINA.toString(),
+                        "Invalid identifier or password");
+
+                model.addAttribute("errorDesc", localizedString);
+                model.addAttribute("viewState", viewState);
+                oAuth2Service.addAttribute(model, cmd, app);
+                return "oauth2-authorize2";
 			}
 		} catch (RuntimeErrorException e) {
 			LOGGER.error("Unexpected exception code = {}", e.getErrorCode());
@@ -179,16 +213,13 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 						OAuth2ServiceErrorCode.SCOPE,
 						String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
 						httpRequest.getLocale().toLanguageTag(),
-						"Invalid request client_id or unregistered redirect URI"));
+						"Internal server error"));
 
 				return "oauth2-error-response";
-
 			default : {
 				URI uri = new URI(String.format("%s#error=%s&state=%s", redirectUri,
 						this.oAuth2Service.getOAuth2AuthorizeError(e.getErrorCode()), cmd.getState()));
-				HttpHeaders httpHeaders = new HttpHeaders();
-				httpHeaders.setLocation(uri);
-				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+                return redirectTo(uri, redirectType, model);
 			}
 			}
 		} catch(Exception e) {
@@ -196,9 +227,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 
 			URI uri = new URI(String.format("%s#error=%s&state=%s", redirectUri,
 					this.oAuth2Service.getOAuth2AuthorizeError(OAuth2ServiceErrorCode.ERROR_SERVER_ERROR), cmd.getState()));
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.setLocation(uri);
-			return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+            return redirectTo(uri, redirectType, model);
 		}
 	}
 
@@ -213,7 +242,8 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			@RequestParam(value="timeStamp", required = false) Long timeStamp,
 			@RequestParam(value="randomNum", required = false) Integer randomNum,
 			@RequestParam(value="communityId", required = false) Long communityId,
-			HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
+            @RequestParam(value="redirect_type", required = false, defaultValue = "http") String redirectType,
+			HttpServletRequest httpRequest, HttpServletResponse httpResponse, Model model) throws Exception {
 		User user = UserContext.current().getUser();
 		if(user==null||user.getId()==User.ANNONYMOUS_UID){
 			UserInfo userInfo = getBizUserInfo(signature,appKey,String.valueOf(id),name,String.valueOf(randomNum),String.valueOf(timeStamp));
@@ -226,17 +256,16 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
 			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
 			String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
-			setCookieInResponse("token", tokenString, httpRequest, httpResponse);
+            WebRequestInterceptor.setCookieInResponse("token", tokenString, httpRequest, httpResponse);
 		}
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setLocation(new URI(sourceUrl));
-		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        return redirectTo(new URI(sourceUrl), redirectType, model);
 	}
 
 	@RequireAuthentication(false)
 	@RequestMapping("oauth2Logon")
 	public Object oauth2Logon(@RequestParam(value="sourceUrl", required = true) String sourceUrl,
-			HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
+                              @RequestParam(value="redirect_type", required = false, defaultValue = "http") String redirectType,
+			HttpServletRequest httpRequest, HttpServletResponse httpResponse, Model model) throws Exception {
 		User user = UserContext.current().getUser();
 		if(user==null||user.getId()==User.ANNONYMOUS_UID){
 			HttpSession session = httpRequest.getSession();
@@ -254,18 +283,15 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 					URLEncoder.encode(redirectUri, "UTF-8"),
 					state
 					);
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.setLocation(new URI(uri));
-			return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+            return redirectTo(new URI(uri), redirectType, model);
 		}
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setLocation(new URI(sourceUrl));
-		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        return redirectTo(new URI(sourceUrl), redirectType, model);
 	}
 
 	@RequireAuthentication(false)
 	@RequestMapping("redirectUri")
-	public Object redirectUri(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
+	public Object redirectUri(@RequestParam(value="redirect_type", required = false, defaultValue = "http") String redirectType,
+                              HttpServletRequest httpRequest, HttpServletResponse httpResponse, Model model) throws Exception {
 		String code = httpRequest.getParameter("code");
 		String state = httpRequest.getParameter("state");
 		String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
@@ -303,13 +329,11 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
 		LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), null);
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
-		setCookieInResponse("token", tokenString, httpRequest, httpResponse);
+        WebRequestInterceptor.setCookieInResponse("token", tokenString, httpRequest, httpResponse);
 		//返回sourceUrl
 		HttpSession session = httpRequest.getSession();
 		String sourceUrl = (String) session.getAttribute("sourceUrl");
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setLocation(new URI(sourceUrl));
-		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+        return redirectTo(new URI(sourceUrl), redirectType, model);
 	}
 
 	private UserInfo getBizUserInfo(String zlSignature,String zlAppKey,String id,String name,String randomNum,String timeStamp) {
@@ -353,39 +377,5 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			LOGGER.error("getUserInfo method error.e="+e.getMessage());
 			return null;
 		}
-	}
-
-	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
-			HttpServletResponse response) {
-
-		Cookie cookie = findCookieInRequest(name, request);
-		if(cookie == null)
-			cookie = new Cookie(name, value);
-		else
-			cookie.setValue(value);
-		cookie.setPath("/");
-		if(value == null || value.isEmpty())
-			cookie.setMaxAge(0);
-
-		response.addCookie(cookie);
-	}
-
-	private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
-		List<Cookie> matchedCookies = new ArrayList<>();
-
-		Cookie[] cookies = request.getCookies();
-		if(cookies != null) {
-			for(Cookie cookie : cookies) {
-				if(cookie.getName().equals(name)) {
-					LOGGER.debug("Found matched cookie with name {} at value: {}, path: {}, version: {}", name,
-							cookie.getValue(), cookie.getPath(), cookie.getVersion());
-					matchedCookies.add(cookie);
-				}
-			}
-		}
-
-		if(matchedCookies.size() > 0)
-			return matchedCookies.get(matchedCookies.size() - 1);
-		return null;
 	}
 }

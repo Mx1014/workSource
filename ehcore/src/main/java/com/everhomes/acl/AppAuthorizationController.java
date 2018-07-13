@@ -1,6 +1,7 @@
 package com.everhomes.acl;
 
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
@@ -8,6 +9,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.ListProjectIdsByAppIdAndOrganizationIdCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,7 +72,9 @@ public class AppAuthorizationController {
     @RequestMapping("distributeServiceModuleAppAuthorization")
     @RestReturn(value = String.class)
     public RestResponse distributeServiceModuleAppAuthorization(@Valid DistributeServiceModuleAppAuthorizationCommand cmd) {
-        //TODO 需要对接权限细化
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleAppAuthorizationService.distributeServiceModuleAppAuthorization(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -84,6 +89,10 @@ public class AppAuthorizationController {
     @RequestMapping("createAppProfile")
     @RestReturn(value = String.class)
     public RestResponse createAppProfile(@Valid CreateAppProfileCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -97,6 +106,10 @@ public class AppAuthorizationController {
     @RequestMapping("updateAppProfile")
     @RestReturn(value = String.class)
     public RestResponse updateAppProfile(UpdateAppProfileCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
         serviceModuleAppAuthorizationService.updateAppProfile(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

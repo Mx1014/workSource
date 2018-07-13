@@ -7,6 +7,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -118,6 +119,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
+
+    @Autowired
+    private ServiceModuleEntryProvider serviceModuleEntryProvider;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
 
     @Override
@@ -1253,5 +1261,60 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         handler = PlatformContext.getComponent(handlerPrefix);
 
         return handler;
+    }
+
+    @Override
+    public ListServiceModuleEntriesResponse listServiceModuleEntries(ListServiceModuleEntriesCommand cmd) {
+        ListServiceModuleEntriesResponse response = new ListServiceModuleEntriesResponse();
+        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, null, null);
+
+        List<ServiceModuleEntryDTO> dtos = new ArrayList<>();
+        if(entries != null){
+            for (ServiceModuleEntry entry: entries){
+                ServiceModuleEntryDTO dto = ConvertHelper.convert(entry, ServiceModuleEntryDTO.class);
+                if(dto.getIconUri() != null){
+                    String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getSimpleName(), entry.getId());
+                    dto.setIconUrl(url);
+                }
+                dtos.add(dto);
+            }
+        }
+
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public void updateServiceModuleEntries(UpdateServiceModuleEntriesCommand cmd) {
+
+        if(cmd.getModuleId() == 0){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "moduleId = " + cmd.getModuleId());
+        }
+
+        if(cmd.getDtos() == null || cmd.getDtos().size() == 0){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "entry size = 0 ");
+        }
+
+        dbProvider.execute((status) ->{
+
+            List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, null, null);
+            if(entries != null){
+                for (ServiceModuleEntry entry: entries){
+                    serviceModuleEntryProvider.delete(entry.getId());
+                }
+            }
+
+            for (ServiceModuleEntryDTO dto: cmd.getDtos()){
+                ServiceModuleEntry entry = ConvertHelper.convert(dto, ServiceModuleEntry.class);
+                entry.setModuleId(cmd.getModuleId());
+                serviceModuleEntryProvider.create(entry);
+            }
+
+            return null;
+        });
+
+
     }
 }

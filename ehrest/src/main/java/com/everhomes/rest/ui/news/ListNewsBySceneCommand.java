@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 新闻类型ID</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>groupId: 新闻对应item_group的id，旧版本为空，新版本才有值</li>
+ * <li>widget: app首页新闻的样式，当前为News或NewsFlash两种</li>
  * </ul>
  */
 public class ListNewsBySceneCommand {
@@ -22,6 +24,9 @@ public class ListNewsBySceneCommand {
     private Long categoryId;
 	private Long pageAnchor;
 	private Integer pageSize;
+	
+	private Long groupId;
+	private String widget;
 
 	public String getSceneToken() {
 		return sceneToken;
@@ -58,6 +63,22 @@ public class ListNewsBySceneCommand {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getWidget() {
+		return widget;
+	}
+
+	public void setWidget(String widget) {
+		this.widget = widget;
 	}
 
 }

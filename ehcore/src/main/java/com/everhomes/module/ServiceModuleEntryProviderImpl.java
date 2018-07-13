@@ -14,10 +14,7 @@ import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhReflectionServiceModuleAppsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentRelationsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -48,6 +45,9 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
     @Override
     public List<ServiceModuleEntry> listServiceModuleEntries(Long moduleId, Byte terminalType, Byte locationType, Byte sceneType) {
         List<ServiceModuleEntry> results = new ArrayList<>();
@@ -71,5 +71,28 @@ public class ServiceModuleEntryProviderImpl implements ServiceModuleEntryProvide
             return null;
         });
         return results;
+    }
+
+
+
+    @Override
+    public void delete(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleEntries.class, id));
+        EhServiceModuleEntriesDao dao = new EhServiceModuleEntriesDao(context.configuration());
+        dao.deleteById(id);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleEntries.class, id);
+    }
+
+    @Override
+    public void create(ServiceModuleEntry serviceModuleEntry) {
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleEntries.class));
+        serviceModuleEntry.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleEntries.class, id));
+        EhServiceModuleEntriesDao dao = new EhServiceModuleEntriesDao(context.configuration());
+        dao.insert(serviceModuleEntry);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleEntries.class, id);
     }
 }
