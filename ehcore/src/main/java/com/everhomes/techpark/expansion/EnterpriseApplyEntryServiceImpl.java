@@ -1452,6 +1452,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		dto.setAreaSearchFlag(LeasePromotionFlag.DISABLED.getCode());
 		dto.setConsultFlag(LeasePromotionFlag.DISABLED.getCode());
 		dto.setBuildingIntroduceFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setHideAddressFlag(LeasePromotionFlag.DISABLED.getCode());
 		String[] defaultNames = {"项目介绍","房源招租"};
 		String[] defaultOrders = {"1","2"};
 		dto.setDisplayNames(Arrays.stream(defaultNames).collect(Collectors.toList()));
