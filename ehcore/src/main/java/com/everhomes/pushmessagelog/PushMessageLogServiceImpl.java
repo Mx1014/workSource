@@ -81,12 +81,11 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 					if(r.getOperatorId() != null){
 						String name = userProvider.getNickNameByUid(r.getOperatorId()==null?null:r.getOperatorId().longValue());
 						String mobile = userProvider.findMobileByUid(r.getOperatorId()==null?null:r.getOperatorId().longValue()) ;
-						if(StringUtils.isNotBlank(name)&& StringUtils.isNotBlank(mobile) ){
-							dto.setOperator(name + "（"+mobile+"）");
-						}else if(StringUtils.isNotBlank(name)){
+						 if(StringUtils.isNotBlank(name)){
 							dto.setOperator(name );
-						}else if(StringUtils.isNotBlank(mobile)){
-							dto.setOperator(mobile );
+						}
+						 if(StringUtils.isNotBlank(mobile)){
+							dto.setPhone(mobile);
 						}
 						/*else{
 							dto.setOperator("Not Found");

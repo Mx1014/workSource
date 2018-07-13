@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
 * <li>createTime: 推送创建时间,格式 yyyy-MM-dd HH:mm</li>
 * <li>pushStatus: 推送状态{@link com.everhomes.rest.pushmessagelog.PushStatusCode}</li>
 * <li>operator: 操作人</li>
+* <li>phone: 操作人电话</li>
 * </ul>
 */
 public class PushMessageLogDTO {
@@ -29,6 +30,7 @@ public class PushMessageLogDTO {
 	private Date createTime ;
 	private Integer pushStatus ;	
     private String operator ;
+    private String phone ;
  
     
 	public Long getId() {
@@ -102,6 +104,14 @@ public class PushMessageLogDTO {
 
 	public void setOperator(String operator) {
 		this.operator = operator;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 	@Override
