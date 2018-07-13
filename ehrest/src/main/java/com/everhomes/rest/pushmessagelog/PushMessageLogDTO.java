@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
 * <ul>
 * <li>id: 主键</li>
-* <li>namespaceId: 下一页开始锚点</li>
+* <li>namespaceId: 域空间ID</li>
 * <li>content: 推送内容</li>
 * <li>pushType: 推送方式{@link com.everhomes.rest.pushmessagelog.PushMessageTypeCode}</li>
 * <li>receiverType: 推送对象的类型{@link com.everhomes.rest.pushmessagelog.ReceiverTypeCode}</li>
@@ -23,11 +23,11 @@ public class PushMessageLogDTO {
 	private Long id ;
 	private Long namespaceId ;
 	private String content ; 
-	private Byte pushType ;
-	private Byte receiverType ;
+	private Integer pushType ;
+	private Integer receiverType ;
 	private List<String> receivers ;
 	private Date createTime ;
-	private Byte pushStatus ;	
+	private Integer pushStatus ;	
     private String operator ;
  
     
@@ -55,19 +55,19 @@ public class PushMessageLogDTO {
 		this.content = content;
 	}
 
-	public Byte getPushType() {
+	public Integer getPushType() {
 		return pushType;
 	}
 
-	public void setPushType(Byte pushType) {
+	public void setPushType(Integer pushType) {
 		this.pushType = pushType;
 	}
 
-	public Byte getReceiverType() {
+	public Integer getReceiverType() {
 		return receiverType;
 	}
 
-	public void setReceiverType(Byte receiverType) {
+	public void setReceiverType(Integer receiverType) {
 		this.receiverType = receiverType;
 	}
 
@@ -87,11 +87,11 @@ public class PushMessageLogDTO {
 		this.createTime = createTime;
 	}
 
-	public Byte getPushStatus() {
+	public Integer getPushStatus() {
 		return pushStatus;
 	}
 
-	public void setPushStatus(Byte pushStatus) {
+	public void setPushStatus(Integer pushStatus) {
 		this.pushStatus = pushStatus;
 	}
 

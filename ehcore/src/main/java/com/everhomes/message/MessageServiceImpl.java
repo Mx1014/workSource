@@ -73,6 +73,9 @@ public class MessageServiceImpl implements MessageService {
 		// 1.找到这个园区所有的公司
 		List<OrganizationCommunityRequest> organizationCommunityRequestList = organizationProvider.listOrganizationCommunityRequests(cmd.getCommunityId());
 		if (organizationCommunityRequestList == null || organizationCommunityRequestList.isEmpty()) {
+			//更新推送记录状态为完成
+	        pushMessageLogService.updatePushStatus(cmd.getLogId(), PushStatusCode.FINISH.getCode());
+	        LOGGER.info("update pushMessageLog status finish .");
 			return;
 		}
 		// 因为这个表里面入驻的企业会有重复的，应该是数据错误，所以要去重

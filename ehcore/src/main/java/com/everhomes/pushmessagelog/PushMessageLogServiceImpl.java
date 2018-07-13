@@ -1,7 +1,7 @@
 package com.everhomes.pushmessagelog;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +28,6 @@ import com.everhomes.rest.pushmessagelog.PushMessageStringCode;
 import com.everhomes.rest.pushmessagelog.PushStatusCode;
 import com.everhomes.rest.pushmessagelog.ReceiverTypeCode;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -161,9 +160,8 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 		
 		PushMessageLog  bo = new PushMessageLog(); 
         bo.setContent(cmd.getMessage());
-        java.util.Date utilDate=DateUtils.currentTimestamp();
-        java.sql.Date sqlDate=new java.sql.Date(utilDate.getTime());
-        bo.setCreateTime(sqlDate);
+        Timestamp createTime=DateUtils.currentTimestamp();
+        bo.setCreateTime(createTime);
         bo.setNamespaceId(cmd.getNamespaceId());
         bo.setOperatorId(UserContext.currentUserId()==null?null:UserContext.currentUserId().intValue());
         bo.setPushStatus(new Byte(PushStatusCode.WAITING.getCode()).intValue());
@@ -220,9 +218,8 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
 		
 		PushMessageLog  bo = new PushMessageLog(); 
         bo.setContent(cmd.getContent());
-        java.util.Date utilDate=new Date();
-        java.sql.Date sqlDate=new java.sql.Date(utilDate.getTime());
-        bo.setCreateTime(sqlDate);
+        Timestamp createTime=DateUtils.currentTimestamp();
+        bo.setCreateTime(createTime);
         bo.setNamespaceId(UserContext.getCurrentNamespaceId());
         bo.setOperatorId(UserContext.currentUserId()==null?null:UserContext.currentUserId().intValue());
         bo.setPushStatus(new Byte(PushStatusCode.WAITING.getCode()).intValue());
@@ -231,14 +228,14 @@ public class PushMessageLogServiceImpl implements PushMessageLogService {
         if(cmd.getCommunityId() != null){
         	StringBuffer receivers = new StringBuffer();
         	if(cmd.getAdminFlag() == 1){
-        		String tex = localeStringService.getLocalizedString(PushMessageStringCode.SCOPE , PushMessageStringCode.ADMIN+"",null,null);
+        		String tex = localeStringService.getLocalizedString(PushMessageStringCode.SCOPE , PushMessageStringCode.ADMIN+"","zh_CN","");
         		receivers.append(tex);
         	}
         	if(cmd.getBusinessContactFlag() == 1){
         		if(receivers !=null && receivers.length()>0){
         			receivers.append("、");
         		}
-        		String tex = localeStringService.getLocalizedString(PushMessageStringCode.SCOPE , PushMessageStringCode.BUSINESS+"",null,null);
+        		String tex = localeStringService.getLocalizedString(PushMessageStringCode.SCOPE , PushMessageStringCode.BUSINESS+"","zh_CN","");
         		receivers.append(tex);
         	}
         	Community com = communityProvider.findCommunityById(cmd.getCommunityId());
