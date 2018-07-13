@@ -2872,7 +2872,7 @@ public class AssetServiceImpl implements AssetService {
                     fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
                     // 重新计算下账单
-//                    assetProvider.reCalBillById(item.getBillId());
+                    assetProvider.reCalBillById(item.getBillId());
                 }
             }
         });
