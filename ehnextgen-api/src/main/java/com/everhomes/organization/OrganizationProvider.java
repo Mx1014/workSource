@@ -430,8 +430,6 @@ public interface OrganizationProvider {
 
 	boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
 
-	void updateProfileIntegrity(Long detailId, Integer integrity);
-
 	OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
 
 	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);

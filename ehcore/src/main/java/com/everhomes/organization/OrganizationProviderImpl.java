@@ -2981,7 +2981,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         return null;
     }
-    
+
     @Override
     public void deleteOrganizationCommunityRequestByCommunityIdAndOrgId(Long communityId, Long organizationId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -4837,11 +4837,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             member.setContactType(detail.getContactType());
             member.setContactDescription(detail.getContactDescription());
             member.setEmployeeNo(detail.getEmployeeNo());
-            member.setAvatar(detail.getAvatar());
             member.setGender(detail.getGender());
             member.setEmployeeStatus(detail.getEmployeeStatus());
             member.setEmploymentTime(detail.getEmploymentTime());
-            member.setProfileIntegrity(detail.getProfileIntegrity());
             member.setCheckInTime(detail.getCheckInTime());
         }
         return old_list;
@@ -5046,13 +5044,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (count == 0)
             return false;
         return true;
-    }
-
-    public void updateProfileIntegrity(Long detailId, Integer integrity) {
-        DSLContext context = this.dbProvider.getDslContext((AccessSpec.readWrite()));
-        context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY, integrity)
-                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
     }
 
     @Override
@@ -6200,7 +6191,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if(null !=groupId){
         	step = step.and(Tables.EH_ORGANIZATIONS.ID.ne(groupId));
         }
-        
+
         Record r = step.fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, Organization.class);
@@ -6667,7 +6658,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(siteName))
                 .execute();
     }
-    
+
     @Override
     public OrganizationWorkPlaces findWorkPlacesByOrgId(Long organizationId, String siteName, Long communityId){
         //获取上下文
