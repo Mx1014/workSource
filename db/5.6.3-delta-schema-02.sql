@@ -256,16 +256,16 @@ CREATE TABLE `eh_organization_workplaces` (
 -- 增加办公地点与楼栋门牌的关系表
 -- DROP TABLE IF EXISTS `eh_communityandbuilding_relationes`;
 -- DROP TABLE IF EXISTS `eh_communityAndbuilding_relationes`;
---
--- CREATE TABLE `eh_communityandbuilding_relationes` (
---   `id` bigint(20) NOT NULL COMMENT '主键id',
---   `building_id` bigint(20) DEFAULT NULL COMMENT '楼栋id',
---   `community_id` bigint(20) DEFAULT NULL COMMENT '所在项目id' ,
---   `address_id` bigint(20) DEFAULT NULL COMMENT '地址id' ,
---   `create_time` datetime NOT NULL DEFAULT now() COMMENT '创建时间',
---   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
---   PRIMARY KEY (`id`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_communityandbuilding_relationes` (
+  `id` bigint(20) NOT NULL COMMENT '主键id',
+  `building_id` bigint(20) DEFAULT NULL COMMENT '楼栋id',
+  `community_id` bigint(20) DEFAULT NULL COMMENT '所在项目id' ,
+  `address_id` bigint(20) DEFAULT NULL COMMENT '地址id' ,
+  `create_time` datetime NOT NULL DEFAULT now() COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- 修复 workplace 的问题 janson TODO 这里需要弄新的分支

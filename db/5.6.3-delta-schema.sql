@@ -68,16 +68,6 @@ ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
 -- 下载中心 搬迁代码  by yanjun end
 
 -- 修复 workplace 的问题 janson TODO 这里需要弄新的分支
--- ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
+ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
 -- by janson end
 
-
-CREATE TABLE `eh_communityandbuilding_relationes` (
-  `id` bigint(20) NOT NULL COMMENT '主键id',
-  `building_id` bigint(20) DEFAULT NULL COMMENT '楼栋id',
-  `community_id` bigint(20) DEFAULT NULL COMMENT '所在项目id' ,
-  `address_id` bigint(20) DEFAULT NULL COMMENT '地址id' ,
-  `create_time` datetime NOT NULL DEFAULT now() COMMENT '创建时间',
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
