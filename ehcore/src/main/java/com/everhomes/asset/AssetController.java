@@ -1509,17 +1509,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     @RequestMapping("testLateFine")
     @RestReturn(value = String.class)
     public RestResponse testLateFine(TestLateFineCommand cmd) throws ParseException {
-    	SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-    	Date targetDay = yyyyMMdd.parse(cmd.getDate());
-    	Date today = new Date();
-    	while(targetDay.getTime() >= today.getTime()) {
-    		cmd.setDate(yyyyMMdd.format(today));
-    		assetService.testLateFine(cmd);
-    		Calendar c = Calendar.getInstance();
-            c.setTime(today);
-            c.add(Calendar.DAY_OF_MONTH, 1);// 今天+1天
-            today = c.getTime();//下一天
-    	}
+    	assetService.testLateFine(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
