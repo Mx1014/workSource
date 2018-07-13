@@ -1,3 +1,4 @@
+-- 人事档案2.8 start by ryan 13/07/2018
 DROP TABLE eh_general_form_groups;
 
 -- 此表未使用 直接重建
@@ -41,3 +42,4 @@ CREATE TABLE `eh_archives_form_groups` (
 	`operator_time` DATETIME,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- 人事档案2.8 end by ryan
