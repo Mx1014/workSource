@@ -13,6 +13,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.activity.ActivityChargeFlag;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.activity.ActivityRosterStatus;
@@ -217,7 +218,10 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
         }
         List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId, ActivityRosterStatus.NORMAL);
         String scope = ActivityNotificationTemplateCode.SCOPE;
-        int code = ActivityNotificationTemplateCode.ACTIVITY_CANCEL;
+        int code = ActivityNotificationTemplateCode.ACTIVITY_CANCEL_NO_PAY;
+        if (ActivityChargeFlag.CHARGE.getCode().equals(activity.getChargeFlag())) {
+            code = ActivityNotificationTemplateCode.ACTIVITY_CANCEL_PAY;
+        }
         Map<String, Object> map = new HashMap<>();
         map.put("subject", activity.getSubject());
         final String content = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
