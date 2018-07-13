@@ -12,6 +12,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -19,6 +20,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.sequence.SequenceProvider;
@@ -36,7 +38,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.everhomes.techpark.expansion.EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID;
@@ -70,6 +74,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	private EnterpriseApplyEntryService enterpriseApplyEntryService;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public ListLeaseBuildingsResponse listLeaseBuildings(ListLeaseBuildingsCommand cmd) {
@@ -378,9 +384,24 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
-		
+
+		Set<Long> authCommunities = null;
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null,0L);//项目介绍权限
+			if (cmd.getCurrentProjectId()!=null) {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null, cmd.getCurrentProjectId());//项目介绍权限
+				authCommunities = new HashSet<>();
+				authCommunities.add(cmd.getCurrentProjectId());
+			}else{//项目导航为全部 找出授权的项目
+				ListUserRelatedProjectByModuleCommand cmd2 = new ListUserRelatedProjectByModuleCommand();
+				cmd2.setAppId(cmd.getAppId());
+				cmd2.setOrganizationId(cmd.getCurrentPMId());
+				cmd2.setModuleId(40100L);
+				List<ProjectDTO> dtos = serviceModuleService.listUserRelatedCategoryProjectByModuleId(cmd2);
+				if (dtos!=null && dtos.size()>0)
+					authCommunities = dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toSet());
+				else
+					authCommunities = new HashSet<>();
+			}
 		}
 
 		if (null == cmd.getCategoryId()) {
@@ -391,7 +412,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		List<Community> communities = communityProvider.listCommunitiesByCityIdAndAreaId(cmd.getNamespaceId(), cmd.getCityId(),
 				cmd.getAreaId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
-
+		Set<Long> finalAuthCommunities = authCommunities;
+		communities = communities.stream().filter(r-> finalAuthCommunities.contains(r.getId())).collect(Collectors.toList());
 		listLeaseProjectsResponse response = new listLeaseProjectsResponse();
 
 		int size = communities.size();
