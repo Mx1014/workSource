@@ -20,4 +20,7 @@ public class ActivityNotificationTemplateCode {
     public static final int ACTIVITY_CHANGE_TIME_ADDRESS = 16;      //活动发布后，修改时间和地址
     public static final int ACTIVITY_CHANGE_SUBJECT_TIME_ADDRESS = 17;    //活动发布后，修改标题、时间和地点
 
+    public static final int ACTIVITY_CANCEL = 18;   //活动报名人数未达到最低限制人数，活动被取消
+
+
 }
