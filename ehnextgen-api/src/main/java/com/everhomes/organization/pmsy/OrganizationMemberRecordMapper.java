@@ -57,11 +57,11 @@ public class OrganizationMemberRecordMapper implements RecordMapper<Record, Orga
         member.setContactToken(r.getValue(t2.CONTACT_TOKEN));
         member.setContactDescription(r.getValue(t2.CONTACT_DESCRIPTION));
         member.setEmployeeNo(r.getValue(t2.EMPLOYEE_NO));
-        member.setAvatar(r.getValue(t2.AVATAR));
+//        member.setAvatar(r.getValue(t2.AVATAR));
         member.setGender(r.getValue(t2.GENDER));
         member.setEmployeeStatus(r.getValue(t2.EMPLOYEE_STATUS));
         member.setEmploymentTime(r.getValue(t2.EMPLOYMENT_TIME));
-        member.setProfileIntegrity(r.getValue(t2.PROFILE_INTEGRITY));
+//        member.setProfileIntegrity(r.getValue(t2.PROFILE_INTEGRITY));
         member.setCheckInTime(r.getValue(t2.CHECK_IN_TIME));
         member.setEmail(r.getValue(t2.EMAIL));
         member.setWorkEmail(r.getValue(t2.WORK_EMAIL));
