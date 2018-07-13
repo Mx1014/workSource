@@ -1,6 +1,9 @@
 
 package com.everhomes.asset;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -1501,11 +1504,22 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     /**
      * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
      * <b>URL: /asset/testLateFine</b>
+     * @throws ParseException 
      */
     @RequestMapping("testLateFine")
     @RestReturn(value = String.class)
-    public RestResponse testLateFine(TestLateFineCommand cmd) {
-        assetService.testLateFine(cmd);
+    public RestResponse testLateFine(TestLateFineCommand cmd) throws ParseException {
+    	SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+    	Date targetDay = yyyyMMdd.parse(cmd.getDate());
+    	Date today = new Date();
+    	while(targetDay.getTime() >= today.getTime()) {
+    		cmd.setDate(yyyyMMdd.format(today));
+    		assetService.testLateFine(cmd);
+    		Calendar c = Calendar.getInstance();
+            c.setTime(today);
+            c.add(Calendar.DAY_OF_MONTH, 1);// 今天+1天
+            today = c.getTime();//下一天
+    	}
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
