@@ -5058,7 +5058,7 @@ public class AssetServiceImpl implements AssetService {
 		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
-        return assetProvider.listBillGroupsForEnt(cmd.getOwnerId(),cmd.getOwnerType());
+        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(),null);//对公转账不区分多入口，所以categoryId为null
 	}
 	
 	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response){
