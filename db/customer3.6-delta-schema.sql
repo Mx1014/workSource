@@ -22,7 +22,7 @@ CREATE TABLE `eh_customer_potential_datas` (
   `operate_uid` bigint(20) DEFAULT NULL,
   `update_time` datetime DEFAULT NULL ,
   `create_time` datetime NOT NULL ,
-  `delete_time` datetime NOT NULL ,
+  `delete_time` datetime  NULL ,
   `delete_uid` bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
