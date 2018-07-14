@@ -4867,7 +4867,6 @@ public class AssetServiceImpl implements AssetService {
                    }else{
                        dtos.addAll(back);
                    }
-
                    pageSize = pageSize - 100;
                    pageAnchor = pageSize;
                    cmd.setPageAnchor(cmd.getPageAnchor()==null?2l:cmd.getPageAnchor()+1l);

@@ -4841,6 +4841,7 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Integer paymentType = cmd.getPaymentType();
         Long billId = cmd.getBillId();
+        Long categoryId = cmd.getCategoryId();//增加多入口查询条件
         //卸货结束
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -4860,6 +4861,9 @@ public class AssetProviderImpl implements AssetProvider {
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         Byte status = new Byte("1");
         query.addConditions(t.SWITCH.eq(status));
+        if(!org.springframework.util.StringUtils.isEmpty(categoryId)){
+        	query.addConditions(t.CATEGORY_ID.eq(categoryId));//增加多入口查询条件
+        }
         if(!org.springframework.util.StringUtils.isEmpty(billId)){
             query.addConditions(t.ID.eq(billId));
         }
