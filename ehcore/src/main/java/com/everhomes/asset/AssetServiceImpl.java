@@ -4723,12 +4723,6 @@ public class AssetServiceImpl implements AssetService {
         return response;
 	}
 
-	public ListBillsDTO createTestZJGKBill() {
-		CreateBillCommand cmd = new CreateBillCommand();
-		
-		return assetProvider.creatPropertyBill(cmd, null);
-	}
-
 	public IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd) {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){//ownerId为-1代表选择的是全部
