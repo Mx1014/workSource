@@ -381,11 +381,7 @@ public interface AssetProvider {
     
     String getProjectNameByBillID(Long billId);
     
-    List<ListBillsDTO> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd);
-    
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
     
     AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType);
-	
-    List<PaymentOrderBillDTO> listBillsForOrderEnt(Integer namespaceId, Integer pageOffSet, Integer pageSize,ListPaymentBillCmd cmd);
 }
