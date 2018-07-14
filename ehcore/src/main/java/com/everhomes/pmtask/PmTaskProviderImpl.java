@@ -656,4 +656,13 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		List<PmTaskOrder> result = query.fetch().map(r->ConvertHelper.convert(r,PmTaskOrder.class));
 		return result.size() == 1 ? result.get(0) : null;
 	}
+
+	@Override
+	public void clearOrderDetails() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		TruncateIdentityStep query = context.truncate(Tables.EH_PM_TASK_ORDERS);
+		query.execute();
+		TruncateIdentityStep query1 = context.truncate(Tables.EH_PM_TASK_ORDER_DETAILS);
+		query.execute();
+	}
 }

@@ -3006,8 +3006,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 				PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
 				bean.setOwnerId(elem.getKey());
 				bean.setOwnerName(null != community ? community.getName() : "");
-				Category category = categoryProvider.findCategoryById(elem1.getKey());
-				bean.setType(null != category ? category.getName() : "");
+				//为科兴与一碑对接
+				if(cmd.getNamespaceId() == 999983 && null != cmd.getAppId() &&
+						cmd.getAppId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+					bean.setType("物业报修");
+				}else{
+					Category category = categoryProvider.findCategoryById(elem1.getKey());
+					bean.setType(null != category ? category.getName() : "");
+				}
 				bean.setTotal(elem1.getValue().size());
 				dtoList.add(bean);
 			}
@@ -3234,7 +3240,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void createOrderDetails(CreateOrderDetailsCommand cmd) {
-
 		User user = UserContext.current().getUser();
 		Integer namespaceId = cmd.getNamespaceId();
 		String ownerType = cmd.getOwnerType();
@@ -3267,7 +3272,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			this.pmTaskProvider.createOrderDetails(details);
 		}
 
-		this.FlowStepCreateOrderDetails(taskId,user.getId(),user.getNickName());
+		this.FlowStepOrderDetailsOperate(taskId,user.getId(),user.getNickName(),FlowStepType.APPROVE_STEP.getCode());
 //		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 //		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 //		handler.createOrderDetails(taskId,user.getId(),user.getNickName());
@@ -3276,6 +3281,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void modifyOrderDetails(CreateOrderDetailsCommand cmd) {
+		User user = UserContext.current().getUser();
 		Integer namespaceId = cmd.getNamespaceId();
 		String ownerType = cmd.getOwnerType();
 		Long ownerId = cmd.getOwnerId();
@@ -3307,15 +3313,22 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}).collect(Collectors.toList());
 			this.pmTaskProvider.createOrderDetails(details);
 		}
+
+		this.FlowStepOrderDetailsOperate(taskId,user.getId(),user.getNickName(),FlowStepType.NO_STEP.getCode());
 	}
 
 	@Override
 	public PmTaskOrderDTO searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd) {
 		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
-		PmTaskOrderDTO dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
-		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTaskId());
-		if(null != result && result.size() > 0)
-			dto.setProducts(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
+		PmTaskOrderDTO dto = new PmTaskOrderDTO();
+		if(null != order)
+			dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
+		List<PmTaskOrderDetailDTO> products = new ArrayList<>();
+		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(null, null, null, cmd.getTaskId());
+		if(null != result && result.size() > 0){
+			products = result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList());
+		}
+			dto.setProducts(products);
 		return dto;
 	}
 
@@ -3380,6 +3393,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}
 			});
 		}
+	}
+
+	@Override
+	public void clearOrderDetails() {
+		this.pmTaskProvider.clearOrderDetails();
 	}
 
 	@Override
@@ -3828,14 +3846,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return JSONObject.parseObject(json).getString("text");
 	}
 
-	private void FlowStepCreateOrderDetails(Long taskId, Long operatorId, String operatorName){
+	private void FlowStepOrderDetailsOperate(Long taskId, Long operatorId, String operatorName, String stepType){
 		FlowCase mainFlowCase = this.flowCaseProvider.findFlowCaseByReferId(taskId,"EhPmTasks",20100L);
 		FlowCaseTree flowCaseTrees = flowService.getProcessingFlowCaseTree(mainFlowCase.getId());
 		List<FlowCaseTree> flowCases = flowCaseTrees.getLeafNodes();
 		FlowCase flowCase = flowCases.get(flowCases.size() - 1).getFlowCase();
 		LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
 		FlowAutoStepDTO dto = new FlowAutoStepDTO();
-		dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		dto.setAutoStepType(stepType);
 		dto.setEventType(FlowEventType.STEP_MODULE.getCode());
 
 		dto.setFlowCaseId(flowCase.getId());
@@ -3860,7 +3878,34 @@ public class PmTaskServiceImpl implements PmTaskService {
 		log.setButtonFiredStep(FlowStepType.NO_STEP.getCode());
 		log.setTrackerApplier(1L); // 申请人可以看到此条log，为0则看不到
 		log.setTrackerProcessor(1L);// 处理人可以看到此条log，为0则看不到
-		log.setLogContent(flowCase.getCurrentNode() + "已完成");
+
+		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(taskId);
+		List<PmTaskOrderDetail> products = this.pmTaskProvider.findOrderDetailsByTaskId(null,null,null,taskId);
+		String content = "";
+		if(null != order){
+			content += "本次服务的费用清单如下，请进行确认\n";
+			BigDecimal total = BigDecimal.valueOf(order.getAmount());
+			content += "总计:"+total.movePointLeft(2).toString()+"元\n";
+			BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+			content += "服务费:"+serviceFee.movePointLeft(2).toString()+"元\n";
+			BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+			content += "物品费:"+ productFee.movePointLeft(2) +"元\n";
+			if(null != products && products.size() > 0){
+				content += "物品费详情：\n";
+				for (PmTaskOrderDetail r : products) {
+					BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+					BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+					content += r.getProductName() + ":";
+					content += price.multiply(amount).movePointLeft(2).toString() + "元";
+					content += "(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")\n";
+				}
+			}
+			content += "如对上述费用有疑义请附言说明";
+		}else{
+			content = "本次服务没有产生维修费";
+		}
+
+		log.setLogContent(content);
 		List<FlowEventLog> logList = new ArrayList<>(1);
 		logList.add(log);
 		dto.setEventLogs(logList);

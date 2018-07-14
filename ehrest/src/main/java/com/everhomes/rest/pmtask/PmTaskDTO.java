@@ -46,6 +46,8 @@ import com.everhomes.util.StringHelper;
  * <li>enterpriseId: 企业id（app场景获取）</li>
  * <li>enterpriseName: 企业名称</li>
  * <li>enterpriseAddress: 楼栋门牌</li>
+ *
+ * <li>amount: 费用金额</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -100,6 +102,8 @@ public class PmTaskDTO {
 	private Long enterpriseId;
 	private String enterpriseName;
 	private String enterpriseAddress;
+
+	private Long amount;
 
 	public Long getId() {
 		return id;
@@ -360,6 +364,14 @@ public class PmTaskDTO {
 
 	public void setEnterpriseAddress(String enterpriseAddress) {
 		this.enterpriseAddress = enterpriseAddress;
+	}
+
+	public Long getAmount() {
+		return amount;
+	}
+
+	public void setAmount(Long amount) {
+		this.amount = amount;
 	}
 
 	@Override

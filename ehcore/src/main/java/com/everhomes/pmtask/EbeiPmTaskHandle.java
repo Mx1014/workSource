@@ -807,6 +807,11 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
 
+                PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(t.getId());
+                if(null != order){
+                    dto.setAmount(order.getAmount());
+                }
+
                 return dto;
             }).collect(Collectors.toList()));
             if(listSize <= pageSize){

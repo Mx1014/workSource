@@ -106,10 +106,10 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig){
 
         if(moudleId.equals(FlowConstants.PM_TASK_MODULE)){
-            JSONObject json = JSONObject.parseObject(instanceConfig);
-            String value = json.getString("taskCategoryId");
-            if(!StringUtils.isEmpty(value)){
-                return value;
+            PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
+            Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
+            if(null != taskCategoryId){
+                return String.valueOf(taskCategoryId);
             }
 //            else{
 //                String str = json.getString("url");

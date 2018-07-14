@@ -244,7 +244,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}
 
 //		企业名称和楼栋门牌
-		if(null != dto.getEnterpriseId()){
+		if(null != dto.getEnterpriseId() && dto.getEnterpriseId() > 0){
 			Organization org = organizationProvider.findOrganizationById(dto.getEnterpriseId());
 			if(null != org){
 				dto.setEnterpriseName(org.getName());
@@ -327,6 +327,21 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setValue(dto.getRequestorPhone());
 		entities.add(e);
 
+		if(null != dto.getEnterpriseId() && dto.getEnterpriseId() > 0){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("企业名称");
+			e.setValue(dto.getEnterpriseName());
+			entities.add(e);
+
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("楼栋门牌");
+			e.setValue(dto.getAddress());
+			entities.add(e);
+		}
+
+
 //		代发情况才显示
 		if (task.getOrganizationUid() != null) {
 			e = new FlowCaseEntity();
@@ -358,33 +373,50 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		if(null != order){
 			orderdto = ConvertHelper.convert(order,PmTaskOrderDTO.class);
 			orderdto.setProducts(products.stream().map(r->ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
+
+			if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode()){
+				if (null != orderdto.getServiceFee()){
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+					e.setKey("服务费");
+					BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+					e.setValue(serviceFee.movePointLeft(2).toString() + "元");
+					entities.add(e);
+				}
+				if(null != products && products.size() > 0){
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+					e.setKey("物品费");
+					BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+					e.setValue(productFee.movePointLeft(2).toString() + "元");
+					entities.add(e);
+				}
+			}
 		}
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("物品清单");
-		e.setValue(orderdto.toString());
-		entities.add(e);
+
+
+
 
 		//填写费用清单
 //		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
-		if (task.getIfUseFeelist()!=null && task.getIfUseFeelist()==1)
-			if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
-				if (products!=null && products.size()>0){
-					e = new FlowCaseEntity();
-					e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-					e.setKey("费用清单");
-					String content = "";
+//		if (task.getIfUseFeelist()!=null && task.getIfUseFeelist()==1)
+//			if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
+//				if (products!=null && products.size()>0){
+//					e = new FlowCaseEntity();
+//					e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+//					e.setKey("费用清单");
+//					String content = "";
 //					List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
 //							.collect(Collectors.toList());
-					content += "本次服务的费用清单如下，请进行确认\n";
+//					content += "本次服务的费用清单如下，请进行确认\n";
 //					Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
-					BigDecimal total = BigDecimal.valueOf(order.getAmount());
-					content += "总计:"+total.movePointLeft(2).toString()+"元\n";
+//					BigDecimal total = BigDecimal.valueOf(order.getAmount());
+//					content += "总计:"+total.movePointLeft(2).toString()+"元\n";
 //					Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
-					BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
-					content += "服务费:"+serviceFee.movePointLeft(2).toString()+"元\n";
-					BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
-					content += "物品费:"+ productFee.movePointLeft(2) +"元\n";
+//					BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+//					content += "服务费:"+serviceFee.movePointLeft(2).toString()+"元\n";
+//					BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+//					content += "物品费:"+ productFee.movePointLeft(2) +"元\n";
 //					PostApprovalFormItem subForm = getFormItem(items,"物品");
 //					if (subForm!=null) {
 //						PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
@@ -402,26 +434,26 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 //							content += "如对上述费用有疑义请附言说明";
 //						}
 //					}
-					if (order.getProductFee().doubleValue() > 0){
-						content += "物品费详情：\n";
-						for (PmTaskOrderDetail r : products) {
-							BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
-							BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
-							content += r.getProductName() + ":";
-							content += price.multiply(amount).movePointLeft(2).toString() + "元";
-							content += "(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")";
-						}
-					}
-					content += "如对上述费用有疑义请附言说明";
-					e.setValue(content);
-					entities.add(e);
-				}else {
-					e = new FlowCaseEntity();
-					e.setEntityType(FlowCaseEntityType.LIST.getCode());
-					e.setKey("费用清单");
-					e.setValue("本次服务没有产生维修费");
-					entities.add(e);
-				}
+//					if (order.getProductFee().doubleValue() > 0){
+//						content += "物品费详情：\n";
+//						for (PmTaskOrderDetail r : products) {
+//							BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+//							BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+//							content += r.getProductName() + ":";
+//							content += price.multiply(amount).movePointLeft(2).toString() + "元";
+//							content += "(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")";
+//						}
+//					}
+//					content += "如对上述费用有疑义请附言说明";
+//					e.setValue(content);
+//					entities.add(e);
+//				}else {
+//					e = new FlowCaseEntity();
+//					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+//					e.setKey("费用清单");
+//					e.setValue("本次服务没有产生维修费");
+//					entities.add(e);
+//				}
 
 		pmTaskProvider.findPmTaskOrderById(task.getId());
 		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
@@ -552,11 +584,16 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
 //			按钮参数
 			String btnParam = ctx.getFlowGraph().getGraphButton(ctx.getCurrentEvent().getFiredButtonId()).getFlowButton().getParam();
+			String btnNodeType = "";
+			if (!StringUtils.isBlank(btnParam)) {
+				JSONObject paramJson = JSONObject.parseObject(btnParam);
+				btnNodeType = paramJson.getString("nodeType");
+			}
 //			发起人
 //			ctx.getFlowCase().getApplyUserId();
 //			处理人
 //			ctx.getOperator().getId();
-			if ("MOTIFYFEE".equals(btnParam)) {
+			if ("MOTIFYFEE".equals(btnNodeType)) {
 				FlowGraphEvent evt = ctx.getCurrentEvent();
 				if (FlowUserType.APPLIER.equals(evt.getUserType())){
 					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
@@ -569,9 +606,18 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					dto.setStepCount(flowCase.getStepCount());
 					flowService.processAutoStep(dto);
 				}
-			} else if ("CONFIRMFEE".equals(btnParam)){
-// TODO: 2018/7/11 支付 
-			} else if ("NEEDFEE".equals(btnParam)){
+			} else if ("CONFIRMFEE".equals(btnNodeType)){
+// TODO: 2018/7/11 支付
+				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+				FlowAutoStepDTO dto = new FlowAutoStepDTO();
+				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+				dto.setFlowCaseId(flowCase.getId());
+				dto.setFlowMainId(flowCase.getFlowMainId());
+				dto.setFlowNodeId(flowCase.getCurrentNodeId());
+				dto.setFlowVersion(flowCase.getFlowVersion());
+				dto.setStepCount(flowCase.getStepCount());
+				flowService.processAutoStep(dto);
+			} else if ("NEEDFEE".equals(btnNodeType)){
 				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
 				FlowAutoStepDTO dto = new FlowAutoStepDTO();
 				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());

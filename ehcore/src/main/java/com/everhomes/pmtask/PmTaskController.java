@@ -957,6 +957,20 @@ public class PmTaskController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /pmtask/clearOrderDetails</b>
+     * <p></p>
+     */
+    @RequestMapping("clearOrderDetails")
+    @RestReturn(value=String.class)
+    public RestResponse clearOrderDetails() {
+        pmTaskService.clearOrderDetails();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /pmtask/listPayeeAccounts</b>
      * <p>列出当前项目下所有的收款方账户</p>
      */
