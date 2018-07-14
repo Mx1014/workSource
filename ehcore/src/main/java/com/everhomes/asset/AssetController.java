@@ -1474,10 +1474,10 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * <b>URL: /asset/listSettledBillForEnt</b>
      */
     @RequestMapping("listSettledBillForEnt")
-    @RestReturn(value = ListBillsResponseForEnt.class)
+    @RestReturn(value = ListBillsResponse.class)
     public RestResponse listSettledBillForEnt(ListBillsCommandForEnt cmd) {
-    	ListBillsResponseForEnt listBillsResponseForEnt = assetService.listBillsForEnt(cmd);
-        RestResponse response = new RestResponse(listBillsResponseForEnt);
+    	ListBillsResponse listBillsResponse = assetService.listBillsForEnt(cmd);
+        RestResponse response = new RestResponse(listBillsResponse);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

@@ -498,14 +498,14 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
-            // 应用id，多入口区分账单 by wentian 2018/5/25
+        //应用id，多入口区分账单 by wentian 2018/5/25
         Long categoryId = cmd.getCategoryId();
-
         Integer paymentType = cmd.getPaymentType();
         Byte isUploadCertificate = cmd.getIsUploadCertificate();
         String buildingName = cmd.getBuildingName();//楼栋名称
         String apartmentName = cmd.getApartmentName();//门牌名称
         String customerTel = cmd.getCustomerTel();//客户手机号
+        Long targetIdForEnt = cmd.getTargetIdForEnt();//对公转账是根据企业id来查询相关的所有账单，如果是对公转账则不能为空
 
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
@@ -521,11 +521,12 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
 
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
-
+        
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         if(!org.springframework.util.StringUtils.isEmpty(status)){
             query.addConditions(t.SWITCH.eq(status));
@@ -545,9 +546,6 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(contractNum)){
             query.addConditions(t.CONTRACT_NUM.eq(contractNum));
         }
-        if(status!=null && status == 1){
-            query.addOrderBy(t.STATUS);
-        }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
             query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
         }
@@ -560,6 +558,9 @@ public class AssetProviderImpl implements AssetProvider {
         if(paymentType!=null){
             query.addConditions(t.PAYMENT_TYPE.eq(paymentType));
         }
+        if(!org.springframework.util.StringUtils.isEmpty(targetIdForEnt)){
+        	query.addConditions(t.TARGET_ID.eq(targetIdForEnt));//对公转账是根据企业id来查询相关的所有账单
+        }
         //只查询上传了缴费凭证的记录
         if(isUploadCertificate!=null && isUploadCertificate == 1){
         	query.addConditions(t.IS_UPLOAD_CERTIFICATE.eq(isUploadCertificate));
@@ -571,6 +572,9 @@ public class AssetProviderImpl implements AssetProvider {
         	apartmentName = apartmentName != null ? apartmentName : "";
         	String queryAddress = buildingName + "/" + apartmentName;
         	query.addHaving(DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).like("%"+queryAddress+"%"));
+        }
+        if(status!=null && status == 1){
+            query.addOrderBy(t.STATUS);
         }
         query.addOrderBy(t.DATE_STR_BEGIN.desc());
         query.addLimit(pageOffSet,pageSize+1);

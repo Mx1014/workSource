@@ -4927,12 +4927,16 @@ public class AssetServiceImpl implements AssetService {
         if( paidBills.size() >0 ) throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS,"this is bills have been paid,please refresh");
     }
 
-	public ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd) {
-    	ListBillsResponseForEnt response = new ListBillsResponseForEnt();
+	public ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd) {
+		ListBillsResponse response = new ListBillsResponse();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
-        List<ListBillsDTO> list = handler.listBillsForEnt(UserContext.getCurrentNamespaceId(),response, cmd);
+        //转换为正确的命令
+        ListBillsCommand converCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
+        converCmd.setTargetIdForEnt(cmd.getTargetId());//对公转账的专有参数
+        converCmd.setStatus((byte) 1);//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
+        List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),response, converCmd);
         response.setListBillsDTOS(list);
         return response;
     }

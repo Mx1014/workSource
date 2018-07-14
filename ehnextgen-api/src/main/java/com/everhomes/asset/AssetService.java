@@ -216,7 +216,7 @@ public interface AssetService {
     
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
     
-    ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd);
+    ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
     
     void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
     
