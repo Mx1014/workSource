@@ -787,7 +787,7 @@ public class ParkingServiceImpl implements ParkingService {
 			createOrderCommand.setPaymentParams(flattenMap);
 			createOrderCommand.setCommitFlag(1);
 			createOrderCommand.setOrderType(3);
-			createOrderCommand.setAccountCode(BIZ_ACCOUNT_PRE+configProvider.getValue("parking.pay."+sNamespaceId,BIZ_ACCOUNT_PRE+"999937"));
+			createOrderCommand.setAccountCode(BIZ_ACCOUNT_PRE+configProvider.getValue("parking.pay."+sNamespaceId,"999937"));
 		}
 		createOrderCommand.setOrderRemark1(configProvider.getValue("parking.pay.OrderRemark1","停车缴费"));
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
