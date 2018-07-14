@@ -1372,20 +1372,6 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
 	}
 	
 	/**
-	 * <p>由于史晗不肯造张江高科的账单数据，所以只能手动造账单数据用于测试新支付</p>
-	 * <b>URL: /asset/createTestZJGKBill</b>
-	 */
-	@RequestMapping("createTestZJGKBill")
-	@RestReturn(value = ListBillsDTO.class)
-	public RestResponse createTestZJGKBill(){
-	    ListBillsDTO dto = assetService.createTestZJGKBill();
-	    RestResponse response = new RestResponse(dto);
-	    response.setErrorDescription("OK");
-	    response.setErrorCode(ErrorCodes.SUCCESS);
-	    return response;
-	}
-	
-	/**
 	 * <b>URL: /asset/isProjectNavigateDefault</b>
 	 * <p>项目导航区分全部、解耦 是否使用默认配置</p>
 	 */
@@ -1474,10 +1460,10 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * <b>URL: /asset/listSettledBillForEnt</b>
      */
     @RequestMapping("listSettledBillForEnt")
-    @RestReturn(value = ListBillsResponseForEnt.class)
+    @RestReturn(value = ListBillsResponse.class)
     public RestResponse listSettledBillForEnt(ListBillsCommandForEnt cmd) {
-    	ListBillsResponseForEnt listBillsResponseForEnt = assetService.listBillsForEnt(cmd);
-        RestResponse response = new RestResponse(listBillsResponseForEnt);
+    	ListBillsResponse listBillsResponse = assetService.listBillsForEnt(cmd);
+        RestResponse response = new RestResponse(listBillsResponse);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -1501,9 +1487,9 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * <b>URL: /asset/listPaymentBillForEnt</b>
      */
     @RequestMapping(value = "listPaymentBillForEnt")
-    @RestReturn(ListPaymentBillRespForEnt.class)
-    public RestResponse listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd, HttpServletRequest request) throws Exception {
-        ListPaymentBillRespForEnt result = assetService.listPaymentBillForEnt(cmd);
+    @RestReturn(ListPaymentBillResp.class)
+    public RestResponse listPaymentBillForEnt(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+        ListPaymentBillResp result = assetService.listPaymentBillForEnt(cmd);
         RestResponse response = new RestResponse(result);
         return response;
     }
@@ -1513,7 +1499,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      * <b>URL: /asset/exportOrdersForEnt</b>
      */
     @RequestMapping("exportOrdersForEnt")
-    public HttpServletResponse exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response) {
+    public HttpServletResponse exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response) {
         assetService.exportOrdersForEnt(cmd,response);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorDescription("OK");

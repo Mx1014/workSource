@@ -353,28 +353,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         return list;
     }
     
-    public List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId,ListBillsResponseForEnt response, ListBillsCommandForEnt cmd) {
-        //修改传递参数为一个对象，卸货
-        Long pageAnchor = cmd.getPageAnchor();
-        Integer pageSize = cmd.getPageSize();
-        //卸货完毕
-        if (pageAnchor == null || pageAnchor < 1l) {
-            pageAnchor = 0l;
-        }
-        if(pageSize == null){
-            pageSize = 20;
-        }
-        Integer pageOffSet = pageAnchor.intValue();
-        List<ListBillsDTOForEnt> list = assetProvider.listBillsForEnt(currentNamespaceId,pageOffSet,pageSize, cmd);
-        if(list.size() <= pageSize){
-            response.setNextPageAnchor(null);
-        }else {
-            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
-            list.remove(list.size()-1);
-        }
-        return list;
-    }
-
     @Override
     public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageNum, Integer pageSize,Long ownerId, ListBillItemsResponse response, Long billGroupId) {
         if (pageNum == null) {

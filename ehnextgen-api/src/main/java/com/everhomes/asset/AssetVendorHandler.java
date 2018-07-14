@@ -36,9 +36,7 @@ import com.everhomes.rest.asset.ListBillItemsResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.ListBillsCommandForEnt;
 import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListBillsDTOForEnt;
 import com.everhomes.rest.asset.ListBillsResponse;
-import com.everhomes.rest.asset.ListBillsResponseForEnt;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.asset.ListPaymentBillResp;
 import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
@@ -244,11 +242,6 @@ public abstract class AssetVendorHandler {
     }
     void payNotify(OrderPaymentNotificationCommand cmd) {
     	LOGGER.error("Insufficient privilege, handler payNotify");
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                "Insufficient privilege");
-    }
-    List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId, ListBillsResponseForEnt response, ListBillsCommandForEnt cmd){
-        LOGGER.error("Insufficient privilege, zuolinhandler listBillsForEnt");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
