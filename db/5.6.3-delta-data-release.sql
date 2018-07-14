@@ -19,3 +19,8 @@ update eh_configurations set  value = '/html/news_text_review.html'  where name 
 -- 园区入驻从“敬请期待”改为“上线”
 UPDATE eh_service_modules set client_handler_type = 0, instance_config = '{}' WHERE id = 40100;
 UPDATE eh_service_module_apps set instance_config = '{}' WHERE module_id = 40100;
+
+-- janson
+delete from eh_rentalv2_orders where  rental_resource_id not in (select id from eh_rentalv2_resources);
+update eh_organizations set organization_type = 'ENTERPRISE' where organization_type is null;
+-- end janson
