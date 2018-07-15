@@ -2655,10 +2655,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}
 				dto.setCreateTime(r.getCreateTime());
 				dto.setBuildingName(r.getBuildingName());
-				Category category = categoryProvider.findCategoryById(r.getCategoryId());
-				if (category != null) {
-					dto.setTaskCategoryName(category.getName());
-				}
+				dto.setTaskCategoryName(categoryProvider.findCategoryById(r.getTaskCategoryId()).getName());
 				dto.setContent(r.getContent());
 				dto.setFlowCaseId(r.getFlowCaseId());
 				ret.add(dto);

@@ -955,16 +955,16 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         if(payUserDTOs == null || payUserDTOs.size() == 0){
             //创建个人账号
             payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), "NS"+namespaceId.toString());
+            String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         }else {
             payUserDTO = payUserDTOs.get(0);
         }
-        String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         return payUserDTO;
     }
 
     private OrderCommandResponse createPreOrder(CreateOrderCommand cmd) {
         CreateOrderRestResponse createOrderRestResponse = new CreateOrderRestResponse();
-        if (PaymentType.WECHAT_JS_ORG_PAY.getCode() == cmd.getPaymentType()) {
+        if (cmd.getPaymentType() != null && PaymentType.WECHAT_JS_ORG_PAY.getCode() == cmd.getPaymentType()) {
             createOrderRestResponse = this.payServiceV2.createCustomOrder(cmd);
         }else {
             createOrderRestResponse = this.payServiceV2.createPurchaseOrder(cmd);

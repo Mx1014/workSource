@@ -352,7 +352,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         }
         return list;
     }
-
+    
     @Override
     public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageNum, Integer pageSize,Long ownerId, ListBillItemsResponse response, Long billGroupId) {
         if (pageNum == null) {

@@ -380,6 +380,10 @@ public interface AssetProvider {
     
     String getProjectNameByBillID(Long billId);
     
+    ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
+    
+    AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType);
+    
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
 	
 	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);

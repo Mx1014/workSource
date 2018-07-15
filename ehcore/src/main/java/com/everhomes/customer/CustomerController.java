@@ -1561,4 +1561,16 @@ public class CustomerController extends ControllerBase {
     public HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse) {
         return customerService.exportCustomerDetails(cmd,httpResponse);
     }
+
+    /**
+     * <b>URL: /customer/getCustomerBasicInfoByOrgId</b>
+     * <p>根据企业id获取客户具体基础信息</p>
+     */
+    @RequestMapping("getCustomerBasicInfoByOrgId")
+    public RestResponse getCustomerBasicInfoByOrgId(GetEnterpriseCustomerCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerBasicInfoByOrgId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

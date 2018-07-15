@@ -8,6 +8,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -1067,29 +1068,31 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 	}
 
     @Override
-    public List<UserActivity> listUserActivetys(Condition cond, Integer pageSize, CrossShardListingLocator locator) {
-        pageSize = pageSize + 1;
-        List<UserActivity> results = new ArrayList<>();
+    public List<UserActivity> listUserActivetys(ListingLocator locator, Integer count, ListingQueryBuilderCallback callback) {
+        com.everhomes.server.schema.tables.EhUserActivities t = Tables.EH_USER_ACTIVITIES;
+
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(Tables.EH_USER_ACTIVITIES);
-        if(null != cond){
-            query.addConditions(cond);
+        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(t);
+
+        if(null != callback) {
+            callback.buildCondition(locator, query);
         }
-        if(null != locator.getAnchor()){
-            query.addConditions(Tables.EH_USER_ACTIVITIES.ID.lt(locator.getAnchor()));
+        if(null != locator.getAnchor()) {
+            query.addConditions(t.ID.le(locator.getAnchor()));
         }
-        query.addOrderBy(Tables.EH_USER_ACTIVITIES.ID.desc());
-        query.addLimit(pageSize);
-        query.fetch().map((r) -> {
-            results.add(ConvertHelper.convert(r, UserActivity.class));
-            return null;
-        });
-        locator.setAnchor(null);
-        if(results.size() >= pageSize){
-            results.remove(results.size() - 1);
-            locator.setAnchor(results.get(results.size() - 1).getId());
+        if (count > 0) {
+            query.addLimit(count + 1);
         }
-        return results;
+        query.addOrderBy(t.ID.desc());
+
+        List<UserActivity> list = query.fetchInto(UserActivity.class);
+        if (list.size() > count && count > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
     }
 
     @Override
@@ -1123,16 +1126,51 @@ public class UserActivityProviderImpl implements UserActivityProvider {
     public List<User> listNotInUserActivityUsers(Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-        SelectConditionStep<Record1<Long>> uidCond = context
-                .selectDistinct(Tables.EH_USER_ACTIVITIES.UID)
-                .from(Tables.EH_USER_ACTIVITIES)
-                .where(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+        List<String> ids = context
+                .selectDistinct(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER)
+                .from(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
+                .where(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId))
+                .fetchInto(String.class);
 
-        return context.select(Tables.EH_USERS.fields())
+        if (ids.size() == 0) {
+            ids.add("0");
+        }
+
+        List<Long> id1s = new ArrayList<>(ids.size());
+        for (String id : ids) {
+            try {
+                id1s.add(Long.valueOf(id));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return context.select(Tables.EH_USERS.ID, Tables.EH_USERS.NAMESPACE_ID, Tables.EH_USERS.CREATE_TIME)
                 .from(Tables.EH_USERS)
                 .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()))
                 .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull())
-                .and(Tables.EH_USERS.ID.notIn(uidCond))
+                .and(Tables.EH_USERS.NAMESPACE_USER_TOKEN.eq(""))
+                .and(Tables.EH_USERS.ID.notIn(id1s))
                 .fetchInto(User.class);
+    }
+
+    @Override
+    public void addActivities(List<UserActivity> activityList) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = sequenceProvider.getNextSequenceBlock(
+                NameMapper.getSequenceDomainFromTablePojo(EhUserActivities.class), activityList.size());
+        for (UserActivity activity : activityList) {
+            activity.setId(id++);
+        }
+        EhUserActivitiesDao dao = new EhUserActivitiesDao(cxt.configuration());
+        dao.insert(activityList.toArray(new EhUserActivities[0]));
+    }
+
+    @Override
+    public void deleteUserActivity(UserActivity activity) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserActivitiesDao dao = new EhUserActivitiesDao(context.configuration());
+        dao.delete(activity);
     }
 }

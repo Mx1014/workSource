@@ -146,8 +146,11 @@ core.server.id: 1
 core.server.list: 1,2
 
 # 允许在 nashorn 中通过 Java.type 访问的类
-nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService
-
+nashorn.class.includes:
+  java.lang.*, java.util.*, java.io.*,
+  com.everhomes.oauth2client.handler.RestCallTemplate,
+  com.everhomes.scriptengine.nashorn.NashornApiService,
+  com.everhomes.flow.FlowNashornConfigService
 
 # pay-sdk需要配置响应的环境变量才能正常使用。我们的实现方式是用spring的@value注释注入yml项目配置文件中的内容。
 #pay.appKey: 6caa8584-c723-4b7b-9aec-071b4e31418f

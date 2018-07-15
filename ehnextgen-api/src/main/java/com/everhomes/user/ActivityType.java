@@ -1,7 +1,7 @@
 package com.everhomes.user;
 
 public enum ActivityType {
-    UNKNOW((byte) 0), LOGON((byte) 1), LOGOFF((byte) 2), BORDER_REGISTER((byte) 3);
+    UNKNOW((byte) 0), LOGON((byte) 1), LOGOFF((byte) 2), BORDER_REGISTER((byte) 3), CORRECT((byte) 4);
     private Byte code;
 
     ActivityType(Byte code) {

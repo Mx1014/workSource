@@ -3,35 +3,34 @@ package com.everhomes.statistics.terminal;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.jooq.impl.SQLDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by sfyan on 2016/11/24.
  */
 @Component
-public class StatTerminalProviderImpl implements StatTerminalProvider{
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StatTerminalProviderImpl.class);
+public class StatTerminalProviderImpl implements StatTerminalProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
@@ -117,7 +116,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     @Override
     public void createTerminalAppVersionCumulatives(TerminalAppVersionCumulatives terminalAppVersionCumulatives) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTerminalAppVersionCumulatives.class));
-        terminalAppVersionCumulatives.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        terminalAppVersionCumulatives.setCreateTime(DateUtils.currentTimestamp());
         terminalAppVersionCumulatives.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhTerminalAppVersionCumulativesDao dao = new EhTerminalAppVersionCumulativesDao(context.configuration());
@@ -129,20 +128,6 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhTerminalAppVersionCumulativesDao dao = new EhTerminalAppVersionCumulativesDao(context.configuration());
         dao.deleteById(id);
-    }
-
-    @Override
-    public TerminalAppVersionCumulatives getTerminalAppVersionCumulative(String version, String imei, Integer namespaceId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        SelectQuery<EhTerminalAppVersionCumulativesRecord> query = context.selectQuery(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES);
-        if(null != version){
-            query.addConditions(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.APP_VERSION.eq(version));
-        }
-        query.addConditions(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.NAMESPACE_ID.eq(namespaceId));
-        if(null != imei){
-            query.addConditions(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.IMEI_NUMBER.eq(imei));
-        }
-        return query.fetchAnyInto(TerminalAppVersionCumulatives.class);
     }
 
     @Override
@@ -166,12 +151,14 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     public TerminalAppVersionActives getTerminalAppVersionActive(String date, String version, String imei, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhTerminalAppVersionActivesRecord> query = context.selectQuery(Tables.EH_TERMINAL_APP_VERSION_ACTIVES);
-        query.addConditions(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.DATE.eq(date));
-        if(null != version){
+        if (date != null) {
+            query.addConditions(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.DATE.eq(date));
+        }
+        if (null != version) {
             query.addConditions(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.APP_VERSION.eq(version));
         }
         query.addConditions(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId));
-        if(null != imei){
+        if (null != imei) {
             query.addConditions(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.eq(imei));
         }
         return query.fetchAnyInto(TerminalAppVersionActives.class);
@@ -197,319 +184,125 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
 
     @Override
     public List<TerminalDayStatistics> listTerminalDayStatisticsByDate(String startDate, String endDate, Integer namespaceId) {
-        List<TerminalDayStatistics> resules = new ArrayList<>();
+        com.everhomes.server.schema.tables.EhTerminalDayStatistics t = Tables.EH_TERMINAL_DAY_STATISTICS;
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhTerminalDayStatisticsRecord> query = context.selectQuery(Tables.EH_TERMINAL_DAY_STATISTICS);
-        query.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.DATE.ge(startDate));
-        query.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.DATE.le(endDate));
-        query.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.NAMESPACE_ID.eq(namespaceId));
-        query.addOrderBy(Tables.EH_TERMINAL_DAY_STATISTICS.DATE);
-        query.fetch().map(r ->{
-            resules.add(ConvertHelper.convert(r, TerminalDayStatistics.class));
-            return null;
-        });
-
-        return resules;
+        SelectQuery<EhTerminalDayStatisticsRecord> query = context.selectQuery(t);
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(t.DATE.ge(startDate));
+        query.addConditions(t.DATE.le(endDate));
+        query.addOrderBy(t.DATE);
+        return query.fetchInto(TerminalDayStatistics.class);
     }
 
     @Override
     public List<TerminalHourStatistics> listTerminalHourStatisticsByDay(String date, Integer namespaceId) {
-        List<TerminalHourStatistics> resules = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhTerminalHourStatisticsRecord> query = context.selectQuery(Tables.EH_TERMINAL_HOUR_STATISTICS);
-        query.addConditions(Tables.EH_TERMINAL_HOUR_STATISTICS.DATE.eq(date));
-        query.addConditions(Tables.EH_TERMINAL_HOUR_STATISTICS.NAMESPACE_ID.eq(namespaceId));
-        query.addOrderBy(Tables.EH_TERMINAL_HOUR_STATISTICS.HOUR);
-        query.fetch().map(r ->{
-            resules.add(ConvertHelper.convert(r, TerminalHourStatistics.class));
-            return null;
-        });
-
-        return resules;
+        com.everhomes.server.schema.tables.EhTerminalHourStatistics t = Tables.EH_TERMINAL_HOUR_STATISTICS;
+        SelectQuery<EhTerminalHourStatisticsRecord> query = context.selectQuery(t);
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(t.DATE.eq(date));
+        query.addOrderBy(t.HOUR);
+        return query.fetchInto(TerminalHourStatistics.class);
     }
 
     @Override
     public List<TerminalAppVersionStatistics> listTerminalAppVersionStatisticsByDay(String date, Integer namespaceId) {
-        List<TerminalAppVersionStatistics> resules = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhTerminalAppVersionStatisticsRecord> query = context.selectQuery(Tables.EH_TERMINAL_APP_VERSION_STATISTICS);
-        query.addConditions(Tables.EH_TERMINAL_APP_VERSION_STATISTICS.DATE.eq(date));
-        query.addConditions(Tables.EH_TERMINAL_APP_VERSION_STATISTICS.NAMESPACE_ID.eq(namespaceId));
-        query.fetch().map(r ->{
-            resules.add(ConvertHelper.convert(r, TerminalAppVersionStatistics.class));
-            return null;
-        });
-
-        return resules;
+        com.everhomes.server.schema.tables.EhTerminalAppVersionStatistics t = Tables.EH_TERMINAL_APP_VERSION_STATISTICS;
+        SelectQuery<EhTerminalAppVersionStatisticsRecord> query = context.selectQuery(t);
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(t.DATE.eq(date));
+        return query.fetchInto(TerminalAppVersionStatistics.class);
     }
 
     @Override
-    public TerminalDayStatistics statisticalUserActivity(String date, String hour, Integer namespaceId){
+    public Map<String, Integer> statisticalByInterval(Integer namespaceId, LocalDateTime start, LocalDateTime end) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        TerminalDayStatistics statistics = new TerminalDayStatistics();
+        com.everhomes.server.schema.tables.EhUserActivities t = Tables.EH_USER_ACTIVITIES;
 
-        Integer startingPosition = 10;
-        if(!StringUtils.isEmpty(hour)){
-            startingPosition = 13;
-            date = date + " " + hour;
+        SelectQuery<Record2<Integer, Integer>> query = context
+                .select(t.ID.count(), t.UID.countDistinct()).from(t).getQuery();
+
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        if (start != null) {
+            query.addConditions(t.CREATE_TIME.ge(Timestamp.valueOf(start)));
+        }
+        if (end != null) {
+            query.addConditions(t.CREATE_TIME.lt(Timestamp.valueOf(end)));
         }
 
-        Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).eq(date);
-        if(null != namespaceId){
-            condition = condition.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }
-        SelectConditionStep<Record2<Integer,Integer>> selectConditionStep1 = context.select(
-                Tables.EH_USER_ACTIVITIES.ID.count(),
-                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct() )
-                .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition)
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
-        LOGGER.debug("statistical start number and active user number sql:{}", selectConditionStep1.getSQL());
-        Record2<Integer, Integer> fetchAny = selectConditionStep1.fetchAny();
-        if(null == fetchAny){
-            statistics.setStartNumber(0L);
-            statistics.setActiveUserNumber(0L);
-        }else{
-            fetchAny.map(r ->{
-                statistics.setStartNumber(Long.valueOf(r.getValue(0).toString()));
-                statistics.setActiveUserNumber(Long.valueOf(r.getValue(1).toString()));
-                return null;
-            });
-        }
-
-
-        Condition condition1= Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).lt(date);
-        if(null != namespaceId){
-            condition1 = condition1.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }
-        condition1 = condition1.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
-        condition1 = condition1.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
-
-        SelectConditionStep<Record1<Integer>> selectConditionStep2 = context.select(
-                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
-                .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition)
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.notIn(
-                        context.selectDistinct(
-                                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER)
-                                .from(Tables.EH_USER_ACTIVITIES)
-                                .where(condition1)
-
-                ))
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
-        LOGGER.debug("statistical new user number sql:{}", selectConditionStep2.getSQL());
-        Record1<Integer> fetchAny1 = selectConditionStep2.fetchAny();
-        if(null == fetchAny1){
-            statistics.setNewUserNumber(0L);
-        }else {
-            fetchAny1.map(r -> {
-                statistics.setNewUserNumber(Long.valueOf(r.getValue(0).toString()));
-                return null;
-            });
-        }
-
-        Condition condition2 = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).le(date);
-        if(null != namespaceId){
-            condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }
-        SelectConditionStep<Record1<Integer>> selectConditionStep3 = context.select(
-                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
-                .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition2)
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
-        LOGGER.debug("statistical cumulative user number sql:{}", selectConditionStep3.getSQL());
-        Record1<Integer> fetchAny2 = selectConditionStep3.fetchAny();
-        if(null == fetchAny2){
-            statistics.setCumulativeUserNumber(0L);
-        }else {
-            fetchAny2.map(r -> {
-                statistics.setCumulativeUserNumber(Long.valueOf(r.getValue(0).toString()));
-                return null;
-            });
-        }
-
-        return statistics;
-    }
-
-
-
-    @Override
-    public Long getTerminalActiveUserNumberByDate(String startDate, String endDate, Integer namespaceId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
-        Condition condition = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
-
-        condition = condition.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
-        condition = condition.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
-
-        Date date1 = DateUtil.strToDate(startDate, "yyyy-MM-dd");
-        long time1 = date1.getTime();
-        Timestamp minTime = new Timestamp(time1);
-
-        Date date2 = DateUtil.strToDate(endDate, "yyyy-MM-dd");
-        long time2 = date2.getTime();
-        Timestamp maxTime = new Timestamp(time2);
-
-        condition = condition.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
-
-        // Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).ge(startDate);
-        // condition = condition.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).le(endDate));
-        /*if(null != namespaceId){
-            condition = condition.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }*/
-        SelectConditionStep<Record1<Integer>> step = context.select(
-                Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
-                .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition);
-        Record1<Integer> fetchAny = step.fetchAny();
-        if(null == fetchAny){
-            return 0L;
-        }
-        return fetchAny.map(r ->{
-            return Long.valueOf(r.getValue(0).toString());
+        List<Map<String, Integer>> fetch = query.fetch(record -> {
+            Map<String, Integer> map = new HashMap<>(2);
+            map.put("startupNumber", record.value1());
+            map.put("activeUserNumber", record.value2());
+            return map;
         });
-    }
-
-
-    @Override
-    public Long getTerminalCumulativeUserNumber(String version, Integer namespaceId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Condition condition = Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.NAMESPACE_ID.eq(namespaceId);
-        if(!StringUtils.isEmpty(version)){
-            condition = condition.and(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.APP_VERSION.eq(version));
+        if (fetch.size() > 0) {
+            return fetch.iterator().next();
         }
-        SelectConditionStep<Record1<Integer>> step = context.select(
-                Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.IMEI_NUMBER.countDistinct())
-                .from(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES)
-                .where(condition);
-        Record1<Integer> fetchAny = step.fetchAny();
-        if(null == fetchAny){
-            return 0L;
-        }
-        return fetchAny.map(r ->{
-            return Long.valueOf(r.getValue(0).toString());
-        });
+        return new HashMap<>(0);
     }
 
     @Override
-    public Long getTerminalAppVersionActiveUserNumberByDay(String date, String version, Integer namespaceId) {
+    public List<Long> listUserIdByInterval(Integer namespaceId, LocalDateTime start, LocalDateTime end) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Condition condition = Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId);
-        condition = condition.and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.DATE.eq(date));
-        if(!StringUtils.isEmpty(version)){
-            condition = condition.and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.APP_VERSION.eq(version));
+        com.everhomes.server.schema.tables.EhUserActivities t = Tables.EH_USER_ACTIVITIES;
+
+        SelectQuery<Record1<Long>> query = context.selectDistinct(t.UID).from(t).getQuery();
+
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        if (start != null) {
+            query.addConditions(t.CREATE_TIME.ge(Timestamp.valueOf(start)));
         }
-        SelectConditionStep<Record1<Integer>> step = context.select(
-                Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.countDistinct())
-                .from(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
-                .where(condition);
-        Record1<Integer> fetchAny = step.fetchAny();
-        if(null == fetchAny){
-            return 0L;
+        if (end != null) {
+            query.addConditions(t.CREATE_TIME.lt(Timestamp.valueOf(end)));
         }
-        return fetchAny.map(r ->{
-            return Long.valueOf(r.getValue(0).toString());
-        });
+        return query.fetchInto(Long.class);
     }
 
     @Override
-    public Long getTerminalAppVersionNewUserNumberByDay(String date, String version, Integer namespaceId) {
+    public Integer countVersionCumulativeUserNumber(String version, Integer namespaceId) {
+        com.everhomes.server.schema.tables.EhTerminalAppVersionActives t = Tables.EH_TERMINAL_APP_VERSION_ACTIVES;
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Condition condition = Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId);
-        condition = condition.and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.DATE.eq(date));
-        if(!StringUtils.isEmpty(version)){
-            condition = condition.and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.APP_VERSION.eq(version));
-        }
 
-        Condition condition1= Tables.EH_TERMINAL_APP_VERSION_ACTIVES.DATE.lt(date);
-        if(null != namespaceId){
-            condition1 = condition1.and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId));
+        SelectQuery<Record1<Integer>> query = context.select(DSL.countDistinct(t.IMEI_NUMBER)).from(t).getQuery();
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+
+        if (!StringUtils.isEmpty(version)) {
+            query.addConditions(t.APP_VERSION.eq(version));
         }
-        condition = condition.and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.notIn(context.selectDistinct(
-                Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER)
-                .from(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
-                .where(condition1)));
-        SelectConditionStep<Record1<Integer>> step = context.select(
-                Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.countDistinct())
-                .from(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
-                .where(condition);
-        Record1<Integer> fetchAny = step.fetchAny();
-        if(null == fetchAny){
-            return 0L;
-        }
-        return fetchAny.map(r ->{
-            return Long.valueOf(r.getValue(0).toString());
-        });
+        return query.fetchAnyInto(Integer.class);
     }
 
     @Override
-    public Long getTerminalStartNumberByDay(String date, String version, Integer namespaceId) {
+    public Integer countVersionActiveUserNumberByDay(String date, String version, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhTerminalAppVersionActives t = Tables.EH_TERMINAL_APP_VERSION_ACTIVES;
 
-        Condition condition = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+        SelectQuery<Record1<Integer>> query = context.select(DSL.countDistinct(t.IMEI_NUMBER)).from(t).getQuery();
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(t.DATE.eq(date));
 
-        condition = condition.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
-                .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
-
-        if(!StringUtils.isEmpty(version)){
-            Condition versionCond = Tables.EH_USER_ACTIVITIES.APP_VERSION_NAME.eq(version);
-            if(version.split("\\.").length > 2){
-                versionCond = versionCond.or(Tables.EH_USER_ACTIVITIES.APP_VERSION_NAME.like(version + ".%"));
-            }
-            condition = condition.and(versionCond);
+        if (!StringUtils.isEmpty(version)) {
+            query.addConditions(t.APP_VERSION.eq(version));
         }
-
-        long aDayMill = 24 * 60 * 60 * 1000 - 1;
-        Date date1 = DateUtil.strToDate(date, "yyyy-MM-dd");
-
-        long time = date1.getTime();
-        Timestamp minTime = new Timestamp(time);
-        Timestamp maxTime = new Timestamp(time + aDayMill);
-
-        condition = condition.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.between(minTime, maxTime));
-
-        // Condition condition = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,10).eq(date);
-        /*if(null != namespaceId){
-            condition = condition.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }*/
-
-        SelectConditionStep<Record1<Integer>> step = context.select(
-                Tables.EH_USER_ACTIVITIES.ID.count())
-                .from(Tables.EH_USER_ACTIVITIES)
-                .where(condition);
-        Record1<Integer> fetchAny = step.fetchAny();
-        if(null == fetchAny){
-            return 0L;
-        }
-        return fetchAny.map(r ->{
-            return Long.valueOf(r.getValue(0).toString());
-        });
+        return query.fetchAnyInto(Integer.class);
     }
 
     @Override
     public List<AppVersion> listAppVersions(Integer namespaceId) {
-        List<AppVersion> resules = new ArrayList<>();
+        com.everhomes.server.schema.tables.EhAppVersion t = Tables.EH_APP_VERSION;
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhAppVersionRecord> query = context.selectQuery(Tables.EH_APP_VERSION);
-        if(null != namespaceId){
-            query.addConditions(Tables.EH_APP_VERSION.NAMESPACE_ID.eq(namespaceId));
-        }else{
-            query.addGroupBy(Tables.EH_APP_VERSION.NAMESPACE_ID);
+        SelectQuery<EhAppVersionRecord> query = context.selectQuery(t);
+        if (null != namespaceId) {
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        } else {
+            query.addGroupBy(t.NAMESPACE_ID);
         }
-        query.addGroupBy(Tables.EH_APP_VERSION.NAME);
-        query.addOrderBy(Tables.EH_APP_VERSION.DEFAULT_ORDER.desc());
-
-        query.fetch().map(r ->{
-            resules.add(ConvertHelper.convert(r, AppVersion.class));
-            return null;
-        });
-
-        return resules;
+        query.addGroupBy(t.NAME);
+        query.addOrderBy(t.DEFAULT_ORDER.desc());
+        return query.fetchInto(AppVersion.class);
     }
-
 
     @Override
     public void createAppVersion(AppVersion appVersion) {
@@ -530,12 +323,12 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         query.addConditions(Tables.EH_APP_VERSION.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_APP_VERSION.NAME.eq(name));
         query.addConditions(Tables.EH_APP_VERSION.TYPE.eq(type));
-        query.fetch().map(r ->{
+        query.fetch().map(r -> {
             resules.add(ConvertHelper.convert(r, AppVersion.class));
             return null;
         });
 
-        if(resules.size() > 0){
+        if (resules.size() > 0) {
             return resules.get(0);
         }
         return null;
@@ -556,22 +349,39 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     // WHERE namespace_id = 999983 AND imei_number NOT IN (SELECT concat('', id, '') FROM eh_users WHERE namespace_id = 999983);
     @Override
     public void cleanTerminalAppVersionCumulativeByCondition(Integer namespaceId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-        SelectConditionStep<Record1<String>> userIdList = context
-                .select(DSL.cast(Tables.EH_USERS.ID, SQLDataType.VARCHAR))
-                .from(Tables.EH_USERS)
-                .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+        com.everhomes.server.schema.tables.EhUsers u = Tables.EH_USERS;
+        com.everhomes.server.schema.tables.EhTerminalAppVersionActives t = Tables.EH_TERMINAL_APP_VERSION_ACTIVES;
+        com.everhomes.server.schema.tables.EhUserActivities at = Tables.EH_USER_ACTIVITIES;
 
-        context.delete(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES)
-                .where(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.IMEI_NUMBER.notIn(userIdList))
-                .execute();
+        List<Long> ids = context.select(u.ID).from(u)
+                .where(u.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                .fetchInto(Long.class);
 
-        context.delete(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
-                .where(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.notIn(userIdList))
-                .execute();
+        if (ids.size() == 0) {
+            ids.add(0L);
+        }
+
+        List<String> idStrList = ids.stream().map(Object::toString).collect(Collectors.toList());
+        List<Long> id1s = context.select(t.ID).from(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.IMEI_NUMBER.notIn(idStrList))
+                .fetchInto(Long.class);
+
+        List<Long> atids = context.select(at.ID).from(at)
+                .where(at.NAMESPACE_ID.eq(namespaceId))
+                .and(at.UID.notIn(ids))
+                .fetchInto(Long.class);
+
+        for (Long id1 : id1s) {
+            context.delete(t).where(t.ID.eq(id1)).execute();
+        }
+
+        for (Long id1 : atids) {
+            context.delete(at).where(at.ID.eq(id1)).execute();
+        }
     }
 
     @Override
@@ -589,9 +399,25 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     @Override
     public void cleanUserActivitiesWithNullAppVersion(Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        context.delete(Tables.EH_USER_ACTIVITIES)
-                .where(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_USER_ACTIVITIES.APP_VERSION_NAME.isNull())
-                .execute();
+        com.everhomes.server.schema.tables.EhUserActivities t = Tables.EH_USER_ACTIVITIES;
+
+        List<Long> ids = context.select(t.ID).from(t).where(t.APP_VERSION_NAME.isNull()).fetchInto(Long.class);
+        for (Long id : ids) {
+            context.delete(t).where(t.ID.eq(id)).execute();
+        }
+    }
+
+    @Override
+    public void createTerminalHourStatistics(List<TerminalHourStatistics> hourStats) {
+        Timestamp createTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+        long id = this.sequenceProvider.getNextSequenceBlock(
+                NameMapper.getSequenceDomainFromTablePojo(EhTerminalHourStatistics.class), hourStats.size());
+        for (TerminalHourStatistics stat : hourStats) {
+            stat.setId(id++);
+            stat.setCreateTime(createTime);
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhTerminalHourStatisticsDao dao = new EhTerminalHourStatisticsDao(context.configuration());
+        dao.insert(hourStats.toArray(new EhTerminalHourStatistics[0]));
     }
 }

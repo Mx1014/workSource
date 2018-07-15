@@ -16,5 +16,7 @@ public interface WeChatService {
 
 //    String testRestCall(String cmd, Object params, String url);
 
+    String httpGet(String url, String safeUrl);
+
     String getAppIdByNamespaceId(Integer namespaceId);
 }

@@ -2,6 +2,7 @@ package com.everhomes.user;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import org.jooq.Condition;
 
@@ -36,8 +37,6 @@ public interface UserActivityProvider {
     List<UserContact> listRetainUserContactByUid(Long uid);
 
     List<UserIdentifier> listUserIdentifiers(List<String> indentifierTokens);
-
-    List<UserActivity> listUserActivetys(Condition cond, Integer pageSize, CrossShardListingLocator locator);
 
     void addUserProfile(UserProfile userProfile);
 
@@ -115,9 +114,15 @@ public interface UserActivityProvider {
 
 	void createStatActiveUser(StatActiveUser stat);
 
+    List<UserActivity> listUserActivetys(ListingLocator locator, Integer count, ListingQueryBuilderCallback callback);
+
     List<UserActivity> listUserActivetys(Long userId, Integer pageSize);
 
     UserActivity findLastUserActivity(Long uid);
 
     List<User> listNotInUserActivityUsers(Integer namespaceId);
+
+    void addActivities(List<UserActivity> activityList);
+
+    void deleteUserActivity(UserActivity activity);
 }
