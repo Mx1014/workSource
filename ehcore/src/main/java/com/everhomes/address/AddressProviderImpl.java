@@ -3,6 +3,7 @@ package com.everhomes.address;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -912,6 +913,34 @@ public class AddressProviderImpl implements AddressProvider {
 					                .where(Tables.EH_ADDRESS_ARRANGEMENT.ADDRESS_ID.eq(addressId))
 					                .fetchOne(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_TYPE);
 		return operationType;
+	}
+
+	@Override
+	public List<AddressArrangement> listActiveAddressArrangementToday(Date today) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<AddressArrangement> result = new ArrayList<>();
+		context.select()
+				.from(Tables.EH_ADDRESS_ARRANGEMENT)
+				.where(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.equal(AddressArrangementStatus.ACTIVE.getCode()))
+				.and(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_FLAG.eq((byte) 0))
+				.and(Tables.EH_ADDRESS_ARRANGEMENT.DATE_BEGIN.eq((Timestamp) today))
+				.fetch()
+				.map(r->{
+					AddressArrangement convert = ConvertHelper.convert(r, AddressArrangement.class);
+					result.add(convert);
+					return null;
+				});
+		return result;
+	}
+
+	@Override
+	public AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.ORIGINAL_ID.like(DSL.concat("%", addressId.toString(), "%")))
+					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					.fetchOneInto(AddressArrangement.class);
 	}
 	
 	

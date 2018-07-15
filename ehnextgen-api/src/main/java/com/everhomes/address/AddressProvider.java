@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -96,4 +97,6 @@ public interface AddressProvider {
 	AddressArrangement findActiveAddressArrangementByTargetId(Long addressId);
 	String findApartmentNameById(long addressId);
 	Byte findArrangementOperationTypeByAddressId(Long addressId);
+	List<AddressArrangement> listActiveAddressArrangementToday(Date today);
+	AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId);
 }

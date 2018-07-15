@@ -27,6 +27,8 @@ public class PropFamilyDTO {
     private Double areaSize;
     private Byte reservationInvolved;
     private Long relatedContractEndDate;
+    private Long relatedAddressArrangementBeginDate;
+    private Byte isFutureApartment;
     
 	public Long getRelatedContractEndDate() {
 		return relatedContractEndDate;
@@ -34,6 +36,22 @@ public class PropFamilyDTO {
 
 	public void setRelatedContractEndDate(Long relatedContractEndDate) {
 		this.relatedContractEndDate = relatedContractEndDate;
+	}
+
+	public Byte getIsFutureApartment() {
+		return isFutureApartment;
+	}
+
+	public void setIsFutureApartment(Byte isFutureApartment) {
+		this.isFutureApartment = isFutureApartment;
+	}
+
+	public Long getRelatedAddressArrangementBeginDate() {
+		return relatedAddressArrangementBeginDate;
+	}
+
+	public void setRelatedAddressArrangementBeginDate(Long relatedAddressArrangementBeginDate) {
+		this.relatedAddressArrangementBeginDate = relatedAddressArrangementBeginDate;
 	}
 
 	public Byte getReservationInvolved() {

@@ -2,6 +2,7 @@
 package com.everhomes.address;
 
 import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
@@ -79,6 +80,8 @@ import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -103,6 +106,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -111,6 +115,8 @@ import javax.annotation.PostConstruct;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Comparator;
 import java.util.regex.Matcher;
@@ -207,6 +213,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
     
     @Autowired
 	private LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    private ScheduleProvider scheduleProvider;
     
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -718,8 +727,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                                                     .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
                                             )
                                             .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
-                                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode())));
-
+                                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode())))
+                    						//不能显示未来房源
+                    						.and(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.equal((byte) 0));
                     if (cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
                     }
@@ -2677,7 +2687,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			address.setChargeArea(apartment.getChargeArea());
 			address.setApartmentName(apartment.getApartmentName());
 			address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-			//TODO 设置成为未来资产
+			//设置成为未来资产
+			address.setIsFutureApartment((byte) 1);
 			address.setNamespaceId(targetAddress.getNamespaceId());
 			address.setCommunityId(targetAddress.getCommunityId());
 			address.setCityName(targetAddress.getCityName());
@@ -2920,5 +2931,38 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			results.add(dto);
 		}
 		return results;
+	}
+	
+	@Scheduled(cron = "0 10 0 * * ?")
+    public void excuteAddressArrangementOnTime() {
+		try {
+			Calendar calendar = Calendar.getInstance();
+			Date time = calendar.getTime();
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			String format = simpleDateFormat.format(time);
+			Date today = simpleDateFormat.parse(format);
+			if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+	            coordinationProvider.getNamedLock(CoordinationLocks.EXCUTE_ADDRESS_ARRANGEMENT.getCode()).tryEnter(() -> {
+	            	List<AddressArrangement> list = addressProvider.listActiveAddressArrangementToday(today);
+	        		for (AddressArrangement arrangement : list) {
+	        			arrangement.setOperationFlag((byte) 1);
+	        			//原始房源失效
+	        			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+	        			for (String addressId : originalIds) {
+	        				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+	        				address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+	        			}
+	        			//未来房源成为正式房源
+	        			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+	        			for (String addressId : targetIds) {
+	        				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+	        				address.setIsFutureApartment((byte) 0);
+	        			}
+	        		}
+	            });
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 }

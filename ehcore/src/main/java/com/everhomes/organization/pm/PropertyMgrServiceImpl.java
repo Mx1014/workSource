@@ -54,6 +54,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
+import com.everhomes.address.AddressArrangement;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
@@ -2767,6 +2768,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 }
                 apartments.add(apt);
             });
+            //TODO 设置每个房源关联的拆分合并计划的生效时间
+            
             response.setApartments(apartments);
         }
 
@@ -2821,7 +2824,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				}
 			}
 		}
-//		response.setResultList(resultList);
 		response.setResultList(filterEdResult);
 
 		return response;
@@ -2881,6 +2883,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
 		Contract latestEndDateContract = findLatestEndDateContract(addressId);
 		dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
+		//设置该房源是否为未来房源，及与其关联的房源拆分合并计划的开始时间
+		Address address = addressProvider.findAddressById(addressId);
+		dto.setIsFutureApartment(address.getIsFutureApartment());
+		if (address.getIsFutureApartment() == 1) {
+			AddressArrangement addressArrangement = addressProvider.findActiveAddressArrangementByTargetId(addressId);
+			dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+		}else if (address.getIsFutureApartment() == 0) {
+			AddressArrangement addressArrangement = addressProvider.findActiveAddressArrangementByOriginalId(addressId);
+			dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+		}
+		
 		return dto;
 	}
 
