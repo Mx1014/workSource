@@ -195,8 +195,6 @@ public interface AssetService {
     	
     ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd);
     
-    ListBillsDTO createTestZJGKBill();
-
 	IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd);
 	
 	void transferOrderPaymentType();
@@ -216,15 +214,15 @@ public interface AssetService {
     
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
     
-    ListBillsResponseForEnt listBillsForEnt(ListBillsCommandForEnt cmd);
+    ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
     
     void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
     
-    void exportOrdersForEnt(ListPaymentBillCmdForEnt cmd,HttpServletResponse response);
+    void exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response);
     
     public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd);
     
-    ListPaymentBillRespForEnt listPaymentBillForEnt(ListPaymentBillCmdForEnt cmd);
+    ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
 	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
     
