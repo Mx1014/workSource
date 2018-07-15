@@ -1288,7 +1288,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		PayUserDTO payUserList = sdkPayService.createPersonalPayUserIfAbsent(payerid, accountCode);
 		if(payUserList==null){
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
-					"创建个人付款账户失败");
+					"");
 		}
 		String s = sdkPayService.bandPhone(payUserList.getId(), userIdenify);
 		ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();

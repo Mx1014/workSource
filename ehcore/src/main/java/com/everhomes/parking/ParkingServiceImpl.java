@@ -756,7 +756,7 @@ public class ParkingServiceImpl implements ParkingService {
 				parkingLot.getOwnerType(), parkingLot.getOwnerId(), parkingLot.getId(),bussinessType.getCode());
 		if(payeeAccounts==null || payeeAccounts.size()==0){
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_NO_PAYEE_ACCOUNT,
-					"未设置收款方账号");
+					"");
 		}
 
 		createOrderCommand.setAccountCode(sNamespaceId);
