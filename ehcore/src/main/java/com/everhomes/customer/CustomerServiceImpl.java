@@ -79,6 +79,7 @@ import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectStatus;
+import com.everhomes.rest.customer.CustomerAttachmentDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
@@ -86,6 +87,7 @@ import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerEventType;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
@@ -231,7 +233,6 @@ import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
@@ -291,6 +292,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -418,6 +420,8 @@ public class CustomerServiceImpl implements CustomerService {
     private BigCollectionProvider bigCollectionProvider;
 
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Value("${equipment.ip}")
     private String equipmentIp;
@@ -573,6 +577,15 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         //创建或更新customer的bannerUri
         enterpriseCustomerProvider.updateEnterpriseBannerUri(customer.getId(), cmd.getBanner());
+        // 创建附件
+        if (cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
+            cmd.getAttachments().forEach((c) -> {
+                CustomerAttachment attachment = ConvertHelper.convert(c, CustomerAttachment.class);
+                attachment.setCustomerId(customer.getId());
+                attachment.setNamespaceId(customer.getNamespaceId());
+                enterpriseCustomerProvider.createCustomerAttachements(attachment);
+            });
+        }
 
         //企业客户新增成功,保存客户事件
         saveCustomerEvent( 1  ,customer ,null,cmd.getDeviceType());
@@ -812,8 +825,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
-        checkPrivilege(customer.getNamespaceId());
-        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+        //checkPrivilege(customer.getNamespaceId());
+        if (cmd.getCheckAuthFlag() != null) {
+            checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
+        }
         //产品功能 #20796 同步过来的客户名称不可改
         if (NamespaceCustomerType.EBEI.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))
                 || NamespaceCustomerType.SHENZHOU.equals(NamespaceCustomerType.fromCode(customer.getNamespaceCustomerType()))) {
@@ -896,6 +911,7 @@ public class CustomerServiceImpl implements CustomerService {
                 command.setLongitude(updateCustomer.getLongitude());
                 command.setLatitude(updateCustomer.getLatitude());
                 command.setWebsite(updateCustomer.getCorpWebsite());
+                command.setEmailDomain(updateCustomer.getCorpEmail());
                 command.setAttachments(cmd.getBanner());
                 command.setPostUri(cmd.getPostUri());
                 command.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
@@ -933,7 +949,20 @@ public class CustomerServiceImpl implements CustomerService {
                 }
             }
         }
+        // 修改附件
+        updateCustomerAttachments(cmd.getId(), cmd.getAttachments());
         return convertToDTO(updateCustomer);
+    }
+
+    private void updateCustomerAttachments(Long customerId, List<CustomerAttachmentDTO> attachments) {
+        enterpriseCustomerProvider.deleteAllCustomerAttachements(customerId);
+        if (attachments != null && attachments.size()>0) {
+            attachments.forEach((a) -> {
+                CustomerAttachment customerAttachment = ConvertHelper.convert(a, CustomerAttachment.class);
+                customerAttachment.setCustomerId(customerId);
+                enterpriseCustomerProvider.createCustomerAttachements(customerAttachment);
+            });
+        }
     }
 
     private void routeMsgForTrackingChanged(Long originalTrackingUid, Long currentTrackingUid, String originalTrackingName, String currentTrackingName, String customerName, Integer namespaceId, boolean deleteCustomer,Long organizationId) {
@@ -1313,6 +1342,17 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setBanner(bannerUrls);
         }
         dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
+        //此处为客户本身的附件  没有和企业的用一个表了
+        List<CustomerAttachment> customerAttachments = enterpriseCustomerProvider.listCustomerAttachments(dto.getId());
+        if(customerAttachments!=null && customerAttachments.size()>0){
+            List<CustomerAttachmentDTO> attachmentDTOS = new ArrayList<>();
+            customerAttachments.forEach((c)->{
+                CustomerAttachmentDTO dto1 = ConvertHelper.convert(c, CustomerAttachmentDTO.class);
+                dto1.setContentUrl(contentServerService.parserUri(c.getContentUri(),EntityType.ENTERPRISE_CUSTOMER.getCode(), dto.getId()));
+                attachmentDTOS.add(dto1);
+            });
+            dto.setAttachments(attachmentDTOS);
+        }
     }
 
     private EnterpriseCustomer checkEnterpriseCustomer(Long id) {
@@ -2632,7 +2672,7 @@ public class CustomerServiceImpl implements CustomerService {
             command.setPageAnchor(cmd.getPageAnchor());
             return rentalv2Service.listRentalBillsByOrdId(command);
         }
-        return null;
+        return new ListRentalBillsCommandResponse();
     }
 
     @Override
@@ -2642,7 +2682,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             return yellowPageService.listSeviceAllianceAppRecordsByEnterpriseId(customer.getOrganizationId(), cmd.getPageAnchor(), cmd.getPageSize());
         }
-        return null;
+        return new SearchRequestInfoResponse();
     }
 
     @Override
@@ -3186,11 +3226,11 @@ public class CustomerServiceImpl implements CustomerService {
         if (dto.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
             if (null != detail && null != detail.getContactName()) {
-                dto.setTrackingUidName(detail.getContactName());
+                dto.setTrackingUidName(detail.getContactName()+"("+detail.getContactToken()+")");
             } else {
-                UserInfo userInfo = userService.getUserInfo(dto.getTrackingUid());
-                if (userInfo != null) {
-                    dto.setTrackingUidName(userInfo.getNickName());
+                User user = userProvider.findUserById(dto.getTrackingUid());
+                if (user != null) {
+                    dto.setTrackingUidName(user.getNickName()+"("+user.getIdentifierToken()+")");
                 }
             }
         }
@@ -3396,14 +3436,18 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
         CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
         if (dto.getCreatorUid() != null) {
-            //用户可能不在组织架构中 所以用nickname
-//        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
-//            if(null != detail && null != detail.getContactName()){
-//        		dto.setCreatorName(detail.getContactName());
-//        	}
             User user = userProvider.findUserById(dto.getCreatorUid());
             if (user != null) {
                 dto.setCreatorName(user.getNickName());
+            }
+        }
+        if (dto.getCreateTime() != null) {
+            dto.setOperateTime(dto.getCreateTime().toLocalDateTime().format(dateSF));
+        }
+        if (dto.getDeviceType() != null) {
+            CustomerEventType type = CustomerEventType.fromCode(dto.getDeviceType());
+            if (type != null) {
+                dto.setSourceType(type.getValue());
             }
         }
         return dto;
@@ -3440,6 +3484,7 @@ public class CustomerServiceImpl implements CustomerService {
         Long currentTrackingUid = cmd.getTrackingUid();
         String currentTrackingName = null;
         customer.setTrackingUid(cmd.getTrackingUid());
+        customer.setTrackingName(null);
         if (cmd.getTrackingUid() != null) {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
             currentTrackingName = detail.getContactName();
@@ -3773,6 +3818,7 @@ public class CustomerServiceImpl implements CustomerService {
                 dto.setContactName(s.getContactName());
                 dto.setGender(s.getGender());
                 dto.setContactToken(s.getContactToken());
+                users.add(dto);
             });
         }
         List<ServiceModuleAppsAuthorizationsDto> moduleAdmins = moduleAppsAdministratorResponse.getDtos();
@@ -4269,5 +4315,19 @@ public class CustomerServiceImpl implements CustomerService {
             throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE, QualityServiceErrorCode.ERROR_DOWNLOAD_EXCEL, ex.getLocalizedMessage());
         }
         return response;
+    }
+
+    @Override
+    public EnterpriseCustomerDTO getCustomerBasicInfoByOrgId(GetEnterpriseCustomerCommand cmd) {
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getOrgId());
+        if (customer == null) {
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST, "customer is not exist");
+        }
+//        return ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        EnterpriseCustomerDTO dto = new EnterpriseCustomerDTO();
+        dto.setCommunityId(customer.getCommunityId());
+        dto.setId(customer.getId());
+        dto.setOrganizationId(customer.getOrganizationId());
+        return dto;
     }
 }

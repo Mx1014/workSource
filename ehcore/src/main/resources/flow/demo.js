@@ -26,7 +26,7 @@ App.config = {
     },
     vendorURL: {
         description: "供应商服务器地址",
-        default: "http://zzz.com",
+        default: "http://10.1.110.33:8888/",
         // 校验用户输入内容, 如果校验通过, 返回 true, 否则返回提示信息
         validator: function (value) {
             var pass = value.indexOf("http") !== -1;
@@ -62,7 +62,7 @@ App.main = function (ctx) {
 
     var vendor = config.getString("vendor") || "通联支付";
     var vendorCount = config.getInt("vendorCount") || 2;
-    var vendorURL = config.getString("vendorURL") || "http://zzz.com";
+    var vendorURL = config.getString("vendorURL") || "http://10.1.110.33:8888/";
 
     log.debug("vendor = ", vendor);
     log.debug("vendorCount = ", vendorCount);
@@ -87,7 +87,7 @@ App.main = function (ctx) {
         log.debug("flowCaseState.operator.nickName = ", cctx.operator.nickName);
     }
 
-    var url = "http://10.1.110.33:8888/";
+    var url = vendorURL;
     url += "?scriptMainId=";
     url += ctx.action.scriptMainId;
     url += "&scriptVersion=";

@@ -34,6 +34,7 @@ import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
 import com.everhomes.rest.asset.ListBillItemsResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsCommandForEnt;
 import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListBillsResponse;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;

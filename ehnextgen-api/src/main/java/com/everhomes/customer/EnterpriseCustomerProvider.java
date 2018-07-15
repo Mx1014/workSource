@@ -190,4 +190,10 @@ public interface EnterpriseCustomerProvider {
 
     void deleteCustomerEntryInfoByBuildingId(Long id);
 
+    void deleteCustomerEntryInfoByAddessId(Long id);
+    void createCustomerAttachements(CustomerAttachment attachment);
+
+    void deleteAllCustomerAttachements(Long customerId);
+
+    List<CustomerAttachment> listCustomerAttachments(Long id);
 }

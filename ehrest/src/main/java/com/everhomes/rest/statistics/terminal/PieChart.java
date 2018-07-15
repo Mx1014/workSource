@@ -15,6 +15,13 @@ public class PieChart {
 	@ItemType(PieChartData.class)
 	private List<PieChartData> data;
 
+	public PieChart() {
+	}
+
+	public PieChart(List<PieChartData> data) {
+		this.data = data;
+	}
+
 	public List<PieChartData> getData() {
 		return data;
 	}

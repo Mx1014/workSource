@@ -2103,6 +2103,9 @@ public class SalaryServiceImpl implements SalaryService {
             SalaryPeriodEmployeeEntityDTO dto = new SalaryPeriodEmployeeEntityDTO();
             dto.setGroupEntityName(entry.getValue());
             dto.setSalaryValue(r.getCells().get(entry.getKey()));
+            if("- 0".equals(dto.getSalaryValue()) || "-0".equals(dto.getSalaryValue())){
+            	dto.setSalaryValue("0");
+            }
             result.add(dto);
         }
         return result;
