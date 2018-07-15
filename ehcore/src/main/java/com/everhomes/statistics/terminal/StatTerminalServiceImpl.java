@@ -210,6 +210,12 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             List<PieChartData> subList = list.subList(0, versionNum - 1);
             List<PieChartData> otherList = list.subList(versionNum, list.size() - 1);
 
+            subList.sort((o1, o2) -> {
+                Version v1 = Version.fromVersionString(o1.getName());
+                Version v2 = Version.fromVersionString(o2.getName());
+                return Math.toIntExact(v1.getEncodedValue() - v2.getEncodedValue());
+            });
+
             PieChartData otherData = new PieChartData();
             otherData.setName("其他");
             otherData.setAmount(otherList.stream().mapToLong(PieChartData::getAmount).sum());
@@ -217,13 +223,13 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
             subList.add(otherData);
             list = subList;
+        } else {
+            list.sort((o1, o2) -> {
+                Version v1 = Version.fromVersionString(o1.getName());
+                Version v2 = Version.fromVersionString(o2.getName());
+                return Math.toIntExact(v1.getEncodedValue() - v2.getEncodedValue());
+            });
         }
-
-        list.sort((o1, o2) -> {
-            Version v1 = Version.fromVersionString(o1.getName());
-            Version v2 = Version.fromVersionString(o2.getName());
-            return Math.toIntExact(v1.getEncodedValue() - v2.getEncodedValue());
-        });
         return new PieChart(list);
     }
 
@@ -554,7 +560,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     }
 
                     TerminalAppVersionActives active =
-                            statTerminalProvider.getTerminalAppVersionActive(dateStr,
+                            statTerminalProvider.getTerminalAppVersionActive(null,
                                     null, activity.getImeiNumber(), activity.getNamespaceId());
                     if (null == active) {
                         active = new TerminalAppVersionActives();
@@ -565,15 +571,16 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                         active.setDate(dateStr);
                         statTerminalProvider.createTerminalAppVersionActives(active);
                     } else {
-                        Version uVersion = Version.fromVersionString(activity.getAppVersionName());
-                        Version cVersion = Version.fromVersionString(active.getAppVersion());
+                        // Version uVersion = Version.fromVersionString(activity.getAppVersionName());
+                        // Version cVersion = Version.fromVersionString(active.getAppVersion());
 
-                        if (uVersion.getEncodedValue() > cVersion.getEncodedValue()) {
-                            statTerminalProvider.deleteTerminalAppVersionCumulativeById(active.getId());
-                            active.setAppVersion(activity.getAppVersionName());
-                            active.setAppVersionRealm(activity.getVersionRealm());
-                            statTerminalProvider.createTerminalAppVersionActives(active);
-                        }
+                        statTerminalProvider.deleteTerminalAppVersionCumulativeById(active.getId());
+                        // if (uVersion.getEncodedValue() > cVersion.getEncodedValue()) {
+                        active.setAppVersion(activity.getAppVersionName());
+                        active.setAppVersionRealm(activity.getVersionRealm());
+                        active.setDate(dateStr);
+                        statTerminalProvider.createTerminalAppVersionActives(active);
+                        // }
                     }
                 }
             } while (locator.getAnchor() != null);
