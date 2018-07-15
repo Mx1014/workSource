@@ -5,6 +5,7 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
+import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -57,6 +58,7 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -4930,7 +4932,7 @@ public class AssetServiceImpl implements AssetService {
         titleName.add("催缴手机号");
         titleSize.add(20);
         //增加收费项的导出
-        ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
+        ShowCreateBillDTO webPage = assetProvider.showCreateBill(billGroupId);
         List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
         for(BillItemDTO billItemDTO : billItemDTOList){
         	if(billItemDTO.getBillItemId() != null) {
