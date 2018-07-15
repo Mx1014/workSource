@@ -225,5 +225,7 @@ public interface AssetService {
     ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
 	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
+
+	PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd);
     
 }

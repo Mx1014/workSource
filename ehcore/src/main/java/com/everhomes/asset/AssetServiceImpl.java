@@ -5084,4 +5084,19 @@ public class AssetServiceImpl implements AssetService {
 		}
     }
 
+	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
+		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        //1、预下单
+        PreOrderDTO preOrderDTO = handler.placeAnAssetOrder(cmd);
+        //2、请求授权token
+        //String token = handler.getPayToken(cmd.getPayerId());
+        
+        //3、使用token登录支付服务器
+        
+        //4、返回支付收银台链接给前端
+        
+        return preOrderDTO;
+	}
+
 }
