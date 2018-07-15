@@ -2676,7 +2676,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			address.setFreeArea(apartment.getFreeArea());
 			address.setChargeArea(apartment.getChargeArea());
 			address.setApartmentName(apartment.getApartmentName());
-			address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+			address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+			//TODO 设置成为未来资产
 			address.setNamespaceId(targetAddress.getNamespaceId());
 			address.setCommunityId(targetAddress.getCommunityId());
 			address.setCityName(targetAddress.getCityName());
@@ -2688,6 +2689,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			
 			Long addressId = addressProvider.createAddress3(address);
 			targetIds.add(addressId.toString());
+			//设置房源的具体状态
+			createOrganizationAddressMapping(addressId,address.getAddress(),cmd.getOrganizationId(),cmd.getCommunityId());
 		}
 		AddressArrangement arrangement = ConvertHelper.convert(cmd, AddressArrangement.class);
 		String targetId = StringHelper.toJsonString(targetIds);
@@ -2701,6 +2704,19 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		addressProvider.createAddressArrangement(arrangement);
 	}	
 	
+	//添加房源、小区、机构的对应关系，设置房源的具体状态存在eh_organization_address_mappings表中
+	private void createOrganizationAddressMapping(Long addressId,String address,Long organizationId, Long communityId) {
+		CommunityAddressMapping communityAddressMapping = new CommunityAddressMapping();
+        communityAddressMapping.setOrganizationId(organizationId);
+        communityAddressMapping.setCommunityId(communityId);
+        communityAddressMapping.setAddressId(addressId);
+        communityAddressMapping.setOrganizationAddress(address);
+        communityAddressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+        communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+        organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+	}
+
 	private void createMergeArrangement(CreateAddressArrangementCommand cmd) {
 		Address targetAddress = addressProvider.findAddressById(cmd.getAddressId());
 		List<String> targetIds = new ArrayList<>();
@@ -2751,38 +2767,44 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	public AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd) {
 		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByAddressId(cmd.getAddressId());
 		AddressArrangementDTO dto = ConvertHelper.convert(arrangement, AddressArrangementDTO.class);
+		dto.setOrganizationId(cmd.getOrganizationId());
 		dto.setDateBegin(arrangement.getDateBegin().getTime());
 		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
 			List<ArrangementApartmentDTO> apartments = generateSplitArrangementApartments(arrangement);
 			dto.setApartments(apartments);
-			//TODO 需要显示的是所有房源关联的企业客户，个人客户，和合同信息
+			generateApartmentRelatedInfo(dto,apartments);
+		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+			List<ArrangementApartmentDTO> apartments = generateMergeArrangementApartments(arrangement);
+			dto.setApartments(apartments);
+			generateApartmentRelatedInfo(dto,apartments);
+		}
+		return dto;
+	}
+
+	//需要显示的是所有房源关联的企业客户，个人客户，和合同信息
+	private void generateApartmentRelatedInfo(AddressArrangementDTO dto,List<ArrangementApartmentDTO> apartments){
+		for(ArrangementApartmentDTO apartment:apartments){
+			//企业客户
 			ListApartmentEnterpriseCustomersCommand listApartmentEnterpriseCustomersCommand= new ListApartmentEnterpriseCustomersCommand();
-			listApartmentEnterpriseCustomersCommand.setAddressId(cmd.getAddressId());
+			listApartmentEnterpriseCustomersCommand.setAddressId(apartment.getAddressId());
 			List<EnterpriseCustomerDTO> enterpriseCustomers = this.listApartmentEnterpriseCustomers(listApartmentEnterpriseCustomersCommand);
 			dto.setEnterpriseCustomers(enterpriseCustomers);
-			
+			//个人客户
 			ListOrganizationOwnersByAddressCommand listOrganizationOwnersByAddressCommand = new ListOrganizationOwnersByAddressCommand();
-			listOrganizationOwnersByAddressCommand.setAddressId(cmd.getAddressId());
-			listOrganizationOwnersByAddressCommand.setOrganizationId(cmd.getOrganizationId());
+			listOrganizationOwnersByAddressCommand.setAddressId(apartment.getAddressId());
+			listOrganizationOwnersByAddressCommand.setOrganizationId(dto.getOrganizationId());
 			List<OrganizationOwnerDTO> individualCustomers = propertyMgrService.listOrganizationOwnersByAddress(listOrganizationOwnersByAddressCommand);
 			dto.setIndividualCustomers(individualCustomers);
-			
-			
-			List<Contract> contracts = contractProvider.listContractsByAddressId(cmd.getAddressId());
+			//合同信息
+			List<Contract> contracts = contractProvider.listContractsByAddressId(apartment.getAddressId());
 			List<ContractDTO> contractDTOs = contracts.stream().map(contract -> {
 				ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
 				return contractDTO;
 			}).collect(Collectors.toList());
 			dto.setContracts(contractDTOs);
-			//TODO
-		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
-			List<ArrangementApartmentDTO> apartments = generateMergeArrangementApartments(arrangement);
-			dto.setApartments(apartments);	
 		}
-		
-		return dto;
 	}
-
+	
 	private List<ArrangementApartmentDTO> generateSplitArrangementApartments(AddressArrangement arrangement) {
 		List<ArrangementApartmentDTO> results = new ArrayList<>();
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);

@@ -26,6 +26,7 @@ public class AddressArrangementDTO {
 	
 	private Long id;
 	private Integer namespaceId;
+	private Long organizationId;
 	private Byte operationType;
 	private Long dateBegin;
 	private Long addressId;
@@ -49,6 +50,12 @@ public class AddressArrangementDTO {
 	}
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 	public Byte getOperationType() {
 		return operationType;

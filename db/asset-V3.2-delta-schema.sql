@@ -18,7 +18,8 @@ CREATE TABLE `eh_address_arrangement` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='房源拆分/合并计划表';
 
-ALTER TABLE `eh_addresses` ADD COLUMN `free_area`  double NULL DEFAULT NULL COMMENT '可招租面积';
-ALTER TABLE `eh_buildings` ADD COLUMN `free_area`  double NULL DEFAULT NULL COMMENT '可招租面积';
-ALTER TABLE `eh_communities` ADD COLUMN `free_area`  double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_addresses` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_buildings` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_communities` ADD COLUMN `free_area` double NULL DEFAULT NULL COMMENT '可招租面积';
+ALTER TABLE `eh_addresses` ADD COLUMN `is_future_apartment` tinyint NULL DEFAULT 0 COMMENT '未来房源标记（0：否，1：是）';
 -- END by 唐岑

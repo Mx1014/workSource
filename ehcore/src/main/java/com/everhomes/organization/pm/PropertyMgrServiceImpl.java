@@ -2379,7 +2379,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         } else {
             throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
         }
-
+        
+        //添加房源、小区、机构的对应关系，房源的具体状态存在eh_organization_address_mappings表中
         insertOrganizationAddressMapping(organizationId, community, address, cmd.getStatus());
 
         //门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要增加相应的值 by xiongying 20170815

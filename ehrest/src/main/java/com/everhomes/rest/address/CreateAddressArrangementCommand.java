@@ -18,6 +18,8 @@ import com.everhomes.util.StringHelper;
 public class CreateAddressArrangementCommand {
 
 	private Integer namespaceId;
+	private Long organizationId;
+	private Long communityId;
 	private Byte operationType;
 	private Long dateBegin;
 	private Long addressId;
@@ -29,6 +31,18 @@ public class CreateAddressArrangementCommand {
 	}
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+	public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 	public Byte getOperationType() {
 		return operationType;

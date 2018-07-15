@@ -4,7 +4,6 @@ package com.everhomes.rest.address;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>
  * <li>addressId:房源id</li>
  * <li>apartmentName:房源名称</li>
  * <li>areaSize:建筑面积</li>
@@ -15,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ArrangementApartmentDTO {
-	 
+	
 	private Long addressId;
 	private String apartmentName;
 	private Double areaSize;

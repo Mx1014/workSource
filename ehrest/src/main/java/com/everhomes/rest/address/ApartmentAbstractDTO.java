@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>livingStatus: 门牌状态 参考{@link com.everhomes.rest.organization.pm.AddressMappingStatus}</li>
  *     <li>chargeArea: 收费面积</li>
  *     <li>orientation: 朝向</li>
+ *     <li>relatedArrangementBeginDate: 关联的拆分合并计划的生效日期</li>
  * </ul>
  * Created by ying.xiong on 2017/8/18.
  */
@@ -26,8 +27,18 @@ public class ApartmentAbstractDTO {
     private Double chargeArea;
 
     private String orientation;
+    
+    private Long relatedArrangementBeginDate;
+    
+    public Long getRelatedArrangementBeginDate() {
+		return relatedArrangementBeginDate;
+	}
 
-    public String getBuildingName() {
+	public void setRelatedArrangementBeginDate(Long relatedArrangementBeginDate) {
+		this.relatedArrangementBeginDate = relatedArrangementBeginDate;
+	}
+
+	public String getBuildingName() {
         return buildingName;
     }
 
