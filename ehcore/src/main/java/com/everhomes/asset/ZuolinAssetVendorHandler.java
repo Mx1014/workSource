@@ -1004,9 +1004,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 }
             }
             //由于收款方账户名称可能存在修改的情况，故重新请求电商
-            HashSet<Long> h = new HashSet<Long>(userIds);//去重   
-            userIds.clear();  
-            userIds.addAll(h);
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("showBillForClientV2(request), cmd={}", userIds);
             }
