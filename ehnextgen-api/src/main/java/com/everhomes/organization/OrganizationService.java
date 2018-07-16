@@ -295,6 +295,7 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
+	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);
 	ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
 	void approveForEnterpriseContact(ApproveContactCommand cmd);
