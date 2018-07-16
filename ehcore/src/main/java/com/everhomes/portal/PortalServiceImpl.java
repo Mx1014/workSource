@@ -540,8 +540,14 @@ public class PortalServiceImpl implements PortalService {
 			if(!StringUtils.isEmpty(config.getTitleUri())){
 				String url = contentServerService.parserUri(config.getTitleUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 				config.setTitleUrl(url);
-				dto.setInstanceConfig(StringHelper.toJsonString(config));
 			}
+
+			if(!StringUtils.isEmpty(config.getIconUri())){
+				String url = contentServerService.parserUri(config.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				config.setIconUrl(url);
+			}
+
+			dto.setInstanceConfig(StringHelper.toJsonString(config));
 		}
 		return dto;
 	}
@@ -1643,7 +1649,7 @@ public class PortalServiceImpl implements PortalService {
 				BulletinsInstanceConfig config = (BulletinsInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), BulletinsInstanceConfig.class);
 				config.setItemGroup(itemGroup.getName());
 				if(!StringUtils.isEmpty(config.getIconUri())){
-					String url = contentServerService.parserUri(config.getIconUri(), EntityType.USER.getCode(), user.getId());
+					String url = contentServerService.parseSharedUri(config.getIconUri());
 					config.setIconUrl(url);
 				}
 
