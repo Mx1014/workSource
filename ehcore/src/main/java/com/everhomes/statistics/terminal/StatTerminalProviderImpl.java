@@ -357,7 +357,9 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
 
         List<Long> ids = context.select(u.ID).from(u)
                 .where(u.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                .and(u.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                .and(u.NAMESPACE_USER_TOKEN.eq(""))
+                .and(u.NAMESPACE_USER_TYPE.isNull())
                 .fetchInto(Long.class);
 
         if (ids.size() == 0) {
