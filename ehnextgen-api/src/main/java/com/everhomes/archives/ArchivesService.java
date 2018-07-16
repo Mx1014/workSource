@@ -107,8 +107,6 @@ public interface ArchivesService {
 
     OutputStream getArchivesEmployeesExportStream(ExportArchivesEmployeesCommand cmd, Long taskId);
 
-    void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd,HttpServletResponse httpResponse);
-
     ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
 
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);

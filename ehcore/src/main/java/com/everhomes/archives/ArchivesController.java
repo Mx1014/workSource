@@ -35,6 +35,9 @@ public class ArchivesController extends ControllerBase{
     @Autowired
     private ArchivesFormService archivesFormService;
 
+    @Autowired
+    private ArchivesDTSService archivesDTSService;
+
     /**
      * <b>URL: /archives/addArchivesContact</b>
      * <p>1.添加与编辑通讯录成员</p>
@@ -413,7 +416,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("exportArchivesEmployeesTemplate")
     @RestReturn(value = String.class)
     public RestResponse exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd, HttpServletResponse httpResponse){
-        archivesService.exportArchivesEmployeesTemplate(cmd,httpResponse);
+        archivesDTSService.exportArchivesEmployeesTemplate(cmd,httpResponse);
         return new RestResponse();
     }
 

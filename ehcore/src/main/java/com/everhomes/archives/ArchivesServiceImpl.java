@@ -2,7 +2,6 @@ package com.everhomes.archives;
 
 import com.alibaba.fastjson.JSON;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -29,7 +28,6 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
@@ -38,13 +36,11 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import javafx.scene.shape.Arc;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -65,7 +61,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -835,8 +830,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  2.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
-
-        //  3.获得 detailId 然后处理其它信息
+//  3.获得 detailId 然后处理其它信息
         Long detailId = null;
         if (memberDTO != null)
             detailId = memberDTO.getDetailId();
@@ -2199,36 +2193,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         return out;
     }
 
-    @Override
-    public void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd, HttpServletResponse httpResponse) {
-
-        ArchivesFormDTO form = getRealArchivesForm(cmd.getNamespaceId(), cmd.getOrganizationId());
-        /*        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
-        formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
-        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);*/
-        String fileName = localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.EMPLOYEE_IMPORT_MODULE, "zh_CN", "EmployeeImportModule");
-        ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
-        List<String> titleNames = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
-        List<String> propertyNames = new ArrayList<>();
-        List<Integer> titleSizes = new ArrayList<>();
-        for (int i = 0; i < form.getFormFields().size(); i++) {
-            titleSizes.add(20);
-        }
-        excelSettings(excelUtils, form);
-        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
-    }
-
-    private void excelSettings(ExcelUtils excelUtils, ArchivesFormDTO form) {
-        List<Integer> mandatoryTitle = new ArrayList<>();
-        for (int i = 0; i < form.getFormFields().size(); i++) {
-            mandatoryTitle.add(checkMandatory(form.getFormFields().get(i).getFieldName()));
-        }
-        excelUtils.setNeedMandatoryTitle(true);
-        excelUtils.setMandatoryTitle(mandatoryTitle);
-        excelUtils.setTitleRemark(localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.EMPLOYEE_IMPORT_REMARK, "zh_CN", "EmployeeImportRemark"), (short) 18, (short) 4480);
-        excelUtils.setNeedSequenceColumn(false);
-        excelUtils.setNeedTitleRemark(true);
-    }
 
     @Override
     public ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd) {
@@ -2236,20 +2200,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     /********************    import function start    ********************/
-    private Integer checkMandatory(String name) {
-        if (ArchivesParameter.CONTACT_NAME.equals(name))
-            return 1;
-        else if (ArchivesParameter.CONTACT_TOKEN.equals(name))
-            return 1;
-        else if (ArchivesParameter.CHECK_IN_TIME.equals(name))
-            return 1;
-        else if (ArchivesParameter.EMPLOYEE_TYPE.equals(name))
-            return 1;
-        else if (ArchivesParameter.DEPARTMENT.equals(name))
-            return 1;
-        else
-            return 0;
-    }
+
 
     private boolean verifyPersonnelByPhone(Long organizationId, String contactToken) {
         VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
