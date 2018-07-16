@@ -32,6 +32,9 @@
 -- REMARK:        }
 -- REMARK:    }
 
+-- AUTHOR: jiarui 20180716
+-- REMARK:执行 search目录下 equipment_standard.sh  然后同步/equipment/syncEquipmentStandardMapIndex
+
 
 
 
@@ -84,8 +87,11 @@ VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
--- AUTHOR:
--- REMARK:
+-- AUTHOR:dengs
+-- REMARK:支付收款失败提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -96,8 +102,11 @@ VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev
 -- DESCRIPTION: 此SECTION只在开发库中执行的脚本
--- AUTHOR:
--- REMARK:
+-- AUTHOR:dengs
+-- REMARK:支付收款失败提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -107,8 +116,11 @@ VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zijing
 -- DESCRIPTION: 此SECTION只在清华信息港(紫荆)-999984执行的脚本
--- AUTHOR: 
--- REMARK: 
+-- AUTHOR:dengs
+-- REMARK:支付收款失败提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -118,8 +130,11 @@ VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guangda
 -- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
--- AUTHOR: 
--- REMARK: 
+-- AUTHOR:dengs
+-- REMARK:支付收款失败提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -141,9 +156,11 @@ VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: chuangyechang
 -- DESCRIPTION: 此SECTION只在成都创业场-999964执行的脚本
--- AUTHOR:
--- REMARK:
-
+-- AUTHOR:dengs
+-- REMARK:支付收款失败提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -154,9 +171,11 @@ VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: anbang
 -- DESCRIPTION: 此SECTION只在安邦物业-999949执行的脚本
--- AUTHOR: 
--- REMARK: 
-
+-- AUTHOR:dengs
+-- REMARK:支付收款失败提示
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
