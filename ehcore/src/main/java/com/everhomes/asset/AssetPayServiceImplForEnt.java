@@ -1,72 +1,43 @@
 package com.everhomes.asset;
 
-import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.order.PayProvider;
-import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.order.PaymentOrderRecord;
-import com.everhomes.order.PaymentServiceConfig;
-import com.everhomes.order.PaymentServiceConfigHandler;
-import com.everhomes.order.PaymentUser;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.pay.order.OrderDTO;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.pay.order.PaymentType;
-import com.everhomes.pay.order.SettlementType;
 import com.everhomes.pay.order.SourceType;
-import com.everhomes.pay.order.ValidationType;
-import com.everhomes.pay.rest.ApiConstants;
-import com.everhomes.pay.user.BindPhoneCommand;
-import com.everhomes.pay.user.BusinessUserType;
-import com.everhomes.pay.user.ListBusinessUsersCommand;
-import com.everhomes.pay.user.RegisterBusinessUserCommand;
-import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.api.PayService;
-import com.everhomes.paySDK.pojo.PayOrderDTO;
 import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.StringRestResponse;
-import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.OwnerType;
-import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PayServiceErrorCode;
-import com.everhomes.rest.order.PaymentParamsDTO;
-import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 
 @Service
@@ -79,9 +50,6 @@ public class AssetPayServiceImplForEnt implements AssetPayServiceForEnt{
 	
 	@Autowired 
 	private UserProvider userProvider;
-	
-	@Autowired
-	private ContentServerService contentServerService;
 	
 	@Autowired
     private PayProvider payProvider;
@@ -296,30 +264,4 @@ public class AssetPayServiceImplForEnt implements AssetPayServiceForEnt{
         return response;
     }
     
-    /*private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
-        PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
-        List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
-        List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
-        String format = "{\"getOrderInfoUrl\":\"%s\"}";
-        for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
-        	PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
-        	payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
-        	payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
-        	String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
-        	payMethodDTO.setPaymentLogo(paymentLogo);
-        	payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
-        	PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-        	com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
-        	if(bizPaymentParamsDTO != null) {
-        		paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
-        	}
-        	payMethodDTO.setPaymentParams(paymentParamsDTO);
-        	payMethods.add(payMethodDTO);
-        }
-        dto.setPayMethod(payMethods);
-        dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
-        dto.setAmount(cmd.getAmount());
-        dto.setOrderId(cmd.getOrderId());
-        return dto;
-    }*/
 }
