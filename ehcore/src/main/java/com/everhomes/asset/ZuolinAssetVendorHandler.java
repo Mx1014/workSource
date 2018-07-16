@@ -920,6 +920,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
         assemble:
         {
+        	List<Long> userIds = new ArrayList<Long>();//由于收款方账户名称可能存在修改的情况，故重新请求电商
             for (int j = 0; j < maps.size(); j++) {
                 Map<?, ?> map = maps.get(j);
                 if (map.size() < 1) continue;
@@ -930,35 +931,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         Long billGroupId = enclosedBills.get(0).getBillGroupId();
                         dto.setBillGroupName(assetProvider.getbillGroupNameById(billGroupId));
                         dto.setBillGroupId(billGroupId);
-                       //新增收款方账户类型、账户ID字段 
+                        //新增收款方账户类型、账户ID字段 
                         PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(billGroupId);
                         if(paymentBillGroup != null) {
                         	dto.setBizPayeeId(paymentBillGroup.getBizPayeeId());
                         	dto.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-                        	//由于收款方审核状态存在修改的情况，故重新请求电商
-                            List<Long> userIds = new ArrayList<Long>();
-                            userIds.add(paymentBillGroup.getBizPayeeId());
-                            if(LOGGER.isDebugEnabled()) {
-                                LOGGER.debug("listBillGroups(request), cmd={}", userIds);
-                            }
-                            List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
-                            if(LOGGER.isDebugEnabled()) {
-                                LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
-                            }
-                            if(payUserDTOs != null && payUserDTOs.size() != 0) {
-                            	for(int i = 0;i < payUserDTOs.size();i++) {
-                            		if(payUserDTOs.get(i).getId() != null && dto.getBizPayeeId() != null &&
-                            			payUserDTOs.get(i).getId().equals(dto.getBizPayeeId())){
-                            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-                                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
-                                        if(registerStatus != null && registerStatus.intValue() == 1) {
-                                            dto.setRegisterStatus(PaymentUserStatus.ACTIVE.getCode());
-                                        } else {
-                                            dto.setRegisterStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-                                        }
-                                	}
-                                }
-                            }
+                        	userIds.add(paymentBillGroup.getBizPayeeId());//由于收款方账户名称可能存在修改的情况，故重新请求电商
                         }
                         if(enclosedBills.get(0).getContractId() != null){
                             dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
@@ -1024,6 +1002,34 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     }
                     tabBills.add(dto);
                 }
+            }
+            //由于收款方账户名称可能存在修改的情况，故重新请求电商
+            HashSet<Long> h = new HashSet<Long>(userIds);//去重   
+            userIds.clear();  
+            userIds.addAll(h);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("showBillForClientV2(request), cmd={}", userIds);
+            }
+            List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("showBillForClientV2(response), response={}", payUserDTOs);
+            }
+            if(payUserDTOs != null && payUserDTOs.size() != 0) {
+            	for(int i = 0;i < payUserDTOs.size();i++) {
+            		for(int j = 0;j < tabBills.size();j++) {
+            			if(payUserDTOs.get(i) != null && tabBills.get(j) != null &&
+                    			payUserDTOs.get(i).getId() != null && tabBills.get(j).getBizPayeeId() != null &&
+                    			payUserDTOs.get(i).getId().equals(tabBills.get(j).getBizPayeeId())){
+            				// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                            Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
+                            if(registerStatus != null && registerStatus.intValue() == 1) {
+                            	tabBills.get(j).setRegisterStatus(PaymentUserStatus.ACTIVE.getCode());
+                            } else {
+                            	tabBills.get(j).setRegisterStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                            }
+            			}
+            		}
+            	}
             }
         }
         return tabBills;
