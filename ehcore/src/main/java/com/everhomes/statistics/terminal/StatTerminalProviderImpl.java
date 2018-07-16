@@ -148,7 +148,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
     }
 
     @Override
-    public TerminalAppVersionActives getTerminalAppVersionActive(String date, String version, String imei, Integer namespaceId) {
+    public List<TerminalAppVersionActives> getTerminalAppVersionActive(String date, String version, String imei, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhTerminalAppVersionActivesRecord> query = context.selectQuery(Tables.EH_TERMINAL_APP_VERSION_ACTIVES);
         if (date != null) {
@@ -161,7 +161,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
         if (null != imei) {
             query.addConditions(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.eq(imei));
         }
-        return query.fetchAnyInto(TerminalAppVersionActives.class);
+        return query.fetchInto(TerminalAppVersionActives.class);
     }
 
     @Override
@@ -357,7 +357,9 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
 
         List<Long> ids = context.select(u.ID).from(u)
                 .where(u.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                .and(u.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                .and(u.NAMESPACE_USER_TOKEN.eq(""))
+                .and(u.NAMESPACE_USER_TYPE.isNull())
                 .fetchInto(Long.class);
 
         if (ids.size() == 0) {
@@ -419,5 +421,25 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhTerminalHourStatisticsDao dao = new EhTerminalHourStatisticsDao(context.configuration());
         dao.insert(hourStats.toArray(new EhTerminalHourStatistics[0]));
+    }
+
+    @Override
+    public void deleteTerminalAppVersionCumulative(String imeiNumber, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhTerminalAppVersionActives t = Tables.EH_TERMINAL_APP_VERSION_ACTIVES;
+        context.delete(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.IMEI_NUMBER.eq(imeiNumber))
+                .execute();
+    }
+
+    @Override
+    public void deleteTerminalStatTask(Integer namespaceId, String taskNo) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhTerminalStatisticsTasks t = Tables.EH_TERMINAL_STATISTICS_TASKS;
+        context.delete(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.TASK_NO.eq(taskNo))
+                .execute();
     }
 }
