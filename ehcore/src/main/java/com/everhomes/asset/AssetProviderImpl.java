@@ -498,14 +498,14 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Byte status = cmd.getStatus();
         String targetType = cmd.getTargetType();
-            // 应用id，多入口区分账单 by wentian 2018/5/25
+        //应用id，多入口区分账单 by wentian 2018/5/25
         Long categoryId = cmd.getCategoryId();
-
         Integer paymentType = cmd.getPaymentType();
         Byte isUploadCertificate = cmd.getIsUploadCertificate();
         String buildingName = cmd.getBuildingName();//楼栋名称
         String apartmentName = cmd.getApartmentName();//门牌名称
         String customerTel = cmd.getCustomerTel();//客户手机号
+        Long targetIdForEnt = cmd.getTargetIdForEnt();//对公转账是根据企业id来查询相关的所有账单，如果是对公转账则不能为空
 
         //卸货结束
         List<ListBillsDTO> list = new ArrayList<>();
@@ -521,11 +521,12 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
 
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
-
+        
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         if(!org.springframework.util.StringUtils.isEmpty(status)){
             query.addConditions(t.SWITCH.eq(status));
@@ -545,9 +546,6 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(contractNum)){
             query.addConditions(t.CONTRACT_NUM.eq(contractNum));
         }
-        if(status!=null && status == 1){
-            query.addOrderBy(t.STATUS);
-        }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
             query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
         }
@@ -560,6 +558,9 @@ public class AssetProviderImpl implements AssetProvider {
         if(paymentType!=null){
             query.addConditions(t.PAYMENT_TYPE.eq(paymentType));
         }
+        if(!org.springframework.util.StringUtils.isEmpty(targetIdForEnt)){
+        	query.addConditions(t.TARGET_ID.eq(targetIdForEnt));//对公转账是根据企业id来查询相关的所有账单
+        }
         //只查询上传了缴费凭证的记录
         if(isUploadCertificate!=null && isUploadCertificate == 1){
         	query.addConditions(t.IS_UPLOAD_CERTIFICATE.eq(isUploadCertificate));
@@ -571,6 +572,9 @@ public class AssetProviderImpl implements AssetProvider {
         	apartmentName = apartmentName != null ? apartmentName : "";
         	String queryAddress = buildingName + "/" + apartmentName;
         	query.addHaving(DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).like("%"+queryAddress+"%"));
+        }
+        if(status!=null && status == 1){
+            query.addOrderBy(t.STATUS);
         }
         query.addOrderBy(t.DATE_STR_BEGIN.desc());
         query.addLimit(pageOffSet,pageSize+1);
@@ -943,29 +947,32 @@ public class AssetProviderImpl implements AssetProvider {
         ListBusinessUserByIdsCommand cmd = new ListBusinessUserByIdsCommand();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-        context.select()
-                .from(t)
-                .where(t.OWNER_ID.eq(ownerId))
-                .and(t.OWNER_TYPE.eq(ownerType))
-                .and(t.CATEGORY_ID.eq(categoryId))
-                .orderBy(t.DEFAULT_ORDER)
-                .fetch()
-                .map(r -> {
-                    ListBillGroupsDTO dto = new ListBillGroupsDTO();
-                    dto.setBillGroupId(r.getValue(t.ID));
-                    dto.setBillGroupName(r.getValue(t.NAME));
-                    dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
-                    dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
-                    dto.setBillingDay(r.getValue(t.BILLS_DAY));
-                    dto.setDueDay(r.getValue(t.DUE_DAY));
-                    dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
-                    dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
-                    dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
-                    dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
-                    userIds.add(r.getValue(t.BIZ_PAYEE_ID));
-                    list.add(dto);
-                    return null;
-                });
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.ID,t.NAME,t.DEFAULT_ORDER,t.BALANCE_DATE_TYPE,t.BALANCE_DATE_TYPE,t.BILLS_DAY,
+        		t.DUE_DAY,t.DUE_DAY_TYPE,t.BILLS_DAY_TYPE,t.BILLS_DAY_TYPE,t.BIZ_PAYEE_TYPE,t.BIZ_PAYEE_ID);
+        query.addFrom(t);
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        if(categoryId != null){
+            query.addConditions(t.CATEGORY_ID.eq(categoryId));
+        }
+        query.addOrderBy(t.DEFAULT_ORDER);
+        query.fetch().map(r -> {
+        	ListBillGroupsDTO dto = new ListBillGroupsDTO();
+            dto.setBillGroupId(r.getValue(t.ID));
+            dto.setBillGroupName(r.getValue(t.NAME));
+            dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER)); 
+            dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
+            dto.setBillingDay(r.getValue(t.BILLS_DAY));
+            dto.setDueDay(r.getValue(t.DUE_DAY));
+            dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
+            dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
+            dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
+            dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
+            userIds.add(r.getValue(t.BIZ_PAYEE_ID));
+            list.add(dto);
+            return null;
+        });
         //由于收款方账户名称可能存在修改的情况，故重新请求电商
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("listBillGroups(request), cmd={}", userIds);
@@ -4834,6 +4841,7 @@ public class AssetProviderImpl implements AssetProvider {
         String targetName = cmd.getTargetName();
         Integer paymentType = cmd.getPaymentType();
         Long billId = cmd.getBillId();
+        Long categoryId = cmd.getCategoryId();//增加多入口查询条件
         //卸货结束
         List<PaymentOrderBillDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -4853,6 +4861,9 @@ public class AssetProviderImpl implements AssetProvider {
         //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
         Byte status = new Byte("1");
         query.addConditions(t.SWITCH.eq(status));
+        if(!org.springframework.util.StringUtils.isEmpty(categoryId)){
+        	query.addConditions(t.CATEGORY_ID.eq(categoryId));//增加多入口查询条件
+        }
         if(!org.springframework.util.StringUtils.isEmpty(billId)){
             query.addConditions(t.ID.eq(billId));
         }
@@ -5432,85 +5443,7 @@ public class AssetProviderImpl implements AssetProvider {
 		return projectName;
 	}
 	
-	public List<ListBillsDTOForEnt> listBillsForEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommandForEnt cmd) {
-        //卸货
-        Long ownerId = cmd.getOwnerId();
-        String ownerType = cmd.getOwnerType();
-        String targetType = cmd.getTargetType();
-        Long targetId = cmd.getTargetId();//对公转账是根据企业id来查询相关的所有账单，不能为空
-        String billGroupName = cmd.getBillGroupName();
-        Long billGroupId = cmd.getBillGroupId();
-        Byte billStatus = cmd.getBillStatus();
-        String dateStrBegin = cmd.getDateStrBegin();
-        String dateStrEnd = cmd.getDateStrEnd();
-        Byte status = 1;//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
-        //卸货结束
-        List<ListBillsDTOForEnt> list = new ArrayList<>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        SelectQuery<EhPaymentBillsRecord> query = context.selectQuery(t);
-        if(!org.springframework.util.StringUtils.isEmpty(currentNamespaceId)) {
-        	query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(ownerId)) {
-        	query.addConditions(t.OWNER_ID.eq(ownerId));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(ownerType)) {
-        	query.addConditions(t.OWNER_TYPE.eq(ownerType));
-        }
-        query.addConditions(t.SWITCH.eq(status));//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
-        if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
-            query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {//账单状态,0:未缴;1:已缴
-            query.addConditions(t.STATUS.eq(billStatus));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(targetType)){
-            query.addConditions(t.TARGET_TYPE.eq(targetType));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
-            query.addConditions(t.DATE_STR_BEGIN.greaterOrEqual(dateStrBegin));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
-            query.addConditions(t.DATE_STR_END.lessOrEqual(dateStrEnd));
-        }
-        query.addConditions(t.TARGET_ID.eq(targetId));//对公转账是根据企业id来查询相关的所有账单
-        if(status!=null && status == 1){
-        	query.addOrderBy(t.STATUS);
-        }
-        query.addOrderBy(t.DATE_STR_BEGIN.desc());
-        query.addLimit(pageOffSet,pageSize+1);
-        query.fetch().map(r -> {
-        	ListBillsDTOForEnt dto = new ListBillsDTOForEnt();
-        	dto.setDateStr(r.getDateStr());
-        	dto.setDateStrBegin(r.getDateStrBegin());
-        	dto.setDateStrEnd(r.getDateStrEnd());
-        	dto.setBillId(String.valueOf(r.getValue(t.ID)));
-        	if(!org.springframework.util.StringUtils.isEmpty(billGroupName)) {
-                dto.setBillGroupName(billGroupName);
-            }else{
-                String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
-                dto.setBillGroupName(billGroupNameFound);
-            }
-        	dto.setTargetName(r.getTargetName());
-        	dto.setTargetId(String.valueOf(r.getTargetId()));
-            dto.setTargetType(r.getTargetType());
-            dto.setContractNum(r.getContractNum());
-            dto.setContractId(String.valueOf(r.getContractId()));
-            dto.setNoticeTel(r.getValue(t.NOTICETEL));
-            dto.setAmountOwed(r.getAmountOwed());
-            dto.setAmountReceivable(r.getAmountReceivable());
-            dto.setAmountReceived(r.getAmountReceived());
-            dto.setBillStatus(r.getValue(t.STATUS));
-            dto.setOwnerId(String.valueOf(r.getOwnerId()));
-            dto.setOwnerType(r.getOwnerType());
-            dto.setInvoiceNum(r.getValue(t.INVOICE_NUMBER));
-            list.add(dto);
-            return null;});
-        return list;
-    }
-    
-    public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmdForEnt cmd) {
+    public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         ListBillDetailVO vo = new ListBillDetailVO();
@@ -5576,197 +5509,5 @@ public class AssetProviderImpl implements AssetProvider {
         dao.insert(order);
         return order;
     }
-    
-    public List<PaymentOrderBillDTO> listBillsForOrderEnt(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize,ListPaymentBillCmdForEnt cmd) {
-        //卸货
-        Long ownerId = cmd.getOwnerId();
-        String startPayTime = cmd.getStartPayTime();
-        String endPayTime = cmd.getEndPayTime();
-        Integer paymentType = 1;//2代表对公转账
-        //卸货结束
-        List<PaymentOrderBillDTO> list = new ArrayList<>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
-        EhPaymentOrderRecords t3 = Tables.EH_PAYMENT_ORDER_RECORDS.as("t3");
-        EhAssetPaymentOrder t4 = Tables.EH_ASSET_PAYMENT_ORDER.as("t4");
-        SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
-        		t2.BILL_ID, t3.PAYMENT_ORDER_ID, t3.CREATE_TIME, t4.UID, t4.PAYMENT_TYPE);
-        query.addFrom(t);
-        query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
-        query.addJoin(t3, t2.ORDER_ID.eq(t3.ORDER_ID));
-        query.addJoin(t4, t2.ORDER_ID.eq(t4.ID));
-        query.addConditions(t.OWNER_ID.eq(ownerId));
-        query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
-        //status[Byte]:账单属性，0:未出账单;1:已出账单，对应到eh_payment_bills表中的switch字段
-        Byte status = new Byte("1");
-        query.addConditions(t.SWITCH.eq(status));
-        if(!org.springframework.util.StringUtils.isEmpty(startPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).greaterOrEqual(startPayTime + " 00:00:00"));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(endPayTime)){
-            query.addConditions(DSL.cast(t3.CREATE_TIME, String.class).lessOrEqual(endPayTime + " 23:59:59"));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(paymentType)){
-        	//业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
-            //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
-            //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
-            if(paymentType.equals(0)) {//微信
-            	query.addConditions(t4.PAYMENT_TYPE.eq("1")
-            			.or(t4.PAYMENT_TYPE.eq("7"))
-            			.or(t4.PAYMENT_TYPE.eq("9"))
-            			.or(t4.PAYMENT_TYPE.eq("12"))
-            			.or(t4.PAYMENT_TYPE.eq("21"))
-            	);
-            }else if(paymentType.equals(1)) {//支付宝
-            	query.addConditions(t4.PAYMENT_TYPE.eq("8")
-            			.or(t4.PAYMENT_TYPE.eq("10"))
-            			.or(t4.PAYMENT_TYPE.eq("13"))
-            	);
-            }else if(paymentType.equals(2)){//对公转账
-            	query.addConditions(t4.PAYMENT_TYPE.eq("2"));
-            }
-        }
-        query.addConditions(t2.STATUS.eq(1));//EhAssetPaymentOrderBills中的status1代表支付成功
-        query.addOrderBy(t3.CREATE_TIME.desc());
-        query.addLimit(pageOffSet,pageSize+1);
-        query.fetch().map(r -> {
-        	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
-        	dto.setBillId(r.getValue(t.ID));//账单ID
-        	dto.setPaymentOrderNum(r.getValue(t3.PAYMENT_ORDER_ID).toString());//订单ID
-        	ListBillDetailVO listBillDetailVO = listBillDetailForPaymentV2(dto.getBillId());
-        	dto.setDateStrBegin(listBillDetailVO.getDateStrBegin());
-        	dto.setDateStrEnd(listBillDetailVO.getDateStrEnd());
-        	dto.setTargetName(listBillDetailVO.getTargetName());
-        	dto.setTargetType(listBillDetailVO.getTargetType());
-        	dto.setAmountReceivable(listBillDetailVO.getAmountReceivable());
-        	dto.setAmountReceived(listBillDetailVO.getAmountReceived());
-        	dto.setAmountExemption(listBillDetailVO.getAmoutExemption());
-    		dto.setAmountSupplement(listBillDetailVO.getAmountSupplement());
-    		dto.setBuildingName(listBillDetailVO.getBuildingName());
-    		dto.setApartmentName(listBillDetailVO.getApartmentName());
-    		dto.setBillGroupName(listBillDetailVO.getBillGroupName());
-    		dto.setAddresses(listBillDetailVO.getAddresses());
-    		if(listBillDetailVO.getBillGroupDTO() != null) {
-    			dto.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
-    			dto.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
-    		}
-            SimpleDateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            //缴费时间
-            String payTime = r.getValue(t3.CREATE_TIME).toString();
-			try {
-				payTime = yyyyMMddHHmm.format(yyyyMMddHHmm.parse(payTime));
-			}catch (Exception e){
-				payTime = null;
-                LOGGER.error(e.toString());
-            }
-            dto.setPayTime(payTime);
-            //获得付款人员（缴费人名称、缴费人电话）
-            User userById = userProvider.findUserById(r.getValue(t4.UID));
-            if(userById != null) {
-            	dto.setPayerName(userById.getNickName());
-                UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
-                if(userIdentifier != null) {
-                	dto.setPayerTel(userIdentifier.getIdentifierToken());
-                }
-            }
-            try {
-            	Integer queryPaymentType = Integer.parseInt(r.getValue(t4.PAYMENT_TYPE));
-                dto.setPaymentType(convertPaymentType(queryPaymentType));//支付方式
-            }catch(Exception e){
-            	LOGGER.debug("Integer.parseInt, paymentType={}, Exception={}", r.getValue(t4.PAYMENT_TYPE), e);
-            }
-            dto.setPaymentStatus(1);//1：已完成，0：订单异常
-            list.add(dto);
-            return null;
-        });
-        //调用支付提供的接口查询订单信息
-        List<Long> payOrderIds = new ArrayList<>();
-        for(PaymentOrderBillDTO dto : list) {
-        	payOrderIds.add(Long.parseLong(dto.getPaymentOrderNum()));
-        }
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listPayOrderByIds(request), cmd={}", payOrderIds);
-        }
-        List<OrderDTO> payOrderDTOs = payServiceV2.listPayOrderByIds(payOrderIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listPayOrderByIds(response), response={}", GsonUtil.toJson(payOrderDTOs));
-        }
-        if(payOrderDTOs != null && payOrderDTOs.size() != 0) {
-        	for(int i = 0;i < payOrderDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payOrderDTOs.get(i).getId() != null && list.get(j).getPaymentOrderNum() != null &&
-            				payOrderDTOs.get(i).getId().equals(Long.parseLong(list.get(j).getPaymentOrderNum()))){
-            			PaymentOrderBillDTO dto = list.get(j);
-            			OrderDTO orderDTO = payOrderDTOs.get(i);
-            			//dto.setAmount(AmountUtil.centToUnit(LongUtil.convert(orderDTO.getAmount())));
-            			if(orderDTO.getPaymentType() != null) {
-            				dto.setPaymentType(convertPaymentType(orderDTO.getPaymentType()));//支付方式
-            			}
-            			list.set(j, dto);
-            		}
-            	}
-            }
-        }
-        return list;
-    }
 
-	public List<ListBillGroupsDTO> listBillGroupsForEnt(Long ownerId, String ownerType) {
-        List<ListBillGroupsDTO> list = new ArrayList<>();
-        List<Long> userIds = new ArrayList<Long>();
-        ListBusinessUserByIdsCommand cmd = new ListBusinessUserByIdsCommand();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-        context.select()
-                .from(t)
-                .where(t.OWNER_ID.eq(ownerId))
-                .and(t.OWNER_TYPE.eq(ownerType))
-                .orderBy(t.DEFAULT_ORDER)
-                .fetch()
-                .map(r -> {
-                    ListBillGroupsDTO dto = new ListBillGroupsDTO();
-                    dto.setBillGroupId(r.getValue(t.ID));
-                    dto.setBillGroupName(r.getValue(t.NAME));
-                    dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
-                    dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
-                    dto.setBillingDay(r.getValue(t.BILLS_DAY));
-                    dto.setDueDay(r.getValue(t.DUE_DAY));
-                    dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
-                    dto.setBillDayType(r.getValue(t.BILLS_DAY_TYPE));
-                    dto.setBizPayeeType(r.getValue(t.BIZ_PAYEE_TYPE));//收款方账户类型
-                    dto.setBizPayeeId(r.getValue(t.BIZ_PAYEE_ID));//收款方账户id
-                    userIds.add(r.getValue(t.BIZ_PAYEE_ID));
-                    list.add(dto);
-                    return null;
-                });
-        //由于收款方账户名称可能存在修改的情况，故重新请求电商
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listBillGroups(request), cmd={}", userIds);
-        }
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
-        }
-        if(payUserDTOs != null && payUserDTOs.size() != 0) {
-        	for(int i = 0;i < payUserDTOs.size();i++) {
-            	for(int j = 0;j < list.size();j++) {
-            		if(payUserDTOs.get(i) != null && list.get(j) != null &&
-            			payUserDTOs.get(i).getId() != null && list.get(j).getBizPayeeId() != null &&
-            			payUserDTOs.get(i).getId().equals(list.get(j).getBizPayeeId())){
-            			list.get(j).setAccountName(payUserDTOs.get(i).getRemark());// 用户向支付系统注册帐号时填写的帐号名称
-            			list.get(j).setAccountAliasName(payUserDTOs.get(i).getUserAliasName());//企业名称（认证企业）
-            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
-                        if(registerStatus != null && registerStatus.intValue() == 1) {
-                        	list.get(j).setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
-                        } else {
-                        	list.get(j).setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-                        }
-            		}
-            	}
-            }
-        }
-        return list;
-	}
 }

@@ -12,6 +12,28 @@
 -- REMARK:   com.everhomes.scriptengine.nashorn.NashornApiService,
 -- REMARK:   com.everhomes.flow.FlowNashornConfigService
 
+-- AUTHOR: liuyilin  20180714
+-- REMARK: border-server的nginx,location / 下补充配置到最后:
+-- REMARK: proxy_http_version 1.1;
+-- REMARK: proxy_set_header Upgrade $http_upgrade;
+-- REMARK: proxy_set_header Connection "upgrade";
+-- REMARK: 以dev01-border为例:
+-- REMARK:    server {
+-- REMARK:        listen 80;
+-- REMARK:        server_name  dev01-border.zuolin.com;
+-- REMARK:        location / {
+-- REMARK:            proxy_set_header X-Forwarded-For $remote_addr;
+-- REMARK:            proxy_set_header Host $host;
+-- REMARK:            proxy_set_header X-Forwarded-Scheme $scheme;
+-- REMARK:            proxy_pass http://localhost:9090;
+-- REMARK:            proxy_http_version 1.1;
+-- REMARK:            proxy_set_header Upgrade $http_upgrade;
+-- REMARK:            proxy_set_header Connection "upgrade";
+-- REMARK:        }
+-- REMARK:    }
+
+
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
