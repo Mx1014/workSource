@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
@@ -227,5 +228,7 @@ public interface AssetService {
 	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
 
 	PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd);
+
+	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
     
 }

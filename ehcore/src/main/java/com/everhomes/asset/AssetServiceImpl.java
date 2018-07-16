@@ -34,6 +34,7 @@ import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -4806,7 +4807,7 @@ public class AssetServiceImpl implements AssetService {
     }
     
     public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd){
-    	List<BillIdAndAmount> bills = new ArrayList<BillIdAndAmount>();
+//    	List<BillIdAndAmount> bills = new ArrayList<BillIdAndAmount>();
     	List<PaymentBillRequest> paymentBillRequests = cmd.getBillList();
         List<String> billIds = new ArrayList<>();
         Long amountsInCents = 0l;
@@ -4821,21 +4822,21 @@ public class AssetServiceImpl implements AssetService {
         //对左邻的用户，直接检查bill的状态即可
         checkHasPaidBills(billIds);
         //如果账单为新的，则进行存储
-        String payerType = cmd.getTargetType();//支付者的类型，eh_user为个人，eh_organization为企业
-        String clientAppName = "Web对公转账";
-        Long communityId = null;
-        String contactNum = cmd.getContractNum();
-        String openid = null;
-        String payerName = cmd.getPayerName();
-        AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
-        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
-        		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
-        assetProvider.saveOrderBills(bills,order.getId());
+//        String payerType = cmd.getTargetType();//支付者的类型，eh_user为个人，eh_organization为企业
+//        String clientAppName = "Web对公转账";
+//        Long communityId = null;
+//        String contactNum = cmd.getContractNum();
+//        String openid = null;
+//        String payerName = cmd.getPayerName();
+//        AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
+//        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
+//        		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+//        assetProvider.saveOrderBills(bills,order.getId());
         
         PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
         
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//定义格式，不显示毫秒
-        String date = format.format(order.getCreateTime());
+        String date = format.format(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		publicTransferBillRespForEnt.setOrderCreateTime(date);
         //paymentOrderNum：订单编号，没点“去支付”按钮之前，没有办法获取订单编号，所以此处只能展示我们业务系统的orderNo支付流水号
         //publicTransferBillRespForEnt.setPaymentOrderNum(String.valueOf(order.getOrderNo()));
@@ -5087,16 +5088,19 @@ public class AssetServiceImpl implements AssetService {
 	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
 		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        //1、预下单
-        PreOrderDTO preOrderDTO = handler.placeAnAssetOrder(cmd);
-        //2、请求授权token
-        //String token = handler.getPayToken(cmd.getPayerId());
-        
-        //3、使用token登录支付服务器
-        
-        //4、返回支付收银台链接给前端
-        
+        PreOrderDTO preOrderDTO = handler.payBillsForEnt(cmd);
         return preOrderDTO;
+	}
+
+	public GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd) {
+		//查询eh_payment_order_records表，获取支付状态
+		GetPayBillsForEntResultResp response = new GetPayBillsForEntResultResp();
+		response.setPayState(1);//只用于测试
+		
+		
+		
+		
+		return response;
 	}
 
 }

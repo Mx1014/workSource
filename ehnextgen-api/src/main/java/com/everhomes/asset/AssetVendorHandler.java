@@ -245,4 +245,10 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
+
+	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
+		LOGGER.error("Insufficient privilege, handler payBillsForEnt");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
 }

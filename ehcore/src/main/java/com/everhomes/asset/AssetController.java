@@ -20,6 +20,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
@@ -1543,6 +1544,20 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     @RestReturn(PreOrderDTO.class)
     public RestResponse payBillsForEnt(PlaceAnAssetOrderCommand cmd){
         PreOrderDTO response = assetService.payBillsForEnt(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+    
+    /**
+     * <p>对公转账：返回支付结果</p>
+     * <b>URL: /asset/getPayBillsForEntResult</b>
+     */
+    @RequestMapping("getPayBillsForEntResult")
+    @RestReturn(GetPayBillsForEntResultResp.class)
+    public RestResponse getPayBillsForEntResult(PaymentOrderRecord cmd){
+    	GetPayBillsForEntResultResp response = assetService.getPayBillsForEntResult(cmd);
         RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
