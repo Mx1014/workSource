@@ -441,6 +441,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			if(!isRunning) {
 				workerPoolFactory.getWorkerPool().addQueue(queueName);
 				isRunning = true;
+				LOGGER.info("WorkerPool addQueue queueName ={}",queueName);
 			}
 		}
         

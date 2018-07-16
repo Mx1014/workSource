@@ -775,6 +775,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     //return null;
                 }else{
                 	bundleId = bmapper.getBundleId();
+                	if(bmapper.getIdentify()!= null && TYPE_DEVELOP.equals(bmapper.getIdentify())){//判断服务器类型
+                		isProductionGateway = false ;
+                	}
                 }   
         	}        	    	
         }
