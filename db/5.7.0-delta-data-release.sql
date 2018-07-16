@@ -67,6 +67,13 @@ set @id = (select id from eh_var_fields WHERE name = 'visitTimeLength' );
 update eh_var_field_scopes set field_param = '{"fieldParamType": "text", "length": 32}' where field_id = @id ;
 -- end
 
+-- AUTHOR: 杨崇鑫  20180716
+-- REMARK: 物业缴费增加广告费费项
+SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_payment_charging_items); 
+INSERT INTO `eh_payment_charging_items`(`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
+VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
