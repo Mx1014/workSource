@@ -170,6 +170,11 @@ update eh_service_module_apps set action_type = 14 where module_id = 40500;
 
 update eh_flow_predefined_params set namespace_id = 0 where module_id = 40500 and entity_type = 'flow_button';
 
+-- REMARK: 执行完数据迁移后，需要修改下类型。
+update eh_service_alliance_attachments set attachment_type = 2 where creator_uid = 2 and attachment_type = 0;
+
+
+
 
 
 -- AUTHOR: wentian integrated by jiarui  20180703
