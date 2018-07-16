@@ -43,6 +43,7 @@ import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rentalv2.utils.RentalUtils;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.order.*;
@@ -959,8 +960,8 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			//订单记录权限
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040840L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+			//订单记录权限校验
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), PrivilegeConstants.PARKING_ORDER_MANAGERMENT, cmd.getAppId(), null,cmd.getCurrentProjectId());
 		}
 
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
@@ -1010,7 +1011,8 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040810L, cmd.getAppId(), null,cmd.getCurrentProjectId());//月卡申请权限
+			//应用管理权限校验
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), PrivilegeConstants.PARKING_APPLY_MANAGERMENT, cmd.getAppId(), null,cmd.getCurrentProjectId());//月卡申请权限
 		}
 		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
 		Timestamp startDate = null;
@@ -1097,11 +1099,11 @@ public class ParkingServiceImpl implements ParkingService {
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("月卡类型");
 		row.createCell(1).setCellValue("公司名称");
-		row.createCell(2).setCellValue("姓名");
-		row.createCell(3).setCellValue("手机号");
-		row.createCell(4).setCellValue("车牌号");
-		row.createCell(5).setCellValue("品牌");
-		row.createCell(6).setCellValue("车系");
+		row.createCell(2).setCellValue("用户姓名");
+		row.createCell(3).setCellValue("手机号码");
+		row.createCell(4).setCellValue("车牌号码");
+		row.createCell(5).setCellValue("车辆品牌");
+		row.createCell(6).setCellValue("车系名称");
 		row.createCell(7).setCellValue("车身颜色");
 		row.createCell(8).setCellValue("申请时间");
 		row.createCell(9).setCellValue("当前状态");
@@ -1497,10 +1499,10 @@ public class ParkingServiceImpl implements ParkingService {
 //		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("订单号");
-		row.createCell(1).setCellValue("车牌号");
-		row.createCell(2).setCellValue("用户名");
-		row.createCell(3).setCellValue("手机号");
+		row.createCell(0).setCellValue("订单号码");
+		row.createCell(1).setCellValue("车牌号码");
+		row.createCell(2).setCellValue("用户名称");
+		row.createCell(3).setCellValue("手机号码");
 		row.createCell(4).setCellValue("缴费时间");
 		row.createCell(5).setCellValue("月卡充值起始时间");
 		row.createCell(6).setCellValue("月卡充值结束时间");
@@ -2378,8 +2380,8 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public SearchParkingCarVerificationResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			//车辆认证申请
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040820L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+			//申请管理权限校验
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), PrivilegeConstants.PARKING_APPLY_MANAGERMENT, cmd.getAppId(), null,cmd.getCurrentProjectId());
 		}
 		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
@@ -2419,8 +2421,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 	public void exportParkingCarVerifications(SearchParkingCarVerificationsCommand cmd, HttpServletResponse resp){
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			//车辆认证申请
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040820L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+			//申请管理权限校验
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), PrivilegeConstants.PARKING_APPLY_MANAGERMENT, cmd.getAppId(), null,cmd.getCurrentProjectId());
 		}
 		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 

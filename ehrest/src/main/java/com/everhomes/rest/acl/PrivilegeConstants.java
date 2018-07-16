@@ -369,4 +369,9 @@ public interface PrivilegeConstants {
 
     // ------- 启动广告权限 --------
     long LAUNCHAD_ALL = 1090010000L;
+
+
+    // 停车缴费权限常量
+    long PARKING_APPLY_MANAGERMENT = 4080040810L;//
+    long PARKING_ORDER_MANAGERMENT = 4080040820L;
 }
