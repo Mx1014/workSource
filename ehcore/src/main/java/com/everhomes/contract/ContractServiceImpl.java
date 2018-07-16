@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -104,8 +105,6 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
-import com.everhomes.rest.contract.*;
-import com.everhomes.rest.customer.CustomerEventDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChangeType;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
@@ -113,10 +112,13 @@ import com.everhomes.rest.contract.CheckAdminCommand;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractAttachmentDTO;
 import com.everhomes.rest.contract.ContractChargingChangeDTO;
+import com.everhomes.rest.contract.ContractChargingChangeEventDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
+import com.everhomes.rest.contract.ContractChargingItemEventDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractEventDTO;
 import com.everhomes.rest.contract.ContractExportDetailDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractNumberDataType;
@@ -127,7 +129,9 @@ import com.everhomes.rest.contract.ContractPaymentPlanDTO;
 import com.everhomes.rest.contract.ContractPaymentType;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.ContractTemplateDTO;
+import com.everhomes.rest.contract.ContractTemplateDeleteStatus;
 import com.everhomes.rest.contract.ContractTemplateStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
 import com.everhomes.rest.contract.ContractType;
 import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.CreatePaymentContractCommand;
@@ -142,6 +146,7 @@ import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetContractTemplateDetailCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractEventsCommand;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
 import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
 import com.everhomes.rest.contract.ListContractsBySupplierCommand;
@@ -670,8 +675,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	}
 
 
-	private void checkContractNumberUnique(Integer namespaceId, String contractNumber) {
-		Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, contractNumber);
+	private void checkContractNumberUnique(Integer namespaceId, String contractNumber, Long categoryId) {
+		Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, contractNumber, categoryId);
 		if(contract != null) {
 			LOGGER.error("contractNumber {} in namespace {} already exist!", contractNumber, namespaceId);
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
@@ -760,7 +765,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
 		contract.setPaymentFlag((byte)0);
 		if(cmd.getContractNumber() != null) {
-			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
+			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber(), cmd.getCategoryId());
 		} else {
 			//创建合同为啥没有 合同号？
 			//contract.setContractNumber(generateContractNumber());
@@ -874,7 +879,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
 		if(cmd.getContractNumber() != null) {
-			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber());
+			checkContractNumberUnique(cmd.getNamespaceId(), cmd.getContractNumber(), cmd.getCategoryId());
 		} else {
 			//为啥会没有合同号？
 			//contract.setContractNumber(generateContractNumber());
@@ -922,7 +927,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_CREATE, cmd.getOrganizationId(), cmd.getCommunityId());
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
-		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());
+		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber(), cmd.getCategoryId());
 		if(existContract != null && !existContract.getId().equals(contract.getId())) {
 			LOGGER.error("contractNumber {} in namespace {} already exist!", cmd.getContractNumber(), cmd.getNamespaceId());
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
@@ -1578,7 +1583,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_CREATE, cmd.getOrgId(), cmd.getCommunityId());
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
-		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());
+		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber(), cmd.getCategoryId());
 		if(existContract != null && !existContract.getId().equals(contract.getId())) {
 			LOGGER.error("contractNumber {} in namespace {} already exist!", cmd.getContractNumber(), cmd.getNamespaceId());
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTNUMBER_EXIST,
@@ -2903,6 +2908,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		
 		//根据id查询数据，
 		ContractTemplate contractTemplateParent = contractProvider.findContractTemplateById(cmd.getId());
+		
+		String oldPath = contractTemplateParent.gogsPath();
+        String oldCommit = contractTemplateParent.getLastCommit();
+		
 		if (cmd.getName() != null) {
 			contractTemplateParent.setName(cmd.getName());
 		}
@@ -2915,7 +2924,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if (contractTemplateParent.getLastCommit() == null) {
 			isNewFile = true;
 		}else {
-			lastCommit = contractTemplateParent.getLastCommit();
+			if (isNewFile = !Objects.equals(oldPath, contractTemplateParent.gogsPath())) {
+				isNewFile = true;
+			}else {
+				lastCommit = contractTemplateParent.getLastCommit();
+			}
 		}
 		
 		if ("gogs".equals(contractTemplate.getContentType())) {
@@ -2928,6 +2941,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	        //3.存储提交脚本返回的id
 	        contractTemplateParent.setLastCommit(commit.getId());
 	        contractTemplateParent.setContents(commit.getId());
+	        
+	        // 目前来说，如果改了名称，在版本仓库里必须删掉原来的，在创建新的
+	        if (!Objects.equals(oldPath, contractTemplateParent.gogsPath())) {
+	            gogsDeleteScript(repo, oldPath, oldCommit);
+	        }
 		}
 		
 		contractProvider.createContractTemplate(contractTemplateParent);
@@ -2968,28 +2986,29 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				if (dto.getCreateTime() != null) {
 					dto.setCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dto.getCreateTime()));
 				}
-				//查询模板是否已被绑定
+				//查询模板是否已被绑定 园区
 				if (null != cmd.getOwnerId() && cmd.getOwnerId() != -1) {
 					//园区获得模板 通用模板都不能删除 
 					if (!dto.getOwnerId().equals(0L)) {
 						//获取是否关联合同
 						Boolean deleteFlag = contractProvider.getContractTemplateById(dto.getId());
 						if (deleteFlag) {
-							dto.setDeleteFlag((byte) 1);
+							dto.setDeleteFlag(ContractTemplateDeleteStatus.CITED.getCode());
+							
 						}else {
-							dto.setDeleteFlag((byte) 0);
+							dto.setDeleteFlag(ContractTemplateDeleteStatus.DELETED.getCode());
 						}
-						
 					}else {
-						dto.setDeleteFlag((byte) 1);
+						//园区下通用模板不能删除
+						dto.setDeleteFlag(ContractTemplateDeleteStatus.NOCOMPETENCE.getCode());
 					}
 				}else {
 					//全部的时候 只有关联合同的模板不能删除
 					Boolean deleteFlag = contractProvider.getContractTemplateById(dto.getId());
 					if (deleteFlag) {
-						dto.setDeleteFlag((byte) 1);
+						dto.setDeleteFlag(ContractTemplateDeleteStatus.CITED.getCode());
 					}else {
-						dto.setDeleteFlag((byte) 0);
+						dto.setDeleteFlag(ContractTemplateDeleteStatus.DELETED.getCode());
 					}
 				}
 				if ("gogs".equals(dto.getContentType())) {

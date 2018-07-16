@@ -21,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>creatorUid: 创建者uid</li>
  * <li>createTime: 创建时间</li>
  * <li>createDate: 创建时间界面显示</li>
- * <li>deleteFlag: 控制按钮是否可以删除 1表示关联合同不能删除，0表示可以删除</li>
+ * <li>deleteFlag: 控制按钮是否可以删除  0表示可以删除, 1表示关联合同不能删除(已引用),2表示园区下不能删除通用模板</li>
  * </ul>
  * Created by jm.ding on 2018/6/27.
  */

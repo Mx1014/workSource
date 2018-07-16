@@ -48,7 +48,7 @@ public interface ContractProvider {
 	Map<Long, Contract> listContractsByIds(List<Long> ids);
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
 
-	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber);
+	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber, Long categoryId);
 
 	List<Contract> listContractByAddressId(Long addressId);
 	List<Contract> listContractByBuildingName(String buildingName, Long communityId);

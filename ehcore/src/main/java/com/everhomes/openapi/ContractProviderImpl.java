@@ -16,6 +16,7 @@ import org.jooq.DSLContext;
 import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DefaultRecordMapper;
@@ -200,14 +201,18 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber) {
-		Record result = getReadOnlyContext().select()
+	public Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber, Long categoryId) {
+		SelectConditionStep<Record> query = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 //				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
-				.fetchAny();
-
+				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber));
+				
+		if (categoryId != null || "".equals(categoryId)) {
+			query.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		}
+		
+		Record result = query.fetchAny();
 		if (result != null) {
 			return ConvertHelper.convert(result, Contract.class);
 		}
@@ -1286,6 +1291,7 @@ public class ContractProviderImpl implements ContractProvider {
 		List<Byte> cids = getReadOnlyContext().select(Tables.EH_CONTRACTS.STATUS)
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.TEMPLATE_ID.eq(id))
+				.and(Tables.EH_CONTRACTS.STATUS.notEqual(ContractTemplateStatus.INACTIVE.getCode()))
 				.fetch(Tables.EH_CONTRACTS.STATUS);
 		if(cids == null || cids.size() < 1){
 			//模板没有关联合同
