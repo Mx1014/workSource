@@ -32,7 +32,7 @@ public interface PmTaskProvider {
 	
 	List<Namespace> listNamespace();
 	
-	Integer countTask(Long ownerId, Byte status, Long taskCategoryId, Long categoryId, Byte star, Timestamp startDate, Timestamp endDate);
+	Integer countTask(Long ownerId, Byte status, Long taskCategoryId, Long categoryId, String star, Timestamp startDate, Timestamp endDate);
 	
 	void createTaskStatistics(PmTaskStatistics statistics);
 	

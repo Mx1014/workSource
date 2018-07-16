@@ -350,7 +350,7 @@ public class PmTaskProviderImpl implements PmTaskProvider{
         		.collect(Collectors.toList());
 	}
 	@Override
-	public Integer countTask(Long ownerId, Byte status, Long taskCategoryId, Long categoryId, Byte star, Timestamp startDate, Timestamp endDate){
+	public Integer countTask(Long ownerId, Byte status, Long taskCategoryId, Long categoryId, String star, Timestamp startDate, Timestamp endDate){
         final Integer[] count = new Integer[1];
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhPmTasks.class), null, 
                 (DSLContext context, Object reducingContext)-> {

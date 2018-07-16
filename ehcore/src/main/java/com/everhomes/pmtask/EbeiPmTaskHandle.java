@@ -387,9 +387,9 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
         param.put("userId", "");
         param.put("recordId", task.getStringTag1());
-        Byte star = task.getStar();
+        String star = task.getStar();
         if(null == star)
-            star = (byte)0;
+            star = "0";
         param.put("serviceAttitude", star);
         param.put("serviceEfficiency", star);
         param.put("serviceQuality", star);
