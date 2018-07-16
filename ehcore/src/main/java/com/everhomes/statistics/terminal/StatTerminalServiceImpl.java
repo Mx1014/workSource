@@ -206,14 +206,14 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
         }
 
         if (list.size() > versionNum) {
-            list.sort(Comparator.comparingLong(PieChartData::getAmount));
-            List<PieChartData> subList = list.subList(0, versionNum - 1);
-            List<PieChartData> otherList = list.subList(versionNum, list.size() - 1);
+            list.sort(Comparator.comparingLong(PieChartData::getAmount).reversed());
+            List<PieChartData> subList = list.subList(0, versionNum-1);
+            List<PieChartData> otherList = list.subList(versionNum-1, list.size());
 
             subList.sort((o1, o2) -> {
                 Version v1 = Version.fromVersionString(o1.getName());
                 Version v2 = Version.fromVersionString(o2.getName());
-                return Math.toIntExact(v1.getEncodedValue() - v2.getEncodedValue());
+                return Math.toIntExact(v2.getEncodedValue() - v1.getEncodedValue());
             });
 
             PieChartData otherData = new PieChartData();
@@ -227,7 +227,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             list.sort((o1, o2) -> {
                 Version v1 = Version.fromVersionString(o1.getName());
                 Version v2 = Version.fromVersionString(o2.getName());
-                return Math.toIntExact(v1.getEncodedValue() - v2.getEncodedValue());
+                return Math.toIntExact(v2.getEncodedValue() - v1.getEncodedValue());
             });
         }
         return new PieChart(list);
@@ -282,10 +282,10 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
                         userActivityProvider.addActivity(activity, activity.getUid());
 
-                        TerminalAppVersionActives appVersionActive = statTerminalProvider
+                        List<TerminalAppVersionActives> terminalAppVersionActive = statTerminalProvider
                                 .getTerminalAppVersionActive(null, null, activity.getImeiNumber(), namespace.getId());
-                        if (appVersionActive == null) {
-                            appVersionActive = new TerminalAppVersionActives();
+                        if (terminalAppVersionActive == null || terminalAppVersionActive.size() == 0) {
+                            TerminalAppVersionActives appVersionActive = new TerminalAppVersionActives();
                             appVersionActive.setDate(user.getCreateTime().toLocalDateTime().format(FORMATTER));
                             appVersionActive.setAppVersion(activity.getAppVersionName());
                             appVersionActive.setImeiNumber(activity.getImeiNumber());
@@ -490,14 +490,15 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
         LOGGER.debug("start production statistical data. date = {}", date);
 
         final String taskNo = date.format(FORMATTER);
-        TerminalStatisticsTask task = statTerminalProvider.getTerminalStatisticsTaskByTaskNo(namespaceId, taskNo);
-        if (null == task) {
-            task = new TerminalStatisticsTask();
-            task.setStatus(TerminalStatisticsTaskStatus.CORRECT_USER_ACTIVITY.getCode());
-            task.setTaskNo(taskNo);
-            task.setNamespaceId(namespaceId);
-            statTerminalProvider.createTerminalStatisticsTask(task);
-        }
+
+        statTerminalProvider.deleteTerminalStatTask(namespaceId, taskNo);
+
+        TerminalStatisticsTask task = new TerminalStatisticsTask();
+        task.setStatus(TerminalStatisticsTaskStatus.CORRECT_USER_ACTIVITY.getCode());
+        task.setTaskNo(taskNo);
+        task.setNamespaceId(namespaceId);
+        statTerminalProvider.createTerminalStatisticsTask(task);
+
         try {
             if (TerminalStatisticsTaskStatus.fromCode(task.getStatus()) == TerminalStatisticsTaskStatus.CORRECT_USER_ACTIVITY) {
                 this.correctUserActivity(namespaceId, date);
@@ -558,30 +559,15 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     if (StringUtils.isEmpty(activity.getImeiNumber())) {
                         continue;
                     }
+                    statTerminalProvider.deleteTerminalAppVersionCumulative(activity.getImeiNumber(), activity.getNamespaceId());
 
-                    TerminalAppVersionActives active =
-                            statTerminalProvider.getTerminalAppVersionActive(null,
-                                    null, activity.getImeiNumber(), activity.getNamespaceId());
-                    if (null == active) {
-                        active = new TerminalAppVersionActives();
-                        active.setAppVersion(activity.getAppVersionName());
-                        active.setAppVersionRealm(activity.getVersionRealm());
-                        active.setImeiNumber(activity.getImeiNumber());
-                        active.setNamespaceId(activity.getNamespaceId());
-                        active.setDate(dateStr);
-                        statTerminalProvider.createTerminalAppVersionActives(active);
-                    } else {
-                        // Version uVersion = Version.fromVersionString(activity.getAppVersionName());
-                        // Version cVersion = Version.fromVersionString(active.getAppVersion());
-
-                        statTerminalProvider.deleteTerminalAppVersionCumulativeById(active.getId());
-                        // if (uVersion.getEncodedValue() > cVersion.getEncodedValue()) {
-                        active.setAppVersion(activity.getAppVersionName());
-                        active.setAppVersionRealm(activity.getVersionRealm());
-                        active.setDate(dateStr);
-                        statTerminalProvider.createTerminalAppVersionActives(active);
-                        // }
-                    }
+                    TerminalAppVersionActives active = new TerminalAppVersionActives();
+                    active.setImeiNumber(activity.getImeiNumber());
+                    active.setAppVersion(activity.getAppVersionName());
+                    active.setAppVersionRealm(activity.getVersionRealm());
+                    active.setNamespaceId(activity.getNamespaceId());
+                    active.setDate(dateStr);
+                    statTerminalProvider.createTerminalAppVersionActives(active);
                 }
             } while (locator.getAnchor() != null);
         }

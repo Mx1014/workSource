@@ -51,7 +51,7 @@ public interface StatTerminalProvider {
 
 	void deleteTerminalAppVersionActivesById(Long id);
 
-	TerminalAppVersionActives getTerminalAppVersionActive(String date, String version, String imei, Integer namespaceId);
+	List<TerminalAppVersionActives> getTerminalAppVersionActive(String date, String version, String imei, Integer namespaceId);
 
 	void createAppVersion(AppVersion appVersion);
 
@@ -66,4 +66,8 @@ public interface StatTerminalProvider {
     void cleanUserActivitiesWithNullAppVersion(Integer namespaceId);
 
     void createTerminalHourStatistics(List<TerminalHourStatistics> hourStats);
+
+    void deleteTerminalAppVersionCumulative(String imeiNumber, Integer namespaceId);
+
+	void deleteTerminalStatTask(Integer namespaceId, String taskNo);
 }
