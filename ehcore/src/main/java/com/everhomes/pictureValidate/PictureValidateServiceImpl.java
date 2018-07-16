@@ -71,7 +71,7 @@ public class PictureValidateServiceImpl implements PictureValidateService {
         if(userIdentifier==null){
             LOGGER.error("cannot find user identifierToken.identifierToken={}",cmd.getIdentifier());
             throw errorWith(UserServiceErrorCode.SCOPE,
-                    UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
+                    UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER, "can not find user identifierToken or status is error");
         }
 
         //判断手机号的用户与当前用户是否一致
