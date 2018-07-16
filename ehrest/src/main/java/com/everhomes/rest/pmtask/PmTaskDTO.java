@@ -63,7 +63,7 @@ public class PmTaskDTO {
 	private String address;
 	private String content;
 	private Byte status;
-	private Byte star;
+	private String star;
 	private Timestamp unprocessedTime;
 	private Timestamp processingTime;
 	private Timestamp processedTime;
@@ -158,10 +158,10 @@ public class PmTaskDTO {
 		this.status = status;
 	}
 	
-	public Byte getStar() {
+	public String getStar() {
 		return star;
 	}
-	public void setStar(Byte star) {
+	public void setStar(String star) {
 		this.star = star;
 	}
 	public Timestamp getUnprocessedTime() {

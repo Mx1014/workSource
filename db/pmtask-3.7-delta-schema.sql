@@ -1,3 +1,5 @@
+ALTER TABLE `eh_pm_tasks` MODIFY COLUMN `star`  varchar(4) NULL DEFAULT NULL COMMENT 'evaluate score' AFTER `status`;
+
 CREATE TABLE `eh_pm_task_configs` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int NOT NULL DEFAULT '0',

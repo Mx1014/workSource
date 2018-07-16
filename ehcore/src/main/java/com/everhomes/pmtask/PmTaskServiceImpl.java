@@ -49,6 +49,8 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.order.PayProvider;
+import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunityRequest;
@@ -231,6 +233,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private FlowEvaluateItemProvider flowEvaluateItemProvider;
 	@Autowired
 	private PayService payService;
+	@Autowired
+    private PayProvider payProvider;
 	@Autowired
 	private ContentServerService contentServerService;
 	@Autowired
@@ -3511,7 +3515,52 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void payNotify(OrderPaymentNotificationCommand cmd) {
-
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
+        }
+        //if(cmd == null || cmd.getPaymentErrorCode() != "200") {
+        if(cmd == null) {
+            LOGGER.error("payNotify fail, cmd={}", cmd);
+        }
+        //检查订单是否存在
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderNum(cmd.getBizOrderNum());
+        if(orderRecord == null){
+            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not find order record");
+        }
+        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
+        cmd.setOrderId(orderRecord.getOrderId());
+        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+        if(orderType != null) {
+            switch (orderType) {
+                case PURCHACE:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //支付成功
+//                        cmd.ge
+                    }
+//                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+//                        //支付失败
+//                        handler.payFail(srvCmd);
+//                    }
+                    break;
+//                case REFUND:
+//                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+//                        //退款成功
+//                        handler.refundSuccess(srvCmd);
+//                    }
+//                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+//                        //退款失败
+//                        handler.refundFail(srvCmd);
+//                    }
+//                    break;
+                default:
+                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+            }
+        }else {
+            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+        }
 	}
 
 	private void exportTaskStatByCategory(GetTaskStatCommand cmd, Sheet sheet){

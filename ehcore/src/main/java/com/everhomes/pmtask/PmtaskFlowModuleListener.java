@@ -80,7 +80,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private ConfigurationProvider configProvider;
+	private ConfigurationProvider configurationProvider;
 	@Autowired
 	private PmTaskService pmTaskService;
 	@Autowired
@@ -256,7 +256,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 		}
 
-		dto.setFeeModel(configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel","0"));
+		if(9L == dto.getTaskCategoryId()){
+//			投诉建议不显示费用清单
+			dto.setFeeModel("0");
+		}else{
+			dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel","0"));
+		}
+
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
@@ -779,7 +785,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	    if(null != flowCaseId){
 	        PmTask task = pmTaskProvider.findTaskByFlowCaseId(flowCaseId);
 	        Double avgEval = evaluates.stream().collect(Collectors.averagingDouble(FlowEvaluate::getStar));
-	        task.setStar(avgEval.byteValue());
+	        BigDecimal avg = BigDecimal.valueOf(avgEval);
+	        task.setStar(avg.setScale(1).toString());
 	        pmTaskProvider.updateTask(task);
             pmTaskSearch.feedDoc(task);
         }
