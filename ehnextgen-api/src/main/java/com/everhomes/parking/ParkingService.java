@@ -170,4 +170,6 @@ public interface ParkingService {
     GetParkingBussnessStatusResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd);
 
     void initFuncLists(GetParkingBussnessStatusCommand cmd);
+
+    void exportParkingCarVerifications(SearchParkingCarVerificationsCommand cmd, HttpServletResponse resp);
 }

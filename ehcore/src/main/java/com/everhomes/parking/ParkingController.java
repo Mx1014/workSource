@@ -815,6 +815,20 @@ public class ParkingController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /parking/exportParkingCarVerifications</b>
+     * <p>导出车辆认证申请</p>
+     */
+    @RequestMapping("exportParkingCarVerifications")
+    @RestReturn(value=String.class)
+    public RestResponse exportParkingCarVerifications(SearchParkingCarVerificationsCommand cmd,HttpServletResponse resp) {
+        parkingService.exportParkingCarVerifications(cmd,resp);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /parking/listParkingCarVerifications</b>
      * <p>获取车辆认证申请列表</p>
      */

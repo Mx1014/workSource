@@ -305,7 +305,7 @@ public class ParkingServiceImpl implements ParkingService {
 				String tag1 = flow.getStringTag1();
 				Integer flowMode = Integer.valueOf(tag1);
 				dto.setFlowMode(flowMode);
-
+				dto.setFlowId(flow.getId());
 				LOGGER.info("parking enabled flow, flow={}", flow);
 				Flow mainFlow = flowProvider.getFlowById(flow.getFlowMainId());
 				LOGGER.info("parking main flow, flow={}", mainFlow);
@@ -313,6 +313,7 @@ public class ParkingServiceImpl implements ParkingService {
 				if (null != mainFlow) {
 					if (mainFlow.getFlowVersion().intValue() != flow.getFlowVersion().intValue()) {
 						dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
+						dto.setFlowId(null);
 					}
 				}
 			}
@@ -2414,6 +2415,76 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 
 		return response;
+	}
+
+	public void exportParkingCarVerifications(SearchParkingCarVerificationsCommand cmd, HttpServletResponse resp){
+		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
+			//车辆认证申请
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4080040820L, cmd.getAppId(), null,cmd.getCurrentProjectId());
+		}
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		Timestamp startTime = null;
+		Timestamp endTime = null;
+		if (null != cmd.getStartTime()) {
+			startTime = new Timestamp(cmd.getStartTime());
+		}
+		if (null != cmd.getEndTime()) {
+			endTime = new Timestamp(cmd.getEndTime());
+		}
+
+		List<ParkingCarVerification> verifications = parkingProvider.searchParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), cmd.getPlateOwnerPhone(), startTime, endTime,
+				cmd.getStatus(), cmd.getRequestorEnterpriseName(), null,configProvider.getIntValue("parking.exportcarverifications.maxcount",10000));
+
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("车辆认证申请记录");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("序号");
+		row.createCell(1).setCellValue("公司名称");
+		row.createCell(2).setCellValue("用户姓名");
+		row.createCell(3).setCellValue("手机号码");
+		row.createCell(4).setCellValue("车牌号码");
+		row.createCell(5).setCellValue("申请时间");
+		row.createCell(6).setCellValue("认证状态");
+
+		DateTimeFormatter datetimeSF = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+		if (null != verifications) {
+			for(int i = 0, size = verifications.size(); i < size; i++){
+				Row tempRow = sheet.createRow(i + 1);
+				ParkingCarVerification carVerification = verifications.get(i);
+
+				tempRow.createCell(0).setCellValue(i+1);
+				tempRow.createCell(1).setCellValue(carVerification.getRequestorEnterpriseName()==null?"无":carVerification.getRequestorEnterpriseName());
+				tempRow.createCell(2).setCellValue(carVerification.getPlateOwnerName()==null?"无":carVerification.getPlateOwnerName());
+				tempRow.createCell(3).setCellValue(carVerification.getPlateOwnerPhone()==null?"无":carVerification.getPlateOwnerPhone());
+				tempRow.createCell(4).setCellValue(carVerification.getPlateNumber()==null?"无":carVerification.getPlateNumber());
+				Timestamp createTime = carVerification.getCreateTime();
+				if(createTime==null){
+					tempRow.createCell(5).setCellValue("无");
+				}else {
+					String applyTime = createTime.toLocalDateTime().format(datetimeSF);
+					tempRow.createCell(5).setCellValue(applyTime);
+				}
+				ParkingCardRequestStatus requestStatus = ParkingCardRequestStatus.fromCode(carVerification.getStatus());
+				tempRow.createCell(6).setCellValue(requestStatus==null?"无":requestStatus.getDesc());
+			}
+		}
+
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtils.download(out, resp);
+		} catch (IOException e) {
+			LOGGER.error("exportParkingCarVerifications is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportParkingCarVerifications is fail.");
+		}
 	}
 
 	@Override
