@@ -167,7 +167,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  1.进行校验(例如: 邮箱)
         if (!StringUtils.isEmpty(cmd.getWorkEmail()))
-            if (organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getUpdateDetailId(), cmd.getWorkEmail()))
+            if (!organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getUpdateDetailId(), cmd.getWorkEmail()))
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                         "Duplicate work email");
 
@@ -825,7 +825,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  1.进行校验(例如: 邮箱)
         if (!StringUtils.isEmpty(cmd.getWorkEmail()))
-            if (organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), null, cmd.getWorkEmail()))
+            if (!organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), null, cmd.getWorkEmail()))
                 throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                         "Duplicate work email");
 
@@ -1399,7 +1399,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                         employee.setContactShortToken(itemValue.getFieldValue());
                         break;
                     case ArchivesParameter.WORK_EMAIL:
-                        if (organizationService.verifyPersonnelByWorkEmail(employee.getOrganizationId(), employee.getId(), itemValue.getFieldValue()))
+                        if (!organizationService.verifyPersonnelByWorkEmail(employee.getOrganizationId(), employee.getId(), itemValue.getFieldValue()))
                             throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DUPLICATE_WORK_EMAIL,
                                     "Duplicate work email");
                         employee.setWorkEmail(itemValue.getFieldValue());
