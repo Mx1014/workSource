@@ -48,6 +48,7 @@ import com.everhomes.util.StringHelper;
  * <li>enterpriseAddress: 楼栋门牌</li>
  *
  * <li>amount: 费用金额</li>
+ * <li>feeModel: 是否开启费用清单</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -104,6 +105,8 @@ public class PmTaskDTO {
 	private String enterpriseAddress;
 
 	private Long amount;
+
+	private String feeModel;
 
 	public Long getId() {
 		return id;
@@ -372,6 +375,14 @@ public class PmTaskDTO {
 
 	public void setAmount(Long amount) {
 		this.amount = amount;
+	}
+
+	public String getFeeModel() {
+		return feeModel;
+	}
+
+	public void setFeeModel(String feeModel) {
+		this.feeModel = feeModel;
 	}
 
 	@Override

@@ -256,6 +256,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 		}
 
+		dto.setFeeModel(configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel","0"));
+
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
 

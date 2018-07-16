@@ -663,6 +663,6 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		TruncateIdentityStep query = context.truncate(Tables.EH_PM_TASK_ORDERS);
 		query.execute();
 		TruncateIdentityStep query1 = context.truncate(Tables.EH_PM_TASK_ORDER_DETAILS);
-		query.execute();
+		query1.execute();
 	}
 }
