@@ -32,6 +32,9 @@
 -- REMARK:        }
 -- REMARK:    }
 
+-- AUTHOR: jiarui 20180716
+-- REMARK:执行 search目录下 equipment_standard.sh  然后同步/equipment/syncEquipmentStandardMapIndex
+
 
 
 
