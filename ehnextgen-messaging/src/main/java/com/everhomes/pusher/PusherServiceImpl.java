@@ -87,6 +87,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PusherServiceImpl.class);
     private final static String MESSAGE_INDEX_ID = "indexId";
     private final static String TYPE_PRODUCTION = "production";
+    private final static String TYPE_DEVELOP = "develop";
     //private final static String TYPE_DEVELOP = "develop";
     /**
      * add by huanglm 20180611,默认bundleId "com.ios" ,
@@ -755,7 +756,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         	bundleId = device.getBundleId();
         	String pusherServiceType = device.getPusherServiceType();
         	//设置为开发服务器类型
-        	if( !TYPE_PRODUCTION.equals(pusherServiceType)){
+        	if( TYPE_DEVELOP.equals(pusherServiceType)){
         		isProductionGateway = false ;
         	}
         //bundleId 为空的情况一般是旧应用的推送，为了兼容需要从映射表中取得bundleId（新应用bundleId一般不为空）
