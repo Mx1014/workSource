@@ -337,20 +337,19 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 	@Override
 	public Long saveGeneralFormValRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId){
-		Long id = this.sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
-		EhGeneralFormValRequests generalFormValsSave = new EhGeneralFormValRequests();
-		generalFormValsSave.setId(id);
-		generalFormValsSave.setOwnerId(ownerId);
-		generalFormValsSave.setOwnerType(ownerType);
-		generalFormValsSave.setNamespaceId(namespaceId);
-		generalFormValsSave.setSourceId(sourceId);
-		generalFormValsSave.setSourceType(sourceType);
+		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
+		EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
+        generalFormValRequests.setId(id);
+        generalFormValRequests.setOwnerId(ownerId);
+        generalFormValRequests.setOwnerType(ownerType);
+        generalFormValRequests.setNamespaceId(namespaceId);
+        generalFormValRequests.setSourceId(sourceId);
+        generalFormValRequests.setSourceType(sourceType);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
 
-		dao.insert(generalFormValsSave);
+		dao.insert(generalFormValRequests);
 
 		DaoHelper.publishDaoAction(DaoAction.CREATE, GeneralFormValRequest.class, null);
 

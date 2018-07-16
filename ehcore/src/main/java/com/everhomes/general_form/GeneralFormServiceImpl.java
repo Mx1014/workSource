@@ -740,7 +740,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
         //先新建表单字段的集合
         Long source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
-        String source_type = "EhGeneralFormValsRequest";
+        String source_type = "EhGeneralFormValRequests";
 
 
         addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
