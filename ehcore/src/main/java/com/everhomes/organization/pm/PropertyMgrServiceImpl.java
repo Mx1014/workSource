@@ -2324,6 +2324,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setChargeArea(cmd.getChargeArea());
             address.setSharedArea(cmd.getSharedArea());
             address.setFreeArea(cmd.getFreeArea());
+            address.setIsFutureApartment((byte)0);
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());

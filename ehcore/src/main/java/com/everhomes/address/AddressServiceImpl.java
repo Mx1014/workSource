@@ -2123,7 +2123,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
-//            address.setBuildArea(buildArea);
             address.setAreaSize(areaSize);
             address.setSharedArea(shareArea);
             address.setChargeArea(chargeArea);
@@ -2134,6 +2133,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
             address.setOrientation(data.getOrientation());
+            address.setIsFutureApartment((byte)0);
         	addressProvider.createAddress(address);
 		}else {
 //            address.setBuildArea(buildArea);
