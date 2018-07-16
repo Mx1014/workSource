@@ -271,20 +271,23 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		entities.add(e);
 
 		//规格
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
-				"spec", RentalNotificationTemplateCode.locale, ""));
-		e.setValue(order.getSpec());
-		entities.add(e);
-
+		if (!StringUtils.isEmpty(order.getAddress())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"spec", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(order.getSpec());
+			entities.add(e);
+		}
 		//资源地址
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
-				"address", RentalNotificationTemplateCode.locale, ""));
-		e.setValue(order.getAddress());
-		entities.add(e);
+		if (!StringUtils.isEmpty(order.getAddress())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"address", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(order.getAddress());
+			entities.add(e);
+		}
 
 		//套餐名
 		if (!StringUtils.isEmpty(order.getPackageName())){
