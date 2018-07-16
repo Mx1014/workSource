@@ -370,7 +370,8 @@ public class GroupProviderImpl implements GroupProvider {
             @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId"),
             @CacheEvict(value="listGroupMessageMembers", allEntries=true),
-            @CacheEvict(value="GroupMemberByUuid", key="#groupMember.uuid")})
+            @CacheEvict(value="GroupMemberByUuid", key="#groupMember.uuid"),
+            @CacheEvict(value="UserGroup-Listing", allEntries = true)})
     public void deleteGroupMember(final GroupMember groupMember) {
         assert(groupMember.getId() != null);
         assert(groupMember.getGroupId() != null);
