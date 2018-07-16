@@ -2597,7 +2597,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         response.setCommunityType(community.getCommunityType());
         
         Byte operationType = addressProvider.findArrangementOperationTypeByAddressId(cmd.getId());
-        response.setArrangementOperationType(operationType);
+        if (operationType!=null) {
+        	response.setArrangementOperationType(operationType);
+		}
         
         Contract latestEndDateContract = findLatestEndDateContract(cmd.getId());
         if (latestEndDateContract!=null) {

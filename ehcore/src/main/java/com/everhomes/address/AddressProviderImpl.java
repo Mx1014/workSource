@@ -911,6 +911,7 @@ public class AddressProviderImpl implements AddressProvider {
         Byte operationType = context.select(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_TYPE)
 					                .from(Tables.EH_ADDRESS_ARRANGEMENT)
 					                .where(Tables.EH_ADDRESS_ARRANGEMENT.ADDRESS_ID.eq(addressId))
+					                .and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
 					                .fetchOne(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_TYPE);
 		return operationType;
 	}
