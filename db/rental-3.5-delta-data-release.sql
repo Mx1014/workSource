@@ -30,3 +30,6 @@ SET eh_rentalv2_default_rules.owner_type = 'community',
 WHERE
 	eh_rentalv2_default_rules.source_type = 'default_rule'
 AND eh_rentalv2_default_rules.owner_type = 'organization';
+
+update eh_configurations set VALUE = '/resource-rental/build/index.html#/resource-detail?namespaceId=%s&rentalSiteId=%s&canRental=1&isApp=1'
+where name = 'rental.resource.detail.url';
