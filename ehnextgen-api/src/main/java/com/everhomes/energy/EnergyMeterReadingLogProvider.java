@@ -40,4 +40,6 @@ public interface EnergyMeterReadingLogProvider {
 	List<EnergyMeterReadingLog> listMeterReadingLogByTask(Long taskId);
 
 	EnergyMeterReadingLog findLastReadingLogByTaskId(Long taskId);
+
+    void findByLogId(Long id);
 }

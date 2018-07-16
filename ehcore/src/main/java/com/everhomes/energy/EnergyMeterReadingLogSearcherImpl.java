@@ -67,6 +67,12 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
     @Autowired
     private UserProvider userProvider;
 
+    @Autowired
+    private EnergyMeterTaskProvider taskProvider;
+
+    @Autowired
+    private EnergyMeterReadingLogProvider energyMeterReadingLogProvider;
+
     // @Autowired
     // private EnergyMeterChangeLogProvider changeLogProvider;
 
@@ -286,7 +292,14 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setMeterNumber((String)source.get("meterNumber"));
             List<EnergyMeterAddressDTO> addressDTOS = populateEnergyMeterAddresses(Long.valueOf(source.get("meterId").toString()));
             dto.setMeterAddress(addressDTOS);
-
+            EnergyMeterReadingLog log = energyMeterReadingLogProvider.getEnergyMeterReadingLogById(dto.getId());
+            if (log != null) {
+                EnergyMeterTask task = taskProvider.findEnergyMeterTaskById(log.getTaskId());
+                if (task != null) {
+                    dto.setLastReading(task.getLastTaskReading());
+                    dto.setValueDifference(dto.getReading().subtract(dto.getLastReading()));
+                }
+            }
             dtoList.add(dto);
         }
         return dtoList;

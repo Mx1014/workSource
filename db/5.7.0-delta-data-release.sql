@@ -75,6 +75,8 @@ update eh_var_field_scopes set field_param = '{"fieldParamType": "text", "length
 SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_payment_charging_items); 
 INSERT INTO `eh_payment_charging_items`(`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
 VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
+INSERT INTO `eh_payment_charging_items`(`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
+VALUES(@id:=@id+1, '空调费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
