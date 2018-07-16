@@ -966,7 +966,12 @@ public class PortalServiceImpl implements PortalService {
 		portalItemCategory.setNamespaceId(namespaceId);
 		portalItemCategory.setItemGroupId(cmd.getItemGroupId());
 		portalItemCategory.setVersionId(itemGroup.getVersionId());
-		portalItemCategory.setDefaultOrder(100);
+
+		Integer defaultOrder = portalItemCategoryProvider.findDefaultOrder(cmd.getItemGroupId());
+		if(defaultOrder == null){
+			defaultOrder = 1;
+		}
+		portalItemCategory.setDefaultOrder(defaultOrder + 1);
 		this.dbProvider.execute((status) -> {
 			portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
 			if(null != cmd.getScopes() && cmd.getScopes().size() > 0){

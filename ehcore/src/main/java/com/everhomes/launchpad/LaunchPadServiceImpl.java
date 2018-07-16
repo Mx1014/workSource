@@ -1569,7 +1569,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				if(d.getItemName().equals(o.getItemName())){
 					if(ApplyPolicy.fromCode(o.getApplyPolicy()) == ApplyPolicy.OVERRIDE){
 						d.setDisplayFlag(o.getDisplayFlag());
-						d.setDefaultOrder(o.getDefaultOrder());
+
+						if(ActionType.fromCode(d.getActionType()) == ActionType.MORE_BUTTON || ActionType.fromCode(d.getActionType()) == ActionType.ALL_BUTTON){
+							d.setDefaultOrder(10000);
+						}else {
+							d.setDefaultOrder(o.getDefaultOrder());
+						}
+
 					}
 				}
 			}
