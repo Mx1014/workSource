@@ -36,6 +36,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
@@ -159,8 +160,11 @@ import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhServiceAllianceAttachmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
+import com.everhomes.server.schema.tables.records.EhServiceAllianceAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
@@ -176,6 +180,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
@@ -3764,6 +3769,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		JSONObject json = new JSONObject();
 		json.put("working", "working");
+		
+		//查看是否迁移过了。
+		if (isAttachmentsTransfered()) {
+			json.put("isTransfered", "true");
+			return json.toJSONString();
+		}
+		
 		dbProvider.execute(status -> {
 
 			int emptyCnt = 0;
@@ -3783,7 +3795,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				attachment.setOwnerId(sa.getId());
 				attachment.setContentUri(sa.getPosterUri());
 				attachment.setCreatorUid(2L); // 用户id为2表示迁移图片
-				attachment.setAttachmentType(ServiceAllianceAttachmentType.BANNER.getCode());
+				attachment.setAttachmentType(ServiceAllianceAttachmentType.COVER_ATTACHMENT.getCode());
 				yellowPageProvider.createServiceAllianceAttachments(attachment);
 			}
 
@@ -3793,6 +3805,20 @@ public class YellowPageServiceImpl implements YellowPageService {
 		});
 
 		return json.toJSONString();
+	}
+	
+	private boolean isAttachmentsTransfered() {
+		
+		com.everhomes.server.schema.tables.EhServiceAllianceAttachments table = Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(table);
+		query.addConditions(table.CREATOR_UID.eq(2L));
+		List<ServiceAllianceAttachment> list = query.fetchInto(ServiceAllianceAttachment.class);
+		if (CollectionUtils.isEmpty(list)) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	@Override
