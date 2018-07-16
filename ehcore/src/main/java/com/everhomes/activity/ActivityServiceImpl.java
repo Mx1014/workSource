@@ -747,6 +747,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 //add by yanjun 20170512
                 dto.setUserRosterId(roster.getId());
 
+                //add by jiarui  20180716
+                syncToPotentialCustomer(temp1,roster);
+
                 //Send message to creator
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("userName", user.getNickName());
@@ -807,6 +810,23 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         // activitySignPoints(cmd.getActivityId());
     	return tuple.first();
 	 }
+
+    private void syncToPotentialCustomer(Activity activity,ActivityRoster roster) {
+        // 同步线索客户 add by jiarui
+        LocalEventBus.publish(event -> {
+            LocalEventContext localEventcontext = new LocalEventContext();
+            localEventcontext.setUid(UserContext.currentUserId());
+            localEventcontext.setNamespaceId(activity.getNamespaceId());
+            event.setContext(localEventcontext);
+            Map<String, Object> map = new HashMap<>();
+            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+            map.put("categoryId", activity.getCategoryId());
+            event.setParams(map);
+            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+            event.setEntityId(UserContext.currentUserId());
+            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+        });
+    }
 
 
 	/*private void activitySignPoints(Long activityId){

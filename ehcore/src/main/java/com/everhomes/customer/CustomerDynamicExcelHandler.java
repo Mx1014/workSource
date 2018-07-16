@@ -194,6 +194,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         List<FieldDTO> fields = fieldService.listFields(command);
         LOGGER.debug("getDynamicSheet: headers: {}", StringHelper.toJsonString(headers));
         if(fields != null && fields.size() > 0) {
+            //remove talent source when get dynamic template
+            if(!withData){
+                fields.removeIf((f) -> f.getFieldName().equals("talentSourceItemName"));
+            }
             fields.forEach(fieldDTO -> {
                 LOGGER.debug("getDynamicSheet: fieldDTO: {}", fieldDTO.getFieldDisplayName());
                 if(isImport) {
@@ -384,7 +388,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 try {
                                     setToObj(column.getFieldName(), talent, column.getValue(), null);
                                 } catch(Exception e){
-                                    LOGGER.warn("one row invoke set method for CustomerTalent failed");
+                                    LOGGER.warn("one row invoke set method for CustomerTalent failed",e);
                                     failedNumber ++;
                                     flag = false;
                                     break;

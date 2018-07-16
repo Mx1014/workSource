@@ -93,7 +93,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
         //sync  activities
         ActivityRoster activityRoster = (ActivityRoster) localEvent.getParams().get(EntityType.ACTIVITY_ROSTER.getCode());
         Integer activityNamespaceId = localEvent.getContext().getNamespaceId();
-        CustomerConfiguration activityConfigutations = customerProvider.getSyncCustomerConfiguration(activityNamespaceId);
+        CustomerConfiguration activityConfigutations = customerProvider.getSyncCustomerConfiguration(activityNamespaceId,PotentialCustomerType.ACTIVITY.getCode());
         if (activityConfigutations != null && TrueOrFalseFlag.TRUE.equals(TrueOrFalseFlag.fromCode(activityConfigutations.getValue()))) {
             if (activityRoster != null) {
                 CustomerPotentialData existPotentialCustomer = customerProvider.findPotentialCustomerByName(activityRoster.getOrganizationName());
@@ -114,7 +114,12 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                 UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(activityNamespaceId, activityRoster.getPhone());
                 // customer talent info
                 CustomerTalent talent = new CustomerTalent();
-                talent.setCustomerId(0L);
+                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(activityNamespaceId, activityRoster.getOrganizationName());
+                if(customers!=null && customers.size()>0){
+                    talent.setCustomerId(customers.get(0).getId());
+                }else {
+                    talent.setCustomerId(0L);
+                }
                 talent.setName(activityRoster.getRealName());
                 talent.setPhone(activityRoster.getPhone());
                 talent.setOriginSourceId(dataId);
@@ -158,7 +163,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
         PostApprovalFormTextValue userPhone = new Gson().fromJson(alliancePhone, PostApprovalFormTextValue.class);
         PostApprovalFormTextValue userName = new Gson().fromJson(allianceName, PostApprovalFormTextValue.class);
         // text value is enterprise name we need  sync to customer  potential  temp tables
-        CustomerConfiguration configutations = customerProvider.getSyncCustomerConfiguration(namespaceId);
+        CustomerConfiguration configutations = customerProvider.getSyncCustomerConfiguration(namespaceId,PotentialCustomerType.SERVICE_ALLIANCE.getCode());
         if (configutations != null && TrueOrFalseFlag.TRUE.equals(TrueOrFalseFlag.fromCode(configutations.getValue()))) {
             if (textValue != null && StringUtils.isNotBlank(textValue.getText())) {
                 if (sourceId != null && StringUtils.isNotBlank(sourceId.getText())) {
@@ -185,7 +190,12 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
                     //sync requestor info to customer talent
                     if (StringUtils.isNotBlank(userPhone.getText())) {
                             CustomerTalent talent = new CustomerTalent();
-                            talent.setCustomerId(0L);
+                            List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, textValue.getText());
+                            if(customers!=null && customers.size()>0){
+                                talent.setCustomerId(customers.get(0).getId());
+                            }else {
+                                talent.setCustomerId(0L);
+                            }
                             talent.setName(userName.getText());
                             talent.setPhone(userPhone.getText());
                             talent.setOriginSourceId(dataId);

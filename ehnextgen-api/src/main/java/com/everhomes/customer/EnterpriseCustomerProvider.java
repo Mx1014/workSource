@@ -195,7 +195,7 @@ public interface EnterpriseCustomerProvider {
 
     void deleteCustomerEntryInfoByBuildingId(Long id);
 
-    CustomerConfiguration getSyncCustomerConfiguration(Integer  namespaceId);
+    CustomerConfiguration getSyncCustomerConfiguration(Integer  namespaceId,byte scopeCode);
 
     void createPotentialCustomer(CustomerPotentialData data);
 

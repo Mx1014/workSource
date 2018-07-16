@@ -2169,10 +2169,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public CustomerConfiguration getSyncCustomerConfiguration(Integer namespaceId) {
+    public CustomerConfiguration getSyncCustomerConfiguration(Integer namespaceId,byte code) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_CUSTOMER_CONFIGUTATIONS)
                 .where(Tables.EH_CUSTOMER_CONFIGUTATIONS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_CUSTOMER_CONFIGUTATIONS.SCOPE_ID.eq((long) code))
                 .and(Tables.EH_CUSTOMER_CONFIGUTATIONS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                 .fetchAnyInto(CustomerConfiguration.class);
     }

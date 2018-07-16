@@ -249,9 +249,43 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> items = systemItems.stream().map(systemItem -> {
                 return ConvertHelper.convert(systemItem, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
+            addExpandItems(items,cmd.getFieldId());
             return items;
         }
         return null;
+    }
+
+    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId) {
+        Field field = fieldProvider.findFieldById(fieldId);
+        if (field!=null && field.getName().equals("sourceItemId")) {
+            List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+            if (activityCategories != null && activityCategories.size() > 0) {
+                activityCategories.forEach((a) -> {
+                    SystemFieldItemDTO activityItem = new SystemFieldItemDTO();
+                    activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
+                    activityItem.setFieldId(field.getId());
+                    activityItem.setId(a.getEntryId());
+                    activityItem.setModuleName(field.getModuleName());
+                    activityItem.setDisplayName(a.getName());
+                    items.add(activityItem);
+                });
+            }
+            //add service alliance categories
+            ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
+            if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+                serviceAllianceCategories.forEach((r) -> {
+                    SystemFieldItemDTO allianceItem = new SystemFieldItemDTO();
+                    allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    allianceItem.setFieldId(field.getId());
+                    allianceItem.setId(r.getId());
+                    allianceItem.setModuleName(field.getModuleName());
+                    allianceItem.setDisplayName(r.getName());
+                    items.add(allianceItem);
+                });
+            }
+        }
     }
 
     /**
@@ -776,8 +810,7 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setModuleName(group.getModuleName());
                 cmd1.setCommunityId(communityId);
                 List<FieldDTO> fields = listFields(cmd1);
-                if(fields==null) fields = new ArrayList<FieldDTO>();
-
+                if(fields==null) fields = new ArrayList<>();
                 //使用字段，获得headers
                 String headers[] = new String[fields.size()];
                 String mandatory[] = new String[headers.length];
