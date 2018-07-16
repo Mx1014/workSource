@@ -2020,63 +2020,41 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId) {
         ScopeFieldItem fieldItem = null;
-        Boolean namespaceFlag = true;
-        Boolean globalFlag = true;
-        if (communityId != null) {
-            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
-            if (fieldItem != null) {
-                namespaceFlag = false;
-                globalFlag = false;
-            }
-        }
-        if (namespaceFlag) {
-            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
-            if (fieldItem != null) {
-                globalFlag = false;
-            }
-        }
-
-        if (globalFlag) {
-            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
-        }
+//        Boolean namespaceFlag = true;
+//        Boolean globalFlag = true;
+//        if (communityId != null) {
+//            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
+//            if (fieldItem != null) {
+//                namespaceFlag = false;
+//                globalFlag = false;
+//            }
+//        }
+//        if (namespaceFlag) {
+//            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+//            if (fieldItem != null) {
+//                globalFlag = false;
+//            }
+//        }
+//
+//        if (globalFlag) {
+//            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
+//        }
+        FieldItem item = fieldProvider.findFieldItemByItemId(itemId);
         // 三种情况 要求删除的item不显示
-        if (fieldItem != null) {
-//<<<<<<< HEAD
-//            Map<Long, ScopeFieldGroup> scopeFieldGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, communityId, fieldItem.getModuleName());
-////            if(scopeFieldGroupMap != null && scopeFieldGroupMap.size() < 1){
-////                scopeFieldGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, communityId, fieldItem.getModuleName(), null);
-////            }
-//=======
-            List<Long> items = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
-//>>>>>>> 5.6.0
+        if (item != null) {
+            List<Long> items = fieldProvider.checkCustomerField(namespaceId, communityId, item.getModuleName());
             // community
             if (items != null && items.size() > 0) {
                 fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
             } else {
                 //namespace
-//<<<<<<< HEAD
-//                Map<Long, ScopeFieldGroup> namespaceGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, null, fieldItem.getModuleName());
-////                if(namespaceGroupMap!=null && namespaceGroupMap.size() < 1){
-////                    namespaceGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, null, fieldItem.getModuleName(),null);
-////                }
-//                if (namespaceGroupMap != null && namespaceGroupMap.size() > 0) {
-//                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
-//                } else {
-//                    //global
-//                    Map<Long, ScopeFieldGroup> globalGroupMap = fieldProvider.listScopeFieldGroups(0, null, fieldItem.getModuleName());
-////                    if(globalGroupMap!=null && globalGroupMap.size() < 1){
-////                        globalGroupMap = fieldProvider.listScopeFieldGroups(0, null, fieldItem.getModuleName(), null);
-////                    }
-//                    if (globalGroupMap != null && globalGroupMap.size() > 0) {
-//=======
-                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, null, fieldItem.getModuleName());
+                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, null, item.getModuleName());
                 if (fields != null && fields.size() > 0) {
                     fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
                 } else {
                     //global
-                    List<Long> groups = fieldProvider.checkCustomerField(0, null, fieldItem.getModuleName());
+                    List<Long> groups = fieldProvider.checkCustomerField(0, null, item.getModuleName());
                     if (groups != null && groups.size() > 0) {
-//>>>>>>> 5.6.0
                         fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
                     }
                 }
