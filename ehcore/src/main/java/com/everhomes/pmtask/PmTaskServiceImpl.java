@@ -3538,6 +3538,11 @@ public class PmTaskServiceImpl implements PmTaskService {
                 case PURCHACE:
                     if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
                         //支付成功
+
+//						String BizOrderNum  = getOrderNum(cmd.getOrderId(),OrderType.OrderTypeEnum.PMTASK_CODE.getPycode());
+						String BizOrderNum = cmd.getBizOrderNum();
+						BizOrderNum.indexOf(OrderType.OrderTypeEnum.PMTASK_CODE.getPycode())
+						pmTaskProvider.findPmTaskOrderById();
 //                        cmd.ge
                     }
 //                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){

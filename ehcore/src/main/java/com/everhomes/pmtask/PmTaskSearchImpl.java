@@ -373,7 +373,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
             doc.setBuildingName((String)source.get("buildingName"));
             doc.setOrganizationUid(SearchUtils.getLongField(source.get("organizationUid")));
-            doc.setStar((String)source.get("star"));
+            doc.setStar( null != source.get("star") ? (String)source.get("star"):"");
             
             return doc;
         }catch (Exception ex) {
