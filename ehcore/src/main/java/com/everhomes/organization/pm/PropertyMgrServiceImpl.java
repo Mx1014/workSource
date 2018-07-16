@@ -2618,7 +2618,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             			|| ContractStatus.HISTORY.equals(ContractStatus.fromStatus(contract.getStatus()))
             			|| ContractStatus.INVALID.equals(ContractStatus.fromStatus(contract.getStatus()))
             			|| ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-            		contracts.remove(contract);
+            		iterator.remove();
     			}
             }
 		}
@@ -2882,18 +2882,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		setOwedFlag(dto, billOwedMap);
 		//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
 		Contract latestEndDateContract = findLatestEndDateContract(addressId);
-		dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
+		if (latestEndDateContract!=null) {
+			dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
+		}
 		//设置该房源是否为未来房源，及与其关联的房源拆分合并计划的开始时间
 		Address address = addressProvider.findAddressById(addressId);
 		dto.setIsFutureApartment(address.getIsFutureApartment());
 		if (address.getIsFutureApartment() == 1) {
 			AddressArrangement addressArrangement = addressProvider.findActiveAddressArrangementByTargetId(addressId);
-			dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+			if(addressArrangement!=null){
+				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+			}
 		}else if (address.getIsFutureApartment() == 0) {
 			AddressArrangement addressArrangement = addressProvider.findActiveAddressArrangementByOriginalId(addressId);
-			dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+			if(addressArrangement!=null){
+				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
+			}
 		}
-		
 		return dto;
 	}
 
