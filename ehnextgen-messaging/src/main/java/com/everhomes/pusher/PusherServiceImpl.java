@@ -90,10 +90,10 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private final static String TYPE_DEVELOP = "develop";
     //private final static String TYPE_DEVELOP = "develop";
     /**
-     * add by huanglm 20180611,默认bundleId "com.techpark.ios.zuolin" ,
+     * add by huanglm 20180611,默认bundleId "com.ios" ,
      * 凡是取不到开发者信息的时候就取这个bundleId对应的开发都信息
      */
-    private final static String DEFAULT_BUNDLEID = "com.techpark.ios.zuolin";
+    private final static String DEFAULT_BUNDLEID = "com.ios";
 
     @Autowired
     private BorderConnectionProvider borderConnectionProvider;
@@ -780,6 +780,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
 	        if(bundleId == null){
 	        	bundleId = DEFAULT_BUNDLEID ;
+	        	LOGGER.warn("bundleId is null ");
 	        }
 	    	//优先从http2ClientMaps 中   取，如没有再创建新的连接
 	        ApnsClient client = this.http2ClientMaps.get(bundleId);
@@ -815,7 +816,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         		        .build();
         			    if(LOGGER.isDebugEnabled()) {
     				    	//LOGGER.warn("NotificationResponse:"+result);
-    		                LOGGER.debug("Pushing message(build client), bundleId=" + bundleId + ", isProductionGateway=" + isProductionGateway + ", authkeyStr=" + authkeyStr
+    		                LOGGER.info("Pushing message(build client), bundleId=" + bundleId + ", isProductionGateway=" + isProductionGateway + ", authkeyStr=" + authkeyStr
     		                    + ", teamId=" + teamId + ", authKeyId=" + authKeyId);
     		                    }
                 } catch (NetworkIOException e) {
