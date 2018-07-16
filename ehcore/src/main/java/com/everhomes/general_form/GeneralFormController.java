@@ -40,7 +40,7 @@ public class GeneralFormController extends ControllerBase {
 		return response;
 	}
 
-    /**
+    /**postGeneralFormVal
 	 * <b>URL: /general_form/postGeneralForm</b>
 	 * <p> 提交表单值 </p>
 	 */

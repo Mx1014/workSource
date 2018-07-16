@@ -3,7 +3,21 @@ package com.everhomes.rest.general_approval;
 import java.sql.Timestamp;
 
 /**
- *
+ *<ul>
+ *     <li>namespaceId: 域空间ID</li>
+ *     <li>organizationId: 组织ID</li>
+ *     <li>ownerId：ownerId</li>
+ *     <li>ownerType: ownerType</li>
+ *     <li>moduleId: moduleId</li>
+ *     <li>moduleType: 模块类型,模块类型 默认"any-module",参考 {@link com.everhomes.rest.flow.FlowModuleType}</li>
+ *     <li>sourceId: 来源ID</li>
+ *     <li>sourceType: sourceType</li>
+ *     <li>formOriginId: 表单原始ID</li>
+ *     <li>formVersion : 表单版本</li>
+ *     <li>fieldName: 值所属的表单项名称</li>
+ *     <li>fieldType: 字段类型</li>
+ *     <li>fieldValue: 字段值</li>
+ *</ul>
  */
 public class SearchFormValDTO {
     private static final long serialVersionUID = 910055375L;
