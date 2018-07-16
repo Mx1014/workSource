@@ -90,10 +90,10 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private final static String TYPE_DEVELOP = "develop";
     //private final static String TYPE_DEVELOP = "develop";
     /**
-     * add by huanglm 20180611,默认bundleId "com.ios" ,
+     * add by huanglm 20180611,默认bundleId "com.techpark.ios.zuolin" ,
      * 凡是取不到开发者信息的时候就取这个bundleId对应的开发都信息
      */
-    private final static String DEFAULT_BUNDLEID = "com.ios";
+    private final static String DEFAULT_BUNDLEID = "com.techpark.ios.zuolin";
 
     @Autowired
     private BorderConnectionProvider borderConnectionProvider;
