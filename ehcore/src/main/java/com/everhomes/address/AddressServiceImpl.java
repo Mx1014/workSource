@@ -2708,6 +2708,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		arrangement.setTargetId(targetId);
 		String originalId = StringHelper.toJsonString(originalIds);
 		arrangement.setOriginalId(originalId);
+		arrangement.setDateBegin(new Timestamp(cmd.getDateBegin()));
 		arrangement.setOperationFlag(ArrangementOperationFlag.NOT_EXCUTED.getCode());
 		arrangement.setStatus(AddressArrangementStatus.ACTIVE.getCode());
 		User user = UserContext.current().getUser();

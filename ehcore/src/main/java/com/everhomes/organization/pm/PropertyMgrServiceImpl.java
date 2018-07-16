@@ -2600,8 +2600,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         response.setArrangementOperationType(operationType);
         
         Contract latestEndDateContract = findLatestEndDateContract(cmd.getId());
-        response.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
-        
+        if (latestEndDateContract!=null) {
+        	response.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
+		}
         return response;
     }
     
