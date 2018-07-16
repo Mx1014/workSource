@@ -1929,19 +1929,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
         }
 
-        //判断手机号的用户与当前用户是否一致
-        if (userIdentifier.getOwnerUid() == null || !userIdentifier.getOwnerUid().equals(UserContext.currentUserId())) {
-            LOGGER.error("phone not match user error");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
-                    "phone not match user error");
-        }
-
-        if (cmd.getRegionCode() != null && userIdentifier.getRegionCode() != null && !cmd.getRegionCode().equals(userIdentifier.getRegionCode())) {
-            LOGGER.error("phone not match user error");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
-                    "phone not match user error");
-        }
-
         this.verifySmsTimes("fogotPasswd", userIdentifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
 
         String verificationCode = RandomGenerator.getRandomDigitalString(6);
@@ -1958,6 +1945,44 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 	}
 
+	@Override
+	public void resendVerficationCodeByApp(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
+		if(userIdentifier==null){
+			LOGGER.error("cannot find user identifierToken.identifierToken={}",cmd.getIdentifier());
+			throw errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
+		}
+
+		//判断手机号的用户与当前用户是否一致
+		if (userIdentifier.getOwnerUid() == null || !userIdentifier.getOwnerUid().equals(UserContext.currentUserId())) {
+			LOGGER.error("phone not match user error");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+					"phone not match user error");
+		}
+
+		if (cmd.getRegionCode() != null && userIdentifier.getRegionCode() != null && !cmd.getRegionCode().equals(userIdentifier.getRegionCode())) {
+			LOGGER.error("phone not match user error");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+					"phone not match user error");
+		}
+
+		this.verifySmsTimes("fogotPasswd", userIdentifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
+
+		String verificationCode = RandomGenerator.getRandomDigitalString(6);
+		userIdentifier.setVerificationCode(verificationCode);
+		userIdentifier.setRegionCode(cmd.getRegionCode());
+		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()), verificationCode);
+
+		this.userProvider.updateIdentifier(userIdentifier);
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
+		}
+	}
 
 
 	@Override
@@ -1994,7 +2019,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		sendcmd.setNamespaceId(cmd.getNamespaceId());
 		sendcmd.setIdentifier(cmd.getIdentifier());
 		sendcmd.setRegionCode(cmd.getRegionCode());
-		resendVerficationCode(sendcmd, request);
+		resendVerficationCodeByApp(sendcmd, request);
 	}
 
 	@Override
@@ -5468,7 +5493,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		if (DateHelper.currentGMTTime().getTime() - identifier.getNotifyTime().getTime() > 10 * 60000) {
 			LOGGER.error("the verifycode is invalid with timeout");
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-					UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+					UserServiceErrorCode.ERROR_VERIFICATION_CODE_EXPIRED, "Invalid token status");
 		}
 
 		if(namespaceId == null || identifier.getNamespaceId() == null || namespaceId.intValue() != identifier.getNamespaceId().intValue()){

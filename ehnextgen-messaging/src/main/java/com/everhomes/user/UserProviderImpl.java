@@ -771,15 +771,7 @@ public class UserProviderImpl implements UserProvider {
             }
             return true;
         });
-        UserIdentifier userIdentifier=result[0];
-        if(userIdentifier!=null){
-            if(DateHelper.currentGMTTime().getTime() - userIdentifier.getNotifyTime().getTime() > getIdentifierClaimingTimeoutMs()) {
-                //if out of expire time,throw exception
-                LOGGER.error("invalid user claim status");
-                return null;
-            }
-        }
-        return userIdentifier;
+        return result[0];
     }
 
 

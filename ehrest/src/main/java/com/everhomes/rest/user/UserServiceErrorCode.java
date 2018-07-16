@@ -50,6 +50,6 @@ public interface UserServiceErrorCode {
     int ERROR_INVALID_USERTOKEN = 400002; //无效的用户token
 
     int ERROR_PHONE_NOT_MATCH_USER = 400003; //手机号与用户不匹配
-
+    int ERROR_VERIFICATION_CODE_EXPIRED = 400004; //验证码已过期
 
 }
