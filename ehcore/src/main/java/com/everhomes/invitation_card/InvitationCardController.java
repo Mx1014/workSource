@@ -26,7 +26,7 @@ public class InvitationCardController {
     @RequestMapping("listInvitationFormBySourceId")
     @RestReturn(value=ListInvitationFormResponse.class)
     public RestResponse listInvitationFormBySourceId(PostGeneralFormValCommand cmd) {
-        //ListInvitationFormResponse dto = listInvitationCardFormBySourceId      
+        //ListInvitationFormResponse dto = listInvitationCardFormBySourceId
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -1,18 +1,13 @@
 package com.everhomes.general_form;
 
-import com.everhomes.community.Building;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractBuildingMapping;
-import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.rest.general_approval.ListGeneralFormValResponse;
 import com.everhomes.rest.general_approval.SearchFormValsCommand;
 import com.everhomes.rest.general_approval.SearchGeneralFormItem;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
-import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -30,13 +25,14 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+@Service
 public class GeneralFormSearcherImpl extends AbstractElasticSearch implements GeneralFormSearcher{
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
