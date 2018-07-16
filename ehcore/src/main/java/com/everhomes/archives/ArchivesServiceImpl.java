@@ -858,16 +858,14 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getEmploymentTime() == null)
             employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
         else {
-            //  若转正日期不为当前时间则需做配置
+            //  若转正日期不为当前时间则需按照配置流程进行
             employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
-            if (ArchivesUtil.parseDate(cmd.getEmploymentTime()).after(ArchivesUtil.parseDate(cmd.getCheckInTime()))) {
-                EmployArchivesEmployeesCommand employConfigCommand = new EmployArchivesEmployeesCommand();
-                employConfigCommand.setDetailIds(Collections.singletonList(employee.getId()));
-                employConfigCommand.setOrganizationId(employee.getOrganizationId());
-                employConfigCommand.setEmploymentTime(cmd.getEmploymentTime());
-                employConfigCommand.setEmploymentEvaluation("");
-                employArchivesEmployeesConfig(employConfigCommand);
-            }
+            EmployArchivesEmployeesCommand command = new EmployArchivesEmployeesCommand();
+            command.setDetailIds(Collections.singletonList(employee.getId()));
+            command.setOrganizationId(employee.getOrganizationId());
+            command.setEmploymentTime(cmd.getEmploymentTime());
+            command.setEmploymentEvaluation("");
+            employArchivesEmployeesConfig(command);
         }
         if (cmd.getContractPartyId() != null)
             employee.setContractPartyId(cmd.getContractPartyId());
