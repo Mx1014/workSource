@@ -35,6 +35,8 @@
 -- AUTHOR: jiarui 20180716
 -- REMARK:执行 search目录下 equipment_standard.sh  然后同步/equipment/syncEquipmentStandardMapIndex
 
+-- AUTHOR: jiarui 20180717
+-- REMARK:执行 search目录下 enterpriseCustomer.sh  然后同步/customer/syncEnterpriseCustomerIndex
 
 
 
@@ -75,13 +77,34 @@ update eh_var_field_scopes set field_param = '{"fieldParamType": "text", "length
 SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_payment_charging_items); 
 INSERT INTO `eh_payment_charging_items`(`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
 VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
+-- end
 
 -- AUTHOR: jiarui  20180717
 -- REMARK: 能耗离线模块升级离线包版本
 UPDATE eh_version_urls SET download_url = replace(download_url,'1-0-4','1-0-5') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement');
 UPDATE eh_version_urls SET info_url = replace(info_url,'1-0-4','1-0-5') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement');
 UPDATE eh_version_urls SET  target_version = '1.0.5' WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement');
+-- end
 
+-- AUTHOR: jiarui  20180717
+-- REMARK: 修改认知途径
+UPDATE  eh_var_fields set display_name ='客户来源' WHERE  name = 'sourceItemId';
+SET  @var_id = (SELECT  max(id) from eh_var_fields);
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@var_id:=@var_id+1), 'enterprise_customer', 'talentSourceItemName', '信息来源', 'Long', '4', '/4/', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+-- end
+
+-- AUTHOR: jiarui  20180717
+-- REMARK: 线索客户转意向时间
+SET @id = (SELECT max(id) from eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id:=@id+1), 'customer.tracking', '60', 'zh_CN', '客户事件', '${operatorName}在${time}将线索客户${customerName}转成意向客户', '0');
+-- end
+
+-- AUTHOR: jiarui  20180717
+-- REMARK: 能耗新增表计类型（此方案为历史实现）
+set @id = (select MAX(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy.meter.type', '6', 'zh_CN', '广告费表');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'energy.meter.type', '7', 'zh_CN', '空调表');
+-- end
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
