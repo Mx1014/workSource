@@ -26,6 +26,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserFavoriteTargetType;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
@@ -34,6 +35,7 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import net.greghaines.jesque.Job;
@@ -46,13 +48,14 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutService, ApplicationListener<ContextRefreshedEvent> {
+public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutService{
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivitySignupTimeoutServiceImpl.class);
 
     @Autowired
@@ -88,19 +91,21 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
     @Autowired
     private UserProvider userProvider;
 
-    private String queueDelay = "activitysignuptimeoutdelays";
-
-    private void setup() {
-        workerPoolFactory.getWorkerPool().addQueue(queueDelay);
-    }
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public void pushTimeout(Post post) {
         if (post != null) {
             Activity activity = this.activityProivider.findSnapshotByPostId(post.getId());
             if (activity != null && activity.getSignupEndTime() != null) {
-                final Job job = new Job(ActivitySignupTimeoutAction.class.getName(), new Object[]{String.valueOf(post.getId()) });
-                jesqueClientFactory.getClientPool().delayedEnqueue(queueDelay, job, activity.getSignupEndTime().getTime());
+                String triggerName = CoordinationLocks.ACTIVITY_SIGNUP_TIMEOUT.getCode() + System.currentTimeMillis();
+                String jobName = CoordinationLocks.ACTIVITY_SIGNUP_TIMEOUT.getCode() + System.currentTimeMillis();
+                String cronExpression = CronDateUtils.getCron(activity.getSignupEndTime());
+                Map param = new HashMap();
+                param.put("postId",post.getId());
+                LOGGER.info("The first ActivitySignupTimeoutJob has been prepared at " + LocalDateTime.now());
+                scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ActivitySignupTimeoutJob.class, param);
             }else {
                 LOGGER.error("create ActivitySignupTimeout error! post={},activity={}",post,activity);
             }
@@ -197,12 +202,6 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
         }
     }
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        if(contextRefreshedEvent.getApplicationContext().getParent() == null) {
-            setup();
-        }
-    }
     private ForumEmbeddedHandler getForumEmbeddedHandler(Long embededAppId) {
         ForumEmbeddedHandler handler = null;
 
