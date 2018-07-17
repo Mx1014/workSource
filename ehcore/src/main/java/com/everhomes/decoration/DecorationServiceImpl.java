@@ -403,6 +403,8 @@ public class DecorationServiceImpl implements  DecorationService {
             locator = new CrossShardListingLocator();
             locator.setAnchor(cmd.getPageAnchor());
         }
+        if (cmd.getStatus() != null)
+            cmd.setCancelFlag((byte)0);
 
         String address = cmd.getBuildingName();
         if (cmd.getDoorPlate() != null)
@@ -1083,10 +1085,10 @@ public class DecorationServiceImpl implements  DecorationService {
         }
         Integer pageSize = Integer.MAX_VALUE;
         String address = cmd.getBuildingName();
+        if (cmd.getStatus() != null)
+            cmd.setCancelFlag((byte)0);
         if (cmd.getDoorPlate() != null)
             address += "&"+cmd.getDoorPlate();
-        if (cmd.getCancelFlag() == null)
-            cmd.setCancelFlag((byte)0);
         List<DecorationRequest> requests =  this.decorationProvider.queryDecorationRequests(UserContext.getCurrentNamespaceId(),cmd.getCommunityId(),cmd.getStartTime(),
                 cmd.getEndTime(),address,cmd.getStatus(),cmd.getKeyword(),cmd.getCancelFlag(),pageSize,null);
 
