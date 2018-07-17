@@ -1,6 +1,10 @@
 
 package com.everhomes.asset;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1530,6 +1534,49 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
     public RestResponse listBillGroupsForEnt(OwnerIdentityCommand cmd) {
         List<ListBillGroupsDTO> list = assetService.listBillGroupsForEnt(cmd);
         RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>展示账单组对应的减免费项列表</p>
+     * <b>URL: /asset/showCreateBillSubItemList</b>
+     */
+    @RequestMapping("showCreateBillSubItemList")
+    @RestReturn(value = ShowCreateBillSubItemListDTO.class)
+    public RestResponse showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	ShowCreateBillSubItemListDTO dto = assetService.showCreateBillSubItemList(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>批量减免费项</p>
+     * <b>URL: /asset/batchModifyBillSubItem</b>
+     */
+    @RequestMapping("batchModifyBillSubItem")
+    @RestReturn(value = String.class)
+    public RestResponse batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+        assetService.batchModifyBillSubItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
+     * <b>URL: /asset/testLateFine</b>
+     * @throws ParseException 
+     */
+    @RequestMapping("testLateFine")
+    @RestReturn(value = String.class)
+    public RestResponse testLateFine(TestLateFineCommand cmd) throws ParseException {
+    	assetService.testLateFine(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

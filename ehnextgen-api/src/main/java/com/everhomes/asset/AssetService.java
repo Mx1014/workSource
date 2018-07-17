@@ -12,6 +12,8 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -213,8 +215,8 @@ public interface AssetService {
 	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
     
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
-    
-    ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
+	
+	ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
     
     void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
     
@@ -225,5 +227,10 @@ public interface AssetService {
     ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
 	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
-    
+	
+	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
+
+	void testLateFine(TestLateFineCommand cmd);
 }

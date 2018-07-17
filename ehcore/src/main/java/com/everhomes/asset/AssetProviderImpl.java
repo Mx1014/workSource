@@ -48,6 +48,7 @@ import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -854,7 +855,6 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        //final String[] dateStr = {""};
         final String[] dateStrBegin = {""};
         final String[] dateStrEnd = {""};
         final BigDecimal[] amountOwed = {new BigDecimal("0")};
@@ -865,7 +865,8 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");//滞纳金
         EhPaymentExemptionItems exemption = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("exemption");//减免/增收项
 
-        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END
+        		,t.CHARGING_ITEMS_ID)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -873,21 +874,31 @@ public class AssetProviderImpl implements AssetProvider {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
-                    String address = r.getValue(t.BUILDING_NAME)==null?"":r.getValue(t.BUILDING_NAME)
-                            + r.getValue(t.APARTMENT_NAME)==null?"":r.getValue(t.APARTMENT_NAME);
+                    String buildingName = r.getValue(t.BUILDING_NAME)==null?"":r.getValue(t.BUILDING_NAME);
+                    String apartmentName = r.getValue(t.APARTMENT_NAME)==null?"":r.getValue(t.APARTMENT_NAME);
+                    String address = buildingName + apartmentName;
                     dto.setAddressName(org.apache.commons.lang.StringUtils.isEmpty(address)?"":address);
+                    
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    //根据减免费项配置重新计算待收金额
+                    Long charingItemId = r.getValue(t.CHARGING_ITEMS_ID);
+                    Boolean isConfigSubtraction = isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
+                    if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
+                    	dto.setIsConfigSubtraction((byte)0);
+                    	amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
+                    }else {
+                    	dto.setIsConfigSubtraction((byte)1);
+                    }
                     dtos.add(dto);
-                    //dateStr[0] = r.getValue(t.DATE_STR);
                     dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
                     dateStrEnd[0] = r.getValue(t.DATE_STR_END);
-                    amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
                     return null;
                 });
-        dslContext.select(fine.AMOUNT,fine.NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.AMOUNT_OWED)
+        dslContext.select(fine.AMOUNT,fine.NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.AMOUNT_OWED,
+        		fine.BILL_ITEM_ID)
                 .from(fine,t)
                 .where(fine.BILL_ITEM_ID.eq(t.ID))
                 .and(fine.BILL_ID.eq(billId))
@@ -897,15 +908,24 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountOwed(r.getValue(fine.AMOUNT));
                     dto.setBillItemName(r.getValue(fine.NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setAmountReceivable(r.getValue(fine.AMOUNT));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+                    Long billItemId = r.getValue(fine.BILL_ITEM_ID);
+                	//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
+                	Long chargingItemId = getPaymentBillItemsChargingItemID(billId,billItemId);
+                	//根据减免费项配置重新计算待收金额
+                    Boolean isConfigSubtraction = isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
+                    if(!isConfigSubtraction) {//如果滞纳金没有配置减免费项，那么需要相加到待缴金额中
+                    	dto.setIsConfigSubtraction((byte)0);
+                    	amountOwed[0] = amountOwed[0].add(r.getValue(fine.AMOUNT));
+                    }else {
+                    	dto.setIsConfigSubtraction((byte)1);
+                    }  
                     dtos.add(dto);
-                    //dateStr[0] = r.getValue(t.DATE_STR);
                     dateStrBegin[0] = r.getValue(t.DATE_STR_BEGIN);
                     dateStrEnd[0] = r.getValue(t.DATE_STR_END);
-                    amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
-                    amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(fine.AMOUNT));
                     return null;
                 });
         //查询该账单id是否存在对应的缴费凭证记录
@@ -1122,6 +1142,7 @@ public class AssetProviderImpl implements AssetProvider {
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            List<SubItemDTO> list3 = billGroupDTO.getSubItemDTOList();//增加减免费项
             String apartmentName = null;
             String buildingName = null;
             if(list1!=null && list1.size() > 0){
@@ -1253,12 +1274,8 @@ public class AssetProviderImpl implements AssetProvider {
                 exemptionItemsDao.insert(exemptionItems);
             }
             Byte billStatus = 0;
-            if(list1!=null){
-                //billItems assemble
-                List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-//                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class), list1.size());
-//                long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
-
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
+            if(list1!=null){                
                 for(int i = 0; i < list1.size() ; i++) {
                     long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
                     if(currentBillItemSeq == 0){
@@ -1286,9 +1303,6 @@ public class AssetProviderImpl implements AssetProvider {
                     //时间假定
                     item.setDateStrBegin(dates.get(0));
                     item.setDateStrEnd(dates.get(1));
-
-
-
                     item.setId(currentBillItemSeq);
                     item.setNamespaceId(UserContext.getCurrentNamespaceId());
                     item.setOwnerType(ownerType);
@@ -1310,27 +1324,70 @@ public class AssetProviderImpl implements AssetProvider {
                     amountReceivable = amountReceivable.add(var1);
                     amountOwed = amountOwed.add(var1);
                 }
-
-                if(amountOwed.compareTo(new BigDecimal("0"))!=1){
-                    billStatus = 1;
-                }
-                for(int i = 0; i < billItemsList.size(); i++) {
-                    billItemsList.get(i).setStatus(billStatus);
-                }
-                EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
-                billItemsDao.insert(billItemsList);
             }
-
+            
+            //增加减免费项
+            if(list3 != null) {
+            	  List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+	              for(int i = 0; i < list3.size() ; i++) {
+	                  long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+	                  if(currentSubtractionItemSeq == 0){
+	                      this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+	                  }
+	                  SubItemDTO dto = list3.get(i);
+	                  PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+	                  subtractionItem.setId(currentSubtractionItemSeq);
+	                  subtractionItem.setNamespaceId(UserContext.getCurrentNamespaceId());
+	                  subtractionItem.setCategoryId(categoryId);
+	                  subtractionItem.setOwnerId(ownerId);
+	                  subtractionItem.setOwnerType(ownerType);
+	                  subtractionItem.setBillId(nextBillId);
+	                  subtractionItem.setBillGroupId(billGroupId);
+	                  subtractionItem.setSubtractionType(dto.getSubtractionType());
+	                  subtractionItem.setChargingItemId(dto.getChargingItemId());
+	                  subtractionItem.setChargingItemName(dto.getChargingItemName());
+	                  subtractionItem.setCreatorUid(UserContext.currentUserId());
+	                  subtractionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                  
+	                  subtractionItemsList.add(subtractionItem);
+	
+	                  //根据减免费项配置重新计费，减免费项类型为eh_payment_bill_items才需要重新计费，减免费项类型为滞纳金新增无需重新计费
+	                  if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.item.getCode())) {
+	                	  if(billItemsList != null){
+		                	  for(int j = 0; j < billItemsList.size() ; j++) {
+		                		  PaymentBillItems item = (PaymentBillItems) billItemsList.get(j);
+		                		  if(item.getChargingItemsId().equals(subtractionItem.getChargingItemId())) {
+		                			  //如果收费项明细和减免费项的charginItemId相等，那么该费项金额应该从账单中减掉
+		                			  amountOwed = amountOwed.subtract(item.getAmountReceivable());
+		                		  }
+		                	  }
+		                  }
+	                  }
+	              }
+	              EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
+	              subtractionItemsDao.insert(subtractionItemsList);
+            }
+            
+            //重新判断状态，如果待缴金额为0，则设置为已缴状态
+//            if(amountOwed.compareTo(new BigDecimal("0"))!=1){
+//                billStatus = 1;
+//            }
+            for(int i = 0; i < billItemsList.size(); i++) {
+                billItemsList.get(i).setStatus(billStatus);
+            }
+            EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
+            billItemsDao.insert(billItemsList);
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
             amountOwed = DecimalUtils.negativeValueFilte(amountOwed);
             newBill.setAmountOwed(amountOwed);
-            if(amountOwed.compareTo(zero) == 0) {
-                newBill.setStatus((byte)1);
-            }else{
-                newBill.setStatus(billStatus);
-            }
+//            if(amountOwed.compareTo(zero) == 0) {
+//                newBill.setStatus((byte)1);
+//            }else{
+//                newBill.setStatus(billStatus);
+//            }
+            newBill.setStatus(billStatus);
             amountReceivable = DecimalUtils.negativeValueFilte(amountReceivable);
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
@@ -1398,10 +1455,12 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItems k = Tables.EH_PAYMENT_CHARGING_ITEMS.as("k");
         EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");
         EhAddresses t1 = Tables.EH_ADDRESSES.as("t1");
+        com.everhomes.server.schema.tables.EhPaymentSubtractionItems t2 = Tables.EH_PAYMENT_SUBTRACTION_ITEMS.as("t2");//增加减免费项
         ListBillDetailVO vo = new ListBillDetailVO();
         BillGroupDTO dto = new BillGroupDTO();
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
+        List<SubItemDTO> subItemDTOList = new ArrayList<SubItemDTO>();//增加减免费项
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
                 , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS)
@@ -1454,6 +1513,7 @@ public class AssetProviderImpl implements AssetProvider {
                         itemDTO.setBuildingName(f.getValue(o.BUILDING_NAME));
                     }
                     itemDTO.setChargingItemsId(f.getValue(o.CHARGING_ITEMS_ID));
+                    itemDTO.setItemType(AssetSubtractionType.item.getCode());//费项类型
                     list1.add(itemDTO);
                     return null;
                 });
@@ -1468,6 +1528,7 @@ public class AssetProviderImpl implements AssetProvider {
                 // 左邻convert为浅拷贝，第一层字段更改不会影响之前的
                 nitem.setBillItemName(n.getName());
                 nitem.setAmountReceivable(n.getAmount());
+                nitem.setItemType(AssetSubtractionType.lateFine.getCode());//费项类型
                 fineList.add(nitem);
             }
         }
@@ -1485,8 +1546,24 @@ public class AssetProviderImpl implements AssetProvider {
                     list2.add(exemDto);
                     return null;
                 });
+        
+        //增加减免费项
+        context.select(t2.ID,t2.SUBTRACTION_TYPE,t2.CHARGING_ITEM_ID, t2.CHARGING_ITEM_NAME)
+	        .from(t2)
+	        .where(t2.BILL_ID.eq(billId))
+	        .fetch()
+	        .map(f -> {
+	        	SubItemDTO subItemDTO = new SubItemDTO();
+	        	subItemDTO.setSubtractionType(f.getValue(t2.SUBTRACTION_TYPE));
+	        	subItemDTO.setChargingItemId(f.getValue(t2.CHARGING_ITEM_ID));
+	        	subItemDTO.setChargingItemName(f.getValue(t2.CHARGING_ITEM_NAME));
+	        	subItemDTOList.add(subItemDTO);
+	            return null;
+        });
+        
         dto.setBillItemDTOList(list1);
         dto.setExemptionItemDTOList(list2);
+        dto.setSubItemDTOList(subItemDTOList);//增加减免费项
         vo.setBillGroupDTO(dto);
         return vo;
     }
@@ -2044,16 +2121,29 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum, String noticeTel) {
+    public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd){
+    	//卸载参数
+    	Long billId = cmd.getBillId();
+    	BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
+    	String targetType = cmd.getTargetType();
+    	Long targetId = cmd.getTargetId();
+    	String targetName = cmd.getTargetName();
+    	String invoiceNum = cmd.getInvoiceNum();
+    	String noticeTel = cmd.getNoticeTel();
+    	Long categoryId = cmd.getCategoryId();
+    	String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+    			
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
             EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
             EhPaymentExemptionItems t2 = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t2");
+            com.everhomes.server.schema.tables.EhPaymentSubtractionItems t3 = Tables.EH_PAYMENT_SUBTRACTION_ITEMS.as("t3");
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
+            List<SubItemDTO> subItemDTOList = billGroupDTO.getSubItemDTOList();//增加减免费项
             //需要组装的信息
             BigDecimal amountExemption = new BigDecimal("0");
             BigDecimal amountSupplement = new BigDecimal("0");
@@ -2113,13 +2203,6 @@ public class AssetProviderImpl implements AssetProvider {
                         exemptionItems.add(exemptionItem);
                         includeExemptionIds.add(nextId);
                     }
-//                    if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
-//                        //更新账单的增加项
-//                        amountExemption = amountExemption.add(exemptionItemDTO.getAmount().multiply(new BigDecimal("-1")));
-//                    }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
-//                        //更新账单的减免项
-//                        amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
-//                    }
                 }
             }
             EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
@@ -2129,6 +2212,40 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(t2.ID.notIn(includeExemptionIds))
                     .and(t2.BILL_ID.eq(billId))
                     .execute();
+            
+            //修改减免费项配置
+            //先删除：根据billId删除该账单原来的减免费项配置
+            context.delete(t3)
+                    .where(t3.BILL_ID.eq(billId))
+                    .execute();
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+            if(subItemDTOList != null) {
+                //后插入：新增修改后的配置
+            	for(int i = 0; i < subItemDTOList.size(); i++){
+            		long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+	                if(currentSubtractionItemSeq == 0){
+	                   this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+	                }
+	                SubItemDTO dto = subItemDTOList.get(i);
+            		PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+            		subtractionItem.setId(currentSubtractionItemSeq);
+            		subtractionItem.setNamespaceId(UserContext.getCurrentNamespaceId());
+            		subtractionItem.setCategoryId(categoryId);
+            		subtractionItem.setOwnerId(ownerId);
+            		subtractionItem.setOwnerType(ownerType);
+            		subtractionItem.setBillId(billId);
+            		subtractionItem.setBillGroupId(billGroupId);
+            		subtractionItem.setSubtractionType(dto.getSubtractionType());
+            		subtractionItem.setChargingItemId(dto.getChargingItemId());
+            		subtractionItem.setChargingItemName(dto.getChargingItemName());
+            		subtractionItem.setCreatorUid(UserContext.currentUserId());
+            		subtractionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            		subtractionItemsList.add(subtractionItem);
+            	}
+            	EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
+	            subtractionItemsDao.insert(subtractionItemsList);
+            }
+            
             reCalBillById(billId);//重新计算账单
             // 更新发票
             context.update(Tables.EH_PAYMENT_BILLS)
@@ -4400,14 +4517,20 @@ public class AssetProviderImpl implements AssetProvider {
         final BigDecimal[] amountExempled = {new BigDecimal("0")};
         final BigDecimal[] amountSupplement = {new BigDecimal("0")};
         BigDecimal zero = new BigDecimal("0");
-        getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED)
+        getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,
+        		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED,Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID)
                 .from(Tables.EH_PAYMENT_BILL_ITEMS)
                 .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
                 .fetch()
                 .forEach(r -> {
-                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));
-                    amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));
-                    amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
+                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));//应收
+                    amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));//已收
+                    //根据减免费项配置重新计算待收金额
+                    Long charingItemId = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
+                    Boolean isConfigSubtraction = isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
+                    if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
+                    	amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
+                    }
                 });
         getReadOnlyContext().select(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT)
                 .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
@@ -4423,14 +4546,21 @@ public class AssetProviderImpl implements AssetProvider {
                     }
                 });
         //包括滞纳金
-        getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT)
+        getReadOnlyContext().select(Tables.EH_PAYMENT_LATE_FINE.AMOUNT,Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID)
                 .from(Tables.EH_PAYMENT_LATE_FINE)
                 .where(Tables.EH_PAYMENT_LATE_FINE.BILL_ID.eq(billId))
                 .fetch()
                 .forEach(r ->{
                     BigDecimal value = r.getValue(Tables.EH_PAYMENT_LATE_FINE.AMOUNT);
                     if(value != null){
-                        amountOwed[0] = amountOwed[0].add(value);
+                    	Long billItemId = r.getValue(Tables.EH_PAYMENT_LATE_FINE.BILL_ITEM_ID);
+                    	//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
+                    	Long chargingItemId = getPaymentBillItemsChargingItemID(billId,billItemId);
+                    	//根据减免费项配置重新计算待收金额
+                        Boolean isConfigSubtraction = isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
+                        if(!isConfigSubtraction) {//如果滞纳金没有配置减免费项，那么需要相加到待缴金额中
+                        	amountOwed[0] = amountOwed[0].add(value);
+                        }    
                     }
                 });
         //修复issue-32525 "导入一个账单，减免大于收费项，列表显示了负数"的bug
@@ -5443,7 +5573,7 @@ public class AssetProviderImpl implements AssetProvider {
 		return projectName;
 	}
 	
-    public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd) {
+	public ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         ListBillDetailVO vo = new ListBillDetailVO();
@@ -5509,5 +5639,171 @@ public class AssetProviderImpl implements AssetProvider {
         dao.insert(order);
         return order;
     }
+    
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	//卸载参数
+    	Long billGroupId = cmd.getBillGroupId();
+    	Long categoryId = cmd.getCategoryId();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroupsRules rule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("rule");
+        EhPaymentChargingItemScopes ci = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("ci");
 
+        ShowCreateBillSubItemListDTO response = new ShowCreateBillSubItemListDTO();
+        List<SubItemDTO> list = new ArrayList<>();
+
+        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID)
+                .from(rule,ci)
+                .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
+                .and(rule.OWNERID.eq(ci.OWNER_ID))
+                .and(rule.BILL_GROUP_ID.eq(billGroupId))
+                .and(ci.CATEGORY_ID.eq(categoryId))
+                .fetch()
+                .map(r -> {
+                	//减免费项
+                    SubItemDTO dto = new SubItemDTO();
+                    dto.setSubtractionType(AssetSubtractionType.item.getCode());
+                    dto.setChargingItemId(r.getValue(rule.CHARGING_ITEM_ID));
+                    dto.setChargingItemName(r.getValue(ci.PROJECT_LEVEL_NAME));
+                    list.add(dto);
+                    //减免费项对应的滞纳金
+                    SubItemDTO dtoLateFine = new SubItemDTO();
+                    dtoLateFine.setSubtractionType(AssetSubtractionType.lateFine.getCode());
+                    dtoLateFine.setChargingItemId(r.getValue(rule.CHARGING_ITEM_ID));
+                    dtoLateFine.setChargingItemName(r.getValue(ci.PROJECT_LEVEL_NAME) + "滞纳金");
+                    list.add(dtoLateFine);
+                    return null;});
+        
+        response.setBillGroupId(billGroupId);
+        response.setSubItemDTOList(list);
+        List<String> fetch = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(categoryId))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
+        if(fetch.size() > 0){
+            response.setBillGroupName(fetch.get(0));
+        }
+        return response;
+	}
+
+	public void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+		//卸载参数
+		Long billGroupId = cmd.getBillGroupId();
+		Long categoryId = cmd.getCategoryId();
+    	String ownerType = cmd.getOwnerType();
+        Long ownerId = cmd.getOwnerId();
+        List<Long> billIdList = cmd.getBillIdList();
+		List<SubItemDTO> subItemDTOList = cmd.getSubItemDTOList();
+		
+		//修改减免费项配置
+		this.dbProvider.execute((TransactionStatus status) -> {
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+            com.everhomes.server.schema.tables.EhPaymentSubtractionItems t3 = Tables.EH_PAYMENT_SUBTRACTION_ITEMS.as("t3");
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+            if(billIdList != null && subItemDTOList != null ) {
+            	//先删除：根据billId删除该账单原来的减免费项配置
+                context.delete(t3)
+                        .where(t3.BILL_ID.in(billIdList))
+                        .execute();
+                //后插入：新增修改后的配置
+            	for(int i = 0; i < subItemDTOList.size(); i++){
+                    SubItemDTO dto = subItemDTOList.get(i);
+                    for(int j = 0;j < billIdList.size();j++) {
+                    	long currentSubtractionItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+                        if(currentSubtractionItemSeq == 0){
+                           this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems.class));
+                        }
+                    	Long billId = billIdList.get(j);
+                    	PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+                		subtractionItem.setId(currentSubtractionItemSeq);
+                		subtractionItem.setNamespaceId(UserContext.getCurrentNamespaceId());
+                		subtractionItem.setCategoryId(categoryId);
+                		subtractionItem.setOwnerId(ownerId);
+                		subtractionItem.setOwnerType(ownerType);
+                		subtractionItem.setBillGroupId(billGroupId);
+                		subtractionItem.setSubtractionType(dto.getSubtractionType());
+                		subtractionItem.setChargingItemId(dto.getChargingItemId());
+                		subtractionItem.setChargingItemName(dto.getChargingItemName());
+                		subtractionItem.setCreatorUid(UserContext.currentUserId());
+                		subtractionItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                		subtractionItem.setBillId(billId);
+                		subtractionItemsList.add(subtractionItem);
+                    }
+            	}
+            	EhPaymentSubtractionItemsDao subtractionItemsDao = new EhPaymentSubtractionItemsDao(context.configuration());
+                subtractionItemsDao.insert(subtractionItemsList);
+                
+                for(int j = 0;j < billIdList.size();j++) {
+                	Long billId = billIdList.get(j);
+                	reCalBillById(billId);//重新计算账单
+                }
+            }
+            return null;
+        });
+	}
+	
+	//根据billId和billItemId获取费项表的charingItemId
+	public Long getPaymentBillItemsChargingItemID(Long billId, Long billItemId) {
+		Long chargingItemId = getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID)
+	            .from(Tables.EH_PAYMENT_BILL_ITEMS)
+	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+	            .and(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+	            .fetchOne(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
+		return chargingItemId;
+	}
+	
+	//取出所有的减免费项配置
+	public List<EhPaymentSubtractionItems> getSubtractionItemsByBillId(Long billId){
+		List<EhPaymentSubtractionItems> subtractionItemsList = new ArrayList<>();
+		getReadOnlyContext().select(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.SUBTRACTION_TYPE,Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_ID,
+        		Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_NAME)
+	        .from(Tables.EH_PAYMENT_SUBTRACTION_ITEMS)
+	        .where(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.BILL_ID.eq(billId))
+	        .fetch()
+	        .forEach(r -> {
+	        	PaymentSubtractionItem subtractionItem = new PaymentSubtractionItem();
+	        	subtractionItem.setSubtractionType(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.SUBTRACTION_TYPE));
+	        	subtractionItem.setChargingItemId(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_ID));
+	        	subtractionItem.setChargingItemName(r.getValue(Tables.EH_PAYMENT_SUBTRACTION_ITEMS.CHARGING_ITEM_NAME));
+	        	subtractionItemsList.add(subtractionItem);
+	        });
+		return subtractionItemsList;
+	}
+	
+	//判断收费项是否配置了减免费项
+	public Boolean isConfigItemSubtraction(Long billId, Long charingItemId) {
+		List<EhPaymentSubtractionItems> subtractionItemsList = getSubtractionItemsByBillId(billId);//取出所有的减免费项配置
+		Boolean isConfigSubtraction = false;//用于判断该费项是否配置了减免费项
+	    if(subtractionItemsList != null) {
+	    	for(int i = 0;i < subtractionItemsList.size();i++) {
+	    		PaymentSubtractionItem subtractionItem = (PaymentSubtractionItem) subtractionItemsList.get(i);
+	    		//如果减免费项类型是"eh_payment_bill_items"，并且charginItemsId相等
+	    		if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.item.getCode())) {
+	    			if(charingItemId != null && charingItemId.equals(subtractionItem.getChargingItemId())) {
+	    				isConfigSubtraction = true;
+	        		}
+	            }
+	    	}
+	    }
+	    return isConfigSubtraction;
+	}
+	
+	//判断滞纳金是否配置了减免费项
+	public Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId) {
+		List<EhPaymentSubtractionItems> subtractionItemsList = getSubtractionItemsByBillId(billId);//取出所有的减免费项配置
+		Boolean isConfigSubtraction = false;//用于判断该费项是否配置了减免费项
+        if(subtractionItemsList != null) {
+        	for(int i = 0;i < subtractionItemsList.size();i++) {
+        		PaymentSubtractionItem subtractionItem = (PaymentSubtractionItem) subtractionItemsList.get(i);
+        		//如果减免费项类型是"eh_payment_late_fine"，并且charginItemsId相等
+        		if(subtractionItem != null && subtractionItem.getSubtractionType().equals(AssetSubtractionType.lateFine.getCode())) {
+        			if(charingItemId != null && charingItemId.equals(subtractionItem.getChargingItemId())) {
+        				isConfigSubtraction = true;
+            		}
+                }
+        	}
+        }
+	    return isConfigSubtraction;
+	}
+    
 }
