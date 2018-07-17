@@ -1108,7 +1108,24 @@ public class ContractProviderImpl implements ContractProvider {
 					            }
 							}
 						}
-						
+						//templateId
+						if("templateId".equals(field.getFieldName())){
+							//获取模板的名字
+				            if (objNew!=null) {
+				            	//根据id查询数据，
+				        		ContractTemplate contractTemplateParent = this.findContractTemplateById((Long)objNew);
+				            	if(contractTemplateParent != null) {
+					            	newData = contractTemplateParent.getName();
+					            }
+							}
+				            if (objOld!=null) {
+				            	//根据id查询数据，
+				        		ContractTemplate contractTemplateParent = this.findContractTemplateById((Long)objOld);
+					            if(contractTemplateParent != null) {
+					            	oldData = contractTemplateParent.getName();
+					            }
+							}
+						}
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
                         if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
                             ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
