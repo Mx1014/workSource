@@ -29,6 +29,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.forum.*;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
@@ -36,6 +37,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
@@ -57,6 +60,8 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
@@ -96,7 +101,11 @@ import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import net.greghaines.jesque.Job;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -266,8 +275,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     @Value("${server.contextPath:}")
     private String contextPath;
 
+	@Autowired
+    private NamespaceProvider namespaceProvider;
+
     @Autowired
     private SensitiveWordService sensitiveWordService;
+
+    @Autowired
+    private TaskService taskService;
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -6454,6 +6469,92 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }else {
             LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
         }
+    }
+
+    @Override
+    public void exportActivity(ExportActivityCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if(cmd.getStartTime() != null){
+            params.put("startTime", cmd.getStartTime());
+        }
+        if(cmd.getEndTime() != null){
+            params.put("endTime", cmd.getEndTime());
+        }
+
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_活动报名_" + fileNameSdf.format(cmd.getStartTime()) + "_" +fileNameSdf.format(cmd.getEndTime()) +".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
+    public void exportOrganization(ExportOrganizationCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityOrganizationList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_企业报名_" + fileNameSdf.format(new Date()) +".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityOrganizationExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
+    public void exportTag(ExportTagCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityTagList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_标签统计_" + fileNameSdf.format(new Date())+".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityTagExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
     }
 
 //	@Override

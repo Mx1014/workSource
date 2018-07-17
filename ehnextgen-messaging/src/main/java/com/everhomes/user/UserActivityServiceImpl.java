@@ -16,6 +16,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.FlowService;
 import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
@@ -25,6 +26,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.namespace.NamespacesService;
 import com.everhomes.point.PointService;
 import com.everhomes.poll.ProcessStatus;
@@ -36,6 +40,8 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
 import com.everhomes.rest.common.ActivityListStyleFlag;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
@@ -65,6 +71,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +88,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -166,6 +182,12 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Autowired
     private PointService pointService;
+
+    @Autowired
+    private NamespaceProvider namespaceProvider;
+
+    @Autowired
+    private TaskService taskService;
 
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
@@ -547,7 +569,29 @@ public class UserActivityServiceImpl implements UserActivityService {
     	return response;
     }
 
-	@Override
+    @Override
+    public void exportFeedbacks(ExportFeedbacksCommand cmd) {
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityTagList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        if (namespace != null) {
+            fileName = namespace.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_举报管理_" + fileNameSdf.format(new Date()) + ".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), FeedbackApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
 	public void updateFeedback(UpdateFeedbackCommand cmd) {
         Feedback feedback = userActivityProvider.findFeedbackById(cmd.getId());
         if (feedback == null) {
