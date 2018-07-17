@@ -33,3 +33,7 @@ CREATE TABLE `eh_user_apps` (
   PRIMARY KEY (`id`),
   KEY `u_eh_user_app_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义显示的应用';
+
+
+ALTER TABLE `eh_news` ADD COLUMN `create_type` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0-后台创建 1-第三方调用接口' ;
+
