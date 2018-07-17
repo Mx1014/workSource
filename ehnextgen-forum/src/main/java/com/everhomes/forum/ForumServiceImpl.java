@@ -1047,12 +1047,6 @@ public class ForumServiceImpl implements ForumService {
             // 如果是活动，返回活动内容的链接，add by tt, 20161013
             if (postDto.getEmbeddedAppId() != null && postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
 				postDto.setContentUrl(getActivityContentUrl(postDto.getId()));
-                ActivityPostCommand activityPostCommand = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
-                        ActivityPostCommand.class);
-                if (activityPostCommand != null) {
-                    activityPostCommand.setMinQuantity(post.getMinQuantity());
-                    postDto.setEmbeddedJson(StringHelper.toJsonString(activityPostCommand));
-                }
             }
             
             return postDto;
