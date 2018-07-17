@@ -10,9 +10,11 @@ import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.statistics.terminal.*;
+import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUserActivities;
+import com.everhomes.server.schema.tables.pojos.EhTerminalAppVersionStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalHourStatistics;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
@@ -181,9 +183,9 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
         List<TerminalAppVersionStatistics> versionStats =
                 statTerminalProvider.listTerminalAppVersionStatisticsByDay(date, namespaceId);
 
-        List<PieChartData> list = new ArrayList<>(versionStats.size());;
+        List<PieChartData> list = new ArrayList<>(versionStats.size());
         switch (type) {
-            case ACTIVE_USER: {
+            case CUMULATIVE_USER: {
                 for (TerminalAppVersionStatistics stat : versionStats) {
                     PieChartData data = new PieChartData();
                     data.setName(stat.getAppVersion());
@@ -191,8 +193,9 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     data.setRate(stat.getVersionCumulativeRate().doubleValue());
                     list.add(data);
                 }
+                break;
             }
-            case CUMULATIVE_USER: {
+            case ACTIVE_USER: {
                 for (TerminalAppVersionStatistics stat : versionStats) {
                     PieChartData data = new PieChartData();
                     data.setName(stat.getAppVersion());
@@ -200,20 +203,22 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     data.setRate(stat.getVersionActiveRate().doubleValue());
                     list.add(data);
                 }
+                break;
             }
             default:
                 LOGGER.warn("not supported type: {}", type.getCode());
+                break;
         }
 
         if (list.size() > versionNum) {
             list.sort(Comparator.comparingLong(PieChartData::getAmount).reversed());
-            List<PieChartData> subList = list.subList(0, versionNum-1);
-            List<PieChartData> otherList = list.subList(versionNum-1, list.size());
+            List<PieChartData> subList = list.subList(0, versionNum - 1);
+            List<PieChartData> otherList = list.subList(versionNum - 1, list.size());
 
             subList.sort((o1, o2) -> {
                 Version v1 = Version.fromVersionString(o1.getName());
                 Version v2 = Version.fromVersionString(o2.getName());
-                return Math.toIntExact(v2.getEncodedValue() - v1.getEncodedValue());
+                return (int) (v2.getEncodedValue() - v1.getEncodedValue());
             });
 
             PieChartData otherData = new PieChartData();
@@ -227,18 +232,21 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             list.sort((o1, o2) -> {
                 Version v1 = Version.fromVersionString(o1.getName());
                 Version v2 = Version.fromVersionString(o2.getName());
-                return Math.toIntExact(v2.getEncodedValue() - v1.getEncodedValue());
+                return (int) (v2.getEncodedValue() - v1.getEncodedValue());
             });
         }
         return new PieChart(list);
     }
 
     @Override
-    public void executeUserSyncTask(Integer namespaceId, boolean genData, String start, String end) {
+    public void executeUserSyncTask(Integer specNsId, boolean genData, String start, String end) {
         new Thread(() -> {
-            List<Namespace> namespaces = getNamespaces(namespaceId);
+            List<Namespace> namespaces = getNamespaces(specNsId);
             for (Namespace namespace : namespaces) {
                 try {
+                    // step 0
+                    statTerminalProvider.cleanInvalidAppVersion(namespace.getId());
+
                     // step 1
                     statTerminalProvider.cleanTerminalAppVersionCumulativeByCondition(namespace.getId());
 
@@ -246,7 +254,26 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     statTerminalProvider.cleanUserActivitiesWithNullAppVersion(namespace.getId());
 
                     // step 3
-                    List<Long> uids = statTerminalProvider.listUserIdByInterval(namespaceId, null, null);
+                    statTerminalProvider.correctUserActivity(namespace.getId());
+
+                    // step 4
+                    List<String> appVersionList = statTerminalProvider.listUserActivityAppVersions(namespace.getId());
+                    List<AppVersion> appVersions = statTerminalProvider.listAppVersions(namespace.getId());
+                    List<String> existVersion = appVersions.stream().map(AppVersion::getName).collect(Collectors.toList());
+                    for (String s : appVersionList) {
+                        if (!existVersion.contains(s)) {
+                            AppVersion version = new AppVersion();
+                            version.setName(s);
+                            version.setDefaultOrder((int) Version.fromVersionString(s).getEncodedValue());
+                            version.setNamespaceId(namespace.getId());
+                            version.setType(OSType.Android.name());
+                            version.setRealm(VersionRealmType.ANDROID.getCode());
+                            statTerminalProvider.createAppVersion(version);
+                        }
+                    }
+
+                    // step 5
+                    List<Long> uids = statTerminalProvider.listUserIdByInterval(namespace.getId(), null, null);
                     List<User> users = userProvider.listUserByCreateTime(namespace.getId(), null, null, uids);
 
                     for (User user : users) {
@@ -267,9 +294,24 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                             return query;
                         });
 
-                        String appVersion = "5.0.0";
+                        String appVersion = null;
                         if (userActivities.size() > 0) {
                             appVersion = userActivities.get(0).getAppVersionName();
+                        } else {
+                            List<AppVersion> list = statTerminalProvider.listAppVersions(namespace.getId());
+                            if (list.size() > 0) {
+                                appVersion = list.iterator().next().getName();
+                            } else {
+                                appVersion = "5.0.0";
+
+                                AppVersion version = new AppVersion();
+                                version.setName(appVersion);
+                                version.setDefaultOrder((int) Version.fromVersionString(appVersion).getEncodedValue());
+                                version.setNamespaceId(namespace.getId());
+                                version.setType(OSType.Android.name());
+                                version.setRealm(VersionRealmType.ANDROID.getCode());
+                                statTerminalProvider.createAppVersion(version);
+                            }
                         }
 
                         activity.setAppVersionName(appVersion);
@@ -562,7 +604,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                     statTerminalProvider.deleteTerminalAppVersionCumulative(activity.getImeiNumber(), activity.getNamespaceId());
 
                     TerminalAppVersionActives active = new TerminalAppVersionActives();
-                    active.setImeiNumber(activity.getImeiNumber());
+                    active.setImeiNumber(String.valueOf(activity.getUid()));
                     active.setAppVersion(activity.getAppVersionName());
                     active.setAppVersionRealm(activity.getVersionRealm());
                     active.setNamespaceId(activity.getNamespaceId());
@@ -764,6 +806,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
         statTerminalProvider.deleteTerminalAppVersionStatistics(namespaceId, dateStr);
 
         TerminalDayStatistics dayStat = statTerminalProvider.getTerminalDayStatisticsByDay(dateStr, namespaceId);
+        List<TerminalAppVersionStatistics> statList = new ArrayList<>(versions.size());
         for (AppVersion version : versions) {
             TerminalAppVersionStatistics versionStat = new TerminalAppVersionStatistics();
             versionStat.setAppVersion(version.getName());
@@ -773,11 +816,12 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
 
             // 版本总用户数量
             Integer versionCumulativeUserNumber = statTerminalProvider
-                    .countVersionCumulativeUserNumber(version.getName(), version.getNamespaceId());
+                    .countVersionCumulativeUserNumber(version.getName(), version.getNamespaceId(), dateStr);
             versionStat.setCumulativeUserNumber(versionCumulativeUserNumber.longValue());
 
             // 版本活跃用户数
-            Integer versionActiveUserNumber = statTerminalProvider.countVersionActiveUserNumberByDay(dateStr, version.getName(), version.getNamespaceId());
+            Integer versionActiveUserNumber = statTerminalProvider
+                    .countVersionActiveUserNumberByDay(dateStr, version.getName(), version.getNamespaceId());
             versionStat.setActiveUserNumber(versionActiveUserNumber.longValue());
 
             // 版本启动次数
@@ -805,8 +849,104 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
                 BigDecimal rate = rate(versionActiveUserNumber, dayStat.getActiveUserNumber());
                 versionStat.setVersionActiveRate(rate);
             }
-            statTerminalProvider.createTerminalAppVersionStatistics(versionStat);
+            statList.add(versionStat);
         }
+
+        fixRate(statList);
+
+        statTerminalProvider.createTerminalAppVersionStatistics(statList);
+    }
+
+    // 修正百分比相加后不是 100 的问题
+    private void fixRate(List<TerminalAppVersionStatistics> statList) {
+        statList.stream()
+                .map(EhTerminalAppVersionStatistics::getVersionCumulativeRate)
+                .reduce(BigDecimal::add)
+                .ifPresent(r -> {
+                    List<TerminalAppVersionStatistics> list =
+                            statList.stream()
+                            .filter(rr -> rr.getVersionCumulativeRate().compareTo(BigDecimal.ZERO) != 0)
+                            .collect(Collectors.toList());
+
+                    if (r.compareTo(BigDecimal.ZERO) == 0) {
+                        return;
+                    }
+
+                    BigDecimal sub = new BigDecimal("100").subtract(r);
+                    int i = sub.compareTo(BigDecimal.ZERO);
+                    if (i > 0) {
+                        list.sort((o1, o2) -> o2.getVersionCumulativeRate().compareTo(o1.getVersionCumulativeRate()));
+                        int i1 = sub.divide(new BigDecimal("0.01"), RoundingMode.FLOOR).intValue();
+                        for (int j = 0; j < i1; j++) {
+                            if (list.size() > j) {
+                                TerminalAppVersionStatistics s = list.get(j);
+                                s.setVersionCumulativeRate(s.getVersionCumulativeRate().add(new BigDecimal("0.01")));
+                            } else {
+                                TerminalAppVersionStatistics s = list.get(j - 1);
+                                s.setVersionCumulativeRate(s.getVersionCumulativeRate().add(new BigDecimal("0.01").multiply(BigDecimal.valueOf(i1 - j))));
+                                break;
+                            }
+                        }
+                    } else if (i < 0) {
+                        list.sort(Comparator.comparing(EhTerminalAppVersionStatistics::getVersionCumulativeRate));
+                        int i1 = sub.divide(new BigDecimal("0.01"), RoundingMode.FLOOR).negate().intValue();
+                        for (int j = 0; j < i1; j++) {
+                            if (list.size() > j) {
+                                TerminalAppVersionStatistics s = list.get(j);
+                                s.setVersionCumulativeRate(s.getVersionCumulativeRate().add(new BigDecimal("0.01").negate()));
+                            } else {
+                                TerminalAppVersionStatistics s = list.get(j - 1);
+                                s.setVersionCumulativeRate(s.getVersionCumulativeRate().add(new BigDecimal("0.01").multiply(BigDecimal.valueOf(i1 - j)).negate()));
+                                break;
+                            }
+                        }
+                    }
+                });
+
+        statList.stream()
+                .map(EhTerminalAppVersionStatistics::getVersionActiveRate)
+                .filter(r -> r.compareTo(BigDecimal.ZERO) == 0)
+                .reduce(BigDecimal::add)
+                .ifPresent(r -> {
+                    List<TerminalAppVersionStatistics> list =
+                            statList.stream()
+                                    .filter(rr -> rr.getVersionActiveRate().compareTo(BigDecimal.ZERO) != 0)
+                                    .collect(Collectors.toList());
+
+                    if (r.compareTo(BigDecimal.ZERO) == 0) {
+                        return;
+                    }
+
+                    BigDecimal sub = new BigDecimal("100").subtract(r);
+                    int i = sub.compareTo(BigDecimal.ZERO);
+                    if (i > 0) {
+                        list.sort((o1, o2) -> o2.getVersionActiveRate().compareTo(o1.getVersionActiveRate()));
+                        int i1 = sub.divide(new BigDecimal("0.01"), RoundingMode.FLOOR).intValue();
+                        for (int j = 0; j < i1; j++) {
+                            if (list.size() > j) {
+                                TerminalAppVersionStatistics s = list.get(j);
+                                s.setVersionActiveRate(s.getVersionActiveRate().add(new BigDecimal("0.01")));
+                            } else {
+                                TerminalAppVersionStatistics s = list.get(j - 1);
+                                s.setVersionActiveRate(s.getVersionActiveRate().add(new BigDecimal("0.01").multiply(BigDecimal.valueOf(i1-j))));
+                                break;
+                            }
+                        }
+                    } else if (i < 0) {
+                        list.sort(Comparator.comparing(EhTerminalAppVersionStatistics::getVersionActiveRate));
+                        int i1 = sub.divide(new BigDecimal("0.01"), RoundingMode.FLOOR).negate().intValue();
+                        for (int j = 0; j < i1; j++) {
+                            if (list.size() > j) {
+                                TerminalAppVersionStatistics s = list.get(j);
+                                s.setVersionActiveRate(s.getVersionActiveRate().add(new BigDecimal("0.01").negate()));
+                            } else {
+                                TerminalAppVersionStatistics s = list.get(j - 1);
+                                s.setVersionActiveRate(s.getVersionActiveRate().add(new BigDecimal("0.01").multiply(BigDecimal.valueOf(i1-j)).negate()));
+                                break;
+                            }
+                        }
+                    }
+                });
     }
 
     private BigDecimal rate(Number num1, Number num2) {
@@ -814,7 +954,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             return BigDecimal.ZERO;
         }
         return BigDecimal.valueOf(num1.longValue())
-                .divide(BigDecimal.valueOf(num2.longValue()), 2, RoundingMode.HALF_UP)
+                .divide(BigDecimal.valueOf(num2.longValue()), 4, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
     }
 }
