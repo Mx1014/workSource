@@ -2037,8 +2037,8 @@ public class ForumServiceImpl implements ForumService {
 
 	         Condition condition = communityCondition
                      .or(regionCondition)
-                     .or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
-                             .and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())))
+                     .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+                             .and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())))
                      .and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
 
 	         if(null != cmd.getEmbeddedAppId()){
