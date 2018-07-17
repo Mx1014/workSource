@@ -4,6 +4,8 @@ package com.everhomes.user;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.forum.ForumProvider;
+import com.everhomes.forum.Post;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.user.ExportFeedbackDTO;
 import com.everhomes.rest.user.FeedbackContentCategoryType;
@@ -34,6 +36,9 @@ public class FeedbackApplyExportTaskHandler  implements FileDownloadTaskHandler 
     @Autowired
     private UserProvider userProvider;
 
+    @Autowired
+    private ForumProvider forumProvider;
+
     @Override
     public void beforeExecute(Map<String, Object> params) {
 
@@ -63,7 +68,12 @@ public class FeedbackApplyExportTaskHandler  implements FileDownloadTaskHandler 
 
             FeedbackContentCategoryType contentCategory = FeedbackContentCategoryType.fromStatus(feedbackDto.getContentCategory().byteValue());
             feedbackDto.setContentCategoryText(contentCategory.getText());
-
+            Post post = forumProvider.findPostById(feedbackDto.getTargetId());
+            if(post != null){
+                feedbackDto.setTargetSubject(post.getSubject());
+                feedbackDto.setForumId(post.getForumId());
+                feedbackDto.setTargetStatus(post.getStatus());
+            }
             feedbackDto.setTargetSubject(r.getSubject());
             feedbackDto.setStatusText(r.getStatus()==(byte)0?"未处理":"已处理");
             feedbackDto.setCreateTimeText(sdf.format(r.getCreateTime()));

@@ -9,6 +9,7 @@ import com.everhomes.rest.activity.StatisticsOrganizationDTO;
 import com.everhomes.rest.activity.StatisticsOrganizationResponse;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.util.excel.ExcelUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +55,13 @@ public class ActivityOrganizationExportTaskHandler implements FileDownloadTaskHa
         statisticsOrganizationCommand.setCategoryId(categoryId);
         StatisticsOrganizationResponse result = this.activityService.statisticsOrganization(statisticsOrganizationCommand);
         List<StatisticsOrganizationDTO> dtos = result.getList();
-
+        if (!CollectionUtils.isEmpty(dtos)) {
+            dtos.stream().forEach(r-> {
+                if (r.getOrgId() == null) {
+                    r.setOrgName("其他企业");
+                }
+            });
+        }
         ExcelUtils excelUtils = new ExcelUtils(fileName, "企业报名");
         List<String> propertyNames = new ArrayList<String>(Arrays.asList("orgName", "signPeopleCount", "signActivityCount"));
         List<String> titleNames = new ArrayList<String>(Arrays.asList("企业名称", "报名总人次", "报名活动场数"));
