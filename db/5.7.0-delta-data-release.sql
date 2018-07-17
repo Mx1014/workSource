@@ -76,6 +76,12 @@ SET @id = (SELECT IFNULL(MAX(id),1) FROM eh_payment_charging_items);
 INSERT INTO `eh_payment_charging_items`(`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
 VALUES(@id:=@id+1, '广告费', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
 
+-- AUTHOR: jiarui  20180717
+-- REMARK: 能耗离线模块升级离线包版本
+UPDATE eh_version_urls SET download_url = replace(download_url,'1-0-4','1-0-5') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement');
+UPDATE eh_version_urls SET info_url = replace(info_url,'1-0-4','1-0-5') WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement');
+UPDATE eh_version_urls SET  target_version = '1.0.5' WHERE realm_id = (SELECT id FROM eh_version_realm WHERE realm = 'energyManagement');
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
