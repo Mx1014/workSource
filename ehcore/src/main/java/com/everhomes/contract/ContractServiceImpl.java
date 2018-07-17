@@ -3116,6 +3116,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contractTemplateParent.setStatus(ContractTemplateStatus.INACTIVE.getCode()); //无效的状态
 		
 		contractProvider.updateContractTemplate(contractTemplateParent);
+		
+		//gogs上面的也需要删除相应的合同模板数据 
+		String oldPath = contractTemplateParent.gogsPath();
+        String oldCommit = contractTemplateParent.getLastCommit();
+        //1.建仓库
+		String moduleType = "ContractTemplate_" + cmd.getCategoryId();
+		GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", contractTemplateParent.getOwnerId());
+		gogsDeleteScript(repo, oldPath, oldCommit);
+		
 	}
 
 	@Override
