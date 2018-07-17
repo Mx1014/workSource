@@ -614,8 +614,6 @@ public class AssetProviderImpl implements AssetProvider {
         return list;
     }
     
-    //TODO 需要写一个根据地址查找账单的方法
-    
     @Override
     public List<BillDTO> listBillItems(Long billId, String targetName, int pageNum, Integer pageSize) {
         List<BillDTO> dtos = new ArrayList<>();

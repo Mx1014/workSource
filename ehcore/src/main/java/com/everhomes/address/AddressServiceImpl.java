@@ -94,6 +94,7 @@ import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import javassist.expr.NewArray;
 
@@ -2656,7 +2657,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     if(levelItem != null) {
                         dto.setLevelItemName(levelItem.getItemDisplayName());
                     }
-
                     dtos.add(dto);
                 });
             }
@@ -2708,7 +2708,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		arrangement.setTargetId(targetId);
 		String originalId = StringHelper.toJsonString(originalIds);
 		arrangement.setOriginalId(originalId);
-		arrangement.setDateBegin(new Timestamp(cmd.getDateBegin()));
+		arrangement.setDateBegin(formatTime(cmd.getDateBegin()));
 		arrangement.setOperationFlag(ArrangementOperationFlag.NOT_EXCUTED.getCode());
 		arrangement.setStatus(AddressArrangementStatus.ACTIVE.getCode());
 		User user = UserContext.current().getUser();
@@ -2733,7 +2733,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		address.setAreaId(targetAddress.getAreaId());
 		address.setAreaName(targetAddress.getAreaName());
 		address.setBuildingName(targetAddress.getBuildingName());
-		address.setApartmentName(targetAddress.getApartmentName()+"-new");
+		String newInChinese = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE,
+																		AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_NEW_IN_CHINESE, 
+																		UserContext.current().getUser().getLocale(), null, "");
+		address.setApartmentName(targetAddress.getApartmentName()+"-"+newInChinese);
 		address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
 		
 		address.setAreaSize((double) 0);
@@ -2743,10 +2746,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		
 		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
 		for (ArrangementApartmentDTO apartment : apartments) {
-			address.setAreaSize(address.getAreaSize() + apartment.getAreaSize());
-			address.setRentArea(address.getRentArea() + apartment.getRentArea());
-			address.setFreeArea(address.getFreeArea() + apartment.getFreeArea());
-			address.setChargeArea(address.getChargeArea() + apartment.getChargeArea());
+			address.setAreaSize(address.getAreaSize() + (apartment.getAreaSize()!=null ? apartment.getAreaSize() : (double)0));
+			address.setRentArea(address.getRentArea() + (apartment.getRentArea()!=null ? apartment.getRentArea() : (double)0));
+			address.setFreeArea(address.getFreeArea() + (apartment.getFreeArea()!=null ? apartment.getFreeArea() : (double)0));
+			address.setChargeArea(address.getChargeArea() + (apartment.getChargeArea()!=null ? apartment.getChargeArea() : (double)0));
 			originalIds.add(apartment.getAddressId().toString());
 		}
 		Long newAddressId = addressProvider.createAddress3(address);
@@ -2759,6 +2762,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		arrangement.setTargetId(targetId);
 		String originalId = StringHelper.toJsonString(originalIds);
 		arrangement.setOriginalId(originalId);
+		arrangement.setDateBegin(formatTime(cmd.getDateBegin()));
 		arrangement.setOperationFlag(ArrangementOperationFlag.NOT_EXCUTED.getCode());
 		arrangement.setStatus(AddressArrangementStatus.ACTIVE.getCode());
 		User user = UserContext.current().getUser();
@@ -2779,6 +2783,19 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
 	}
 	
+	private Timestamp formatTime(Long time){
+		Timestamp result = null;
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String format = simpleDateFormat.format(time);
+		try {
+			Date today = simpleDateFormat.parse(format);
+			result = new Timestamp(today.getTime());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	@Override
 	public AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd) {
 		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByAddressId(cmd.getAddressId());
@@ -2797,30 +2814,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		return dto;
 	}
 
-	//需要显示的是所有房源关联的企业客户，个人客户，和合同信息
-	private void generateApartmentRelatedInfo(AddressArrangementDTO dto,List<ArrangementApartmentDTO> apartments){
-		for(ArrangementApartmentDTO apartment:apartments){
-			//企业客户
-			ListApartmentEnterpriseCustomersCommand listApartmentEnterpriseCustomersCommand= new ListApartmentEnterpriseCustomersCommand();
-			listApartmentEnterpriseCustomersCommand.setAddressId(apartment.getAddressId());
-			List<EnterpriseCustomerDTO> enterpriseCustomers = this.listApartmentEnterpriseCustomers(listApartmentEnterpriseCustomersCommand);
-			dto.setEnterpriseCustomers(enterpriseCustomers);
-			//个人客户
-			ListOrganizationOwnersByAddressCommand listOrganizationOwnersByAddressCommand = new ListOrganizationOwnersByAddressCommand();
-			listOrganizationOwnersByAddressCommand.setAddressId(apartment.getAddressId());
-			listOrganizationOwnersByAddressCommand.setOrganizationId(dto.getOrganizationId());
-			List<OrganizationOwnerDTO> individualCustomers = propertyMgrService.listOrganizationOwnersByAddress(listOrganizationOwnersByAddressCommand);
-			dto.setIndividualCustomers(individualCustomers);
-			//合同信息
-			List<Contract> contracts = contractProvider.listContractsByAddressId(apartment.getAddressId());
-			List<ContractDTO> contractDTOs = contracts.stream().map(contract -> {
-				ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
-				return contractDTO;
-			}).collect(Collectors.toList());
-			dto.setContracts(contractDTOs);
-		}
-	}
-	
 	private List<ArrangementApartmentDTO> generateSplitArrangementApartments(AddressArrangement arrangement) {
 		List<ArrangementApartmentDTO> results = new ArrayList<>();
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
@@ -2845,6 +2838,30 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		}
 		return results;
 	}
+	
+	//需要显示的是所有房源关联的企业客户，个人客户，和合同信息
+	private void generateApartmentRelatedInfo(AddressArrangementDTO dto,List<ArrangementApartmentDTO> apartments){
+		for(ArrangementApartmentDTO apartment:apartments){
+			//企业客户
+			ListApartmentEnterpriseCustomersCommand listApartmentEnterpriseCustomersCommand= new ListApartmentEnterpriseCustomersCommand();
+			listApartmentEnterpriseCustomersCommand.setAddressId(apartment.getAddressId());
+			List<EnterpriseCustomerDTO> enterpriseCustomers = this.listApartmentEnterpriseCustomers(listApartmentEnterpriseCustomersCommand);
+			dto.setEnterpriseCustomers(enterpriseCustomers);
+			//个人客户
+			ListOrganizationOwnersByAddressCommand listOrganizationOwnersByAddressCommand = new ListOrganizationOwnersByAddressCommand();
+			listOrganizationOwnersByAddressCommand.setAddressId(apartment.getAddressId());
+			listOrganizationOwnersByAddressCommand.setOrganizationId(dto.getOrganizationId());
+			List<OrganizationOwnerDTO> individualCustomers = propertyMgrService.listOrganizationOwnersByAddress(listOrganizationOwnersByAddressCommand);
+			dto.setIndividualCustomers(individualCustomers);
+			//合同信息
+			List<Contract> contracts = contractProvider.listContractsByAddressId(apartment.getAddressId());
+			List<ContractDTO> contractDTOs = contracts.stream().map(contract -> {
+				ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
+				return contractDTO;
+			}).collect(Collectors.toList());
+			dto.setContracts(contractDTOs);
+		}
+	}
 
 	@Override
 	public void updateAddressArrangement(UpdateAddressArrangementCommand cmd) {
@@ -2853,11 +2870,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "the addressArrangement does not exist!");
 		}
-		if (cmd.getDateBegin()!=null && cmd.getDateBegin() != arrangement.getDateBegin().getTime()) {
-			arrangement.setDateBegin(new Timestamp(cmd.getDateBegin()));
+		if (cmd.getDateBegin()!=null && formatTime(cmd.getDateBegin()) != arrangement.getDateBegin()) {
+			arrangement.setDateBegin(formatTime(cmd.getDateBegin()));
 			arrangement.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			User user = UserContext.current().getUser();
 			arrangement.setUpdateUid(user.getId());
+			addressProvider.updateAddressArrangement(arrangement);
 		}
 		
 		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
@@ -2883,6 +2901,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
 	@Override
 	public void deleteAddressArrangement(DeleteAddressArrangementCommand cmd) {
+		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		for (String addressId : targetIds) {
+			addressProvider.deleteAddressById(Long.parseLong(addressId));
+		}
 		addressProvider.deleteAddressArrangement(cmd.getId());
 	}
 
@@ -2893,59 +2916,60 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "the addressId should not be null!");
 		}
-		
-		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByTargetId(cmd.getAddressId());
-		
-		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
-		List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
-		String remark = null;
-		HashMap<String, String> data = new HashMap<>();
-		StringBuffer targetIdsStringBuffer= new StringBuffer();
-		StringBuffer originalIdsStringBuffer = new StringBuffer();
-		for (String addressId : targetIds) {
-			String apartmentName = addressProvider.findApartmentNameById(Long.parseLong(addressId));
-			targetIdsStringBuffer.append(apartmentName).append(",");
-		}
-		for (String addressId : originalIds) {
-			String apartmentName = addressProvider.findApartmentNameById(Long.parseLong(addressId));
-			originalIdsStringBuffer.append(apartmentName).append(",");
-		}
-		String targetIdsString = targetIdsStringBuffer.toString().length() > 0 
-									? targetIdsStringBuffer.toString().substring(0,targetIdsStringBuffer.toString().length() -1) 
-									: targetIdsStringBuffer.toString();
-		String originalIdsString = originalIdsStringBuffer.toString().length() > 0 
-									? originalIdsStringBuffer.toString().substring(0,originalIdsStringBuffer.toString().length() -1) 
-									: originalIdsStringBuffer.toString();
-		data.put("targetIds", targetIdsString);
-		data.put("originalIds", originalIdsString);
-		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
-			//需要获取特定的语句：如101被拆分成101A,101B
-            remark = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE,
-            													AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_SPLIT , 
-            													UserContext.current().getUser().getLocale(), 
-            													data, "");
-		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
-			//需要获取特定的语句：如101,102,103被合并成101
-			remark = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE, 
-																AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_MERGE , 
-																UserContext.current().getUser().getLocale(), 
-																data, "");
-		}
-		
 		List<HistoryApartmentDTO> results = new ArrayList<>();
-		for (String addressId : originalIds) {
-			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
-			HistoryApartmentDTO dto = ConvertHelper.convert(address, HistoryApartmentDTO.class);
-			dto.setAddressId(address.getId());
-			dto.setDateBegin(arrangement.getDateBegin().getTime());
-			dto.setRemark(remark);
-			results.add(dto);
+		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByTargetId(cmd.getAddressId());
+		if (arrangement != null) {
+			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+			String remark = null;
+			HashMap<String, String> data = new HashMap<>();
+			StringBuffer targetIdsStringBuffer= new StringBuffer();
+			StringBuffer originalIdsStringBuffer = new StringBuffer();
+			for (String addressId : targetIds) {
+				String apartmentName = addressProvider.findApartmentNameById(Long.parseLong(addressId));
+				targetIdsStringBuffer.append(apartmentName).append(",");
+			}
+			for (String addressId : originalIds) {
+				String apartmentName = addressProvider.findApartmentNameById(Long.parseLong(addressId));
+				originalIdsStringBuffer.append(apartmentName).append(",");
+			}
+			String targetIdsString = targetIdsStringBuffer.toString().length() > 0 
+										? targetIdsStringBuffer.toString().substring(0,targetIdsStringBuffer.toString().length() -1) 
+										: targetIdsStringBuffer.toString();
+			String originalIdsString = originalIdsStringBuffer.toString().length() > 0 
+										? originalIdsStringBuffer.toString().substring(0,originalIdsStringBuffer.toString().length() -1) 
+										: originalIdsStringBuffer.toString();
+			data.put("targetIds", targetIdsString);
+			data.put("originalIds", originalIdsString);
+			if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+				//需要获取特定的语句：如101被拆分成101A,101B
+	            remark = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE,
+	            													AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_SPLIT , 
+	            													UserContext.current().getUser().getLocale(), 
+	            													data, "");
+			}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+				//需要获取特定的语句：如101,102,103被合并成101
+				remark = localeTemplateService.getLocaleTemplateString(AddressArrangementTemplateCode.SCOPE, 
+																	AddressArrangementTemplateCode.ADDRESS_ARRANGEMENT_MERGE , 
+																	UserContext.current().getUser().getLocale(), 
+																	data, "");
+			}
+			for (String addressId : originalIds) {
+				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+				HistoryApartmentDTO dto = ConvertHelper.convert(address, HistoryApartmentDTO.class);
+				dto.setAddressId(address.getId());
+				dto.setDateBegin(arrangement.getDateBegin().getTime());
+				dto.setRemark(remark);
+				results.add(dto);
+			}
 		}
 		return results;
 	}
 	
-	@Scheduled(cron = "0 10 0 * * ?")
+	//@Scheduled(cron = "0 10 0 * * ?")
+	@Scheduled(cron = "0 */1 * * * ?")
     public void excuteAddressArrangementOnTime() {
+        LOGGER.debug("start excuting addressArrangement!");
 		try {
 			Calendar calendar = Calendar.getInstance();
 			Date time = calendar.getTime();
@@ -2954,24 +2978,28 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			Date today = simpleDateFormat.parse(format);
 			if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
 	            coordinationProvider.getNamedLock(CoordinationLocks.EXCUTE_ADDRESS_ARRANGEMENT.getCode()).tryEnter(() -> {
-	            	List<AddressArrangement> list = addressProvider.listActiveAddressArrangementToday(today);
+	            	List<AddressArrangement> list = addressProvider.listActiveAddressArrangementToday(new Timestamp(today.getTime()));
 	        		for (AddressArrangement arrangement : list) {
 	        			arrangement.setOperationFlag((byte) 1);
+	        			addressProvider.updateAddressArrangement(arrangement);
 	        			//原始房源失效
 	        			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
 	        			for (String addressId : originalIds) {
 	        				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
 	        				address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+	        				addressProvider.updateAddress(address);
 	        			}
 	        			//未来房源成为正式房源
 	        			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 	        			for (String addressId : targetIds) {
 	        				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
 	        				address.setIsFutureApartment((byte) 0);
+	        				addressProvider.updateAddress(address);
 	        			}
 	        		}
 	            });
 			}
+			LOGGER.debug("addressArrangement excuted!");
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

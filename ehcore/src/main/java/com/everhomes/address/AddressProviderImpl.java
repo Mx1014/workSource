@@ -872,6 +872,7 @@ public class AddressProviderImpl implements AddressProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		context.update(Tables.EH_ADDRESS_ARRANGEMENT)
 				.set(Tables.EH_ADDRESS_ARRANGEMENT.STATUS,AddressArrangementStatus.INACTIVE.getCode())
+				.where(Tables.EH_ADDRESS_ARRANGEMENT.ID.eq(id))
 				.execute();
 	}
 
@@ -918,14 +919,14 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
-	public List<AddressArrangement> listActiveAddressArrangementToday(Date today) {
+	public List<AddressArrangement> listActiveAddressArrangementToday(Timestamp today) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<AddressArrangement> result = new ArrayList<>();
 		context.select()
 				.from(Tables.EH_ADDRESS_ARRANGEMENT)
 				.where(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.equal(AddressArrangementStatus.ACTIVE.getCode()))
 				.and(Tables.EH_ADDRESS_ARRANGEMENT.OPERATION_FLAG.eq((byte) 0))
-				.and(Tables.EH_ADDRESS_ARRANGEMENT.DATE_BEGIN.eq((Timestamp) today))
+				.and(Tables.EH_ADDRESS_ARRANGEMENT.DATE_BEGIN.eq(today))
 				.fetch()
 				.map(r->{
 					AddressArrangement convert = ConvertHelper.convert(r, AddressArrangement.class);
@@ -944,6 +945,11 @@ public class AddressProviderImpl implements AddressProvider {
 					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
 					.fetchOneInto(AddressArrangement.class);
 	}
-	
-	
+
+	@Override
+	public void updateAddressArrangement(AddressArrangement arrangement) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AddressArrangement.class));
+        EhAddressArrangementDao dao = new EhAddressArrangementDao(context.configuration());
+        dao.update(arrangement);
+	}
 }
