@@ -1051,6 +1051,7 @@ public class ForumServiceImpl implements ForumService {
                         ActivityPostCommand.class);
                 if (activityPostCommand != null) {
                     activityPostCommand.setMinQuantity(post.getMinQuantity());
+                    postDto.setEmbeddedJson(StringHelper.toJsonString(activityPostCommand));
                 }
             }
             
