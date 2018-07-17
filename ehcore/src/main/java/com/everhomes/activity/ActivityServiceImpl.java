@@ -10,6 +10,7 @@ import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
@@ -44,7 +45,10 @@ import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -130,9 +134,12 @@ import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -141,7 +148,19 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -394,7 +413,21 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         addAdditionalInfo(roster, user, activity);
         
         activityProvider.createActivityRoster(roster);
-        
+        // 注册成功事件 add by jiarui
+        LocalEventBus.publish(event -> {
+            LocalEventContext localEventcontext = new LocalEventContext();
+            localEventcontext.setUid(UserContext.currentUserId());
+            localEventcontext.setNamespaceId(activity.getNamespaceId());
+            event.setContext(localEventcontext);
+            Map<String, Object> map = new HashMap<>();
+            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+            map.put("categoryId", activity.getCategoryId());
+            event.setParams(map);
+            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+            event.setEntityId(UserContext.currentUserId());
+            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+        });
+
     }
 
     //活动报名
@@ -542,6 +575,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 //add by yanjun 20170512
                 dto.setUserRosterId(roster.getId());
 
+                //add by jiarui  20180716
+                syncToPotentialCustomer(temp1,roster);
+
                 //Send message to creator
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("userName", user.getNickName());
@@ -602,6 +638,23 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         // activitySignPoints(cmd.getActivityId());
     	return tuple.first();
 	 }
+
+    private void syncToPotentialCustomer(Activity activity,ActivityRoster roster) {
+        // 同步线索客户 add by jiarui
+        LocalEventBus.publish(event -> {
+            LocalEventContext localEventcontext = new LocalEventContext();
+            localEventcontext.setUid(UserContext.currentUserId());
+            localEventcontext.setNamespaceId(activity.getNamespaceId());
+            event.setContext(localEventcontext);
+            Map<String, Object> map = new HashMap<>();
+            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+            map.put("categoryId", activity.getCategoryId());
+            event.setParams(map);
+            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+            event.setEntityId(UserContext.currentUserId());
+            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+        });
+    }
 
 
 	/*private void activitySignPoints(Long activityId){
@@ -859,7 +912,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     "no activity.");
         }
 
-        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
         setPreOrder(cmd,createOrderCommand,roster,activity);
 
         PreOrderDTO callback = new PreOrderDTO();
@@ -1146,6 +1199,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	            //createActivityRoster(roster);
 	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
+                // 注册成功事件 add by jiarui
+                LocalEventBus.publish(event -> {
+                    LocalEventContext localEventcontext = new LocalEventContext();
+                    localEventcontext.setUid(UserContext.currentUserId());
+                    localEventcontext.setNamespaceId(activity.getNamespaceId());
+                    event.setContext(localEventcontext);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+                    map.put("categoryId", activity.getCategoryId());
+                    event.setParams(map);
+                    event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+                    event.setEntityId(UserContext.currentUserId());
+                    event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+                });
 
 				LOGGER.info("manualSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
@@ -1352,6 +1419,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             event.setEntityType(EhActivities.class.getSimpleName());
                             event.setEntityId(activity.getId());
                             event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.dft());
+                        });
+                        // 注册成功事件 add by jiarui
+                        LocalEventBus.publish(event -> {
+                            LocalEventContext localEventcontext = new LocalEventContext();
+                            localEventcontext.setUid(UserContext.currentUserId());
+                            localEventcontext.setNamespaceId(activity.getNamespaceId());
+                            event.setContext(localEventcontext);
+                            Map<String, Object> map = new HashMap<>();
+                            map.put(EntityType.ACTIVITY_ROSTER.getCode(), r);
+                            map.put("categoryId", activity.getCategoryId());
+                            event.setParams(map);
+                            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+                            event.setEntityId(UserContext.currentUserId());
+                            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
                         });
 					}
 				});
@@ -6448,7 +6529,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                         //支付成功
                         handler.paySuccess(srvCmd);
                     }
-                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.FAILED.getCode()){
                         //支付失败
                         handler.payFail(srvCmd);
                     }

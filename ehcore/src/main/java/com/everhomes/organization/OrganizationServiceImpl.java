@@ -5819,6 +5819,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             //增加customer admin record 状态
             try {
                 customerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(), member.getNamespaceId());
+                customerProvider.updateCustomerTalentRegisterStatus(member.getContactToken());
             } catch (Exception e) {
                 LOGGER.error("update enterprise customer admins status error:{}", e);
             }

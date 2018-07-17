@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.daos.EhVarFieldGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldItemsDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
+import com.everhomes.server.schema.tables.daos.EhVarFieldsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
@@ -891,6 +892,13 @@ public class FieldProviderImpl implements FieldProvider {
                 .fetchInto(Long.class);
     }
 
+
+    @Override
+    public Field findFieldById(Long fieldId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhVarFieldsDao dao = new EhVarFieldsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(fieldId), Field.class);
+    }
     @Override
     public FieldItem findFieldItemByItemId(Long itemId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());

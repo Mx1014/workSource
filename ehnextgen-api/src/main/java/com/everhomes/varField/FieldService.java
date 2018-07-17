@@ -76,4 +76,6 @@ public interface FieldService {
     DynamicImportResponse importDynamicExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 
     ScopeFieldItem findScopeFieldItemByDisplayNameAndFieldId(Integer namespaceId, Long communityId, String moduleName, String displayName, Long fieldId);
+
+    void createDynamicScopeItems(Integer namespaceId, String instanceConfig, String appName);
 }

@@ -168,6 +168,12 @@ public class CreateEnterpriseCustomerCommand {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> banner;
     private String hotline;
+    //potential data primary key
+    private Long sourceId;
+    //service alliance activity
+    private String sourceType;
+
+    private Long originPotentialSourceId;
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
@@ -830,6 +836,22 @@ public class CreateEnterpriseCustomerCommand {
 
     public void setDeviceType(Byte deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
     }
 
     public List<CustomerAttachmentDTO> getAttachments() {

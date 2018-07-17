@@ -1,6 +1,8 @@
 package com.everhomes.varField;
 
 
+import com.everhomes.activity.ActivityCategories;
+import com.everhomes.activity.ActivityProivider;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -97,7 +99,9 @@ import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
 import com.everhomes.rest.varField.UpdateFieldItemsCommand;
 import com.everhomes.rest.varField.UpdateFieldsCommand;
 import com.everhomes.rest.varField.VarFieldStatus;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
@@ -108,6 +112,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.yellowPage.YellowPageProvider;
+import com.everhomes.yellowPage.YellowPageService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -204,6 +210,15 @@ public class FieldServiceImpl implements FieldService {
     @Autowired
     private EnterpriseCustomerProvider customerProvider;
 
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
+
+    @Autowired
+    private ActivityProivider activityProivider;
+
+    @Autowired
+    private YellowPageService yellowPageService;
+
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
         List<FieldGroup> systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
@@ -247,9 +262,43 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> items = systemItems.stream().map(systemItem -> {
                 return ConvertHelper.convert(systemItem, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
+            addExpandItems(items,cmd.getFieldId());
             return items;
         }
         return null;
+    }
+
+    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId) {
+        Field field = fieldProvider.findFieldById(fieldId);
+        if (field!=null && field.getName().equals("sourceItemId")) {
+            List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+            if (activityCategories != null && activityCategories.size() > 0) {
+                activityCategories.forEach((a) -> {
+                    SystemFieldItemDTO activityItem = new SystemFieldItemDTO();
+                    activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
+                    activityItem.setFieldId(field.getId());
+                    activityItem.setId(a.getEntryId());
+                    activityItem.setModuleName(field.getModuleName());
+                    activityItem.setDisplayName(a.getName());
+                    items.add(activityItem);
+                });
+            }
+            //add service alliance categories
+            ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
+            if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+                serviceAllianceCategories.forEach((r) -> {
+                    SystemFieldItemDTO allianceItem = new SystemFieldItemDTO();
+                    allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    allianceItem.setFieldId(field.getId());
+                    allianceItem.setId(r.getId());
+                    allianceItem.setModuleName(field.getModuleName());
+                    allianceItem.setDisplayName(r.getName());
+                    items.add(allianceItem);
+                });
+            }
+        }
     }
 
     /**
@@ -419,6 +468,11 @@ public class FieldServiceImpl implements FieldService {
         return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
     }
 
+    @Override
+    public void createDynamicScopeItems(Integer namespaceId, String instanceConfig, String appName) {
+
+    }
+
     private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
     }
@@ -430,6 +484,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
                 SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
                 List<SystemFieldItemDTO> itemDTOs = getSystemFieldItems(systemField.getId());
+                addExpandItems(itemDTOs, systemField.getId());
                 dto.setItems(itemDTOs);
                 return dto;
             }).collect(Collectors.toList());
@@ -560,6 +615,8 @@ public class FieldServiceImpl implements FieldService {
                         });
                         //按default order排序
                         items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
+                        // service alliance and activity expand items ,we add expand item flag for it
+                        addExpandItems(dto, items);
                         dto.setItems(items);
                     }
                     dtos.add(dto);
@@ -571,6 +628,38 @@ public class FieldServiceImpl implements FieldService {
             }
         }
         return null;
+    }
+
+    private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items) {
+        if (dto.getFieldName().equals("sourceItemId")) {
+            List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+            if (activityCategories != null && activityCategories.size() > 0) {
+                activityCategories.forEach((a) -> {
+                    FieldItemDTO activityItem = new FieldItemDTO();
+                    activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
+                    activityItem.setFieldId(dto.getId());
+                    activityItem.setItemId(a.getEntryId());
+                    activityItem.setItemDisplayName(a.getName());
+                    activityItem.setFieldId(a.getId());
+                    items.add(activityItem);
+                });
+            }
+            //add service alliance categories
+            ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
+            if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+                serviceAllianceCategories.forEach((r) -> {
+                    FieldItemDTO allianceItem = new FieldItemDTO();
+                    allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    allianceItem.setFieldId(dto.getId());
+                    allianceItem.setItemId(r.getId());
+                    allianceItem.setItemDisplayName(r.getName());
+                    allianceItem.setFieldId(r.getId());
+                    items.add(allianceItem);
+                });
+            }
+        }
     }
 
     @Override
@@ -730,8 +819,7 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setModuleName(group.getModuleName());
                 cmd1.setCommunityId(communityId);
                 List<FieldDTO> fields = listFields(cmd1);
-                if(fields==null) fields = new ArrayList<FieldDTO>();
-
+                if(fields==null) fields = new ArrayList<>();
                 //使用字段，获得headers
                 String headers[] = new String[fields.size()];
                 String mandatory[] = new String[headers.length];
