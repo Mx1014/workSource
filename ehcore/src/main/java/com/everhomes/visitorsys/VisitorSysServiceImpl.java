@@ -1636,6 +1636,16 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return getUploadFileToken();
     }
 
+    @Override
+    public void checkBlackList(CheckBlackListCommand cmd) {
+
+    }
+
+    @Override
+    public void checkBlackListForWeb(CheckBlackListForWebCommand cmd) {
+
+    }
+
     /**
      * 检查owerid是否在系统中存在
      * @param ownerType

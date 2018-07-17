@@ -117,4 +117,20 @@ public interface VisitorSysService {
     GetUploadFileTokenResponse getUploadFileToken(GetUIUploadFileTokenCommand cmd);
 
     GetUploadFileTokenResponse getUploadFileTokenForWeb(GetUploadFileTokenCommand cmd);
+
+    void checkBlackList(CheckBlackListCommand cmd);
+
+    void checkBlackListForWeb(CheckBlackListForWebCommand cmd);
+
+    ListBookedVisitorsResponse listBookedVisitorsForManage(ListBookedVisitorsCommand cmd);
+
+    GetBookedVisitorByIdResponse getBookedVisitorByIdForManage(GetBookedVisitorByIdCommand cmd);
+
+    ListVisitReasonsResponse listVisitReasonsForManage(BaseVisitorsysCommand cmd);
+
+    GetBookedVisitorByIdResponse createOrUpdateVisitorForManage(CreateOrUpdateVisitorCommand cmd);
+
+    void confirmVisitorForManage(CreateOrUpdateVisitorCommand cmd);
+
+    void rejectVisitorForManage(CreateOrUpdateVisitorCommand cmd);
 }

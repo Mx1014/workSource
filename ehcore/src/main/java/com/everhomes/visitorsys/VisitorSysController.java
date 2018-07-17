@@ -7,10 +7,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.visitorsys.*;
-import com.everhomes.rest.visitorsys.ui.GetUIFormCommand;
-import com.everhomes.rest.visitorsys.ui.GetFormResponse;
-import com.everhomes.rest.visitorsys.ui.GetUploadFileTokenResponse;
-import com.everhomes.rest.visitorsys.ui.TransferQrcodeCommand;
+import com.everhomes.rest.visitorsys.ui.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.WebDataBinder;
@@ -33,7 +30,7 @@ public class VisitorSysController extends ControllerBase {
 		super.initListBinder(binder);
 		binder.registerCustomEditor(Timestamp.class,new TimestampEditor());
 	}
-
+	/*------------------------------web后端，企业访客管理和园区访客管理-----------------------------*/
 	/**
 	 * <b>URL: /visitorsys/listBookedVisitors</b>
 	 * <p>
@@ -496,6 +493,7 @@ public class VisitorSysController extends ControllerBase {
 		return response;
 	}
 
+	/*------------------------------web版本的访客录入和访客邀请函-----------------------------*/
 	/**
 	 * <b>URL: /visitorsys/getConfigurationForWeb</b>
 	 * <p>
@@ -727,6 +725,130 @@ public class VisitorSysController extends ControllerBase {
 		GetUploadFileTokenResponse baseResponse = visitorSysService.getUploadFileTokenForWeb(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL:  /visitorsys/checkBlackListForWeb</b>
+	 * <p>
+	 * 14.检查手机号码是否在黑名单,返回码 200是正常，1407 1408是手机号在黑名单
+	 * </p>
+	 */
+	@RequestMapping("checkBlackListForWeb")
+	@RestReturn(String.class)
+	public RestResponse checkBlackListForWeb(CheckBlackListForWebCommand cmd) {
+		visitorSysService.checkBlackListForWeb(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/*------------------------------web版本的客户端，企业访客管理和园区访客管理-----------------------------*/
+	/**
+	 * <b>URL: /visitorsys/listBookedVisitorsForManage</b>
+	 * <p>
+	 * 1.获取预约访客列表-h5（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("listBookedVisitorsForManage")
+	@RestReturn(ListBookedVisitorsResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse listBookedVisitorsForManage(ListBookedVisitorsCommand cmd) {
+		ListBookedVisitorsResponse baseResponse = visitorSysService.listBookedVisitorsForManage(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/getBookedVisitorByIdForManage</b>
+	 * <p>
+	 * 2.获取预约详情-h5（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("getBookedVisitorByIdForManage")
+	@RestReturn(GetBookedVisitorByIdResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getBookedVisitorByIdForManage(GetBookedVisitorByIdCommand cmd) {
+		GetBookedVisitorByIdResponse baseResponse = visitorSysService.getBookedVisitorByIdForManage(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/listVisitReasonsForManage</b>
+	 * <p>
+	 * 3.获取事由列表（此接口否使用接口待定，可以使用枚举）-h5（（客户端/微信端 web企业访客/园区访客管理用））
+	 * </p>
+	 */
+	@RequestMapping("listVisitReasonsForManage")
+	@RestReturn(ListVisitReasonsResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse listVisitReasonsForManage(BaseVisitorsysCommand cmd) {
+		ListVisitReasonsResponse baseResponse = visitorSysService.listVisitReasonsForManage(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/createOrUpdateVisitorForWeb</b>
+	 * <p>
+	 * 4.创建临时/预约访客-h5（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("createOrUpdateVisitorForManage")
+	@RestReturn(GetBookedVisitorByIdResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse createOrUpdateVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+		GetBookedVisitorByIdResponse baseResponse = visitorSysService.createOrUpdateVisitorForManage(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/confirmVisitorForManage</b>
+	 * <p>
+	 * 5.访客到访确认接口-（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("confirmVisitorForManage")
+	@RestReturn(String.class)
+	public RestResponse confirmVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+		visitorSysService.confirmVisitorForManage(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/rejectVisitorForManage</b>
+	 * <p>
+	 * 6.拒绝访客-（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("rejectVisitorForManage")
+	@RestReturn(String.class)
+	public RestResponse rejectVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+		visitorSysService.rejectVisitorForManage(cmd);
+
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
