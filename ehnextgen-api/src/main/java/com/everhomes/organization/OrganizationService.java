@@ -612,7 +612,7 @@ public interface OrganizationService {
 	FindOrgPersonelCommandResponse findOrgPersonel(FindOrgPersonelCommand cmd);
 
 	/**根据总公司id快速拿到所有公司人员的档案id**/
-	List<Long> ListDetailsByEnterpriseId(Long enterpriseId);
+	List<Long> listDetailIdsByEnterpriseId(Long enterpriseId);
 
 	/**通过机构类型和名称获取机构id**/
 	Long getOrganizationNameByNameAndType(String name, String groupType);

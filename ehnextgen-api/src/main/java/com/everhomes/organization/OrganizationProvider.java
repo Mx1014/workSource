@@ -579,6 +579,10 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> queryOrganizationPersonnelsWithDownStream(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
+    List<Long> queryOrganizationPersonnelDetailIds(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+
+    Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+
     // path查询接口
     List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens);
 
@@ -607,8 +611,6 @@ public interface OrganizationProvider {
 
     void deleteOrganizationMembersByGroupTypeWithDetailIds(Integer namespaceId, List<Long> detailIds, String groupType);
 
-    List<Long> listDetailsByEnterpriseId(Integer namespaceId, Long enterpriseId);
-
     List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 
     void updateOrganizationDefaultOrder(Integer namespaceId, Long orgId, Integer order);
@@ -635,7 +637,6 @@ public interface OrganizationProvider {
 
     List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId);
 
-    Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
     List<Organization> listPMOrganizations(Integer namespaceId);
 

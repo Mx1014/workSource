@@ -103,15 +103,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     private ImportFileService importFileService;
 
     @Autowired
-    private GeneralFormService generalFormService;
-
-    @Autowired
-    private GeneralFormProvider generalFormProvider;
-
-    @Autowired
-    private GeneralFormValProvider generalFormValProvider;
-
-    @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Autowired
@@ -916,16 +907,9 @@ public class ArchivesServiceImpl implements ArchivesService {
             return response;
 
         //  1.获取表单所有字段
-/*        GeneralFormIdCommand formCommand = new GeneralFormIdCommand(getRealFormOriginId(cmd.getFormOriginId()));
-        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);*/
         ArchivesFormDTO form = getRealArchivesForm(cmd.getNamespaceId(), cmd.getOrganizationId());
 
         //  2.获取表单对应的值
-
-        /*
-        GetGeneralFormValuesCommand valueCommand =new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_AUTH.getCode(), cmd.getDetailId(), NormalFlag.NEED.getCode());
-        List<PostApprovalFormItem> employeeDynamicVal = generalFormService.getGeneralFormValues(valueCommand);
-        */
         List<GeneralFormFieldDTO> dynamicVals = archivesFormService.getArchivesDynamicValues(form.getId(), cmd.getDetailId());
         Map<String, String> dynamicMaps = handleEmployeeDynamicVal(dynamicVals);
 
@@ -933,7 +917,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         Map<String, String> staticMaps = handleEmployeeDefaultVal(employee);
 
         //  4.赋值
-
         //  4-1.处理部门.岗位.职级字段
         processEmployeeOrganization(staticMaps, employee);
         for (GeneralFormFieldDTO dto : form.getFormFields()) {
@@ -2090,109 +2073,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         updateCommand.setValues(itemValues);
         updateArchivesEmployee(updateCommand);
     }
-
-    @Override
-    public void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd) {
-
-        //  export with the file download center
-        Map<String, Object> params = new HashMap<>();
-        //  the value could be null if it is not exist
-        params.put("namespaceId", cmd.getNamespaceId());
-        params.put("organizationId", cmd.getOrganizationId());
-        params.put("keywords", cmd.getKeywords());
-        params.put("userId", UserContext.current().getUser().getId());
-        String fileName = localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.EMPLOYEE_LIST, "zh_CN", "EmployeeList") + ".xlsx";
-
-        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesEmployeesExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
-    }
-
-    @Override
-    public OutputStream getArchivesEmployeesExportStream(ExportArchivesEmployeesCommand cmd, Long taskId) {
-        //  此处的数据类型不好调用晓强哥的 ExcelUtil, 所以使用原始的导出方法
-        /*GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
-        formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));*/
-        ArchivesFormDTO form = getRealArchivesForm(cmd.getNamespaceId(), cmd.getOrganizationId());
-
-        //  1.设置导出标题
-        List<String> titles = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
-        taskService.updateTaskProcess(taskId, 10);
-
-        //  2.设置导出变量值
-        List<Long> detailIds = organizationService.ListDetailsByEnterpriseId(cmd.getOrganizationId());
-        taskService.updateTaskProcess(taskId, 20);
-
-        List<ExportArchivesEmployeesDTO> values = new ArrayList<>();
-        for (Long detailId : detailIds) {
-            ExportArchivesEmployeesDTO dto = new ExportArchivesEmployeesDTO();
-            GetArchivesEmployeeCommand getCommand =
-                    new GetArchivesEmployeeCommand(cmd.getOrganizationId(), detailId, 1);
-            GetArchivesEmployeeResponse response = getArchivesEmployee(getCommand);
-            List<String> employeeValues = response.getForm().getFormFields().stream().map(GeneralFormFieldDTO::getFieldValue).collect(Collectors.toList());
-            dto.setVals(employeeValues);
-            values.add(dto);
-        }
-        taskService.updateTaskProcess(taskId, 70);
-
-        XSSFWorkbook workbook = this.exportArchivesEmployeesFiles(titles, values);
-        taskService.updateTaskProcess(taskId, 95);
-        return writeExcel(workbook);
-    }
-
-    private XSSFWorkbook exportArchivesEmployeesFiles(List<String> titles, List<ExportArchivesEmployeesDTO> values) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-
-        Sheet sheet = workbook.createSheet(localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.EMPLOYEE_LIST, "zh_CN", "EmployeeList"));
-        //  导出标题
-        Row titleNameRow = sheet.createRow(0);
-        createArchivesEmployeesFilesTitle(workbook, titleNameRow, titles);
-        for (int rowIndex = 1; rowIndex < values.size(); rowIndex++) {
-            Row dataRow = sheet.createRow(rowIndex);
-            createArchivesEmployeesFilesContent(workbook, dataRow, values.get(rowIndex - 1).getVals());
-        }
-        return workbook;
-    }
-
-    private void createArchivesEmployeesFilesTitle(XSSFWorkbook workbook, Row titleNameRow, List<String> list) {
-        //  设置样式
-        XSSFCellStyle titleStyle = workbook.createCellStyle();
-        XSSFFont font = workbook.createFont();
-        font.setFontHeightInPoints((short) 12);
-        font.setFontName("Arial Unicode MS");
-        font.setBold(true);
-        titleStyle.setAlignment(CellStyle.ALIGN_CENTER);
-        titleStyle.setFont(font);
-        for (int i = 0; i < list.size(); i++) {
-            Cell cell = titleNameRow.createCell(i);
-            cell.setCellStyle(titleStyle);
-            cell.setCellValue(list.get(i));
-        }
-    }
-
-    private void createArchivesEmployeesFilesContent(XSSFWorkbook workbook, Row dataRow, List<String> list) {
-        //  设置样式
-        XSSFCellStyle contentStyle = workbook.createCellStyle();
-        XSSFFont font = workbook.createFont();
-        font.setFontHeightInPoints((short) 12);
-        font.setFontName("Arial Unicode MS");
-        contentStyle.setAlignment(CellStyle.ALIGN_CENTER);
-        contentStyle.setFont(font);
-        for (int i = 0; i < list.size(); i++) {
-            Cell cell = dataRow.createCell(i);
-            cell.setCellStyle(contentStyle);
-            cell.setCellValue(list.get(i));
-        }
-    }
-
-    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try {
-            workbook.write(out);
-        } catch (Exception e) {
-            LOGGER.error("export error, e = {}", e);
-        }
-        return out;
-    }
-
 
     @Override
     public ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd) {

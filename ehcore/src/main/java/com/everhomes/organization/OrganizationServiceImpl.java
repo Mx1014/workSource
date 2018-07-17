@@ -6360,10 +6360,10 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 	@Override
-    public List<Long> ListDetailsByEnterpriseId(Long enterpriseId) {
+    public List<Long> listDetailIdsByEnterpriseId(Long enterpriseId) {
             Organization org = this.organizationProvider.findOrganizationById(enterpriseId);
             if(org != null){
-                return this.organizationProvider.listDetailsByEnterpriseId(org.getNamespaceId(), enterpriseId);
+                return this.organizationProvider.queryOrganizationPersonnelDetailIds(new ListingLocator(), enterpriseId, null);
             }
         return null;
     }

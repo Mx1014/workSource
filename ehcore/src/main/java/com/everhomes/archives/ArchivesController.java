@@ -405,7 +405,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("exportArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse exportArchivesEmployees(ExportArchivesEmployeesCommand cmd){
-        archivesService.exportArchivesEmployees(cmd);
+        archivesDTSService.exportArchivesEmployees(cmd);
         return new RestResponse();
     }
 
