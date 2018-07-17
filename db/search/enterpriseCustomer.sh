@@ -17,7 +17,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
                     },
                     "baidu": {
                         "type": "string",
-                        index": "not_analyzed"
+                        "index": "not_analyzed"
                     }
                 }
             },
