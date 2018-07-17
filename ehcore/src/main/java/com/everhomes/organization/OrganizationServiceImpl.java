@@ -3518,6 +3518,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
                 if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())) {
                     addPathOrganizationId(org.getPath(), orgIds);
+                    
+                    //Added by janson, normal user in PM company, may remove at later
+                    if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                    	organizationIds.add(org.getId());
+                    }
+                    
                 }
             }
         }
