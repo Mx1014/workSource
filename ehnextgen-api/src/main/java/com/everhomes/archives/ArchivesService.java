@@ -29,9 +29,6 @@ public interface ArchivesService {
 
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
 
-    ImportFileTaskDTO importArchivesContacts(
-            MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
-
     void exportArchivesContacts(ListArchivesContactsCommand cmd);
 
     OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
@@ -67,8 +64,6 @@ public interface ArchivesService {
 
     GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd);
 
-//    List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId);
-
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
 //    void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
@@ -94,16 +89,6 @@ public interface ArchivesService {
     ListDismissCategoriesResponse listArchivesDismissCategories();
 
     ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
-
-//    ArchivesFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
-
-//
-
-//    ArchivesFromsDTO identifyArchivesForm(IdentifyArchivesFormCommand cmd);
-
-    ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, ImportArchivesEmployeesCommand cmd);
-
-    ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
 
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 

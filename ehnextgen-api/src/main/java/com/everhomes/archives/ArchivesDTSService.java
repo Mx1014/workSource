@@ -1,12 +1,22 @@
 package com.everhomes.archives;
 
-import com.everhomes.rest.archives.ExportArchivesEmployeesCommand;
-import com.everhomes.rest.archives.ExportArchivesEmployeesTemplateCommand;
+import com.everhomes.rest.archives.*;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.GetImportFileResultCommand;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 
 public interface ArchivesDTSService {
+
+    ImportFileTaskDTO importArchivesContacts(
+            MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
+
+    ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, ImportArchivesEmployeesCommand cmd);
+
+    ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
 
     void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd);
 
