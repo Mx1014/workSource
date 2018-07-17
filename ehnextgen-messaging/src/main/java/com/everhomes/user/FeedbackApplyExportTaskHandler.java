@@ -74,7 +74,6 @@ public class FeedbackApplyExportTaskHandler  implements FileDownloadTaskHandler 
                 feedbackDto.setForumId(post.getForumId());
                 feedbackDto.setTargetStatus(post.getStatus());
             }
-            feedbackDto.setTargetSubject(r.getSubject());
             feedbackDto.setStatusText(r.getStatus()==(byte)0?"未处理":"已处理");
             feedbackDto.setCreateTimeText(sdf.format(r.getCreateTime()));
             feedbackDtos.add(feedbackDto);
