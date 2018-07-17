@@ -21,6 +21,7 @@ import java.math.BigDecimal;
  * <li>chargingItemsId:收费项目对应的账单组费项字典id</li>
  * <li>energyConsume: 费项的用量</li>
  * <li>itemFineType: 费项类型，eh_payment_bill_items：费项，eh_payment_late_fine：滞纳金 ，参考{com.everhomes.rest.asset.AssetItemFineType}</li>
+ * <li>itemType:费项类型，eh_payment_bill_items：费项（如：物业费），eh_payment_late_fine：减免滞纳金（如：物业费滞纳金）参考{com.everhomes.rest.asset.AssetSubtractionType}</li>
  *</ul>
  */
 public class BillItemDTO {
@@ -39,6 +40,7 @@ public class BillItemDTO {
     private String energyConsume;
     //增加费项类型字段
     private String itemFineType; 
+    private String itemType;//增加费项类型
 
     @Override
     public String toString() {
@@ -152,5 +154,13 @@ public class BillItemDTO {
 
 	public void setItemFineType(String itemFineType) {
 		this.itemFineType = itemFineType;
+	}
+	
+	public String getItemType() {
+		return itemType;
+	}
+
+	public void setItemType(String itemType) {
+		this.itemType = itemType;
 	}
 }

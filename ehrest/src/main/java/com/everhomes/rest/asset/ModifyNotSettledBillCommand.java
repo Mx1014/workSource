@@ -21,9 +21,12 @@ import java.util.List;
  * <li>categoryId:多应用入口区分标识</li>
  * <li>ownerType:所属者类型</li>
  * <li>ownerId:所属者ID</li>
+<<<<<<< HEAD
  * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
  * <li>contractNum: 合同编号</li>
  * <li>contractId: 合同ID</li>
+=======
+>>>>>>> 5.7.0
  *</ul>
  */
 public class ModifyNotSettledBillCommand {
@@ -40,10 +43,13 @@ public class ModifyNotSettledBillCommand {
     private Long categoryId;
     private String ownerType;
     private Long ownerId;
+<<<<<<< HEAD
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
     private String contractNum;
     private Long contractId;
+=======
+>>>>>>> 5.7.0
 
     public String getInvoiceNum() {
         return invoiceNum;
@@ -126,6 +132,7 @@ public class ModifyNotSettledBillCommand {
 		this.customerTel = customerTel;
 	}
 
+<<<<<<< HEAD
 	public List<AssetPaymentBillAttachment> getAssetPaymentBillAttachmentList() {
 		return assetPaymentBillAttachmentList;
 	}
@@ -134,6 +141,8 @@ public class ModifyNotSettledBillCommand {
 		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
 	}
 
+=======
+>>>>>>> 5.7.0
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -157,6 +166,7 @@ public class ModifyNotSettledBillCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
+<<<<<<< HEAD
 
 	public String getContractNum() {
 		return contractNum;
@@ -173,4 +183,6 @@ public class ModifyNotSettledBillCommand {
 	public void setContractId(Long contractId) {
 		this.contractId = contractId;
 	}
+=======
+>>>>>>> 5.7.0
 }

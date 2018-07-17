@@ -384,6 +384,14 @@ public interface AssetProvider {
     
     AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType);
     
+    ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+	
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
+	
+	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
+	
+	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+    
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
 	
 	void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd);

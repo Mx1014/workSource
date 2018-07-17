@@ -59,7 +59,9 @@ public interface UserActivityProvider {
     void addFeedback(Feedback feedback,Long uid);
     
     List<Feedback> ListFeedbacks(CrossShardListingLocator locator, Integer namespaceId, Byte targetType, Byte status, int pageSize);
-    
+
+    List<Feedback> ListFeedbacksByNamespaceId(Integer namespaceId);
+
     void updateFeedback(Feedback feedback);
     
     void updateOtherFeedback(Long targetId, Long feedbackId, Byte verifyType, Byte handleType);

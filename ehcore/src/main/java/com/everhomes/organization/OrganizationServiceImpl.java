@@ -3564,7 +3564,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 //物业或业委增加小区Id和小区name信息
-                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
+                		||org.getOrganizationType().equals(OrganizationType.ENTERPRISE.getCode())
+                		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                     this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                 }
                 orgs.add(tempSimpleOrgDTO);
@@ -5817,6 +5819,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             //增加customer admin record 状态
             try {
                 customerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(), member.getNamespaceId());
+                customerProvider.updateCustomerTalentRegisterStatus(member.getContactToken());
             } catch (Exception e) {
                 LOGGER.error("update enterprise customer admins status error:{}", e);
             }

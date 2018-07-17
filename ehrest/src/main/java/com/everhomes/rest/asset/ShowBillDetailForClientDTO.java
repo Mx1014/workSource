@@ -18,6 +18,7 @@ import java.math.BigDecimal;
  * <li>dateStr:账期</li>
  * <li>energyConsume: 费项的用量</li>
  * <li>energyUnit: 费项的用量单位</li>
+ * <li>isConfigSubtraction:1：已经配置了减免费项，0：代表没有配置减免费项</li>
  *</ul>
  */
 public class ShowBillDetailForClientDTO {
@@ -33,6 +34,7 @@ public class ShowBillDetailForClientDTO {
     private String energyConsume;
     //费项增加用量单位字段
     private String energyUnit;
+    private Byte isConfigSubtraction;
 
     @Override
     public String toString() {
@@ -121,5 +123,13 @@ public class ShowBillDetailForClientDTO {
 
 	public void setEnergyUnit(String energyUnit) {
 		this.energyUnit = energyUnit;
+	}
+
+	public Byte getIsConfigSubtraction() {
+		return isConfigSubtraction;
+	}
+
+	public void setIsConfigSubtraction(Byte isConfigSubtraction) {
+		this.isConfigSubtraction = isConfigSubtraction;
 	}
 }
