@@ -67,6 +67,8 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.gogs.GogsCommit;
+import com.everhomes.gogs.GogsConflictException;
+import com.everhomes.gogs.GogsFileNotExistException;
 import com.everhomes.gogs.GogsRawFileParam;
 import com.everhomes.gogs.GogsRepo;
 import com.everhomes.gogs.GogsRepoType;
@@ -178,6 +180,7 @@ import com.everhomes.rest.openapi.OrganizationDTO;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -2879,16 +2882,29 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if ("gogs".equals(contractTemplate.getContentType())) {
 			//使用gogs存储合同内容
 			//1.建仓库 不同应用建立不同仓库
-			String moduleType = "ContractTemplate_" + contractTemplate.getCategoryId();
-			GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", contractTemplate.getOwnerId());
-			//2.提交脚本
-	        GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), lastCommit, contractTemplate.getContents(), isNewFile);
-	        //3.存储提交脚本返回的id
-	        contractTemplate.setLastCommit(commit.getId());
-	        contractTemplate.setContents(commit.getId());
+			try {
+				String moduleType = "ContractTemplate_" + contractTemplate.getCategoryId();
+				GogsRepo repo = gogsRepo(contractTemplate.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplate.getOwnerId());
+				//2.提交脚本
+				GogsCommit commit = gogsCommitScript(repo, contractTemplate.gogsPath(), lastCommit, contractTemplate.getContents(), isNewFile);
+				//3.存储提交脚本返回的id
+				contractTemplate.setLastCommit(commit.getId());
+				contractTemplate.setContents(commit.getId());
+				
+				contractProvider.createContractTemplate(contractTemplate);
+			} catch (GogsConflictException e) {
+				LOGGER.error("contractTemplateName {} in namespace {} already exist!", contractTemplate.gogsPath(), cmd.getNamespaceId());
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTTEMPLATENAME_EXIST,
+						"contractTemplateName is already exist");
+			} catch (GogsFileNotExistException e) {
+				LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractTemplate.gogsPath(), cmd.getNamespaceId());
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
+						"contractGogsFileNotExist is already exist");
+			} catch (Exception e){
+				LOGGER.error("Gogs OthersException .", e);
+			}
 		}
 		
-		contractProvider.createContractTemplate(contractTemplate);
 		return ConvertHelper.convert(contractTemplate, ContractTemplateDTO.class);
 	}
 
@@ -2933,22 +2949,35 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		
 		if ("gogs".equals(contractTemplate.getContentType())) {
 			//使用gogs存储合同内容
-			//1.建仓库
-			String moduleType = "ContractTemplate_" + contractTemplate.getCategoryId();
-			GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", contractTemplateParent.getOwnerId());
-			//2.提交脚本
-	        GogsCommit commit = gogsCommitScript(repo, contractTemplateParent.gogsPath(), lastCommit, contractTemplateParent.getContents(), isNewFile);
-	        //3.存储提交脚本返回的id
-	        contractTemplateParent.setLastCommit(commit.getId());
-	        contractTemplateParent.setContents(commit.getId());
-	        
-	        // 目前来说，如果改了名称，在版本仓库里必须删掉原来的，在创建新的
-	        if (!Objects.equals(oldPath, contractTemplateParent.gogsPath())) {
-	            gogsDeleteScript(repo, oldPath, oldCommit);
-	        }
+			try {
+				//1.建仓库
+				String moduleType = "ContractTemplate_" + contractTemplate.getCategoryId();
+				GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
+				//2.提交脚本
+				GogsCommit commit = gogsCommitScript(repo, contractTemplateParent.gogsPath(), lastCommit, contractTemplateParent.getContents(), isNewFile);
+				//3.存储提交脚本返回的id
+				contractTemplateParent.setLastCommit(commit.getId());
+				contractTemplateParent.setContents(commit.getId());
+				
+				// 目前来说，如果改了名称，在版本仓库里必须删掉原来的，在创建新的
+				if (!Objects.equals(oldPath, contractTemplateParent.gogsPath())) {
+				    gogsDeleteScript(repo, oldPath, oldCommit);
+				}
+				contractProvider.createContractTemplate(contractTemplateParent);
+				
+			} catch (GogsConflictException e) {
+				LOGGER.error("contractTemplateName {} in namespace {} already exist!", contractTemplate.gogsPath(), cmd.getNamespaceId());
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTTEMPLATENAME_EXIST,
+						"contractTemplateName is already exist");
+			} catch (GogsFileNotExistException e) {
+				LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractTemplate.gogsPath(), cmd.getNamespaceId());
+				throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
+						"contractGogsFileNotExist is already exist");
+			} catch (Exception e){
+				LOGGER.error("Gogs OthersException .", e);
+			}
 		}
 		
-		contractProvider.createContractTemplate(contractTemplateParent);
 		//contractProvider.updateContractTemplate(contractTemplateParent);
 		return ConvertHelper.convert(contractTemplateParent, ContractTemplateDTO.class);
 	}
@@ -3012,10 +3041,22 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					}
 				}
 				if ("gogs".equals(dto.getContentType())) {
-					//查询gogs上面的数据
-					String moduleType = "ContractTemplate_" + dto.getCategoryId();
-					GogsRepo repo = gogsRepo(dto.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", dto.getOwnerId());
-			        dto.setContents(gogsGetScript(repo, dto.gogsPath(), dto.getLastCommit()));
+					try {
+						//查询gogs上面的数据
+						String moduleType = "ContractTemplate_" + dto.getCategoryId();
+						GogsRepo repo = gogsRepo(dto.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", dto.getOwnerId());
+						dto.setContents(gogsGetScript(repo, dto.gogsPath(), dto.getLastCommit()));
+					} catch (GogsConflictException e) {
+						LOGGER.error("contractTemplateName {} in namespace {} already exist!", dto.gogsPath(), cmd.getNamespaceId());
+						throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTTEMPLATENAME_EXIST,
+								"contractTemplateName is already exist");
+					} catch (GogsFileNotExistException e) {
+						LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", dto.gogsPath(), cmd.getNamespaceId());
+						throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
+								"contractGogsFileNotExist is already exist");
+					} catch (Exception e){
+						LOGGER.error("Gogs OthersException .", e);
+					}
 				}
 				
 				return dto;
@@ -3089,10 +3130,22 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			}
 			
 			if ("gogs".equals(contractTemplatedto.getContentType())) {
-				//查询gogs上面的数据
-				String moduleType = "ContractTemplate_" + contractTemplatedto.getCategoryId();
-				GogsRepo repo = gogsRepo(contractTemplatedto.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", contractTemplatedto.getOwnerId());
-				contractTemplatedto.setContents(gogsGetScript(repo, contractTemplatedto.gogsPath(), contractTemplatedto.getLastCommit()));
+				try {
+					//查询gogs上面的数据
+					String moduleType = "ContractTemplate_" + contractTemplatedto.getCategoryId();
+					GogsRepo repo = gogsRepo(contractTemplatedto.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplatedto.getOwnerId());
+					contractTemplatedto.setContents(gogsGetScript(repo, contractTemplatedto.gogsPath(), contractTemplatedto.getLastCommit()));
+				} catch (GogsConflictException e) {
+					LOGGER.error("contractTemplateName {} in namespace {} already exist!", contractTemplatedto.gogsPath(), cmd.getNamespaceId());
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTTEMPLATENAME_EXIST,
+							"contractTemplateName is already exist");
+				} catch (GogsFileNotExistException e) {
+					LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", contractTemplatedto.gogsPath(), cmd.getNamespaceId());
+					throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
+							"contractGogsFileNotExist is already exist");
+				} catch (Exception e){
+					LOGGER.error("Gogs OthersException .", e);
+				}
 			}
 			
 			dto.setContractTemplate(contractTemplatedto);
@@ -3120,10 +3173,22 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		//gogs上面的也需要删除相应的合同模板数据 
 		String oldPath = contractTemplateParent.gogsPath();
         String oldCommit = contractTemplateParent.getLastCommit();
-        //1.建仓库
-		String moduleType = "ContractTemplate_" + cmd.getCategoryId();
-		GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, 21200L, "EhContractTemplate", contractTemplateParent.getOwnerId());
-		gogsDeleteScript(repo, oldPath, oldCommit);
+        try {
+			//1.建仓库
+			String moduleType = "ContractTemplate_" + cmd.getCategoryId();
+			GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
+			gogsDeleteScript(repo, oldPath, oldCommit);
+        } catch (GogsConflictException e) {
+			LOGGER.error("contractTemplateName {} in namespace {} already exist!", oldPath, cmd.getNamespaceId());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTTEMPLATENAME_EXIST,
+					"contractTemplateName is already exist");
+		} catch (GogsFileNotExistException e) {
+			LOGGER.error("contractGogsFileNotExist {} in namespace {} already exist!", oldPath, cmd.getNamespaceId());
+			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACTGOGSFILENOTEXIST_NOTEXIST,
+					"contractGogsFileNotExist is already exist");
+		} catch (Exception e){
+			LOGGER.error("Gogs OthersException .", e);
+		}
 		
 	}
 

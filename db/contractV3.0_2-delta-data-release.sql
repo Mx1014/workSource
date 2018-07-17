@@ -60,4 +60,9 @@ INSERT INTO `ehcore`.`eh_var_field_item_scopes` (`id`, `namespace_id`, `module_n
 INSERT INTO `ehcore`.`eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`, `category_id`) VALUES 
 ((@id:=@id+1), '0', 'contract', '105', '30', '车位服务合同', '3', '2', '1', NOW(), NULL, NULL, NULL, NULL, NULL);
 
+
+SET @id = (SELECT MAX(id) from eh_locale_strings);
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10010', 'zh_CN', '模板名称已存在');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10011', 'zh_CN', '模板不存在');
+
 -- END BY 丁建民 

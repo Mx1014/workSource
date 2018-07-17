@@ -232,13 +232,16 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
 
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody()));
-
             StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
+			try {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody()));
+				String line;
+				while ((line = reader.readLine()) != null) {
+				    sb.append(line);
+				}
+			} catch (Exception e) {
+				LOGGER.error("Gogs rest call getBody error.", e);
+			}
             LOGGER.error("Gogs rest call error: {}", sb.toString());
             switch (response.getStatusCode()) {
                 case CONFLICT:
