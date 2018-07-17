@@ -2772,25 +2772,38 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 }
                 apartments.add(apt);
             });
-            //TODO 设置每个房源关联的拆分合并计划的生效时间
+            //设置每个房源关联的拆分合并计划的生效时间
             for (ApartmentAbstractDTO apartment: apartments) {
             	if (apartment.getIsFutureApartment()==0) {
             		//不是未来房源
-            		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByOriginalId(apartment.getId());
-            		if (arrangement != null) {
-            			apartment.setRelatedArrangementBeginDate(arrangement.getDateBegin().getTime());
+            		AddressArrangement addressArrangement = null;
+            		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(apartment.getId());
+            		for (AddressArrangement arrangement : arrangements) {
+            			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
+            			if (originalIds.contains(apartment.getId().toString())) {
+            				addressArrangement = arrangement;
+						}
+            		}
+            		if (addressArrangement != null) {
+            			apartment.setRelatedArrangementBeginDate(addressArrangement.getDateBegin().getTime());
 					}
 				}else if (apartment.getIsFutureApartment()==1) {
 					//是未来房源
-					AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByTargetId(apartment.getId());	
-					if (arrangement != null) {
-            			apartment.setRelatedArrangementBeginDate(arrangement.getDateBegin().getTime());
+            		AddressArrangement addressArrangement = null;
+            		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(apartment.getId());
+            		for (AddressArrangement arrangement : arrangements) {
+            			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
+            			if (targetIds.contains(apartment.getId().toString())) {
+            				addressArrangement = arrangement;
+						}
+            		}
+					if (addressArrangement != null) {
+            			apartment.setRelatedArrangementBeginDate(addressArrangement.getDateBegin().getTime());
 					}
 				}		
 			}
             response.setApartments(apartments);
         }
-
 		return response;
 	}
 

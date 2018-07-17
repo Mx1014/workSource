@@ -952,4 +952,24 @@ public class AddressProviderImpl implements AddressProvider {
         EhAddressArrangementDao dao = new EhAddressArrangementDao(context.configuration());
         dao.update(arrangement);
 	}
+
+	@Override
+	public List<AddressArrangement> findActiveAddressArrangementByOriginalIdV2(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.ORIGINAL_ID.like(DSL.concat("%", addressId.toString(), "%")))
+					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					.fetchInto(AddressArrangement.class);
+	}
+
+	@Override
+	public List<AddressArrangement> findActiveAddressArrangementByTargetIdV2(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select()
+					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+					.where(Tables.EH_ADDRESS_ARRANGEMENT.TARGET_ID.like(DSL.concat("%", addressId.toString(), "%")))
+					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+					.fetchInto(AddressArrangement.class);
+	}
 }
