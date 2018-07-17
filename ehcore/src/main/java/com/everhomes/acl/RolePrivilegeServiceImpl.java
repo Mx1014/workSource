@@ -2125,11 +2125,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
 		List<Long> roleIds = Collections.singletonList(RoleConstants.ENTERPRISE_SUPER_ADMIN);
-		if(detail != null){
+		if(detail != null) {
 			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
-			for (RoleAssignment roleAssignment: roleAssignments) {
-				if(roleIds.contains(roleAssignment.getRoleId())){
-					aclProvider.deleteRoleAssignment(roleAssignment.getId());
+			if (roleAssignments != null && roleAssignments.size() > 0) {
+				for (RoleAssignment roleAssignment : roleAssignments) {
+					if (roleIds.contains(roleAssignment.getRoleId())) {
+						aclProvider.deleteRoleAssignment(roleAssignment.getId());
+					}
 				}
 			}
 		}

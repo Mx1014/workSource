@@ -2152,4 +2152,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .execute();
 
     }
+
+    @Override
+    public List<CustomerAdminRecord> listEnterpriseCustomerAdminRecordsByToken(Long id, String adminToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+       return  context.selectFrom(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS)
+                .where(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CONTACT_TOKEN.eq(adminToken))
+                .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(id))
+                .fetchInto(CustomerAdminRecord.class);
+    }
 }

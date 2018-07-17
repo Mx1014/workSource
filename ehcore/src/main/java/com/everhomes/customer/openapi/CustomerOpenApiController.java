@@ -11,11 +11,11 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.openapi.AddressDTO;
 import com.everhomes.rest.customer.openapi.CommunityResponse;
 import com.everhomes.rest.customer.openapi.DeleteEnterpriseCommand;
 import com.everhomes.rest.customer.openapi.ListBuildingResponse;
 import com.everhomes.rest.customer.openapi.OpenApiUpdateCustomerCommand;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.util.SignatureHelper;
 import org.jooq.tools.StringUtils;
@@ -82,9 +82,9 @@ public class CustomerOpenApiController extends ControllerBase {
      * <p>查看门牌列表</p>
      */
     @RequestMapping("listAddresses")
-    @RestReturn(value = AddressDTO.class,collection = true)
+    @RestReturn(value = PropFamilyDTO.class,collection = true)
     public RestResponse listAddresses(ListBuildingCommand cmd) {
-        List<AddressDTO> addresses = customerService.listAddresses(cmd.getBuildingId());
+        List<PropFamilyDTO> addresses = customerService.listAddresses(cmd.getBuildingId());
         RestResponse response = new RestResponse(addresses);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -113,7 +113,7 @@ public class CustomerOpenApiController extends ControllerBase {
     @RequestMapping("updateEnterprise")
     @RestReturn(value = String.class)
     public RestResponse updateEnterprise(OpenApiUpdateCustomerCommand cmd) {
-        EnterpriseCustomerDTO enterpriseCustomerDTO = customerService.createEnterpriseCustomer(cmd);
+        EnterpriseCustomerDTO enterpriseCustomerDTO = customerService.updateEnterpriseCustomer(cmd);
         RestResponse response = new RestResponse(enterpriseCustomerDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

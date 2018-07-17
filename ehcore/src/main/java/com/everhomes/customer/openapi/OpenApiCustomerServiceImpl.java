@@ -21,6 +21,8 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
@@ -42,6 +44,7 @@ import com.everhomes.rest.customer.openapi.OpenApiUpdateCustomerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -108,6 +111,7 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setName(cmd.getCompanyName());
         checkEnterpriseCustomerUnique(cmd.getNamespaceId(), cmd.getCompanyName());
+        checkEnterpriseCustomerAddress(cmd.getAddresses());
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
         if (cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
@@ -149,6 +153,13 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
         return dto;
     }
 
+    private void checkEnterpriseCustomerAddress(List<AddressDTO> addresses) {
+        if(addresses==null || addresses.size()==0){
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_ISNULL,
+                    "address is null");
+        }
+    }
+
     private void checkEnterpriseCustomerUnique( Integer namespaceId,  String companyName) {
         if (StringUtils.isNotBlank(companyName)) {
             List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, companyName);
@@ -180,7 +191,7 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
         //create
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         //save operate event
-        customerService.saveCustomerEvent(3, customer, null, (byte)0);
+        customerService.saveCustomerEvent(3, customer, customer, (byte)0);
         //entry infos
         enterpriseCustomerProvider.deleteAllCustomerEntryInfo(customer.getId());
         if (cmd.getAddresses()!=null && cmd.getAddresses().size()>0) {
@@ -237,7 +248,7 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
     @Override
     public void createEnterpriseAdmin(DeleteEnterpriseCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getEnterpriseId());
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getAdminToken());
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(customer.getNamespaceId(), cmd.getAdminToken());
         String contactType = null;
         if (null != userIdentifier) {
             contactType = OrganizationMemberTargetType.USER.getCode();
@@ -253,10 +264,14 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
             createAdminCmd.setNamespaceId(customer.getNamespaceId());
             createAdminCmd.setOwnerType("EhOrganization");
             rolePrivilegeService.createOrganizationAdmin(createAdminCmd);
+            List<CustomerAdminRecord> records = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecordsByToken(customer.getId(), cmd.getAdminToken());
+            if (records == null || records.size() == 0)
             enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getEnterpriseId(), cmd.getAdminName(), contactType, cmd.getAdminToken(),customer.getNamespaceId());
         } else if (customer != null) {
             //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
             // 旧版的模式为新建客户则关联企业客户中organizationId，现在为激活才增加organizationId
+            List<CustomerAdminRecord> records = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecordsByToken(customer.getId(), cmd.getAdminToken());
+            if (records == null || records.size() == 0)
             enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getEnterpriseId(), cmd.getAdminName(), contactType, cmd.getAdminToken(),customer.getNamespaceId());
         }
         if (customer != null) {
@@ -276,9 +291,10 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
                 //删除企业管理中的管理员权限
                 DeleteOrganizationAdminCommand deleteOrganizationAdminCmd = new DeleteOrganizationAdminCommand();
                 deleteOrganizationAdminCmd.setContactToken(cmd.getAdminToken());
-                deleteOrganizationAdminCmd.setOwnerType("EhOrganization");
+                deleteOrganizationAdminCmd.setOwnerType("EhOrganizations");
                 deleteOrganizationAdminCmd.setOrganizationId(customer.getOrganizationId());
-                deleteOrganizationAdminCmd.setOwnerId(customer.getOwnerId());
+                List<Organization> organizations =  organizationProvider.listPMOrganizations(customer.getNamespaceId());
+                deleteOrganizationAdminCmd.setOwnerId(organizations.get(0).getId());
                 rolePrivilegeService.deleteOrganizationAdministrators(deleteOrganizationAdminCmd);
             }
             return null;
@@ -305,7 +321,7 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
     }
 
     @Override
-    public List<com.everhomes.rest.customer.openapi.AddressDTO> listAddresses(Long buildingId) {
+    public List<PropFamilyDTO> listAddresses(Long buildingId) {
         Building building = communityProvider.findBuildingById(buildingId);
         if (building == null) {
             LOGGER.error("building is not exist，id = {}", buildingId);
@@ -320,17 +336,12 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
                         BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
             }
         }
-        List<AddressDTO> addressDTOS =  addressProvider.listAddressByBuildingName(building.getNamespaceId(), building.getCommunityId(), building.getName());
-        List<com.everhomes.rest.customer.openapi.AddressDTO> addresses = new ArrayList<>();
-        if(addressDTOS!=null && addressDTOS.size()>0){
-            addressDTOS.forEach(address -> {
-                address.setBuildingId(building.getId());
-                com.everhomes.rest.customer.openapi.AddressDTO addressDTO = ConvertHelper.convert(address, com.everhomes.rest.customer.openapi.AddressDTO.class);
-                addressDTO.setAddressId(address.getId());
-                addresses.add(addressDTO);
-            });
-        }
-        return addresses;
+        ListPropApartmentsByKeywordCommand cmd = new ListPropApartmentsByKeywordCommand();
+        cmd.setBuildingName(building.getName());
+        cmd.setCommunityId(building.getCommunityId());
+        cmd.setNamespaceId(building.getNamespaceId());
+        ListPropApartmentsResponse response =  propertyMgrService.listNewPropApartmentsByKeyword(cmd);
+        return response.getResultList();
     }
 
     @Override
