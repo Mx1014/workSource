@@ -382,4 +382,6 @@ public interface AssetProvider {
     String getProjectNameByBillID(Long billId);
     
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
+    
+	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
 }

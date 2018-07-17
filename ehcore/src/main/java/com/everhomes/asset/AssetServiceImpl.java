@@ -5093,12 +5093,7 @@ public class AssetServiceImpl implements AssetService {
 
 	public GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd) {
 		//查询eh_payment_order_records表，获取支付状态
-		GetPayBillsForEntResultResp response = new GetPayBillsForEntResultResp();
-		response.setPayState(1);//只用于测试
-		
-		
-		
-		
+		GetPayBillsForEntResultResp response = assetProvider.getPayBillsResultByOrderId(cmd.getOrderId());
 		return response;
 	}
 

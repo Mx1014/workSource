@@ -5472,4 +5472,24 @@ public class AssetProviderImpl implements AssetProvider {
         return vo;
     }
 
+	public GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId) {
+		GetPayBillsForEntResultResp response = new GetPayBillsForEntResultResp();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t2 = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t2");
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(t2.STATUS);
+        query.addFrom(t2);
+		query.addConditions(t2.ORDER_ID.eq(orderId));
+		query.fetch().map(r -> {
+			Integer status = r.getValue(t2.STATUS);
+			if(status != null && status.equals(1)) {
+				response.setPayState(1);//EhAssetPaymentOrderBills中的status1代表支付成功
+			}else{
+				response.setPayState(0);
+			}
+			return null;
+		});
+		return response;
+	}
+
 }
