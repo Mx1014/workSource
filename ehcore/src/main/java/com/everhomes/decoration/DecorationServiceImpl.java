@@ -1170,9 +1170,10 @@ public class DecorationServiceImpl implements  DecorationService {
         //公司名称
         row.createCell(++i).setCellValue(dto.getApplyCompany());
         //装修进度
-        if (dto.getCancelFlag() == null || dto.getCancelFlag() == 0)
+        if (dto.getCancelFlag() == null || dto.getCancelFlag() == 0) {
             if (dto.getStatus() != null)
                 row.createCell(++i).setCellValue(DecorationRequestStatus.fromCode(dto.getStatus()).getDescribe());
+        }
         else
             row.createCell(++i).setCellValue("已取消");
     }
