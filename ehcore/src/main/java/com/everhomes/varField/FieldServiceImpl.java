@@ -476,6 +476,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
                 SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
                 List<SystemFieldItemDTO> itemDTOs = getSystemFieldItems(systemField.getId());
+                addExpandItems(itemDTOs, systemField.getId());
                 dto.setItems(itemDTOs);
                 return dto;
             }).collect(Collectors.toList());
