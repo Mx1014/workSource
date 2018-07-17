@@ -2716,19 +2716,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		addressProvider.createAddressArrangement(arrangement);
 	}	
 	
-	//添加房源、小区、机构的对应关系，设置房源的具体状态存在eh_organization_address_mappings表中
-	private void createOrganizationAddressMapping(Long addressId,String address,Long organizationId, Long communityId) {
-		CommunityAddressMapping communityAddressMapping = new CommunityAddressMapping();
-        communityAddressMapping.setOrganizationId(organizationId);
-        communityAddressMapping.setCommunityId(communityId);
-        communityAddressMapping.setAddressId(addressId);
-        communityAddressMapping.setOrganizationAddress(address);
-        communityAddressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-        communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
-        organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
-	}
-
 	private void createMergeArrangement(CreateAddressArrangementCommand cmd) {
 		Address targetAddress = addressProvider.findAddressById(cmd.getAddressId());
 		List<String> targetIds = new ArrayList<>();
@@ -2736,7 +2723,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		originalIds.add(targetAddress.getId().toString());
 		
 		Address address = new Address();
-		address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+		address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+		//设置成为未来资产
+		address.setIsFutureApartment((byte) 1);
 		address.setNamespaceId(targetAddress.getNamespaceId());
 		address.setCommunityId(targetAddress.getCommunityId());
 		address.setCityName(targetAddress.getCityName());
@@ -2744,7 +2733,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		address.setAreaId(targetAddress.getAreaId());
 		address.setAreaName(targetAddress.getAreaName());
 		address.setBuildingName(targetAddress.getBuildingName());
-		address.setApartmentName(targetAddress.getApartmentName());
+		address.setApartmentName(targetAddress.getApartmentName()+"-new");
 		address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
 		
 		address.setAreaSize((double) 0);
@@ -2762,6 +2751,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		}
 		Long newAddressId = addressProvider.createAddress3(address);
 		targetIds.add(newAddressId.toString());
+		//设置房源的具体状态
+		createOrganizationAddressMapping(newAddressId,address.getAddress(),cmd.getOrganizationId(),cmd.getCommunityId());
 		
 		AddressArrangement arrangement = ConvertHelper.convert(cmd, AddressArrangement.class);
 		String targetId = StringHelper.toJsonString(targetIds);
@@ -2773,6 +2764,19 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		User user = UserContext.current().getUser();
 		arrangement.setCreatorUid(user.getId());
 		addressProvider.createAddressArrangement(arrangement);
+	}
+	
+	//添加房源、小区、机构的对应关系，设置房源的具体状态存在eh_organization_address_mappings表中
+	private void createOrganizationAddressMapping(Long addressId,String address,Long organizationId, Long communityId) {
+		CommunityAddressMapping communityAddressMapping = new CommunityAddressMapping();
+        communityAddressMapping.setOrganizationId(organizationId);
+        communityAddressMapping.setCommunityId(communityId);
+        communityAddressMapping.setAddressId(addressId);
+        communityAddressMapping.setOrganizationAddress(address);
+        communityAddressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+        communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+        organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
 	}
 	
 	@Override
@@ -2857,17 +2861,23 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		}
 		
 		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
-		for (ArrangementApartmentDTO dto : apartments) {
-			Address address = addressProvider.findAddressById(dto.getAddressId());
-			if (dto.getApartmentName() != null && !dto.getApartmentName().equals(address.getApartmentName())) {
-				address.setApartmentName(dto.getApartmentName());
-				address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
+		if (apartments!=null) {
+			for (ArrangementApartmentDTO dto : apartments) {
+				Address address = addressProvider.findAddressById(dto.getAddressId());
+				if (address == null) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+		                    "the address does not exist!");
+				}
+				if (dto.getApartmentName() != null && !dto.getApartmentName().equals(address.getApartmentName())) {
+					address.setApartmentName(dto.getApartmentName());
+					address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
+				}
+				address.setAreaSize(dto.getAreaSize());
+				address.setChargeArea(dto.getChargeArea());
+				address.setFreeArea(dto.getFreeArea());
+				address.setRentArea(dto.getRentArea());
+				addressProvider.updateAddress(address);
 			}
-			address.setAreaSize(dto.getAreaSize());
-			address.setChargeArea(dto.getChargeArea());
-			address.setFreeArea(dto.getFreeArea());
-			address.setRentArea(dto.getRentArea());
-			addressProvider.updateAddress(address);
 		}
 	}
 

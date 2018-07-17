@@ -30,7 +30,17 @@ public class ApartmentAbstractDTO {
     
     private Long relatedArrangementBeginDate;
     
-    public Long getRelatedArrangementBeginDate() {
+    private Byte isFutureApartment;
+    
+    public Byte getIsFutureApartment() {
+		return isFutureApartment;
+	}
+
+	public void setIsFutureApartment(Byte isFutureApartment) {
+		this.isFutureApartment = isFutureApartment;
+	}
+
+	public Long getRelatedArrangementBeginDate() {
 		return relatedArrangementBeginDate;
 	}
 

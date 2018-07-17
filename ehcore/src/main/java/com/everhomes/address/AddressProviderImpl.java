@@ -497,6 +497,7 @@ public class AddressProviderImpl implements AddressProvider {
             dto.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
             dto.setName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
             dto.setOrientation(r.getValue(Tables.EH_ADDRESSES.ORIENTATION));
+            dto.setIsFutureApartment(r.getValue(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT));
             addresses.add(dto);
             return null;
         });

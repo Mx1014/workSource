@@ -2773,7 +2773,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 apartments.add(apt);
             });
             //TODO 设置每个房源关联的拆分合并计划的生效时间
-            
+            for (ApartmentAbstractDTO apartment: apartments) {
+            	if (apartment.getIsFutureApartment()==0) {
+            		//不是未来房源
+            		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByOriginalId(apartment.getId());
+            		if (arrangement != null) {
+            			apartment.setRelatedArrangementBeginDate(arrangement.getDateBegin().getTime());
+					}
+				}else if (apartment.getIsFutureApartment()==1) {
+					//是未来房源
+					AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByTargetId(apartment.getId());	
+					if (arrangement != null) {
+            			apartment.setRelatedArrangementBeginDate(arrangement.getDateBegin().getTime());
+					}
+				}		
+			}
             response.setApartments(apartments);
         }
 
