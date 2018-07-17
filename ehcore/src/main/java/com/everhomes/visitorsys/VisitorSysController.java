@@ -751,7 +751,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listBookedVisitorsForManage</b>
 	 * <p>
-	 * 1.获取预约访客列表-h5（客户端/微信端 web企业访客/园区访客管理用）
+	 * 1.获取预约访客列表-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
 	 * </p>
 	 */
 	@RequestMapping("listBookedVisitorsForManage")
@@ -769,7 +769,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/getBookedVisitorByIdForManage</b>
 	 * <p>
-	 * 2.获取预约详情-h5（客户端/微信端 web企业访客/园区访客管理用）
+	 * 2.获取预约详情-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
 	 * </p>
 	 */
 	@RequestMapping("getBookedVisitorByIdForManage")
@@ -787,7 +787,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listVisitReasonsForManage</b>
 	 * <p>
-	 * 3.获取事由列表（此接口否使用接口待定，可以使用枚举）-h5（（客户端/微信端 web企业访客/园区访客管理用））
+	 * 3.获取事由列表 100055 权限校验失败（此接口否使用接口待定，可以使用枚举）-h5（（客户端/微信端 web企业访客/园区访客管理用））
 	 * </p>
 	 */
 	@RequestMapping("listVisitReasonsForManage")
@@ -805,7 +805,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/createOrUpdateVisitorForWeb</b>
 	 * <p>
-	 * 4.创建临时/预约访客-h5（客户端/微信端 web企业访客/园区访客管理用）
+	 * 4.创建临时/预约访客-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
 	 * </p>
 	 */
 	@RequestMapping("createOrUpdateVisitorForManage")
@@ -823,7 +823,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/confirmVisitorForManage</b>
 	 * <p>
-	 * 5.访客到访确认接口-（客户端/微信端 web企业访客/园区访客管理用）
+	 * 5.访客到访确认接口- 拒绝访客- 返回码：071701 状态已被更新；100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
 	 * </p>
 	 */
 	@RequestMapping("confirmVisitorForManage")
@@ -840,7 +840,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/rejectVisitorForManage</b>
 	 * <p>
-	 * 6.拒绝访客-（客户端/微信端 web企业访客/园区访客管理用）
+	 * 6.拒绝访客- 返回码：071701 状态已被更新；100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
 	 * </p>
 	 */
 	@RequestMapping("rejectVisitorForManage")
