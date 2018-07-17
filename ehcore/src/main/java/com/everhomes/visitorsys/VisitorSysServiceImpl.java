@@ -1646,6 +1646,36 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     }
 
+    @Override
+    public ListBookedVisitorsResponse listBookedVisitorsForManage(ListBookedVisitorsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public GetBookedVisitorByIdResponse getBookedVisitorByIdForManage(GetBookedVisitorByIdCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListVisitReasonsResponse listVisitReasonsForManage(BaseVisitorsysCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public GetBookedVisitorByIdResponse createOrUpdateVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void confirmVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+
+    }
+
+    @Override
+    public void rejectVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
+
+    }
+
     /**
      * 检查owerid是否在系统中存在
      * @param ownerType

@@ -37,7 +37,7 @@ public class VisitorSysOpenApiController extends ControllerBase {
 	@RequestMapping("listOrganizations")
 	@RestReturn(OpenApiListOrganizationsResponse.class)
 	public RestResponse listOrganizations(OpenApiListOrganizationsCommand cmd) {
-
+		return null;
 	}
 
 	/**
