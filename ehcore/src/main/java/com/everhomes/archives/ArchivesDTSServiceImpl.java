@@ -38,12 +38,12 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         //  1.set the header
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size()));
         Row headRow = sheet.createRow(0);
-        headRow.setHeight((short)3000);
+        headRow.setHeight((short) (150 * 20));
         createTemplateHead(workbook, headRow, head);
 
         //  2.set the title
         Row titleRow = sheet.createRow(1);
-        createTemplateTitle(workbook, titleRow, title);
+        createTemplateTitle(workbook, sheet, titleRow, title);
 
         buildExcel(workbook, httpResponse, fileName);
     }
@@ -64,11 +64,12 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         cell.setCellValue(head);
     }
 
-    private void createTemplateTitle(XSSFWorkbook workbook, Row titleRow, List<String> title) {
+    private void createTemplateTitle(XSSFWorkbook workbook, Sheet sheet, Row titleRow, List<String> title) {
         XSSFCellStyle commonStyle = commonTitleStyle(workbook);
         XSSFCellStyle mandatoryStyle = mandatoryTitleStyle(workbook);
         for (int i = 0; i < title.size(); i++) {
             Cell cell = titleRow.createCell(i);
+            sheet.setColumnWidth( i,18 * 256);
             if (checkMandatory(title.get(i)))
                 cell.setCellStyle(mandatoryStyle);
             else
