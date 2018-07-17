@@ -1,5 +1,7 @@
 ALTER TABLE `eh_pm_tasks` MODIFY COLUMN `star`  varchar(4) NULL DEFAULT NULL COMMENT 'evaluate score' AFTER `status`;
 
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `amount`  decimal(16,0) NOT NULL DEFAULT 0 COMMENT '订单费用';
+
 CREATE TABLE `eh_pm_task_configs` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int NOT NULL DEFAULT '0',

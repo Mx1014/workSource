@@ -3260,6 +3260,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		order.setProductFee(productFee);
 		order.setAmount(serviceFee + productFee);
+		order.setStatus((byte)0);
 		order = this.pmTaskProvider.createPmTaskOrder(order);
 		Long orderId = order.getId();
 		if(null != cmd.getOrderDetails()){
@@ -3538,12 +3539,14 @@ public class PmTaskServiceImpl implements PmTaskService {
                 case PURCHACE:
                     if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
                         //支付成功
-
-//						String BizOrderNum  = getOrderNum(cmd.getOrderId(),OrderType.OrderTypeEnum.PMTASK_CODE.getPycode());
 						String BizOrderNum = cmd.getBizOrderNum();
-						BizOrderNum.indexOf(OrderType.OrderTypeEnum.PMTASK_CODE.getPycode())
-						pmTaskProvider.findPmTaskOrderById();
-//                        cmd.ge
+						Integer idx = BizOrderNum.indexOf(OrderType.OrderTypeEnum.PMTASK_CODE.getV2code());
+						if(idx > -1){
+							Long orderId = Long.valueOf(BizOrderNum.substring(idx + 3));
+							PmTaskOrder order = pmTaskProvider.findPmTaskOrderById(orderId);
+							order.setStatus((byte)1);
+							pmTaskProvider.updatePmTaskOrder(order);
+						}
                     }
 //                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
 //                        //支付失败
