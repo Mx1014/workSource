@@ -58,5 +58,7 @@ public interface FieldProvider {
 
     List <Long>checkCustomerField(Integer namespaceId, Long communityId, String moduleName);
 
+    Field findFieldById(Long fieldId);
+
     FieldItem findFieldItemByItemId(Long itemId);
 }

@@ -465,7 +465,15 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 
         return feedbacks;
 	}
-    
+
+    @Override
+    public List<Feedback> ListFeedbacksByNamespaceId(Integer namespaceId) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhFeedbacks.class));
+        return cxt.select().from(Tables.EH_FEEDBACKS).where(Tables.EH_FEEDBACKS.NAMESPACE_ID.eq(namespaceId))
+                .orderBy(Tables.EH_FEEDBACKS.CREATE_TIME.desc()).fetch().stream().map(r ->
+                        ConvertHelper.convert(r, Feedback.class)).collect(Collectors.toList());
+    }
+
     @Override
 	public void updateFeedback(Feedback feedback) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, feedback.getOwnerUid()));

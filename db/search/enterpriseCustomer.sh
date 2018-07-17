@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 ELASTIC=elasticsearch:9200
 INDEX=everhomesv3
 
@@ -8,10 +9,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 		"properties": {
 			"name":{
                 "type":"string",
-                "index_analyzer":"ansj_index", 
-                "search_analyzer":"ansj_query", 
-                "similarity":"BM25", 
-                "store":"yes",
+                "index":"not_analyzed",
                 "fields": {
                     "raw": { 
                         "type":  "string",
@@ -19,14 +17,14 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
                     },
                     "baidu": {
                         "type": "string",
-                        index": "not_analyzed"
+                        "index": "not_analyzed"
                     }
                 }
             },
-			"contactName":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
-            "contactAddress":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
-            "contactMobile":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
-            "trackingName":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
+			"contactName":{"type":"string", "index":"not_analyzed"},
+            "contactAddress":{"type":"string", "index":"not_analyzed"},
+            "contactMobile":{"type":"string", "index":"not_analyzed"},
+            "trackingName":{"type":"string", "index":"not_analyzed"},
             "contentcategory":{"type":"string", "index":"not_analyzed"},
             "actioncategory":{"type":"string", "index":"not_analyzed"},
             "identify": {"type":"string", "index":"not_analyzed"},
@@ -36,6 +34,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
 			"categoryItemId": {"type":"long"},
 			"levelItemId": {"type":"long"},
 			"trackingUid": {"type":"long"},
+			"sourceItemId": {"type":"long"},
 			"propertyType": {"type":"long"},
 			"trackingUid": {"type":"long"},
             "status":{"type":"byte"},
@@ -43,10 +42,11 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
             "buildingId":{"type":"string"},
             "addressId":{"type":"string"},
             "adminFlag":{"type":"long"},
+            "sourceId":{"type":"long"},
+            "sourceType":{"type":"string","index":"not_analyzed"},
             "propertyArea":{"type":"double"},
 			"lastTrackingTime":{"type":"date"}
 		}
 	}
-
 }
 '

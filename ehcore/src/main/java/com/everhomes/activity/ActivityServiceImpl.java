@@ -2,14 +2,9 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.paySDK.api.PayService;
-import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
@@ -29,23 +24,155 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
-import com.everhomes.forum.*;
+import com.everhomes.filedownload.TaskService;
+import com.everhomes.forum.Attachment;
+import com.everhomes.forum.ForumProvider;
+import com.everhomes.forum.ForumService;
+import com.everhomes.forum.InteractSetting;
+import com.everhomes.forum.Post;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.organization.*;
+import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rest.activity.*;
+import com.everhomes.rest.activity.ActivityAttachmentDTO;
+import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCancelType;
+import com.everhomes.rest.activity.ActivityCategoryDTO;
+import com.everhomes.rest.activity.ActivityChargeFlag;
+import com.everhomes.rest.activity.ActivityCheckinCommand;
+import com.everhomes.rest.activity.ActivityConfirmCommand;
+import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityGoodsDTO;
+import com.everhomes.rest.activity.ActivityListCommand;
+import com.everhomes.rest.activity.ActivityListResponse;
+import com.everhomes.rest.activity.ActivityLocalStringCode;
+import com.everhomes.rest.activity.ActivityMemberDTO;
+import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
+import com.everhomes.rest.activity.ActivityPayeeDTO;
+import com.everhomes.rest.activity.ActivityPayeeStatusType;
+import com.everhomes.rest.activity.ActivityPostCommand;
+import com.everhomes.rest.activity.ActivityRejectCommand;
+import com.everhomes.rest.activity.ActivityRosterPayFlag;
+import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
+import com.everhomes.rest.activity.ActivityRosterSourceFlag;
+import com.everhomes.rest.activity.ActivityRosterStatus;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.activity.ActivityShareDetailResponse;
+import com.everhomes.rest.activity.ActivitySignupCommand;
+import com.everhomes.rest.activity.ActivitySignupFlag;
+import com.everhomes.rest.activity.ActivityTimeResponse;
+import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.ActivityVideoRoomType;
+import com.everhomes.rest.activity.ActivityWarningResponse;
+import com.everhomes.rest.activity.CheckPayeeIsUsefulCommand;
+import com.everhomes.rest.activity.CheckPayeeIsUsefulResponse;
+import com.everhomes.rest.activity.CreateActivityAttachmentCommand;
+import com.everhomes.rest.activity.CreateActivityGoodsCommand;
+import com.everhomes.rest.activity.CreateOrUpdateActivityPayeeCommand;
+import com.everhomes.rest.activity.CreateSignupOrderCommand;
+import com.everhomes.rest.activity.CreateSignupOrderV2Command;
+import com.everhomes.rest.activity.CreateWechatJsSignupOrderCommand;
+import com.everhomes.rest.activity.DeleteActivityAttachmentCommand;
+import com.everhomes.rest.activity.DeleteActivityGoodsCommand;
+import com.everhomes.rest.activity.DeleteSignupInfoCommand;
+import com.everhomes.rest.activity.DownloadActivityAttachmentCommand;
+import com.everhomes.rest.activity.ExportActivityCommand;
+import com.everhomes.rest.activity.ExportOrganizationCommand;
+import com.everhomes.rest.activity.ExportSignupInfoCommand;
+import com.everhomes.rest.activity.ExportTagCommand;
+import com.everhomes.rest.activity.GeoLocation;
+import com.everhomes.rest.activity.GetActivityAchievementCommand;
+import com.everhomes.rest.activity.GetActivityAchievementResponse;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
+import com.everhomes.rest.activity.GetActivityGoodsCommand;
+import com.everhomes.rest.activity.GetActivityPayeeCommand;
+import com.everhomes.rest.activity.GetActivityPayeeDTO;
+import com.everhomes.rest.activity.GetActivityTimeCommand;
+import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.GetRosterOrderSettingCommand;
+import com.everhomes.rest.activity.GetVideoCapabilityCommand;
+import com.everhomes.rest.activity.ImportSignupErrorDTO;
+import com.everhomes.rest.activity.ImportSignupInfoCommand;
+import com.everhomes.rest.activity.ImportSignupInfoResponse;
+import com.everhomes.rest.activity.ListActivitiesByCategoryIdCommand;
+import com.everhomes.rest.activity.ListActivitiesByCategoryIdResponse;
+import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
+import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
+import com.everhomes.rest.activity.ListActivitiesByTagCommand;
+import com.everhomes.rest.activity.ListActivitiesCommand;
+import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.activity.ListActivityAttachmentsCommand;
+import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
+import com.everhomes.rest.activity.ListActivityCategoriesCommand;
+import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
+import com.everhomes.rest.activity.ListActivityGoodsCommand;
+import com.everhomes.rest.activity.ListActivityGoodsResponse;
+import com.everhomes.rest.activity.ListActivityPayeeCommand;
+import com.everhomes.rest.activity.ListNearByActivitiesCommand;
+import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
+import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.ListSignupInfoCommand;
+import com.everhomes.rest.activity.ListSignupInfoResponse;
+import com.everhomes.rest.activity.ManualSignupCommand;
+import com.everhomes.rest.activity.RosterOrderSettingDTO;
+import com.everhomes.rest.activity.SetActivityAchievementCommand;
+import com.everhomes.rest.activity.SetActivityTimeCommand;
+import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.SetActivityWarningCommand;
+import com.everhomes.rest.activity.SetRosterOrderSettingCommand;
+import com.everhomes.rest.activity.SignupErrorHandleType;
+import com.everhomes.rest.activity.SignupInfoDTO;
+import com.everhomes.rest.activity.StatisticsActivityCommand;
+import com.everhomes.rest.activity.StatisticsActivityDTO;
+import com.everhomes.rest.activity.StatisticsActivityResponse;
+import com.everhomes.rest.activity.StatisticsOrderByFlag;
+import com.everhomes.rest.activity.StatisticsOrganizationCommand;
+import com.everhomes.rest.activity.StatisticsOrganizationDTO;
+import com.everhomes.rest.activity.StatisticsOrganizationResponse;
+import com.everhomes.rest.activity.StatisticsSummaryCommand;
+import com.everhomes.rest.activity.StatisticsSummaryResponse;
+import com.everhomes.rest.activity.StatisticsTagCommand;
+import com.everhomes.rest.activity.StatisticsTagDTO;
+import com.everhomes.rest.activity.StatisticsTagResponse;
+import com.everhomes.rest.activity.UpdateActivityGoodsCommand;
+import com.everhomes.rest.activity.UpdateSignupInfoCommand;
+import com.everhomes.rest.activity.UserAuthFlag;
+import com.everhomes.rest.activity.VertifyPersonByPhoneCommand;
+import com.everhomes.rest.activity.VideoCallbackCommand;
+import com.everhomes.rest.activity.VideoCapabilityResponse;
+import com.everhomes.rest.activity.VideoManufacturerType;
+import com.everhomes.rest.activity.VideoState;
+import com.everhomes.rest.activity.VideoSupportType;
+import com.everhomes.rest.activity.WechatSignupFlag;
+import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -57,14 +184,51 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.forum.*;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
+import com.everhomes.rest.forum.AttachmentDTO;
+import com.everhomes.rest.forum.ForumConstants;
+import com.everhomes.rest.forum.ForumModuleType;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.InteractFlag;
+import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.PostCloneFlag;
+import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PostFavoriteFlag;
+import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
-import com.everhomes.rest.order.*;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.CreateWechatJsPayOrderCmd;
+import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
+import com.everhomes.rest.order.OrderPaymentStatus;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PayServiceErrorCode;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
+import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
@@ -78,8 +242,19 @@ import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
 import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
-import com.everhomes.rest.ui.user.*;
-import com.everhomes.rest.user.*;
+import com.everhomes.rest.ui.user.ActivityLocationScope;
+import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
+import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserFavoriteDTO;
+import com.everhomes.rest.user.UserFavoriteTargetType;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -90,8 +265,27 @@ import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
+import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.SortOrder;
+import com.everhomes.util.StatusChecker;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.VersionRange;
+import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -108,7 +302,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -121,9 +320,12 @@ import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -132,7 +334,19 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -266,8 +480,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     @Value("${server.contextPath:}")
     private String contextPath;
 
+	@Autowired
+    private NamespaceProvider namespaceProvider;
+
     @Autowired
     private SensitiveWordService sensitiveWordService;
+
+    @Autowired
+    private TaskService taskService;
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -379,7 +599,21 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         addAdditionalInfo(roster, user, activity);
         
         activityProvider.createActivityRoster(roster);
-        
+        // 注册成功事件 add by jiarui
+        LocalEventBus.publish(event -> {
+            LocalEventContext localEventcontext = new LocalEventContext();
+            localEventcontext.setUid(UserContext.currentUserId());
+            localEventcontext.setNamespaceId(activity.getNamespaceId());
+            event.setContext(localEventcontext);
+            Map<String, Object> map = new HashMap<>();
+            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+            map.put("categoryId", activity.getCategoryId());
+            event.setParams(map);
+            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+            event.setEntityId(UserContext.currentUserId());
+            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+        });
+
     }
 
     //活动报名
@@ -527,6 +761,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 //add by yanjun 20170512
                 dto.setUserRosterId(roster.getId());
 
+                //add by jiarui  20180716
+                syncToPotentialCustomer(temp1,roster);
+
                 //Send message to creator
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("userName", user.getNickName());
@@ -587,6 +824,23 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         // activitySignPoints(cmd.getActivityId());
     	return tuple.first();
 	 }
+
+    private void syncToPotentialCustomer(Activity activity,ActivityRoster roster) {
+        // 同步线索客户 add by jiarui
+        LocalEventBus.publish(event -> {
+            LocalEventContext localEventcontext = new LocalEventContext();
+            localEventcontext.setUid(UserContext.currentUserId());
+            localEventcontext.setNamespaceId(activity.getNamespaceId());
+            event.setContext(localEventcontext);
+            Map<String, Object> map = new HashMap<>();
+            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+            map.put("categoryId", activity.getCategoryId());
+            event.setParams(map);
+            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+            event.setEntityId(UserContext.currentUserId());
+            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+        });
+    }
 
 
 	/*private void activitySignPoints(Long activityId){
@@ -844,7 +1098,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                     "no activity.");
         }
 
-        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
         setPreOrder(cmd,createOrderCommand,roster,activity);
 
         PreOrderDTO callback = new PreOrderDTO();
@@ -1131,6 +1385,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	            //createActivityRoster(roster);
 	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
+                // 注册成功事件 add by jiarui
+                LocalEventBus.publish(event -> {
+                    LocalEventContext localEventcontext = new LocalEventContext();
+                    localEventcontext.setUid(UserContext.currentUserId());
+                    localEventcontext.setNamespaceId(activity.getNamespaceId());
+                    event.setContext(localEventcontext);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+                    map.put("categoryId", activity.getCategoryId());
+                    event.setParams(map);
+                    event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+                    event.setEntityId(UserContext.currentUserId());
+                    event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+                });
 
 				LOGGER.info("manualSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
@@ -1337,6 +1605,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             event.setEntityType(EhActivities.class.getSimpleName());
                             event.setEntityId(activity.getId());
                             event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.dft());
+                        });
+                        // 注册成功事件 add by jiarui
+                        LocalEventBus.publish(event -> {
+                            LocalEventContext localEventcontext = new LocalEventContext();
+                            localEventcontext.setUid(UserContext.currentUserId());
+                            localEventcontext.setNamespaceId(activity.getNamespaceId());
+                            event.setContext(localEventcontext);
+                            Map<String, Object> map = new HashMap<>();
+                            map.put(EntityType.ACTIVITY_ROSTER.getCode(), r);
+                            map.put("categoryId", activity.getCategoryId());
+                            event.setParams(map);
+                            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+                            event.setEntityId(UserContext.currentUserId());
+                            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
                         });
 					}
 				});
@@ -6433,7 +6715,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                         //支付成功
                         handler.paySuccess(srvCmd);
                     }
-                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.FAILED.getCode()){
                         //支付失败
                         handler.payFail(srvCmd);
                     }
@@ -6454,6 +6736,92 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }else {
             LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
         }
+    }
+
+    @Override
+    public void exportActivity(ExportActivityCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if(cmd.getStartTime() != null){
+            params.put("startTime", cmd.getStartTime());
+        }
+        if(cmd.getEndTime() != null){
+            params.put("endTime", cmd.getEndTime());
+        }
+
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_活动报名_" + fileNameSdf.format(cmd.getStartTime()) + "_" +fileNameSdf.format(cmd.getEndTime()) +".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
+    public void exportOrganization(ExportOrganizationCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityOrganizationList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_企业报名_" + fileNameSdf.format(new Date()) +".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityOrganizationExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
+    public void exportTag(ExportTagCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityTagList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_标签统计_" + fileNameSdf.format(new Date())+".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityTagExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
     }
 
 //	@Override
