@@ -48,6 +48,8 @@ import com.everhomes.rest.asset.ShowBillForClientDTO;
 import com.everhomes.rest.asset.ShowBillForClientV2Command;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
@@ -245,4 +247,10 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
+    
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+		LOGGER.error("Insufficient privilege, handler showCreateBillSubItemList");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
 }

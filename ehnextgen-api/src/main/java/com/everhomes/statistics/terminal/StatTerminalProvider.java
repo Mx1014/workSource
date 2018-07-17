@@ -11,7 +11,7 @@ public interface StatTerminalProvider {
 	
 	void createTerminalHourStatistics(TerminalHourStatistics terminalHourStatistics);
 	
-	void createTerminalAppVersionStatistics(TerminalAppVersionStatistics terminalAppVersionStatistics);
+	void createTerminalAppVersionStatistics(List<TerminalAppVersionStatistics> terminalAppVersionStatistics);
 	
 	void deleteTerminalDayStatistics(Integer namespaceId, String date);
 
@@ -25,7 +25,7 @@ public interface StatTerminalProvider {
 
 	List<Long> listUserIdByInterval(Integer namespaceId, LocalDateTime start, LocalDateTime end);
 
-	Integer countVersionCumulativeUserNumber(String version, Integer namespaceId);
+	Integer countVersionCumulativeUserNumber(String version, Integer namespaceId, String date);
 
 	Integer countVersionActiveUserNumberByDay(String date, String version, Integer namespaceId);
 
@@ -70,4 +70,10 @@ public interface StatTerminalProvider {
     void deleteTerminalAppVersionCumulative(String imeiNumber, Integer namespaceId);
 
 	void deleteTerminalStatTask(Integer namespaceId, String taskNo);
+
+    void cleanInvalidAppVersion(Integer namespaceId);
+
+	List<String> listUserActivityAppVersions(Integer namespaceId);
+
+	void correctUserActivity(Integer namespaceId);
 }

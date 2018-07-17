@@ -4,12 +4,12 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.*;
@@ -20,7 +20,6 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,13 +58,16 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
     }
 
     @Override
-    public void createTerminalAppVersionStatistics(TerminalAppVersionStatistics terminalAppVersionStatistics) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTerminalAppVersionStatistics.class));
+    public void createTerminalAppVersionStatistics(List<TerminalAppVersionStatistics> terminalAppVersionStatistics) {
+        long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(
+                EhTerminalAppVersionStatistics.class), terminalAppVersionStatistics.size());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        terminalAppVersionStatistics.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        terminalAppVersionStatistics.setId(id);
+        for (TerminalAppVersionStatistics stat : terminalAppVersionStatistics) {
+            stat.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            stat.setId(id++);
+        }
         EhTerminalAppVersionStatisticsDao dao = new EhTerminalAppVersionStatisticsDao(context.configuration());
-        dao.insert(terminalAppVersionStatistics);
+        dao.insert(terminalAppVersionStatistics.toArray(new EhTerminalAppVersionStatistics[0]));
     }
 
     @Override
@@ -261,7 +263,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
     }
 
     @Override
-    public Integer countVersionCumulativeUserNumber(String version, Integer namespaceId) {
+    public Integer countVersionCumulativeUserNumber(String version, Integer namespaceId, String date) {
         com.everhomes.server.schema.tables.EhTerminalAppVersionActives t = Tables.EH_TERMINAL_APP_VERSION_ACTIVES;
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
@@ -270,6 +272,9 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
 
         if (!StringUtils.isEmpty(version)) {
             query.addConditions(t.APP_VERSION.eq(version));
+        }
+        if (date != null) {
+            query.addConditions(t.DATE.le(date));
         }
         return query.fetchAnyInto(Integer.class);
     }
@@ -317,21 +322,15 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
 
     @Override
     public AppVersion findAppVersion(Integer namespaceId, String name, String type) {
-        List<AppVersion> resules = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhAppVersionRecord> query = context.selectQuery(Tables.EH_APP_VERSION);
-        query.addConditions(Tables.EH_APP_VERSION.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_APP_VERSION.NAME.eq(name));
-        query.addConditions(Tables.EH_APP_VERSION.TYPE.eq(type));
-        query.fetch().map(r -> {
-            resules.add(ConvertHelper.convert(r, AppVersion.class));
-            return null;
-        });
+        com.everhomes.server.schema.tables.EhAppVersion t = Tables.EH_APP_VERSION;
 
-        if (resules.size() > 0) {
-            return resules.get(0);
-        }
-        return null;
+        SelectQuery<EhAppVersionRecord> query = context.selectQuery(t);
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(t.NAME.eq(name));
+        query.addConditions(t.TYPE.eq(type));
+
+        return query.fetchAnyInto(AppVersion.class);
     }
 
     @Override
@@ -440,6 +439,44 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
         context.delete(t)
                 .where(t.NAMESPACE_ID.eq(namespaceId))
                 .and(t.TASK_NO.eq(taskNo))
+                .execute();
+    }
+
+    @Override
+    public void cleanInvalidAppVersion(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhAppVersion t = Tables.EH_APP_VERSION;
+
+        List<AppVersion> list = context.selectFrom(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId)).fetchInto(AppVersion.class);
+
+        for (AppVersion version : list) {
+            if (VersionRealmType.fromCode(version.getRealm()) == null) {
+                context.delete(t).where(t.ID.eq(version.getId())).execute();
+            }
+        }
+    }
+
+    @Override
+    public List<String> listUserActivityAppVersions(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhUserActivities t = Tables.EH_USER_ACTIVITIES;
+
+        return context.select(t.APP_VERSION_NAME)
+                .from(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .groupBy(t.APP_VERSION_NAME)
+                .fetchInto(String.class);
+    }
+
+    @Override
+    public void correctUserActivity(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhUserActivities t = Tables.EH_USER_ACTIVITIES;
+
+        context.delete(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.UID.eq(0L))
                 .execute();
     }
 }

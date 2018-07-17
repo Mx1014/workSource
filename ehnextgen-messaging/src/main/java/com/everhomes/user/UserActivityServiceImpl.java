@@ -51,6 +51,7 @@ import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
+import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
@@ -235,49 +236,49 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     public void updateActivity(SyncActivityCommand cmd) {
-    	
-        UserActivity activity = new UserActivity();
+        VersionRealmType realmType = VersionRealmType.fromCode(UserContext.current().getVersionRealm());
+        if (realmType == null) {
+            LOGGER.warn("invalid version realm type of [{}], ignored.", UserContext.current().getVersionRealm());
+            return;
+        }
+
+        OSType osType = OSType.fromString(cmd.getOsType());
+        if (osType == OSType.Unknown) {
+            if (realmType.getCode().toLowerCase().startsWith("ios")) {
+                osType = OSType.IOS;
+            } else if (realmType.getCode().toLowerCase().startsWith("android")) {
+                osType = OSType.Android;
+            }
+        }
+        String type = osType.name().toLowerCase();
+
+        String versionName = cmd.getAppVersionName();
+        if (StringUtils.isEmpty(versionName) || versionName.split("\\.").length < 3) {
+            LOGGER.warn("invalid version name of [{}], ignored.", versionName);
+            return;
+        }
+
+        String[] tmp = new String[3];
+        String[] arr = versionName.split("\\.");
+        System.arraycopy(arr, 0, tmp, 0, 3);
+
+        versionName = StringUtils.join(tmp, ".");
+        Version version = null;
         try {
-            BeanUtils.copyProperties(cmd, activity, "activityType", "osType");
+            version = Version.fromVersionString(versionName);
         } catch (Exception e) {
-        	LOGGER.error("some thing error", e);
+            LOGGER.warn("invalid version name of [{}], ignored.", versionName);
+            return;
         }
-        User user = UserContext.current().getUser();
-        activity.setCreateTime(getCreateTime());
-        activity.setUid((long) -1);
-        if (user != null)
-            activity.setUid(user.getId());
-        activity.setActivityType(ActivityType.fromString(cmd.getActivityType()).getCode());
 
-        if(OSType.fromString(cmd.getOsType()) == OSType.Unknown){
-            activity.setOsType(OSType.fromCode(cmd.getOsType()).getCode());
-        }else{
-            activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
-        }
-        activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
-        activity.setNamespaceId(UserContext.getCurrentNamespaceId());
-        activity.setVersionRealm(UserContext.current().getVersionRealm());
-
-        // @see com.everhomes.statistics.terminal.BorderRegisterListener comment by xq.tian 2017/07/14
-        // if (user != null)
-        // 	userActivityProvider.addActivity(activity, user.getId());
-
-        // 增加版本号 用于运营统计 by sfyan 20170117
-        String type = OSType.fromCode(activity.getOsType().toString()).name().toLowerCase();
-        String version = activity.getAppVersionName();
-        if(!org.springframework.util.StringUtils.isEmpty(version)
-                && version.split("\\.").length > 3)
-            version = version.substring(0, version.lastIndexOf("."));
-
-        AppVersion appVersion = statTerminalProvider.findAppVersion(activity.getNamespaceId(), version, type);
-        if(null == appVersion){
+        AppVersion appVersion = statTerminalProvider.findAppVersion(UserContext.getCurrentNamespaceId(), versionName, type);
+        if(null == appVersion) {
             appVersion = new AppVersion();
-            appVersion.setName(version);
+            appVersion.setName(versionName);
             appVersion.setType(type);
-            appVersion.setNamespaceId(activity.getNamespaceId());
-            appVersion.setRealm(activity.getVersionRealm());
-            VersionRange versionRange = new VersionRange("["+version+","+version+")");
-            appVersion.setDefaultOrder((int)versionRange.getUpperBound());
+            appVersion.setNamespaceId(UserContext.getCurrentNamespaceId());
+            appVersion.setRealm(realmType.getCode());
+            appVersion.setDefaultOrder((int) version.getEncodedValue());
             statTerminalProvider.createAppVersion(appVersion);
         }
     }
@@ -1813,10 +1814,4 @@ public class UserActivityServiceImpl implements UserActivityService {
 		}
 		
 	}
-
-    public static void main(String[] args) {
-        System.out.println(ActivityType.fromString("logon").getCode());
-        System.out.println(ActivityType.fromString("1").getCode());
-    }
-
 }
