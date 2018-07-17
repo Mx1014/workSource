@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,13 +38,14 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         //  1.set the header
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size()));
         Row headRow = sheet.createRow(0);
+        headRow.setHeight((short)3000);
         createTemplateHead(workbook, headRow, head);
 
         //  2.set the title
         Row titleRow = sheet.createRow(1);
         createTemplateTitle(workbook, titleRow, title);
 
-        buildExcel(workbook, httpResponse);
+        buildExcel(workbook, httpResponse, fileName);
     }
 
     private void createTemplateHead(XSSFWorkbook workbook, Row headRow, String head) {
@@ -52,10 +54,10 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         font.setFontHeightInPoints((short) 11);
         // font.setBold(true);
         font.setFontName("微软雅黑");
-        headStyle.setAlignment(HorizontalAlignment.CENTER);
         headStyle.setFont(font);
         headStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         headStyle.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex()); //  find it in the IndexedColors
+        headStyle.setWrapText(true);
 
         Cell cell = headRow.createCell(0);
         cell.setCellStyle(headStyle);
@@ -63,6 +65,33 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     }
 
     private void createTemplateTitle(XSSFWorkbook workbook, Row titleRow, List<String> title) {
+        XSSFCellStyle commonStyle = commonTitleStyle(workbook);
+        XSSFCellStyle mandatoryStyle = mandatoryTitleStyle(workbook);
+        for (int i = 0; i < title.size(); i++) {
+            Cell cell = titleRow.createCell(i);
+            if (checkMandatory(title.get(i)))
+                cell.setCellStyle(mandatoryStyle);
+            else
+                cell.setCellStyle(commonStyle);
+            cell.setCellValue(title.get(i));
+        }
+    }
+
+    private boolean checkMandatory(String text) {
+        if (ArchivesExcelLocaleString.T_NAME.equals(text))
+            return true;
+        if (ArchivesExcelLocaleString.T_CONTACT_TOKEN.equals(text))
+            return true;
+        if (ArchivesExcelLocaleString.T_CHECK_IN_TIME.equals(text))
+            return true;
+        if (ArchivesExcelLocaleString.T_EMPLOYEE_TYPE.equals(text))
+            return true;
+        if (ArchivesExcelLocaleString.T_DEPARTMENT.equals(text))
+            return true;
+        return false;
+    }
+
+    private XSSFCellStyle commonTitleStyle(XSSFWorkbook workbook){
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 11);
@@ -71,23 +100,37 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         titleStyle.setAlignment(HorizontalAlignment.CENTER);
         titleStyle.setFont(font);
         titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        titleStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex()); //  find it in the IndexedColors
-
-        for (int i = 0; i < title.size(); i++) {
-            Cell cell = titleRow.createCell(i);
-            cell.setCellStyle(titleStyle);
-            cell.setCellValue(title.get(i));
-        }
-
+        titleStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        return titleStyle;
     }
 
-    private void buildExcel(Workbook workbook, HttpServletResponse httpResponse) {
+    private XSSFCellStyle mandatoryTitleStyle(XSSFWorkbook workbook){
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 11);
+        font.setColor(IndexedColors.RED.index);
+        font.setBold(true);
+        font.setFontName("微软雅黑");
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setFont(font);
+        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        titleStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        return titleStyle;
+    }
+
+    private void buildExcel(Workbook workbook, HttpServletResponse httpResponse, String fileName) {
         try {
-            ByteArrayOutputStream templateStream = new ByteArrayOutputStream();
-            workbook.write(templateStream);
-            DownloadUtil.download(templateStream, httpResponse);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            DownloadUtil.download(out, httpResponse, fileName);
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            try {
+                workbook.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -97,42 +140,4 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             form = archivesFormService.getArchivesDefaultForm();
         return form;
     }
-
-    private Integer checkMandatory(String name) {
-        if (ArchivesParameter.CONTACT_NAME.equals(name))
-            return 1;
-        else if (ArchivesParameter.CONTACT_TOKEN.equals(name))
-            return 1;
-        else if (ArchivesParameter.CHECK_IN_TIME.equals(name))
-            return 1;
-        else if (ArchivesParameter.EMPLOYEE_TYPE.equals(name))
-            return 1;
-        else if (ArchivesParameter.DEPARTMENT.equals(name))
-            return 1;
-        else
-            return 0;
-    }
-
-/*
-      /*  ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
-        List<String> titleNames = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
-        List<String> propertyNames = new ArrayList<>();
-        List<Integer> titleSizes = new ArrayList<>();
-        for (int i = 0; i < form.getFormFields().size(); i++) {
-            titleSizes.add(20);
-        }
-        excelSettings(excelUtils, form);
-        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
-
-        private void excelSettings(ExcelUtils excelUtils, ArchivesFormDTO form) {
-        List<Integer> mandatoryTitle = new ArrayList<>();
-        for (int i = 0; i < form.getFormFields().size(); i++) {
-            mandatoryTitle.add(checkMandatory(form.getFormFields().get(i).getFieldName()));
-        }
-        excelUtils.setNeedMandatoryTitle(true);
-        excelUtils.setMandatoryTitle(mandatoryTitle);
-        excelUtils.setTitleRemark(localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.EMPLOYEE_IMPORT_REMARK, "zh_CN", "EmployeeImportRemark"), (short) 18, (short) 4480);
-        excelUtils.setNeedSequenceColumn(false);
-        excelUtils.setNeedTitleRemark(true);
-    }*/
 }
