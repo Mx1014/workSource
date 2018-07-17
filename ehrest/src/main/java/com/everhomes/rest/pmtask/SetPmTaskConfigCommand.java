@@ -6,6 +6,7 @@ package com.everhomes.rest.pmtask;
  * <li>namespaceId: 域空间Id</li>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>taskCategoryId: 应用类型：6为物业报修（1为正中会报修），9为投诉建议</li>
  * <li>paymentFlag: 费用清单在线支付启用标识 0:禁用 1:启用</li>
  * <li>paymentAccount: 收款方账号</li>
  * <li>paymentAccountType: 收款方类型</li>
@@ -18,6 +19,7 @@ public class SetPmTaskConfigCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
+    private Long taskCategoryId;
     private Byte paymentFlag;
     private Long paymentAccount;
     private Byte paymentAccountType;
@@ -85,5 +87,13 @@ public class SetPmTaskConfigCommand {
 
     public void setContentHint(String contentHint) {
         this.contentHint = contentHint;
+    }
+
+    public Long getTaskCategoryId() {
+        return taskCategoryId;
+    }
+
+    public void setTaskCategoryId(Long taskCategoryId) {
+        this.taskCategoryId = taskCategoryId;
     }
 }

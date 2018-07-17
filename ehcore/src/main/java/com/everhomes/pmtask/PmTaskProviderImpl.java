@@ -571,7 +571,7 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	}
 
 	@Override
-	public PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId) {
+	public PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId, Long taskCategoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskConfigs.class));
 		SelectQuery query = context.selectQuery(Tables.EH_PM_TASK_CONFIGS);
 		if(null != namespaceId)
@@ -580,6 +580,8 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 			query.addConditions(Tables.EH_PM_TASK_CONFIGS.OWNER_TYPE.eq(ownerType));
 		if(null != ownerId)
 			query.addConditions(Tables.EH_PM_TASK_CONFIGS.OWNER_ID.eq(ownerId));
+		if(null != taskCategoryId)
+			query.addConditions(Tables.EH_PM_TASK_CONFIGS.TASK_CATEGORY_ID.eq(taskCategoryId));
 		return ConvertHelper.convert(query.fetchOne(),PmTaskConfig.class);
 	}
 

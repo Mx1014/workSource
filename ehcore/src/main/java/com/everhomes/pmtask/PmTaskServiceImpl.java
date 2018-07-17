@@ -3262,7 +3262,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public PmTaskConfigDTO setPmTaskConfig(SetPmTaskConfigCommand cmd) {
 		User user = UserContext.current().getUser();
-		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
 		if(null != result){
 			if(StringUtils.isNotEmpty(cmd.getContentHint()))
 				result.setContentHint(cmd.getContentHint());
@@ -3290,7 +3290,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameter.");
 		}
-		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
 		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
 	}
 
@@ -3533,7 +3533,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		//2、收款方是否有会员，无则报错
-		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+		Long taskCategoryId = 6L;
+		if(999983 == cmd.getNamespaceId())
+			taskCategoryId = 1L;
+		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),taskCategoryId);
 		Long payeeUserId = pmTaskConfig.getPaymentAccount();
 		if(payeeUserId == null) {
 			LOGGER.error("payeeUserId no find, cmd={}", cmd);
