@@ -3376,16 +3376,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public PmTaskOrderDTO searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd) {
+		PmTask task = this.pmTaskProvider.findTaskById(cmd.getTaskId());
 		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
 		PmTaskOrderDTO dto = new PmTaskOrderDTO();
-		if(null != order)
-			dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
 		List<PmTaskOrderDetailDTO> products = new ArrayList<>();
-		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(null, null, null, cmd.getTaskId());
-		if(null != result && result.size() > 0){
-			products = result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList());
+		dto.setProducts(products);
+		if(task.getStatus() == PmTaskFlowStatus.COMPLETED.getCode() || task.getStatus() == PmTaskFlowStatus.CONFIRMED.getCode()){
+			if(null != order)
+				dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
+
+			List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(null, null, null, cmd.getTaskId());
+			if(null != result && result.size() > 0){
+				products.addAll(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
+			}
 		}
-			dto.setProducts(products);
 		return dto;
 	}
 
