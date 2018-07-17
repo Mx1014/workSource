@@ -329,10 +329,10 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 				if (dto.getOrganizationUid()==0)
 					dto.setOrganizationUid(null);
 
-				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(t.getId());
-				if(null != order){
-					dto.setAmount(order.getAmount());
-				}
+//				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(t.getId());
+//				if(null != order){
+//					dto.setAmount(order.getAmount());
+//				}
 
     			return dto;
     		}).collect(Collectors.toList()));

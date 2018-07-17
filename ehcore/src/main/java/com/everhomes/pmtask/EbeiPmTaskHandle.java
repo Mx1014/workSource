@@ -800,17 +800,16 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         int listSize = list.size();
         if(listSize > 0){
             response.setRequests(list.stream().map(t -> {
-//    			PmTask task = pmTaskProvider.findTaskById(t.getId());
                 PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
 
                 CategoryDTO taskCategory = createCategoryDTO();
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
 
-                PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(t.getId());
-                if(null != order){
-                    dto.setAmount(order.getAmount());
-                }
+//                PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(t.getId());
+//                if(null != order){
+//                    dto.setAmount(order.getAmount());
+//                }
 
                 return dto;
             }).collect(Collectors.toList()));

@@ -616,6 +616,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 			} else if ("CONFIRMFEE".equals(btnNodeType)){
 // TODO: 2018/7/11 支付
+				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+				task.setAmount(order.getAmount());
+				pmTaskProvider.updateTask(task);
+				pmTaskSearch.feedDoc(task);
+
 				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
 				FlowAutoStepDTO dto = new FlowAutoStepDTO();
 				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());

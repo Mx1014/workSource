@@ -123,6 +123,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -1117,7 +1118,58 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 				Cell cell10 = tempRow.createCell(10);
 				cell10.setCellStyle(style);
-				cell10.setCellValue(null == task.getStar() ? "-" : task.getStar().toString());
+				cell10.setCellValue(null == task.getStar() ? "-" : task.getStar());
+
+				Cell cell11 = tempRow.createCell(11);
+				cell11.setCellStyle(style);
+
+				Cell cell12 = tempRow.createCell(12);
+				cell12.setCellStyle(style);
+
+				Cell cell13 = tempRow.createCell(13);
+				cell13.setCellStyle(style);
+
+				Cell cell14 = tempRow.createCell(14);
+				cell14.setCellStyle(style);
+
+				String feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel","");
+				if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
+					if(PmTaskFlowStatus.COMPLETED.getCode() == task.getStatus() || PmTaskFlowStatus.CONFIRMED.getCode() == task.getStatus()){
+//						费用确认后导出费用清单
+						PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+						if(null != order){
+							BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+							BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+							BigDecimal totalAmount = BigDecimal.valueOf(order.getAmount());
+
+
+							cell11.setCellValue(serviceFee.movePointLeft(2).toString());
+
+
+							cell12.setCellValue(productFee.movePointLeft(2).toString());
+
+							List<PmTaskOrderDetail> products = pmTaskProvider.findOrderDetailsByTaskId(null,null,null,task.getId());
+							StringBuffer content = new StringBuffer();
+							if(null != products && products.size() > 0){
+								for (PmTaskOrderDetail r : products) {
+									BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+									BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+									content.append(r.getProductName() + ":");
+									content.append(price.multiply(amount).movePointLeft(2).toString() + "元");
+									content.append("(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")\n");
+								}
+							}
+
+
+							cell13.setCellValue(content.toString());
+
+
+							cell14.setCellValue(totalAmount.movePointLeft(2).toString());
+						}
+
+					}
+				}
+
 			}
 
 			Row tempRow4 = sheet.createRow(size + 4);
@@ -3942,19 +3994,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(null != order){
 			content += "本次服务的费用清单如下，请进行确认\n";
 			BigDecimal total = BigDecimal.valueOf(order.getAmount());
-			content += "总计:"+total.movePointLeft(2).toString()+"元\n";
+			content += "总计："+total.movePointLeft(2).toString()+"元\n";
 			BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
-			content += "服务费:"+serviceFee.movePointLeft(2).toString()+"元\n";
+			content += "服务费："+serviceFee.movePointLeft(2).toString()+"元\n";
 			BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
-			content += "物品费:"+ productFee.movePointLeft(2) +"元\n";
+			content += "物品费："+ productFee.movePointLeft(2) +"元\n";
 			if(null != products && products.size() > 0){
 				content += "物品费详情：\n";
 				for (PmTaskOrderDetail r : products) {
 					BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
 					BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
-					content += r.getProductName() + ":";
+					content += r.getProductName() + "：";
 					content += price.multiply(amount).movePointLeft(2).toString() + "元";
-					content += "(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")\n";
+					content += "（" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + "）\n";
 				}
 			}
 			content += "如对上述费用有疑义请附言说明";

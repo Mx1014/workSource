@@ -7,6 +7,7 @@ CREATE TABLE `eh_pm_task_configs` (
   `namespace_id` int NOT NULL DEFAULT '0',
   `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
   `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
+  `task_category_id` bigint(20) NOT NULL DEFAULT '6' COMMENT '应用类型：6为物业报修（1为正中会报修），9为投诉建议',
   `payment_flag` tinyint(4) DEFAULT '0' COMMENT '0: inactive, 1: active',
   `payment_account` bigint(20) DEFAULT NULL COMMENT '收款方账号',
   `payment_account_type` tinyint(4) DEFAULT NULL COMMENT '收款方类型',
