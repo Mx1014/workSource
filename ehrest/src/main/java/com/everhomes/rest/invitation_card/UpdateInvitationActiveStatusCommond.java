@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateInvitationActiveStatusCommond {
     private Integer namespaceId;
+    private Long moduleId;
     private Long id;
     private Byte status;
 
@@ -38,6 +39,14 @@ public class UpdateInvitationActiveStatusCommond {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
     @Override
