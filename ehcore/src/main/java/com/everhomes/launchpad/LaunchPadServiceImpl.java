@@ -2725,6 +2725,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemDTO.setContentType(searchType.getContentType());
 			dtos.add(itemDTO);
 		});
+
+		refreshActionData(dtos, sceneTokenDto);
+
 		response.setLaunchPadItemDtos(dtos);
 		response.setNextPageAnchor(nextPageAnchor);
 		return response;
