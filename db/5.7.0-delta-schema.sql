@@ -43,6 +43,7 @@ CREATE TABLE `eh_customer_attachments` (
 
 -- 通用脚本
 -- AUTHOR liuyilin  20180712
--- REMARK issue-32260 人脸识别V1.6 - 管理控制台 增加字段长度 
+-- REMARK issue-32260 人脸识别V1.6 - 管理控制台 增加字段长度 删除唯一约束
 ALTER TABLE `eh_aclink_servers` MODIFY COLUMN `uuid` VARCHAR(64) NOT NULL;
+ALTER TABLE `eh_aclink_servers` DROP INDEX `uuid`;
 -- end
