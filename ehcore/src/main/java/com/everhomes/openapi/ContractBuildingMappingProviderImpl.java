@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.server.schema.tables.records.EhContractBuildingMappingsRecord;
+import com.everhomes.server.schema.tables.records.EhVarFieldItemScopesRecord;
+import com.everhomes.server.schema.tables.records.EhVarFieldItemsRecord;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +20,15 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
 import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RecordHelper;
+import com.everhomes.varField.FieldItem;
+import com.everhomes.varField.ScopeFieldItem;
 
 @Component
 public class ContractBuildingMappingProviderImpl implements ContractBuildingMappingProvider {
@@ -192,6 +198,27 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		});
 
 		return result;
+	}
+	
+	@Override
+	public FieldItem listFieldItems(String moduleName, Long fieldId, Byte businessValue) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<FieldItem> item = new ArrayList<>();
+		SelectQuery<EhVarFieldItemsRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEMS);
+		query.addConditions(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.eq(fieldId));
+		query.addConditions(Tables.EH_VAR_FIELD_ITEMS.MODULE_NAME.eq(moduleName));
+		query.addConditions(Tables.EH_VAR_FIELD_ITEMS.BUSINESS_VALUE.eq(businessValue));
+		query.addConditions(Tables.EH_VAR_FIELD_ITEMS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			item.add(ConvertHelper.convert(r, FieldItem.class));
+			return null;
+		});
+
+		if (item.size() == 0)
+			return null;
+
+		return item.get(0);
 	}
 
 	private EhContractBuildingMappingsDao getReadWriteDao() {

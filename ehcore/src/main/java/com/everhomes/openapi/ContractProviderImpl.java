@@ -6,8 +6,26 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.contract.ContractAttachment;
@@ -15,45 +33,42 @@ import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractChargingChange;
 import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
-
-import com.everhomes.contract.ContractCategory;
-
-import com.everhomes.asset.AssetErrorCodes;
-
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
-import com.everhomes.customer.CustomerEvent;
-import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.contract.ContractTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.server.schema.tables.*;
-import com.everhomes.server.schema.tables.EhContractAttachments;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhContractEvents;
+import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
-import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.EhContractCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
-import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.daos.EhContractTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhContractsDao;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
-import com.everhomes.server.schema.tables.pojos.EhNewsCategories;
 import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
@@ -61,6 +76,7 @@ import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
 import com.everhomes.util.RuntimeErrorException;
@@ -70,37 +86,6 @@ import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultRecordMapper;
-
-import org.jooq.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.news.NewsCategory;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhContractsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerEventsDao;
-import com.everhomes.server.schema.tables.daos.EhNewsCategoriesDao;
-import com.everhomes.util.ConvertHelper;
-
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -216,14 +201,18 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber) {
-		Record result = getReadOnlyContext().select()
+	public Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber, Long categoryId) {
+		SelectConditionStep<Record> query = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 //				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
-				.fetchAny();
-
+				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber));
+				
+		if (categoryId != null || "".equals(categoryId)) {
+			query.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		}
+		
+		Record result = query.fetchAny();
 		if (result != null) {
 			return ConvertHelper.convert(result, Contract.class);
 		}
@@ -1119,7 +1108,24 @@ public class ContractProviderImpl implements ContractProvider {
 					            }
 							}
 						}
-						
+						//templateId
+						if("templateId".equals(field.getFieldName())){
+							//获取模板的名字
+				            if (objNew!=null) {
+				            	//根据id查询数据，
+				        		ContractTemplate contractTemplateParent = this.findContractTemplateById((Long)objNew);
+				            	if(contractTemplateParent != null) {
+					            	newData = contractTemplateParent.getName();
+					            }
+							}
+				            if (objOld!=null) {
+				            	//根据id查询数据，
+				        		ContractTemplate contractTemplateParent = this.findContractTemplateById((Long)objOld);
+					            if(contractTemplateParent != null) {
+					            	oldData = contractTemplateParent.getName();
+					            }
+							}
+						}
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
                         if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
                             ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
@@ -1182,7 +1188,96 @@ public class ContractProviderImpl implements ContractProvider {
                 .where(Tables.EH_CONTRACTS.ID.eq(contractId))
                 .fetchOne(Tables.EH_CONTRACTS.CATEGORY_ID);
 	}
+	
+	@Override
+	public void createContractTemplate(ContractTemplate contractTemplate) {
+        long id = this.dbProvider.allocPojoRecordId(EhContractTemplates.class);
+        contractTemplate.setId(id);
+        contractTemplate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        contractTemplate.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+        contractTemplate.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, id));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        dao.insert(contractTemplate);
 
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhContractTemplates.class, null);
+	}
+
+	@Override
+	public ContractTemplate findContractTemplateById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractTemplates.class, id));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ContractTemplate.class);
+	}
+
+	@Override
+	public void updateContractTemplate(ContractTemplate contractTemplate) {
+		assert(contractTemplate.getId() != null);
+		contractTemplate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contractTemplate.setUpdateUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class, contractTemplate.getId()));
+        EhContractTemplatesDao dao = new EhContractTemplatesDao(context.configuration());
+        dao.update(contractTemplate);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTemplates.class, contractTemplate.getId());
+	}
+
+	@Override
+	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,
+			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
+        EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
+        EhContractTemplates t2 = Tables.EH_CONTRACT_TEMPLATES.as("t2");
+        SelectJoinStep<Record> query = context.select(Tables.EH_CONTRACT_TEMPLATES.fields()).from(Tables.EH_CONTRACT_TEMPLATES);
+        
+		Condition cond = Tables.EH_CONTRACT_TEMPLATES.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		
+		if(null != pageAnchor && pageAnchor != 0){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID.gt(pageAnchor));
+		}
+		if(null != name && !"".equals(name)){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.NAME.like('%'+name+'%'));
+		}
+		if(null != categoryId){
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.CATEGORY_ID.eq(categoryId));
+		}
+		//取到最大的versionid
+		if (null != ownerId && ownerId != -1) {
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(ownerId).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
+			
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
+		}else {
+			//查询所有的通用模板
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
+					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.notEqual(0L)))));
+		}
+		
+		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
+		
+		if(null != pageSize)
+			query.limit(pageSize);
+		
+		List<ContractTemplate> contracttemplates = query.where(cond).fetch().
+				map(new DefaultRecordMapper(Tables.EH_CONTRACT_TEMPLATES.recordType(), ContractTemplate.class));
+
+		return contracttemplates;
+	}
+
+	@Override
+	public void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber,
+			Long ownerId, Long templateId) {
+		getReadWriteContext().update(Tables.EH_CONTRACTS)
+		.set(Tables.EH_CONTRACTS.TEMPLATE_ID, templateId)
+		.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_CONTRACTS.ID.eq(contractId))
+		.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId))
+		.execute();
+	}
 
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
@@ -1206,6 +1301,21 @@ public class ContractProviderImpl implements ContractProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public Boolean getContractTemplateById(Long id) {
+		List<Byte> cids = getReadOnlyContext().select(Tables.EH_CONTRACTS.STATUS)
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.TEMPLATE_ID.eq(id))
+				.and(Tables.EH_CONTRACTS.STATUS.notEqual(ContractTemplateStatus.INACTIVE.getCode()))
+				.fetch(Tables.EH_CONTRACTS.STATUS);
+		if(cids == null || cids.size() < 1){
+			//模板没有关联合同
+			return false;
+		}
+		
+		return true;
 	}
 
 }
