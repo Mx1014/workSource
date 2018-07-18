@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.everhomes.rest.forum.NeedTemporaryType;
+import com.everhomes.rest.forum.PostCloneFlag;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
@@ -1157,7 +1158,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 					if(contentCategoryId != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
-					
+					//统计时，只统计real贴和normal贴
+					Condition cloneCondition = Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode());
+					cloneCondition  =cloneCondition.or(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.REAL.getCode()));
+					condition = condition.and(cloneCondition);
 					if(isDelete){
 						condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.INACTIVE.getCode()));
 						if(startTime != null && endTime != null){
@@ -1269,6 +1273,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 					if(contentCategoryId != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
+                    //统计时，只统计real贴和normal贴
+                    Condition cloneCondition = Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode());
+                    cloneCondition  =cloneCondition.or(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.REAL.getCode()));
+                    condition = condition.and(cloneCondition);
 
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 					if(startTime != null && endTime != null){
@@ -1372,7 +1380,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 					if(contentCategoryId != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
-					
+                    //统计时，只统计real贴和normal贴
+                    Condition cloneCondition = Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode());
+                    cloneCondition  =cloneCondition.or(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.REAL.getCode()));
+                    condition = condition.and(cloneCondition);
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 
 					List<Object[]> list = context.select(Tables.EH_ACTIVITIES.TAG, DSL.count())
@@ -1402,7 +1413,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 					if(contentCategoryId != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
-					
+                    //统计时，只统计real贴和normal贴
+                    Condition cloneCondition = Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode());
+                    cloneCondition  =cloneCondition.or(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.REAL.getCode()));
+                    condition = condition.and(cloneCondition);
 					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 

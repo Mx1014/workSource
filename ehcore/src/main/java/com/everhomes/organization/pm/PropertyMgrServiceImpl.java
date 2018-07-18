@@ -1,6 +1,5 @@
 // @formatter:off
 package com.everhomes.organization.pm;
-
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.beans.PropertyDescriptor;
@@ -23,6 +22,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,6 +41,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+
+import net.greghaines.jesque.Job;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -139,6 +141,7 @@ import com.everhomes.pushmessage.PushMessageResultProvider;
 import com.everhomes.pushmessage.PushMessageStatus;
 import com.everhomes.pushmessage.PushMessageTargetType;
 import com.everhomes.pushmessage.PushMessageType;
+import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -199,6 +202,7 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.AccountType;
+import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.BillTransactionResult;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -226,6 +230,7 @@ import com.everhomes.rest.organization.TxType;
 import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.pushmessagelog.PushMessageTypeCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.IdentifierType;
@@ -256,6 +261,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateStatisticHelper;
@@ -272,47 +278,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
-import jdk.nashorn.internal.parser.JSONParser;
-import net.greghaines.jesque.Job;
-import org.apache.poi.ss.usermodel.*;
-import org.jooq.Record;
-import org.jooq.RecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import java.io.*;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import net.greghaines.jesque.Job;
 
 /**
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
@@ -455,6 +420,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
    	@Autowired
     private ScheduleProvider scheduleProvider;
+   	
+   	@Autowired
+   	private PushMessageLogService pushMessageLogService;
 
     private String queueName = "property-mgr-push";
 
@@ -473,6 +441,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			if(!isRunning) {
 				workerPoolFactory.getWorkerPool().addQueue(queueName);
 				isRunning = true;
+				LOGGER.info("WorkerPool addQueue queueName ={}",queueName);
 			}
 		}
         
@@ -1315,7 +1284,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void sendNotice(SendNoticeCommand cmd) {
 
-        this.checkCommunityIdIsNull(cmd.getCommunityId());
+       // this.checkCommunityIdIsNull(cmd.getCommunityId()); 
 
 		/*List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
@@ -1348,7 +1317,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}*/
 
         LOGGER.debug("push message task scheduling, cmd = {}", cmd);
-
+        //创建消息记录
+        Long logId = pushMessageLogService.createfromSendNotice(cmd, PushMessageTypeCode.APP.getCode());
+        cmd.setLogId(logId);
+        LOGGER.info("create pushMessageLog and set status waitting  .");
         // 调度执行一键推送
         Job job = new Job(
                 SendNoticeAction.class.getName(),
@@ -1358,6 +1330,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 cmd.getNamespaceId()
         );
 
+               
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
     }
 
@@ -1373,7 +1346,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         if (sendNoticeMode == SendNoticeMode.NAMESPACE) {
             sendNoticeToNamespaceUser(cmd);
-        } else {
+        } 
+         //添加按项目推送的维度 20180712
+        else if(sendNoticeMode == SendNoticeMode.COMMUNITY){
+        	sendNoticeToCommunitsUser(cmd);
+        	
+        }else {
             // 八百年前的代码，看都不想看
             Community community = this.checkCommunity(cmd.getCommunityId());
 
@@ -1395,6 +1373,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             List<User> users = userProvider.listUserByNamespace(null, cmd.getNamespaceId(), locator, 200);
             for (User u : users) {
                 sendNoticeToUserById(u.getId(), messageBody, cmd.getMessageBodyType());
+            }
+        } while (locator.getAnchor() != null);
+    }
+    
+    /**
+     * 按项目推送
+     * @param cmd
+     */
+    private void sendNoticeToCommunitsUser(SendNoticeCommand cmd) {
+        String messageBody = processMessage(cmd.getMessage(), cmd.getMessageBodyType(),
+                cmd.getImgUri(), EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+
+        List<Integer> status = new ArrayList<Integer>();
+        status.add(AuthFlag.PENDING_AUTHENTICATION.getCode());
+        status.add(AuthFlag.AUTHENTICATED.getCode());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        do {
+            List<UserOrganizations> users = organizationProvider.findUserByCommunityIDAndAuthStatus(cmd.getNamespaceId(),
+            							cmd.getCommunityIds(), status, locator, 200);
+            for (UserOrganizations u : users) {
+                sendNoticeToUserById(u.getUserId(), messageBody, cmd.getMessageBodyType());
             }
         } while (locator.getAnchor() != null);
     }
@@ -2658,6 +2657,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
+        enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(cmd.getId());
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
@@ -5048,6 +5048,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
             }
         }
+        CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
+        pmOwnerSearcher.feedDoc(owner);
 
         return convertOwnerToDTO(tuple.first());
     }
@@ -6860,6 +6862,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
                 }
             }
+            pmOwnerSearcher.feedDoc(owner);
         }
         return resultLogs;
     }

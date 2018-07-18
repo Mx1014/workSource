@@ -5,6 +5,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.util.RuntimeErrorException;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +86,15 @@ public class GogsServiceImpl implements GogsService {
         GogsRawFileParam param = new GogsRawFileParam();
         param.setLastCommit(lastCommit);
         return gogsProvider.listObjects(repo.getFullName(), path, param, GogsObject.class);
+    }
+
+    @Override
+    public List<GogsCommit> listCommits(GogsRepo repo, String path, Integer page, Integer size) {
+        check(repo, path);
+        GogsPaginationParam param = new GogsPaginationParam();
+        param.setPage(page);
+        param.setSize(size);
+        return gogsProvider.listCommits(repo.getFullName(), path, param, new TypeToken<List<GogsCommit>>() {}.getType());
     }
 
     @Override

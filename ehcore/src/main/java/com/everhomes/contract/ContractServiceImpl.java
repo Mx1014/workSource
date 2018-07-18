@@ -1,21 +1,6 @@
 // @formatter:off
 package com.everhomes.contract;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -73,8 +58,6 @@ import com.everhomes.rest.asset.RentFree;
 import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
-import com.everhomes.rest.contract.*;
-import com.everhomes.rest.customer.CustomerEventDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChangeType;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
@@ -82,10 +65,13 @@ import com.everhomes.rest.contract.CheckAdminCommand;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractAttachmentDTO;
 import com.everhomes.rest.contract.ContractChargingChangeDTO;
+import com.everhomes.rest.contract.ContractChargingChangeEventDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
+import com.everhomes.rest.contract.ContractChargingItemEventDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractEventDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractNumberDataType;
 import com.everhomes.rest.contract.ContractParamDTO;
@@ -94,6 +80,7 @@ import com.everhomes.rest.contract.ContractParamGroupType;
 import com.everhomes.rest.contract.ContractPaymentPlanDTO;
 import com.everhomes.rest.contract.ContractPaymentType;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
 import com.everhomes.rest.contract.ContractType;
 import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.CreatePaymentContractCommand;
@@ -106,6 +93,7 @@ import com.everhomes.rest.contract.GenerateContractNumberRule;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractEventsCommand;
 import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
 import com.everhomes.rest.contract.ListContractsBySupplierCommand;
 import com.everhomes.rest.contract.ListContractsBySupplierResponse;
@@ -182,9 +170,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -2269,6 +2259,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			return contracts.stream().map(contract -> {
 				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
 				dto.setOrganizationName(contract.getCustomerName());
+				dto.setContractTypeName(ContractType.fromStatus(contract.getContractType()).getDescription());
 				if(categoryConfigMap.containsKey(contract.getCategoryId())){
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}else{

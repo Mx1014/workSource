@@ -1,6 +1,8 @@
 package com.everhomes.general_form;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
@@ -13,7 +15,6 @@ import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
-import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,8 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
         obj.setCreateTime(new Timestamp(l2));
         EhGeneralFormValsDao dao = new EhGeneralFormValsDao(context.configuration());
         dao.insert(obj);
+        //add by RuiJia for publishing create action to customer listener 20180629
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhGeneralFormVals.class, id);
         return id;
     }
 

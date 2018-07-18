@@ -122,6 +122,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -4346,7 +4347,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				order.getResourceType(), order.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId());
 
 		if (order.getRentalType().equals(RentalType.HOUR.getCode()) || order.getRentalType().equals(RentalType.HALFDAY.getCode())
-				|| order.getRentalType().equals(RentalType.THREETIMEADAY.getCode()) || order.getRentalType().equals(RentalType.DAY.getCode())) {
+				|| order.getRentalType().equals(RentalType.THREETIMEADAY.getCode())) {
 			RentalOrderStatistics statistics = ConvertHelper.convert(order, RentalOrderStatistics.class);
 			statistics.setOrderId(order.getId());
 			statistics.setValidTimeLong(order.getEndTime().getTime() - order.getStartTime().getTime());
@@ -4357,6 +4358,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					EhRentalv2Resources.class.getSimpleName(), order.getRentalResourceId());
 			Set<Long> closeTime = closeDates == null ? new HashSet<>() : closeDates.stream().map(r -> r.getCloseDate().getTime()).collect(Collectors.toSet());
 			LocalDateTime startDate = new java.util.Date(order.getStartTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			startDate = LocalDateTime.of(startDate.toLocalDate(), LocalTime.MIN);
 			LocalDateTime endDate = new java.util.Date(order.getEndTime().getTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 			while (!startDate.isAfter(endDate)) {
 				Long time = startDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -4369,7 +4371,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						RentalDayopenTime t = dayopenTimes.get(0);
 						statistics.setValidTimeLong((long) (t.getCloseTime() - t.getOpenTime()) * 3600 * 1000);
 					} else
-						statistics.setValidTimeLong((long) (rule.getDayOpenTime() - rule.getDayCloseTime()) * 3600 * 1000);
+						statistics.setValidTimeLong((long) ( rule.getDayCloseTime()-rule.getDayOpenTime()) * 3600 * 1000);
 					statistics.setRentalDate(new Date(time));
 					rentalv2Provider.createRentalOrderStatistics(statistics);
 				}

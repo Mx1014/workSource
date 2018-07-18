@@ -1,8 +1,6 @@
 //@formatter:off
 package com.everhomes.rest.field;
 
-import java.util.List;
-
 /**
  * Created by Wentian Wang on 2017/9/13.
  */
@@ -28,6 +26,7 @@ public class ExportFieldsExcelCommand {
 
     private Long communityId;
     private Long orgId;
+    private Byte headerDisplay;
 
     public Long getOrgId() {
         return orgId;
@@ -83,5 +82,14 @@ public class ExportFieldsExcelCommand {
 
     public void setIncludedGroupIds(String includedGroupIds) {
         this.includedGroupIds = includedGroupIds;
+    }
+
+
+    public Byte getHeaderDisplay() {
+        return headerDisplay;
+    }
+
+    public void setHeaderDisplay(Byte headerDisplay) {
+        this.headerDisplay = headerDisplay;
     }
 }

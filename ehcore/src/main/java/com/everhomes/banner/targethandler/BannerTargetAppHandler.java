@@ -4,6 +4,10 @@ import com.everhomes.banner.BannerTargetHandleResult;
 import com.everhomes.banner.BannerTargetHandler;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.banner.targetdata.BannerAppTargetData;
+import com.everhomes.rest.common.RentalActionData;
+import com.everhomes.rest.common.Router;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.springframework.stereotype.Component;
@@ -21,7 +25,19 @@ public class BannerTargetAppHandler implements BannerTargetHandler {
                     "Target data should be not null.");
         }
 
-        BannerAppTargetData tData = (BannerAppTargetData) StringHelper.fromJsonString(targetData, BannerAppTargetData.class);
+        BannerAppTargetData tData = (BannerAppTargetData)
+                StringHelper.fromJsonString(targetData, BannerAppTargetData.class);
+
+        // #28905 资源预定 title 显示名称，特殊处理
+        if (ActionType.RENTAL == ActionType.fromCode(tData.getActionType())) {
+            RentalActionData actionData = (RentalActionData)
+                    StringHelper.fromJsonString(tData.getActionData(), RentalActionData.class);
+            String uri = RouterBuilder.build(Router.RESOURCE_RESERVATION_LIST, actionData, tData.getName());
+
+            tData.setActionType(ActionType.ROUTER.getCode());
+            tData.setActionData(formatURI(uri));
+        }
+
         BannerTargetHandleResult res = new BannerTargetHandleResult();
         res.setActionType(tData.getActionType());
         res.setActionData(tData.getActionData());

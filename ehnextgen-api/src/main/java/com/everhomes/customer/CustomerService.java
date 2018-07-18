@@ -24,14 +24,18 @@ import com.everhomes.rest.customer.CustomerAccountDTO;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
 import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerConfigurationCommand;
+import com.everhomes.rest.customer.CustomerConfigurationDTO;
 import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerEntryInfoDTO;
 import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerExpandItemDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
 import com.everhomes.rest.customer.CustomerInvestmentDTO;
 import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerPotentialResponse;
 import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
 import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
 import com.everhomes.rest.customer.CustomerTalentDTO;
@@ -123,6 +127,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
+import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -363,4 +368,20 @@ public interface CustomerService {
     void syncOrganizationToCustomer(SyncCustomerDataCommand cmd);
 
     HttpServletResponse exportCustomerDetails(ListEnterpriseCustomerStatisticsCommand cmd, HttpServletResponse httpResponse);
+
+    EnterpriseCustomerDTO getCustomerBasicInfoByOrgId(GetEnterpriseCustomerCommand cmd);
+
+    void deletePotentialCustomer(DeleteEnterpriseCommand cmd);
+
+    CustomerPotentialResponse listPotentialCustomers(DeleteEnterpriseCommand cmd);
+
+    void setSyncPotentialCustomer(CustomerConfigurationCommand cmd);
+
+    List<CustomerConfigurationDTO> listSyncPotentialCustomer(CustomerConfigurationCommand cmd);
+
+    List<CustomerExpandItemDTO> listExpandItems(CustomerConfigurationCommand cmd);
+
+    List<CustomerTalentDTO> listPotentialTalent(DeleteEnterpriseCommand cmd);
+
+    void updatePotentialCustomer(DeleteEnterpriseCommand cmd);
 }

@@ -10,11 +10,9 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralApprovalValsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalVals;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalValsRecord;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
-import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -126,4 +124,11 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
 	        }
 		
 	}
+
+    @Override
+    public GeneralApprovalVal getGeneralApprovalById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhGeneralApprovalValsDao dao = new EhGeneralApprovalValsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), GeneralApprovalVal.class);
+    }
 }
