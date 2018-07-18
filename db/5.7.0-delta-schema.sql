@@ -220,13 +220,6 @@ CREATE TABLE `eh_push_message_log` (
 -- end
 
 -- 通用脚本
--- AUTHOR liuyilin  20180712
--- REMARK issue-32260 人脸识别V1.6 - 管理控制台 增加字段长度 删除唯一约束
-ALTER TABLE `eh_aclink_servers` MODIFY COLUMN `uuid` VARCHAR(64) NOT NULL;
-ALTER TABLE `eh_aclink_servers` DROP INDEX `uuid`;
--- end
-
--- 通用脚本
 -- AUTHOR 郑思挺  20180718
 -- REMARK 资源预约3.5
 CREATE TABLE `eh_rentalv2_holiday` (
@@ -242,3 +235,11 @@ ADD COLUMN `org_member_original_price`  decimal(10,2) NULL AFTER `org_member_wor
 ADD COLUMN `approving_user_original_price`  decimal(10,2) NULL AFTER `approving_user_workday_price`;
 
 -- end
+
+-- 通用脚本
+-- AUTHOR liuyilin  20180712
+-- REMARK issue-32260 人脸识别V1.6 - 管理控制台 增加字段长度 删除唯一约束
+ALTER TABLE `eh_aclink_servers` MODIFY COLUMN `uuid` VARCHAR(64) NOT NULL;
+ALTER TABLE `eh_aclink_servers` DROP INDEX `uuid`;
+-- end
+
