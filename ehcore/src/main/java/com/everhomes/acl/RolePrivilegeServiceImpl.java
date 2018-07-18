@@ -1775,7 +1775,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}*/
 
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-
+		
 		List<OrganizationMember> members =
 				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
 						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
@@ -3112,6 +3112,36 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return dto;
 		}).collect(Collectors.toList());
 	}
+	
+	/**
+	 * 如果是应用管理员或者系统管理员，返回 true，普通用户，则返回 false 
+	 * by Janson
+	 * @param orgId
+	 * @param userId
+	 */
+	@Override
+	public boolean checkIsSystemOrAppAdmin(Long orgId, Long userId) {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		int pageSize = 10;
+		
+		//判断是否是应用管理员
+		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), orgId, EntityType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
+		if(authorizations == null || authorizations.size() == 0) {
+			locator = new CrossShardListingLocator();
+			
+			//判断是否是系统管理员
+			List<OrganizationMember> members =
+					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+							orgId, OrganizationMemberGroupType.MANAGER.getCode(),
+							EntityType.USER.getCode(), userId, pageSize, locator);
+			if(members == null || members.size() == 0) {
+				//非系统管理员
+				return false;
+			}
+		}
+		
+		return true;
+	}
 
 	@Override
 	public ListServiceModuleAppsAdministratorResponse listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
@@ -3127,6 +3157,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(cmd.getPageSize() != null){
 			pageSize = cmd.getPageSize();
 		}
+		
 		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), null, null, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
 		List<ServiceModuleAppsAuthorizationsDto> dtos = authorizations.stream().map((r) ->{
             ServiceModuleAppsAuthorizationsDto dto = new ServiceModuleAppsAuthorizationsDto();

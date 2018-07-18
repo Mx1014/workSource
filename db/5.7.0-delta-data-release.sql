@@ -659,6 +659,17 @@ VALUES (3,'cmbmobilebank','招商银行');
 update eh_service_modules SET path = '/200/110000/40200/40210' WHERE id = 40210;
 update eh_service_modules SET path = '/200/110000/40200/40220' WHERE id = 40220;
 -- end
+
+-- AUTHOR: 黄良铭
+-- REMARK: 一键推送改造
+SET @c_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO eh_locale_strings (id ,scope ,CODE ,locale ,TEXT)
+VALUES( @c_id + 1 , 'pushMessage',1 ,'zh_CN' ,'企业管理员');
+INSERT INTO eh_locale_strings (id ,scope ,CODE ,locale ,TEXT)
+VALUES( @c_id + 2 , 'pushMessage',2 ,'zh_CN' ,'业务联系人');
+
+DELETE FROM eh_web_menus  WHERE NAME='短信推送' AND data_type='sms-push' AND id=16020400;
+-- end
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
