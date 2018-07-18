@@ -21,6 +21,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.CreateLocalVistorCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
@@ -141,9 +142,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
         VisitorsysSearchFlagType searchFlagType = checkSearchFlag(cmd.getSearchFlag());
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.BOOKING_MANAGEMENT) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041810L, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_BOOKING_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }else if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041820L, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
         return listBookedVisitorsWithOutACL(cmd);
     }
@@ -335,6 +336,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else{
             VisitorSysVisitor oldVisitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(),cmd.getId());
             hasSendMessage = oldVisitor!=null && VisitorsysStatus.HAS_VISITED == VisitorsysStatus.fromCode(oldVisitor.getVisitStatus());
+            checkConcurrentModify(cmd,oldVisitor);
             visitor = updateVisitor(cmd,oldVisitor);
         }
         sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
@@ -344,6 +346,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
         return convert;
+    }
+
+    //更新访客状态的时候，检查状态是否已经被提前更新
+    private void checkConcurrentModify(CreateOrUpdateVisitorCommand cmd, VisitorSysVisitor oldVisitor) {
+        if((cmd.getBookingStatus()== VisitorsysStatus.REJECTED_VISIT.getCode()
+                && cmd.getVisitStatus()== VisitorsysStatus.REJECTED_VISIT.getCode()) ||
+                (cmd.getBookingStatus()== VisitorsysStatus.HAS_VISITED.getCode()
+                        && cmd.getVisitStatus()== VisitorsysStatus.HAS_VISITED.getCode())){
+            if(oldVisitor.getVisitStatus() == VisitorsysStatus.REJECTED_VISIT.getCode()
+                    || oldVisitor.getVisitStatus()  == VisitorsysStatus.HAS_VISITED.getCode()){
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_HAS_UPDATE_VISITOR,
+                        "此访客记录已被处理");
+            }
+        }
     }
 
     /**
@@ -724,7 +740,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public AddDeviceResponse addDevice(AddDeviceCommand cmd) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041840L, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
         if(cmd.getPairingCode()==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -788,7 +804,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListDevicesResponse listDevices(BaseVisitorsysCommand cmd) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), 4180041840L, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
 
         List<VisitorSysDevice> deviceList = visitorSysDeviceProvider.listVisitorSysDeviceByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
@@ -1638,42 +1654,59 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public void checkBlackList(CheckBlackListCommand cmd) {
-
+        VisitorSysDevice sysDevice = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
+        checkBlackList(sysDevice.getNamespaceId(),sysDevice.getOwnerType(),sysDevice.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
     }
 
     @Override
     public void checkBlackListForWeb(CheckBlackListForWebCommand cmd) {
-
+        checkBlackList(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
     }
 
+    public void checkMoblieManagePrivilege(BaseVisitorsysCommand cmd){
+        VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
+        if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
+        }else{
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "not support ownerType = "+cmd.getOwnerType()+" at mobile terminal");
+        }
+    }
     @Override
     public ListBookedVisitorsResponse listBookedVisitorsForManage(ListBookedVisitorsCommand cmd) {
-        return null;
+        cmd.setSearchFlag(VisitorsysSearchFlagType.VISITOR_MANAGEMENT.getCode());
+        checkMoblieManagePrivilege(cmd);
+        return listBookedVisitors(cmd);
     }
 
     @Override
     public GetBookedVisitorByIdResponse getBookedVisitorByIdForManage(GetBookedVisitorByIdCommand cmd) {
-        return null;
+        checkMoblieManagePrivilege(cmd);
+        return getBookedVisitorById(cmd);
     }
 
     @Override
     public ListVisitReasonsResponse listVisitReasonsForManage(BaseVisitorsysCommand cmd) {
-        return null;
+        checkMoblieManagePrivilege(cmd);
+        return listVisitReasons(cmd);
     }
 
     @Override
     public GetBookedVisitorByIdResponse createOrUpdateVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
-        return null;
+        checkMoblieManagePrivilege(cmd);
+        return createOrUpdateVisitorForManage(cmd);
     }
 
     @Override
     public void confirmVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
-
+        checkMoblieManagePrivilege(cmd);
+        confirmVisitor(cmd);
     }
 
     @Override
     public void rejectVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
-
+        checkMoblieManagePrivilege(cmd);
+        rejectVisitor(cmd);
     }
 
     /**
