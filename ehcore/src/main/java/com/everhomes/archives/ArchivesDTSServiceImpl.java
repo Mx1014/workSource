@@ -479,7 +479,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         UpdateArchivesEmployeeCommand updateCommand = new UpdateArchivesEmployeeCommand();
         updateCommand.setDetailId(detailId);
         updateCommand.setOrganizationId(organizationId);
-        updateCommand.setValues(itemValues);
+        updateCommand.setValues(itemValues.stream().filter(r -> !StringUtils.isEmpty(r.getFieldValue())).collect(Collectors.toList()));
         archivesService.updateArchivesEmployee(updateCommand);
     }
 
