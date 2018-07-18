@@ -35,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -65,7 +66,9 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     @Autowired
     private TaskService taskService;
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private DateTimeFormatter employeeFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+    private DateTimeFormatter templateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public ImportFileTaskDTO importArchivesContacts(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd) {
@@ -494,7 +497,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         params.put("organizationId", cmd.getOrganizationId());
         params.put("keywords", cmd.getKeywords());
         params.put("userId", UserContext.current().getUser().getId());
-        String fileName = ArchivesExcelLocaleString.E_FILENAME + "_" + formatter.format(LocalDate.now()) + ".xlsx";
+        String fileName = ArchivesExcelLocaleString.E_FILENAME + "_" + employeeFormat.format(LocalDate.now()) + ".xlsx";
 
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesEmployeesExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
     }
@@ -543,7 +546,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         Row headRow = sheet.createRow(0);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
         headRow.setHeight((short) (50 * 20));
-        createExcelHead(workbook, headRow, ArchivesExcelLocaleString.E_HEAD + DateHelper.currentGMTTime());
+        createExcelHead(workbook, headRow, ArchivesExcelLocaleString.E_HEAD + templateFormat.format(LocalDateTime.now()));
         //  2.title
         Row titleRow = sheet.createRow(1);
         createExcelTitle(workbook, sheet, titleRow, title);
