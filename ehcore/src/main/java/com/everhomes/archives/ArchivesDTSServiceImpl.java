@@ -623,6 +623,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         headStyle.setFont(font);
         headStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         headStyle.setFillForegroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex()); //  find it in the IndexedColors
+        headStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         headStyle.setWrapText(true);
 
         Cell cell = headRow.createCell(0);
