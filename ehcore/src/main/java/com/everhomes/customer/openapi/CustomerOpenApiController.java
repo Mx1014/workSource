@@ -177,7 +177,6 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("signatureGen")
     @RestReturn(value = String.class)
-    @RequireAuthentication(value = true)
     public RestResponse deleteEnterprisAdmin(HttpServletRequest request) {
         Map<String, String[]> paramMap = request.getParameterMap();
         Map<String, String> mapForSignature = new HashMap<String, String>();
