@@ -1,6 +1,9 @@
 -- 人事档案2.8 start by ryan 13/07/2018
 DROP TABLE eh_general_form_groups;
 
+DROP TABLE eh_archives_configurations;
+DROP TABLE eh_archives_logs;
+
 -- 此表未使用 直接重建
 DROP TABLE eh_archives_forms;
 CREATE TABLE `eh_archives_forms` (
