@@ -1,54 +1,34 @@
 package com.everhomes.pmtask;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-
-
-
-
-
-
-
-import java.util.stream.Collectors;
-
-import com.everhomes.flow.FlowCase;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.flow.FlowEvaluate;
+import com.everhomes.flow.FlowEvaluateProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	
@@ -69,6 +49,8 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	private FlowService flowService;
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+	@Autowired
+	private FlowEvaluateProvider flowEvaluateProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -342,11 +324,15 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 						dto.setTaskCategoryId(taskCategory.getId());
 						dto.setTaskCategoryName(taskCategory.getName());
 					}
-
 				}
 				
 				if (dto.getOrganizationUid()==0)
 					dto.setOrganizationUid(null);
+
+//				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(t.getId());
+//				if(null != order){
+//					dto.setAmount(order.getAmount());
+//				}
 
     			return dto;
     		}).collect(Collectors.toList()));
