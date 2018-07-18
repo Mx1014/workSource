@@ -382,7 +382,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			orderdto = ConvertHelper.convert(order,PmTaskOrderDTO.class);
 			orderdto.setProducts(products.stream().map(r->ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
 
-			if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode()){
+			if (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode())){
 				if (null != orderdto.getServiceFee()){
 					e = new FlowCaseEntity();
 					e.setEntityType(FlowCaseEntityType.LIST.getCode());

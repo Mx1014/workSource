@@ -3264,8 +3264,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		User user = UserContext.current().getUser();
 		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
 		if(null != result){
-			if(StringUtils.isNotEmpty(cmd.getContentHint()))
+			if(null != cmd.getContentHint())
 				result.setContentHint(cmd.getContentHint());
+			else
+				result.setContentHint("");
 			if(null != cmd.getPaymentFlag())
 				result.setPaymentFlag(cmd.getPaymentFlag());
 			if(null != cmd.getPaymentAccount())
@@ -3274,11 +3276,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 				result.setPaymentAccountType(cmd.getPaymentAccountType());
 			}
 			result.setUpdaterId(user.getId());
-			pmTaskProvider.updatePmTaskConfig(result);
+			result = pmTaskProvider.updatePmTaskConfig(result);
 		} else {
 			result = ConvertHelper.convert(cmd, PmTaskConfig.class);
 			result.setCreatorId(user.getId());
-			pmTaskProvider.createPmTaskConfig(result);
+			result = pmTaskProvider.createPmTaskConfig(result);
 		}
 		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
 	}
