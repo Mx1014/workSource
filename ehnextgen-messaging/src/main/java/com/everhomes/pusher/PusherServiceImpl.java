@@ -1,6 +1,34 @@
 // @formatter:off
 package com.everhomes.pusher;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+
+import org.jooq.tools.StringUtils;
+import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.apnshttp2.builder.ApnsClient;
+import com.everhomes.apnshttp2.builder.impl.ApnsClientBuilder;
+import com.everhomes.apnshttp2.notifiction.Notification;
+import com.everhomes.apnshttp2.notifiction.Notification.Builder;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -8,13 +36,22 @@ import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
+import com.everhomes.bundleid_mapper.BundleidMapper;
+import com.everhomes.bundleid_mapper.BundleidMapperProvider;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.developer_account_info.DeveloperAccountInfo;
+import com.everhomes.developer_account_info.DeveloperAccountInfoProvider;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
-import com.everhomes.messaging.*;
+import com.everhomes.messaging.ApnsServiceFactory;
+import com.everhomes.messaging.PushMessageResolver;
+import com.everhomes.messaging.PusherService;
+import com.everhomes.messaging.PusherVenderType;
+import com.everhomes.messaging.PusherVendorService;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
@@ -31,40 +68,32 @@ import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-import com.notnoop.apns.*;
+import com.notnoop.apns.APNS;
+import com.notnoop.apns.ApnsService;
+import com.notnoop.apns.ApnsServiceBuilder;
+import com.notnoop.apns.EnhancedApnsNotification;
+import com.notnoop.apns.PayloadBuilder;
 import com.notnoop.exceptions.NetworkIOException;
 import com.xiaomi.xmpush.server.Result;
 import com.xiaomi.xmpush.server.Sender;
-import org.json.simple.parser.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PusherServiceImpl.class);
     private final static String MESSAGE_INDEX_ID = "indexId";
+    private final static String TYPE_PRODUCTION = "production";
+    private final static String TYPE_DEVELOP = "develop";
+    //private final static String TYPE_DEVELOP = "develop";
+    /**
+     * add by huanglm 20180611,默认bundleId "com.ios" ,
+     * 凡是取不到开发者信息的时候就取这个bundleId对应的开发都信息
+     */
+    private final static String DEFAULT_BUNDLEID = "com.ios";
 
     @Autowired
     private BorderConnectionProvider borderConnectionProvider;
@@ -99,6 +128,19 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     @Autowired
     PusherVendorService pusherVendorService;
     
+    /**
+     * add by huanglm for IOS pusher update
+     */
+    @Autowired
+    DeveloperAccountInfoProvider developerAccountInfoProvider;
+    
+    /**
+     * add by huanglm for IOS pusher update
+     */
+    @Autowired
+    BundleidMapperProvider bundleidMapperProvider;
+    
+    
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
 //    private String queueName = "iOS-pusher2";
@@ -113,6 +155,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private String namespacePrefix = "namespace:";
     
     ConcurrentMap<String, ApnsService> certMaps = new ConcurrentHashMap<String, ApnsService>();
+    
+    /**
+     * add by huanglm 20180604 用于存储http2与apns的连接
+     */
+    ConcurrentMap<String, ApnsClient> http2ClientMaps = new ConcurrentHashMap<String, ApnsClient>();
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 
@@ -209,6 +256,15 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         
         LOGGER.info("Pushing to uid=" + destLogin.getUserId() );
     }
+    /**
+     * 该苹果推送方法为IOS推送升级前的方法，是基于证书和socket的推送方式
+     * @param senderLogin
+     * @param destLogin
+     * @param msgId
+     * @param msg
+     * @param platform
+     * @param devMessage
+     */
     private void pushMessageApple(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg, String platform, DeviceMessage devMessage) {
         PayloadBuilder payloadBuilder = APNS.newPayload();
         if(devMessage.getAlert().length() > 20) {
@@ -285,7 +341,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                             tempService.push(notification);   
                             if(LOGGER.isDebugEnabled()) {
                                 LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
-                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin+"payload="+payload);
                                     }
                      } else {
                          LOGGER.warn("Pushing apnsServer not found");
@@ -309,6 +365,62 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             
     }
 
+    /**
+     * 该苹果推送方法为IOS推送升级的方法，是基于Token和http2的推送方式
+     * @param senderLogin
+     * @param destLogin
+     * @param msgId
+     * @param msg
+     * @param platform
+     * @param devMessage
+     */
+    private void pushMessageApplehttp2(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg, String platform, DeviceMessage devMessage) {
+    	//1.组装推送信息；  	
+    	Builder notifBuilder = new Notification.Builder(destLogin.getDeviceIdentifier());      
+        notifBuilder = notifBuilder.alertBody(devMessage.getAlert());
+        notifBuilder = notifBuilder.alertTitle(devMessage.getTitle())
+        						   .badge(devMessage.getBadge())
+        						   .customField("alertType", devMessage.getAlertType())
+        						   .customField("appId", devMessage.getAppId());
+        
+        if(devMessage.getAudio() != null && !devMessage.getAudio().isEmpty()) {
+        	notifBuilder = notifBuilder.sound(devMessage.getAudio());    
+            }
+        if(null != devMessage.getAction()) {
+        	notifBuilder = notifBuilder.customField("actionType", devMessage.getAction())
+                  .customField("actionData", devMessage.getExtra().get("actionData"));
+            }
+        
+        //2.获取http2与APNs连接好的客户端    	
+        Notification notif = notifBuilder.build();
+        String identify = destLogin.getDeviceIdentifier();
+        
+        //获取域空间ID，该值无论如何都得有值
+        Integer namespaceId = destLogin.getNamespaceId() ;
+        namespaceId = UserContext.getCurrentNamespaceId(namespaceId);        
+        try {
+		        ApnsClient client;
+		        client = getApnsClient(destLogin);
+			    if(client != null ){
+			    	//3.消息推送(回应消息暂无地方存放)				   
+				    		client.addPush(notif);
+				    		//无队列模式，方便定位问题调试，提交的时候记得注掉（与上一语句互斥）
+			    	//NotificationResponse result =	client.push(notif);
+				    if(LOGGER.isDebugEnabled()) {
+				    	//LOGGER.warn("NotificationResponse:"+result);
+		                LOGGER.debug("Pushing message(push ios), namespaceId=" + namespaceId + ", msgId=" + msgId + ", identify=" + identify
+		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin+"payload="+notif.getPayload());
+		                    }
+			    }else{
+			    	LOGGER.warn("Pushing apnsServer not found");
+			    }
+            } catch (NetworkIOException e) {
+                LOGGER.warn("apns error ", e);
+            } catch(Exception ex) {
+                LOGGER.warn("apns error deviceId not correct", ex);
+            }            
+    }
+    
     /**
      * 
      * @param destLogin
@@ -385,7 +497,19 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
         
         if(platform.equals("iOS")) {
-            pushMessageApple(senderLogin, destLogin, msgId, msg, platform, devMessage);
+        	//chagne by huanglm for IOS pusher update
+        	Integer namespaceId = destLogin.getNamespaceId() ;
+            namespaceId = UserContext.getCurrentNamespaceId(namespaceId); 
+        	String flag = configProvider.getValue(namespaceId, ConfigConstants.APPLE_PUSHER_FLAG,"");
+        	//苹果推送方式开关，值为1时为基于http2的新方式推送，其他值或空为旧方式推送
+        	if(flag.equals("1")){
+        		LOGGER.info("configuration flag is {},there will use http2 new pusher ", flag);
+        		pushMessageApplehttp2(senderLogin, destLogin, msgId, msg, platform, devMessage);
+        	}else{
+        		LOGGER.info("configuration flag is {},there will use old pusher ", flag);
+        		pushMessageApple(senderLogin, destLogin, msgId, msg, platform, devMessage);
+        	}
+        	
         } else if (platform.equals("xiaomi")) {
             pusherVendorService.pushMessageAsync(PusherVenderType.XIAOMI, senderLogin, destLogin, msg, devMessage);
         } else if (platform.equals("huawei")) {
@@ -607,4 +731,129 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 
     }
 
+    /**
+     * add by huanglm 建立与APNs的http2连接
+     * @param namespaceId
+     * @param identify
+     * @return
+     */
+    public ApnsClient getApnsClient(UserLogin destLogin) {   
+    	String identify = destLogin.getDeviceIdentifier();
+    	if(identify == null){
+    		LOGGER.warn("identify is null  and Unable to establish a connection");
+    		return null ;
+    	}
+    	//bundleId 一般从Device中取，但为了兼容旧数据，Device中取不到的话可以namespaceId + pusherIdentify
+        String bundleId = null ;
+        //推送服务器类型默认为生产
+        boolean isProductionGateway =  true ;
+        //获取设备注册时保存的bundleId
+        Device device = this.deviceProvider.findDeviceByDeviceId(identify);
+        if(device ==null ){
+        	LOGGER.warn("device is null  and Unable to establish a connection");
+    		return null ;
+        }
+        	bundleId = device.getBundleId();
+        	String pusherServiceType = device.getPusherServiceType();
+        	//设置为开发服务器类型
+        	if( TYPE_DEVELOP.equals(pusherServiceType)){
+        		isProductionGateway = false ;
+        	}
+        //bundleId 为空的情况一般是旧应用的推送，为了兼容需要从映射表中取得bundleId（新应用bundleId一般不为空）
+        if(StringUtils.isBlank(bundleId)){
+        	String pidentyfy = destLogin.getPusherIdentify();
+        	if(StringUtils.isBlank(pidentyfy)){
+        		 LOGGER.warn("bundleId is null  and pusherIdentify is null , it will use DEFAULT_BUNDLEID");
+                // return null;
+        	}else{
+        		//获取域空间ID，该值无论如何都得有值
+                Integer namespaceId = destLogin.getNamespaceId() ;
+                namespaceId = UserContext.getCurrentNamespaceId(namespaceId); 
+                BundleidMapper bmapper = bundleidMapperProvider.findBundleidMapperByParams(namespaceId, pidentyfy);
+                if(bmapper == null || StringUtils.isBlank(bmapper.getBundleId())){
+                	LOGGER.warn("namespaceId = "+namespaceId+";identify = "+pidentyfy+"; can not find data or bundleId from mapper table ,it will use DEFAULT_BUNDLEID");
+                    //return null;
+                }else{
+                	bundleId = bmapper.getBundleId();
+                	if(bmapper.getIdentify()!= null && TYPE_DEVELOP.equals(bmapper.getIdentify())){//判断服务器类型
+                		isProductionGateway = false ;
+                	}
+                }   
+        	}        	    	
+        }
+	        if(bundleId == null){
+	        	bundleId = DEFAULT_BUNDLEID ;
+	        	LOGGER.warn("bundleId is null ");
+	        }
+	    	//优先从http2ClientMaps 中   取，如没有再创建新的连接
+	        ApnsClient client = this.http2ClientMaps.get(bundleId);
+	        if(client != null ){
+	        	return client;
+	        }
+        		
+                //获取开发者信息
+                DeveloperAccountInfo  dlaInfo = developerAccountInfoProvider.getDeveloperAccountInfoByBundleId(bundleId);
+                //取不到开发者账号，则取默认的开发者账号
+                if(dlaInfo == null){
+                	LOGGER.warn("bundleId is "+bundleId+" ; can not find DeveloperAccountInfo ,it will use DEFAULT_BUNDLEID");
+                	dlaInfo = developerAccountInfoProvider.getDeveloperAccountInfoByBundleId(DEFAULT_BUNDLEID);
+                }
+                if(dlaInfo == null ){
+                	//查询不到开发者信息，则不往下走了，因为没法建立与APNs服务的连接
+                    LOGGER.warn("can not find DeveloperAccountInfo by DEFAULT_BUNDLEID  and Unable to establish a connection");
+                    return null;
+                }
+                byte[] authkey = dlaInfo.getAuthkey();
+                String teamId = dlaInfo.getTeamId();
+                String authKeyId = dlaInfo.getAuthkeyId();
+                String authkeyStr = new String(authkey);
+               
+                try {        		
+        			    client = new ApnsClientBuilder()
+        		        .inSynchronousMode()
+        		        .withProductionGateway(isProductionGateway)
+        		        .withApnsAuthKey(authkeyStr.trim())
+        		        .withTeamID(teamId.trim())
+        		        .withKeyID(authKeyId.trim())
+        		        .withDefaultTopic(bundleId.trim())
+        		        .build();
+        			    if(LOGGER.isDebugEnabled()) {
+    				    	//LOGGER.warn("NotificationResponse:"+result);
+    		                LOGGER.info("Pushing message(build client), bundleId=" + bundleId + ", isProductionGateway=" + isProductionGateway + ", authkeyStr=" + authkeyStr
+    		                    + ", teamId=" + teamId + ", authKeyId=" + authKeyId);
+    		                    }
+                } catch (NetworkIOException e) {
+                    LOGGER.warn("apns error and stop it", e);
+                } catch(Exception ex) {
+                    LOGGER.warn("apns error deviceId not correct", ex);
+                }
+                //将  client 转为PriorityQueuedApnsClient，让client推送PriorityQueuedApnsClient中队列的消息，也让添加到client的消息存在队列中
+                //测试调试时可以把下两句注掉让其消息直接发送不经过队列，方便调试
+                client = new PriorityQueuedApnsClient(client, Executors.defaultThreadFactory());
+                client.start();
+                
+        	    ApnsClient tmp = this.http2ClientMaps.putIfAbsent(bundleId, client);
+                if(tmp != null) {  
+                	 try{
+                		 client.stop();
+                     } catch (Exception e) {
+                     LOGGER.warn("stop client server error");    
+                     }
+                    client = tmp;
+                }
+                      
+        return client;
+    }
+    
+    /**
+     * 停止bundleId对应的连接端，add by huanglm
+     */
+    public void stophttp2Client(String bundleId) {
+    	ApnsClient client = null;
+    	client = this.http2ClientMaps.remove(bundleId);
+    	if(client != null){
+    		client.shutdown();
+    	}
+    	
+    }
 }

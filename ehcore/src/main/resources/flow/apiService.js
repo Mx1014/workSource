@@ -1,4 +1,4 @@
-var javaService = Java.type("com.everhomes.flow.NashornApiService");
+var javaService = Java.type("com.everhomes.scriptengine.nashorn.NashornApiService");
 
 var apiService = {};
 

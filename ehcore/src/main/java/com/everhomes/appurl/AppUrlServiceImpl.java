@@ -1,5 +1,6 @@
 package com.everhomes.appurl;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumServiceImpl;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.CreateAppInfoCommand;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.appurl.UpdateAppInfoCommand;
+import com.everhomes.service_agreement.ServiceAgreement;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -38,7 +42,10 @@ public class AppUrlServiceImpl implements AppUrlService {
 		}
 		AppUrlDTO dto = ConvertHelper.convert(appUrls, AppUrlDTO.class);
 		dto.setLogoUrl(null);
-		
+
+		if (StringUtils.isBlank(dto.getDownloadUrl())) {
+		    dto.setDownloadUrl(null);
+        }
 		String logoUri = appUrls.getLogoUrl();
 		if(logoUri != null && logoUri.length() > 0) {
             try{
@@ -56,5 +63,17 @@ public class AppUrlServiceImpl implements AppUrlService {
 		
 		return dto;
 	}
+	
+	@Override
+	public void createAppInfo(CreateAppInfoCommand cmd){
 
+		AppUrls bo = ConvertHelper.convert(cmd, AppUrls.class);	
+		appUrlProvider.createAppInfo(bo);
+	}
+
+	@Override
+	public void updateAppInfo(UpdateAppInfoCommand cmd) {
+		AppUrls bo = ConvertHelper.convert(cmd, AppUrls.class);	
+		appUrlProvider.updateAppInfo(bo);
+	}
 }

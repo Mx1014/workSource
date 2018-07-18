@@ -29,6 +29,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.common.TagSearchItem;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityFetchType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -1382,7 +1383,9 @@ public class NewsServiceImpl implements NewsService {
 			if (tags != null)
 				for (NewsTagDTO dto : tags) {
 					NewsTag tag = ConvertHelper.convert(dto, NewsTag.class);
+
 					tag.setDefaultOrder(order++);
+
 					tag.setParentId(parentId);
 					tag.setNamespaceId(parentTag.getNamespaceId());
 					tag.setOwnerType(parentTag.getOwnerType());

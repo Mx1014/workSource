@@ -159,6 +159,7 @@ import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
 import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyForEnterpriseContactByEmailCommand;
+import com.everhomes.rest.organization.ApplyForEnterpriseContactNewCommand;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.BatchUpdateOrganizationContactVisibleFlagCommand;
@@ -399,6 +400,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -594,8 +596,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd) {
         User user = UserContext.current().getUser();
 
+        //TODO 校验权限有问题，里面使用了组织架构的内容。敢哥说先注释掉。
         //权限校验
-        checkOrganizationPrivilege(cmd.getParentId(),PrivilegeConstants.CREATE_DEPARTMENT);
+        //checkOrganizationpPivilege(cmd.getParentId(),PrivilegeConstants.CREATE_DEPARTMENT);
 
         if (null == OrganizationGroupType.fromCode(cmd.getGroupType())) {
             LOGGER.error("organization group type error. cmd = {}", cmd);
@@ -1084,6 +1087,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
+        dto.setAdminMembers(getAdmins(org.getOrganizationId()));
         if(!StringUtils.isEmpty(organization.getWebsite())){
             dto.setWebsite(organization.getWebsite());
         }
@@ -3507,6 +3511,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
                 if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())) {
                     addPathOrganizationId(org.getPath(), orgIds);
+
+                    //Added by janson, normal user in PM company, may remove at later
+                    if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                    	organizationIds.add(org.getId());
+                    }
+
                 }
             }
         }
@@ -3554,7 +3564,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 //物业或业委增加小区Id和小区name信息
-                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
+                		||org.getOrganizationType().equals(OrganizationType.ENTERPRISE.getCode())
+                		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                     this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                 }
                 orgs.add(tempSimpleOrgDTO);
@@ -3587,7 +3599,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
                         OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                         //物业或业委增加小区Id和小区name信息
-                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
+                        		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                             this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                         }
                         orgs.add(tempSimpleOrgDTO);
@@ -3597,7 +3610,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(org.getGroupType())) {
                         OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                         //物业或业委增加小区Id和小区name信息
-                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
+                        		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                             this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                         }
                         tempSimpleOrgDTO.setContactName(member.getContactName());
@@ -5771,7 +5785,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationDTO.setFeedbackForumId(community.getFeedbackForumId());
                 organizationDTO.setCommunityType(community.getCommunityType());
             }
-
+            organizationDTO.setManagerList(getAdmins(cmd.getOrganizationId()));
             return organizationDTO;
         }
 
@@ -5807,6 +5821,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             //增加customer admin record 状态
             try {
                 customerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(), member.getNamespaceId());
+                customerProvider.updateCustomerTalentRegisterStatus(member.getContactToken());
             } catch (Exception e) {
                 LOGGER.error("update enterprise customer admins status error:{}", e);
             }
@@ -5839,8 +5854,47 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationDTO.setFeedbackForumId(community.getFeedbackForumId());
                 organizationDTO.setCommunityType(community.getCommunityType());
             }
-
+            organizationDTO.setManagerList(getAdmins(cmd.getOrganizationId()));
             return organizationDTO;
+        }
+    }
+
+
+    private boolean checkUserEmailDomain(ApplyForEnterpriseContactNewCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("OrganizationId is null");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "OrganizationId is null");
+        }
+        Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+        if (organization == null) {
+            LOGGER.error("organization is null");
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST, "organization not exists");
+        }
+        boolean flag = false;
+        if (!StringUtils.isEmpty(cmd.getEmail())) {
+            String[] email = cmd.getEmail().split("@");
+            if (email != null && email.length > 1) {
+                String emailDomain = email[1];
+                if (!StringUtils.isEmpty(emailDomain) && emailDomain.equals(organization.getEmailDomain())) {
+                    flag = true;
+                }
+            }
+        }
+        return flag;
+    }
+
+    @Override
+    public OrganizationDTO applyForEnterpriseContactNew(ApplyForEnterpriseContactNewCommand cmd) {
+        boolean flag = checkUserEmailDomain(cmd);
+        OrganizationDTO dto = new OrganizationDTO();
+        if (flag) {
+            ApplyForEnterpriseContactByEmailCommand command = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
+            this.applyForEnterpriseContactByEmail(command);
+            return dto;
+        }else {
+            CreateOrganizationMemberCommand command = ConvertHelper.convert(cmd, CreateOrganizationMemberCommand.class);
+            dto = this.applyForEnterpriseContact(command);
+            return dto;
         }
     }
 

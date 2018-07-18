@@ -29,17 +29,8 @@ import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
-import com.everhomes.server.schema.tables.pojos.EhUserGroups;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
-import com.everhomes.server.schema.tables.pojos.EhUserLikes;
-import com.everhomes.server.schema.tables.pojos.EhUserNotificationSettings;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
@@ -50,7 +41,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.MapReduceCallback;
 import com.everhomes.util.RecordHelper;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -64,6 +54,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.everhomes.server.schema.Tables.*;
@@ -119,7 +110,7 @@ public class UserProviderImpl implements UserProvider {
     
     public UserProviderImpl() {
     }
-    
+
     @Override
     public void createUser(User user) {
         // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
@@ -480,6 +471,71 @@ public class UserProviderImpl implements UserProvider {
         return null;
     }
 
+    @Override
+    public Integer countUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+        com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
+        final Integer[] count = {0};
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+                (DSLContext context, Object reducingContext)-> {
+                    SelectQuery<Record1<Integer>> query = context
+                            .selectCount().from(t)
+                            .where(t.NAMESPACE_ID.eq(namespaceId))
+                            .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                            .and(t.NAMESPACE_USER_TYPE.isNull())
+                            .and(t.NAMESPACE_USER_TOKEN.eq(""))
+                            .getQuery();
+
+                    if (excludeUIDs != null && excludeUIDs.size() > 0) {
+                        query.addConditions(t.ID.notIn(excludeUIDs));
+                    }
+                    if (start != null) {
+                        query.addConditions(t.CREATE_TIME.ge(Timestamp.valueOf(start)));
+                    }
+                    if (end != null) {
+                        query.addConditions(t.CREATE_TIME.lt(Timestamp.valueOf(end)));
+                    }
+                    count[0] += query.fetchOneInto(Integer.class);
+                    return true;
+                });
+        return count[0];
+    }
+
+    @Override
+    public List<User> listUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs) {
+        com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
+        final List<User> users = new ArrayList<>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+                (DSLContext context, Object reducingContext)-> {
+                    SelectQuery<EhUsersRecord> query = context
+                            .selectFrom(t)
+                            .where(t.NAMESPACE_ID.eq(namespaceId))
+                            .and(t.STATUS.eq(UserStatus.ACTIVE.getCode()))
+                            .and(t.NAMESPACE_USER_TYPE.isNull())
+                            .and(t.NAMESPACE_USER_TOKEN.eq(""))
+                            .getQuery();
+
+                    if (excludeUIDs != null && excludeUIDs.size() > 0) {
+                        query.addConditions(t.ID.notIn(excludeUIDs));
+                    }
+                    if (start != null) {
+                        query.addConditions(t.CREATE_TIME.ge(Timestamp.valueOf(start)));
+                    }
+                    if (end != null) {
+                        query.addConditions(t.CREATE_TIME.lt(Timestamp.valueOf(end)));
+                    }
+                    users.addAll(query.fetchInto(User.class));
+                    return true;
+                });
+        return users;
+    }
+
+    @Override
+    public String getNickNameByUid(Long creatorUid) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_USERS.NICK_NAME)
+                .from(Tables.EH_USERS).where(Tables.EH_USERS.ID.eq(creatorUid))
+                .fetchOne(Tables.EH_USERS.NICK_NAME);
+    }
+
 
     /**
      * 根据域空间id和注册的手机号来查询对应的注册信息
@@ -561,6 +617,34 @@ public class UserProviderImpl implements UserProvider {
             .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
             .fetchAny();
         return ConvertHelper.convert(record, UserIdentifier.class);
+    }
+
+    @Override
+    public UserIdentifier findClaimingIdentifierByToken(Integer namespaceId, String identifierToken) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode())
+                            .or(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.VERIFYING.getCode())))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+
+        if(result.size() == 1)
+            return result.get(0);
+        else if(result.size() > 1) {
+            LOGGER.warn(String.format("%s has been claimed by multiple users", identifierToken));
+            return result.get(0);
+        }
+
+        return null;
     }
 
     @Override
@@ -771,15 +855,7 @@ public class UserProviderImpl implements UserProvider {
             }
             return true;
         });
-        UserIdentifier userIdentifier=result[0];
-        if(userIdentifier!=null){
-            if(DateHelper.currentGMTTime().getTime() - userIdentifier.getNotifyTime().getTime() > getIdentifierClaimingTimeoutMs()) {
-                //if out of expire time,throw exception
-                LOGGER.error("invalid user claim status");
-                return null;
-            }
-        }
-        return userIdentifier;
+        return result[0];
     }
 
 
@@ -1939,24 +2015,22 @@ public class UserProviderImpl implements UserProvider {
 		com.everhomes.server.schema.tables.EhUserIdentifiers token = Tables.EH_USER_IDENTIFIERS.as("token");
 		com.everhomes.server.schema.tables.EhUsers user = Tables.EH_USERS.as("user");
 
-		TargetDTO targetDTO = new TargetDTO();
-		context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user).leftOuterJoin(token)
-				.on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID))).where(user.ID.eq(userId))
-				.fetchOne().map(r -> {
-					targetDTO.setTargetName(r.getValue(user.NICK_NAME));
-					targetDTO.setTargetType("eh_user");
-					targetDTO.setTargetId(r.getValue(user.ID));
-					targetDTO.setUserIdentifier(r.getValue(token.IDENTIFIER_TOKEN));
-					return null;
-				});
+		Record3<String, Long, String> ret =
+				context.select(token.IDENTIFIER_TOKEN, user.ID, user.NICK_NAME).from(user)
+				.leftOuterJoin(token).on(token.OWNER_UID.eq(user.ID).and(token.NAMESPACE_ID.eq(user.NAMESPACE_ID)))
+				.where(user.ID.eq(userId))
+				.fetchOne();
 
-		if (!userId.equals(targetDTO.getTargetId())) {
+		if (null == ret) {
 			return null;
 		}
 
+		TargetDTO targetDTO = new TargetDTO();
+		targetDTO.setTargetName(ret.getValue(user.NICK_NAME));
+		targetDTO.setTargetType("eh_user");
+		targetDTO.setTargetId(ret.getValue(user.ID));
+		targetDTO.setUserIdentifier(ret.getValue(token.IDENTIFIER_TOKEN));
+
 		return targetDTO;
 	}
-
-    
-
 }

@@ -37,4 +37,5 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_NUM_FORMAT_ERROR = 10029;  //数字格式不对
     int ERROR_CUSTOMER_DATE_FORMAT_ERROR = 10030;  //日期格式不对
     int ERROR_CUSTOMER_TRACKING_USER_ERROR = 10031;  //跟进人找不到
+    int ERROR_CUSTOMER_PRIVILGE_ERROR = 10032;  //线索客户操作权限不足
 }

@@ -1,13 +1,17 @@
 package com.everhomes.rest.yellowPage;
 
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  *  <li>id: id</li>
+ *  <li>namespaceId: 域空间id</li>
  *  <li>ownerType: 拥有者类型：现在是comunity</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>name: 名称</li>
@@ -18,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *  <li>type:类型  </li>
  *  <li>skipType: 只有一个企业时是否跳过列表页，0 不跳； 1 跳过</li>
  *  <li>displayMode:类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode} </li>
+ *  <li>coverAttachments: 封面图片文件 服务联盟v3.4 {@link com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO} </li>
  * </ul>
  */
 public class UpdateServiceAllianceCommand {
@@ -45,6 +50,9 @@ public class UpdateServiceAllianceCommand {
 	private Byte skipType;
 	
 	private Integer namespaceId;
+	
+	@ItemType(ServiceAllianceAttachmentDTO.class)
+	private List<ServiceAllianceAttachmentDTO> coverAttachments;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -146,4 +154,12 @@ public class UpdateServiceAllianceCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public List<ServiceAllianceAttachmentDTO> getCoverAttachments() {
+		return coverAttachments;
+	}
+
+	public void setCoverAttachments(List<ServiceAllianceAttachmentDTO> coverAttachments) {
+		this.coverAttachments = coverAttachments;
+	}
 }

@@ -1399,6 +1399,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 //如果没有id ,说明是新建的setting,同时创建一个payment
                 socialSecuritySettingProvider.createSocialSecuritySetting(setting);
                 String payMonth = findPaymentMonth(detail.getOrganizationId());
+                if (null == payMonth)
+                	payMonth = monthSF.get().format(DateHelper.currentGMTTime());
                 SocialSecurityPayment payment = processSocialSecurityPayment(setting, payMonth, NormalFlag.NO.getCode());
                 socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
             } else {

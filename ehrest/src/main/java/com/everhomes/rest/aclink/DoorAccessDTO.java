@@ -34,8 +34,12 @@ import com.everhomes.discover.ItemType;
  * <li>groupId:分组id</li>
  * <li>groupNmae:分组名称</li>
  * <li>enableAmount:门禁是否允许授权按次开门，1是0否{@link com.everhomes.rest.aclink.DoorAuthEnableAmount}</li>
+ * <li>enableDuration:门禁是否允许授权按时间开门，1是0否</li>
  * <li>server：门禁关联服务器{@link com.everhomes.rest.aclink.AclinkServerDTO}</li>
  * <li>hasQr:门禁是否支持二维码0否1是</li>
+ * <li>maxDuration:访客授权最长有效期</li>
+ * <li>maxCount:访客授权最大次数</li>
+ * <li>defualtInvalidDuration:按次开门授权默认有效期</li>
  * </ul>
  * @author janson
  *
@@ -66,13 +70,65 @@ public class DoorAccessDTO {
     private String groupName;
     private Long groupId;
     private Byte enableAmount;
+    private Byte enableDuration;
     private AclinkServerDTO server;
     private String localUUid;
     private String localAesKey;
     private Long localServerId;
     private Byte hasQr;
+    private Integer maxDuration;
+    private Integer maxCount;
+    private Integer defualtInvalidDuration;
 
-    public String getLocalAesKey() {
+    public Byte getEnableDuration() {
+		return enableDuration;
+	}
+
+
+
+	public void setEnableDuration(Byte enableDuration) {
+		this.enableDuration = enableDuration;
+	}
+
+
+
+	public Integer getMaxDuration() {
+		return maxDuration;
+	}
+
+
+
+	public void setMaxDuration(Integer maxDuration) {
+		this.maxDuration = maxDuration;
+	}
+
+
+
+	public Integer getMaxCount() {
+		return maxCount;
+	}
+
+
+
+	public void setMaxCount(Integer maxCount) {
+		this.maxCount = maxCount;
+	}
+
+
+
+	public Integer getDefualtInvalidDuration() {
+		return defualtInvalidDuration;
+	}
+
+
+
+	public void setDefualtInvalidDuration(Integer defualtInvalidDuration) {
+		this.defualtInvalidDuration = defualtInvalidDuration;
+	}
+
+
+
+	public String getLocalAesKey() {
 		return localAesKey;
 	}
 

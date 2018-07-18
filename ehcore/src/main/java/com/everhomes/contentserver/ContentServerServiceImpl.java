@@ -38,7 +38,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
@@ -234,6 +233,14 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
         return null;
     }
 
+    @Override
+    public String parseSharedUri(String uri) {
+        if (uri != null && !uri.isEmpty()) {
+            return parserSingleUri(uri, getServersHash(), null, null, null, "Shared");
+        }
+        return null;
+    }
+
     private Map<Long, ContentServer> getServersHash() {
         List<ContentServer> servers = contentServerProvider.listContentServers();
         Map<Long, ContentServer> cache = new HashMap<>();
@@ -244,6 +251,11 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
     }
 
     private String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId, String token) {
+        return parserSingleUri(uri, cache, ownerType, ownerId, token, null);
+    }
+
+    private String parserSingleUri(String uri, Map<Long, ContentServer> cache,
+                                   String ownerType, Long ownerId, String token, String vendor) {
         if (StringUtils.isEmpty(uri)) {
             return null;
         }
@@ -299,7 +311,7 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
         uriParams.put("pxw", width);
         uriParams.put("pxh", height);
 
-        return ContentURLVendors.evaluateURL(scheme, publicAddress, port, uri, uriParams);
+        return ContentURLVendors.evaluateURL(scheme, publicAddress, port, uri, uriParams, vendor);
     }
 
     private Tuple<Integer, Integer> parseWidthAndHeight(String uri) {
@@ -500,7 +512,18 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
 
     @Override
     public UploadCsFileResponse uploadFileToContentServer(InputStream fileStream, String fileName, String token) {
-        String contentServerUri = getContentServer();
+        String contentServerUri;
+        try {
+            ContentServer contentServer = selectContentServer();
+            contentServerUri = contentServer.getPublicAddress();
+
+            //add by xq.tian
+            if (contentServer.getPublicPort() != 443) {
+                contentServerUri = contentServerUri + ":" + contentServer.getPublicPort();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         String fileSuffix = FilenameUtils.getExtension(fileName);
 
         // 通过文件后缀确定Content server中定义的媒体类型
@@ -511,7 +534,7 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
         }
 
         // https 默认端口443 by sfyan 20161226
-        String url = String.format("%s://%s/upload/%s?token=%s", getScheme(), contentServerUri, mediaType, token);
+        String url = String.format("%s://%s/upload/%s?token=%s", HTTP, contentServerUri, mediaType, token);
         HttpPost httpPost = new HttpPost(url);
 
         CloseableHttpResponse response = null;

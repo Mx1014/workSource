@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.daos.EhVarFieldGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldItemsDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
+import com.everhomes.server.schema.tables.daos.EhVarFieldsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
@@ -43,9 +44,9 @@ import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import org.elasticsearch.common.cli.CliToolConfig.Cmd;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -849,6 +850,19 @@ public class FieldProviderImpl implements FieldProvider {
 
         return item.get(0);
     }
+    
+    //add by tangcen
+	@Override
+	public FieldItem findFieldItemByBusinessValue(Long fieldId, Byte businessValue) {
+		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		 Record record = context.select()
+		 						.from(Tables.EH_VAR_FIELD_ITEMS)
+		 						.where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.eq(fieldId))
+		 						.and(Tables.EH_VAR_FIELD_ITEMS.BUSINESS_VALUE.eq(businessValue))
+		 						.fetchOne();
+		 return ConvertHelper.convert(record, FieldItem.class);
+	}
+    
 
     @Override
     public List<Long> checkCustomerField(Integer namespaceId, Long communityId, String moduleName) {
@@ -876,5 +890,20 @@ public class FieldProviderImpl implements FieldProvider {
                 .unionAll(context.select(Tables.EH_VAR_FIELD_SCOPES.ID).from(Tables.EH_VAR_FIELD_SCOPES).where(fieldCondition))
                 .unionAll(context.select(Tables.EH_VAR_FIELD_GROUP_SCOPES.ID).from(Tables.EH_VAR_FIELD_GROUP_SCOPES).where(groupCondition))
                 .fetchInto(Long.class);
+    }
+
+
+    @Override
+    public Field findFieldById(Long fieldId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhVarFieldsDao dao = new EhVarFieldsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(fieldId), Field.class);
+    }
+    @Override
+    public FieldItem findFieldItemByItemId(Long itemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+       return  context.selectFrom(Tables.EH_VAR_FIELD_ITEMS)
+                .where(Tables.EH_VAR_FIELD_ITEMS.ID.eq(itemId))
+                .fetchOneInto(FieldItem.class);
     }
 }

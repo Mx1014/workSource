@@ -65,10 +65,13 @@ import com.everhomes.rest.contract.CheckAdminCommand;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.contract.ContractAttachmentDTO;
 import com.everhomes.rest.contract.ContractChargingChangeDTO;
+import com.everhomes.rest.contract.ContractChargingChangeEventDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
+import com.everhomes.rest.contract.ContractChargingItemEventDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractEventDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractNumberDataType;
 import com.everhomes.rest.contract.ContractParamDTO;
@@ -77,6 +80,7 @@ import com.everhomes.rest.contract.ContractParamGroupType;
 import com.everhomes.rest.contract.ContractPaymentPlanDTO;
 import com.everhomes.rest.contract.ContractPaymentType;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTrackingTemplateCode;
 import com.everhomes.rest.contract.ContractType;
 import com.everhomes.rest.contract.CreateContractCommand;
 import com.everhomes.rest.contract.CreatePaymentContractCommand;
@@ -89,6 +93,7 @@ import com.everhomes.rest.contract.GenerateContractNumberRule;
 import com.everhomes.rest.contract.GetContractParamCommand;
 import com.everhomes.rest.contract.GetUserGroupsCommand;
 import com.everhomes.rest.contract.ListApartmentContractsCommand;
+import com.everhomes.rest.contract.ListContractEventsCommand;
 import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
 import com.everhomes.rest.contract.ListContractsBySupplierCommand;
 import com.everhomes.rest.contract.ListContractsBySupplierResponse;
@@ -165,9 +170,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -657,7 +664,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		
 		Calendar cal=Calendar.getInstance();
 		StringBuffer contractNumber = new StringBuffer();
-		if (communityExist == null) {
+		
+		if (communityExist == null || communityExist.getContractNumberRulejson() == null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("MM");
 			java.util.Date month  = Calendar.getInstance().getTime();
 			//收款
@@ -754,9 +762,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		contract.setCreateUid(UserContext.currentUserId());
 		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contract.setUpdateTime(contract.getCreateTime());
 		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
-
+		//添加合同日志add by tangcen
+		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_ADD,contract,null);
+		//如果是变更或续约合同，需在父合同添加日志
+		if(ContractType.RENEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_RENEW,parentContract,contract);
+		} else if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))) {
+			Contract parentContract = checkContract(contract.getParentId());
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_CHANGE,parentContract,contract);
+		}
 		//调用计算明细
 		ExecutorUtil.submit(new Runnable() {
 			@Override
@@ -769,7 +787,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		Double totalSize = dealContractApartments(contract, cmd.getApartments(), cmd.getContractApplicationScene());
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
-		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
+		dealContractChargingChanges(contract, cmd.getAdjusts(),cmd.getFrees());
 
 		contract.setRentSize(totalSize);
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -782,6 +800,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		FindContractCommand command = new FindContractCommand();
 		command.setId(contract.getId());
 		command.setPartyAId(contract.getPartyAId());
+		//add by tangcen
+		command.setCommunityId(contract.getCommunityId());
+		command.setNamespaceId(contract.getNamespaceId());
+		command.setCategoryId(contract.getCategoryId());
+
 		ContractDetailDTO contractDetailDTO = findContract(command);
 		// 签合同的customer 同步到organization
 		syncCustomerToOrganization(cmd.getCustomerId());
@@ -1105,12 +1128,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		flowService.createFlowCase(createFlowCaseCommand);
 	}
 
-	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments, Byte contractApplicationScene) {
+	private Double dealContractApartments(Contract contract, List<BuildingApartmentDTO> buildingApartments,Byte contractApplicationScene) {
+		//add by tangcen
+		List<String> oldApartments = new ArrayList<>();
+		List<String> newApartments = new ArrayList<>();
+		//没有id的，增加
+	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractBuildingMapping> existApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		Map<Long, ContractBuildingMapping> map = new HashMap<>();
 		if(existApartments != null && existApartments.size() > 0) {
 			existApartments.forEach(apartment -> {
 				map.put(apartment.getId(), apartment);
+				//add by tangcen
+				oldApartments.add(apartment.getApartmentName());
 			});
 		}
 
@@ -1128,15 +1158,17 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					}
 				}
 
-
 			}
 		}
 		Double totalSize = 0.0;
 		if(buildingApartments != null && buildingApartments.size() > 0) {
 			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
+				//add by tangcen
+				newApartments.add(buildingApartment.getApartmentName());
 				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				totalSize = totalSize + size;
 				if(buildingApartment.getId() == null) {
+					//新增的资产
 					ContractBuildingMapping mapping = ConvertHelper.convert(buildingApartment, ContractBuildingMapping.class);
 					mapping.setNamespaceId(contract.getNamespaceId());
 //					mapping.setOrganizationName(contract.getCustomerName());
@@ -1146,9 +1178,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					mapping.setStatus(CommonStatus.ACTIVE.getCode());
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
+					//记录合同日志 by tangcen
+					//contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,mapping);
 					//物业合同不修改资产状态
 					if(!parentAddressIds.contains(buildingApartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
+						if(LOGGER.isDebugEnabled()){
+							LOGGER.error("!!!777 addressMapping : {}",addressMapping);
+						}
 						//26058  已售的状态不变
 						if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
 							addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
@@ -1158,14 +1195,18 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 					}
 				} else {
+					//保留的资产
 					map.remove(buildingApartment.getId());
 				}
 			}
 		}
+		//删除的资产
 		if(map.size() > 0) {
 			List<Long> finalParents = parentAddressIds;
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
+				//记录合同日志 by tangcen
+				//contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_DELETE,contract,apartment);
 
 				if(!finalParents.contains(apartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
@@ -1178,11 +1219,25 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 			});
 		}
-
+		//add by tangcen
+		if (oldApartments.size() == 0) {
+			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,null,newApartments.toString());
+		}else if (newApartments.size() < oldApartments.size()) {
+			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_UPDATE,contract,oldApartments.toString(),newApartments.toString());
+		}else if (newApartments.size() >= oldApartments.size()) {
+			for(String apartmentName : newApartments){
+				if (!oldApartments.contains(apartmentName)) {
+					contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_UPDATE,contract,oldApartments.toString(),newApartments.toString());
+					break;
+				}
+			}
+		}
 		return totalSize;
 	}
 
 	private void dealContractChargingItems(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+		//没有id的，增加
+	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractChargingItem> existChargingItems = contractChargingItemProvider.listByContractId(contract.getId());
 		Map<Long, ContractChargingItem> map = new HashMap<>();
 		if(existChargingItems != null && existChargingItems.size() > 0) {
@@ -1201,29 +1256,53 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					contractChargingItem.setChargingExpiredTime(new Timestamp(item.getChargingExpiredTime()));
 				}
 				if(item.getId() == null) {
+					//新增的计价条款
 					contractChargingItem.setContractId(contract.getId());
 					contractChargingItem.setNamespaceId(contract.getNamespaceId());
 					contractChargingItem.setStatus(CommonStatus.ACTIVE.getCode());
 					contractChargingItemProvider.createContractChargingItem(contractChargingItem);
 					dealContractChargingItemAddresses(contractChargingItem, item.getApartments());
+					//记录合同日志 by tangcen
+					contractProvider.saveContractEventAboutChargingItem(ContractTrackingTemplateCode.CHARGING_ITEM_ADD,contract,contractChargingItem);
 				} else {
+					//保留的计价条款
 					ContractChargingItem exist = contractChargingItemProvider.findById(item.getId());
 					contractChargingItem.setCreateUid(exist.getCreateUid());
 					contractChargingItem.setCreateTime(exist.getCreateTime());
 					contractChargingItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractChargingItemProvider.updateContractChargingItem(contractChargingItem);
+					//修复issue-32556，已存在的ChargingItem如果修改了关联的Apartments，应该更新ChargingItem和Apartments的对应关系
+					dealContractChargingItemAddresses(contractChargingItem, item.getApartments());
 					map.remove(item.getId());
+					//add by tangcen
+					if (!compareContractChargingItem(contractChargingItem,exist)) {
+						contractProvider.saveContractEventAboutChargingItem(ContractTrackingTemplateCode.CHARGING_ITEM_UPDATE,contract,exist);
+					}
 				}
 			});
 		}
 		if(map.size() > 0) {
+			//删除的计价条款
 			map.forEach((id, item) -> {
 				contractChargingItemProvider.deleteContractChargingItem(item);
+				//记录合同日志 by tangcen
+				contractProvider.saveContractEventAboutChargingItem(ContractTrackingTemplateCode.CHARGING_ITEM_DELETE,contract,item);
 			});
 		}
 	}
+	//对比ContractChargingItem by tangcen
+	private boolean compareContractChargingItem(ContractChargingItem contractChargingItem, ContractChargingItem exist) {
+		if (contractChargingItem==null || exist==null) {
+			return false;
+		}
+		ContractChargingItemEventDTO updateDto = ConvertHelper.convert(contractChargingItem, ContractChargingItemEventDTO.class);
+		ContractChargingItemEventDTO existDto = ConvertHelper.convert(exist, ContractChargingItemEventDTO.class);
+		return updateDto.equals(existDto);
+	}
 
 	private void dealContractChargingItemAddresses(ContractChargingItem item, List<BuildingApartmentDTO> addresses) {
+		//没有id的，增加
+	    //有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
 		List<ContractChargingItemAddress> existItemAddresses = contractChargingItemAddressProvider.findByItemId(item.getId());
 		Map<Long, ContractChargingItemAddress> map = new HashMap<>();
 		if(existItemAddresses != null && existItemAddresses.size() > 0) {
@@ -1272,7 +1351,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		if(map.size() > 0) {
 			map.forEach((id, change) -> {
+				//删除的调免租计划
 				contractChargingChangeProvider.deleteContractChargingChange(change);
+				//记录合同日志 by tangcen
+				if (ChangeType.fromStatus(change.getChangeType()).equals(ChangeType.ADJUST)) {
+					contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.ADJUST_DELETE,contract,change);
+				}else if (ChangeType.fromStatus(change.getChangeType()).equals(ChangeType.FREE)) {
+					contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.FREE_DELETE,contract,change);
+				}
 			});
 		}
 	}
@@ -1287,21 +1373,48 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				contractChargingChange.setChangeExpiredTime(new Timestamp(change.getChangeExpiredTime()));
 			}
 			if(change.getId() == null) {
+				//新增的调免租计划
 				contractChargingChange.setContractId(contract.getId());
 				contractChargingChange.setNamespaceId(contract.getNamespaceId());
 				contractChargingChange.setChangeType(changeType.getCode());
 				contractChargingChange.setStatus(CommonStatus.ACTIVE.getCode());
 				contractChargingChangeProvider.createContractChargingChange(contractChargingChange);
 				dealContractChargingChangeAddresses(contractChargingChange, change.getApartments());
+				//记录合同日志 by tangcen
+				if (changeType.equals(ChangeType.ADJUST)) {
+					contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.ADJUST_ADD,contract,contractChargingChange);
+				}else if (changeType.equals(ChangeType.FREE)) {
+					contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.FREE_ADD,contract,contractChargingChange);
+				}
 			} else {
+				//保留的调免租计划
 				ContractChargingChange exist = contractChargingChangeProvider.findById(change.getId());
 				contractChargingChange.setCreateUid(exist.getCreateUid());
 				contractChargingChange.setCreateTime(exist.getCreateTime());
 				contractChargingChangeProvider.updateContractChargingChange(contractChargingChange);
 				map.remove(change.getId());
+				//记录合同日志 by tangcen
+				if (changeType.equals(ChangeType.ADJUST)) {
+					if (!compareContractChargingChange(contractChargingChange, exist)) {
+						contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.ADJUST_UPDATE,contract,contractChargingChange);
+					}	
+				}else if (changeType.equals(ChangeType.FREE)) {
+					if (!compareContractChargingChange(contractChargingChange, exist)) {
+						contractProvider.saveContractEventAboutChargingChange(ContractTrackingTemplateCode.FREE_UPDATE,contract,contractChargingChange);
+					}
+				}
 			}
 		});
 		return map;
+	}
+	//对比ContractChargingChange by tangcen
+	private boolean compareContractChargingChange(ContractChargingChange contractChargingChange,ContractChargingChange exist) {
+		if (contractChargingChange == null || exist ==null) {
+			return false;
+		}
+		ContractChargingChangeEventDTO updateDto = ConvertHelper.convert(contractChargingChange, ContractChargingChangeEventDTO.class);
+		ContractChargingChangeEventDTO existDto = ConvertHelper.convert(exist, ContractChargingChangeEventDTO.class);
+		return updateDto.equals(existDto);
 	}
 
 	private void dealContractChargingChangeAddresses(ContractChargingChange contractChargingChange, List<BuildingApartmentDTO> apartments ) {
@@ -1345,20 +1458,60 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		if(attachments != null && attachments.size() > 0) {
 			attachments.forEach(attachment -> {
 				if(attachment.getId() == null) {
+					//新增的合同附件
 					ContractAttachment contractAttachment = ConvertHelper.convert(attachment, ContractAttachment.class);
 					contractAttachment.setContractId(contractId);
 					contractAttachmentProvider.createContractAttachment(contractAttachment);
 				} else {
+					//保留的合同附件
 					map.remove(attachment.getId());
 				}
 			});
 		}
 		if(map.size() > 0) {
 			map.forEach((id, attachment) -> {
+				//删除的合同附件
 				contractAttachmentProvider.deleteContractAttachment(attachment);
 			});
 		}
 	}
+	
+	//add by tangcen
+	private void dealContractAttachments(Contract contract, List<ContractAttachmentDTO> attachments) {
+		Long contractId = contract.getId();
+		List<ContractAttachment> existAttachments = contractAttachmentProvider.listByContractId(contractId);
+		Map<Long, ContractAttachment> map = new HashMap<>();
+		if(existAttachments != null && existAttachments.size() > 0) {
+			existAttachments.forEach(attachment -> {
+				map.put(attachment.getId(), attachment);
+			});
+		}
+
+		if(attachments != null && attachments.size() > 0) {
+			attachments.forEach(attachment -> {
+				if(attachment.getId() == null) {
+					//新增的合同附件
+					ContractAttachment contractAttachment = ConvertHelper.convert(attachment, ContractAttachment.class);
+					contractAttachment.setContractId(contractId);
+					contractAttachmentProvider.createContractAttachment(contractAttachment);
+					//记录合同日志 by tangcen
+					contractProvider.saveContractEventAboutAttachment(ContractTrackingTemplateCode.ATTACHMENT_ADD,contract,contractAttachment);
+				} else {
+					//保留的合同附件
+					map.remove(attachment.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, attachment) -> {
+				//删除的合同附件
+				contractAttachmentProvider.deleteContractAttachment(attachment);
+				//记录合同日志 by tangcen
+				contractProvider.saveContractEventAboutAttachment(ContractTrackingTemplateCode.ATTACHMENT_DELETE,contract,attachment);
+			});
+		}
+	}
+
 
 	private void dealContractPlans(Long contractId, List<ContractPaymentPlanDTO> plans) {
 		List<ContractPaymentPlan> existPlans = contractPaymentPlanProvider.listByContractId(contractId);
@@ -1423,20 +1576,26 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contract.setDownpaymentTime(setToEnd(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
+		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
 		Double rentSize = dealContractApartments(contract, cmd.getApartments(), cmd.getContractApplicationScene());
+
 		if(cmd.getRentSize() == null) {
 			contract.setRentSize(rentSize);
 		}
 		if(cmd.getCategoryId() != null) {
 			contract.setCategoryId(cmd.getCategoryId());
 		}
-		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+		
 		contractProvider.updateContract(contract);
-
+		//记录合同事件日志，by tangcen
+		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
+		
 		dealContractChargingItems(contract, cmd.getChargingItems());
-		dealContractAttachments(contract.getId(), cmd.getAttachments());
-//		contractSearcher.feedDoc(contract);
+		//dealContractAttachments(contract.getId(), cmd.getAttachments())
+		//change by tangcen
+		dealContractAttachments(contract, cmd.getAttachments());
+		contractSearcher.feedDoc(contract);
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract, flowcaseContractOwnerType);
@@ -1483,11 +1642,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_DENUNCIATION, cmd.getOrgId(), cmd.getCommunityId());
 		}
 		Contract contract = checkContract(cmd.getId());
+		Contract exist = checkContract(cmd.getId());
 		contract.setStatus(ContractStatus.DENUNCIATION.getCode());
 		contract.setDenunciationReason(cmd.getDenunciationReason());
 		contract.setDenunciationUid(cmd.getDenunciationUid());
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
 		contractProvider.updateContract(contract);
+		//记录合同事件日志，by tangcen
+		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
+		
 		contractSearcher.feedDoc(contract);
 //		// todo 将此合同关联的关联的未出账单删除，但账单记录着不用
 //		assetService.deleteUnsettledBillsOnContractId(contract.getId());
@@ -1519,10 +1682,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			contract.setInvalidTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			contract.setInvalidUid(UserContext.currentUserId());
 			contract.setStatus(cmd.getResult());
+			Contract exist = checkContract(cmd.getId());
 			contractProvider.updateContract(contract);
+			//记录合同事件日志，by tangcen
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 			contractSearcher.feedDoc(contract);
 //			//todo 将此合同关联的关联的未出账单删除，但账单记录着不用
 //			assetService.deleteUnsettledBillsOnContractId(contract.getId());
+
 			//作废合同关联资产释放,by dingjianmin 如果是物业合同场景不释放资产
 			if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(cmd.getContractApplicationScene()))){
 				List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
@@ -1603,16 +1770,19 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 					}
 
 				}
-
-				contract.setStatus(cmd.getResult());
-				contractProvider.updateContract(contract);
-				contractSearcher.feedDoc(contract);
+				
 				if(cmd.getPaymentFlag() == 1) {
 					addToFlowCase(contract, flowcasePaymentContractOwnerType);
 				}else {
 					addToFlowCase(contract, flowcaseContractOwnerType);
 				}
-
+				//工作流未开启，修改数据需要回滚，然后同步es，把最新的状态同步到es，否则数据就会不一致  更新完所有的操作，要在最后同步es by -- dingjianmin 
+				contract.setStatus(cmd.getResult());
+				Contract exist = checkContract(cmd.getId());
+				contractProvider.updateContract(contract);
+				//记录合同事件日志，by tangcen
+				contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
+				contractSearcher.feedDoc(contract);
 			}
 			return null;
 		});
@@ -1631,7 +1801,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		contract.setStatus(ContractStatus.ACTIVE.getCode());
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		Contract exist = checkContract(cmd.getId());
 		contractProvider.updateContract(contract);
+		//记录合同事件日志，by tangcen
+		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		contractSearcher.feedDoc(contract);
 		
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
@@ -1887,8 +2060,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
-
-
+		//添加合同日志 by tangcen
+		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_DELETE,contract,null);
 		//释放资源状态
 		if(flag) {
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
@@ -1922,8 +2095,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 //		}
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
-		// just in case
-		dto.setCategoryId(contract.getCategoryId());
+
+		dto.setCommunityId(cmd.getCommunityId());
+		dto.setNamespaceId(cmd.getNamespaceId());
+		dto.setCategoryId(cmd.getCategoryId());
+		
 		if(dto.getCreateUid() != null) {
 			User creator = userProvider.findUserById(dto.getCreateUid());
 			if(creator != null) {
@@ -2083,6 +2259,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			return contracts.stream().map(contract -> {
 				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
 				dto.setOrganizationName(contract.getCustomerName());
+				dto.setContractTypeName(ContractType.fromStatus(contract.getContractType()).getDescription());
 				if(categoryConfigMap.containsKey(contract.getCategoryId())){
 					dto.setConfigId(categoryConfigMap.get(contract.getCategoryId()));
 				}else{
@@ -2244,8 +2421,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				if(item.getChargingExpiredTime() != null) {
 					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
 				}
-				String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
-				itemDto.setChargingItemName(itemName);
+				//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+				Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,dto.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+				//add by tangcen 显示客户自定义的收费项名称，需要使用缴费应用的categoryId来查
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),assetCategoryId,itemDto.getChargingItemId());
+
+				itemDto.setChargingItemName(projectChargingItemName);
+				//String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());
+				//itemDto.setChargingItemName(itemName);
 				String standardName = assetProvider.getStandardNameById(itemDto.getChargingStandardId());
 				itemDto.setChargingStandardName(standardName);
 				String lateFeeStandardName = assetProvider.getStandardNameById(itemDto.getLateFeeStandardId());
@@ -2457,7 +2640,39 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		return false;
 	}
 
+	@Override
+	public List<ContractEventDTO> listContractEvents(ListContractEventsCommand cmd) {
+		List<ContractEvents> contractEventsList = contractProvider.listContractEvents(cmd.getContractId());
+		//把操作时间（OpearteTime）相同的日志记录内容（Content）都合起来，传给前端展示
+		LinkedHashMap<Timestamp, ContractEventDTO> map = new LinkedHashMap<>();
+		for (ContractEvents contractEvents : contractEventsList) {
+			if (map.containsKey(contractEvents.getOpearteTime())) {
+				ContractEventDTO contractEventDTO = map.get(contractEvents.getOpearteTime());
+				String content = contractEventDTO.getContent();
+				content = content + ";" +contractEvents.getContent();
+				contractEventDTO.setContent(content);
+			}else {
+				ContractEventDTO dto = ConvertHelper.convert(contractEvents, ContractEventDTO.class);
+		        if(dto.getOperatorUid() != null) {
+		            //用户可能不在组织架构中 所以用nickname
+		            User user = userProvider.findUserById(dto.getOperatorUid());
+		            if(user != null) {
+		                dto.setOperatorName(user.getNickName());
+		            }
+		        }
+				map.put(dto.getOpearteTime(), dto);
+			}
+		}
+		List<ContractEventDTO> result = new ArrayList<>();
+		Set<Entry<Timestamp, ContractEventDTO>> entrySet = map.entrySet();
+		for (Entry<Timestamp, ContractEventDTO> entry : entrySet) {
+			result.add(entry.getValue());
+		}
+		return result;
+	}
+
     public Long findContractCategoryIdByContractId(Long contractId) {
 		return contractProvider.findContractCategoryIdByContractId(contractId);
     }
+
 }

@@ -4,9 +4,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.servicehotline.*;
-import com.everhomes.user.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,16 +18,10 @@ import com.everhomes.util.RequireAuthentication;
 @RestController
 @RequestMapping("/hotline")
 public class ServiceHotlineController extends ControllerBase {
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(ServiceHotlineController.class);
 
-	private static final String DEFAULT_SORT = "default_order";
 
 	@Autowired
 	private HotlineService hotlineService;
-	@Autowired
-	private UserService userService;
- 
 
 	/**
 	 * <b>URL: /hotline/getHotlineTopic</b>

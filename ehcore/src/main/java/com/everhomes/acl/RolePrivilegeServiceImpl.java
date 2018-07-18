@@ -1516,6 +1516,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
         String organizationName = getOrganizationDisplayName(contactDTO.getOrganizationId());
 
+        //add by huanglm ,如果organizationName为NotFound，那就不发推送。
+        //往后找到原因后再去掉
+        if("NotFound".equals(organizationName)){
+        	//打印堆栈，方便定位－－－start
+        	Throwable ex = new Throwable();
+            StackTraceElement[] stackElements = ex.getStackTrace();
+            if (stackElements != null) {
+            	LOGGER.info("--------the stackTeace for---organizationName is NotFound---start---------------------");
+                for (int i = 0; i < stackElements.length; i++) {
+                	LOGGER.info(stackElements[i].toString());           	
+                }
+                LOGGER.info("--------the stackTeace for---organizationName is NotFound---end---------------------");
+            }
+          //打印堆栈，方便定位－－－end
+        	return ;
+        }
+
+        
+
         Map<String, String> model = new HashMap<>();
         model.put("userName", defaultIfNull(contactDTO.getContactName(), ""));
         model.put("contactToken", defaultIfNull(contactDTO.getContactToken(), ""));
@@ -1524,7 +1543,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toOtherTemplateCode,
+                toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1552,7 +1571,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toTargetTemplateCode,
+                toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1756,7 +1775,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}*/
 
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-
+		
 		List<OrganizationMember> members =
 				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
 						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
@@ -2047,6 +2066,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(null != userIdentifier){
 				member.setTargetType(OrganizationMemberTargetType.USER.getCode());
 				member.setTargetId(userIdentifier.getOwnerUid());
+				//update by huanglm ,fix 缺陷 #31483 .添加userName、contactToken、organizationId等后续消息使用到的字段，
+				//要不然在发送的消息内容中这些字段会为空		
+				member.setContactToken(contactToken);
+				member.setOrganizationId(organizationId);
+				User deleteuser = userProvider.findUserById(userIdentifier.getOwnerUid());
+				if(deleteuser != null){
+					member.setContactName(deleteuser.getNickName());					
+				}				
 			}
 		}else{
 			//从公司人员里面把管理员的标识去掉
@@ -2739,10 +2766,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(identifier != null){
 				response.setTopAdminToken(identifier.getIdentifierToken());
 			}
-			User user = userProvider.findUserById(topId);
-			if(user != null){
-				response.setTopAdminName(user.getNickName());
-			}			
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(topId, cmd.getOrganizationId());
+			if(member != null && member.getContactName() != null) {
+				response.setTopAdminName(member.getContactName());
+			} else {
+				User user = userProvider.findUserById(topId);
+				if(user != null){
+					response.setTopAdminName(user.getNickName());
+				}		
+			}
+
 		}
 
 
@@ -3079,6 +3112,36 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return dto;
 		}).collect(Collectors.toList());
 	}
+	
+	/**
+	 * 如果是应用管理员或者系统管理员，返回 true，普通用户，则返回 false 
+	 * by Janson
+	 * @param orgId
+	 * @param userId
+	 */
+	@Override
+	public boolean checkIsSystemOrAppAdmin(Long orgId, Long userId) {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		int pageSize = 10;
+		
+		//判断是否是应用管理员
+		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), orgId, EntityType.USER.getCode(), userId, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
+		if(authorizations == null || authorizations.size() == 0) {
+			locator = new CrossShardListingLocator();
+			
+			//判断是否是系统管理员
+			List<OrganizationMember> members =
+					organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
+							orgId, OrganizationMemberGroupType.MANAGER.getCode(),
+							EntityType.USER.getCode(), userId, pageSize, locator);
+			if(members == null || members.size() == 0) {
+				//非系统管理员
+				return false;
+			}
+		}
+		
+		return true;
+	}
 
 	@Override
 	public ListServiceModuleAppsAdministratorResponse listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd) {
@@ -3094,6 +3157,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(cmd.getPageSize() != null){
 			pageSize = cmd.getPageSize();
 		}
+		
 		List<Authorization> authorizations =  authorizationProvider.listAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), null, null, EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, locator, pageSize);
 		List<ServiceModuleAppsAuthorizationsDto> dtos = authorizations.stream().map((r) ->{
             ServiceModuleAppsAuthorizationsDto dto = new ServiceModuleAppsAuthorizationsDto();

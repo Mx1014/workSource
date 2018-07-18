@@ -512,7 +512,9 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         if (cmd.getRepeatType() == null) {
             cmd.setRepeatType(RemindRepeatType.NONE.getCode());
         }
-
+        if (cmd.getPlanDate() != null && cmd.getPlanDate() <= 0) {
+            cmd.setPlanDate(null);
+        }
         if (cmd.getId() == null) {
             return createRemind(cmd);
         }
@@ -1319,11 +1321,13 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             String url = null;
             if (remind.getTrackRemindId() != null && remind.getTrackRemindId() > 0) {
                 TrackRemindDetailActionData actionData = new TrackRemindDetailActionData();
+                actionData.setOrganizationId(remind.getOwnerId());
                 actionData.setRemindId(remind.getTrackRemindId());
                 actionData.setRemindUserId(remind.getTrackRemindUserId());
                 url = RouterBuilder.build(Router.SHARED_CALENDAR_REMIND_DETAIL, actionData);
             } else {
                 SelfRemindDetailActionData actionData = new SelfRemindDetailActionData();
+                actionData.setOrganizationId(remind.getOwnerId());
                 actionData.setRemindId(remind.getId());
                 url = RouterBuilder.build(Router.SELF_CALENDAR_REMIND_DETAIL, actionData);
             }

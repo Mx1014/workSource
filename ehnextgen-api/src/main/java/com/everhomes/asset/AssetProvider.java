@@ -64,7 +64,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
 
-    ListBillsDTO creatPropertyBill(CreateBillCommand cmd);
+    ListBillsDTO creatPropertyBill(CreateBillCommand cmd, Long billId);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -81,8 +81,7 @@ public interface AssetProvider {
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId);
 
 
-    void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum, String noticeTel);
+    void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
 
     List<ListBillExemptionItemsDTO> listBillExemptionItems(String billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
 
@@ -162,7 +161,8 @@ public interface AssetProvider {
     void changeOrderStaus(Long orderId, Byte finalOrderStatus);
 
     void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId);
-
+    
+    void changeOrderPaymentType(Long orderId, Integer paymentType);
 
     PaymentUser findByOwner(String userType, Long id);
 
@@ -295,7 +295,6 @@ public interface AssetProvider {
 
     List<ListLateFineStandardsDTO> listLateFineStandards(Long ownerId, String ownerType, Integer namespaceId, Long categoryId);
 
-
     void updateLateFineAndBill(PaymentLateFine fine, BigDecimal fineAmount, Long billId, boolean isInsert);
 
     PaymentChargingItem getBillItemByName(Integer namespaceId, Long ownerId, String ownerType, Long billGroupId, String projectLevelName);
@@ -312,6 +311,9 @@ public interface AssetProvider {
 
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
+    //add by tangcen
+	String findProjectChargingItemNameByCommunityId(Long ownerId, Integer namespaceId, Long categoryId, Long chargingItemId);
+
     void modifySettledBill(Long billId, String invoiceNum, String noticeTel);
 
     boolean checkBillExistById(Long billId);
@@ -327,7 +329,9 @@ public interface AssetProvider {
 
     void insertAssetCategory(EhAssetAppCategories c);
 
-    
+
+    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+ 
     //ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
 
     boolean checkBillByCategory(Long billId, Long categoryId);
@@ -342,8 +346,17 @@ public interface AssetProvider {
 	void updatePaymentBillCertificates(Long billId, String certificateNote, List<String> certificateUris);
 
 	void setRent(Long contractId, BigDecimal rent);
+
     
-    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
+    List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
+    
+    IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+    IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+    IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+	void transferOrderPaymentType();
 
     PaymentLateFine findLastedFine(Long id);
 
@@ -362,4 +375,20 @@ public interface AssetProvider {
     Long checkEnergyFlag(Integer namespaceID);
 
     void changeEnergyFlag(Long mappingId, AppMappingEnergyFlag no);
+    
+    void modifyBillForImport(Long billId, CreateBillCommand cmd);
+    
+    String getProjectNameByBillID(Long billId);
+    
+    ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
+    
+    AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType);
+    
+    ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+	
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
+	
+	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
+	
+	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
 }

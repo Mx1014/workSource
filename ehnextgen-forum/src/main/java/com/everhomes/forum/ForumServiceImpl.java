@@ -33,6 +33,8 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.hotTag.HotTagService;
 import com.everhomes.hotTag.HotTag;
+import com.everhomes.link.Link;
+import com.everhomes.link.LinkProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -68,6 +70,7 @@ import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.hotTag.*;
+import com.everhomes.rest.link.LinkContentType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -222,6 +225,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Autowired
     private SensitiveWordService sensitiveWordService;
+
+    @Autowired
+    private LinkProvider linkProvider;
 
     @Override
     public boolean isSystemForum(long forumId, Long communityId) {
@@ -963,7 +969,9 @@ public class ForumServiceImpl implements ForumService {
         Long postId = cmd.getTopicId();
         Post post = checkPostParameter(userId, null, postId, "getTopic");
         cmd.setForumId(post.getForumId());
-        cmd.setCommunityId(post.getCommunityId());
+        if (cmd.getCommunityId() == null) {
+            cmd.setCommunityId(post.getCommunityId());
+        }
 
         //先查帖子再查论坛，可能没有forumId  edit by yanjun 20170830
         checkForumParameter(userId, cmd.getForumId(), "getTopic");
@@ -2011,23 +2019,26 @@ public class ForumServiceImpl implements ForumService {
 	        
 	         
 	         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId(), cmd.getContentCategory());
-	         
+
+             //             范围                帖子
+//
+//             一个园区            community + normal
+//             多个园区            all + clone,    community + real,   多个community + clone
+//             一个公司            organization + normal
+//             全部                all + normal
 	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
 	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
-
-             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
-             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
+//             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 
 	         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
 	         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
-
-             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
              regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 
-             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
+
 	         Condition condition = communityCondition
                      .or(regionCondition)
-                     .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()))
+                     .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+                             .and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())))
                      .and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
 
 	         if(null != cmd.getEmbeddedAppId()){
@@ -4787,14 +4798,14 @@ public class ForumServiceImpl implements ForumService {
                     namespaceId = UserContext.getCurrentNamespaceId();
                 }
 
-
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
-                    LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl 
+                    LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl
                         + ", relativeUrl=" + relativeUrl + ", postId=" + post.getId());
                 } else {
-                	//单独处理活动的分享链接 modified by xiongying 20160622
-                	if(post.getCategoryId() != null && post.getCategoryId() == 1010) {
-                		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
+                    //单独处理活动的分享链接 modified by xiongying 20160622
+                    if((post.getCategoryId() != null && post.getCategoryId() == 1010) || (post.getEmbeddedAppId() != null && post.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY))) {
+                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
+                        relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
 //                		ActivityTokenDTO dto = new ActivityTokenDTO();
 //                		dto.setPostId(post.getId());
 //                		dto.setForumId(post.getForumId());
@@ -4804,18 +4815,25 @@ public class ForumServiceImpl implements ForumService {
                         //改用直接传输的方式。因为增加微信报名活动后，涉及到报名取消支付等操作，这些操作都要编码的话，工作量会巨大。
                         //添加命名空间ns
                         // 增加是否支持微信报名wechatSignup  add by yanjun 20170620
-                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
                         Byte wechatSignup = 0;
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
+                            post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup + "&categoryId=" + activity.getCategoryId());
+                        }else {
+                            post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                         }
-                        post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                 	} else if(post.getCategoryId() != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_TOPIC_POLLING) {
                         //投票帖子用自己的分享链接 modified by yanjun 220171227
                         relativeUrl = configProvider.getValue(ConfigConstants.POLL_SHARE_URL, "");
-                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	    post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId()  + "&communityId=" + communityId);
                     }else {
-                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	    if (embededAppId != null && embededAppId.equals(AppConstants.APPID_LINK)) {
+                            Link link = linkProvider.findLinkByPostId(post.getId());
+                            if(link != null && LinkContentType.FORWARD.getCode().equals(link.getContentType())){
+                                relativeUrl = configProvider.getValue(ConfigConstants.POST_LINK_SHARE_URL, "");
+                            }
+                        }
+                		post.setShareUrl(homeUrl + relativeUrl + "?namespaceId=" + namespaceId + "&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&communityId=" + communityId + "&userId=" + userId);
                 	}
                 }
             } catch(Exception e) {
@@ -5539,7 +5557,7 @@ public class ForumServiceImpl implements ForumService {
         }
         topicCmd.setCurrentOrgId(currentOrgId);
         topicCmd.setStatus((byte)2);
-        if (!StringUtils.isEmpty(topicCmd.getEmbeddedJson())) {
+        if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY) && !StringUtils.isEmpty(topicCmd.getEmbeddedJson())) {
             ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(topicCmd.getEmbeddedJson(),
                     ActivityPostCommand.class);
             if (tempCmd != null) {
@@ -7046,6 +7064,9 @@ public class ForumServiceImpl implements ForumService {
 		    list.forEach(r ->{
 		        //更新帖子
                 r.setStatus(PostStatus.ACTIVE.getCode());
+                //编辑后发布需要重新设置创建时间.
+                Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+                r.setCreateTime(ts);
                 ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(r.getEmbeddedJson(),
                         ActivityPostCommand.class);
                 tempCmd.setStatus(PostStatus.ACTIVE.getCode());
@@ -7055,6 +7076,7 @@ public class ForumServiceImpl implements ForumService {
                 //更新活动
                 Activity r_activity = activityProvider.findSnapshotByPostId(r.getId());
                 r_activity.setStatus(PostStatus.ACTIVE.getCode());
+                r_activity.setCreateTime(ts);
                 activityProvider.updateActivity(r_activity);
 
                 //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609

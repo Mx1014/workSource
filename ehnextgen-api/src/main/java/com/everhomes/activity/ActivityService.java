@@ -2,6 +2,7 @@ package com.everhomes.activity;
 
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
@@ -31,7 +32,10 @@ public interface ActivityService {
 
     CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd);
 
-    PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd);
+    //更换使用新的支付V3
+//    PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd);
+
+    PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd);
 
     CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
 
@@ -206,6 +210,22 @@ public interface ActivityService {
 	 * 同步报名人数
 	 */
 	void syncActivitySignupAttendeeCount();
+
+    GetActivityPayeeDTO getActivityPayee(GetActivityPayeeCommand cmd);
+
+	List<ActivityPayeeDTO> listActivityPayee(ListActivityPayeeCommand cmd);
+
+	void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd);
+
+	CheckPayeeIsUsefulResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd);
+
+	void payNotify(OrderPaymentNotificationCommand cmd);
+
+	void exportActivity(ExportActivityCommand cmd);
+
+	void exportOrganization(ExportOrganizationCommand cmd);
+
+	void exportTag(ExportTagCommand cmd);
 
 //	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
