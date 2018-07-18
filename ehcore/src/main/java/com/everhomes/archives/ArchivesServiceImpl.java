@@ -607,7 +607,8 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  2.添加人员到组织架构
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
-//  3.获得 detailId 然后处理其它信息
+
+        //  3-1.获得 detailId 处理人事档案信息
         Long detailId = null;
         if (memberDTO != null)
             detailId = memberDTO.getDetailId();
@@ -628,26 +629,23 @@ public class ArchivesServiceImpl implements ArchivesService {
         employee.setCheckInTimeIndex(ArchivesUtil.getMonthAndDay(employee.getCheckInTime()));
         if (cmd.getEmploymentTime() == null)
             employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getCheckInTime()));
-        else {
-            //  若转正日期不为当前时间则需按照配置流程进行
+        else
             employee.setEmploymentTime(ArchivesUtil.parseDate(cmd.getEmploymentTime()));
-            EmployArchivesEmployeesCommand command = new EmployArchivesEmployeesCommand();
-            command.setDetailIds(Collections.singletonList(employee.getId()));
-            command.setOrganizationId(employee.getOrganizationId());
-            command.setEmploymentTime(cmd.getEmploymentTime());
-            command.setEmploymentEvaluation("");
-            employArchivesEmployeesConfig(command);
-        }
         if (cmd.getContractPartyId() != null)
             employee.setContractPartyId(cmd.getContractPartyId());
         else
             employee.setContractPartyId(cmd.getOrganizationId());
         organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
-
-        //  4.查询若存在于离职列表则删除
+        //  3-2.配置转正
+        EmployArchivesEmployeesCommand command = new EmployArchivesEmployeesCommand();
+        command.setDetailIds(Collections.singletonList(employee.getId()));
+        command.setOrganizationId(employee.getOrganizationId());
+        command.setEmploymentTime(cmd.getEmploymentTime());
+        command.setEmploymentEvaluation("");
+        employArchivesEmployeesConfig(command);
+        //  3-3.查询若存在于离职列表则删除
         deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
-
-        //  5.增加入职记录
+        //  3-4.增加入职记录
         addCheckInLogs(detailId, cmd);
 
         dto.setDetailId(employee.getId());

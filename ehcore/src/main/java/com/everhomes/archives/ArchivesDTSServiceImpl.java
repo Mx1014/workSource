@@ -180,7 +180,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesLocaleStringCode.SCOPE);
 
         //  姓名校验
-        if (!checkArchivesContactName(log, data, data.getContactName()))
+        if (checkArchivesContactName(log, data, data.getContactName()))
             return log;
 
         //  英文名校验
