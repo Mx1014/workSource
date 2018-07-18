@@ -91,6 +91,8 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsCategory;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -126,6 +128,9 @@ public class ContractProviderImpl implements ContractProvider {
 	
 	@Autowired
 	private UserProvider userProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 	
 	@Override
 	public void createContract(Contract contract) {
@@ -1105,19 +1110,29 @@ public class ContractProviderImpl implements ContractProvider {
 						}
 						//处理 退约经办人 字段
 						if("denunciationUid".equals(field.getFieldName())){
-							//用户可能不在组织架构中 所以用nickname
-				            if (objNew!=null) {
+							//查找组织架构中的contact_name
+				            if (objNew != null) {
 				            	User userNew = userProvider.findUserById((Long)objNew);
-				            	if(userNew != null) {
-					            	newData = userNew.getNickName();
-					            }
+								if (userNew != null) {
+									OrganizationMemberDetails organizationMember = organizationProvider.findOrganizationMemberDetailsByTargetId(userNew.getId());
+									if(organizationMember != null) {
+										newData = organizationMember.getContactName();
+									}else{
+										newData = userNew.getNickName();
+									}
+								}
 							}
-				            if (objOld!=null) {
+				            if (objOld != null) {
 				            	User userOld = userProvider.findUserById((Long)objOld);
-					            if(userOld != null) {
-					            	oldData = userOld.getNickName();
-					            }
-							}
+								if (userOld != null) {
+									OrganizationMemberDetails organizationMember = organizationProvider.findOrganizationMemberDetailsByTargetId(userOld.getId());
+									if(organizationMember != null) {
+										oldData = organizationMember.getContactName();
+									}else{
+										oldData = userOld.getNickName();
+									}
+								}
+				            }
 						}
 						
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);

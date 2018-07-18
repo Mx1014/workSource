@@ -54,6 +54,7 @@ import com.everhomes.openapi.ZjSyncdataBackupProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -2152,9 +2153,15 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 		if(dto.getDenunciationUid() != null) {
 			User denunciactionName = userProvider.findUserById(dto.getDenunciationUid());
-			if(denunciactionName != null) {
-				dto.setDenunciationName(denunciactionName.getNickName());
+			if (denunciactionName!=null) {
+				OrganizationMemberDetails organizationMember = organizationProvider.findOrganizationMemberDetailsByTargetId(denunciactionName.getId());
+				if(organizationMember != null) {
+					dto.setDenunciationName(organizationMember.getContactName());
+				}else{
+					dto.setDenunciationName(denunciactionName.getNickName());
+				}
 			}
+			
 		}
 
 		if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
