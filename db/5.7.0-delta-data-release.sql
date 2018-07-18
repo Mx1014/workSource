@@ -620,6 +620,16 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 UPDATE eh_web_menus set path = '/70000010/77000000/72152100', `level` = 3 WHERE id = '72152100';
 
+
+UPDATE eh_service_modules SET path = '/200/20000/21300/21310' WHERE id = 21310;
+UPDATE eh_service_modules SET path = '/200/20000/21300/21320' WHERE id = 21320;
+
+UPDATE eh_service_modules SET path = '/200/80000/41700/41710' WHERE id = 41710;
+UPDATE eh_service_modules SET path = '/200/80000/41700/41720' WHERE id = 41720;
+
+UPDATE eh_service_modules SET path = '/200/20000/20400/204011' WHERE id = 204011;
+UPDATE eh_service_modules SET path = '/200/20000/20400/204021' WHERE id = 204021;
+
 -- end
 
 -- AUTHOR: yanlong.liang  20180718
