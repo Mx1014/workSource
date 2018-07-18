@@ -6,21 +6,15 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>identifierToken: 用户手机号</li>
  *     <li>verifyCode: 验证码</li>
  *     <li>newPassword: 新密码</li>
- *     <li>regionCode: 区号</li>
  * </ul>
  */
-public class CheckVerifyCodeAndResetPasswordCommand {
-    @NotNull
-    private String identifierToken;
+public class CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand {
     @NotNull
     private String verifyCode;
     @NotNull
     private String newPassword;
-
-    private Integer regionCode;
 
     public String getVerifyCode() {
         return verifyCode;
@@ -30,28 +24,12 @@ public class CheckVerifyCodeAndResetPasswordCommand {
         this.verifyCode = verifyCode;
     }
 
-    public String getIdentifierToken() {
-        return identifierToken;
-    }
-
-    public void setIdentifierToken(String identifierToken) {
-        this.identifierToken = identifierToken;
-    }
-
     public String getNewPassword() {
         return newPassword;
     }
 
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
-    }
-
-    public Integer getRegionCode() {
-        return regionCode;
-    }
-
-    public void setRegionCode(Integer regionCode) {
-        this.regionCode = regionCode;
     }
 
     @Override

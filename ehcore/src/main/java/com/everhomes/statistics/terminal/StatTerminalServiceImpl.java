@@ -343,7 +343,7 @@ public class StatTerminalServiceImpl implements StatTerminalService, Application
             if (genData) {
                 LocalDate st = LocalDate.parse(start, FORMATTER);
                 LocalDate ed = LocalDate.parse(end, FORMATTER);
-                executeStatTask(null, st, ed);
+                executeStatTask(specNsId, st, ed);
             }
         }, "term-user-syncTask-0").start();
     }

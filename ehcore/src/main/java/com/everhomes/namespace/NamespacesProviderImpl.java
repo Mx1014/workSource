@@ -5,8 +5,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.launchpad.PortalVersionStatus;
 import com.everhomes.rest.namespace.MaskDTO;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.schema.tables.daos.EhNamespacesDao;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.sequence.SequenceProvider;
@@ -90,6 +92,33 @@ public class NamespacesProviderImpl implements NamespacesProvider {
 			return result.map(r->RecordHelper.convert(r, NamespaceInfoDTO.class));
 		}
 		return new ArrayList<NamespaceInfoDTO>();
+	}
+
+	@Override
+	public List<NamespaceInfoDTO> listNamespaceByModuleId(Long moduleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.schema.tables.EhNamespaces t1 = com.everhomes.schema.Tables.EH_NAMESPACES.as("t1");
+		com.everhomes.server.schema.tables.EhNamespaceDetails t2 = Tables.EH_NAMESPACE_DETAILS.as("t2");
+		com.everhomes.server.schema.tables.EhPortalVersions t3 = Tables.EH_PORTAL_VERSIONS.as("t3");
+		com.everhomes.server.schema.tables.EhServiceModuleApps t4 = Tables.EH_SERVICE_MODULE_APPS.as("t4");
+
+		Result<?> result = context.selectDistinct(t1.ID, t1.NAME, t2.RESOURCE_TYPE)
+				.from(t1)
+				.join(t3)
+				.on(t1.ID.eq(t3.NAMESPACE_ID))
+				.join(t4)
+				.on(t3.ID.eq(t4.VERSION_ID))
+				.leftOuterJoin(t2)
+				.on(t1.ID.eq(t2.NAMESPACE_ID))
+				.where(t3.STATUS.eq(PortalVersionStatus.RELEASE.getCode())
+						.and(t4.MODULE_ID.eq(moduleId))
+						.and(t4.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode())))
+				.orderBy(t1.ID)
+				.fetch();
+		if(result != null && result.isNotEmpty()){
+			return result.map(r->RecordHelper.convert(r, NamespaceInfoDTO.class));
+		}
+		return new ArrayList<>();
 	}
 
 	@Override

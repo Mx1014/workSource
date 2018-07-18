@@ -332,6 +332,18 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
+    public List<ServiceModule> listServiceModulesByMenuAuthFlag(Byte menuAuthFlag) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+        SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+
+        Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
+        cond = cond.and(Tables.EH_SERVICE_MODULES.MENU_AUTH_FLAG.eq(menuAuthFlag));
+        query.addConditions(cond);
+        List<ServiceModule> results  = query.fetch().map((r) -> ConvertHelper.convert(r, ServiceModule.class));
+        return results;
+    }
+
+    @Override
     public List<ServiceModule> listServiceModule(String path) {
         List<ServiceModule> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));

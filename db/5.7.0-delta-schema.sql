@@ -114,3 +114,22 @@ CREATE TABLE `eh_payment_subtraction_items` (
 -- REMARK: 取消滞纳金表字段非空限制
 ALTER TABLE eh_payment_late_fine MODIFY COLUMN customer_id BIGINT COMMENT 'allows searching taking advantage of it';
 -- --------------------- SECTION END ---------------------------------------------------------
+
+-- 通用脚本
+-- ADD BY jun.yan
+-- ISSUE-32697 模块对应的菜单是否需要授权, add by yanjun 20180517
+ALTER TABLE `eh_service_modules` ADD COLUMN `menu_auth_flag`  tinyint(4) NOT NULL DEFAULT 1 COMMENT 'if its menu need auth' ;
+
+ALTER TABLE `eh_service_modules` ADD COLUMN `category`  varchar(255) NULL COMMENT 'classify, module, subModule';
+-- end
+
+-- 通用脚本
+-- add by liangyanlong 20180710
+-- 第三方应用链接白名单.
+CREATE TABLE `eh_app_white_list` (
+  `id` BIGINT NOT NULL COMMENT '主键',
+  `link` VARCHAR(128) NOT NULL COMMENT '第三方应用链接',
+  `name` VARCHAR(128) NOT NULL COMMENT '第三方应用名称',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='第三方应用白名单';
+-- end
