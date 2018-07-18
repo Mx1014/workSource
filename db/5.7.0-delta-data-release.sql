@@ -612,7 +612,9 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('77000000', 'OA管理', '70000010', NULL, NULL, '1', '2', '/70000010/77000000', 'organization', '30', NULL, '2', 'system', 'classify', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('78000000', 'ERP', '70000010', NULL, NULL, '1', '2', '/70000010/78000000', 'organization', '40', NULL, '2', 'system', 'classify', '2');
 
-
+UPDATE eh_service_modules SET `status` = 0 where id = 22000;
+UPDATE eh_service_module_apps SET `status` = 0  WHERE module_id = 22000;
+UPDATE eh_web_menus SET `status` = 0 WHERE module_id = 22000;
 -- end
 
 -- AUTHOR: yanlong.liang  20180718
