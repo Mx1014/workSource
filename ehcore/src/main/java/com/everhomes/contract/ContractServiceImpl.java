@@ -2095,16 +2095,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 //		}
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
-//<<<<<<< HEAD
-		//add by tangcen
+
 		dto.setCommunityId(cmd.getCommunityId());
 		dto.setNamespaceId(cmd.getNamespaceId());
 		dto.setCategoryId(cmd.getCategoryId());
 		
-//=======
-		// just in case
-//		dto.setCategoryId(contract.getCategoryId());
-//>>>>>>> 5.6.2
 		if(dto.getCreateUid() != null) {
 			User creator = userProvider.findUserById(dto.getCreateUid());
 			if(creator != null) {
@@ -2426,8 +2421,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				if(item.getChargingExpiredTime() != null) {
 					itemDto.setChargingExpiredTime(item.getChargingExpiredTime().getTime());
 				}
-				//add by tangcen 显示客户自定义的收费项名称
-				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),dto.getCategoryId(),itemDto.getChargingItemId());
+				//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+				Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,dto.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+				//add by tangcen 显示客户自定义的收费项名称，需要使用缴费应用的categoryId来查
+				String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(dto.getCommunityId(),dto.getNamespaceId(),assetCategoryId,itemDto.getChargingItemId());
 
 				itemDto.setChargingItemName(projectChargingItemName);
 				//String itemName = assetProvider.findChargingItemNameById(itemDto.getChargingItemId());

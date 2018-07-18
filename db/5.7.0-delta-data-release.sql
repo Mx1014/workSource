@@ -635,6 +635,23 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('77000000', 'OA管理', '70000010', NULL, NULL, '1', '2', '/70000010/77000000', 'organization', '30', NULL, '2', 'system', 'classify', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('78000000', 'ERP', '70000010', NULL, NULL, '1', '2', '/70000010/78000000', 'organization', '40', NULL, '2', 'system', 'classify', '2');
 
+UPDATE eh_service_modules SET `status` = 0 where id = 22000;
+UPDATE eh_service_module_apps SET `status` = 0  WHERE module_id = 22000;
+UPDATE eh_web_menus SET `status` = 0 WHERE module_id = 22000;
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16033100', '企业访客', '23010000', NULL, 'visitor-enterprise', '1', '2', '/16000000/16040000/16033100', 'zuolin', '90', '52100', '3', 'system', 'module', NULL);
+
+UPDATE eh_web_menus set path = '/70000010/77000000/72152100', `level` = 3 WHERE id = '72152100';
+
+
+UPDATE eh_service_modules SET path = '/200/20000/21300/21310' WHERE id = 21310;
+UPDATE eh_service_modules SET path = '/200/20000/21300/21320' WHERE id = 21320;
+
+UPDATE eh_service_modules SET path = '/200/80000/41700/41710' WHERE id = 41710;
+UPDATE eh_service_modules SET path = '/200/80000/41700/41720' WHERE id = 41720;
+
+UPDATE eh_service_modules SET path = '/200/20000/20400/204011' WHERE id = 204011;
+UPDATE eh_service_modules SET path = '/200/20000/20400/204021' WHERE id = 204021;
 
 -- end
 
@@ -656,6 +673,25 @@ INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
 VALUES (2,'alipays','支付宝');
 INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
 VALUES (3,'cmbmobilebank','招商银行');
+-- end
+
+
+
+-- AUTHOR: dengs 20180718
+-- REMARK: issue 33614, 工位预定模块路径错误，修正
+update eh_service_modules SET path = '/200/110000/40200/40210' WHERE id = 40210;
+update eh_service_modules SET path = '/200/110000/40200/40220' WHERE id = 40220;
+-- end
+
+-- AUTHOR: 黄良铭
+-- REMARK: 一键推送改造
+SET @c_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO eh_locale_strings (id ,scope ,CODE ,locale ,TEXT)
+VALUES( @c_id + 1 , 'pushMessage',1 ,'zh_CN' ,'企业管理员');
+INSERT INTO eh_locale_strings (id ,scope ,CODE ,locale ,TEXT)
+VALUES( @c_id + 2 , 'pushMessage',2 ,'zh_CN' ,'业务联系人');
+
+DELETE FROM eh_web_menus  WHERE NAME='短信推送' AND data_type='sms-push' AND id=16020400;
 -- end
 -- --------------------- SECTION END ---------------------------------------------------------
 
