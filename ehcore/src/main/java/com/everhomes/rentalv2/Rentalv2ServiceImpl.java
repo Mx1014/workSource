@@ -8865,6 +8865,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			cell.setBeginTime(r.getBeginTime());
 			cell.setEndTime(r.getEndTime());
 			cell.setResourceRentalDate(r.getResourceRentalDate());
+			cell.setAmorpm(r.getAmorpm());
 			return cell;
 		}).collect(Collectors.toList());
 		if (collect.size() == 0)
