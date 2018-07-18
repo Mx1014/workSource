@@ -517,5 +517,17 @@ public interface OrganizationProvider {
     
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(
 			String contactPhone, Long organizationId, String memberGroup);
+	
+	/**
+	 * 通过项目ID 与 认证状态来查询项目下的用户
+	 * @param namespaceId
+	 * @param communityIds
+	 * @param authStatus
+	 * @param locator
+	 * @param pageSize
+	 * @return
+	 */
+	List<UserOrganizations>  findUserByCommunityIDAndAuthStatus(Integer namespaceId , 
+			List<Long> communityIds , List<Integer> authStatus ,CrossShardListingLocator locator , int pageSize);
  
 }

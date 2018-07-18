@@ -58,7 +58,8 @@ INSERT INTO `eh_service_agreement` (`id`, `namespace_id`, `agreement_content`) V
 
 -- AUTHOR:jiarui 20180625
 -- REMARK:增加企业后台菜单及动态表单附件
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48035000', '企业后台', '72000000', NULL, 'customer-info', '1', '2', '/72000000/48035000', 'organization', '3', '21400', '2', 'system', 'module', '2');
+DELETE  FROM  eh_web_menus WHERE  module_id = 21400;
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48035000', '企业信息', '72000000', NULL, 'customer-info', '1', '2', '/72000000/48035000', 'organization', '3', '21400', '2', 'system', 'module', '2');
 SET  @id  = (SELECT max(id) from eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'attachments', '附件', 'List<ContractAttachmentDTO>', '11', '/1/11', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"file\", \"length\": 9}');
 UPDATE  eh_var_fields SET field_param = '{"fieldParamType": "text", "length": 6}' WHERE name LIKE 'corpEmployeeAmount%';
@@ -611,6 +612,13 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('77000000', 'OA管理', '70000010', NULL, NULL, '1', '2', '/70000010/77000000', 'organization', '30', NULL, '2', 'system', 'classify', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('78000000', 'ERP', '70000010', NULL, NULL, '1', '2', '/70000010/78000000', 'organization', '40', NULL, '2', 'system', 'classify', '2');
 
+UPDATE eh_service_modules SET `status` = 0 where id = 22000;
+UPDATE eh_service_module_apps SET `status` = 0  WHERE module_id = 22000;
+UPDATE eh_web_menus SET `status` = 0 WHERE module_id = 22000;
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16033100', '企业访客', '23010000', NULL, 'visitor-enterprise', '1', '2', '/16000000/16040000/16033100', 'zuolin', '90', '52100', '3', 'system', 'module', NULL);
+
+UPDATE eh_web_menus set path = '/70000010/77000000/72152100', `level` = 3 WHERE id = '72152100';
 
 -- end
 
@@ -622,6 +630,36 @@ INSERT INTO eh_locale_strings ( `scope`, `code`, `locale`, `text`)
 	VALUES ('user', 400004, 'zh_CN', '验证码已过期');
 -- end
 
+-- AUTHOR: yanlong.liang  20180718
+-- REMARK: 第三方应用链接白名单数据
+INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
+    VALUES (0,'weixin','微信');
+INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
+VALUES (1,'alipay','支付宝');
+INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
+VALUES (2,'alipays','支付宝');
+INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
+VALUES (3,'cmbmobilebank','招商银行');
+-- end
+
+
+
+-- AUTHOR: dengs 20180718
+-- REMARK: issue 33614, 工位预定模块路径错误，修正
+update eh_service_modules SET path = '/200/110000/40200/40210' WHERE id = 40210;
+update eh_service_modules SET path = '/200/110000/40200/40220' WHERE id = 40220;
+-- end
+
+-- AUTHOR: 黄良铭
+-- REMARK: 一键推送改造
+SET @c_id = (SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO eh_locale_strings (id ,scope ,CODE ,locale ,TEXT)
+VALUES( @c_id + 1 , 'pushMessage',1 ,'zh_CN' ,'企业管理员');
+INSERT INTO eh_locale_strings (id ,scope ,CODE ,locale ,TEXT)
+VALUES( @c_id + 2 , 'pushMessage',2 ,'zh_CN' ,'业务联系人');
+
+DELETE FROM eh_web_menus  WHERE NAME='短信推送' AND data_type='sms-push' AND id=16020400;
+-- end
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -640,6 +678,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- AUTHOR:dengs
 -- REMARK:银星停车场对接配置
+-- REMARK:请勿在beta执行此配置！！！！！！beta配置在5.7.0-delta-data-beta.sql中。
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.url', 'http://java.mallparking.cn', '银星科技园停车场url', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.parkId', '07550000151453862236', '银星科技园停车场id', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyId', 'yinxingkeji', '银星科技园停车场访问者标识', '0', NULL, '1');
@@ -675,6 +714,14 @@ SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
+-- AUTHOR: 黄良铭
+-- REMARK: 苹果推送升级兼容旧应用mapper
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_bundleid_mapper);
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','develop','com.qinghua.ios.zuolin');
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','appbeta','com.qinghua.ios.zuolin');
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','appstore','com.qinghua.ios.zuolin');
+UPDATE eh_bundleid_mapper ebm SET ebm.bundle_id='com.qinghua.ios' WHERE ebm.namespace_id='999984' AND ebm.identify='appstore';
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -688,6 +735,13 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
+
+-- AUTHOR: 黄良铭
+-- REMARK: 苹果推送升级兼容旧应用mapper
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_bundleid_mapper);
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999979','develop','com.guangdawegu.ios.zuolin');
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999979','appbeta','com.guangdawegu.ios.zuolin');
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999979','appstore','com.guangdawegu.ios.zuolin');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -729,6 +783,13 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
+
+-- AUTHOR: 黄良铭
+-- REMARK: 苹果推送升级兼容旧应用mapper
+SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_bundleid_mapper);
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999949','develop','com.huimengwuyezhushou.ios.zuolin');
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999949','appbeta','com.huimengwuyezhushou.ios.zuolin');
+INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999949','appstore','com.huimengwuyezhushou.ios.zuolin');
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

@@ -3571,7 +3571,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 //物业或业委增加小区Id和小区name信息
-                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
+                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) 
                 		||org.getOrganizationType().equals(OrganizationType.ENTERPRISE.getCode())
                 		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                     this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
@@ -3606,7 +3606,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
                         OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                         //物业或业委增加小区Id和小区name信息
-                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) 
+                        		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                             this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                         }
                         orgs.add(tempSimpleOrgDTO);
@@ -3616,7 +3617,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(org.getGroupType())) {
                         OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                         //物业或业委增加小区Id和小区name信息
-                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                        if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())                        		
+                        		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                             this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                         }
                         tempSimpleOrgDTO.setContactName(member.getContactName());
