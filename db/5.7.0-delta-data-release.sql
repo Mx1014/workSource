@@ -640,6 +640,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- AUTHOR:dengs
 -- REMARK:银星停车场对接配置
+-- REMARK:请勿在beta执行此配置！！！！！！beta配置在5.7.0-delta-data-beta.sql中。
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.url', 'http://java.mallparking.cn', '银星科技园停车场url', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.parkId', '07550000151453862236', '银星科技园停车场id', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyId', 'yinxingkeji', '银星科技园停车场访问者标识', '0', NULL, '1');
