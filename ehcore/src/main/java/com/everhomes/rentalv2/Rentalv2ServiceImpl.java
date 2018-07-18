@@ -8829,8 +8829,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                             min((p, q) -> p.getRentalResourceRuleId().compareTo(q.getRentalResourceRuleId())).get();
                     RentalResourceOrder lastOrder = resourceOrders.stream().filter(p -> number.getResourceNumber().equals(p.getResourceNumber())).
                             max((p, q) -> p.getRentalResourceRuleId().compareTo(q.getRentalResourceRuleId())).get();
-                    dto.setStartTime(firstOrder.getBeginTime() == null ? firstOrder.getBeginTime().getTime() : firstOrder.getResourceRentalDate().getTime());
-                    dto.setEndTime(lastOrder.getEndTime() == null ? lastOrder.getEndTime().getTime() : lastOrder.getResourceRentalDate().getTime());
+                    dto.setStartTime(firstOrder.getBeginTime() != null ? firstOrder.getBeginTime().getTime() : firstOrder.getResourceRentalDate().getTime());
+                    dto.setEndTime(lastOrder.getEndTime() != null ? lastOrder.getEndTime().getTime() : lastOrder.getResourceRentalDate().getTime());
                     dto.setRentalType(r.getRentalType());
                     dtos.add(dto);
                 }
