@@ -4,23 +4,23 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>namespaceId: 域空间id</li>
- *     <li>communityId: 园区id</li>
- *     <li>enterpriseCustomerId: 企业客户id</li>
+ *     <li>orgId: orgId</li>
+ *     <li>communityId: 园区Id</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>categoryId: 多入口</li>
  * </ul>
- * Created by ying.xiong on 2017/8/22.
+ * Created by dingjianmin on 2018/7/05.
  */
-public class ListEnterpriseCustomerContractsCommand {
-    private Long enterpriseCustomerId;
+public class PrintPreviewPrivilegeCommand {
+    private Long orgId;
 
     private Long communityId;
 
     private Integer namespaceId;
 
-    private Byte status;
-    private Long categoryId;
+	private Long categoryId;
 
-    public Long getCategoryId() {
+	public Long getCategoryId() {
 		return categoryId;
 	}
 
@@ -28,13 +28,6 @@ public class ListEnterpriseCustomerContractsCommand {
 		this.categoryId = categoryId;
 	}
 
-	public Byte getStatus() {
-        return status;
-    }
-
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
 
     public Long getCommunityId() {
         return communityId;
@@ -44,20 +37,20 @@ public class ListEnterpriseCustomerContractsCommand {
         this.communityId = communityId;
     }
 
-    public Long getEnterpriseCustomerId() {
-        return enterpriseCustomerId;
-    }
-
-    public void setEnterpriseCustomerId(Long enterpriseCustomerId) {
-        this.enterpriseCustomerId = enterpriseCustomerId;
-    }
-
     public Integer getNamespaceId() {
         return namespaceId;
     }
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
     
 	@Override
