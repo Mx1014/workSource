@@ -8773,9 +8773,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//每日开放时间
 		RentalType[] iterators = {RentalType.HALFDAY,RentalType.DAY,RentalType.WEEK,RentalType.MONTH};
 		StringBuilder builder = new StringBuilder();
-		String separate = "注:";
+		String separate = "注：";
 		for (RentalType iterator:iterators){
-            String s = getResourceOpenTime(rentalSite.getResourceType(),rentalSite.getId(),iterator.getCode(),",");
+            String s = getResourceOpenTime(rentalSite.getResourceType(),rentalSite.getId(),iterator.getCode(),"，");
             if (s == null)
                 continue;
 			builder.append(separate);
@@ -8790,9 +8790,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					builder.append("按周预订时每日开放时间为");
 					break;
 				case MONTH:
+                    builder.append("按月预订时每日开放时间为");
+                    break;
 			}
 			builder.append(s);
-			separate = ";";
+			separate = "；";
 		}
 		response.setOpenTimes(builder.toString());
 		//今天(包含)的订单
