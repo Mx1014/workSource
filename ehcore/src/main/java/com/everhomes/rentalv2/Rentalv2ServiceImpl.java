@@ -8854,6 +8854,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                 return true;
             return System.currentTimeMillis()>r.getStartTime() && System.currentTimeMillis()<r.getEndTime();
         }).collect(Collectors.toList()));
+        response.setUsingInfos(usingInfos.stream().filter(r->r.getStartTime()>System.currentTimeMillis()).collect(Collectors.toList()));
         return response;
 	}
 
