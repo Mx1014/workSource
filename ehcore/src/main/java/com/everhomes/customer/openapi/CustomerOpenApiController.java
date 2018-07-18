@@ -56,6 +56,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("listCommunities")
     @RestReturn(value = String.class)
+    //    @RequireAuthentication(value = true)
     public RestResponse listCommunities(ListCommunitiesByCategoryCommand cmd) {
         CommunityResponse resp = customerService.listCommunitiesByCategory(cmd);
         RestResponse response = new RestResponse(resp);
@@ -70,6 +71,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("listBuildings")
     @RestReturn(value = String.class)
+    //    @RequireAuthentication(value = true)
     public RestResponse listBuildings(ListBuildingCommand cmd) {
         ListBuildingResponse buildingResponse = customerService.listBuildings(cmd);
         RestResponse response = new RestResponse(buildingResponse);
@@ -83,6 +85,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("listAddresses")
     @RestReturn(value = PropFamilyDTO.class,collection = true)
+    //    @RequireAuthentication(value = true)
     public RestResponse listAddresses(ListBuildingCommand cmd) {
         List<PropFamilyDTO> addresses = customerService.listAddresses(cmd.getBuildingId());
         RestResponse response = new RestResponse(addresses);
@@ -98,6 +101,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("createEnterprise")
     @RestReturn(value = String.class)
+//    @RequireAuthentication(value = true)
     public RestResponse createEnterprise(OpenApiUpdateCustomerCommand cmd) {
         EnterpriseCustomerDTO enterpriseCustomerDTO = customerService.createEnterpriseCustomer(cmd);
         RestResponse response = new RestResponse(enterpriseCustomerDTO);
@@ -112,6 +116,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("updateEnterprise")
     @RestReturn(value = String.class)
+    //    @RequireAuthentication(value = true)
     public RestResponse updateEnterprise(OpenApiUpdateCustomerCommand cmd) {
         EnterpriseCustomerDTO enterpriseCustomerDTO = customerService.updateEnterpriseCustomer(cmd);
         RestResponse response = new RestResponse(enterpriseCustomerDTO);
@@ -126,6 +131,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("deleteEnterprise")
     @RestReturn(value = String.class)
+    //    @RequireAuthentication(value = true)
     public RestResponse deleteEnterprise(DeleteEnterpriseCommand cmd) {
         EnterpriseCustomerDTO enterpriseCustomerDTO = customerService.deleteEnterpriseCustomer(cmd);
         RestResponse response = new RestResponse(enterpriseCustomerDTO);
@@ -140,6 +146,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("createEnterprisAdmin")
     @RestReturn(value = String.class)
+    //    @RequireAuthentication(value = true)
     public RestResponse createEnterprisAdmin(DeleteEnterpriseCommand cmd) {
         customerService.createEnterpriseAdmin(cmd);
         RestResponse response = new RestResponse();
@@ -154,6 +161,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("deleteEnterprisAdmin")
     @RestReturn(value = String.class)
+    //    @RequireAuthentication(value = true)
     public RestResponse deleteEnterprisAdmin(DeleteEnterpriseCommand cmd) {
         customerService.deleteEnterpriseAdmin(cmd);
         RestResponse response = new RestResponse();
@@ -168,6 +176,7 @@ public class CustomerOpenApiController extends ControllerBase {
      */
     @RequestMapping("signatureGen")
     @RestReturn(value = String.class)
+    //    @RequireAuthentication(value = true)
     public RestResponse deleteEnterprisAdmin(HttpServletRequest request) {
         Map<String, String[]> paramMap = request.getParameterMap();
         Map<String, String> mapForSignature = new HashMap<String, String>();
