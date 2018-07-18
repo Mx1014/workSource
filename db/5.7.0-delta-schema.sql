@@ -152,7 +152,7 @@ CREATE TABLE `eh_push_message_log` (
   PRIMARY KEY(`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '一键推送消息(短信)记录表';
 
---end
+-- end
 
 -- 通用脚本
 -- AUTHOR liuyilin  20180712
