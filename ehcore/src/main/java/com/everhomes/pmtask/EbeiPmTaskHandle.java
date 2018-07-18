@@ -105,6 +105,8 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
     private OrganizationProvider organizationProvider;
     @Autowired
     private AddressProvider addressProvider;
+    @Autowired
+    private FlowEvaluateProvider flowEvaluateProvider;
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -385,9 +387,9 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
         param.put("userId", "");
         param.put("recordId", task.getStringTag1());
-        Byte star = task.getStar();
+        String star = task.getStar();
         if(null == star)
-            star = (byte)0;
+            star = "0";
         param.put("serviceAttitude", star);
         param.put("serviceEfficiency", star);
         param.put("serviceQuality", star);
@@ -735,6 +737,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
         List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
+//      V3.6 过滤正中会办事的中间类型
+//        if(childrens.size() == 1){
+//            childrens = childrens.get(0).getChildrens();
+//        }
 
         if(null == cmd.getParentId()) {
             CategoryDTO dto = createCategoryDTO();
@@ -794,12 +800,16 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         int listSize = list.size();
         if(listSize > 0){
             response.setRequests(list.stream().map(t -> {
-//    			PmTask task = pmTaskProvider.findTaskById(t.getId());
                 PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
 
                 CategoryDTO taskCategory = createCategoryDTO();
                 dto.setTaskCategoryId(taskCategory.getId());
                 dto.setTaskCategoryName(taskCategory.getName());
+
+//                PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(t.getId());
+//                if(null != order){
+//                    dto.setAmount(order.getAmount());
+//                }
 
                 return dto;
             }).collect(Collectors.toList()));
