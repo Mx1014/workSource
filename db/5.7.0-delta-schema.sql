@@ -1,4 +1,4 @@
--- 通用脚本
+﻿-- 通用脚本
 -- ADD BY xq.tian
 -- ISSUE-32697 运营统计重构
 ALTER TABLE eh_terminal_hour_statistics ADD COLUMN cumulative_active_user_number BIGINT NOT NULL DEFAULT 0;
@@ -153,3 +153,10 @@ CREATE TABLE `eh_push_message_log` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '一键推送消息(短信)记录表';
 
 --end
+
+-- 通用脚本
+-- AUTHOR liuyilin  20180712
+-- REMARK issue-32260 人脸识别V1.6 - 管理控制台 增加字段长度 删除唯一约束
+ALTER TABLE `eh_aclink_servers` MODIFY COLUMN `uuid` VARCHAR(64) NOT NULL;
+ALTER TABLE `eh_aclink_servers` DROP INDEX `uuid`;
+-- end

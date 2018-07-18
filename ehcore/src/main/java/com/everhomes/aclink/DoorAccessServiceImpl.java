@@ -3557,7 +3557,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 resp.setNamespaceName(namespace.getName());    
             }
             
-            if(driverType == DoorAccessDriverType.ZUOLIN_V2 && qrDriverExt == DoorAccessDriverType.ZUOLIN) {
+            //ZUOLIN_V2按次开门的二维码不转成9号指令,按次二维码防截图后面再做 by liuyilin 20180717
+            if(driverType == DoorAccessDriverType.ZUOLIN_V2 && qrDriverExt == DoorAccessDriverType.ZUOLIN && (auth.getAuthRuleType() == null || auth.getAuthRuleType() == DoorAuthRuleType.DURATION.getCode())) {
                 byte[] origin = Base64.decodeBase64(auth.getQrKey());
                 byte[] qrLenArr = new byte[2];
                 qrLenArr[0] = origin[2];
@@ -3918,7 +3919,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     			e.printStackTrace();
     		}
     		pdu.setType(1);
-            pdu.setUuid(aclinkServerService.findLocalServerById(doorAccess.getLocalServerId()).getUuid());
+            pdu.setUuid(aclinkServerService.findLocalServerById(doorAccess.getLocalServerId()).getUuidNum());
         }else{
         	pdu.setBody(Base64.encodeBase64String(mBuf));
         	pdu.setType(1);
