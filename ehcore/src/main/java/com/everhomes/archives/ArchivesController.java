@@ -392,7 +392,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("importArchivesEmployees")
     @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importArchivesEmployees(ImportArchivesEmployeesCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
-        RestResponse response = new RestResponse(archivesService.importArchivesEmployees(files[0],cmd));
+        RestResponse response = new RestResponse(archivesDTSService.importArchivesEmployees(files[0],cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -427,7 +427,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("getImportEmployeesResult")
     @RestReturn(value = ImportFileResponse.class)
     public RestResponse getImportEmployeesResult(GetImportFileResultCommand cmd) {
-        RestResponse response = new RestResponse(archivesService.getImportEmployeesResult(cmd));
+        RestResponse response = new RestResponse(archivesDTSService.getImportEmployeesResult(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
