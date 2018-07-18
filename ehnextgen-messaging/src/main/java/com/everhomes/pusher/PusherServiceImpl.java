@@ -341,7 +341,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                             tempService.push(notification);   
                             if(LOGGER.isDebugEnabled()) {
                                 LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
-                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin+"payload="+payload);
                                     }
                      } else {
                          LOGGER.warn("Pushing apnsServer not found");
@@ -409,7 +409,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				    if(LOGGER.isDebugEnabled()) {
 				    	//LOGGER.warn("NotificationResponse:"+result);
 		                LOGGER.debug("Pushing message(push ios), namespaceId=" + namespaceId + ", msgId=" + msgId + ", identify=" + identify
-		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin+"payload="+notif.getPayload());
 		                    }
 			    }else{
 			    	LOGGER.warn("Pushing apnsServer not found");
