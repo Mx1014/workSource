@@ -1,13 +1,12 @@
 // @formatter:off
 package com.everhomes.controller;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +22,12 @@ import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 
-import com.everhomes.rest.aclink.AclinkWebSocketMessage;
-import com.everhomes.rest.aclink.DataUtil;
-import com.everhomes.rest.aclink.DoorAccessDTO;
-import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
-import com.everhomes.rest.rpc.server.AclinkRemotePdu;
-import com.everhomes.util.StringHelper;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AclinkWebSocketHandler.class);

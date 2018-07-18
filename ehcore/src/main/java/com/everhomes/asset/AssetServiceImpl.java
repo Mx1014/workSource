@@ -5,6 +5,7 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
+import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
@@ -57,6 +58,7 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -832,201 +834,16 @@ public class AssetServiceImpl implements AssetService {
         }else{
             dtos.addAll(listBills(cmd).getListBillsDTOS());
         }
-        Calendar c = newClearedCalendar();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int date = c.get(Calendar.DATE);
-        int hour = c.get(Calendar.HOUR_OF_DAY);
-        int minute = c.get(Calendar.MINUTE);
-        int second = c.get(Calendar.SECOND);
-        String fileName = "bill"+year+month+date+hour+minute+ second;
-        
-        //初始化
-        List<String> propertyNames = new ArrayList<String>();
-        List<String> titleName = new ArrayList<String>();
-        List<Integer> titleSize = new ArrayList<Integer>();
-        propertyNames.add("dateStrBegin");
-        titleName.add("账单开始时间");
-        titleSize.add(20);
-        propertyNames.add("dateStrEnd");
-        titleName.add("账单结束时间");
-        titleSize.add(20);
-        propertyNames.add("targetName");
-        titleName.add("客户名称");
-        titleSize.add(20);
-        propertyNames.add("contractNum");
-        titleName.add("合同编号");
-        titleSize.add(20);
-        propertyNames.add("customerTel");
-        titleName.add("客户手机号");
-        titleSize.add(20);
-        propertyNames.add("noticeTel");
-        titleName.add("催缴手机号");
-        titleSize.add(20);
-        //增加收费项的导出
-        ShowCreateBillDTO webPage = assetProvider.showCreateBill(cmd.getBillGroupId());
-        List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
-        for(BillItemDTO billItemDTO : billItemDTOList){
-        	if(billItemDTO.getBillItemId() != null) {
-        		propertyNames.add(billItemDTO.getBillItemId().toString());
-                titleName.add(billItemDTO.getBillItemName()+"(元)");
-                titleSize.add(20);
-        	}
-        }
-        propertyNames.add("addresses");
-        titleName.add("楼栋/门牌");
-        titleSize.add(20);
-        propertyNames.add("amountExemption");
-        titleName.add("减免金额");
-        titleSize.add(20);
-        propertyNames.add("remarkExemption");
-        titleName.add("减免备注");
-        titleSize.add(20);
-        propertyNames.add("amountSupplement");
-        titleName.add("增收金额");
-        titleSize.add(20);
-        propertyNames.add("remarkSupplement");
-        titleName.add("增收备注");
-        titleSize.add(20);
-        propertyNames.add("invoiceNum");
-        titleName.add("发票单号");
-        titleSize.add(20);
-        List<Map<String, String>> dataList = new ArrayList<>();
-        //组装datalist来确定propertyNames的值
-        for(int i = 0; i < dtos.size(); i++) {
-            ListBillsDTO dto = dtos.get(i);
-            Map<String, String> detail = new HashMap<String, String>();
-            detail.put("dateStrBegin", dto.getDateStrBegin());
-            detail.put("dateStrEnd", dto.getDateStrEnd());
-            detail.put("targetName", dto.getTargetName());
-            detail.put("contractNum", dto.getContractNum());
-            detail.put("customerTel", dto.getCustomerTel());
-            detail.put("noticeTel", dto.getNoticeTel());
-            //导出增加费项列
-            List<BillItemDTO> billItemDTOs = new ArrayList<>();
-            List<ExemptionItemDTO> exemptionItemDTOs = new ArrayList<>();
-            ListBillDetailVO listBillDetailVO = new ListBillDetailVO();
-            if(dto.getBillId() != null) {
-    			listBillDetailVO = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
-    			if(listBillDetailVO != null && listBillDetailVO.getBillGroupDTO() != null) {
-    				billItemDTOs = listBillDetailVO.getBillGroupDTO().getBillItemDTOList();
-    				exemptionItemDTOs = listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList();
-    			}
-    		}
-            for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
-            	BigDecimal amountRecivable = BigDecimal.ZERO;
-        		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
-        			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
-        				//如果费项是一样的，那么导出的时候，对费项做相加
-        				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
-        			}
-        		}
-        		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
-            }
-            detail.put("addresses", dto.getAddresses());
-            //导出增加减免（总和）、减免备注、增收（总和）、增收备注
-            if(listBillDetailVO != null) {
-            	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
-            	detail.put("amountSupplement", listBillDetailVO.getAmountSupplement() != null ? listBillDetailVO.getAmountSupplement().toString() : "");
-            }
-            StringBuffer remarkExemption = new StringBuffer();//减免备注
-            StringBuffer remarkSupplement = new StringBuffer();//增收备注
-            for(ExemptionItemDTO exemptionItemDTO : exemptionItemDTOs) {
-            	if(exemptionItemDTO.getAmount().compareTo(new BigDecimal("0"))==-1) {
-            		remarkExemption = remarkExemption.append(exemptionItemDTO.getRemark() + ",");
-                }else{
-                	remarkSupplement = remarkSupplement.append(exemptionItemDTO.getRemark() + ",");
-                }
-            }
-            if(remarkExemption.length() != 0) {
-            	detail.put("remarkExemption", remarkExemption.substring(0, remarkExemption.length() - 1));
-            }
-            if(remarkSupplement.length() != 0) {
-            	detail.put("remarkSupplement", remarkSupplement.substring(0, remarkSupplement.length() - 1));
-            }
-            detail.put("invoiceNum", dto.getInvoiceNum());
-            dataList.add(detail);
-        }
-        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
-        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+        exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response);//导出账单
     }
     
     public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(Long.parseLong("5000"));
         }
-        ListPaymentBillResp result;
-		try {
-			result = listPaymentBill(cmd);
-			List<PaymentOrderBillDTO> dtos = result.getPaymentOrderBillDTOs();
-	        Calendar c = newClearedCalendar();
-	        int year = c.get(Calendar.YEAR);
-	        int month = c.get(Calendar.MONTH);
-	        int date = c.get(Calendar.DATE);
-	        int hour = c.get(Calendar.HOUR_OF_DAY);
-	        int minute = c.get(Calendar.MINUTE);
-	        int second = c.get(Calendar.SECOND);
-	        String fileName = "payment"+year+month+date+hour+minute+ second;
-
-	        List<exportPaymentOrdersDetail> dataList = new ArrayList<>();
-	        //组装datalist来确定propertyNames的值
-	        for(int i = 0; i < dtos.size(); i++) {
-	        	PaymentOrderBillDTO dto = dtos.get(i);
-	        	if(dto != null) {
-		        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
-		            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
-		            detail.setBillGroupName(dto.getBillGroupName());
-		            //组装所有的收费项信息
-		            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
-		            String billItemListMsg = "";
-		            if(billItemDTOList != null) {
-		            	for(int k = 0; k < billItemDTOList.size();k++) {
-		            		BillItemDTO billItemDTO = billItemDTOList.get(k);
-		            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
-		            	}
-		            }
-		            detail.setBillItemListMsg(billItemListMsg);
-		            detail.setTargetName(dto.getTargetName());
-		            detail.setTargetType(dto.getTargetType().equals("eh_user") ? "个人客户" : "企业客户");
-		            //detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
-		            detail.setPaymentStatus("已完成");
-		            if(dto.getPaymentType() != null) {
-		            	switch (dto.getPaymentType()) {
-						case 0:
-							detail.setPaymentType("微信");
-							break;
-						case 1:
-							detail.setPaymentType("支付宝");
-							break;
-						case 2:
-							detail.setPaymentType("对公转账");
-							break;
-						default:
-							break;
-		            	}
-		            }
-		            detail.setAmountReceived(dto.getAmountReceived());
-		            detail.setAmountReceivable(dto.getAmountReceivable());
-		            detail.setAmoutExemption(dto.getAmountExemption());
-		            detail.setAmountSupplement(dto.getAmountSupplement());
-		            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
-		            detail.setPayTime(dto.getPayTime());
-		            detail.setPayerTel(dto.getPayerTel());
-		            detail.setPayerName(dto.getPayerName());
-		            detail.setAddresses(dto.getAddresses());
-		            dataList.add(detail);
-	        	}
-	        }
-	        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
-	        		"amountReceived","amountReceivable","amoutExemption","amountSupplement","paymentOrderNum","payTime","payerTel","payerName","addresses"};
-	        String[] titleName ={"账单时间","账单组","收费项信息","客户名称","客户类型","订单状态","支付方式",
-	        		"实收金额","应收金额","减免","增收","订单编号","缴费时间","缴费人电话","缴费人","楼栋门牌"};
-	        int[] titleSize = {40,20,20,20,20,20,20,20,20,20,20,30,20,20,20,40};
-	        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
-	        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
-		} catch (Exception e) {
-			LOGGER.error("exportOrders cmd={}, Exception={}", cmd, e);
-		}
+        ListPaymentBillResp result = listPaymentBill(cmd);
+        List<PaymentOrderBillDTO> dtos = result.getPaymentOrderBillDTOs();
+        exportOrdersUtil(dtos, cmd, response);
     }
 
     @Override
@@ -1062,7 +879,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
-        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTO(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName(), cmd.getInvoiceNum(), cmd.getNoticeTel());
+    	assetProvider.modifyNotSettledBill(cmd);
     }
 
     @Override
@@ -2792,88 +2609,90 @@ public class AssetServiceImpl implements AssetService {
      */
     @Scheduled(cron = "0 0 0 * * ?")
     private void lateFineCal(){
-        /**
-         * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
-         * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
-         * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据,update bill, 不用锁，一条一条走
-         */
-        //获得账单,分页一次最多10000个，防止内存不够
-        int pageSize = 10000;
-        long pageAnchor = 1l;
-        SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-        Date today = new Date();
-        coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
-            Long nextPageAnchor = 0l;
-            while(nextPageAnchor != null){
-                List<Long> overdueBillIds = new ArrayList<>();
-                SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
-                List<PaymentBills> bills = res.getBills();
-                //更新账单
-                for(PaymentBills bill : bills){
-                    String dueDayDeadline = bill.getDueDayDeadline();
-                    try{
-                        Date deadline = yyyyMMdd.parse(dueDayDeadline);
-//                    if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
-                        if(deadline.compareTo(today) != 1) {
-                            assetProvider.changeBillToDue(bill.getId());
-                            bill.setChargeStatus((byte)1);
+    	if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+    		/**
+             * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
+             * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
+             * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据,update bill, 不用锁，一条一条走
+             */
+            //获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = new Date();
+            coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
+                Long nextPageAnchor = 0l;
+                while(nextPageAnchor != null){
+                    List<Long> overdueBillIds = new ArrayList<>();
+                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+                    List<PaymentBills> bills = res.getBills();
+                    //更新账单
+                    for(PaymentBills bill : bills){
+                        String dueDayDeadline = bill.getDueDayDeadline();
+                        try{
+                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+//                        if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
+                            if(deadline.compareTo(today) != 1) {
+                                assetProvider.changeBillToDue(bill.getId());
+                                bill.setChargeStatus((byte)1);
+                            }
+                            if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
+                        } catch (Exception e){ continue; };
+                    }
+                    nextPageAnchor = res.getNextPageAnchor();
+                    //这10000个账单中欠费的billItem
+                    List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
+                    for(int i = 0; i < billItems.size(); i++){
+                        PaymentBillItems item = billItems.get(i);
+                        //没有关联滞纳金标准的不计算，剔除出更新队列
+                        if(item.getLateFineStandardId() == null){
+                            billItems.remove(i--);
+                            continue;
                         }
-                        if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
-                    } catch (Exception e){ continue; };
+                        //计算滞纳金金额
+                        //获得欠费的钱
+                        BigDecimal amountOwed = new BigDecimal("0");
+                        if(item.getAmountOwed() !=null){
+                            amountOwed = amountOwed.add(item.getAmountOwed());
+                        }else{
+                            item.setAmountOwed(new BigDecimal("0"));
+                            assetProvider.updatePaymentItem(item);
+                        }
+                        amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
+                        List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
+                        if(formulas.size() != 1) {
+                            LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
+                        }
+                        String formulaJson = formulas.get(0).getFormulaJson();
+                        formulaJson = formulaJson.replace("qf",amountOwed.toString());
+                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+                        //开始构造一条滞纳金记录
+                        //查看item是否已经有滞纳金产生了
+                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+                        boolean isInsert = false;
+                        if(fine == null){
+                            isInsert = true;
+                            fine = new PaymentLateFine();
+                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+                            fine.setId(nextSequence);
+                            fine.setName(item.getChargingItemName() + "滞纳金");
+                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            fine.setBillId(item.getBillId());
+                            fine.setBillItemId(item.getId());
+                            fine.setCommunityId(item.getOwnerId());
+                            fine.setNamespaceId(item.getNamespaceId());
+                            fine.setCustomerId(item.getTargetId());
+                            fine.setCustomerType(item.getTargetType());
+                        }
+                        fine.setAmount(fineAmount);
+                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
+                        // 重新计算下账单
+                        assetProvider.reCalBillById(item.getBillId());
+                    }
                 }
-                nextPageAnchor = res.getNextPageAnchor();
-                //这10000个账单中欠费的billItem
-                List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
-                for(int i = 0; i < billItems.size(); i++){
-                    PaymentBillItems item = billItems.get(i);
-                    //没有关联滞纳金标准的不计算，剔除出更新队列
-                    if(item.getLateFineStandardId() == null){
-                        billItems.remove(i--);
-                        continue;
-                    }
-                    //计算滞纳金金额
-                    //获得欠费的钱
-                    BigDecimal amountOwed = new BigDecimal("0");
-                    if(item.getAmountOwed() !=null){
-                        amountOwed = amountOwed.add(item.getAmountOwed());
-                    }else{
-                        item.setAmountOwed(new BigDecimal("0"));
-                        assetProvider.updatePaymentItem(item);
-                    }
-                    amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
-                    List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
-                    if(formulas.size() != 1) {
-                        LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
-                    }
-                    String formulaJson = formulas.get(0).getFormulaJson();
-                    formulaJson = formulaJson.replace("qf",amountOwed.toString());
-                    BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
-                    //开始构造一条滞纳金记录
-                    //查看item是否已经有滞纳金产生了
-                    PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
-                    boolean isInsert = false;
-                    if(fine == null){
-                        isInsert = true;
-                        fine = new PaymentLateFine();
-                        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
-                        fine.setId(nextSequence);
-                        fine.setName(item.getChargingItemName() + "滞纳金");
-                        fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        fine.setBillId(item.getBillId());
-                        fine.setBillItemId(item.getId());
-                        fine.setCommunityId(item.getOwnerId());
-                        fine.setNamespaceId(item.getNamespaceId());
-                        fine.setCustomerId(item.getTargetId());
-                        fine.setCustomerType(item.getTargetType());
-                    }
-                    fine.setAmount(fineAmount);
-                    fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
-                    // 重新计算下账单
-//                    assetProvider.reCalBillById(item.getBillId());
-                }
-            }
-        });
+            });
+    	}
     }
 
     /**
@@ -3193,6 +3012,11 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
+        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
+            // 转换
+            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+            cmd.setCategoryId(assetCategoryId);
+         }
         return assetProvider.listLateFineStandards(ownerId,ownerType,namespaceId, cmd.getCategoryId());
     }
 
@@ -4836,13 +4660,7 @@ public class AssetServiceImpl implements AssetService {
         response.setPaymentOrderBillDTOs(list);
         return response;
 	}
-
-	public ListBillsDTO createTestZJGKBill() {
-		CreateBillCommand cmd = new CreateBillCommand();
-		
-		return assetProvider.creatPropertyBill(cmd, null);
-	}
-
+	
 	public IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd) {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){//ownerId为-1代表选择的是全部
@@ -4956,4 +4774,454 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return response;
 	}
+	
+	public void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response) {
+       if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+           cmd.setPageSize(5000);
+       }
+       List<ListBillsDTO> dtos = new ArrayList<>();
+       if(UserContext.getCurrentNamespaceId()==999983){
+           Integer pageSize = cmd.getPageSize();
+           if(pageSize <= 100){
+               dtos.addAll(listBillsForEnt(cmd).getListBillsDTOS());
+           }
+           Integer hundred = 100;
+           Integer pageAnchor = 100;
+           if(pageSize > 100){
+               while(pageSize > 0){
+                   cmd.setPageSize(hundred);
+                   List<ListBillsDTO> back = listBillsForEnt(cmd).getListBillsDTOS();
+                   if(back.size() > pageAnchor) {
+                       for(int i = 0; i < pageAnchor; i++){
+                           dtos.add(back.get(i));
+                       }
+                       break;
+                   }else{
+                       dtos.addAll(back);
+                   }
+                   pageSize = pageSize - 100;
+                   pageAnchor = pageSize;
+                   cmd.setPageAnchor(cmd.getPageAnchor()==null?2l:cmd.getPageAnchor()+1l);
+               }
+           }
+       }else{
+           dtos.addAll(listBillsForEnt(cmd).getListBillsDTOS());
+       }
+       exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response);//导出账单
+    }
+    
+    public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd){
+    	List<BillIdAndAmount> bills = new ArrayList<BillIdAndAmount>();
+    	List<PaymentBillRequest> paymentBillRequests = cmd.getBillList();
+        List<String> billIds = new ArrayList<>();
+        Long amountsInCents = 0l;
+        StringBuffer orderExplain = new StringBuffer();//订单说明，如：2017-06物业费、2017-06租金
+        for(PaymentBillRequest paymentBillRequest : paymentBillRequests){
+            billIds.add(String.valueOf(paymentBillRequest.getBillId()));
+            String amountOwed = String.valueOf(paymentBillRequest.getAmountOwed());
+            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
+            amountsInCents += amountOwedInCents.longValue();
+            orderExplain.append(paymentBillRequest.getDateStr() + paymentBillRequest.getBillGroupName() + "、");
+        }
+        //对左邻的用户，直接检查bill的状态即可
+        checkHasPaidBills(billIds);
+        //如果账单为新的，则进行存储
+        String payerType = cmd.getTargetType();//支付者的类型，eh_user为个人，eh_organization为企业
+        String clientAppName = "Web对公转账";
+        Long communityId = null;
+        String contactNum = cmd.getContractNum();
+        String openid = null;
+        String payerName = cmd.getPayerName();
+        AssetPaymentOrder order  = assetProvider.saveAnOrderCopyForEnt(payerType,null,String.valueOf(amountsInCents/100l),clientAppName,
+        		communityId,contactNum,openid,cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, 
+        		cmd.getNamespaceId(),OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        assetProvider.saveOrderBills(bills,order.getId());
+        
+        PublicTransferBillRespForEnt publicTransferBillRespForEnt = new PublicTransferBillRespForEnt();
+        
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//定义格式，不显示毫秒
+        String date = format.format(order.getCreateTime());
+		publicTransferBillRespForEnt.setOrderCreateTime(date);
+        //paymentOrderNum：订单编号，没点“去支付”按钮之前，没有办法获取订单编号，所以此处只能展示我们业务系统的orderNo支付流水号
+        //publicTransferBillRespForEnt.setPaymentOrderNum(String.valueOf(order.getOrderNo()));
+        //publicTransferBillRespForEnt.setBusinessType("业务类型：待产品决定");
+        publicTransferBillRespForEnt.setOrderSource(cmd.getOrderSource());
+        if(orderExplain != null && orderExplain.length() != 0) {
+        	publicTransferBillRespForEnt.setOrderExplain(orderExplain.substring(0, orderExplain.length() - 1));
+        }
+        publicTransferBillRespForEnt.setOrderAmount(BigDecimal.valueOf(amountsInCents/100l));
+        return publicTransferBillRespForEnt;
+    }
+    
+    private void checkHasPaidBills(List<String> billIds) {
+        List<PaymentBills> paidBills = assetProvider.findPaidBillsByIds(billIds);
+        if( paidBills.size() >0 ) throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS,"this is bills have been paid,please refresh");
+    }
+
+	public ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd) {
+		ListBillsResponse response = new ListBillsResponse();
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        //转换为正确的命令
+        ListBillsCommand converCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
+        converCmd.setTargetIdForEnt(cmd.getTargetId());//对公转账的专有参数
+        converCmd.setStatus((byte) 1);//0:未出账单;1:已出账单,普通企业客户只能查询已出账单
+        List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),response, converCmd);
+        response.setListBillsDTOS(list);
+        return response;
+    }
+
+	public void exportOrdersForEnt(ListPaymentBillCmd cmd, HttpServletResponse response) {
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(Long.parseLong("5000"));
+        }
+        ListPaymentBillResp result = listPaymentBillForEnt(cmd);
+        List<PaymentOrderBillDTO> dtos = result.getPaymentOrderBillDTOs();
+        exportOrdersUtil(dtos, cmd, response);
+	}
+
+	public ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd) {
+		//初始化参数
+		cmd.setOrganizationId(cmd.getTargetId());
+        cmd.setCommunityId(cmd.getOwnerId());
+        //业务系统：paymentType：支付方式，0:微信，1：支付宝，2：对公转账
+        //电商系统：paymentType： 支付类型:1:"微信APP支付",2:"网关支付",7:"微信扫码支付",8:"支付宝扫码支付",9:"微信公众号支付",10:"支付宝JS支付",
+        //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
+    	cmd.setPaymentType(2);//2代表对公转账
+        return listPaymentBill(cmd);
+	}
+
+	public List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd) {
+		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+        }
+        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(),null);//对公转账不区分多入口，所以categoryId为null
+	}
+	
+	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response){
+		Calendar c = newClearedCalendar();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int date = c.get(Calendar.DATE);
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        int minute = c.get(Calendar.MINUTE);
+        int second = c.get(Calendar.SECOND);
+        String fileName = "bill"+year+month+date+hour+minute+ second;
+        
+        //初始化
+        List<String> propertyNames = new ArrayList<String>();
+        List<String> titleName = new ArrayList<String>();
+        List<Integer> titleSize = new ArrayList<Integer>();
+        propertyNames.add("dateStrBegin");
+        titleName.add("账单开始时间");
+        titleSize.add(20);
+        propertyNames.add("dateStrEnd");
+        titleName.add("账单结束时间");
+        titleSize.add(20);
+        propertyNames.add("targetName");
+        titleName.add("客户名称");
+        titleSize.add(20);
+        propertyNames.add("contractNum");
+        titleName.add("合同编号");
+        titleSize.add(20);
+        propertyNames.add("customerTel");
+        titleName.add("客户手机号");
+        titleSize.add(20);
+        propertyNames.add("noticeTel");
+        titleName.add("催缴手机号");
+        titleSize.add(20);
+        //增加收费项的导出
+        ShowCreateBillDTO webPage = assetProvider.showCreateBill(billGroupId);
+        List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
+        for(BillItemDTO billItemDTO : billItemDTOList){
+        	if(billItemDTO.getBillItemId() != null) {
+        		propertyNames.add(billItemDTO.getBillItemId().toString());
+                titleName.add(billItemDTO.getBillItemName()+"(元)");
+                titleSize.add(20);
+                //增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "LateFine");
+                titleName.add(billItemDTO.getBillItemName()+"滞纳金"+"(元)");
+                titleSize.add(30);
+        	}
+        }
+        propertyNames.add("addresses");
+        titleName.add("楼栋/门牌");
+        titleSize.add(20);
+        propertyNames.add("amountExemption");
+        titleName.add("减免金额");
+        titleSize.add(20);
+        propertyNames.add("remarkExemption");
+        titleName.add("减免备注");
+        titleSize.add(20);
+        propertyNames.add("amountSupplement");
+        titleName.add("增收金额");
+        titleSize.add(20);
+        propertyNames.add("remarkSupplement");
+        titleName.add("增收备注");
+        titleSize.add(20);
+        propertyNames.add("invoiceNum");
+        titleName.add("发票单号");
+        titleSize.add(20);
+        List<Map<String, String>> dataList = new ArrayList<>();
+        //组装datalist来确定propertyNames的值
+        for(int i = 0; i < dtos.size(); i++) {
+            ListBillsDTO dto = dtos.get(i);
+            Map<String, String> detail = new HashMap<String, String>();
+            detail.put("dateStrBegin", dto.getDateStrBegin());
+            detail.put("dateStrEnd", dto.getDateStrEnd());
+            detail.put("targetName", dto.getTargetName());
+            detail.put("contractNum", dto.getContractNum());
+            detail.put("customerTel", dto.getCustomerTel());
+            detail.put("noticeTel", dto.getNoticeTel());
+            //导出增加费项列
+            List<BillItemDTO> billItemDTOs = new ArrayList<>();
+            List<ExemptionItemDTO> exemptionItemDTOs = new ArrayList<>();
+            ListBillDetailVO listBillDetailVO = new ListBillDetailVO();
+            if(dto.getBillId() != null) {
+    			listBillDetailVO = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
+    			if(listBillDetailVO != null && listBillDetailVO.getBillGroupDTO() != null) {
+    				billItemDTOs = listBillDetailVO.getBillGroupDTO().getBillItemDTOList();
+    				exemptionItemDTOs = listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList();
+    			}
+    		}
+            for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
+            	BigDecimal amountRecivable = BigDecimal.ZERO;
+            	BigDecimal lateFineAmount = BigDecimal.ZERO;
+        		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
+        			//如果费项ID相等
+        			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
+        				//如果费项ID相等，并且费项名称相等，那么说明是费项本身，如果不相等，则说明是费项产生的滞纳金
+        				if(billItemDTO.getBillItemName() != null && billItemDTO.getBillItemName().equals(billItemDTO2.getBillItemName())) {
+        					//如果费项是一样的，那么导出的时候，对费项做相加
+            				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+            				//根据减免费项配置重新计算待收金额
+            				long billId = Long.parseLong(dto.getBillId());
+                            Long charingItemId = billItemDTO.getBillItemId();
+                            Boolean isConfigSubtraction = assetProvider.isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
+                            if(isConfigSubtraction) {//如果费项配置了减免费项，那么导出金额置为0
+                            	amountRecivable = BigDecimal.ZERO;//修复issue-33462
+                            }
+        				}else {
+        					lateFineAmount = lateFineAmount.add(billItemDTO2.getAmountReceivable());
+        					//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
+        					long billId = Long.parseLong(dto.getBillId());
+        					Long chargingItemId = billItemDTO.getBillItemId();
+                        	//根据减免费项配置重新计算待收金额
+                            Boolean isConfigSubtraction = assetProvider.isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
+                            if(isConfigSubtraction) {//如果滞纳金配置了减免费项，那么导出金额置为0
+                            	lateFineAmount = BigDecimal.ZERO;//修复issue-33462
+                            }
+        				}
+        			}
+        		}
+        		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
+        		//导出增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
+        		detail.put(billItemDTO.getBillItemId().toString() + "LateFine", lateFineAmount.toString());
+            }
+            detail.put("addresses", dto.getAddresses());
+            //导出增加减免（总和）、减免备注、增收（总和）、增收备注
+            if(listBillDetailVO != null) {
+            	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
+            	detail.put("amountSupplement", listBillDetailVO.getAmountSupplement() != null ? listBillDetailVO.getAmountSupplement().toString() : "");
+            }
+            StringBuffer remarkExemption = new StringBuffer();//减免备注
+            StringBuffer remarkSupplement = new StringBuffer();//增收备注
+            for(ExemptionItemDTO exemptionItemDTO : exemptionItemDTOs) {
+            	if(exemptionItemDTO.getAmount().compareTo(new BigDecimal("0"))==-1) {
+            		remarkExemption = remarkExemption.append(exemptionItemDTO.getRemark() + ",");
+                }else{
+                	remarkSupplement = remarkSupplement.append(exemptionItemDTO.getRemark() + ",");
+                }
+            }
+            if(remarkExemption.length() != 0) {
+            	detail.put("remarkExemption", remarkExemption.substring(0, remarkExemption.length() - 1));
+            }
+            if(remarkSupplement.length() != 0) {
+            	detail.put("remarkSupplement", remarkSupplement.substring(0, remarkSupplement.length() - 1));
+            }
+            detail.put("invoiceNum", dto.getInvoiceNum());
+            dataList.add(detail);
+        }
+        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+	}
+	
+	public void exportOrdersUtil(List<PaymentOrderBillDTO> dtos, ListPaymentBillCmd cmd, HttpServletResponse response) {
+    	try {
+	        Calendar c = newClearedCalendar();
+	        int year = c.get(Calendar.YEAR);
+	        int month = c.get(Calendar.MONTH);
+	        int date = c.get(Calendar.DATE);
+	        int hour = c.get(Calendar.HOUR_OF_DAY);
+	        int minute = c.get(Calendar.MINUTE);
+	        int second = c.get(Calendar.SECOND);
+	        String fileName = "payment"+year+month+date+hour+minute+ second;
+	        List<exportPaymentOrdersDetail> dataList = new ArrayList<>();
+	        //组装datalist来确定propertyNames的值
+	        for(int i = 0; i < dtos.size(); i++) {
+	        	PaymentOrderBillDTO dto = dtos.get(i);
+	        	if(dto != null) {
+		        	exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
+		            detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+		            detail.setBillGroupName(dto.getBillGroupName());
+		            //组装所有的收费项信息
+		            List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
+		            String billItemListMsg = "";
+		            if(billItemDTOList != null) {
+		            	for(int k = 0; k < billItemDTOList.size();k++) {
+		            		BillItemDTO billItemDTO = billItemDTOList.get(k);
+		            		billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
+		            	}
+		            }
+		            detail.setBillItemListMsg(billItemListMsg);
+		            detail.setTargetName(dto.getTargetName());
+		            detail.setTargetType(dto.getTargetType().equals("eh_user") ? "个人客户" : "企业客户");
+		            //detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
+		            detail.setPaymentStatus("已完成");
+		            if(dto.getPaymentType() != null) {
+		            	switch (dto.getPaymentType()) {
+						case 0:
+							detail.setPaymentType("微信");
+							break;
+						case 1:
+							detail.setPaymentType("支付宝");
+							break;
+						case 2:
+							detail.setPaymentType("对公转账");
+							break;
+						default:
+							break;
+		            	}
+		            }
+		            detail.setAmountReceived(dto.getAmountReceived());
+		            detail.setAmountReceivable(dto.getAmountReceivable());
+		            detail.setAmoutExemption(dto.getAmountExemption());
+		            detail.setAmountSupplement(dto.getAmountSupplement());
+		            detail.setPaymentOrderNum(dto.getPaymentOrderNum());
+		            detail.setPayTime(dto.getPayTime());
+		            detail.setPayerTel(dto.getPayerTel());
+		            detail.setPayerName(dto.getPayerName());
+		            detail.setAddresses(dto.getAddresses());
+		            dataList.add(detail);
+	        	}
+	        }
+	        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
+	        		"amountReceived","amountReceivable","amoutExemption","amountSupplement","paymentOrderNum","payTime","payerTel","payerName","addresses"};
+	        String[] titleName ={"账单时间","账单组","收费项信息","客户名称","客户类型","订单状态","支付方式",
+	        		"实收金额","应收金额","减免","增收","订单编号","缴费时间","缴费人电话","缴费人","楼栋门牌"};
+	        int[] titleSize = {40,20,20,20,20,20,20,20,20,20,20,30,20,20,20,40};
+	        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+	        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+		} catch (Exception e) {
+			LOGGER.error("exportOrdersUtil cmd={}, Exception={}", cmd, e);
+		}
+    }
+	
+	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.showCreateBillSubItemList(cmd);
+	}
+
+	public void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+		assetProvider.batchModifyBillSubItem(cmd);
+	}
+	
+	/**
+     * 手动修改系统时间，从而触发滞纳金产生（仅用于测试）
+     */
+    public void testLateFine(TestLateFineCommand cmd){
+    	if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+    		/**
+             * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
+             * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
+             * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据,update bill, 不用锁，一条一条走
+             */
+            //获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            //Date today = new Date();
+			try {
+				Date today = yyyyMMdd.parse(cmd.getDate());
+				coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
+	                Long nextPageAnchor = 0l;
+	                while(nextPageAnchor != null){
+	                    List<Long> overdueBillIds = new ArrayList<>();
+	                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+	                    List<PaymentBills> bills = res.getBills();
+	                    //更新账单
+	                    for(PaymentBills bill : bills){
+	                        String dueDayDeadline = bill.getDueDayDeadline();
+	                        try{
+	                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+//	                        if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
+	                            if(deadline.compareTo(today) != 1) {
+	                                assetProvider.changeBillToDue(bill.getId());
+	                                bill.setChargeStatus((byte)1);
+	                            }
+	                            if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
+	                        } catch (Exception e){ continue; };
+	                    }
+	                    nextPageAnchor = res.getNextPageAnchor();
+	                    //这10000个账单中欠费的billItem
+	                    List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
+	                    for(int i = 0; i < billItems.size(); i++){
+	                        PaymentBillItems item = billItems.get(i);
+	                        //没有关联滞纳金标准的不计算，剔除出更新队列
+	                        if(item.getLateFineStandardId() == null){
+	                            billItems.remove(i--);
+	                            continue;
+	                        }
+	                        //计算滞纳金金额
+	                        //获得欠费的钱
+	                        BigDecimal amountOwed = new BigDecimal("0");
+	                        if(item.getAmountOwed() !=null){
+	                            amountOwed = amountOwed.add(item.getAmountOwed());
+	                        }else{
+	                            item.setAmountOwed(new BigDecimal("0"));
+	                            assetProvider.updatePaymentItem(item);
+	                        }
+	                        amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
+	                        List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
+	                        if(formulas.size() != 1) {
+	                            LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
+	                        }
+	                        String formulaJson = formulas.get(0).getFormulaJson();
+	                        formulaJson = formulaJson.replace("qf",amountOwed.toString());
+	                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+	                        //开始构造一条滞纳金记录
+	                        //查看item是否已经有滞纳金产生了
+	                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+	                        boolean isInsert = false;
+	                        if(fine == null){
+	                            isInsert = true;
+	                            fine = new PaymentLateFine();
+	                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+	                            fine.setId(nextSequence);
+	                            fine.setName(item.getChargingItemName() + "滞纳金");
+	                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                            fine.setBillId(item.getBillId());
+	                            fine.setBillItemId(item.getId());
+	                            fine.setCommunityId(item.getOwnerId());
+	                            fine.setNamespaceId(item.getNamespaceId());
+	                            fine.setCustomerId(item.getTargetId());
+	                            fine.setCustomerType(item.getTargetType());
+	                        }
+	                        fine.setAmount(fineAmount);
+	                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
+	                        // 重新计算下账单
+	                        assetProvider.reCalBillById(item.getBillId());
+	                    }
+	                }
+	            });
+			} catch (ParseException e1) {
+				LOGGER.error("please input yyyy-MM-dd");
+			}
+    	}
+    }
+
 }

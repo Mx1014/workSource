@@ -103,7 +103,7 @@ public class GogsProviderImplTest {
         param.setTreePath(path);
         gogs.commitFile(repoName, path, param);
 
-        List<GogsCommit> commits = gogs.listCommits(repoName, path, new TypeToken<List<GogsCommit>>() {
+        List<GogsCommit> commits = gogs.listCommits(repoName, path, null, new TypeToken<List<GogsCommit>>() {
         }.getType());
 
         assertNotNull(commits);
@@ -166,7 +166,7 @@ public class GogsProviderImplTest {
         param.setNewFile(true);
         param.setTreePath(path);
         gogs.commitFile(repoName, path, param);
-        List<GogsCommit> data = gogs.listCommits(repoName, path, new TypeToken<List<GogsCommit>>(){}.getType());
+        List<GogsCommit> data = gogs.listCommits(repoName, path, null, new TypeToken<List<GogsCommit>>(){}.getType());
         assertNotNull(data);
         assertTrue(data.size() > 0);
 

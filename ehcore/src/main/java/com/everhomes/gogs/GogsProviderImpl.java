@@ -87,12 +87,12 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
 
     // GET /repos/:username/:reponame/commits/:ref/:path
     @Override
-    public <T> List<T> listCommits(String repoName, String path, Type type) throws GogsFileNotExistException {
-    	if (gogsAdmin.length() == 0) {
-    		init();
-    	}
+    public <T> List<T> listCommits(String repoName, String path, GogsPaginationParam param, Type type) throws GogsFileNotExistException {
+		if (gogsAdmin.length() == 0) {
+			init();
+		}
         String api = String.format("/repos/%s/%s/commits/%s/%s", gogsAdmin, repoName, "master", path);
-        ResponseEntity<String> response = restCall(HttpMethod.GET, api, null, String.class);
+        ResponseEntity<String> response = restCall(HttpMethod.GET, api, param, String.class);
 
         Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").create();
         return gson.fromJson(response.getBody(), type);

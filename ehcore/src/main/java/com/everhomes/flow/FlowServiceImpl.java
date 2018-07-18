@@ -109,6 +109,7 @@ import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.scriptengine.nashorn.NashornEngineService;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
@@ -5354,14 +5355,14 @@ public class FlowServiceImpl implements FlowService {
             gogsDeleteScript(repo, oldPath, oldCommit);
         }
 
-        script.setScript(null);// not used, migrate to gogs repo
-        flowScriptProvider.createFlowScriptWithId(script);
-
         if (scriptType == FlowScriptType.JAVASCRIPT) {
             // 获取配置信息
             List<FlowScriptConfigInfo> scriptConfig = getScriptConfig(script);
             createFlowScriptConfig(script, scriptConfig);
         }
+
+        script.setScript(null);// not used, migrate to gogs repo
+        flowScriptProvider.createFlowScriptWithId(script);
         return toFlowScriptDTO(script, EhFlowScripts.class.getSimpleName(), script.getId());
     }
 

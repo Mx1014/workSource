@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.daos.EhVarFieldGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldItemsDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
+import com.everhomes.server.schema.tables.daos.EhVarFieldsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
@@ -43,7 +44,6 @@ import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import org.elasticsearch.common.cli.CliToolConfig.Cmd;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -896,4 +896,18 @@ public class FieldProviderImpl implements FieldProvider {
                 .fetchInto(Long.class);
     }
 
+
+    @Override
+    public Field findFieldById(Long fieldId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhVarFieldsDao dao = new EhVarFieldsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(fieldId), Field.class);
+    }
+    @Override
+    public FieldItem findFieldItemByItemId(Long itemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+       return  context.selectFrom(Tables.EH_VAR_FIELD_ITEMS)
+                .where(Tables.EH_VAR_FIELD_ITEMS.ID.eq(itemId))
+                .fetchOneInto(FieldItem.class);
+    }
 }

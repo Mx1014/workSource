@@ -602,8 +602,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd) {
         User user = UserContext.current().getUser();
 
+        //TODO 校验权限有问题，里面使用了组织架构的内容。敢哥说先注释掉。
         //权限校验
-        checkOrganizationpPivilege(cmd.getParentId(),PrivilegeConstants.CREATE_DEPARTMENT);
+        //checkOrganizationpPivilege(cmd.getParentId(),PrivilegeConstants.CREATE_DEPARTMENT);
 
         if (null == OrganizationGroupType.fromCode(cmd.getGroupType())) {
             LOGGER.error("organization group type error. cmd = {}", cmd);
@@ -3517,6 +3518,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
                 if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())) {
                     addPathOrganizationId(org.getPath(), orgIds);
+                    
+                    //Added by janson, normal user in PM company, may remove at later
+                    if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                    	organizationIds.add(org.getId());
+                    }
+                    
                 }
             }
         }
@@ -3564,7 +3571,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 //物业或业委增加小区Id和小区name信息
-                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
+                		||org.getOrganizationType().equals(OrganizationType.ENTERPRISE.getCode())
+                		|| org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
                     this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
                 }
                 orgs.add(tempSimpleOrgDTO);
@@ -5817,6 +5826,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             //增加customer admin record 状态
             try {
                 customerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(), member.getNamespaceId());
+                customerProvider.updateCustomerTalentRegisterStatus(member.getContactToken());
             } catch (Exception e) {
                 LOGGER.error("update enterprise customer admins status error:{}", e);
             }

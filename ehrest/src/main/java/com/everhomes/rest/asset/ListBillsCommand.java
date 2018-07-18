@@ -32,6 +32,8 @@ import javax.validation.constraints.NotNull;
  * <li>contractNum: 合同编号</li>
  * <li>organizationId: 企业id</li>
  * <li>customerTel: 客户手机号</li>
+ * <li>categoryId : 多入口应用数据范围id</li>
+ * <li>targetIdForEnt: 对公转账的企业id</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -60,6 +62,8 @@ public class ListBillsCommand {
     private Long organizationId;
 
     private Long categoryId;
+    
+    private Long targetIdForEnt;
 
     public Long getCategoryId() {
         return categoryId;
@@ -261,5 +265,13 @@ public class ListBillsCommand {
 
 	public void setCustomerTel(String customerTel) {
 		this.customerTel = customerTel;
+	}
+
+	public Long getTargetIdForEnt() {
+		return targetIdForEnt;
+	}
+
+	public void setTargetIdForEnt(Long targetIdForEnt) {
+		this.targetIdForEnt = targetIdForEnt;
 	}
 }

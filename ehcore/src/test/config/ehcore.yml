@@ -49,7 +49,7 @@ endpoint.dump: true
 endpoint.metrics: true
 endpoint.configprops: true
 endpoint.beans: true
-endpoint.trace: true
+endpoint.trace: trueN
 endpoint.mappings: true
             
 management.security.enabled: false
@@ -100,7 +100,7 @@ db.driver: com.mysql.jdbc.Driver
 db.master: jdbc:mysql://ehcore:ehcore@db-master:13318/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
-db.jta: true
+db.jta: false
 db.tx.timeout: 600
         
 #
@@ -140,7 +140,11 @@ ems.sys.password: e10adc3949ba59abbe56e057f20f883e
 
 schedule.running.flag: 1
 
+
 # current core id
 core.server.id: 1
 # core server list
-core.server.list: 1
+core.server.list: 1,2
+
+# 允许在 nashorn 中通过 Java.type 访问的类
+nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService
