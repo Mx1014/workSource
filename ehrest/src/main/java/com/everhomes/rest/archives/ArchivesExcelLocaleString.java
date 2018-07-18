@@ -3,7 +3,7 @@ package com.everhomes.rest.archives;
 public interface ArchivesExcelLocaleString {
 
     String T_FILENAME= "人事档案批量导入模板";
-    String T_HEAD = "\"1、此表用于批量导入员工到人事档案，请不要修改或删除表头内容；\r\n" +
+    String T_HEAD = "1、此表用于批量导入员工到人事档案，请不要修改或删除表头内容；\r\n" +
             "2、Excel中红色字段为必填字段,黑色字段为选填字段\r\n" +
             "3、请不要包含公式，以免错误识别员工信息；\r\n" +
             "4、多次导入时，若系统中已存在相同手机号码的员工，将以新导入的信息为准；\r\n" +
@@ -24,5 +24,5 @@ public interface ArchivesExcelLocaleString {
 
     String E_FILENAME = "人事档案";
 
-    String E_HEAD = "\"人事档案\r\n" + "导出时间：";
+    String E_HEAD = "人事档案\r\n" + "导出时间：";
 }

@@ -538,10 +538,11 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         Sheet sheet = workbook.createSheet(ArchivesExcelLocaleString.E_FILENAME);
+        sheet.createFreezePane(1,2,1,1);
         //  1.head
         Row headRow = sheet.createRow(0);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
-        headRow.setHeight((short) (15 * 20));
+        headRow.setHeight((short) (50 * 20));
         createExcelHead(workbook, headRow, ArchivesExcelLocaleString.E_HEAD + DateHelper.currentGMTTime());
         //  2.title
         Row titleRow = sheet.createRow(1);
@@ -595,7 +596,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(fileName);
-        sheet.createFreezePane(1,0,1,0);
+        sheet.createFreezePane(1,2,1,1);
 
         //  1.set the header
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
