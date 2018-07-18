@@ -634,6 +634,14 @@ VALUES (2,'alipays','支付宝');
 INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
 VALUES (3,'cmbmobilebank','招商银行');
 -- end
+
+
+
+-- AUTHOR: dengs 20180718
+-- REMARK: issue 33614, 工位预定模块路径错误，修正
+update eh_service_modules SET path = '/200/110000/40200/40210' WHERE id = 40210;
+update eh_service_modules SET path = '/200/110000/40200/40220' WHERE id = 40220;
+-- end
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
