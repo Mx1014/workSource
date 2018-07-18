@@ -113,6 +113,65 @@ CREATE TABLE `eh_payment_subtraction_items` (
 -- AUTHOR: 杨崇鑫
 -- REMARK: 取消滞纳金表字段非空限制
 ALTER TABLE eh_payment_late_fine MODIFY COLUMN customer_id BIGINT COMMENT 'allows searching taking advantage of it';
+
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.6 V3.7 新增通用配置
+CREATE TABLE `eh_pm_task_configs` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) DEFAULT NULL COMMENT 'attachment object owner type',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id',
+  `payment_flag` tinyint(4) DEFAULT '0' COMMENT '0: inactive, 1: active',
+  `payment_account` bigint(20) DEFAULT NULL COMMENT '收款方账号',
+  `payment_account_type` tinyint(4) DEFAULT NULL COMMENT '收款方类型',
+  `content_hint` varchar(64) DEFAULT '请描述服务具体内容' COMMENT '服务内容提示文本',
+  `creator_id` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `updater_id` bigint(20) NOT NULL DEFAULT '0',
+  `update_time` datetime DEFAULT NULL,
+  `task_category_id` bigint(20) DEFAULT '6' COMMENT '应用类型：6为物业报修（1为正中会报修），9为投诉建议',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修通用配置表';
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.6 V3.7 新增费用清单
+CREATE TABLE `eh_pm_task_orders` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
+  `task_id` bigint(20) NOT NULL COMMENT '报修单Id',
+  `biz_order_num` varchar(64) DEFAULT NULL COMMENT '处理过的资源预订订单号',
+  `pay_order_id` bigint(20) DEFAULT NULL COMMENT '支付系统订单号',
+  `payment_order_type` tinyint(8) DEFAULT NULL COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单',
+  `status` tinyint(8) DEFAULT NULL COMMENT '订单状态0未支付 1已支付',
+  `amount` decimal(16,0) DEFAULT NULL COMMENT '订单金额',
+  `service_fee` decimal(16,0) DEFAULT NULL COMMENT '服务费',
+  `product_fee` decimal(16,0) DEFAULT NULL COMMENT '产品费',
+  `account_id` bigint(20) DEFAULT NULL COMMENT '收款方账号',
+  `order_commit_url` varchar(1024) DEFAULT NULL,
+  `order_commit_token` varchar(1024) DEFAULT NULL,
+  `order_commit_nonce` varchar(128) DEFAULT NULL,
+  `order_commit_timestamp` bigint(20) DEFAULT NULL,
+  `pay_info` text,
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修订单表';
+
+CREATE TABLE `eh_pm_task_order_details` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
+  `owner_id` bigint(20) DEFAULT NULL,
+  `owner_type` varchar(32) DEFAULT NULL,
+  `task_id` bigint(20) NOT NULL COMMENT '报修单Id',
+  `order_id` bigint(20) NOT NULL COMMENT '资源预订订单id',
+  `product_name` varchar(60) DEFAULT NULL COMMENT '产品名称',
+  `product_amount` int(11) DEFAULT NULL COMMENT '产品数量',
+  `product_price` decimal(16,0) DEFAULT NULL COMMENT '产品单价',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修订单明细表';
 -- --------------------- SECTION END ---------------------------------------------------------
 
 -- 通用脚本

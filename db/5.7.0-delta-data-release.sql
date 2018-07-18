@@ -699,6 +699,35 @@ VALUES( @c_id + 2 , 'pushMessage',2 ,'zh_CN' ,'业务联系人');
 
 DELETE FROM eh_web_menus  WHERE NAME='短信推送' AND data_type='sms-push' AND id=16020400;
 -- end
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.6 V3.7 修改物业报修应用默认配置
+UPDATE eh_service_modules SET instance_config='{"taskCategoryId":6,"agentSwitch":1,"feeModule":0}' WHERE id=20100;
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.6 V3.7 修改物业报修工作流为按钮参数实现
+SET @ns_id = 0;
+SET @module_id = 20100;
+SET @entity_type = 'flow_button';
+SET @flow_predefined_params_id = IFNULL((SELECT MAX(id) FROM `eh_flow_predefined_params`), 1);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', @module_id, 'any-module', @entity_type, '需要费用', '需要费用', '{"nodeType":"NEEDFEE"}', 2, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', @module_id, 'any-module', @entity_type, '费用确认', '费用确认', '{"nodeType":"CONFIRMFEE"}', 2, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', @module_id, 'any-module', @entity_type, '修改费用', '修改费用', '{"nodeType":"MOTIFYFEE"}', 2, NULL, NULL, NULL, NULL);
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.6 V3.7 修改物业报修权限显示
+update eh_service_module_privileges set remark = '任务列表' where module_id = 20140 and privilege_id = 2010020140;
+update eh_service_module_privileges set remark = '统计信息' where module_id = 20190 and privilege_id = 2010020190;
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.6 V3.7 修改物业报修费用清单数据迁移
+-- REMARK: 先调用接口 /pmtask/syncOrderDetails 后执行脚本
+update eh_pm_tasks t , eh_pm_task_orders o set t.amount = o.amount where t.status in (4,7) and t.id = o.task_id;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
