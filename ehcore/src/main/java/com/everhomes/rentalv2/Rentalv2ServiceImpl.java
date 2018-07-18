@@ -1165,9 +1165,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public FindRentalSitesCommandResponse findRentalSites(FindRentalSitesCommand cmd) {
-		if (null == cmd.getResourceTypeId() || null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
-	public FindRentalSitesCommandResponse
-	findRentalSites(FindRentalSitesCommand cmd) {
 		if(null==cmd.getResourceTypeId()||null==cmd.getOwnerId()||null==cmd.getOwnerType()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter ResourceTypeId, OwnerId, OwnerType");
@@ -2643,29 +2640,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	 */
 	@Scheduled(cron = "50 0/30 * * * ?")
 	@Override
-	public void rentalSchedule() {
-		Boolean[] flag = {false};
+	public void rentalSchedule(){
+		Boolean [] flag = {false};
 		Long currTime = DateHelper.currentGMTTime().getTime();
-		coordinationProvider.getNamedLock("Rental_schedule_flag2") //集群运行时只有一台执行定时任务
+		coordinationProvider.getNamedLock("Rental_schedule_flag2" ) //集群运行时只有一台执行定时任务
 				.tryEnter(() -> {
-					Long temp = configurationProvider.getLongValue(0, "rental.shcedule.flag", 0l);
+					Long temp = configurationProvider.getLongValue(0,"rental.shcedule.flag",0l);
 					Long timeFlag = currTime / 600000;
-					if (!temp.equals(timeFlag)) {
-						configurationProvider.setLongValue(0, "rental.shcedule.flag", timeFlag);
+					if (!temp.equals(timeFlag)){
+						configurationProvider.setLongValue(0,"rental.shcedule.flag",timeFlag);
 						flag[0] = true;
 					}
 				});
-		if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE && flag[0]) {
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE  && flag[0]){
 			//把所有状态为success-已预约的捞出来 
 
-			List<RentalOrder> orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.SUCCESS.getCode());
-			for (RentalOrder order : orders) {
+			List<RentalOrder>  orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.SUCCESS.getCode());
+			for(RentalOrder order : orders ){
 				if (order.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())) {
-					Long orderReminderTimeLong = order.getReminderTime() != null ? order.getReminderTime().getTime() : 0L;
-					Long orderEndTimeLong = order.getEndTime() != null ? order.getEndTime().getTime() : 0L;
-					Long orderReminderEndTimeLong = order.getReminderEndTime() != null ? order.getReminderEndTime().getTime() : 0L;
+					Long orderReminderTimeLong = order.getReminderTime()!=null?order.getReminderTime().getTime():0L;
+					Long orderEndTimeLong = order.getEndTime()!=null?order.getEndTime().getTime():0L;
+					Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0L;
 					//时间快到发推送
-					if (currTime < orderReminderTimeLong && currTime + 30 * 60 * 1000L >= orderReminderTimeLong) {
+					if(currTime<orderReminderTimeLong && currTime + 30*60*1000L >= orderReminderTimeLong){
 						Map<String, String> map = new HashMap<>();
 						map.put("resourceName", order.getResourceName());
 						map.put("startTime", order.getUseDetail());
@@ -2673,8 +2670,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 								RentalNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, RentalNotificationTemplateCode.locale, map, "");
 
 						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("userId", order.getRentalUid());
-						messageMap.put("content", notifyTextForOther);
+						messageMap.put("userId",order.getRentalUid());
+						messageMap.put("content",notifyTextForOther);
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
 								queueName,
@@ -2682,12 +2679,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 								RentalMessageJob.class,
 								messageMap
 						);
-						LOGGER.debug("rentalSchedule push reminderMessage uid:" + order.getRentalUid() + "  orderId:" + order.getId() + "  message:" + notifyTextForOther + "  time:" + orderReminderTimeLong);
+						LOGGER.debug("rentalSchedule push reminderMessage uid:"+order.getRentalUid()+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
 
 					}
 
 					//结束时间快到发推送
-					if (currTime < orderReminderEndTimeLong && currTime + 30 * 60 * 1000L >= orderReminderEndTimeLong) {
+					if(currTime<orderReminderEndTimeLong && currTime + 30*60*1000L >= orderReminderEndTimeLong){
 						Map<String, String> map = new HashMap<>();
 						map.put("resourceName", order.getResourceName());
 						Long uid = order.getCreatorUid();
@@ -2695,9 +2692,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 							OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(uid, order.getUserEnterpriseId());
 							map.put("requestorName", member.getContactName());
 							map.put("requestorPhone", member.getContactToken());
-						} else {
-							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode());
-							map.put("requestorPhone", userIdentifier.getIdentifierToken());
+						}else {
+							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+							map.put("requestorPhone",userIdentifier.getIdentifierToken());
 							User user = this.userProvider.findUserById(order.getRentalUid());
 							map.put("requestorName", user.getNickName());
 						}
@@ -2713,8 +2710,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 									RentalNotificationTemplateCode.RENTAL_END_NOTIFY_DAY, RentalNotificationTemplateCode.locale, map, "");
 
 						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("userId", chargeUid);
-						messageMap.put("content", notifyTextForOther);
+						messageMap.put("userId",chargeUid);
+						messageMap.put("content",notifyTextForOther);
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
 								queueName,
@@ -2722,11 +2719,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 								RentalMessageJob.class,
 								messageMap
 						);
-						LOGGER.debug("rentalSchedule push endReminderMessage id:" + chargeUid + "  orderId:" + order.getId() + "  message:" + notifyTextForOther + "  time:" + orderReminderEndTimeLong);
+						LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderEndTimeLong);
 
 					}
-					//订单过期,置状态
-					if (orderEndTimeLong <= currTime) {
 					//使用中
 					if (currTime >= order.getStartTime().getTime() ) {
 						order.setStatus(SiteBillStatus.IN_USING.getCode());
@@ -2736,7 +2731,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					if(orderEndTimeLong <= currTime){
 						order.setStatus(SiteBillStatus.COMPLETE.getCode());
 						rentalv2Provider.updateRentalBill(order);
-					} else if (currTime + 30 * 60 * 1000L >= orderReminderTimeLong) {
+					}else if(currTime + 30*60*1000L >= orderReminderTimeLong){
 						//超期未确认的置为超时
 						final Job job1 = new Job(
 								IncompleteUnsuccessRentalBillAction.class.getName(),
@@ -2745,18 +2740,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 								orderEndTimeLong);
 					}
-				} else if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
+				}else if (order.getResourceType().equals(RentalV2ResourceType.VIP_PARKING.getCode())) {
 					//订单开始 置为使用中的状态
-					if (currTime >= order.getStartTime().getTime()) {
+					if (currTime >= order.getStartTime().getTime() ) {
 						RentalOrderHandler orderHandler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
 						orderHandler.autoUpdateOrder(order);
 					}
-					Long orderReminderEndTimeLong = order.getReminderEndTime() != null ? order.getReminderEndTime().getTime() : 0L;
+					Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0L;
 
-					if (currTime < orderReminderEndTimeLong && currTime + 30 * 60 * 1000L >= orderReminderEndTimeLong) {
+					if(currTime<orderReminderEndTimeLong && currTime + 30*60*1000L >= orderReminderEndTimeLong){
 
 						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("orderId", order.getId());
+						messageMap.put("orderId",order.getId());
 						messageMap.put("methodName", "endReminderSendMessage");
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
