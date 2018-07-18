@@ -614,6 +614,14 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 -- end
 
+-- AUTHOR: yanlong.liang  20180718
+-- REMARK: 修改密码提示信息
+INSERT INTO eh_locale_strings ( `scope`, `code`, `locale`, `text`)
+	VALUES ('user', 400003, 'zh_CN', '手机号与登录账号不匹配');
+INSERT INTO eh_locale_strings ( `scope`, `code`, `locale`, `text`)
+	VALUES ('user', 400004, 'zh_CN', '验证码已过期');
+-- end
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
