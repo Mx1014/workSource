@@ -117,7 +117,7 @@ public class ArchivesController extends ControllerBase{
     @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importArchivesContacts(ImportArchivesContactsCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         User user = UserContext.current().getUser();
-        RestResponse response = new RestResponse(archivesService.importArchivesContacts(files[0], user.getId(),user.getNamespaceId(),cmd));
+        RestResponse response = new RestResponse(archivesDTSService.importArchivesContacts(files[0], user.getId(),user.getNamespaceId(),cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -155,7 +155,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("getImportContactsResult")
     @RestReturn(value = ImportFileResponse.class)
     public RestResponse getImportContactsResult(GetImportFileResultCommand cmd) {
-        RestResponse response = new RestResponse(archivesService.getImportContactsResult(cmd));
+        RestResponse response = new RestResponse(archivesDTSService.getImportContactsResult(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -168,7 +168,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("exportImportFileFailResults")
     @RestReturn(value = String.class)
     public RestResponse exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
-        archivesService.exportImportFileFailResults(cmd, httpResponse);
+        archivesDTSService.exportImportFileFailResults(cmd, httpResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

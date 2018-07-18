@@ -2,14 +2,11 @@ package com.everhomes.archives;
 
 import com.alibaba.fastjson.JSON;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.general_form.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -39,15 +36,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +44,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -66,7 +53,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -97,9 +83,6 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private ImportFileService importFileService;
-
-    @Autowired
-    private ConfigurationProvider configurationProvider;
 
     @Autowired
     private ContentServerService contentServerService;
@@ -289,12 +272,10 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
-        /*
-          1.If the keywords is not null, just pass the key and get the corresponding employee back.
-          2.If the keywords is null, then judged by the "pageAnchor"
-          3.If the pageAnchor is null, we should get stick employees first.
-          4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.
-         */
+        // 1.If the keywords is not null, just pass the key and get the corresponding employee back.
+        // 2.If the keywords is null, then judged by the "pageAnchor"
+        // 3.If the pageAnchor is null, we should get stick employees first.
+        // 4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
         final Integer stickCount = 20;  //  置顶数为20,表示一页最多显示20个置顶人员 at 11/06/2017
@@ -483,16 +464,6 @@ public class ArchivesServiceImpl implements ArchivesService {
             LOGGER.error("Password does not match for " + user.getIdentifierToken());
             throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
         }
-    }
-
-    @Override
-    public ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd) {
-        return importFileService.getImportFileResult(cmd.getTaskId());
-    }
-
-    @Override
-    public void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
-        importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
     }
 
     /**

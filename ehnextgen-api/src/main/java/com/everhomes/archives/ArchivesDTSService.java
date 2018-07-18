@@ -14,6 +14,8 @@ public interface ArchivesDTSService {
     ImportFileTaskDTO importArchivesContacts(
             MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
 
+    ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd);
+
     ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, ImportArchivesEmployeesCommand cmd);
 
     ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
@@ -24,5 +26,6 @@ public interface ArchivesDTSService {
 
     void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd, HttpServletResponse httpResponse);
 
+    void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
 }

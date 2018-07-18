@@ -35,9 +35,6 @@ public interface ArchivesService {
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
 
-    ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd);
-
-    void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
