@@ -65,4 +65,8 @@ SET @id = (SELECT MAX(id) from eh_locale_strings);
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10010', 'zh_CN', '模板名称已存在');
 INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'contract', '10011', 'zh_CN', '模板不存在');
 
+-- 初始化付款合同
+UPDATE eh_var_fields SET module_name='paymentContract' WHERE  group_path like '%/30%';
+UPDATE eh_var_field_items SET module_name = 'paymentContract' WHERE field_id IN ( 12008, 12009, 12012, 12002, 12027);
+
 -- END BY 丁建民 
