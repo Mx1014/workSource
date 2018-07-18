@@ -214,6 +214,7 @@ public class PotentialCustomerListener implements LocalBusSubscriber, Applicatio
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         if (contextRefreshedEvent.getApplicationContext().getParent() == null) {
             String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+            LOGGER.info("potential customer listener start ...equipmentIp:{}",taskServer);
             if (taskServer.equals(equipmentIp)) {
                 LocalEventBus.subscribe(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft(), this);
                 LocalEventBus.subscribe(SystemEvent.SERVICE_ALLIANCE_CREATE.dft(), this);
