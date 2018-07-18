@@ -622,6 +622,17 @@ INSERT INTO eh_locale_strings ( `scope`, `code`, `locale`, `text`)
 	VALUES ('user', 400004, 'zh_CN', '验证码已过期');
 -- end
 
+-- AUTHOR: yanlong.liang  20180718
+-- REMARK: 第三方应用链接白名单数据
+INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
+    VALUES (0,'weixin','微信');
+INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
+VALUES (1,'alipay','支付宝');
+INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
+VALUES (2,'alipays','支付宝');
+INSERT INTO `eh_app_white_list` (`id`,`link`,`name`)
+VALUES (3,'cmbmobilebank','招商银行');
+-- end
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
