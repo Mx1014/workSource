@@ -1,5 +1,6 @@
 package com.everhomes.user;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.activity.*;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -877,7 +878,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         rsp.setMyOrderUrl(getMyOrderUrl());
         rsp.setPointRuleUrl(getPointRuleUrl());
         rsp.setMyCoupon(getMyCoupon());
-        
+
         if(orderCount != null) {
         	rsp.setOrderCount(NumberUtils.toInt(orderCount.getItemValue(), 0));
         } else {

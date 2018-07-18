@@ -73,40 +73,6 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/createResourceType</b>
-//	 * <p>
-//	 * 添加资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("createResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse createResourceType(@Valid CreateResourceTypeCommand cmd) {
-//		this.rentalService.createResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/deleteResourceType</b>
-//	 * <p>
-//	 * 删除资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("deleteResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse deleteResourceType(@Valid DeleteResourceTypeCommand cmd) {
-//		this.rentalService.deleteResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
 	
 	
 	/**
@@ -125,57 +91,6 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/closeResourceType</b>
-//	 * <p>
-//	 * 关闭资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("closeResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse closeResourceType(@Valid CloseResourceTypeCommand cmd) {
-//		this.rentalService.closeResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/openResourceType</b>
-//	 * <p>
-//	 * 开启资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("openResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse openResourceType(@Valid OpenResourceTypeCommand cmd) {
-//		this.rentalService.openResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 *
-//	 * <b>URL: /rental/admin/updateResourceType</b>
-//	 * <p>
-//	 * 修改资源类型
-//	 * </p>
-//	 */
-//	@RequestMapping("updateResourceType")
-//	@RestReturn(String.class)
-//	public RestResponse updateResourceType(@Valid UpdateResourceTypeCommand cmd) {
-//		this.rentalService.updateResourceType(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
 
 	
 	/**
@@ -556,73 +471,6 @@ public class Rentalv2AdminController extends ControllerBase {
 		rentalService.exportRentalBills(cmd, response );
 	}
 
-//	/**
-//	 * <b>URL: /rental/admin/findRentalSitesStatus</b>
-//	 * <p>
-//	 * 批量完成预约- 状态置为已完成
-//	 * </p>
-//	 */
-//
-//	@RequestMapping("batchCompleteBill")
-//	@RestReturn(value = BatchCompleteBillCommandResponse.class )
-//	public RestResponse batchCompleteBill(@Valid BatchCompleteBillCommand cmd) {
-//		BatchCompleteBillCommandResponse res= rentalService.batchCompleteBill(cmd);
-//		RestResponse response = new RestResponse(res);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-
-//	/**
-//	 * <b>URL: /rental/admin/completeBill</b>
-//	 * <p>
-//	 * 完成预约- 状态置为已完成
-//	 * </p>
-//	 */
-//
-//	@RequestMapping("completeBill")
-//	@RestReturn(value = RentalBillDTO.class)
-//	public RestResponse completeBill(@Valid CompleteBillCommand cmd) {
-//		RentalBillDTO bill = rentalService.completeBill(cmd);
-//		RestResponse response = new RestResponse(bill);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	/**
-//	 * <b>URL: /rental/admin/batchIncompleteBill</b>
-//	 * <p>
-//	 * 批量未完成预约- 状态置为未完成
-//	 * </p>
-//	 */
-//
-//	@RequestMapping("batchIncompleteBill")
-//	@RestReturn(value = BatchCompleteBillCommandResponse.class)
-//	public RestResponse batchIncompleteBill(@Valid BatchIncompleteBillCommand cmd) {
-//		BatchCompleteBillCommandResponse res = rentalService.batchIncompleteBill(cmd);
-//		RestResponse response = new RestResponse(res);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-
-//	/**
-//	 * <b>URL: /rental/admin/incompleteBill</b>
-//	 * <p>
-//	 * 未完成预约- 状态置为未完成
-//	 * </p>
-//	 */
-//
-//	@RequestMapping("incompleteBill")
-//	@RestReturn(value = RentalBillDTO.class)
-//	public RestResponse incompleteBill(@Valid IncompleteBillCommand cmd) {
-//		RentalBillDTO bill = rentalService.incompleteBill(cmd);
-//		RestResponse response = new RestResponse(bill);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-
 	
 	/**
 	 * <b>URL: /rental/admin/getRefundOrderList</b>
@@ -674,39 +522,7 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 
-//	/**
-//	 * <b>URL: /rental/admin/addCheckOperator</b>
-//	 * <p>
-//	 * 新增签到的管理员
-//	 * </p>
-//	 */
-//	@RequestMapping("addCheckOperator")
-//	@RestReturn(value = String.class)
-//	public RestResponse addCheckOperator(@Valid AddCheckOperatorCommand cmd) {
-//		rentalService.addCheckOperator(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//
-//	/**
-//	 * <b>URL: /rental/admin/deleteCheckOperator</b>
-//	 * <p>
-//	 * 删除签到的管理员
-//	 * </p>
-//	 */
-//	@RequestMapping("deleteCheckOperator")
-//	@RestReturn(value = String.class)
-//	public RestResponse deleteCheckOperator(@Valid AddCheckOperatorCommand cmd) {
-//		rentalService.deleteCheckOperator(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
 
 	/*-------------------------------------------新的更新资源规则接口---------------------------------- */
 
@@ -718,6 +534,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourceTimeRule")
 	@RestReturn(String.class)
 	public RestResponse updateResourceTimeRule(UpdateResourceTimeRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		rentalService.updateResourceTimeRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -733,7 +553,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceTimeRule")
 	@RestReturn(ResourceTimeRuleDTO.class)
 	public RestResponse getResourceTimeRule(GetResourceTimeRuleCommand cmd) {
-
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		RestResponse response = new RestResponse(rentalService.getResourceTimeRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -748,6 +571,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourcePriceRule")
 	@RestReturn(String.class)
 	public RestResponse updateResourcePriceRule(UpdateResourcePriceRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		rentalService.updateResourcePriceRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -763,6 +590,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourcePriceRule")
 	@RestReturn(ResourcePriceRuleDTO.class)
 	public RestResponse getResourcePriceRule(GetResourcePriceRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		RestResponse response = new RestResponse(rentalService.getResourcePriceRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -777,6 +608,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourceRentalRule")
 	@RestReturn(String.class)
 	public RestResponse updateResourceRentalRule(UpdateResourceRentalRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		rentalService.updateResourceRentalRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -792,7 +627,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceRentalRule")
 	@RestReturn(ResourceRentalRuleDTO.class)
 	public RestResponse getResourceRentalRule(GetResourceRentalRuleCommand cmd) {
-
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		RestResponse response = new RestResponse(rentalService.getResourceRentalRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -807,6 +645,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateResourceOrderRule")
 	@RestReturn(String.class)
 	public RestResponse updateResourceOrderRule(UpdateResourceOrderRuleCommand cmd) {
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		rentalService.updateResourceOrderRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -822,7 +664,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceOrderRule")
 	@RestReturn(ResourceOrderRuleDTO.class)
 	public RestResponse getResourceOrderRule(GetResourceOrderRuleCommand cmd) {
-
+		if (RuleSourceType.RESOURCE.getCode().equals(cmd.getSourceType())){
+			cmd.setOwnerId(null);
+			cmd.setOwnerType(null);
+		}
 		RestResponse response = new RestResponse(rentalService.getResourceOrderRule(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1055,4 +900,20 @@ public class Rentalv2AdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+	/**
+	 * <b>URL: /rental/admin/getHolidayCloseDates</b>
+	 * <p>
+	 * 获取双休日和节假日关闭日期
+	 * </p>
+	 */
+	@RequestMapping("getHolidayCloseDates")
+	@RestReturn(value = Long.class,collection = true)
+	public RestResponse getHolidayCloseDates( GetHolidayCloseDatesCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getHolidayCloseDates(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
