@@ -615,6 +615,11 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 UPDATE eh_service_modules SET `status` = 0 where id = 22000;
 UPDATE eh_service_module_apps SET `status` = 0  WHERE module_id = 22000;
 UPDATE eh_web_menus SET `status` = 0 WHERE module_id = 22000;
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16033100', '企业访客', '23010000', NULL, 'visitor-enterprise', '1', '2', '/16000000/16040000/16033100', 'zuolin', '90', '52100', '3', 'system', 'module', NULL);
+
+UPDATE eh_web_menus set path = '/70000010/77000000/72152100', `level` = 3 WHERE id = '72152100';
+
 -- end
 
 -- AUTHOR: yanlong.liang  20180718
