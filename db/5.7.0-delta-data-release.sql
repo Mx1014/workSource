@@ -645,6 +645,10 @@ UPDATE eh_service_modules SET path = '/200/80000/41700/41720' WHERE id = 41720;
 UPDATE eh_service_modules SET path = '/200/20000/20400/204011' WHERE id = 204011;
 UPDATE eh_service_modules SET path = '/200/20000/20400/204021' WHERE id = 204021;
 
+
+update eh_service_module_apps set module_control_type = 'unlimit_control' where module_id = 41300;
+UPDATE eh_service_modules set module_control_type = 'unlimit_control' where id = 41300;
+
 -- end
 
 -- AUTHOR:jiarui 20180625
