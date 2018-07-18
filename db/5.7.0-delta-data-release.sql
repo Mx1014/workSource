@@ -638,6 +638,14 @@ SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
+-- AUTHOR:dengs
+-- REMARK:银星停车场对接配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.url', 'http://java.mallparking.cn', '银星科技园停车场url', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.parkId', '07550000151453862236', '银星科技园停车场id', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyId', 'yinxingkeji', '银星科技园停车场访问者标识', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyValue', '1f9f1cb5c0d1e752917e1a38b957e33d', '银星科技园停车场加密后的-accessKeyValue', '0', NULL, '1');
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
