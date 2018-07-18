@@ -114,6 +114,12 @@ CREATE TABLE `eh_payment_subtraction_items` (
 -- REMARK: 取消滞纳金表字段非空限制
 ALTER TABLE eh_payment_late_fine MODIFY COLUMN customer_id BIGINT COMMENT 'allows searching taking advantage of it';
 
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.6 V3.7 修改评分字段
+ALTER TABLE `eh_pm_tasks` MODIFY COLUMN `star`  varchar(4) NULL DEFAULT NULL COMMENT 'evaluate score' AFTER `status`;
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.6 V3.7 新增费用字段
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `amount`  decimal(16,0) NOT NULL DEFAULT 0 COMMENT '订单费用';
 
 -- AUTHOR: 马世亨
 -- REMARK: 物业报修V3.6 V3.7 新增通用配置
