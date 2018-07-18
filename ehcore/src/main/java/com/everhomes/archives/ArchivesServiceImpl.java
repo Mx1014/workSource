@@ -64,7 +64,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private static final String ARCHIVES_NOTIFICATION = "archives_notification";
 
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private DbProvider dbProvider;
@@ -640,7 +640,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         EmployArchivesEmployeesCommand command = new EmployArchivesEmployeesCommand();
         command.setDetailIds(Collections.singletonList(employee.getId()));
         command.setOrganizationId(employee.getOrganizationId());
-        command.setEmploymentTime(cmd.getEmploymentTime());
+        command.setEmploymentTime(format.format(employee.getEmploymentTime().toLocalDate()));
         command.setEmploymentEvaluation("");
         employArchivesEmployeesConfig(command);
         //  3-3.查询若存在于离职列表则删除
@@ -754,20 +754,20 @@ public class ArchivesServiceImpl implements ArchivesService {
         Map<String, Object> map = new LinkedHashMap<>();
         switch (EmployeeStatus.fromCode(employee.getEmployeeStatus())) {
             case PROBATION:
-                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
-                map.put("nextDate", employee.getEmploymentTime() != null ? format.format(employee.getEmploymentTime()) : "  无");
+                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime().toLocalDate()) : "  无");
+                map.put("nextDate", employee.getEmploymentTime() != null ? format.format(employee.getEmploymentTime().toLocalDate()) : "  无");
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
                         ArchivesLocaleTemplateCode.ARCHIVES_PROBATION_CASE, "zh_CN", map, "");
                 break;
             case DISMISSAL:
-                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
-                map.put("nextDate", employee.getDismissTime() != null ? format.format(employee.getDismissTime()) : "  无");
+                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime().toLocalDate()) : "  无");
+                map.put("nextDate", employee.getDismissTime() != null ? format.format(employee.getDismissTime().toLocalDate()) : "  无");
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
                         ArchivesLocaleTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
                 break;
             default:
-                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime()) : "  无");
-                map.put("nextDate", employee.getContractEndTime() != null ? format.format(employee.getContractEndTime()) : "   无");
+                map.put("firstDate", employee.getCheckInTime() != null ? format.format(employee.getCheckInTime().toLocalDate()) : "  无");
+                map.put("nextDate", employee.getContractEndTime() != null ? format.format(employee.getContractEndTime().toLocalDate()) : "   无");
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesLocaleTemplateCode.SCOPE,
                         ArchivesLocaleTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
                 break;
