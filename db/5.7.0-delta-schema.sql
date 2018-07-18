@@ -284,13 +284,6 @@ CREATE TABLE `eh_archives_form_groups` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- end
 
--- 通用脚本
--- AUTHOR liuyilin  20180712
--- REMARK issue-32260 人脸识别V1.6 - 管理控制台 增加字段长度 删除唯一约束
-ALTER TABLE `eh_aclink_servers` MODIFY COLUMN `uuid` VARCHAR(64) NOT NULL;
-ALTER TABLE `eh_aclink_servers` DROP INDEX `uuid`;
--- end
-
 -- AUTHOR: 丁建民
 -- REMARK: #Issue-21713 合同管理 合同模板及打印
 CREATE TABLE `eh_contract_templates` (
@@ -317,7 +310,13 @@ CREATE TABLE `eh_contract_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='合同模板打印表';
 
 ALTER TABLE `eh_contracts` ADD COLUMN `template_id` bigint(20) NULL COMMENT 'contract template_id';
-
 -- #Issue-21713  end
+
+-- 通用脚本
+-- AUTHOR liuyilin  20180712
+-- REMARK issue-32260 人脸识别V1.6 - 管理控制台 增加字段长度 删除唯一约束
+ALTER TABLE `eh_aclink_servers` MODIFY COLUMN `uuid` VARCHAR(64) NOT NULL;
+ALTER TABLE `eh_aclink_servers` DROP INDEX `u_eh_aclink_servers_uuid`;
+-- end
 -- --------------------- SECTION END ---------------------------------------------------------
 
