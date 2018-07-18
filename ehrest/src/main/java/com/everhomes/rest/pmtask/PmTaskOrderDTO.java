@@ -14,6 +14,7 @@ public class PmTaskOrderDTO {
     private Long amount;
     private Long serviceFee;
     private Long productFee;
+    private Byte isConfirmed;
     List<PmTaskOrderDetailDTO> products;
 
     public Long getId() {
@@ -78,6 +79,14 @@ public class PmTaskOrderDTO {
 
     public void setProductFee(Long productFee) {
         this.productFee = productFee;
+    }
+
+    public Byte getIsConfirmed() {
+        return isConfirmed;
+    }
+
+    public void setIsConfirmed(Byte isConfirmed) {
+        this.isConfirmed = isConfirmed;
     }
 
     public List<PmTaskOrderDetailDTO> getProducts() {

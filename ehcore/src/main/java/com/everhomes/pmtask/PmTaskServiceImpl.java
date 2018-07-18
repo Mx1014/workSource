@@ -1134,7 +1134,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 				String feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel","");
 				if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
-					if(PmTaskFlowStatus.COMPLETED.getCode() == task.getStatus() || PmTaskFlowStatus.CONFIRMED.getCode() == task.getStatus()){
+					if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
 //						费用确认后导出费用清单
 						PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
 						if(null != order){
@@ -3380,15 +3380,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
 		PmTaskOrderDTO dto = new PmTaskOrderDTO();
 		List<PmTaskOrderDetailDTO> products = new ArrayList<>();
-		dto.setProducts(products);
-		if(task.getStatus() == PmTaskFlowStatus.COMPLETED.getCode() || task.getStatus() == PmTaskFlowStatus.CONFIRMED.getCode()){
-			if(null != order)
-				dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
+		if(null != order)
+			dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
 
-			List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(null, null, null, cmd.getTaskId());
-			if(null != result && result.size() > 0){
-				products.addAll(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
-			}
+		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(null, null, null, cmd.getTaskId());
+		if(null != result && result.size() > 0){
+			products.addAll(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
+		}
+		dto.setProducts(products);
+		if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
+			dto.setIsConfirmed((byte)1);
+		} else {
+			dto.setIsConfirmed((byte)0);
 		}
 		return dto;
 	}
@@ -3765,7 +3768,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    cmd1.setBeginTime(cmd.getDateStart());
 	    cmd1.setEndTime(cmd.getDateEnd());
 	    cmd1.setOwnerType("PMTASK");
-	    cmd1.setModuleType("any-module");
+		if (9L == cmd.getAppId()) {
+			cmd1.setModuleType("suggestion");
+		} else {
+			cmd1.setModuleType("any-module");
+		}
 	    cmd1.setProjectId(cmd.getOwnerId());
 	    cmd1.setProjectType("EhCommunities");
 	    List<PmTaskEvalStatDTO> datalist = this.getEvalStat(cmd1);
