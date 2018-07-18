@@ -6,7 +6,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.user.User;
@@ -461,20 +460,14 @@ public class ArchivesController extends ControllerBase{
         return response;
     }
 
-    /*@RequestMapping("testNotification")
+    /**
+     * <b>URL: /archives/makeArchivesCheckInTime</b>
+     * <p>刷入职时间</p>
+     */
+    @RequestMapping("makeArchivesCheckInTime")
     @RestReturn(value = String.class)
-    public RestResponse testNotification(){
-        archivesService.executeArchivesNotification(6, 9, LocalDateTime.now());
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }*/
-
-    @RequestMapping("syncArchivesConfigAndLogs")
-    @RestReturn(value = String.class)
-    public RestResponse syncArchivesConfigAndLogs(){
-        archivesService.syncArchivesConfigAndLogs();
+    public RestResponse makeArchivesCheckInTime(){
+        archivesService.makeArchivesCheckInTime();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

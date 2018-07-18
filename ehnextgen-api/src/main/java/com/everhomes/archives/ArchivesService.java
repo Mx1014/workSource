@@ -35,7 +35,6 @@ public interface ArchivesService {
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
 
-
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
     void addArchivesLog(AddArchivesLogCommand cmd);
@@ -93,10 +92,7 @@ public interface ArchivesService {
 
     void setArchivesNotification(ArchivesNotificationCommand cmd);
 
-//    void runArchivesNotificationCycle();
-
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
-    void syncArchivesConfigAndLogs();
-
+    void makeArchivesCheckInTime();
 }

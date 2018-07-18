@@ -5,6 +5,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.archives.ArchivesOperationStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -293,65 +295,6 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesOperationalLogs.class, null);
     }
 
-    /*@Override
-    public void createArchivesConfigurations(ArchivesConfigurations configuration){
-        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesConfigurations.class));
-        configuration.setId(id);
-        configuration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        configuration.setOperatorUid(UserContext.currentUserId());
-        configuration.setNamespaceId(UserContext.getCurrentNamespaceId());
-
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhArchivesConfigurationsDao dao = new EhArchivesConfigurationsDao(context.configuration());
-        dao.insert(configuration);
-
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesConfigurations.class, null);
-    }
-
-    @Override
-    public void updateArchivesConfigurations(ArchivesConfigurations configuration) {
-        configuration.setOperatorUid(UserContext.currentUserId());
-
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhArchivesConfigurationsDao dao = new EhArchivesConfigurationsDao(context.configuration());
-        dao.update(configuration);
-
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesConfigurations.class, configuration.getId());
-    }*/
-
-    /*
-
-    @Override
-    public void createArchivesLogs(ArchivesLogs log){
-        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesLogs.class));
-        log.setId(id);
-        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        log.setNamespaceId(UserContext.getCurrentNamespaceId());
-
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhArchivesLogsDao dao = new EhArchivesLogsDao(context.configuration());
-        dao.insert(log);
-
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesLogs.class, null);
-    }
-
-    @Override
-    public List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhArchivesLogsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_LOGS);
-        query.addConditions(Tables.EH_ARCHIVES_LOGS.ORGANIZATION_ID.eq(organizationId));
-        query.addConditions(Tables.EH_ARCHIVES_LOGS.DETAIL_ID.eq(detailId));
-        List<ArchivesLogs> results = new ArrayList<>();
-        query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, ArchivesLogs.class));
-            return null;
-        });
-        if (null != results && 0 != results.size()) {
-            return results;
-        }
-        return null;
-    }*/
-
     @Override
     public List<ArchivesOperationalLog> listArchivesLogs(Long organizationId, Long detailId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -421,28 +364,18 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<ArchivesLogs> listAllArchivesLogs(){
+    public List<OrganizationMemberDetails> listDetailsWithoutCheckInTime() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhArchivesLogsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_LOGS);
-        List<ArchivesLogs> results = new ArrayList<>();
-        query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, ArchivesLogs.class));
-            return null;
-        });
-        return results;
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.isNull());
+        return query.fetchInto(OrganizationMemberDetails.class);
     }
 
     @Override
-    public List<ArchivesConfigurations> listAllPendingConfigs() {
+    public OrganizationMember findOrganizationMemberWithoutStatusByDetailId(Long detailId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhArchivesConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_CONFIGURATIONS);
-        query.addConditions(Tables.EH_ARCHIVES_CONFIGURATIONS.OPERATION_TIME.gt(ArchivesUtil.currentDate()));
-        List<ArchivesConfigurations> results = new ArrayList<>();
-        query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, ArchivesConfigurations.class));
-            return null;
-        });
-        return results;
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
+        return query.fetchAnyInto(OrganizationMember.class);
     }
-
 }

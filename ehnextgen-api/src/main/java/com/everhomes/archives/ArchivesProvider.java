@@ -1,5 +1,7 @@
 package com.everhomes.archives;
 
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import org.jooq.Condition;
 
 import java.sql.Date;
@@ -51,8 +53,6 @@ public interface ArchivesProvider {
 
     void createOperationalLog(ArchivesOperationalLog log);
 
-//    void createArchivesLogs(ArchivesLogs log);
-
     List<ArchivesOperationalLog> listArchivesLogs(Long organizationId, Long detailId);
 
     void createArchivesNotifications(ArchivesNotifications archivesNotification);
@@ -63,8 +63,8 @@ public interface ArchivesProvider {
 
     List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time);
 
-    List<ArchivesLogs> listAllArchivesLogs();
+    List<OrganizationMemberDetails> listDetailsWithoutCheckInTime();
 
-    List<ArchivesConfigurations> listAllPendingConfigs();
+    OrganizationMember findOrganizationMemberWithoutStatusByDetailId(Long detailId);
 
 }

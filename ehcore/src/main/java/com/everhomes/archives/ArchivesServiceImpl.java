@@ -1872,64 +1872,17 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void syncArchivesConfigAndLogs() {
-        List<ArchivesLogs> results = archivesProvider.listAllArchivesLogs();
-        if (results.size() > 0) {
-            for (ArchivesLogs result : results) {
-                ArchivesOperationalLog log = ConvertHelper.convert(result, ArchivesOperationalLog.class);
-                switch (ArchivesOperationType.fromCode(result.getOperationType())) {
-                    case CHECK_IN:
-                        break;
-                    case EMPLOY:
-                        log.setStringTag1(result.getOperationReason());
-                        break;
-                    case TRANSFER:
-                        log.setStringTag1(result.getOperationRemark());
-                        log.setStringTag4(ArchivesUtil.resolveArchivesEnum(result.getOperationCategory(), ArchivesParameter.TRANSFER_TYPE));
-                        log.setStringTag5(result.getOperationReason());
-                        break;
-                    case DISMISS:
-                        log.setStringTag1(ArchivesUtil.resolveArchivesEnum(result.getOperationCategory(), ArchivesParameter.DISMISS_TYPE));
-                        log.setStringTag2(result.getOperationReason());
-                        log.setStringTag3(result.getOperationRemark());
-                        break;
-                }
-                archivesProvider.createOperationalLog(log);
-            }
-        }
-
-        List<ArchivesConfigurations> results2 = archivesProvider.listAllPendingConfigs();
-        if (results2.size() > 0) {
-            for (ArchivesConfigurations result2 : results2) {
-                createConfig(result2);
-            }
-        }
-    }
-
-    private void createConfig(ArchivesConfigurations r) {
-        if (r.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())) {
-            EmployArchivesEmployeesCommand cmd = (EmployArchivesEmployeesCommand) StringHelper.fromJsonString(r.getOperationInformation(), EmployArchivesEmployeesCommand.class);
-            if (cmd.getDetailIds() == null || cmd.getDetailIds().size() == 0)
-                return;
-            for (Long detailId : cmd.getDetailIds()) {
-                ArchivesOperationalConfiguration oldConfig = archivesProvider.findConfigurationByDetailId(r.getNamespaceId(), r.getOrganizationId(), r.getOperationType(), detailId);
-                if (oldConfig != null) {
-                    if (r.getOperationTime().before(oldConfig.getOperationDate()))
-                        continue;
-                    oldConfig.setOperationDate(r.getOperationTime());
-                    oldConfig.setAdditionalInfo(r.getOperationInformation());
-                    oldConfig.setCreateTime(r.getCreateTime());
-                    oldConfig.setOperatorUid(r.getOperatorUid());
-                    archivesProvider.updateOperationalConfiguration(oldConfig);
-                } else {
-                    ArchivesOperationalConfiguration newConfig = ConvertHelper.convert(r, ArchivesOperationalConfiguration.class);
-                    newConfig.setDetailId(detailId);
-                    newConfig.setOperationType(r.getOperationType());
-                    newConfig.setOperationDate(r.getOperationTime());
-                    newConfig.setStatus(ArchivesOperationStatus.PENDING.getCode());
-                    newConfig.setAdditionalInfo(r.getOperationInformation());
-                    archivesProvider.createOperationalConfiguration(newConfig);
-                }
+    public void makeArchivesCheckInTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMdd");
+        List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutCheckInTime();
+        if(details == null)
+            return;
+        for(OrganizationMemberDetails detail : details){
+            OrganizationMember member = archivesProvider.findOrganizationMemberWithoutStatusByDetailId(detail.getId());
+            if(member != null){
+                detail.setCheckInTime(new Date(member.getCreateTime().getTime()));
+                detail.setCheckInTimeIndex(formatter.format(detail.getCheckInTime().toLocalDate()));
+                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
             }
         }
     }
