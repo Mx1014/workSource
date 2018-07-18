@@ -1571,10 +1571,11 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setChargingItemsId(f.getValue(o.CHARGING_ITEMS_ID));
                     itemDTO.setEnergyConsume(f.getValue(o.ENERGY_CONSUME));//费项增加用量字段
                     itemDTO.setItemFineType(AssetItemFineType.item.getCode());//增加费项类型字段
+                    itemDTO.setItemType(AssetSubtractionType.item.getCode());//增加费项类型字段
                     list1.add(itemDTO);
                     return null;
                 });
-        // 滞纳金
+        //滞纳金
         List<BillItemDTO> fineList = new ArrayList<>();
         for(BillItemDTO item : list1){
             List<PaymentLateFine> fines = context.selectFrom(fine)
