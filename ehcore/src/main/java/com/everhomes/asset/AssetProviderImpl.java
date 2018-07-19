@@ -68,6 +68,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -891,7 +892,15 @@ public class AssetProviderImpl implements AssetProvider {
                     }else {
                     	dto.setIsConfigSubtraction((byte)1);
                     }
-                    dto.setEnergyConsume(r.getValue(t.ENERGY_CONSUME));//增加用量
+                    //issue-34165 个人客户，登录查看账单详情页面，用量保留一位小数 杨崇鑫
+                    DecimalFormat df = new DecimalFormat("#0.0");
+                    String energyConsume = r.getValue(t.ENERGY_CONSUME);
+                    if(!org.springframework.util.StringUtils.isEmpty(energyConsume)) {
+                    	BigDecimal energyConsumeBigDecimal = new BigDecimal(energyConsume);
+                    	dto.setEnergyConsume(df.format(energyConsumeBigDecimal));//增加用量
+                    }else {
+                    	dto.setEnergyConsume(energyConsume);//增加用量
+                    }
                     if(AssetEnergyType.personWaterItem.getCode().equals(r.getValue(t.CHARGING_ITEMS_ID))
                     		|| AssetEnergyType.publicWaterItem.getCode().equals(r.getValue(t.CHARGING_ITEMS_ID))) {
                     	dto.setEnergyUnit("吨");
