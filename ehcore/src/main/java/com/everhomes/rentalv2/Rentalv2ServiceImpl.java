@@ -1312,7 +1312,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
 		if (null != pics)
 			rSiteDTO.setSitePics(convertRentalSitePicDTOs(pics));
-
+		List<RentalResourceFile> files = this.rentalv2Provider.findRentalSiteFilesByOwnerTypeAndId(rentalSite.getResourceType(),
+				EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+		if (null != files)
+			rSiteDTO.setSiteFiles(convertRentalSiteFileDTOs(files));
 		rSiteDTO.setSiteCounts(rentalSite.getResourceCounts());
 		if (rentalSite.getAutoAssign().equals(NormalFlag.NEED.getCode())) {
 			List<RentalResourceNumber> resourceNumbers = this.rentalv2Provider.queryRentalResourceNumbersByOwner(
@@ -5236,6 +5239,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return new ArrayList<>();
 	}
 
+	private List<RentalSiteFileDTO> convertRentalSiteFileDTOs(List<RentalResourceFile> files) {
+		if (null != files) {
+			return files.stream().map(p -> {
+				RentalSiteFileDTO fileDTO=ConvertHelper.convert(p, RentalSiteFileDTO.class);
+				fileDTO.setUrl(this.contentServerService.parserUri(p.getUri(),
+						EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+				return fileDTO;
+			}).collect(Collectors.toList());
+		}
+		return new ArrayList<>();
+	}
+
 	private void processWeekRuleDTOs(Calendar start, Calendar end, List<RentalSiteDayRulesDTO> dtos, RentalResource rs,
 									 RentalDefaultRule rule, String sceneToken, byte rentalType, String packageName) {
 
@@ -6568,7 +6583,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			createSiteOwners(cmd.getOwners(), resource);
 			//资源图片
 			createSiteDetailUris(cmd.getDetailUris(), resource);
-
+			//文件附件
+			createSiteFileUris(cmd.getFileUris(),resource);
 			return null;
 		});
 	}
@@ -6741,6 +6757,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 	}
 
+	private void createSiteFileUris(List<String> fileUris, RentalResource resource) {
+		if (fileUris != null) {
+			for (String uri : fileUris) {
+				RentalResourceFile file = new RentalResourceFile();
+				file.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+				file.setOwnerId(resource.getId());
+				file.setUri(uri);
+				file.setResourceType(resource.getResourceType());
+				this.rentalv2Provider.createRentalSiteFile(file);
+			}
+		}
+	}
+
 	@Override
 	public void updateResource(UpdateResourceAdminCommand cmd) {
 
@@ -6787,29 +6816,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			//rentalSite.setResourceCounts(cmd.getSiteCounts());
 			rentalv2Provider.updateRentalSite(rentalSite);
 			this.rentalv2Provider.deleteRentalSitePicsBySiteId(rentalSite.getResourceType(), cmd.getId());
+			this.rentalv2Provider.deleteRentalSiteFilesBySiteId(rentalSite.getResourceType(), cmd.getId());
 			this.rentalv2Provider.deleteRentalSiteOwnersBySiteId(rentalSite.getResourceType(), cmd.getId());
 			//先删除
 //			rentalv2Provider.deleteRentalResourceNumbersByOwnerId(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
-//			//set site number
-//			setRentalRuleSiteNumbers(rentalSite.getResourceType(), EhRentalv2Resources.class.getSimpleName(), rentalSite.getId(), cmd.getSiteNumbers());
-//			if(cmd.getOwners() != null){
-//				for(SiteOwnerDTO dto:cmd.getOwners()){
-//					RentalSiteRange siteOwner = ConvertHelper.convert(dto, RentalSiteRange.class);
-//					siteOwner.setRentalResourceId(cmd.getId());
-//					this.rentalv2Provider.createRentalSiteOwner(siteOwner);
-//				}
-//			}
+
 			createSiteOwners(cmd.getOwners(), rentalSite);
 			createSiteDetailUris(cmd.getDetailUris(), rentalSite);
-//			if(cmd.getDetailUris() != null){
-//				for(String uri:cmd.getDetailUris()){
-//					RentalResourcePic detailPic =new RentalResourcePic();
-//					detailPic.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-//					detailPic.setOwnerId(cmd.getId());
-//					detailPic.setUri(uri);
-//					this.rentalv2Provider.createRentalSitePic(detailPic);
-//				}
-//			}
+			createSiteFileUris(cmd.getFileUris(),rentalSite);
+
 			return null;
 		});
 	}

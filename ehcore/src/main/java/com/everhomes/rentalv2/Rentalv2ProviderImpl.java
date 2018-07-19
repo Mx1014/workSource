@@ -1485,6 +1485,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerType));
 		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
 				.equal(resourceType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("pic"));
 		step.where(condition);
 		List<RentalResourcePic> result = step
 				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.desc()).fetch()
@@ -1495,6 +1496,29 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return result ;
 		return null;
 
+	}
+
+	@Override
+	public List<RentalResourceFile> findRentalSiteFilesByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_SITE_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_TYPE
+				.equal(ownerType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
+				.equal(resourceType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("file"));
+		step.where(condition);
+		List<RentalResourceFile> result = step
+				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalResourceFile.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
 	}
 
 	@Override
@@ -1821,6 +1845,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2SiteResources.class));
 		detailPic.setId(id);
+		detailPic.setType("pic");
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2SiteResourcesRecord record = ConvertHelper.convert(detailPic,
 				EhRentalv2SiteResourcesRecord.class);
@@ -1830,6 +1855,22 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		query.execute();
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2SiteResources.class, null);
 		
+	}
+
+	@Override
+	public void createRentalSiteFile(RentalResourceFile file) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2SiteResources.class));
+		file.setId(id);
+		file.setType("file");
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2SiteResourcesRecord record = ConvertHelper.convert(file,
+				EhRentalv2SiteResourcesRecord.class);
+		InsertQuery<EhRentalv2SiteResourcesRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_SITE_RESOURCES);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2SiteResources.class, null);
 	}
 
 	@Override
@@ -1843,6 +1884,23 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(EhRentalv2Resources.class.getSimpleName()));
 		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
 				.equal(resourceType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("pic"));
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public void deleteRentalSiteFilesBySiteId(String resourceType, Long siteId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2SiteResourcesRecord> step = context
+				.delete(Tables.EH_RENTALV2_SITE_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_ID
+				.equal(siteId);
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_TYPE
+				.equal(EhRentalv2Resources.class.getSimpleName()));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
+				.equal(resourceType));
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.TYPE.eq("file"));
 		step.where(condition);
 		step.execute();
 	}

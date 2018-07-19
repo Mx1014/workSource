@@ -84,6 +84,8 @@ public interface Rentalv2Provider {
 
 	List<RentalResourcePic> findRentalSitePicsByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId);
 
+	List<RentalResourceFile> findRentalSiteFilesByOwnerTypeAndId(String resourceType, String ownerType, Long ownerId);
+
 	RentalItem getRentalSiteItemById(Long id);
 
     void setAuthDoorId(Long orderId,String AuthDoorId);
@@ -116,7 +118,11 @@ public interface Rentalv2Provider {
 
 	void createRentalSitePic(RentalResourcePic detailPic);
 
+	void createRentalSiteFile(RentalResourceFile file);
+
 	void deleteRentalSitePicsBySiteId(String resourceType, Long siteId);
+
+	void deleteRentalSiteFilesBySiteId(String resourceType, Long siteId);
 
 	void deleteRentalSiteOwnersBySiteId(String resourceType, Long siteId);
 

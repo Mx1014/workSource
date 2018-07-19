@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>notice: 备注信息</li>
  * <li>coverUri: 封面图uri</li>
  * <li>detailUris: 详情图</li>
+ * <li>fileUris: 附件</li>
  * <li>owners: 可见社区</li>
  * <li>status: 是否开启，1是0否</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
@@ -64,6 +65,7 @@ public class AddResourceAdminCommand {
 	private String coverUri;
 	@ItemType(String.class)
 	private List<String> detailUris;
+	private List<String> fileUris;
 	@ItemType(SiteOwnerDTO.class)
 	private List<SiteOwnerDTO> owners;
 	private Byte status;
@@ -306,5 +308,13 @@ public class AddResourceAdminCommand {
 
 	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
 		this.siteNumbers = siteNumbers;
+	}
+
+	public List<String> getFileUris() {
+		return fileUris;
+	}
+
+	public void setFileUris(List<String> fileUris) {
+		this.fileUris = fileUris;
 	}
 }
