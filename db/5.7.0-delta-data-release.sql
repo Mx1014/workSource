@@ -41,7 +41,8 @@
 -- AUTHOR: ryan荣 20180719
 -- REMARK:执行 /archives/makeArchivesCheckInTime 接口(可能速度有点慢，但可重复执行)
 
-
+-- AUTHOR: ryan荣 20180719
+-- REMARK:执行 /archives/cleanRedundantArchivesDetails 接口(可能速度有点慢，但可重复执行)
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

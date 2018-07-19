@@ -67,4 +67,8 @@ public interface ArchivesProvider {
 
     OrganizationMember findOrganizationMemberWithoutStatusByDetailId(Long detailId);
 
+    List<OrganizationMemberDetails> listDetailsWithoutDismissalStatus();
+
+    OrganizationMember findOrganizationMemberWithStatusByDetailId(Long detailId);
+
 }

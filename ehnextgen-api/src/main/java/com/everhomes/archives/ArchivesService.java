@@ -95,4 +95,6 @@ public interface ArchivesService {
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
     void makeArchivesCheckInTime();
+
+    void cleanRedundantArchivesDetails();
 }

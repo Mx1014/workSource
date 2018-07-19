@@ -1863,12 +1863,29 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutCheckInTime();
         if(details == null)
             return;
+        int i = 0;
         for(OrganizationMemberDetails detail : details){
             OrganizationMember member = archivesProvider.findOrganizationMemberWithoutStatusByDetailId(detail.getId());
             if(member != null){
                 detail.setCheckInTime(new Date(member.getCreateTime().getTime()));
                 detail.setCheckInTimeIndex(formatter.format(detail.getCheckInTime().toLocalDate()));
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+                LOGGER.info("the [" + i++ + "] times to make the archives check in time") ;
+            }
+        }
+    }
+
+    @Override
+    public void cleanRedundantArchivesDetails() {
+        List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutDismissalStatus();
+        if (details == null)
+            return;
+        int i = 0;
+        for (OrganizationMemberDetails detail : details) {
+            OrganizationMember member = archivesProvider.findOrganizationMemberWithStatusByDetailId(detail.getId());
+            if (member == null){
+                organizationProvider.deleteOrganizationMemberDetails(detail);
+                LOGGER.info("the [" + i++ + "] times to make the delete the detail") ;
             }
         }
     }
