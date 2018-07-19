@@ -320,5 +320,12 @@ ALTER TABLE `eh_contracts` ADD COLUMN `template_id` bigint(20) NULL COMMENT 'con
 ALTER TABLE `eh_aclink_servers` MODIFY COLUMN `uuid` VARCHAR(64) NOT NULL;
 ALTER TABLE `eh_aclink_servers` DROP INDEX `u_eh_aclink_servers_uuid`;
 -- end
+
+-- 通用脚本
+-- AUTHOR huangmingbo  20180719
+-- REMARK issue-33610 服务联盟 服务表字段过短导致前端解析出错
+ALTER TABLE `eh_service_alliances` CHANGE COLUMN `service_url` `service_url` VARCHAR(512) NULL DEFAULT NULL;
+-- end
+
 -- --------------------- SECTION END ---------------------------------------------------------
 

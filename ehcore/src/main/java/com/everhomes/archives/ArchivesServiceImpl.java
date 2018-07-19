@@ -1,6 +1,7 @@
 package com.everhomes.archives;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -17,11 +18,9 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.archives.*;
-import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
-import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
@@ -45,10 +44,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -107,6 +104,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
@@ -568,17 +568,14 @@ public class ArchivesServiceImpl implements ArchivesService {
         return names.toString();
     }
 
-    private boolean checkTheEmployeePrivilege(Long detailId, Long enterpriseId, Long organizationId){
+    private void checkTargetPrivilege(Long detailId, Long organizationId) {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        if(employee == null || employee.getTargetId() == 0)
-            return false;
-        boolean isAdmin;
-        try {
-            isAdmin = userPrivilegeMgr.checkUserPrivilege(employee.getTargetId(), enterpriseId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON, FlowConstants.ORGANIZATION_MODULE, null, null, organizationId, null);
-        } catch (Exception e) {
-            isAdmin = false;
-        }
-        return isAdmin;
+        if (employee == null || employee.getTargetId() == 0)
+            throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DELETE_ADMIN,
+                    "No rights to remove the admin.");
+        if (!rolePrivilegeService.checkIsSystemOrAppAdmin(organizationId, employee.getTargetId()))
+            throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DELETE_ADMIN,
+                    "No rights to remove the admin.");
     }
 
     @Override
@@ -1330,10 +1327,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
                 //  1.校验管理员
-                if (checkTheEmployeePrivilege(detailId, cmd.getOrganizationId(), cmd.getOrganizationId())) {
-                    throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DELETE_ADMIN,
-                            "No rights to remove the admin.");
-                }
+                checkTargetPrivilege(detailId, cmd.getOrganizationId());
                 //  2.按照操作时间执行分情况执行下一步
                 if (!ArchivesUtil.parseDate(cmd.getDismissTime()).after(ArchivesUtil.currentDate())) {
                     dismissArchivesEmployee(detailId, namespaceId, cmd);
@@ -1357,15 +1351,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         ArchivesDismissEmployees dismissEmployee = processDismissEmployee(employee, cmd);
         archivesProvider.createArchivesDismissEmployee(dismissEmployee);
-
         //  2.改为离职状态
         employee.setEmployeeStatus(EmployeeStatus.DISMISSAL.getCode());
         employee.setDismissTime(ArchivesUtil.parseDate(cmd.getDismissTime()));
         organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
-
         //  3.删除置顶信息
         archivesProvider.deleteArchivesStickyContactsByDetailId(namespaceId, detailId);
-
         //  4.删除员工权限
         DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
         deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(employee.getOrganizationId());
@@ -1404,23 +1395,18 @@ public class ArchivesServiceImpl implements ArchivesService {
         dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                //  1.校验是否为管理员
-                if (checkTheEmployeePrivilege(detailId, detail.getOrganizationId(), detail.getOrganizationId()))
-                    throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DELETE_ADMIN,
-                            "No rights to remove the admin.");
+                //  1.校验管理员
+                checkTargetPrivilege(detailId, cmd.getOrganizationId());
                 //  2.删除员工权限
                 DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
                 deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(detail.getOrganizationId());
                 deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
                 deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
                 organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
-
                 //  3.删除员工档案
                 organizationProvider.deleteOrganizationMemberDetails(detail);
-
                 //  4.删除离职列表中对应的员工
                 deleteArchivesDismissEmployees(detailId, detail.getOrganizationId());
-
             }
             return null;
         });
@@ -1877,12 +1863,29 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutCheckInTime();
         if(details == null)
             return;
+        int i = 0;
         for(OrganizationMemberDetails detail : details){
             OrganizationMember member = archivesProvider.findOrganizationMemberWithoutStatusByDetailId(detail.getId());
             if(member != null){
                 detail.setCheckInTime(new Date(member.getCreateTime().getTime()));
                 detail.setCheckInTimeIndex(formatter.format(detail.getCheckInTime().toLocalDate()));
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+                LOGGER.info("the [" + i++ + "] times to make the archives check in time") ;
+            }
+        }
+    }
+
+    @Override
+    public void cleanRedundantArchivesDetails() {
+        List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutDismissalStatus();
+        if (details == null)
+            return;
+        int i = 0;
+        for (OrganizationMemberDetails detail : details) {
+            OrganizationMember member = archivesProvider.findOrganizationMemberWithStatusByDetailId(detail.getId());
+            if (member == null){
+                organizationProvider.deleteOrganizationMemberDetails(detail);
+                LOGGER.info("the [" + i++ + "] times to make the delete the detail") ;
             }
         }
     }
