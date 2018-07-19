@@ -1172,4 +1172,18 @@ public class PunchAdminController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: punch/getUserPunchRuleInfo</b>
+     * <p>
+     * 列出用户的考勤规则详情
+     * </p>
+     */
+    @RequestMapping("getUserPunchRuleInfo")
+    @RestReturn(value = GetUserPunchRuleInfoResponse.class)
+    public RestResponse getUserPunchRuleInfo(@Valid GetUserPunchRuleInfoCommand cmd) {
+        RestResponse response = new RestResponse(punchService.getUserPunchRuleInfo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

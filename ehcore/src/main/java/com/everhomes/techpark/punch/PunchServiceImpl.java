@@ -184,6 +184,8 @@ import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountCommand;
 import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountResponse;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
+import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoCommand;
+import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoResponse;
 import com.everhomes.rest.techpark.punch.admin.ImportVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
@@ -266,6 +268,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -301,6 +304,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -8288,32 +8292,14 @@ public class PunchServiceImpl implements PunchService {
             }
         }
         //打卡时间
-        List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), r.getId(), pr.getStatus());
-        if (null != timeRules && timeRules.size() > 0)
-            dto.setTimeRules(timeRules.stream().map(r1 -> {
-                PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1);
-                if (r1.getPunchTimesPerDay().equals((byte) 2)) {
-                    dto1.setAfternoonArriveTime(r1.getAfternoonArriveTimeLong());
-                    dto1.setNoonLeaveTime(r1.getNoonLeaveTimeLong());
-                }
-                return dto1;
-            }).collect(Collectors.toList()));
+        dto.setTimeRules(processPunchTimeRuleDTOs(r.getId(), pr.getStatus()));
+        
 
         //打卡地点和WiFi
-        dto.setPunchGeoPoints(new ArrayList<>());
-        dto.setWifis(new ArrayList<>());
-        List<PunchGeopoint> points = punchProvider.listPunchGeopointsByOwner(PunchOwnerType.ORGANIZATION.getCode(), r.getId());
-        if (null != points)
-            for (PunchGeopoint point : points) {
-                PunchGeoPointDTO dto1 = ConvertHelper.convert(point, PunchGeoPointDTO.class);
-                dto.getPunchGeoPoints().add(dto1);
-            }
-        List<PunchWifi> wifis = punchProvider.listPunchWifsByOwner(PunchOwnerType.ORGANIZATION.getCode(), r.getId());
-        if (null != wifis)
-            for (PunchWifi wifi : wifis) {
-                PunchWiFiDTO dto1 = ConvertHelper.convert(wifi, PunchWiFiDTO.class);
-                dto.getWifis().add(dto1);
-            }
+        dto.setPunchGeoPoints(processPunchGeoPointDTOs(r.getId()));
+        dto.setWifis(processPunchWiFiDTOs(r.getId()));
+       
+         
 
         //排班和非排班的特殊处理
         if (pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())) {
@@ -8347,16 +8333,54 @@ public class PunchServiceImpl implements PunchService {
                 }
             }
         }
-        List<PunchOvertimeRule> punchOvertimeRules = punchProvider.findPunchOvertimeRulesByPunchRuleId(pr.getId(), pr.getStatus());
-        if (!CollectionUtils.isEmpty(punchOvertimeRules)) {
-            dto.setPunchOvertimeRules(punchOvertimeRules.stream().map(punchOvertimeRule -> {
-                return ConvertHelper.convert(punchOvertimeRule, PunchOvertimeRuleDTO.class);
-            }).collect(Collectors.toList()));
-        }
+        dto.setPunchOvertimeRules(processPunchOvertimeRuleDTOs(pr.getId(),pr.getStatus()));
+       
         return dto;
     }
+    
+    private List<PunchTimeRuleDTO> processPunchTimeRuleDTOs(Long pucnhOrgId, Byte status) {
+        List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), pucnhOrgId, status);
+    	if (null != timeRules && timeRules.size() > 0)
+            return timeRules.stream().map(r1 -> {
+                PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1);
+                if (r1.getPunchTimesPerDay().equals((byte) 2)) {
+                    dto1.setAfternoonArriveTime(r1.getAfternoonArriveTimeLong());
+                    dto1.setNoonLeaveTime(r1.getNoonLeaveTimeLong());
+                }
+                return dto1;
+            }).collect(Collectors.toList());
+		return null;
+	}
 
-    private List<PunchSchedulingDTO> processschedulings(PunchRule pr, java.sql.Date startDate,
+	private List<PunchWiFiDTO> processPunchWiFiDTOs(Long pucnhOrgId) {
+    	List<PunchWifi> wifis = punchProvider.listPunchWifsByOwner(PunchOwnerType.ORGANIZATION.getCode(), pucnhOrgId);
+    	if (!CollectionUtils.isEmpty(wifis))
+    		return wifis.stream().map(punchOvertimeRule -> {
+                return ConvertHelper.convert(punchOvertimeRule, PunchWiFiDTO.class);
+            }).collect(Collectors.toList()); 
+		return null;
+	}
+
+	private List<PunchGeoPointDTO> processPunchGeoPointDTOs(Long pucnhOrgId) {
+    	List<PunchGeopoint> points = punchProvider.listPunchGeopointsByOwner(PunchOwnerType.ORGANIZATION.getCode(), pucnhOrgId);
+        if (!CollectionUtils.isEmpty(points))
+        	return points.stream().map(punchOvertimeRule -> {
+        		return ConvertHelper.convert(punchOvertimeRule, PunchGeoPointDTO.class);
+            }).collect(Collectors.toList()); 
+		return null;
+	}
+
+	private List<PunchOvertimeRuleDTO> processPunchOvertimeRuleDTOs(Long ruleId, Byte status) {
+    	List<PunchOvertimeRule> punchOvertimeRules = punchProvider.findPunchOvertimeRulesByPunchRuleId(ruleId, status);
+        if (!CollectionUtils.isEmpty(punchOvertimeRules)) {
+            return punchOvertimeRules.stream().map(punchOvertimeRule -> {
+                return ConvertHelper.convert(punchOvertimeRule, PunchOvertimeRuleDTO.class);
+            }).collect(Collectors.toList());
+        }
+		return null;
+	}
+
+	private List<PunchSchedulingDTO> processschedulings(PunchRule pr, java.sql.Date startDate,
                                                         java.sql.Date endDate) {
         List<PunchSchedulingDTO> result = new ArrayList<PunchSchedulingDTO>();
         PunchSchedulingDTO dto = new PunchSchedulingDTO();
@@ -11300,5 +11324,24 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public GetOvertimeInfoResponse getOvertimeInfo(GetOvertimeInfoCommand cmd){
     	return new GetOvertimeInfoResponse(processOvertimeInfo(cmd.getOwnerId(), UserContext.currentUserId()));
+    }
+
+
+    @Override
+    public GetUserPunchRuleInfoResponse getUserPunchRuleInfo(GetUserPunchRuleInfoCommand cmd){
+ 
+        PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId(), UserContext.currentUserId());
+        GetUserPunchRuleInfoResponse response =  ConvertHelper.convert(pr, GetUserPunchRuleInfoResponse.class);
+        //打卡时间
+        response.setTimeRules(processPunchTimeRuleDTOs(pr.getPunchOrganizationId(), pr.getStatus()));
+        //打卡地点和WiFi
+        response.setPunchGeoPoints(processPunchGeoPointDTOs(pr.getPunchOrganizationId()));
+        response.setWifis(processPunchWiFiDTOs(pr.getPunchOrganizationId()));
+        //加班时长
+        response.setPunchOvertimeRules(processPunchOvertimeRuleDTOs(pr.getId(),pr.getStatus()));
+        PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, new Date(cmd.getPunchDate()), UserContext.currentUserId());
+        response.setCurrentTimeRuleName(ptr.getName());
+		return response;
+    	
     }
 }
