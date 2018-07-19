@@ -2729,7 +2729,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId) {
+    public List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize,Long contractId, Long categoryId, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
@@ -2739,6 +2739,8 @@ public class AssetProviderImpl implements AssetProvider {
         List<Long> fetch = context.select(bill.ID)
                 .from(bill)
                 .where(bill.CONTRACT_NUM.eq(contractNum))
+                .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+                .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
         context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
@@ -2765,6 +2767,8 @@ public class AssetProviderImpl implements AssetProvider {
         List<Long> fetch1 = context.select(bill.ID)
                 .from(bill)
                 .where(bill.CONTRACT_ID.eq(contractId))
+                .and(bill.NAMESPACE_ID.eq(namespaceId))//解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+                .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
         context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
@@ -4518,34 +4522,54 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId) {
+    public BigDecimal getBillExpectanciesAmountOnContract(String contractNum, Long contractId, Long categoryId, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
         HashSet<PaymentExpectancyDTO> set = new HashSet<>();
-        List<Long> fetch = context.select(bill.ID)
-                .from(bill)
-                .where(bill.CONTRACT_NUM.eq(contractNum))
-                .fetch(bill.ID);
+        List<Long> fetch = new ArrayList<Long>();
+        if(categoryId != null) {
+        	fetch = context.select(bill.ID)
+                    .from(bill)
+                    .where(bill.CONTRACT_NUM.eq(contractNum))
+                    .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+                    .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+                    .fetch(bill.ID);
+        }else {
+        	fetch = context.select(bill.ID)
+                    .from(bill)
+                    .where(bill.CONTRACT_NUM.eq(contractNum))
+                    .fetch(bill.ID);
+        }
         context.select(t.ID,t.AMOUNT_RECEIVABLE)
-                .from(t,t1)
-                .where(t.BILL_ID.in(fetch))
-                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                .orderBy(t1.NAME,t.DATE_STR)
-                .fetch()
-                .map(r -> {
-                    PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
-                    dto.setBillItemId(r.getValue(t.ID));
-                    set.add(dto);
-                    return null;
-                });
-
-        List<Long> fetch1 = context.select(bill.ID)
-                .from(bill)
-                .where(bill.CONTRACT_ID.eq(contractId))
-                .fetch(bill.ID);
+	        .from(t,t1)
+	        .where(t.BILL_ID.in(fetch))
+	        .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+	        .orderBy(t1.NAME,t.DATE_STR)
+	        .fetch()
+	        .map(r -> {
+	            PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+	            dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+	            dto.setBillItemId(r.getValue(t.ID));
+	            set.add(dto);
+	            return null;
+        });
+        
+        List<Long> fetch1 = new ArrayList<Long>();
+        if(categoryId != null) {
+        	fetch1 = context.select(bill.ID)
+                    .from(bill)
+                    .where(bill.CONTRACT_ID.eq(contractId))
+                    .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+                    .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
+                    .fetch(bill.ID);
+        }else {
+        	fetch1 = context.select(bill.ID)
+                    .from(bill)
+                    .where(bill.CONTRACT_ID.eq(contractId))
+                    .fetch(bill.ID);
+        }
         context.select(t.ID,t.AMOUNT_RECEIVABLE)
                 .from(t,t1)
                 .where(t.BILL_ID.in(fetch1))

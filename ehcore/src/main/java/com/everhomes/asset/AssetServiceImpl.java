@@ -1301,7 +1301,7 @@ public class AssetServiceImpl implements AssetService {
                 }
                 LOGGER.error("工作flag完成");
                 //得到金额总和并更新到eh_contracts表中 by steve
-                BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId());
+                BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(), null, null);
                 assetProvider.setRent(cmd.getContractId(),totalAmount);
                 
             }catch(Exception e){
@@ -4714,7 +4714,7 @@ public class AssetServiceImpl implements AssetService {
 		if (contractList!=null && contractList.size()>0) {
 			for (Contract contract : contractList) {
 				if (contract.getRent()==null) {
-					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId());
+					BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), null, null);
 			        assetProvider.setRent(contract.getId(),totalAmount);
 				}
 			}
