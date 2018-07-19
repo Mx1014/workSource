@@ -4856,13 +4856,15 @@ public class AssetServiceImpl implements AssetService {
 			try {
 				Date dateBegin = yyyyMMdd.parse(billItem.getDateStrBegin());
 				Date dateEnd = yyyyMMdd.parse(billItem.getDateStrEnd());
-				int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
-				int actualPeriod = daysBetween_date(dateBegin,endTime);
-				billItem.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceivable()));
-				billItem.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceived()));
-				billItem.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountOwed()));
-				String actualDateStrEnd = yyyyMMdd.format(endTime);
-				billItem.setDateStrEnd(actualDateStrEnd);
+				if (dateEnd.getTime() >= endTime.getTime()) {
+					int agreedPeriod = daysBetween_date(dateBegin, dateEnd);
+					int actualPeriod = daysBetween_date(dateBegin,endTime);
+					billItem.setAmountReceivable(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceivable()));
+					billItem.setAmountReceived(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountReceived()));
+					billItem.setAmountOwed(calculateFee(agreedPeriod,actualPeriod,billItem.getAmountOwed()));
+					String actualDateStrEnd = yyyyMMdd.format(endTime);
+					billItem.setDateStrEnd(actualDateStrEnd);
+				}
 			} catch (ParseException e) {
 				if(LOGGER.isDebugEnabled()) {
 		            LOGGER.error("parse date error!");

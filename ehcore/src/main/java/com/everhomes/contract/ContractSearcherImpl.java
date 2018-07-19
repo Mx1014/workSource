@@ -304,8 +304,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             anchor = cmd.getPageAnchor();
         }
         
-        //fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
-
+        if(cmd.getCategoryId() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
+        }
+        
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);

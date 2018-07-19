@@ -4863,7 +4863,6 @@ public class AssetProviderImpl implements AssetProvider {
 		
 	}
 	
-	//add by tangcen 2018年6月12日16:18:51
 	@Override
 	public PaymentBills getFirstUnsettledBill(Long contractId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -4878,7 +4877,6 @@ public class AssetProviderImpl implements AssetProvider {
        return ConvertHelper.convert(record, PaymentBills.class);         
 	}
 	
-	//add by tangcen 2018年6月12日
 	@Override
 	public List<PaymentBillItems> findBillItemsByBillId(Long billId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());

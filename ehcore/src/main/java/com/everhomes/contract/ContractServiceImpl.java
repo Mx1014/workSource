@@ -1685,10 +1685,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
 		
 		contractSearcher.feedDoc(contract);
-		//将此合同关联的未出账单记为无效账单 by tangcen
-//		if (cmd.getCostGenerationMethod()!=null) {
-//			assetService.deleteUnsettledBillsOnContractId(cmd.getCostGenerationMethod(),contract.getId(),contract.getDenunciationTime());
-//		}
 		
 		if(cmd.getPaymentFlag() == 1) {
 			addToFlowCase(contract, flowcasePaymentContractOwnerType);
