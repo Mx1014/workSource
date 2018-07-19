@@ -977,7 +977,7 @@ public class AssetProviderImpl implements AssetProvider {
         //增加附件信息
         List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList = new ArrayList<>();
         dslContext.select(Tables.EH_PAYMENT_BILL_ATTACHMENTS.ID,Tables.EH_PAYMENT_BILL_ATTACHMENTS.FILENAME,Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URI,
-        		Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URL)
+        		Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URL,Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_TYPE)
 		    .from(Tables.EH_PAYMENT_BILL_ATTACHMENTS)
 		    .where(Tables.EH_PAYMENT_BILL_ATTACHMENTS.BILL_ID.eq(billId))
 		    .fetch()
@@ -986,6 +986,7 @@ public class AssetProviderImpl implements AssetProvider {
 		    	assetPaymentBillAttachment.setFilename(r.getValue(Tables.EH_PAYMENT_BILL_ATTACHMENTS.FILENAME));
 		    	assetPaymentBillAttachment.setUri(r.getValue(Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URI));
 		    	assetPaymentBillAttachment.setUrl(r.getValue(Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_URL));
+		    	assetPaymentBillAttachment.setContentType(r.getValue(Tables.EH_PAYMENT_BILL_ATTACHMENTS.CONTENT_TYPE));
 		    	assetPaymentBillAttachmentList.add(assetPaymentBillAttachment);
 		        return null;
 	    });
@@ -1424,6 +1425,7 @@ public class AssetProviderImpl implements AssetProvider {
 	                  paymentBillAttachments.setFilename(dto.getFilename());
 	                  paymentBillAttachments.setContentUri(dto.getUri());
 	                  paymentBillAttachments.setContentUrl(dto.getUrl());
+	                  paymentBillAttachments.setContentType(dto.getContentType());
 	                  paymentBillAttachmentsList.add(paymentBillAttachments);
 	              }
 	              EhPaymentBillAttachmentsDao paymentBillAttachmentsDao = new EhPaymentBillAttachmentsDao(context.configuration());
@@ -2398,6 +2400,7 @@ public class AssetProviderImpl implements AssetProvider {
 	                  paymentBillAttachments.setFilename(dto.getFilename());
 	                  paymentBillAttachments.setContentUri(dto.getUri());
 	                  paymentBillAttachments.setContentUrl(dto.getUrl());
+	                  paymentBillAttachments.setContentType(dto.getContentType());
 	                  paymentBillAttachmentsList.add(paymentBillAttachments);
 	              }
 	              EhPaymentBillAttachmentsDao paymentBillAttachmentsDao = new EhPaymentBillAttachmentsDao(context.configuration());

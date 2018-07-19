@@ -16,7 +16,14 @@ public class AssetPaymentBillAttachment {
     private String filename;
     private String uri;
     private String url;
+    private String contentType;
     
+	public String getContentType() {
+		return contentType;
+	}
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
 	public String getFilename() {
 		return filename;
 	}
