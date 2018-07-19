@@ -8853,10 +8853,18 @@ public class PunchServiceImpl implements PunchService {
     			if(null != pl){
     				PunchLogDTO dto = convertPunchLog2DTO(pl); 
     	            intervalDTO.getPunchLogs().add(dto);
+    			}else{
+    				PunchLogDTO dto = new PunchLogDTO();
+    				dto.setPunchType(PunchType.OVERTIME_ON_DUTY.getCode());
+    	            intervalDTO.getPunchLogs().add(dto);
     			}
     			pl = findPunchLog(punchLogs, PunchType.OVERTIME_OFF_DUTY.getCode(), punchIntervalNo);
     			if(null != pl){
     				PunchLogDTO dto = convertPunchLog2DTO(pl);
+    	            intervalDTO.getPunchLogs().add(dto);
+    			}else{
+    				PunchLogDTO dto = new PunchLogDTO();
+    				dto.setPunchType(PunchType.OVERTIME_OFF_DUTY.getCode());
     	            intervalDTO.getPunchLogs().add(dto);
     			}
                 response.getIntervals().add(intervalDTO);
