@@ -5298,13 +5298,13 @@ public class PunchServiceImpl implements PunchService {
                 BigDecimal extTotal = BigDecimal.ZERO;
                 if (!CollectionUtils.isEmpty(extDTOs)) {
                     for (ExtDTO e : extDTOs) {
-                        e.setTimeCountDisplay(PunchDayParseUtils.parseDayTimeDisplayString(new BigDecimal(e.getTimeCount()).doubleValue(), dayUnit, hourUnit));
+                        e.setTimeCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(new BigDecimal(e.getTimeCount()).doubleValue(), dayUnit, hourUnit));
                         extTotal = extTotal.add(new BigDecimal(e.getTimeCount()));
                     }
                 }
                 dto.setExts(extDTOs);
                 dto.setExtTotal(extTotal.doubleValue());
-                dto.setExtTotalDisplay(PunchDayParseUtils.parseDayTimeDisplayString(extTotal.doubleValue(), dayUnit, hourUnit));
+                dto.setExtTotalDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(extTotal.doubleValue(), dayUnit, hourUnit));
                 absenceUserIdList.add(statistic.getUserId());
             }
 
@@ -8230,12 +8230,14 @@ public class PunchServiceImpl implements PunchService {
             if (ApprovalServiceConstants.ANNUAL_LEAVE.equals(category.getCategoryName()) && punchVacationBalance != null) {
                 code = ApprovalServiceConstants.TIP_INFO_FOR_REMAIN_APPROVAL_CATEGORY;
                 category.setRemainCount(punchVacationBalance.getAnnualLeaveBalance());
+                category.setRemainCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(category.getRemainCount(), dayUnit, hourUnit));
+                model.put("remainCountDisplay", category.getRemainCountDisplay());
             } else if (ApprovalServiceConstants.OVERTIME_COMPENSATION.equals(category.getCategoryName()) && punchVacationBalance != null) {
                 code = ApprovalServiceConstants.TIP_INFO_FOR_REMAIN_APPROVAL_CATEGORY;
                 category.setRemainCount(punchVacationBalance.getOvertimeCompensationBalance());
+                category.setRemainCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(category.getRemainCount(), dayUnit, hourUnit));
+                model.put("remainCountDisplay", category.getRemainCountDisplay());
             }
-            category.setRemainCountDisplay(PunchDayParseUtils.parseDayTimeDisplayString(category.getRemainCount(), dayUnit, hourUnit));
-            model.put("remainCountDisplay", category.getRemainCountDisplay());
 
             String timeUnitTipInfo = localeTemplateService.getLocaleTemplateString(ApprovalServiceConstants.SCOPE, code, UserContext.current().getUser().getLocale(), model, "");
             category.setTimeUnitTipInfo(timeUnitTipInfo);
@@ -10302,22 +10304,22 @@ public class PunchServiceImpl implements PunchService {
             PunchVacationBalance balance = punchVacationBalanceMap.get(r.getId());
             if (null != balance) {
                 dto.setAnnualLeaveBalance(balance.getAnnualLeaveBalance());
-                dto.setAnnualLeaveBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayString(balance.getAnnualLeaveBalance(), dayUnit, hourUnit));
+                dto.setAnnualLeaveBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(balance.getAnnualLeaveBalance(), dayUnit, hourUnit));
                 dto.setOvertimeCompensationBalance(balance.getOvertimeCompensationBalance());
-                dto.setOvertimeCompensationBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayString(balance.getOvertimeCompensationBalance(), dayUnit, hourUnit));
+                dto.setOvertimeCompensationBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(balance.getOvertimeCompensationBalance(), dayUnit, hourUnit));
                 dto.setAnnualLeaveHistoryCount(balance.getAnnualLeaveHistoryCount());
-                dto.setAnnualLeaveHistoryCountDisplay(PunchDayParseUtils.parseDayTimeDisplayString(balance.getAnnualLeaveHistoryCount().doubleValue(), dayUnit, hourUnit));
+                dto.setAnnualLeaveHistoryCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(balance.getAnnualLeaveHistoryCount().doubleValue(), dayUnit, hourUnit));
                 dto.setOvertimeCompensationHistoryCount(balance.getOvertimeCompensationHistoryCount());
-                dto.setOvertimeCompensationHistoryCountDisplay(PunchDayParseUtils.parseDayTimeDisplayString(balance.getOvertimeCompensationHistoryCount().doubleValue(), dayUnit, hourUnit));
+                dto.setOvertimeCompensationHistoryCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(balance.getOvertimeCompensationHistoryCount().doubleValue(), dayUnit, hourUnit));
             } else {
                 dto.setAnnualLeaveBalance(0.0);
-                dto.setAnnualLeaveBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayString(0D, dayUnit, hourUnit));
+                dto.setAnnualLeaveBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(0D, dayUnit, hourUnit));
                 dto.setOvertimeCompensationBalance(0.0);
-                dto.setOvertimeCompensationBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayString(0D, dayUnit, hourUnit));
+                dto.setOvertimeCompensationBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(0D, dayUnit, hourUnit));
                 dto.setAnnualLeaveHistoryCount(BigDecimal.ZERO);
-                dto.setAnnualLeaveHistoryCountDisplay(PunchDayParseUtils.parseDayTimeDisplayString(0D, dayUnit, hourUnit));
+                dto.setAnnualLeaveHistoryCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(0D, dayUnit, hourUnit));
                 dto.setOvertimeCompensationHistoryCount(BigDecimal.ZERO);
-                dto.setOvertimeCompensationHistoryCountDisplay(PunchDayParseUtils.parseDayTimeDisplayString(0D, dayUnit, hourUnit));
+                dto.setOvertimeCompensationHistoryCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(0D, dayUnit, hourUnit));
             }
 
             results.add(dto);
@@ -10471,10 +10473,10 @@ public class PunchServiceImpl implements PunchService {
 
         for (PunchVacationBalanceLog r : results) {
             VacationBalanceLogDTO dto = ConvertHelper.convert(r, VacationBalanceLogDTO.class);
-            dto.setAnnualLeaveBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayString(dto.getAnnualLeaveBalance(), dayUnit, hourUnit));
-            dto.setAnnualLeaveBalanceCorrectionDisplay(PunchDayParseUtils.parseDayTimeDisplayString(dto.getAnnualLeaveBalanceCorrection(), dayUnit, hourUnit));
-            dto.setOvertimeCompensationBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayString(dto.getOvertimeCompensationBalance(), dayUnit, hourUnit));
-            dto.setOvertimeCompensationBalanceCorrectionDisplay(PunchDayParseUtils.parseDayTimeDisplayString(dto.getOvertimeCompensationBalanceCorrection(), dayUnit, hourUnit));
+            dto.setAnnualLeaveBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(dto.getAnnualLeaveBalance(), dayUnit, hourUnit));
+            dto.setAnnualLeaveBalanceCorrectionDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(dto.getAnnualLeaveBalanceCorrection(), dayUnit, hourUnit));
+            dto.setOvertimeCompensationBalanceDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(dto.getOvertimeCompensationBalance(), dayUnit, hourUnit));
+            dto.setOvertimeCompensationBalanceCorrectionDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithoutUnit(dto.getOvertimeCompensationBalanceCorrection(), dayUnit, hourUnit));
             dto.setCreatorName(socialSecurityService.findNameByOwnerAndUser(cmd.getOrganizationId(), r.getCreatorUid()));
             dto.setCreateTime(r.getCreateTime().getTime());
             response.getVacationBalanceLogs().add(dto);

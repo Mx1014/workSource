@@ -242,7 +242,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString(EnterpriseApprovalStringCode.SCOPE, EnterpriseApprovalStringCode.ASK_FOR_LEAVE_TIME, "zh_CN", "Total Time"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(PunchDayParseUtils.parseDayTimeDisplayString(leaveValue.getDuration(), "天", "小时"));
+        e.setValue(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(leaveValue.getDuration(), "天", "小时"));
         entities.add(3, e);
     }
 

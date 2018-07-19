@@ -45,9 +45,9 @@ WHERE s.id IS NULL;
 SET @max_template_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_templates`),1);
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10000, 'zh_CN', '$假期类型名称$：按$请假单位$请假，最小请假0.5$请假单位$','${categoryName}：按${timeUnit}请假，最小请假${timeStep}${timeUnit}', 0);
+VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10000, 'zh_CN', '$假期类型名称$：最小请假0.5$请假单位$','${categoryName}：最小请假${timeStep}${timeUnit}', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10001, 'zh_CN', '$假期类型名称$：按$请假单位$请假，最小请假0.5$请假单位$；余额：$余额值$','${categoryName}：按${timeUnit}请假，最小请假${timeStep}${timeUnit}；余额：${remainCountDisplay}', 0);
+VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10001, 'zh_CN', '$假期类型名称$：最小请假0.5$请假单位$；剩余 $余额$','${categoryName}：最小请假${timeStep}${timeUnit}；剩余${remainCountDisplay}', 0);
 
 
 

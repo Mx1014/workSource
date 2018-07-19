@@ -35,8 +35,8 @@ public final class PunchDayParseUtils {
         return s.toString();
     }
 
-    // 该方法用于将天数换算成“3.5天1.5小时”的格式
-    public static String parseDayTimeDisplayString(Double dayCount, String dayUnit, String hourUnit) {
+    // 该方法用于将天数换算成“3.5天1.5小时”的格式，0时不显示单位
+    public static String parseDayTimeDisplayStringZeroWithoutUnit(Double dayCount, String dayUnit, String hourUnit) {
         double halfDays = calculateTimesOfHalfDay(Math.abs(dayCount));
         double halfHours = calculateTimesOfHalfHour(Math.abs(dayCount));
         StringBuffer s = new StringBuffer();
@@ -51,6 +51,13 @@ public final class PunchDayParseUtils {
             }
         }
         return s.toString();
+    }
+
+    // 该方法用于将天数换算成“3.5天1.5小时”的格式，0时显示单位
+    public static String parseDayTimeDisplayStringZeroWithUnit(Double dayCount, String dayUnit, String hourUnit) {
+        double halfDays = calculateTimesOfHalfDay(Math.abs(dayCount));
+        double halfHours = calculateTimesOfHalfHour(Math.abs(dayCount));
+        return (halfDays + dayUnit + halfHours + hourUnit).replace(".0", "");
     }
 
     public static double calculateTimesOfHalfDay(Double dayCount) {
