@@ -67,7 +67,8 @@ public class FileDownloadTaskController extends ControllerBase {
     @RequestMapping("getFileDownloadReadStatus")
     @RestReturn(value=GetFileDownloadReadStatusResponse.class)
     public RestResponse getFileDownloadReadStatus() {
-        RestResponse response = new RestResponse();
+        GetFileDownloadReadStatusResponse readStatusResponse = this.fileDownloadTaskService.getFileDownloadReadStatus();
+        RestResponse response = new RestResponse(readStatusResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -80,6 +81,7 @@ public class FileDownloadTaskController extends ControllerBase {
     @RequestMapping("updateFileDownloadReadStatus")
     @RestReturn(value=String.class)
     public RestResponse updateFileDownloadReadStatus() {
+        this.fileDownloadTaskService.updateFileDownloadReadStatus();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -93,6 +95,7 @@ public class FileDownloadTaskController extends ControllerBase {
     @RequestMapping("updateFileDownloadTimes")
     @RestReturn(value=String.class)
     public RestResponse updateFileDownloadTimes(UpdateDownloadTimesCommand cmd) {
+        this.fileDownloadTaskService.updateFileDownloadTimes(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
