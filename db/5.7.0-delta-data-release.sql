@@ -33,16 +33,20 @@
 -- REMARK:    }
 
 -- AUTHOR: jiarui 20180716
--- REMARK:执行 search目录下 equipment_standard.sh  然后同步/equipment/syncEquipmentStandardMapIndex
+-- REMARK: 执行 search目录下 equipment_standard.sh  然后同步/equipment/syncEquipmentStandardMapIndex
 
 -- AUTHOR: jiarui 20180717
--- REMARK:执行 search目录下 enterpriseCustomer.sh  然后同步/customer/syncEnterpriseCustomerIndex
+-- REMARK: 执行 search目录下 enterpriseCustomer.sh  然后同步/customer/syncEnterpriseCustomerIndex
 
 -- AUTHOR: ryan荣 20180719
--- REMARK:执行 /archives/makeArchivesCheckInTime 接口(可能速度有点慢，但可重复执行)
+-- REMARK: 执行 /archives/makeArchivesCheckInTime 接口(可能速度有点慢，但可重复执行)
 
 -- AUTHOR: ryan荣 20180719
--- REMARK:执行 /archives/cleanRedundantArchivesDetails 接口(可能速度有点慢，但可重复执行)
+-- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(执行前请先备份eh_organization_member_details 表, 可能速度有点慢，但可重复执行)
+
+-- AUTHOR: yanjun 20180719
+-- REMARK: 请备份 eh_service_modules 表与 eh_web_menus 表
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
