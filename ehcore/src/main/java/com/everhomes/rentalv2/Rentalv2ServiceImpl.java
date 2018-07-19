@@ -6757,13 +6757,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 	}
 
-	private void createSiteFileUris(List<String> fileUris, RentalResource resource) {
+	private void createSiteFileUris(List<RentalSiteFileDTO> fileUris, RentalResource resource) {
 		if (fileUris != null) {
-			for (String uri : fileUris) {
+			for (RentalSiteFileDTO dto : fileUris) {
 				RentalResourceFile file = new RentalResourceFile();
 				file.setOwnerType(EhRentalv2Resources.class.getSimpleName());
 				file.setOwnerId(resource.getId());
-				file.setUri(uri);
+				file.setUri(dto.getUri());
+				file.setName(dto.getName());
 				file.setResourceType(resource.getResourceType());
 				this.rentalv2Provider.createRentalSiteFile(file);
 			}

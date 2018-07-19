@@ -114,6 +114,7 @@ public class RentalBillDTO {
 	private String confirmationPrompt;
 	private Long flowCaseId;
 	private String resourceType;
+	private String scene;
 	private String customObject;
 
 	private Byte holidayOpenFlag;
@@ -570,5 +571,13 @@ public class RentalBillDTO {
 
 	public void setOpenTime(String openTime) {
 		this.openTime = openTime;
+	}
+
+	public String getScene() {
+		return scene;
+	}
+
+	public void setScene(String scene) {
+		this.scene = scene;
 	}
 }

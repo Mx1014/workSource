@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.rentalv2.RentalSiteFileDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -65,7 +66,7 @@ public class AddResourceAdminCommand {
 	private String coverUri;
 	@ItemType(String.class)
 	private List<String> detailUris;
-	private List<String> fileUris;
+	private List<RentalSiteFileDTO> fileUris;
 	@ItemType(SiteOwnerDTO.class)
 	private List<SiteOwnerDTO> owners;
 	private Byte status;
@@ -310,11 +311,11 @@ public class AddResourceAdminCommand {
 		this.siteNumbers = siteNumbers;
 	}
 
-	public List<String> getFileUris() {
+	public List<RentalSiteFileDTO> getFileUris() {
 		return fileUris;
 	}
 
-	public void setFileUris(List<String> fileUris) {
+	public void setFileUris(List<RentalSiteFileDTO> fileUris) {
 		this.fileUris = fileUris;
 	}
 }
