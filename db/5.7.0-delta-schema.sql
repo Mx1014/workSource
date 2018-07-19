@@ -229,8 +229,10 @@ PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_rentalv2_price_rules`
-ADD COLUMN `original_price`  decimal(10,2) NULL AFTER `workday_price`,
-ADD COLUMN `org_member_original_price`  decimal(10,2) NULL AFTER `org_member_workday_price`,
+ADD COLUMN `original_price`  decimal(10,2) NULL AFTER `workday_price`;
+ALTER TABLE `eh_rentalv2_price_rules`
+ADD COLUMN `org_member_original_price`  decimal(10,2) NULL AFTER `org_member_workday_price`;
+ALTER TABLE `eh_rentalv2_price_rules`
 ADD COLUMN `approving_user_original_price`  decimal(10,2) NULL AFTER `approving_user_workday_price`;
 
 -- end
@@ -318,5 +320,12 @@ ALTER TABLE `eh_contracts` ADD COLUMN `template_id` bigint(20) NULL COMMENT 'con
 ALTER TABLE `eh_aclink_servers` MODIFY COLUMN `uuid` VARCHAR(64) NOT NULL;
 ALTER TABLE `eh_aclink_servers` DROP INDEX `u_eh_aclink_servers_uuid`;
 -- end
+
+-- 通用脚本
+-- AUTHOR huangmingbo  20180719
+-- REMARK issue-33610 服务联盟 服务表字段过短导致前端解析出错
+ALTER TABLE `eh_service_alliances` CHANGE COLUMN `service_url` `service_url` VARCHAR(512) NULL DEFAULT NULL;
+-- end
+
 -- --------------------- SECTION END ---------------------------------------------------------
 

@@ -38,6 +38,9 @@
 -- AUTHOR: jiarui 20180717
 -- REMARK:执行 search目录下 enterpriseCustomer.sh  然后同步/customer/syncEnterpriseCustomerIndex
 
+-- AUTHOR: ryan荣 20180719
+-- REMARK:执行 /archives/makeArchivesCheckInTime 接口(可能速度有点慢，但可重复执行)
+
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
