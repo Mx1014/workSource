@@ -372,29 +372,59 @@ public class RentalCommonServiceImpl {
             }else if (order.getRefundStrategy() == RentalOrderStrategy.FULL.getCode()) {
                 return order.getPaidMoney();
             }else if (order.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
-                processOrderNotRefundTip(order);
+                order.setTip(processOrderNotRefundTip());
             }
         }
 
-        processOrderNotRefundTip(order);
+        order.setTip(processOrderNotRefundTip());
 
         return order.getPaidMoney();
     }
 
 
-    public void processOrderNotRefundTip(RentalOrder order) {
+    public String processOrderNotRefundTip() {
 
         String locale = UserContext.current().getUser().getLocale();
 
         String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
                 String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP), locale, "");
 
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。");
-//        sb.append("\r\n");
-//        sb.append("\r\n");
-//        sb.append("确认要取消订单吗？");
-        order.setTip(content);
+        return content;
+    }
+
+    public String processResourceCustomRefundTip(RentalDefaultRule rule){
+        List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(rule.getResourceType(), rule.getSourceType(),
+                rule.getId(), RentalOrderHandleType.REFUND.getCode());
+
+        List<RentalOrderRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
+                .collect(Collectors.toList());
+        List<RentalOrderRule> innerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.INNER.getCode())
+                .collect(Collectors.toList());
+        StringBuilder sb = new StringBuilder();
+        sb.append("亲爱的用户，为保障资源使用效益，如在服务开始前取消订单，将扣除您订单金额的一定比例数额，恳请您谅解。具体规则如下：");
+        sb.append("\r\n");
+        int i = 0;
+        for (int  size = outerRules.size(); i < size; i++) {
+            sb.append(i+1);
+            sb.append("，");
+            sb.append("订单开始前");
+            sb.append(outerRules.get(i).getDuration());
+            sb.append("小时外取消，退还");
+            sb.append(outerRules.get(i).getFactor().intValue());
+            sb.append("%订单金额;");
+            sb.append("\r\n");
+        }
+
+        for (int j=0, size = innerRules.size(); j < size; j++) {
+            sb.append(i+j+1);
+            sb.append("，");
+            sb.append("订单开始前");
+            sb.append(innerRules.get(j).getDuration());
+            sb.append("小时内取消，退还");
+            sb.append(innerRules.get(j).getFactor().intValue());
+            sb.append("%订单金额;");
+        }
+        return sb.toString();
     }
 
     public void processOrderCustomRefundTip(RentalOrder order, List<RentalOrderRule> outerRules, List<RentalOrderRule> innerRules,

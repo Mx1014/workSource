@@ -87,6 +87,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PusherServiceImpl.class);
     private final static String MESSAGE_INDEX_ID = "indexId";
     private final static String TYPE_PRODUCTION = "production";
+    private final static String TYPE_DEVELOP = "develop";
     //private final static String TYPE_DEVELOP = "develop";
     /**
      * add by huanglm 20180611,默认bundleId "com.ios" ,
@@ -340,7 +341,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                             tempService.push(notification);   
                             if(LOGGER.isDebugEnabled()) {
                                 LOGGER.debug("Pushing message(push ios), pushMsgKey=" + partner + ", msgId=" + msgId + ", identify=" + identify
-                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+                                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin+"payload="+payload);
                                     }
                      } else {
                          LOGGER.warn("Pushing apnsServer not found");
@@ -408,7 +409,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				    if(LOGGER.isDebugEnabled()) {
 				    	//LOGGER.warn("NotificationResponse:"+result);
 		                LOGGER.debug("Pushing message(push ios), namespaceId=" + namespaceId + ", msgId=" + msgId + ", identify=" + identify
-		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin);
+		                    + ", senderLogin=" + senderLogin + ", destLogin=" + destLogin+"payload="+notif.getPayload());
 		                    }
 			    }else{
 			    	LOGGER.warn("Pushing apnsServer not found");
@@ -744,8 +745,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     	}
     	//bundleId 一般从Device中取，但为了兼容旧数据，Device中取不到的话可以namespaceId + pusherIdentify
         String bundleId = null ;
-        //推送服务器类型默认为开发
-        boolean isProductionGateway =  false ;
+        //推送服务器类型默认为生产
+        boolean isProductionGateway =  true ;
         //获取设备注册时保存的bundleId
         Device device = this.deviceProvider.findDeviceByDeviceId(identify);
         if(device ==null ){
@@ -754,9 +755,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         }
         	bundleId = device.getBundleId();
         	String pusherServiceType = device.getPusherServiceType();
-        	//设置为生产服务器类型
-        	if(TYPE_PRODUCTION.equals(pusherServiceType)){
-        		isProductionGateway = true ;
+        	//设置为开发服务器类型
+        	if( TYPE_DEVELOP.equals(pusherServiceType)){
+        		isProductionGateway = false ;
         	}
         //bundleId 为空的情况一般是旧应用的推送，为了兼容需要从映射表中取得bundleId（新应用bundleId一般不为空）
         if(StringUtils.isBlank(bundleId)){
@@ -774,15 +775,21 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     //return null;
                 }else{
                 	bundleId = bmapper.getBundleId();
+                	if(bmapper.getIdentify()!= null && TYPE_DEVELOP.equals(bmapper.getIdentify())){//判断服务器类型
+                		isProductionGateway = false ;
+                	}
                 }   
         	}        	    	
         }
-        
-    	//优先从http2ClientMaps 中   取，如没有再创建新的连接
-        ApnsClient client = this.http2ClientMaps.get(bundleId);
-        if(client != null ){
-        	return client;
-        }
+	        if(bundleId == null){
+	        	bundleId = DEFAULT_BUNDLEID ;
+	        	LOGGER.warn("bundleId is null ");
+	        }
+	    	//优先从http2ClientMaps 中   取，如没有再创建新的连接
+	        ApnsClient client = this.http2ClientMaps.get(bundleId);
+	        if(client != null ){
+	        	return client;
+	        }
         		
                 //获取开发者信息
                 DeveloperAccountInfo  dlaInfo = developerAccountInfoProvider.getDeveloperAccountInfoByBundleId(bundleId);
@@ -812,7 +819,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         		        .build();
         			    if(LOGGER.isDebugEnabled()) {
     				    	//LOGGER.warn("NotificationResponse:"+result);
-    		                LOGGER.debug("Pushing message(build client), bundleId=" + bundleId + ", isProductionGateway=" + isProductionGateway + ", authkeyStr=" + authkeyStr
+    		                LOGGER.info("Pushing message(build client), bundleId=" + bundleId + ", isProductionGateway=" + isProductionGateway + ", authkeyStr=" + authkeyStr
     		                    + ", teamId=" + teamId + ", authKeyId=" + authKeyId);
     		                    }
                 } catch (NetworkIOException e) {

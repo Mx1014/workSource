@@ -1067,9 +1067,9 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
 
-    /**
+    /*
      * <b>URL: /org/listOrganizationContacts</b>
-     * <p>通讯录</p>
+     * <p>通讯录（停用 at 2018/04/06）</p>
      */
     @RequestMapping("listOrganizationContacts")
     @RestReturn(value = ListOrganizationContactCommandResponse.class)

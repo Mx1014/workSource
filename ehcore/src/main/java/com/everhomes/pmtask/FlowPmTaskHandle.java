@@ -1,5 +1,6 @@
 package com.everhomes.pmtask;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.FLOW)
@@ -43,6 +45,8 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 	private FlowButtonProvider flowButtonProvider;
 	@Autowired
 	private PortalService portalService;
+	@Autowired
+	private FlowEventLogProvider flowEventLogProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){

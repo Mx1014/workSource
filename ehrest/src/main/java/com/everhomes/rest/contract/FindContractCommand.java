@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>id: 合同id</li>
@@ -91,5 +93,10 @@ public class FindContractCommand {
 
     public void setPartyAId(Long partyAId) {
         this.partyAId = partyAId;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

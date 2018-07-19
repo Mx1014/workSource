@@ -87,6 +87,7 @@ import java.util.List;
  */
 public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>{
     private Long id;
+    private Long enterpriseId;
     private Long organizationId;
     private Long communityId;
     private String customerNumber;
@@ -197,6 +198,15 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     @ItemType(CustomerAttachmentDTO.class)
     private List<CustomerAttachmentDTO> attachments;
+
+
+    public Long getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
+    }
 
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;

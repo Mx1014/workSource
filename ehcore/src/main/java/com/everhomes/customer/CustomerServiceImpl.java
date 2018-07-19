@@ -2476,7 +2476,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
-    private void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
+    @Override
+    public void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
         Long userId = UserContext.currentUserId();
         OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
         if (address != null) {
@@ -3948,10 +3949,14 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer != null && customer.getOrganizationId() != null && customer.getOrganizationId() != 0) {
             cmd.setOrganizationId(customer.getOrganizationId());
             rolePrivilegeService.createOrganizationAdmin(cmd);
+            List<CustomerAdminRecord> records = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecordsByToken(customer.getId(), cmd.getContactToken());
+            if (records == null || records.size() == 0)
             enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken(),customer.getNamespaceId());
         } else if (customer != null) {
             //如果属于未认证的 只记录下管理员信息  在添加楼栋门牌和签约的时候激活管理员即可
             // 旧版的模式为新建客户则关联企业客户中organizationId，现在为激活才增加organizationId
+            List<CustomerAdminRecord> records = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecordsByToken(customer.getId(), cmd.getContactToken());
+            if (records == null || records.size() == 0)
             enterpriseCustomerProvider.createEnterpriseCustomerAdminRecord(cmd.getCustomerId(), cmd.getContactName(), contactType, cmd.getContactToken(),customer.getNamespaceId());
         }
         if (customer != null) {
@@ -3996,10 +4001,11 @@ public class CustomerServiceImpl implements CustomerService {
         List<CustomerAdminRecord> customerAdminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), contactType);
         //reflect map
         List<OrganizationContactDTO> customerAdminContacts = new ArrayList<>();
+        List<CustomerAdminRecord> adminRecords = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(cmd.getCustomerId(), null);
         if (customerAdminRecords != null && customerAdminRecords.size() > 0) {
             customerAdminContacts = processOrganizationMembers(customerAdminRecords);
         }
-        if (null == customerAdminContacts || customerAdminContacts.size() == 0) {
+        if (null == adminRecords || adminRecords.size() == 0) {
             cmd.setOrganizationId(customer.getOrganizationId() == null ? 0 : customer.getOrganizationId());
             result = rolePrivilegeService.listOrganizationAdministrators(cmd);
             //复制organization管理员到企业客户管理中来

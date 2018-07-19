@@ -346,6 +346,8 @@ public interface CustomerService {
 
     void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
 
+    void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId);
+
     OrganizationDTO createOrganization(EnterpriseCustomer customer);
 
     void createCustomerTalentFromOrgMember(Long orgId, OrganizationMember member);

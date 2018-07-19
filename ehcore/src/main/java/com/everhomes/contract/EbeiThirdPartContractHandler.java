@@ -424,7 +424,7 @@ public class EbeiThirdPartContractHandler implements ThirdPartContractHandler {
                     }
                     if(notdeal){
                         // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber());
+                        Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, ebeiContract.getSerialNumber(), null);
                         if (contract == null) {
 //                            dbProvider.execute((s) -> {
                                 insertContract(NAMESPACE_ID, communityId, ebeiContract);
