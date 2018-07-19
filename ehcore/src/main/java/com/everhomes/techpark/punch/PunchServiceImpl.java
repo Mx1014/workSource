@@ -152,6 +152,8 @@ import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchClockResponse;
 import com.everhomes.rest.techpark.punch.PunchCountDTO;
+import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentCommand;
+import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentResponse;
 import com.everhomes.rest.techpark.punch.PunchDayType;
 import com.everhomes.rest.techpark.punch.PunchExceptionDTO;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
@@ -264,8 +266,12 @@ import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.socialSecurity.SocialSecurityService;
+import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.MonthlyPunchStatusStatisticsRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatisticsRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsRecordMapper;
 import com.everhomes.techpark.punch.utils.PunchDayParseUtils;
 import com.everhomes.uniongroup.UniongroupConfigureProvider;
 import com.everhomes.uniongroup.UniongroupConfigures;
@@ -11971,8 +11977,8 @@ public class PunchServiceImpl implements PunchService {
         if (record == null) {
             return response;
         }
-        response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems());
-        response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems());
+        response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
+        response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
         return response;
     }
 
@@ -11980,14 +11986,34 @@ public class PunchServiceImpl implements PunchService {
     public PunchMonthlyStatisticsByDepartmentResponse monthlyStatisticsByDepartment(PunchMonthlyStatisticsByDepartmentCommand cmd) {
         List<Long> deptIds = Arrays.asList(1045731L, 1045699L, 1045695L, 1045687L);
         MonthlyStatisticsByDepartmentRecordMapper record = punchProvider.monthlyStatisticsByDepartment(cmd.getOrganizationId(), cmd.getStatisticsMonth(), deptIds);
+        MonthlyPunchStatusStatisticsRecordMapper r2 = punchProvider.monthlyPunchStatusMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getStatisticsMonth(), deptIds);
+        PunchExceptionRequestStatisticsRecordMapper r3 = punchProvider.monthlyPunchExceptionRequestMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getStatisticsMonth(), deptIds);
+
         PunchMonthlyStatisticsByDepartmentResponse response = new PunchMonthlyStatisticsByDepartmentResponse();
         response.setStatisticsMonth(cmd.getStatisticsMonth());
         response.setDepartmentId(cmd.getDepartmentId());
         if (record == null) {
             return response;
         }
-        response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems());
-        response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems());
+        response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
+        response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
+        return response;
+    }
+
+    @Override
+    public PunchDailyStatisticsByDepartmentResponse dailyStatisticsByDepartment(PunchDailyStatisticsByDepartmentCommand cmd) {
+        List<Long> deptIds = Arrays.asList(1045731L, 1045699L, 1045695L, 1045687L);
+        DailyStatisticsByDepartmentRecordMapper record = punchProvider.dailyStatisticsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getStatisticsDate()), deptIds);
+        DailyPunchStatusStatisticsRecordMapper r2 = punchProvider.dailyPunchStatusMemberCountsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getStatisticsDate()), deptIds);
+        PunchExceptionRequestStatisticsRecordMapper r3 = punchProvider.dailyPunchExceptionRequestMemberCountsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getStatisticsDate()), deptIds);
+        PunchDailyStatisticsByDepartmentResponse response = new PunchDailyStatisticsByDepartmentResponse();
+        response.setStatisticsDate(cmd.getStatisticsDate());
+        response.setDepartmentId(cmd.getDepartmentId());
+        if (record == null) {
+            return response;
+        }
+        response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
+        response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
         return response;
     }
 

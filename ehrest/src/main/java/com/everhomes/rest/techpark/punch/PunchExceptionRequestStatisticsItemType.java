@@ -34,4 +34,22 @@ public enum PunchExceptionRequestStatisticsItemType {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case ASK_FOR_LEAVE:
+                return "请假";
+            case GO_OUT:
+                return "外出";
+            case BUSINESS_TRIP:
+                return "出差";
+            case OVERTIME:
+                return "加班";
+            case PUNCH_EXCEPTION:
+                return "打卡异常";
+            default:
+                return "";
+        }
+    }
 }

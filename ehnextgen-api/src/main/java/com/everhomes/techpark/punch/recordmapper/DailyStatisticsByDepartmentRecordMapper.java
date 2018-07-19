@@ -152,8 +152,8 @@ public class DailyStatisticsByDepartmentRecordMapper implements RecordMapper<Rec
         DailyStatisticsByDepartmentRecordMapper data = new DailyStatisticsByDepartmentRecordMapper();
         data.setRestMemberCount(record.getValue("restMemberCount", Integer.class));
         data.setShouldArrivedMemberCount(record.getValue("shouldArrivedMemberCount", Integer.class));
-        data.setActArrivedMemberCount(record.getValue("actArrivedMemberCount", Integer.class));
-        data.setUnArrivedMemberCount(record.getValue("unArrivedMemberCount", Integer.class));
+//        data.setActArrivedMemberCount(record.getValue("actArrivedMemberCount", Integer.class));
+//        data.setUnArrivedMemberCount(record.getValue("unArrivedMemberCount", Integer.class));
         data.setAbsentMemberCount(record.getValue("absentMemberCount", Integer.class));
         data.setForgotPunchMemberCount(record.getValue("forgotPunchMemberCount", Integer.class));
         data.setBelateMemberCount(record.getValue("belateMemberCount", Integer.class));

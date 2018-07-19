@@ -8,11 +8,15 @@ import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
-import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
+import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
+import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.MonthlyPunchStatusStatisticsRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatisticsRecordMapper;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -420,5 +424,15 @@ public interface PunchProvider {
 	MonthlyStatisticsByMemberRecordMapper monthlyStatisticsByMember(Long organizationId, String punchMonth, Long detailId);
 
 	MonthlyStatisticsByDepartmentRecordMapper monthlyStatisticsByDepartment(Long organizationId, String punchMonth, List<Long> deptIds);
+
+	DailyStatisticsByDepartmentRecordMapper dailyStatisticsByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds);
+
+	DailyPunchStatusStatisticsRecordMapper dailyPunchStatusMemberCountsByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds);
+
+	MonthlyPunchStatusStatisticsRecordMapper monthlyPunchStatusMemberCountsByDepartment(Long organizationId, String punchMonth, List<Long> deptIds);
+
+	PunchExceptionRequestStatisticsRecordMapper dailyPunchExceptionRequestMemberCountsByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds);
+
+	PunchExceptionRequestStatisticsRecordMapper monthlyPunchExceptionRequestMemberCountsByDepartment(Long organizationId, String punchMonth, List<Long> deptIds);
 
 }

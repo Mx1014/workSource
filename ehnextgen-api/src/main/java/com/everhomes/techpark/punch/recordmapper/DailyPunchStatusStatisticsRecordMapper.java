@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
-public class PunchStatusStatisticsRecordMapper implements RecordMapper<Record, PunchStatusStatisticsRecordMapper>, PunchStatisticsParser {
+public class DailyPunchStatusStatisticsRecordMapper implements RecordMapper<Record, DailyPunchStatusStatisticsRecordMapper>, PunchStatisticsParser {
     @PunchStatusStatisticsItem(defaultOrder = 1, type = PunchStatusStatisticsItemType.UN_ATTENDANCE)
     private Integer unArrivedMemberCount;
 
@@ -16,7 +16,7 @@ public class PunchStatusStatisticsRecordMapper implements RecordMapper<Record, P
     private Integer leaveEarlyMemberCount;
 
     @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.ABSENT)
-    private Integer absentMemberCount;
+    private Integer absenceMemberCount;
 
     @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.FORGOT_PUNCH)
     private Integer forgotPunchMemberCount;
@@ -39,12 +39,12 @@ public class PunchStatusStatisticsRecordMapper implements RecordMapper<Record, P
         this.unArrivedMemberCount = unArrivedMemberCount;
     }
 
-    public Integer getAbsentMemberCount() {
-        return absentMemberCount;
+    public Integer getAbsenceMemberCount() {
+        return absenceMemberCount;
     }
 
-    public void setAbsentMemberCount(Integer absentMemberCount) {
-        this.absentMemberCount = absentMemberCount;
+    public void setAbsenceMemberCount(Integer absenceMemberCount) {
+        this.absenceMemberCount = absenceMemberCount;
     }
 
     public Integer getForgotPunchMemberCount() {
@@ -104,13 +104,13 @@ public class PunchStatusStatisticsRecordMapper implements RecordMapper<Record, P
     }
 
     @Override
-    public PunchStatusStatisticsRecordMapper map(Record record) {
-        PunchStatusStatisticsRecordMapper data = new PunchStatusStatisticsRecordMapper();
+    public DailyPunchStatusStatisticsRecordMapper map(Record record) {
+        DailyPunchStatusStatisticsRecordMapper data = new DailyPunchStatusStatisticsRecordMapper();
         data.setRestMemberCount(record.getValue("restMemberCount", Integer.class));
         data.setShouldArrivedMemberCount(record.getValue("shouldArrivedMemberCount", Integer.class));
-        data.setActArrivedMemberCount(record.getValue("actArrivedMemberCount", Integer.class));
-        data.setUnArrivedMemberCount(record.getValue("unArrivedMemberCount", Integer.class));
-        data.setAbsentMemberCount(record.getValue("absentMemberCount", Integer.class));
+//        data.setActArrivedMemberCount(record.getValue("actArrivedMemberCount", Integer.class));
+//        data.setUnArrivedMemberCount(record.getValue("unArrivedMemberCount", Integer.class));
+        data.setAbsenceMemberCount(record.getValue("absenceMemberCount", Integer.class));
         data.setForgotPunchMemberCount(record.getValue("forgotPunchMemberCount", Integer.class));
         data.setBelateMemberCount(record.getValue("belateMemberCount", Integer.class));
         data.setLeaveEarlyMemberCount(record.getValue("leaveEarlyMemberCount", Integer.class));

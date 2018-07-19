@@ -36,4 +36,26 @@ public enum PunchStatusStatisticsItemType {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case UN_ATTENDANCE:
+                return "未到";
+            case BELATE:
+                return "迟到";
+            case LEAVE_EARLY:
+                return "早退";
+            case NORMAL:
+                return "正常";
+            case REST:
+                return "休息";
+            case ABSENT:
+                return "旷工";
+            case FORGOT_PUNCH:
+                return "缺卡";
+            default:
+                return "";
+        }
+    }
 }

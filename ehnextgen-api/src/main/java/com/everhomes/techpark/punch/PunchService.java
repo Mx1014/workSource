@@ -56,6 +56,8 @@ import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchClockResponse;
+import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentCommand;
+import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentResponse;
 import com.everhomes.rest.techpark.punch.PunchLogsDay;
 import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentCommand;
 import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentResponse;
@@ -424,6 +426,8 @@ public interface PunchService {
 	PunchMonthlyStatisticsByMemberResponse monthlyStatisticsByMember(PunchMonthlyStatisticsByMemberCommand cmd);
 
 	PunchMonthlyStatisticsByDepartmentResponse monthlyStatisticsByDepartment(PunchMonthlyStatisticsByDepartmentCommand cmd);
+
+	PunchDailyStatisticsByDepartmentResponse dailyStatisticsByDepartment(PunchDailyStatisticsByDepartmentCommand cmd);
 
 	GetUserPunchRuleInfoResponse getUserPunchRuleInfo(GetUserPunchRuleInfoCommand cmd);
 

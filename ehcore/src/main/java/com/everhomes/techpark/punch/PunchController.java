@@ -572,7 +572,9 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("dailyStatisticsByDepartment")
 	@RestReturn(PunchDailyStatisticsByDepartmentResponse.class)
 	public RestResponse dailyStatisticsByDepartment(PunchDailyStatisticsByDepartmentCommand cmd) {
-		RestResponse response = new RestResponse();
+		cmd.setOrganizationId(1045660L);
+		cmd.setStatisticsDate(1531756800000L);
+		RestResponse response = new RestResponse(punchService.dailyStatisticsByDepartment(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

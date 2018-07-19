@@ -1,5 +1,6 @@
 package com.everhomes.techpark.punch.recordmapper;
 
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
 import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemDTO;
 
@@ -10,7 +11,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public interface PunchStatisticsParser {
-    default List<PunchStatusStatisticsItemDTO> parseToPunchStatusStatisticsItems() {
+    String PUNCH_STATUS_STATISTICS_ITEM_NAME_SCOPE = "PunchStatusStatisticsItemName";
+    String PUNCH_EXCEPTION_REQUEST_STATISTICS_ITEM_NAME_SCOPE = "PunchExceptionRequestStatisticsItemName";
+
+    default List<PunchStatusStatisticsItemDTO> parseToPunchStatusStatisticsItems(LocaleStringService localeStringService, String locale) {
         Field[] fields = this.getClass().getDeclaredFields();
         if (fields == null || fields.length == 0) {
             return null;
@@ -27,7 +31,9 @@ public interface PunchStatisticsParser {
                     throw new IllegalAccessException("Annotation 'PunchStatusStatisticsItem' only supports 'Integer' type");
                 }
                 Object value = field.get(this);
+                String itemName = localeStringService.getLocalizedString(PUNCH_STATUS_STATISTICS_ITEM_NAME_SCOPE, String.valueOf(annotation.type().getCode()), locale, annotation.type().toString());
                 PunchStatusStatisticsItemDTO item = new PunchStatusStatisticsItemDTO();
+                item.setItemName(itemName);
                 item.setItemType(annotation.type().getCode());
                 item.setNum(value != null ? (int) value : 0);
                 items.put(annotation.defaultOrder(), item);
@@ -38,7 +44,7 @@ public interface PunchStatisticsParser {
         return new ArrayList<>(items.values());
     }
 
-    default List<PunchExceptionRequestStatisticsItemDTO> parseToPunchExceptionRequestStatisticsItems() {
+    default List<PunchExceptionRequestStatisticsItemDTO> parseToPunchExceptionRequestStatisticsItems(LocaleStringService localeStringService, String locale) {
         Field[] fields = this.getClass().getDeclaredFields();
         if (fields == null || fields.length == 0) {
             return null;
@@ -55,7 +61,9 @@ public interface PunchStatisticsParser {
                     throw new IllegalAccessException("Annotation 'PunchExceptionRequestStatisticsItem' only supports 'Integer' type");
                 }
                 Object value = field.get(this);
+                String itemName = localeStringService.getLocalizedString(PUNCH_EXCEPTION_REQUEST_STATISTICS_ITEM_NAME_SCOPE, String.valueOf(annotation.type().getCode()), locale, annotation.type().toString());
                 PunchExceptionRequestStatisticsItemDTO item = new PunchExceptionRequestStatisticsItemDTO();
+                item.setItemName(itemName);
                 item.setItemType(annotation.type().getCode());
                 item.setNum(value != null ? (int) value : 0);
                 items.put(annotation.defaultOrder(), item);
