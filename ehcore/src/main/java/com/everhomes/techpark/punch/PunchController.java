@@ -641,7 +641,7 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("listItemDetailsOfAPunchStatus")
 	@RestReturn(ListPunchStatusItemDetailResponse.class)
 	public RestResponse listItemDetailsOfAPunchStatus(ListPunchStatusItemDetailCommand cmd) {
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(punchService.listItemDetailsOfAPunchStatus(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -654,7 +654,7 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("listItemDetailsOfAPunchExceptionRequest")
 	@RestReturn(ListPunchExceptionRequestItemDetailResponse.class)
 	public RestResponse listItemDetailsOfAPunchExceptionRequest(ListPunchExceptionRequestItemDetailCommand cmd) {
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(punchService.listItemDetailsOfAPunchExceptionRequest(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

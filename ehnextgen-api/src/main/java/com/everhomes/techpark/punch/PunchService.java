@@ -429,6 +429,9 @@ public interface PunchService {
 
 	PunchDailyStatisticsByDepartmentResponse dailyStatisticsByDepartment(PunchDailyStatisticsByDepartmentCommand cmd);
 
+	ListPunchStatusItemDetailResponse listItemDetailsOfAPunchStatus(ListPunchStatusItemDetailCommand cmd);
+
+	ListPunchExceptionRequestItemDetailResponse listItemDetailsOfAPunchExceptionRequest(ListPunchExceptionRequestItemDetailCommand cmd);
 	GetUserPunchRuleInfoResponse getUserPunchRuleInfo(GetUserPunchRuleInfoCommand cmd);
 
 	String processUserPunchRuleInfoUrl(Long ownerId, Long punchDate);

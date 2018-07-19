@@ -85,4 +85,15 @@ public class PunchConstants {
 	public static final String OVERTIME_INFO_WORKDAY ="4";
 	/**休息日/节假日加班：*/
 	public static final String OVERTIME_INFO_HOLIDAY ="5";
+	
+
+	/** 申请统计项列表 "punch.exception.statistic"  */
+	public static final String EXCEPTION_STATISTIC_SCOPE ="punch.exception.statistic";
+	public static final int ASK_FOR_LEAVE_TEMPLATE_CONTENT = 1;
+	public static final int GO_OUT_TEMPLATE_TITLE = 2;
+	public static final int GO_OUT_TEMPLATE_CONTENT = 3;
+	
+	
+	/** punchType的scope "punch.punchType"  */
+	public static final String PUNCH_PUNCHTYPE_SCOPE ="punch.punchType";
 }

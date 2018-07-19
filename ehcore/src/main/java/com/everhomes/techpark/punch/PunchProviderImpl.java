@@ -15,19 +15,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.punch.ClockCode;
-import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.ExceptionStatus;
-import com.everhomes.rest.techpark.punch.ExtDTO;
-import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
-import com.everhomes.rest.techpark.punch.PunchOwnerType;
-import com.everhomes.rest.techpark.punch.PunchRquestType;
-import com.everhomes.rest.techpark.punch.PunchStatus;
-import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
-import com.everhomes.rest.techpark.punch.TimeCompareFlag;
-import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
-import com.everhomes.rest.techpark.punch.ViewFlags;
+import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
@@ -3736,7 +3724,7 @@ public class PunchProviderImpl implements PunchProvider {
 		String startDay, String endDay, PunchStatusStatisticsItemType itemType, Integer pageOffset, Integer pageSize) {
 	 	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());  
         SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS); 
-        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(orgId));  
+        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(orgId));
         if (deptIds != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds)); 
         if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
@@ -3744,8 +3732,25 @@ public class PunchProviderImpl implements PunchProvider {
             Date endDate = Date.valueOf(endDay);
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
         }
+        condition = getPDLStatusItemTypeCondition(itemType, condition);
+
+        Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
+        if (null != pageOffset && null != pageSize)
+            step.limit(offset, pageSize);
+        List<PunchDayLog> result = new ArrayList<PunchDayLog>();
+        step.where(condition)
+                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, PunchDayLog.class));
+            return null;
+        });
+        if (result == null || result.isEmpty())
+            return null;
+        return result;
+	}
+
+    private Condition getPDLStatusItemTypeCondition(PunchStatusStatisticsItemType itemType, Condition condition) {
         if(itemType != null){
-        	switch(itemType){ 
+        	switch(itemType){
         		case BELATE:
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0));
         			break;
@@ -3768,25 +3773,14 @@ public class PunchProviderImpl implements PunchProvider {
     				break;
         	}
         }
+        return condition;
+    }
 
-        Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
-        if (null != pageOffset && null != pageSize)
-            step.limit(offset, pageSize);
-        List<PunchDayLog> result = new ArrayList<PunchDayLog>();
-        step.where(condition)
-                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, PunchDayLog.class));
-            return null;
-        });
-        if (result == null || result.isEmpty())
-            return null;
-        return result;
-	}
-	public List<PunchStatistic> listPunchSatisticsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth,
+    public List<PunchStatistic> listPunchSatisticsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth,
                                 PunchStatusStatisticsItemType itemType, Integer pageOffset, int pageSize){
 		 	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());  
 	        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_STATISTICS); 
-	        Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.equal(organizationId));  
+	        Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId));
 	        if (deptIds != null)
 	            condition = condition.and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds)); 
 	        if (!StringUtils.isEmpty(queryByMonth)) { 
@@ -3970,6 +3964,151 @@ public class PunchProviderImpl implements PunchProvider {
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("forgotPunchRequestMemberCount")).from(Tables.EH_PUNCH_STATISTICS);
         Condition condition = Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq("organization").and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId)).and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(punchMonth)).and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds));
         return query.where(condition).fetchOne().map(new PunchExceptionRequestStatisticsRecordMapper());
+    }
+
+    @Override
+    public List<PunchDayLog> listPunchDayLogsByApprovalAttributeAndDeptIds(Long organizationId, List<Long> deptIds,
+                                                                           Date queryDate, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS);
+        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
+        if (deptIds != null)
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds));
+        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(queryDate));
+
+        if(itemType != null){
+            switch(itemType){
+                case ASK_FOR_LEAVE:
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ASK_FOR_LEAVE_REQUEST_COUNT.gt(0));
+                    break;
+                case GO_OUT:
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.GO_OUT_REQUEST_COUNT.gt(0));
+                    break;
+                case BUSINESS_TRIP:
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.BUSINESS_TRIP_REQUEST_COUNT.gt(0));
+                    break;
+                case OVERTIME:
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.OVERTIME_REQUEST_COUNT.gt(0));
+                    break;
+                case PUNCH_EXCEPTION:
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_REQUEST_COUNT.gt(0));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
+        step.limit(offset, pageSize);
+        List<PunchDayLog> result = new ArrayList<PunchDayLog>();
+        step.where(condition)
+                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, PunchDayLog.class));
+            return null;
+        });
+        if (result == null || result.isEmpty())
+            return null;
+        return result;
+    }
+
+    @Override
+    public List<PunchStatistic> listPunchSatisticsByExceptionItemTypeAndDeptIds(Long organizationId, List<Long> deptIds, String queryByMonth, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_STATISTICS);
+        Condition condition = (Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId));
+        if (deptIds != null)
+            condition = condition.and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds));
+        if (!StringUtils.isEmpty(queryByMonth)) {
+            condition = condition.and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(queryByMonth));
+        }
+        if(itemType != null){
+            switch(itemType){
+                case ASK_FOR_LEAVE:
+                    condition = condition.and(Tables.EH_PUNCH_STATISTICS.ASK_FOR_LEAVE_REQUEST_COUNT.gt(0));
+                    break;
+                case GO_OUT:
+                    condition = condition.and(Tables.EH_PUNCH_STATISTICS.GO_OUT_REQUEST_COUNT.gt(0));
+                    break;
+                case BUSINESS_TRIP:
+                    condition = condition.and(Tables.EH_PUNCH_STATISTICS.BUSINESS_TRIP_REQUEST_COUNT.gt(0));
+                    break;
+                case OVERTIME:
+                    condition = condition.and(Tables.EH_PUNCH_STATISTICS.OVERTIME_REQUEST_COUNT.gt(0));
+                    break;
+                case PUNCH_EXCEPTION:
+                    condition = condition.and(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_REQUEST_COUNT.gt(0));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
+        step.limit(offset, pageSize);
+        List<PunchStatistic> result = new ArrayList<>();
+        step.where(condition)
+                .orderBy(Tables.EH_PUNCH_STATISTICS.USER_ID.desc()).fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, PunchStatistic.class));
+            return null;
+        });
+        if (result == null || result.isEmpty())
+            return null;
+        return result;
+    }
+
+    @Override
+    public List<PunchDayLog> listPunchDayLogsByItemTypeAndDeptIds(Long organizationId, Long userId, Date startDay, Date endDay, PunchStatusStatisticsItemType itemType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step =context.select().from(Tables.EH_PUNCH_DAY_LOGS);
+        Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId));
+        if (userId != null)
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.eq(userId));
+        if (null != startDay && null != endDay) {
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDay).and(endDay));
+        }
+        condition = getPDLStatusItemTypeCondition(itemType, condition);
+
+        List<PunchDayLog> result = new ArrayList<PunchDayLog>();
+        step.where(condition)
+                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, PunchDayLog.class));
+            return null;
+        });
+        if (result == null || result.isEmpty())
+            return null;
+        return result;
+    }
+
+    @Override
+    public List<PunchExceptionRequest> listExceptionRequestsByItemTypeAndDate(Long userId, Long organizationId, Date startDate, Date endDate, GeneralApprovalAttribute approvalAttribute) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields())
+                .from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+        Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(organizationId));
+        switch(approvalAttribute){
+            case ABNORMAL_PUNCH:
+                condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate, endDate));
+                break;
+            default:
+                condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.BEGIN_TIME.lt(new Timestamp(endDate.getTime())))
+                        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.END_TIME.gt(new Timestamp(startDate.getTime())));
+                break;
+        }
+        if(null != userId)
+            condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+        condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.ne(ApprovalStatus.REJECTION.getCode()));
+
+        List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+                .orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+                .map(new EhPunchExceptionRequestMapper());
+
+        List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchExceptionRequest.class);
+        }).collect(Collectors.toList());
+        if (result == null || result.size() == 0) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(result);
     }
 }
 
