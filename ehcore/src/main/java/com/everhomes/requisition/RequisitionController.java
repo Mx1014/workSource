@@ -3,6 +3,7 @@ package com.everhomes.requisition;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.requisition.*;
 import com.everhomes.rest.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,21 @@ public class RequisitionController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse createRequisition(CreateRequisitionCommand cmd){
         requisitionService.createRequisition(cmd);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
+    }
+
+    /**
+     *
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("saveRequisition")
+    @RestReturn(value = String.class)
+    public RestResponse saveRequisition(PostGeneralFormValCommand cmd){
+        //requisitionService.createRequisition(cmd);
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");

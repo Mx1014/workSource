@@ -12,6 +12,7 @@ import java.util.List;
  * <li>ownerId：ownerId</li>
  * <li>sourceId：sourceId</li>
  * <li>sourceType：sourceType</li>
+ * <li>communityId : 项目id</li>
  * <li>currentOrganizationId：用户当前公司id</li>
  * <li>values: 审批项中，每项对应的值{@link PostApprovalFormItem} </li>
  * </ul>
@@ -27,10 +28,20 @@ public class PostGeneralFormValCommand {
 	private String sourceType;
 	private Long sourceId;
 
+	private Long communityId;
     private Long currentOrganizationId;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
 
 	public String getSourceType() {
 		return sourceType;
