@@ -59,4 +59,43 @@ public class FileDownloadTaskController extends ControllerBase {
 //        response.setErrorDescription("OK");
 //        return response;
 //    }
+
+    /**
+     * <b>URL: /fileDownloadTask/getFileDownloadReadStatus</b>
+     * <p>查询是否所有下载任务都为已阅读</p>
+     */
+    @RequestMapping("getFileDownloadReadStatus")
+    @RestReturn(value=GetFileDownloadReadStatusResponse.class)
+    public RestResponse getFileDownloadReadStatus() {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /fileDownloadTask/updateFileDownloadReadStatus</b>
+     * <p>更新所有下载任务都为已阅读</p>
+     */
+    @RequestMapping("updateFileDownloadReadStatus")
+    @RestReturn(value=String.class)
+    public RestResponse updateFileDownloadReadStatus() {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /fileDownloadTask/updateFileDownloadTimes</b>
+     * <p>更新下载次数</p>
+     */
+    @RequestMapping("updateFileDownloadTimes")
+    @RestReturn(value=String.class)
+    public RestResponse updateFileDownloadTimes(UpdateDownloadTimesCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
