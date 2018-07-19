@@ -1360,6 +1360,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				rSiteDTO.setAvgPriceStr("价格认证可见");
 				return;
 			}
+		}else if (TrueOrFalseFlag.fromCode(rSiteDTO.getUnauthVisible()) != TrueOrFalseFlag.TRUE){
+			rSiteDTO.setAvgPriceStr("价格认证可见");
+			return;
 		}
 
 		if (rSiteDTO.getNeedPay() == NormalFlag.NONEED.getCode()) {
