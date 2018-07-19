@@ -133,11 +133,13 @@ import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressArrangementType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.AddressLivingStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ArrangementOperationFlag;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CreateApartmentCommand;
 import com.everhomes.rest.address.DeleteApartmentCommand;
@@ -2596,10 +2598,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         response.setCommunityType(community.getCommunityType());
         
-        Byte operationType = addressProvider.findArrangementOperationTypeByAddressId(cmd.getId());
-        if (operationType!=null) {
-        	response.setArrangementOperationType(operationType);
+        AddressArrangement arrangement = null;
+		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getId());
+		for (AddressArrangement addressArrangement : arrangements) {
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
+			if (originalIds.contains(cmd.getId().toString())) {
+				arrangement = addressArrangement;
+				break;
+			}
 		}
+		if (arrangement != null) {
+			response.setArrangementOperationType(arrangement.getOperationType());
+			if (AddressArrangementType.MERGE.getCode() == arrangement.getOperationType()) {
+				if (arrangement.getAddressId() == cmd.getId()) {
+					response.setIsPassiveApartment((byte)0);
+				}else {
+					response.setIsPassiveApartment((byte)1);
+				}
+			}
+		}
+        
+        
         
         Contract latestEndDateContract = findLatestEndDateContract(cmd.getId());
         if (latestEndDateContract!=null) {
@@ -2782,6 +2801,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
             			if (originalIds.contains(apartment.getId().toString())) {
             				addressArrangement = arrangement;
+            				break;
 						}
             		}
             		if (addressArrangement != null) {
@@ -2795,6 +2815,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
             			if (targetIds.contains(apartment.getId().toString())) {
             				addressArrangement = arrangement;
+            				break;
 						}
             		}
 					if (addressArrangement != null) {
@@ -2917,15 +2938,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
 		}
 		//设置该房源是否为未来房源，及与其关联的房源拆分合并计划的开始时间
+		
 		Address address = addressProvider.findAddressById(addressId);
 		dto.setIsFutureApartment(address.getIsFutureApartment());
 		if (address.getIsFutureApartment() == 1) {
-			AddressArrangement addressArrangement = addressProvider.findActiveAddressArrangementByTargetId(addressId);
+			AddressArrangement addressArrangement = null;
+			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(addressId);
+			for (AddressArrangement arrangement : arrangements) {
+    			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
+    			if (targetIds.contains(addressId.toString())) {
+    				addressArrangement = arrangement;
+    				break;
+				}
+    		}
 			if(addressArrangement!=null){
 				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
 			}
 		}else if (address.getIsFutureApartment() == 0) {
-			AddressArrangement addressArrangement = addressProvider.findActiveAddressArrangementByOriginalId(addressId);
+			AddressArrangement addressArrangement = null;
+			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
+			for (AddressArrangement arrangement : arrangements) {
+    			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
+    			if (originalIds.contains(addressId.toString())) {
+    				addressArrangement = arrangement;
+    				break;
+				}
+    		}
 			if(addressArrangement!=null){
 				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
 			}

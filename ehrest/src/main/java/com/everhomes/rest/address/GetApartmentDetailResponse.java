@@ -54,7 +54,16 @@ public class GetApartmentDetailResponse {
 	private Byte arrangementOperationType;
 	private Long relatedContractEndDate;
 	private Double freeArea;
+	private Byte isPassiveApartment;
 	
+	public Byte getIsPassiveApartment() {
+		return isPassiveApartment;
+	}
+
+	public void setIsPassiveApartment(Byte isPassiveApartment) {
+		this.isPassiveApartment = isPassiveApartment;
+	}
+
 	public Double getFreeArea() {
 		return freeArea;
 	}

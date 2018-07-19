@@ -936,15 +936,15 @@ public class AddressProviderImpl implements AddressProvider {
 		return result;
 	}
 
-	@Override
-	public AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		return context.select()
-					.from(Tables.EH_ADDRESS_ARRANGEMENT)
-					.where(Tables.EH_ADDRESS_ARRANGEMENT.ORIGINAL_ID.like(DSL.concat("%", addressId.toString(), "%")))
-					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
-					.fetchOneInto(AddressArrangement.class);
-	}
+//	@Override
+//	public AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId) {
+//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//		return context.select()
+//					.from(Tables.EH_ADDRESS_ARRANGEMENT)
+//					.where(Tables.EH_ADDRESS_ARRANGEMENT.ORIGINAL_ID.like(DSL.concat("%", addressId.toString(), "%")))
+//					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
+//					.fetchOneInto(AddressArrangement.class);
+//	}
 
 	@Override
 	public void updateAddressArrangement(AddressArrangement arrangement) {

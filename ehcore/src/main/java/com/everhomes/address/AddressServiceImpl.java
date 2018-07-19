@@ -2798,23 +2798,46 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	
 	@Override
 	public AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd) {
-		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByAddressId(cmd.getAddressId());
-		AddressArrangementDTO dto = ConvertHelper.convert(arrangement, AddressArrangementDTO.class);
-		dto.setOrganizationId(cmd.getOrganizationId());
-		dto.setDateBegin(arrangement.getDateBegin().getTime());
-		if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
-			List<ArrangementApartmentDTO> apartments = generateSplitArrangementApartments(arrangement);
-			dto.setApartments(apartments);
-			generateApartmentRelatedInfo(dto,apartments);
-		}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
-			List<ArrangementApartmentDTO> apartments = generateMergeArrangementApartments(arrangement);
-			dto.setApartments(apartments);
-			generateApartmentRelatedInfo(dto,apartments);
+		AddressArrangement arrangement = null;
+		//因为用的是like匹配，所以需要对数据进一步过滤
+		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getAddressId());
+		for (AddressArrangement addressArrangement : arrangements) {
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
+			if (originalIds.contains(cmd.getAddressId().toString())) {
+				arrangement = addressArrangement;
+				break;
+			}
+		}
+		AddressArrangementDTO dto = null;
+		if (arrangement != null) {
+			dto = ConvertHelper.convert(arrangement, AddressArrangementDTO.class);
+			dto.setOrganizationId(cmd.getOrganizationId());
+			dto.setDateBegin(arrangement.getDateBegin().getTime());
+			
+			Address address = addressProvider.findAddressById(arrangement.getAddressId());
+			ArrangementApartmentDTO baseApartment = ConvertHelper.convert(address, ArrangementApartmentDTO.class);
+			baseApartment.setAddressId(address.getId());
+			dto.setBaseApartment(baseApartment);
+			
+			if (arrangement.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+				//获取未来房源（即被拆分产生的房源）
+				List<ArrangementApartmentDTO> targetApartments = generateTargetApartments(arrangement);
+				dto.setApartments(targetApartments);
+				generateApartmentRelatedInfo(dto,targetApartments);
+			}else if (arrangement.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+				//获取当下房源（即参与合并的房源）
+				List<ArrangementApartmentDTO> OriginalApartments = generateOriginalApartments(arrangement);
+				dto.setApartments(OriginalApartments);
+				List<ArrangementApartmentDTO> targetApartments = generateTargetApartments(arrangement);
+				generateApartmentRelatedInfo(dto,targetApartments);
+			}
+			
 		}
 		return dto;
 	}
-
-	private List<ArrangementApartmentDTO> generateSplitArrangementApartments(AddressArrangement arrangement) {
+	
+	//获取未来房源
+	private List<ArrangementApartmentDTO> generateTargetApartments(AddressArrangement arrangement) {
 		List<ArrangementApartmentDTO> results = new ArrayList<>();
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 		for (String addressId : targetIds) {
@@ -2826,7 +2849,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		return results;
 	}
 	
-	private List<ArrangementApartmentDTO> generateMergeArrangementApartments(AddressArrangement arrangement) {
+	//获取当下房源
+	private List<ArrangementApartmentDTO> generateOriginalApartments(AddressArrangement arrangement) {
 		List<ArrangementApartmentDTO> results = new ArrayList<>();
 		List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
 		originalIds.remove(arrangement.getAddressId().toString());
@@ -2917,7 +2941,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     "the addressId should not be null!");
 		}
 		List<HistoryApartmentDTO> results = new ArrayList<>();
-		AddressArrangement arrangement = addressProvider.findActiveAddressArrangementByTargetId(cmd.getAddressId());
+		AddressArrangement arrangement = null;
+		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(cmd.getAddressId());
+		//因为用的是like匹配，所以需要对数据进一步过滤
+		for (AddressArrangement addressArrangement : arrangements) {
+			List<String> targetIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getTargetId(), ArrayList.class); 
+			if (targetIds.contains(cmd.getAddressId().toString())) {
+				arrangement = addressArrangement;
+				break;
+			}
+		}
 		if (arrangement != null) {
 			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
@@ -2966,8 +2999,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		return results;
 	}
 	
-	//@Scheduled(cron = "0 10 0 * * ?")
-	@Scheduled(cron = "0 */1 * * * ?")
+	@Scheduled(cron = "0 10 0 * * ?")
+	//@Scheduled(cron = "0 */1 * * * ?")
     public void excuteAddressArrangementOnTime() {
         LOGGER.debug("start excuting addressArrangement!");
 		try {

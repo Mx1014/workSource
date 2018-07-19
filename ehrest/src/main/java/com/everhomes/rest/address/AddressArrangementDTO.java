@@ -3,6 +3,8 @@ package com.everhomes.rest.address;
 
 import java.util.List;
 
+import org.omg.CORBA.PRIVATE_MEMBER;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
@@ -30,6 +32,7 @@ public class AddressArrangementDTO {
 	private Byte operationType;
 	private Long dateBegin;
 	private Long addressId;
+	private ArrangementApartmentDTO baseApartment;
 	@ItemType(ArrangementApartmentDTO.class)
     private List<ArrangementApartmentDTO> apartments;
 	@ItemType(EnterpriseCustomerDTO.class)
@@ -74,6 +77,12 @@ public class AddressArrangementDTO {
 	}
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
+	}
+	public ArrangementApartmentDTO getBaseApartment() {
+		return baseApartment;
+	}
+	public void setBaseApartment(ArrangementApartmentDTO baseApartment) {
+		this.baseApartment = baseApartment;
 	}
 	public List<ArrangementApartmentDTO> getApartments() {
 		return apartments;

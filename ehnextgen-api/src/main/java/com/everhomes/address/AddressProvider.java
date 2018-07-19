@@ -99,7 +99,7 @@ public interface AddressProvider {
 	String findApartmentNameById(long addressId);
 	Byte findArrangementOperationTypeByAddressId(Long addressId);
 	List<AddressArrangement> listActiveAddressArrangementToday(Timestamp today);
-	AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId);
+//	AddressArrangement findActiveAddressArrangementByOriginalId(Long addressId);
 	void updateAddressArrangement(AddressArrangement arrangement);
 	List<AddressArrangement> findActiveAddressArrangementByOriginalIdV2(Long id);
 	List<AddressArrangement> findActiveAddressArrangementByTargetIdV2(Long id);
