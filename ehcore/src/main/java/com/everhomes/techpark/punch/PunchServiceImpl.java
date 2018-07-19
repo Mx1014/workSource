@@ -2338,7 +2338,7 @@ public class PunchServiceImpl implements PunchService {
         if (null != wifis && null != cmd.getWifiMac()) {
             for (PunchWifi wifi : wifis) {
                 if (null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase())) {
-                    punchLog.setWifiInfo(wifi.getSsid() + " " + wifi.getMacAddress());
+                    punchLog.setWifiInfo(wifi.getSsid() + "(" + wifi.getMacAddress() + ")");
                     return ClockCode.SUCESS;
                 }
             }
