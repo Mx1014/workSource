@@ -400,7 +400,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -1959,6 +1958,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 enterpriseCustomer.setContactAddress(organizationDetail.getAddress());
                 enterpriseCustomer.setLatitude(organizationDetail.getLatitude());
                 enterpriseCustomer.setLongitude(organizationDetail.getLongitude());
+                enterpriseCustomer.setCorpEmail(organizationDetail.getEmailDomain());
                 enterpriseCustomerProvider.createEnterpriseCustomer(enterpriseCustomer);
                 enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 
