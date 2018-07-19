@@ -975,30 +975,41 @@ public class YellowPageServiceImpl implements YellowPageService {
 	*
 	*/
 	private List<ServiceAlliances> reSortServiceAllianceList(List<ServiceAlliances> sas) {
-		
+
 		// 1.没有截止时间的不处理
 		if (null == sas.get(0).getEndTime()) {
 			return sas;
 		}
-		
-		return sas.stream().sorted((x, y) -> {
-			return getSortResult(x, y);
+
+		Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+		List<ServiceAlliances> needToSort = new ArrayList<>(50);
+		List<ServiceAlliances> noNeedSort = new ArrayList<>(50);
+		for (ServiceAlliances sa : sas) {
+			String nowDateStr = DateUtil.dateToStr(nowTime, "yyyy-MM-dd");
+			String sADateStr = DateUtil.dateToStr(sa.getEndTime(), "yyyy-MM-dd");
+			if (sADateStr.compareTo(nowDateStr) >= 0) {
+				// 筛选出日期>=今天的数据
+				needToSort.add(sa);
+				continue;
+			}
+			noNeedSort.add(sa);
+		}
+
+		// 对需要排序的进行排序
+		needToSort = needToSort.stream().sorted((x, y) -> {
+			return x.getEndTime().compareTo(y.getEndTime());
 		}).collect(Collectors.toList());
+
+		List<ServiceAlliances> total = new ArrayList<>(100);
+		if (!CollectionUtils.isEmpty(needToSort)) {
+			total.addAll(needToSort);
+		}
+		if (!CollectionUtils.isEmpty(noNeedSort)) {
+			total.addAll(noNeedSort);
+		}
+		return total;
 	}
 	
-	private int getSortResult(ServiceAlliances sA, ServiceAlliances sB) {
-		
-		// 1.已过期的不处理。
-		Timestamp nowTime = new Timestamp(System.currentTimeMillis());
-		String nowDateStr = DateUtil.dateToStr(nowTime, "yyyy-MM-dd");
-		String sADateStr = DateUtil.dateToStr(sA.getEndTime(), "yyyy-MM-dd");
-		if (sADateStr.compareTo(nowDateStr) < 0) {
-			return 0;
-		}
-		
-		// 2.越靠近今天的越靠前
-		return sA.getEndTime().compareTo(sB.getEndTime());
-	}
 
 	/**
 	 * 将前台传的筛选项转成tagId
@@ -3525,7 +3536,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			String fixedOwnerType = ServiceAllianceBelongType.COMMUNITY.getCode();
 
 			// 读取所有记录
-			List<ServiceAlliances> saList = queryAllServiceAlliances();
+			List<ServiceAlliances> saList = queryAllServiceAlliances(null);
 			if (CollectionUtils.isEmpty(saList)) {
 				return null;
 			}
@@ -3591,9 +3602,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 	 * @date: 2018年6月1日 下午5:16:44
 	 *
 	 */
-	private List<ServiceAlliances> queryAllServiceAlliances() {
+	private List<ServiceAlliances> queryAllServiceAlliances(Long parentId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+		if (null != parentId) {
+			query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
+		}
 		return query.fetchInto(ServiceAlliances.class);
 	}
 
@@ -3762,7 +3776,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public String transferPosterUriToAttachment() {
 		// 读取所有记录
-		List<ServiceAlliances> saList = queryAllServiceAlliances();
+		List<ServiceAlliances> saList = queryAllServiceAlliances(null);
 		if (CollectionUtils.isEmpty(saList)) {
 			return null;
 		}
@@ -3895,5 +3909,52 @@ public class YellowPageServiceImpl implements YellowPageService {
 		SelectConditionStep<Record> query = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS)
 				.where(Tables.EH_LAUNCH_PAD_ITEMS.ACTION_TYPE.eq((byte) 33));
 		return query.fetchInto(LaunchPadItem.class);
+	}
+	
+	@Override
+	public String transferTime(Long parentId) {
+		// 读取所有记录
+		List<ServiceAlliances> saList = queryAllServiceAlliances(parentId);
+		if (CollectionUtils.isEmpty(saList)) {
+			return null;
+		}
+
+		JSONObject json = new JSONObject();
+		json.put("working", "working");
+		
+		dbProvider.execute(status -> {
+
+			int emptyCnt = 0;
+			int toChangCnt = 0;
+
+			// 循环所有的serviceAlliance
+			for (ServiceAlliances sa : saList) {
+				if (StringUtils.isEmpty(sa.getEndTime())) {
+					emptyCnt++;
+					continue;
+				}
+
+				toChangCnt++;
+				sa.setDefaultOrder(getDateDefaultOrder(sa.getEndTime()));
+				yellowPageProvider.updateServiceAlliances(sa);
+			}
+
+			json.put("emptyCnt", emptyCnt);
+			json.put("toChangCnt", toChangCnt);
+			return null;
+		});
+
+		return json.toJSONString();
+	}
+	
+	private Long getDateDefaultOrder(Timestamp endTime) {
+		long timeMillis = System.currentTimeMillis();
+		long ms = timeMillis % 1000; // 获得毫秒
+		long ms1 = ms / 100;
+		long ms2 = (ms % 100) / 10;
+		long ms3 = (ms % 10);
+		String timeHeadStr = DateUtil.dateToStr(endTime, "yyyyMMdd");
+		String timeMidStr = DateUtil.dateToStr(new Timestamp(timeMillis), "HHmmss");
+		return -Long.parseLong(timeHeadStr + timeMidStr + ms1 + ms2 + ms3);
 	}
 }
