@@ -1478,16 +1478,16 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	public List<RentalResourcePic> findRentalSitePicsByOwnerTypeAndId(String resourceType, String ownerType,Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTALV2_RESOURCE_PICS);
-		Condition condition = Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_ID
+				Tables.EH_RENTALV2_SITE_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_ID
 				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_TYPE
 				.equal(ownerType));
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.RESOURCE_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
 				.equal(resourceType));
 		step.where(condition);
 		List<RentalResourcePic> result = step
-				.orderBy(Tables.EH_RENTALV2_RESOURCE_PICS.ID.desc()).fetch()
+				.orderBy(Tables.EH_RENTALV2_SITE_RESOURCES.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalResourcePic.class);
 				});
@@ -1819,29 +1819,29 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	@Override
 	public void createRentalSitePic(RentalResourcePic detailPic) {
 		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhRentalv2ResourcePics.class));
+				.getSequenceDomainFromTablePojo(EhRentalv2SiteResources.class));
 		detailPic.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhRentalv2ResourcePicsRecord record = ConvertHelper.convert(detailPic,
-				EhRentalv2ResourcePicsRecord.class);
-		InsertQuery<EhRentalv2ResourcePicsRecord> query = context
-				.insertQuery(Tables.EH_RENTALV2_RESOURCE_PICS);
+		EhRentalv2SiteResourcesRecord record = ConvertHelper.convert(detailPic,
+				EhRentalv2SiteResourcesRecord.class);
+		InsertQuery<EhRentalv2SiteResourcesRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_SITE_RESOURCES);
 		query.setRecord(record);
 		query.execute();
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2ResourcePics.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2SiteResources.class, null);
 		
 	}
 
 	@Override
 	public void deleteRentalSitePicsBySiteId(String resourceType, Long siteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		DeleteWhereStep<EhRentalv2ResourcePicsRecord> step = context
-				.delete(Tables.EH_RENTALV2_RESOURCE_PICS);
-		Condition condition = Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_ID
+		DeleteWhereStep<EhRentalv2SiteResourcesRecord> step = context
+				.delete(Tables.EH_RENTALV2_SITE_RESOURCES);
+		Condition condition = Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_ID
 				.equal(siteId);
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.OWNER_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.OWNER_TYPE
 				.equal(EhRentalv2Resources.class.getSimpleName()));
-		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_PICS.RESOURCE_TYPE
+		condition = condition.and(Tables.EH_RENTALV2_SITE_RESOURCES.RESOURCE_TYPE
 				.equal(resourceType));
 		step.where(condition);
 		step.execute();
