@@ -236,4 +236,6 @@ public interface AssetService {
 
 	void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd);
 
+	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);
+
 }

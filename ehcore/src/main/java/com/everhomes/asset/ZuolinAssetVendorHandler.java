@@ -14,11 +14,13 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -126,7 +128,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     
     @Autowired
     private UserService userService;
-
+    
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         List<Long> tenantIds = new ArrayList<>();
@@ -1134,20 +1136,23 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             headList.add(dto.getBillItemName()+"(元)");
             cur++;
             mandatoryIndex.add(1);//收费项为必填
-            if(dto.getBillItemId() != null) {
-            	if(dto.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
-            			|| dto.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
-            		//eh_payment_charging_items 4:自用水费  7：公摊水费
-            		headList.add("用量（吨）");
-                    cur++;
-                    mandatoryIndex.add(0);//用量非必填
-            	}else if (dto.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
-            			|| dto.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
-            		//eh_payment_charging_items 5:自用电费   8：公摊电费
-            		headList.add("用量（度）");
-                    cur++;
-                    mandatoryIndex.add(0);//用量非必填
-				}
+            //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+            if(assetService.isShowEnergy(cmd.getNamespaceId(), cmd.getCommunityId(), ServiceModuleConstants.ASSET_MODULE)) {//判断该域空间下是否显示用量
+            	if(dto.getBillItemId() != null) {
+                	if(dto.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                			|| dto.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
+                		//eh_payment_charging_items 4:自用水费  7：公摊水费
+                		headList.add("用量（吨）");
+                        cur++;
+                        mandatoryIndex.add(0);//用量非必填
+                	}else if (dto.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+                			|| dto.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                		//eh_payment_charging_items 5:自用电费   8：公摊电费
+                		headList.add("用量（度）");
+                        cur++;
+                        mandatoryIndex.add(0);//用量非必填
+    				}
+                }
             }
         }
         headList.add("楼栋/门牌");
@@ -1200,7 +1205,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                 .setIsCellStylePureString(true)
                 .writeExcel(null, headers, true, null, null);
     }
-
+    
     @Override
     BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
         BatchImportBillsResponse response = new BatchImportBillsResponse();
@@ -1510,12 +1515,16 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     item.setBuildingName(buildingName);
                     item.setApartmentName(apartmentName);
                     item.setAddressId(addressId);
-                	//如果费项是属于自用水电费、公摊水电费，那么会有用量
-                	if(itemPojo.getId().equals(AssetEnergyType.personWaterItem.getCode()) 
-                    		|| itemPojo.getId().equals(AssetEnergyType.personElectricItem.getCode())
-                    		|| itemPojo.getId().equals(AssetEnergyType.publicWaterItem.getCode())
-                    		|| itemPojo.getId().equals(AssetEnergyType.publicElectricItem.getCode())) {
-                		item.setEnergyConsume(data[++j]);
+                    //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+                    if(assetService.isShowEnergy(namespaceId, ownerId, ServiceModuleConstants.ASSET_MODULE)) {
+                    	//判断该域空间下是否显示用量  
+                    	//如果费项是属于自用水电费、公摊水电费，那么会有用量
+                    	if(itemPojo.getId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                        		|| itemPojo.getId().equals(AssetEnergyType.personElectricItem.getCode())
+                        		|| itemPojo.getId().equals(AssetEnergyType.publicWaterItem.getCode())
+                        		|| itemPojo.getId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                    		item.setEnergyConsume(data[++j]);
+                        }
                     }
                 	billItemDTOList.add(item);
                 }else if(headers[j].contains("减免金额")){

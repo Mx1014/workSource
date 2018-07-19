@@ -30,6 +30,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
@@ -41,6 +42,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -216,8 +218,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ContractServiceImpl contractService;
-
-
+    
+    @Autowired
+    private ServiceModuleService serviceModuleService;
+    
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -834,7 +838,7 @@ public class AssetServiceImpl implements AssetService {
         }else{
             dtos.addAll(listBills(cmd).getListBillsDTOS());
         }        
-        exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response);//导出账单
+        exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
     }
     
     public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
@@ -4830,7 +4834,7 @@ public class AssetServiceImpl implements AssetService {
        }else{
            dtos.addAll(listBillsForEnt(cmd).getListBillsDTOS());
        }
-       exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response);//导出账单
+       exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
     }
     
     public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd){
@@ -4922,7 +4926,7 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(),null);//对公转账不区分多入口，所以categoryId为null
 	}
 	
-	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response){
+	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response, Integer namespaceId, Long communityId, Long moduleId){
 		Calendar c = newClearedCalendar();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
@@ -4961,20 +4965,24 @@ public class AssetServiceImpl implements AssetService {
         	if(billItemDTO.getBillItemId() != null) {
         		propertyNames.add(billItemDTO.getBillItemId().toString());
                 titleName.add(billItemDTO.getBillItemName()+"(元)");
-                titleSize.add(20);                
-                if(billItemDTO.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
-            			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
-            		//eh_payment_charging_items 4:自用水费  7：公摊水费
-                    propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
-                    titleName.add("用量（吨）");
-                    titleSize.add(20);
-            	}else if (billItemDTO.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
-            			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
-            		//eh_payment_charging_items 5:自用电费   8：公摊电费
-            		propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
-                    titleName.add("用量（度）");
-                    titleSize.add(20);
-				}
+                titleSize.add(20);
+                //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+                if(isShowEnergy(namespaceId, communityId, moduleId)) {
+                	//判断该域空间下是否显示用量
+                	if(billItemDTO.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
+                		//eh_payment_charging_items 4:自用水费  7：公摊水费
+                        propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
+                        titleName.add("用量（吨）");
+                        titleSize.add(20);
+                	}else if (billItemDTO.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+                			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                		//eh_payment_charging_items 5:自用电费   8：公摊电费
+                		propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
+                        titleName.add("用量（度）");
+                        titleSize.add(20);
+    				}
+                }
 				//增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
                 propertyNames.add(billItemDTO.getBillItemId().toString() + "LateFine");
                 titleName.add(billItemDTO.getBillItemName()+"滞纳金"+"(元)");
@@ -5272,4 +5280,20 @@ public class AssetServiceImpl implements AssetService {
 	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
 		assetProvider.updatePaymentBillStatus(cmd);
 	}
+	
+	//判断该域空间下是否显示用量
+	public boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId) {
+    	//修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+        ListServiceModulefunctionsCommand cmd = new ListServiceModulefunctionsCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setCommunityId(communityId);
+        cmd.setModuleId(moduleId);
+        List<Long> serviceModulefunctionList = serviceModuleService.listServiceModulefunctions(cmd);
+        if(serviceModulefunctionList.contains(101L)) {//判断是否显示用量
+        	return true;
+        }else {
+        	return false;
+        }
+    }
+
 }
