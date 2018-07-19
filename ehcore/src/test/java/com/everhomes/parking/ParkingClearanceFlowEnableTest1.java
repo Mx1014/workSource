@@ -388,9 +388,9 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	ListOrganizationContactCommand cmdContact = new ListOrganizationContactCommand();
     	cmdContact.setVisibleFlag(VisibleFlag.ALL.getCode());
     	cmdContact.setOrganizationId(orgId);
-    	ListOrganizationContactCommandResponse contactResp = organizationService.listOrganizationContacts(cmdContact);
+		ListOrganizationMemberCommandResponse contactResp = organizationService.listOrganizationPersonnelsWithDownStream(cmdContact);
     	List<Long> users = new ArrayList<>();
-    	for(OrganizationContactDTO member : contactResp.getMembers()) {
+    	for(OrganizationMemberDTO member : contactResp.getMembers()) {
     		if(OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType())) {
     			users.add(member.getTargetId());	
     		}

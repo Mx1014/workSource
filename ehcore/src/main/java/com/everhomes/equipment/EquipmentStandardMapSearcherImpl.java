@@ -297,6 +297,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(map.getTargetId());
             if(equipment != null) {
             	b.field("ownerId", equipment.getOwnerId());
+            	b.field("equipmentName", equipment.getName());
             	b.field("equipmentNumber", equipment.getCustomNumber());
             	b.field("ownerType", equipment.getOwnerType());
 				b.field("namespaceId", equipment.getNamespaceId());
