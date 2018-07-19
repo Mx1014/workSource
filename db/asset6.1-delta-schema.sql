@@ -16,6 +16,7 @@ CREATE TABLE `eh_payment_bill_attachments` (
   `bill_id` BIGINT NOT NULL DEFAULT 0,
   `bill_group_id` BIGINT,
   `filename` VARCHAR(1024) COMMENT '附件名称',
+  `content_type` VARCHAR(64) COMMENT '附件类型：word/pdf/png...',
   `content_uri` VARCHAR(1024) COMMENT '附件uri',
   `content_url` VARCHAR(1024) COMMENT '附件url',
   `creator_uid` BIGINT COMMENT '创建者ID',
