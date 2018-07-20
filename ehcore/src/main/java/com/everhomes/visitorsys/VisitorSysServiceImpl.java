@@ -3,6 +3,7 @@ package com.everhomes.visitorsys;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -137,6 +138,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private DoorAccessService doorAccessService;
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -342,10 +345,53 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
         if(!hasSendMessage)
             sendMessageInviter(visitor);//发送消息给邀请者
+        sendMessageToAdmin(visitor);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         GetBookedVisitorByIdResponse convert = ConvertHelper.convert(visitor, GetBookedVisitorByIdResponse.class);
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
         return convert;
+    }
+
+    private void sendMessageToAdmin(VisitorSysVisitor visitor) {
+        VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+        VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
+        if(ownerType != VisitorsysOwnerType.COMMUNITY
+                || VisitorsysStatus.WAIT_CONFIRM_VISIT != visitStatus){
+            return;
+        }
+        String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
+        String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "");
+
+        String url = String.format(contextUrl, homeurl,visitor.getId(),visitor.getNamespaceId());
+
+        // 组装路由
+        OfficialActionData actionData = new OfficialActionData();
+        actionData.setUrl(url);
+
+        String uri = RouterBuilder.build(Router.BROWSER_I, actionData);
+        RouterMetaObject metaObject = new RouterMetaObject();
+        metaObject.setUrl(uri);
+
+        Map<String, String> meta = new HashMap<String, String>();
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_TITLE, "待确认访客"));
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+
+        String detail = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITER_DETAIL, "你有一个访客等待确认");
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), visitor.getInviterId().toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(String.format(detail,visitor.getVisitorName(),visitor.getVisitorPhone()));
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+        }
+
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                visitor.getInviterId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
     //更新访客状态的时候，检查状态是否已经被提前更新

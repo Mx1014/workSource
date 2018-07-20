@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>enterpriseId: (必填)选择的到访公司id</li>
  * </ul>
  */
-public class CheckBlackListCommand extends BaseVisitorsysUICommand{
+public class CheckBlackListCommand{
     private String appkey;
     private String signature;
     private Integer nonce;
@@ -27,64 +27,60 @@ public class CheckBlackListCommand extends BaseVisitorsysUICommand{
 
     private Long enterpriseId;
 
-    @Override
     public String getAppkey() {
         return appkey;
     }
 
-    @Override
     public void setAppkey(String appkey) {
         this.appkey = appkey;
     }
 
-    @Override
     public String getSignature() {
         return signature;
     }
 
-    @Override
     public void setSignature(String signature) {
         this.signature = signature;
     }
 
-    @Override
     public Integer getNonce() {
         return nonce;
     }
 
-    @Override
     public void setNonce(Integer nonce) {
         this.nonce = nonce;
     }
 
-    @Override
     public Long getTimestamp() {
         return timestamp;
     }
 
-    @Override
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 
-    @Override
     public String getDeviceType() {
         return deviceType;
     }
 
-    @Override
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
     }
 
-    @Override
     public String getDeviceId() {
         return deviceId;
     }
 
-    @Override
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getVisitorPhone() {
+        return visitorPhone;
+    }
+
+    public void setVisitorPhone(String visitorPhone) {
+        this.visitorPhone = visitorPhone;
     }
 
     public Long getEnterpriseId() {
@@ -95,13 +91,6 @@ public class CheckBlackListCommand extends BaseVisitorsysUICommand{
         this.enterpriseId = enterpriseId;
     }
 
-    public String getVisitorPhone() {
-        return visitorPhone;
-    }
-
-    public void setVisitorPhone(String visitorPhone) {
-        this.visitorPhone = visitorPhone;
-    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
