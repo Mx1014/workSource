@@ -1571,7 +1571,7 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      */
     @RequestMapping("testLateFine")
     @RestReturn(value = String.class)
-    public RestResponse testLateFine(TestLateFineCommand cmd) throws ParseException {
+    public RestResponse testLateFine(TestLateFineCommand cmd){
     	assetService.testLateFine(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
