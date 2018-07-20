@@ -47,6 +47,9 @@
 -- AUTHOR: yanjun 20180719
 -- REMARK: 请备份 eh_service_modules 表与 eh_web_menus 表
 
+-- AUTHOR: huangmingbo 20180720
+-- REMARK: 执行 /yellowPage/transferTime 参数：201233
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
