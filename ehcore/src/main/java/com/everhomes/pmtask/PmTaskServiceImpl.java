@@ -3431,14 +3431,22 @@ public class PmTaskServiceImpl implements PmTaskService {
 							for (PostApprovalFormSubformItemValue itemValue : array) {
 								PmTaskOrderDetail product = new PmTaskOrderDetail();
 								List<PostApprovalFormItem> values = itemValue.getValues();
-								product.setTaskId(taskId);
-								product.setProductName(getTextString(getFormItem(values, "物品名称").getFieldValue()));
-								product.setProductPrice(Long.valueOf(getTextString(getFormItem(values, "单价").getFieldValue())) * 100);
-								product.setProductAmount(Integer.valueOf(getTextString(getFormItem(values, "数量").getFieldValue())));
-								productFee += product.getProductPrice() * product.getProductAmount();
-								products.add(product);
+								String pname = getTextString(getFormItem(values, "物品名称").getFieldValue());
+								String pprice = getTextString(getFormItem(values, "单价").getFieldValue());
+								String pamount = getTextString(getFormItem(values, "数量").getFieldValue());
+								if(StringUtils.isNotEmpty(pname) && StringUtils.isNotEmpty(pprice) && StringUtils.isNotEmpty(pamount)){
+									product.setTaskId(taskId);
+									product.setProductName(pname);
+									product.setProductPrice(Long.valueOf(pamount) * 100);
+									product.setProductAmount(Integer.valueOf(pamount));
+									productFee += product.getProductPrice() * product.getProductAmount();
+									products.add(product);
+								} else {
+									LOGGER.info("pmtaskorder useless data,data = {}",itemValue.toString());
+								}
 							}
 						}
+
 					} else if ("总计".equals(item.getFieldName())) {
 						BigDecimal totalamount = BigDecimal.valueOf(Double.valueOf(getTextString(item.getFieldValue())));
 						order.setAmount(totalamount.movePointRight(2).longValue());
