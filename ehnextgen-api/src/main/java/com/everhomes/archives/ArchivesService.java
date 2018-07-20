@@ -29,18 +29,11 @@ public interface ArchivesService {
 
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
 
-    ImportFileTaskDTO importArchivesContacts(
-            MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesContactsCommand cmd);
-
-    void exportArchivesContacts(ExportArchivesContactsCommand cmd);
+    void exportArchivesContacts(ListArchivesContactsCommand cmd);
 
     OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
-
-    ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd);
-
-    void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
@@ -66,8 +59,6 @@ public interface ArchivesService {
     void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd);
 
     GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd);
-
-//    List<ArchivesLogDTO> listArchivesLogs(Long organizationId, Long detailId);
 
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
@@ -95,32 +86,15 @@ public interface ArchivesService {
 
     ArchivesOperationalConfigurationDTO getArchivesOperationByUserId(Long userId, Long organizationId, Byte operationType);
 
-    GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
-
-    GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd);
-
-    ArchivesFromsDTO identifyArchivesForm(IdentifyArchivesFormCommand cmd);
-
-    ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
-
-    void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd);
-
-    OutputStream getArchivesEmployeesExportStream(ExportArchivesEmployeesCommand cmd, Long taskId);
-
-    void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd,HttpServletResponse httpResponse);
-
-    ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
-
     List<OrganizationMemberDetails> queryArchivesEmployees(ListingLocator locator, Long organizationId, Long departmentId, ListingQueryBuilderCallback queryBuilderCallback);
 
     void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd);
 
     void setArchivesNotification(ArchivesNotificationCommand cmd);
 
-//    void runArchivesNotificationCycle();
-
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
-    void syncArchivesConfigAndLogs();
+    void makeArchivesCheckInTime();
 
+    void cleanRedundantArchivesDetails();
 }

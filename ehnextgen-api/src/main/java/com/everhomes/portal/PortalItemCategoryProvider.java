@@ -15,6 +15,8 @@ public interface PortalItemCategoryProvider {
 
     PortalItemCategory findPortalItemCategoryById(Long id);
 
+    Integer findDefaultOrder(Long itemGroupId);
+
 	List<PortalItemCategory> listPortalItemCategory(Integer namespaceId, Long itemGroupId);
 
 	PortalItemCategory getPortalItemCategoryByName(Integer namespaceId, Long itemGroupId, String name);

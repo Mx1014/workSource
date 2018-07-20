@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
+import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkListLocalServersCommand;
 import com.everhomes.rest.aclink.AclinkServerDTO;
 import com.everhomes.rest.aclink.CreateLocalServersCommand;
@@ -49,5 +50,7 @@ public interface AclinkServerService {
 	void updateServerSyncTime(Long serverId);
 
 	ListLocalServerByOrgResponse listLocalServerByOrg(ListLocalServerByOrgCommand cmd);
+
+	AclinkServerDTO onServerDisconnecting(AclinkDisconnectedCommand cmd);
 
 }

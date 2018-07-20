@@ -81,8 +81,7 @@ public interface AssetProvider {
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId);
 
 
-    void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId
-            ,String targetName, String invoiceNum, String noticeTel);
+    void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
 
     List<ListBillExemptionItemsDTO> listBillExemptionItems(String billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
 
@@ -382,6 +381,14 @@ public interface AssetProvider {
     String getProjectNameByBillID(Long billId);
     
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
+    
+    ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+	
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
+	
+	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
+	
+	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
     
 	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
 }

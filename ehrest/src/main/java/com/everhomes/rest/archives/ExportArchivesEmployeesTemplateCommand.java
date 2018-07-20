@@ -4,17 +4,25 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId: 域空间id</li>
  * <li>organizationId: 公司id</li>
- * <li>formOriginId: 表单id(调用模板或没有表单时为0)</li>
  * </ul>
  */
 public class ExportArchivesEmployeesTemplateCommand {
 
+    private Integer namespaceId;
+
     private Long organizationId;
 
-    private Long formOriginId;
-
     public ExportArchivesEmployeesTemplateCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getOrganizationId() {
@@ -23,14 +31,6 @@ public class ExportArchivesEmployeesTemplateCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
-    }
-
-    public Long getFormOriginId() {
-        return formOriginId;
-    }
-
-    public void setFormOriginId(Long formOriginId) {
-        this.formOriginId = formOriginId;
     }
 
     @Override

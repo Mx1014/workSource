@@ -5,7 +5,12 @@ import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.Organization;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.EasySearchEnterpriseCustomersDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 
 import java.math.BigDecimal;
@@ -196,4 +201,36 @@ public interface EnterpriseCustomerProvider {
     void deleteAllCustomerAttachements(Long customerId);
 
     List<CustomerAttachment> listCustomerAttachments(Long id);
+    CustomerConfiguration getSyncCustomerConfiguration(Integer  namespaceId,byte scopeCode);
+
+    void createPotentialCustomer(CustomerPotentialData data);
+
+    CustomerPotentialData findPotentialCustomerByName(String text);
+
+    void deletePotentialCustomer(Long enterpriseId);
+
+    void updatePotentialTalentsToCustomer(Long customerId,Long sourceId);
+
+    List<CustomerPotentialData> listPotentialCustomers(Integer namespaceId, Long sourceId, String sourceType, String name,Long pageAnchor,Integer pageSize);
+
+    void deleteCustomerConfiguration(Integer namespaceId,String sourceType);
+
+    void createCustomerConfiguration(CustomerConfiguration customerConfiguration);
+
+    List<CustomerConfiguration> listSyncPotentialCustomer(Integer namespaceId);
+
+    List<CustomerTalent> listPotentialTalentBySourceId(Long sourceId);
+
+    void updatePotentialCustomer(Long sourceId, String name, Long aLong, Integer currentNamespaceId);
+
+    void updatePotentialCustomer(CustomerPotentialData latestPotentialCustomer);
+
+    void updateCustomerTalentRegisterStatus(String contactToken);
+
+    CustomerTalent findPotentialTalentBySourceId(Long sourceId);
+
+    void createCustomerEvent(CustomerEvent event);
+
+    CustomerTalent findPotentialCustomerById(Long sourceId);
+    List<CustomerAdminRecord> listEnterpriseCustomerAdminRecordsByToken(Long id, String adminToken);
 }

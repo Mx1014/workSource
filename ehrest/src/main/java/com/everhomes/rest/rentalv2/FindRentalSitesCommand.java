@@ -15,6 +15,11 @@ import com.everhomes.util.StringHelper;
  * <li>anchor: 锚点</li>
  * <li>pageSize: 每页个数</li>
  * <li>status: 状态码</li>
+ * <li>startTime: 开始筛选时间</li>
+ * <li>rentalType: 预订模式</li>
+ * <li>endTime: 结束筛选时间</li>
+ * <li>startTimeAmOrPm: 开始时间上午还是下午还是晚上(半天时用) {@link AmorpmFlag}</li>
+ * <li>endTimeAmOrPm: 结束时间上午还是下午还是晚上(半天时用) {@link AmorpmFlag}</li>
  * </ul>
  */
 public class FindRentalSitesCommand {
@@ -24,6 +29,11 @@ public class FindRentalSitesCommand {
 	private String resourceType;
 	private Long resourceTypeId;
 	private String keyword;
+	private Byte rentalType;
+	private Long startTime;
+	private Long endTime;
+	private Byte startTimeAmOrPm;
+	private Byte endTimeAmOrPm;
 
 	private String sceneToken;
 
@@ -96,5 +106,45 @@ public class FindRentalSitesCommand {
 
 	public void setSceneToken(String sceneToken) {
 		this.sceneToken = sceneToken;
+	}
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+	public Byte getStartTimeAmOrPm() {
+		return startTimeAmOrPm;
+	}
+
+	public void setStartTimeAmOrPm(Byte startTimeAmOrPm) {
+		this.startTimeAmOrPm = startTimeAmOrPm;
+	}
+
+	public Byte getEndTimeAmOrPm() {
+		return endTimeAmOrPm;
+	}
+
+	public void setEndTimeAmOrPm(Byte endTimeAmOrPm) {
+		this.endTimeAmOrPm = endTimeAmOrPm;
 	}
 }

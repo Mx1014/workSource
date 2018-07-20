@@ -756,7 +756,7 @@ public class ParkingServiceImpl implements ParkingService {
 				parkingLot.getOwnerType(), parkingLot.getOwnerId(), parkingLot.getId(),bussinessType.getCode());
 		if(payeeAccounts==null || payeeAccounts.size()==0){
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_NO_PAYEE_ACCOUNT,
-					"未设置收款方账号");
+					"");
 		}
 
 		createOrderCommand.setAccountCode(sNamespaceId);
@@ -787,6 +787,7 @@ public class ParkingServiceImpl implements ParkingService {
 			createOrderCommand.setPaymentParams(flattenMap);
 			createOrderCommand.setCommitFlag(1);
 			createOrderCommand.setOrderType(3);
+			createOrderCommand.setAccountCode(configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.wx.subnumberpay",""));
 		}
 		createOrderCommand.setOrderRemark1(configProvider.getValue("parking.pay.OrderRemark1","停车缴费"));
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
@@ -2965,7 +2966,7 @@ public class ParkingServiceImpl implements ParkingService {
 			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
 			dto.setAccountName(r.getUserName());
 			dto.setAccountAliasName(r.getUserAliasName());
-			dto.setAccountStatus(Byte.valueOf(r.getRegisterStatus()+""));
+			dto.setAccountStatus(Byte.valueOf((r.getRegisterStatus()+1)+""));
 			return dto;
 		}).collect(Collectors.toList());
 	}
@@ -3018,7 +3019,7 @@ public class ParkingServiceImpl implements ParkingService {
 				convert.setPayeeUserName(payUserDTO.getUserName());
 				convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
 				convert.setPayeeAccountCode(payUserDTO.getAccountCode());
-				convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus());
+				convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus()+1);//由，0非认证，1认证，变为 1，非认证，2，审核通过
 				convert.setPayeeRemark(payUserDTO.getRemark());
 			}
 			return convert;

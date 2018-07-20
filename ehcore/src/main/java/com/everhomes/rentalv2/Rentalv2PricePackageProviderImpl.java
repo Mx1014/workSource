@@ -102,22 +102,16 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
         Record record = null;
        if (StringUtils.isEmpty(packageName))
            record = context.select(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE),
-                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE),
                 DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE),
-                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE),
-                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE),
-                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE)
+                DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE)
         ).from(Tables.EH_RENTALV2_PRICE_PACKAGES)
                 .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq("cell"))
                 .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.in(packageIds))
                 .fetchOne();
        else
            record = context.select(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE),
-                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE),
                    DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE),
-                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE),
-                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE),
-                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE)
+                   DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE)
            ).from(Tables.EH_RENTALV2_PRICE_PACKAGES)
                    .where(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq("cell"))
                    .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.in(packageIds))
@@ -125,19 +119,12 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
                    .fetchOne();
 
         if (record != null) {
-            BigDecimal maxPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE)),
-                    record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE)));
-            BigDecimal minPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE)),
-                    record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORIGINAL_PRICE)));
-
-            BigDecimal maxOrgMemberPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE)),
-                    record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE)));
-            BigDecimal minOrgMemberPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE)),
-                    record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_ORIGINAL_PRICE)));
-            BigDecimal maxApprovingUserPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE)),
-                    record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE)));
-            BigDecimal minApprovingUserPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE)),
-                    record.getValue(DSL.min(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_ORIGINAL_PRICE)));
+            BigDecimal maxPrice =record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.PRICE));
+            BigDecimal minPrice = maxPrice;
+            BigDecimal maxOrgMemberPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.ORG_MEMBER_PRICE));
+            BigDecimal minOrgMemberPrice = maxOrgMemberPrice;
+            BigDecimal maxApprovingUserPrice = record.getValue(DSL.max(Tables.EH_RENTALV2_PRICE_PACKAGES.APPROVING_USER_PRICE));
+            BigDecimal minApprovingUserPrice = maxApprovingUserPrice;
             return new MaxMinPrice(maxPrice, minPrice, maxOrgMemberPrice, minOrgMemberPrice, maxApprovingUserPrice, minApprovingUserPrice);
         }
         return null;

@@ -226,6 +226,12 @@ public interface AssetService {
     ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
 	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
+	
+	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
+
+	void testLateFine(TestLateFineCommand cmd);
 
 	PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd);
 

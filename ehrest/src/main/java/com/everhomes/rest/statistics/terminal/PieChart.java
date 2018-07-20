@@ -1,9 +1,10 @@
 package com.everhomes.rest.statistics.terminal;
 
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  *<ul>
@@ -28,5 +29,10 @@ public class PieChart {
 
 	public void setData(List<PieChartData> data) {
 		this.data = data;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

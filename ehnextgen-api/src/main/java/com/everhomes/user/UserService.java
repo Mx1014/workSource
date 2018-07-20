@@ -70,7 +70,10 @@ public interface UserService {
 
     void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
 
+    void resendVerficationCodeByApp(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
     void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
+
+    void sendCodeWithPictureValidateByApp(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
 
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
 
@@ -277,6 +280,8 @@ public interface UserService {
     UserLogin bindPhoneByApp(BindPhoneCommand cmd);
 
     void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
+
+    void checkVerifyCodeAndResetPasswordWithoutIdentifyToken(CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand cmd);
 
     UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd);
 

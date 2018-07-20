@@ -1,6 +1,8 @@
 package com.everhomes.varField;
 
 
+import com.everhomes.activity.ActivityCategories;
+import com.everhomes.activity.ActivityProivider;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -62,14 +64,16 @@ import com.everhomes.rest.customer.ListCustomerTaxesCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
 import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
+import com.everhomes.rest.customer.PotentialCustomerType;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
-import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.pmtask.SearchTasksByOrgCommand;
+import com.everhomes.rest.pmtask.SearchTasksByOrgDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
@@ -97,7 +101,9 @@ import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
 import com.everhomes.rest.varField.UpdateFieldItemsCommand;
 import com.everhomes.rest.varField.UpdateFieldsCommand;
 import com.everhomes.rest.varField.VarFieldStatus;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.sequence.SequenceProvider;
@@ -108,6 +114,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.yellowPage.YellowPageProvider;
+import com.everhomes.yellowPage.YellowPageService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -204,6 +212,15 @@ public class FieldServiceImpl implements FieldService {
     @Autowired
     private EnterpriseCustomerProvider customerProvider;
 
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
+
+    @Autowired
+    private ActivityProivider activityProivider;
+
+    @Autowired
+    private YellowPageService yellowPageService;
+
     @Override
     public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
         List<FieldGroup> systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
@@ -247,9 +264,43 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> items = systemItems.stream().map(systemItem -> {
                 return ConvertHelper.convert(systemItem, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
+            addExpandItems(items,cmd.getFieldId());
             return items;
         }
         return null;
+    }
+
+    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId) {
+        Field field = fieldProvider.findFieldById(fieldId);
+        if (field!=null && field.getName().equals("sourceItemId")) {
+            List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+            if (activityCategories != null && activityCategories.size() > 0) {
+                activityCategories.forEach((a) -> {
+                    SystemFieldItemDTO activityItem = new SystemFieldItemDTO();
+                    activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
+                    activityItem.setFieldId(field.getId());
+                    activityItem.setId(a.getEntryId());
+                    activityItem.setModuleName(field.getModuleName());
+                    activityItem.setDisplayName(a.getName());
+                    items.add(activityItem);
+                });
+            }
+            //add service alliance categories
+            ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
+            if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+                serviceAllianceCategories.forEach((r) -> {
+                    SystemFieldItemDTO allianceItem = new SystemFieldItemDTO();
+                    allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    allianceItem.setFieldId(field.getId());
+                    allianceItem.setId(r.getId());
+                    allianceItem.setModuleName(field.getModuleName());
+                    allianceItem.setDisplayName(r.getName());
+                    items.add(allianceItem);
+                });
+            }
+        }
     }
 
     /**
@@ -419,6 +470,11 @@ public class FieldServiceImpl implements FieldService {
         return dynamicExcelService.importMultiSheet(file, DynamicExcelStrings.CUSTOEMR, null, cmd);
     }
 
+    @Override
+    public void createDynamicScopeItems(Integer namespaceId, String instanceConfig, String appName) {
+
+    }
+
     private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, communityId);
     }
@@ -430,6 +486,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
                 SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
                 List<SystemFieldItemDTO> itemDTOs = getSystemFieldItems(systemField.getId());
+                addExpandItems(itemDTOs, systemField.getId());
                 dto.setItems(itemDTOs);
                 return dto;
             }).collect(Collectors.toList());
@@ -476,10 +533,10 @@ public class FieldServiceImpl implements FieldService {
         Boolean globalFlag = true;
         if(cmd.getCommunityId() != null) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
-            //查询旧数据 多入口
-            if (scopeFields != null && scopeFields.size() < 1) {
+            //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
+            /*if (scopeFields != null && scopeFields.size() < 1) {
             	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), null);
-			}
+			}*/
             if(scopeFields != null && scopeFields.size() > 0) {
                 namespaceFlag = false;
                 globalFlag = false;
@@ -487,10 +544,10 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
-          //查询旧数据 多入口
-            if (scopeFields != null && scopeFields.size() < 1) {
+            //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
+            /*if (scopeFields != null && scopeFields.size() < 1) {
             	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath(), null);
-			}
+			}*/
             if (scopeFields != null && scopeFields.size() > 0) {
                 globalFlag = false;
             }
@@ -503,6 +560,7 @@ public class FieldServiceImpl implements FieldService {
         if(globalFlag) {
             scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
         }
+        //查询表单初始化的数据
         if (scopeFields != null && scopeFields.size() < 1) {
         	scopeFields = fieldProvider.listScopeFields(0, null, cmd.getModuleName(), cmd.getGroupPath(), null);
 		}
@@ -529,11 +587,18 @@ public class FieldServiceImpl implements FieldService {
             } else if (namespaceFlag) {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+    			}
+                //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
+                /*if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
                 }
-
                 if (scopeItems != null && scopeItems.size() < 1) {
-                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
+    			}*/
+                //查询表单初始化的数据
+                if (scopeItems != null && scopeItems.size() < 1) {
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
     			}
 
             } else {
@@ -560,6 +625,8 @@ public class FieldServiceImpl implements FieldService {
                         });
                         //按default order排序
                         items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
+                        // service alliance and activity expand items ,we add expand item flag for it
+                        addExpandItems(dto, items);
                         dto.setItems(items);
                     }
                     dtos.add(dto);
@@ -573,6 +640,38 @@ public class FieldServiceImpl implements FieldService {
         return null;
     }
 
+    private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items) {
+        if (dto.getFieldName().equals("sourceItemId")) {
+            List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+            if (activityCategories != null && activityCategories.size() > 0) {
+                activityCategories.forEach((a) -> {
+                    FieldItemDTO activityItem = new FieldItemDTO();
+                    activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
+                    activityItem.setFieldId(dto.getId());
+                    activityItem.setItemId(a.getEntryId());
+                    activityItem.setItemDisplayName(a.getName());
+                    activityItem.setFieldId(a.getId());
+                    items.add(activityItem);
+                });
+            }
+            //add service alliance categories
+            ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
+            if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+                serviceAllianceCategories.forEach((r) -> {
+                    FieldItemDTO allianceItem = new FieldItemDTO();
+                    allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                    allianceItem.setFieldId(dto.getId());
+                    allianceItem.setItemId(r.getId());
+                    allianceItem.setItemDisplayName(r.getName());
+                    allianceItem.setFieldId(r.getId());
+                    items.add(allianceItem);
+                });
+            }
+        }
+    }
+
     @Override
     public List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd) {
         Map<Long, ScopeFieldItem> fieldItems = new HashMap<>();
@@ -582,10 +681,10 @@ public class FieldServiceImpl implements FieldService {
         fieldIds.add(cmd.getFieldId());
         if(cmd.getCommunityId() != null) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
-            //查询旧数据，多入口
-            if (fieldItems != null && fieldItems.size() < 1) {
+            //查询旧数据，多入口 
+            /*if (fieldItems != null && fieldItems.size() < 1) {
             	fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null);
-			}
+			}*/
 
             if(fieldItems != null && fieldItems.size() > 0) {
                 namespaceFlag = false;
@@ -594,10 +693,10 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
-          //查询旧数据，多入口
-            if (fieldItems != null && fieldItems.size() < 1) {
+            //查询旧数据，多入口
+            /*if (fieldItems != null && fieldItems.size() < 1) {
             	fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, null);
-			}
+			}*/
             if(fieldItems!=null && fieldItems.size()>0){
                 globalFlag = false;
             }
@@ -730,8 +829,7 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setModuleName(group.getModuleName());
                 cmd1.setCommunityId(communityId);
                 List<FieldDTO> fields = listFields(cmd1);
-                if(fields==null) fields = new ArrayList<FieldDTO>();
-
+                if(fields==null) fields = new ArrayList<>();
                 //使用字段，获得headers
                 String headers[] = new String[fields.size()];
                 String mandatory[] = new String[headers.length];
@@ -2020,63 +2118,41 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId) {
         ScopeFieldItem fieldItem = null;
-        Boolean namespaceFlag = true;
-        Boolean globalFlag = true;
-        if (communityId != null) {
-            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
-            if (fieldItem != null) {
-                namespaceFlag = false;
-                globalFlag = false;
-            }
-        }
-        if (namespaceFlag) {
-            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
-            if (fieldItem != null) {
-                globalFlag = false;
-            }
-        }
-
-        if (globalFlag) {
-            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
-        }
+//        Boolean namespaceFlag = true;
+//        Boolean globalFlag = true;
+//        if (communityId != null) {
+//            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
+//            if (fieldItem != null) {
+//                namespaceFlag = false;
+//                globalFlag = false;
+//            }
+//        }
+//        if (namespaceFlag) {
+//            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+//            if (fieldItem != null) {
+//                globalFlag = false;
+//            }
+//        }
+//
+//        if (globalFlag) {
+//            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
+//        }
+        FieldItem item = fieldProvider.findFieldItemByItemId(itemId);
         // 三种情况 要求删除的item不显示
-        if (fieldItem != null) {
-//<<<<<<< HEAD
-//            Map<Long, ScopeFieldGroup> scopeFieldGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, communityId, fieldItem.getModuleName());
-////            if(scopeFieldGroupMap != null && scopeFieldGroupMap.size() < 1){
-////                scopeFieldGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, communityId, fieldItem.getModuleName(), null);
-////            }
-//=======
-            List<Long> items = fieldProvider.checkCustomerField(namespaceId, communityId, fieldItem.getModuleName());
-//>>>>>>> 5.6.0
+        if (item != null) {
+            List<Long> items = fieldProvider.checkCustomerField(namespaceId, communityId, item.getModuleName());
             // community
             if (items != null && items.size() > 0) {
                 fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
             } else {
                 //namespace
-//<<<<<<< HEAD
-//                Map<Long, ScopeFieldGroup> namespaceGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, null, fieldItem.getModuleName());
-////                if(namespaceGroupMap!=null && namespaceGroupMap.size() < 1){
-////                    namespaceGroupMap = fieldProvider.listScopeFieldGroups(namespaceId, null, fieldItem.getModuleName(),null);
-////                }
-//                if (namespaceGroupMap != null && namespaceGroupMap.size() > 0) {
-//                    fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
-//                } else {
-//                    //global
-//                    Map<Long, ScopeFieldGroup> globalGroupMap = fieldProvider.listScopeFieldGroups(0, null, fieldItem.getModuleName());
-////                    if(globalGroupMap!=null && globalGroupMap.size() < 1){
-////                        globalGroupMap = fieldProvider.listScopeFieldGroups(0, null, fieldItem.getModuleName(), null);
-////                    }
-//                    if (globalGroupMap != null && globalGroupMap.size() > 0) {
-//=======
-                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, null, fieldItem.getModuleName());
+                List<Long> fields = fieldProvider.checkCustomerField(namespaceId, null, item.getModuleName());
                 if (fields != null && fields.size() > 0) {
                     fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
                 } else {
                     //global
-                    List<Long> groups = fieldProvider.checkCustomerField(0, null, fieldItem.getModuleName());
+                    List<Long> groups = fieldProvider.checkCustomerField(0, null, item.getModuleName());
                     if (groups != null && groups.size() > 0) {
-//>>>>>>> 5.6.0
                         fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(0, null, itemId);
                     }
                 }
