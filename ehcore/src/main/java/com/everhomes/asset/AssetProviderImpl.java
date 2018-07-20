@@ -6001,12 +6001,27 @@ public class AssetProviderImpl implements AssetProvider {
 	}
 
 	public void updatePaymentBillStatus(BatchUpdateBillsToPaidCmd cmd) {
-		//对应到eh_payment_bills表中的status字段账单属性，0:未缴;1:已缴
-		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        dslContext.update(Tables.EH_PAYMENT_BILLS)
-                .set(Tables.EH_PAYMENT_BILLS.STATUS, new Byte("1"))
-                .where(Tables.EH_PAYMENT_BILLS.ID.in(cmd.getBillIdList()))
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //更新 状态，更新 金钱数目，不可逆
+        EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        EhPaymentBillItems item = Tables.EH_PAYMENT_BILL_ITEMS.as("item");
+        //BILL
+        //手动调整缴费状态时，需要将PAYMENT_TYPE置为0（线下支付）
+        context.update(bill)
+                .set(bill.STATUS,(byte)1)//对应到eh_payment_bills表中的status字段账单属性，0:未缴;1:已缴
+                .set(bill.AMOUNT_RECEIVED,bill.AMOUNT_OWED)
+                .set(bill.AMOUNT_OWED,new BigDecimal("0"))
+                .set(bill.PAYMENT_TYPE,0)
+                .where(bill.ID.in(cmd.getBillIdList()))
                 .execute();
+        //bill item
+        context.update(item)
+                .set(item.STATUS,(byte)1)//对应到eh_payment_bills表中的status字段账单属性，0:未缴;1:已缴
+                .set(item.AMOUNT_RECEIVED,item.AMOUNT_OWED)
+                .set(item.AMOUNT_OWED,new BigDecimal("0"))
+                .where(item.BILL_ID.in(cmd.getBillIdList()))
+                .execute();
+        //bill exemption已经减到bill中了
 	}
 	
 	public List<Long> getOriginIdFromMappingAppForEnergy(final Long moduleId, final Long originId, long targetModuleId, Integer namespaceId) {
