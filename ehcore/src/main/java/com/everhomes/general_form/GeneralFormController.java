@@ -111,7 +111,6 @@ public class GeneralFormController extends ControllerBase {
 		RestResponse response = new RestResponse(dtos);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
-
 		return response;
 	}
 
