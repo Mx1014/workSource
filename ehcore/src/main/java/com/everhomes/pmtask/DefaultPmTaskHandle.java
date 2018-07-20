@@ -307,6 +307,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		SearchTasksResponse response = new SearchTasksResponse();
+		List<PmTaskDTO> dtos = new ArrayList<>();
 //		V3.5修改兼容查询域空间下全部项目
 		List<PmTaskDTO> list = pmTaskSearch.searchAllDocsByType(cmd,pageSize + 1);
 //		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
@@ -314,7 +315,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 //				cmd.getPageAnchor(), pageSize+1);
 		int listSize = list.size();
 		if (listSize > 0) {
-    		response.setRequests(list.stream().map(t -> {
+    		dtos = list.stream().map(t -> {
     			PmTask task = pmTaskProvider.findTaskById(t.getId());
     			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
     			if(task != null) {
@@ -335,8 +336,9 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 //				}
 
     			return dto;
-    		}).collect(Collectors.toList()));
-    		if(response.getRequests() != null && response.getRequests().size() > pageSize){
+    		}).collect(Collectors.toList());
+    		response.setRequests(dtos);
+    		if(response.getRequests().size() > 0 && response.getRequests().size() > pageSize){
 				response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
 				response.getRequests().remove(list.get(listSize-1));
         	}else{
