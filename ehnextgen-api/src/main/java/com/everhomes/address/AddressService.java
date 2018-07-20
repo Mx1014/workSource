@@ -89,5 +89,6 @@ public interface AddressService {
 	void updateAddressArrangement(UpdateAddressArrangementCommand cmd);
 	void deleteAddressArrangement(DeleteAddressArrangementCommand cmd);
 	List<HistoryApartmentDTO> getHistoryApartment(GetHistoryApartmentCommand cmd);
-
+	void excuteAddressArrangementOnTime();
+	void excuteAddressArrangement(ExcuteAddressArrangementCommand cmd);
 }

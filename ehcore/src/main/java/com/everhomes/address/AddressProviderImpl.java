@@ -972,4 +972,5 @@ public class AddressProviderImpl implements AddressProvider {
 					.and(Tables.EH_ADDRESS_ARRANGEMENT.STATUS.eq(AddressArrangementStatus.ACTIVE.getCode()))
 					.fetchInto(AddressArrangement.class);
 	}
+
 }

@@ -3001,6 +3001,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	
 	@Scheduled(cron = "0 10 0 * * ?")
 	//@Scheduled(cron = "0 */1 * * * ?")
+	@Override
     public void excuteAddressArrangementOnTime() {
         LOGGER.debug("start excuting addressArrangement!");
 		try {
@@ -3035,6 +3036,27 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			LOGGER.debug("addressArrangement excuted!");
 		} catch (ParseException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void excuteAddressArrangement(ExcuteAddressArrangementCommand cmd){
+		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		arrangement.setOperationFlag((byte) 1);
+		addressProvider.updateAddressArrangement(arrangement);
+		//原始房源失效
+		List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
+		for (String addressId : originalIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+			address.setStatus(AddressAdminStatus.INACTIVE.getCode());
+			addressProvider.updateAddress(address);
+		}
+		//未来房源成为正式房源
+		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		for (String addressId : targetIds) {
+			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
+			address.setIsFutureApartment((byte) 0);
+			addressProvider.updateAddress(address);
 		}
 	}
 }

@@ -521,5 +521,19 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/excuteAddressArrangement</b>
+     * <p>测试接口：用于执行拆分合并计划</p>
+     */
+    @RequestMapping("excuteAddressArrangement")
+    @RestReturn(value=String.class)
+    public RestResponse excuteAddressArrangement(ExcuteAddressArrangementCommand cmd) {
+    	addressService.excuteAddressArrangement(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     
 }
