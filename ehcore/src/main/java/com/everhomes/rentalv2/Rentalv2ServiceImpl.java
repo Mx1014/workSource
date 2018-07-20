@@ -7584,6 +7584,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
+		rule.setBeginDate(new Date(System.currentTimeMillis()));//重置开始时间
 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
