@@ -709,6 +709,7 @@ INSERT INTO eh_locale_strings (id ,scope ,CODE ,locale ,TEXT)
 VALUES( @c_id + 2 , 'pushMessage',2 ,'zh_CN' ,'业务联系人');
 
 DELETE FROM eh_web_menus  WHERE NAME='短信推送' AND data_type='sms-push' AND id=16020400;
+DELETE FROM eh_web_menus  WHERE NAME LIKE '短信推送%' AND data_type='sms-push' AND id=41060000;
 -- end
 
 -- AUTHOR: 马世亨
