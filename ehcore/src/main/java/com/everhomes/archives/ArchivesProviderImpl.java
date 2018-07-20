@@ -385,6 +385,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     public List<Long> listDismissalDetailIds(){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
+        query.addSelect(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DETAIL_ID);
         return query.fetchInto(Long.class);
     }
 
