@@ -133,4 +133,6 @@ public interface VisitorSysService {
     void confirmVisitorForManage(CreateOrUpdateVisitorCommand cmd);
 
     void rejectVisitorForManage(CreateOrUpdateVisitorCommand cmd);
+
+    void addMessageReceiverForManage(BaseVisitorsysCommand cmd);
 }

@@ -1755,6 +1755,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         rejectVisitor(cmd);
     }
 
+    @Override
+    public void addMessageReceiverForManage(BaseVisitorsysCommand cmd) {
+
+    }
+
     /**
      * 检查owerid是否在系统中存在
      * @param ownerType
