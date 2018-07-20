@@ -110,6 +110,8 @@ public class RentalBillDTO {
 	@ItemType(BillAttachmentDTO.class)
 	private List<BillAttachmentDTO> billAttachments;
 
+	private List<RentalSiteFileDTO> fileUris;
+
 	private Byte toastFlag;
 	private String confirmationPrompt;
 	private Long flowCaseId;
@@ -579,5 +581,13 @@ public class RentalBillDTO {
 
 	public void setScene(String scene) {
 		this.scene = scene;
+	}
+
+	public List<RentalSiteFileDTO> getFileUris() {
+		return fileUris;
+	}
+
+	public void setFileUris(List<RentalSiteFileDTO> fileUris) {
+		this.fileUris = fileUris;
 	}
 }

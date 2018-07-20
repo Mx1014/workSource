@@ -3096,6 +3096,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			dto.getBillAttachments().add(attachmentDTO);
 		}
 
+		//订单的文件
+		List<RentalResourceFile> files = rentalv2Provider.findRentalSiteFilesByOwnerTypeAndId(bill.getResourceType(), EhRentalv2Orders.class.getSimpleName(),
+				bill.getId());
+		dto.setFileUris(convertRentalSiteFileDTOs(files));
+
 		//加上资源类型的类型
 		if (bill.getResourceTypeId() != null) {
 			RentalResourceType resourceType = this.rentalv2Provider.getRentalResourceTypeById(bill.getResourceTypeId());
@@ -4201,14 +4206,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 			}
 
-			// save bill and online pay bill
-//			RentalOrderPayorderMap billmap = new RentalOrderPayorderMap();
-//			billmap.setOrderId(bill.getId());
-//			billmap.setOrderNo(Long.valueOf(bill.getOrderNo()));
-//			rentalv2Provider.createRentalBillPaybillMap(billmap);
+
 			//save Attachments
 			createOrderAttachments(bill, cmd.getRentalAttachments());
-			//签名
+			//save files
+			createOrderFileUris(cmd.getFileUris(),bill);
 			return null;
 		});
 
@@ -4631,6 +4633,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setRentalBills(new ArrayList<>());
 		for (RentalOrder bill : bills) {
 			RentalBillDTO dto = processOrderDTO(bill);
+			if (dto.getStatus().equals(SiteBillStatus.FAIL.getCode()) && dto.getPaidPrice()!=null && dto.getPaidPrice().compareTo(new BigDecimal(0))>0)
+				dto.setStatus(SiteBillStatus.FAIL_PAID.getCode());
 			response.getRentalBills().add(dto);
 		}
  
@@ -6771,6 +6775,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 	}
 
+	private void createOrderFileUris(List<RentalSiteFileDTO> fileUris,RentalOrder order){
+		if (fileUris != null) {
+			for (RentalSiteFileDTO dto : fileUris) {
+				RentalResourceFile file = new RentalResourceFile();
+				file.setOwnerType(EhRentalv2Orders.class.getSimpleName());
+				file.setOwnerId(order.getId());
+				file.setUri(dto.getUri());
+				file.setName(dto.getName());
+				file.setResourceType(order.getResourceType());
+				this.rentalv2Provider.createRentalSiteFile(file);
+			}
+		}
+	}
+
 	@Override
 	public void updateResource(UpdateResourceAdminCommand cmd) {
 
@@ -7192,8 +7210,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter : bill id can not find bill");
 		}
-
-		return processOrderDTO(bill);
+		RentalBillDTO dto = processOrderDTO(bill);
+		if (dto.getStatus().equals(SiteBillStatus.FAIL.getCode()) && dto.getPaidPrice()!=null && dto.getPaidPrice().compareTo(new BigDecimal(0))>0)
+			dto.setStatus(SiteBillStatus.FAIL_PAID.getCode());
+		return dto;
 	}
 
 	@Override
@@ -8198,29 +8218,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (null != timeIntervals && !timeIntervals.isEmpty()) {
 			dto.setTimeStep(timeIntervals.get(0).getTimeStep());
 		}
-
-		// 订单的rules
-//		dto.setRentalSiteRules(new ArrayList<>());
-//		List<RentalResourceOrder> rsbs = rentalv2Provider.findRentalResourceOrderByOrderId(bill.getId());
-//		for (RentalResourceOrder rsb : rsbs) {
-//			RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
-//			ruleDto.setId(rsb.getId());
-//			ruleDto.setRentalSiteId(rsb.getRentalResourceRuleId());
-//			ruleDto.setRentalType(rsb.getRentalType());
-//			ruleDto.setRentalStep(rsb.getRentalStep());
-//			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) {
-//				ruleDto.setBeginTime(rsb.getBeginTime().getTime());
-//				ruleDto.setEndTime(rsb.getEndTime().getTime());
-//			}else if (ruleDto.getRentalType() == RentalType.HALFDAY.getCode() ||
-//					ruleDto.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
-//				ruleDto.setAmorpm(rsb.getAmorpm());
-//			}
-//			ruleDto.setPrice(rsb.getPrice());
-//			ruleDto.setRuleDate(rsb.getResourceRentalDate().getTime());
-//
-//			dto.getRentalSiteRules().add(ruleDto);
-//
-//		}
 
 
 	}
