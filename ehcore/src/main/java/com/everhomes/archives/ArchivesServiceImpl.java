@@ -1876,7 +1876,8 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void cleanRedundantArchivesDetails() {
-        List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutDismissalStatus();
+        List<Long> detailIds = archivesProvider.listDismissalDetailIds();
+        List<OrganizationMemberDetails> details = archivesProvider.listDetailsWithoutDismissalStatus(detailIds);
         if (details == null)
             return;
         int i = 0;
