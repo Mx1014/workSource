@@ -6224,8 +6224,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
+        //  兼容 admin/org/listOrganizationPersonnels 接口, 给一个固定的类型
+        if(cmd.getFilterScopeTypes() == null)
+            cmd.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CURRENT.getCode()));
 
-/*
+        /*
         VisibleFlag visibleFlag;
         if (VisibleFlag.fromCode(cmd.getVisibleFlag()) != VisibleFlag.SHOW)
             visibleFlag = VisibleFlag.ALL;
@@ -6235,7 +6238,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else if (null != VisibleFlag.fromCode(cmd.getVisibleFlag())) {
             visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
         }
-*/
+        */
 
         List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(cmd.getKeywords(), cmd.getIsSignedup(), locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0), cmd.getTargetTypes());
         if (0 == organizationMembers.size()) {
