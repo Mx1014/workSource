@@ -382,10 +382,17 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<OrganizationMemberDetails> listDetailsWithoutDismissalStatus() {
+    public List<Long> listDismissalDetailIds(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
+        return query.fetchInto(Long.class);
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> listDetailsWithoutDismissalStatus(List<Long> detailIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.notIn(detailIds));
         return query.fetchInto(OrganizationMemberDetails.class);
     }
 
@@ -394,7 +401,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
         return query.fetchAnyInto(OrganizationMember.class);
     }
 }
