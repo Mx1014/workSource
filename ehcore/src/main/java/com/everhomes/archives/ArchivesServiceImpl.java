@@ -571,9 +571,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     private void checkTargetPrivilege(Long detailId, Long organizationId) {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         if (employee == null || employee.getTargetId() == 0)
-            throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DELETE_ADMIN,
-                    "No rights to remove the admin.");
-        if (!rolePrivilegeService.checkIsSystemOrAppAdmin(organizationId, employee.getTargetId()))
+            return;
+        if (rolePrivilegeService.checkIsSystemOrAppAdmin(organizationId, employee.getTargetId()))
             throw RuntimeErrorException.errorWith(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.ERROR_DELETE_ADMIN,
                     "No rights to remove the admin.");
     }
