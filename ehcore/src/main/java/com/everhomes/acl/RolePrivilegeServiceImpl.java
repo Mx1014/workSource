@@ -6,6 +6,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
@@ -145,6 +147,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private ServiceModuleAppService serviceModuleAppService;
+
+	@Autowired
+	private EnterpriseCustomerProvider customerProvider;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -1658,6 +1663,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			organizationProvider.updateOrganization(o);
 			organizationSearcher.feedDoc(o);
 		}
+		//sync to customer admin record
+		EnterpriseCustomer customer = customerProvider.findByOrganizationId(organizationId);
+		if(customer!=null)
+		customerProvider.createEnterpriseCustomerAdminRecord(customer.getId(), contactName, member.getTargetType(), contactToken,customer.getNamespaceId());
 
 		return processOrganizationContactDTO(member);
 	}
