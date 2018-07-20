@@ -63,7 +63,40 @@ public class VisitorSysMessageReceiverProviderImpl implements VisitorSysMessageR
 				.orderBy(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysMessageReceiver.class));
 	}
-	
+
+	@Override
+	public VisitorSysMessageReceiver findMessageReceiverByOwner(Integer namespaceId, String ownerType, Long ownerId, Long createorId) {
+		List<VisitorSysMessageReceiver> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS)
+				.where(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.CREATOR_UID.eq(createorId))
+				.orderBy(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysMessageReceiver.class));
+		return list==null || list.size()==0?null:list.get(0);
+	}
+
+	@Override
+	public void deleteMessageReceiverByOwner(Integer namespaceId, String ownerType, Long ownerId, Long createorId) {
+		getReadWriteContext().delete(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS)
+				.where(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.CREATOR_UID.eq(createorId))
+				.execute();
+	}
+
+	@Override
+	public List<VisitorSysMessageReceiver> listVisitorSysMessageReceiverByOwner(Integer namespaceId, String ownerType, Long ownerId) {
+		List<VisitorSysMessageReceiver> list = getReadOnlyContext().select().from(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS)
+				.where(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.OWNER_ID.eq(ownerId))
+				.orderBy(Tables.EH_VISITOR_SYS_MESSAGE_RECEIVERS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, VisitorSysMessageReceiver.class));
+		return list;
+	}
+
 	private EhVisitorSysMessageReceiversDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -13,4 +13,9 @@ public interface VisitorSysMessageReceiverProvider {
 
 	List<VisitorSysMessageReceiver> listVisitorSysMessageReceiver();
 
+    VisitorSysMessageReceiver findMessageReceiverByOwner(Integer namespaceId, String ownerType, Long ownerId, Long id);
+
+	void deleteMessageReceiverByOwner(Integer namespaceId, String ownerType, Long ownerId, Long id);
+
+	List<VisitorSysMessageReceiver> listVisitorSysMessageReceiverByOwner(Integer namespaceId, String ownerType, Long ownerId);
 }

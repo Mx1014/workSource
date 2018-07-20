@@ -139,7 +139,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
-    private RolePrivilegeService rolePrivilegeService;
+    private VisitorSysMessageReceiverProvider messageReceiverProvider;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -390,8 +390,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             messageDto.getMeta().putAll(meta);
         }
 
-        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                visitor.getInviterId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+        List<VisitorSysMessageReceiver> list = messageReceiverProvider.listVisitorSysMessageReceiverByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
+        if(list == null || list.size()==0)
+            return;
+        for (VisitorSysMessageReceiver receiver : list) {
+            try {
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            }catch (Exception e){
+                LOGGER.error("visitorsys {} send message error",receiver, e);
+            }
+        }
+
     }
 
     //更新访客状态的时候，检查状态是否已经被提前更新
@@ -1713,9 +1723,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
-        }else{
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "not support ownerType = "+cmd.getOwnerType()+" at mobile terminal");
         }
     }
     @Override
@@ -1756,8 +1763,19 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     }
 
     @Override
-    public void addMessageReceiverForManage(BaseVisitorsysCommand cmd) {
-
+    public void updateMessageReceiverForManage(UpdateMessageReceiverCommand cmd) {
+        VisitorsysOwnerType visitorsysOwnerType = checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        //这里考虑加锁，其实没有什么并发量也没必要
+        VisitorsysFlagType statusFlag = VisitorsysFlagType.fromCode(cmd.getStatusFlag());
+        if(statusFlag == VisitorsysFlagType.NO){
+            messageReceiverProvider.deleteMessageReceiverByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),UserContext.current().getUser().getId());
+        }else {
+            VisitorSysMessageReceiver receiver = messageReceiverProvider.findMessageReceiverByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), UserContext.current().getUser().getId());
+            if (receiver == null) {
+                receiver=ConvertHelper.convert(cmd,VisitorSysMessageReceiver.class);
+                messageReceiverProvider.createVisitorSysMessageReceiver(receiver);
+            }
+        }
     }
 
     /**

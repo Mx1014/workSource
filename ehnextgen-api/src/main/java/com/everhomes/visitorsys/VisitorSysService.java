@@ -134,5 +134,5 @@ public interface VisitorSysService {
 
     void rejectVisitorForManage(CreateOrUpdateVisitorCommand cmd);
 
-    void addMessageReceiverForManage(BaseVisitorsysCommand cmd);
+    void updateMessageReceiverForManage(UpdateMessageReceiverCommand cmd);
 }
