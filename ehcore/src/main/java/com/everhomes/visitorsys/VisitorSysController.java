@@ -860,7 +860,7 @@ public class VisitorSysController extends ControllerBase {
 	 * 7.园区访客管理决定接受（客户端/微信端 web企业访客/园区访客管理用）
 	 * </p>
 	 */
-	@RequestMapping("updateMessageReceiverForManage")
+	@RequestMapping("addMessageReceiverForManage")
 	@RestReturn(String.class)
 	public RestResponse updateMessageReceiverForManage(UpdateMessageReceiverCommand cmd) {
 		visitorSysService.updateMessageReceiverForManage(cmd);

@@ -35,17 +35,17 @@ public class VisitorsysCommunityManagePortalPublishHandler implements PortalPubl
 
     @Override
     public String processInstanceConfig(String instanceConfig) {
-        return null;
+        return instanceConfig;
     }
 
     @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig) {
-        return null;
+        return instanceConfig;
     }
 
     @Override
     public String getAppInstanceConfig(Integer namespaceId, String actionData) {
-        return null;
+        return actionData;
     }
 
     @Override
