@@ -8,7 +8,8 @@ package com.everhomes.rest.community.admin;
  *     <li>memberStatus: 参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
  *     <li>communityId: 小区id</li>
  *     <li>namespaceId: 域空间id</li>
- *     <li>userInfoKeyword: 用户昵称、手机号</li>
+ *     <li>userInfoKeyword: 用户昵称</li>
+ *     <li>identifierToken: 手机号</li>
  *     <li>communityKeyword: 小区名称</li>
  * </ul>
  */
@@ -21,7 +22,16 @@ public class CommunityAuthUserAddressCommand {
     private Long communityId;
 
     private String userInfoKeyword;
+    private String identifierToken;
     private String communityKeyword;
+
+    public String getIdentifierToken() {
+        return identifierToken;
+    }
+
+    public void setIdentifierToken(String identifierToken) {
+        this.identifierToken = identifierToken;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

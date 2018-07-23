@@ -3934,6 +3934,43 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
+    public List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String identifierToken, String keywords, CrossShardListingLocator locator, int pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds));
+        if (userInfoKeyword != null) {
+            String keyword = "%" + userInfoKeyword + "%";
+            query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_NAME.like(keyword)
+                    .or(Tables.EH_USERS.NICK_NAME.like(keyword)));
+        }
+        if (identifierToken != null) {
+            String keyword = "%" + identifierToken + "%";
+            query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_TOKEN.like(keyword));
+        }
+        if (keywords != null) {
+            String keyword = "%" + keywords + "%";
+            query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.JOIN, Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));
+        }
+        if (locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.le(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
+        query.addLimit(pageSize + 1);
+
+        List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
+        if (list != null && list.size() > pageSize) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list = list.subList(0, pageSize);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
+    }
+
+    @Override
     public List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds, Byte operationType) {
         List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -3953,7 +3990,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
     @Override
-    public List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String orgNameKeyword, List<Long> orgIds,
+    public List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword,String identifierToken, String orgNameKeyword, List<Long> orgIds,
                                                                Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
@@ -3973,12 +4010,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (!StringUtils.isEmpty(userInfoKeyword)) {
             String keyword = "%" + userInfoKeyword + "%";
 
-            Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(keyword);
-
-            cond = cond.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like(keyword)).or(Tables.EH_USERS.NICK_NAME.like(keyword));
+            Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like(keyword).or(Tables.EH_USERS.NICK_NAME.like(keyword));
             query.addConditions(cond);
         }
 
+        if (!StringUtils.isEmpty(identifierToken)) {
+            String keyword = "%" + identifierToken + "%";
+
+            Condition cond = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(keyword);
+            query.addConditions(cond);
+        }
         if (!StringUtils.isEmpty(orgNameKeyword)) {
             String keyword = "%" + orgNameKeyword + "%";
             query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyword));

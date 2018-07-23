@@ -379,10 +379,12 @@ public interface OrganizationProvider {
 
 	List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String keywords, CrossShardListingLocator locator, int pageSize);
 
+	List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword,String identifierToken, String keywords, CrossShardListingLocator locator, int pageSize);
+
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
 														   Byte operationType);
 
-	List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String orgNameKeyword, List<Long> orgIds,
+	List<OrganizationMember> listOrganizationPersonnels(String userInfoKeyword, String identifierToken, String orgNameKeyword, List<Long> orgIds,
 														Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, int pageSize);
 
 	List<UserOrganizations> listUserOrganizations(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback callback);

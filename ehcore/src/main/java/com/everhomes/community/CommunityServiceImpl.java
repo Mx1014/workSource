@@ -141,6 +141,7 @@ import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
+import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
 import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
@@ -1693,7 +1694,7 @@ public class CommunityServiceImpl implements CommunityService {
         List<GroupMemberDTO> memberDTOList;
 
         if (cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.REJECT.getCode())) {
-            memberDTOList = listCommunityRejectUserAddress(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), communityIds, locator, pageSize);
+            memberDTOList = listCommunityRejectUserAddress(cmd.getUserInfoKeyword(), cmd.getIdentifierToken(), cmd.getCommunityKeyword(), communityIds, locator, pageSize);
         } else if (cmd.getMemberStatus() != null && cmd.getMemberStatus().equals(GroupMemberStatus.ACTIVE.getCode())) {
             memberDTOList = listCommunityActiveUserAddress(cmd, communityIds, locator, pageSize);
         } else {
@@ -1706,7 +1707,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
     private List<GroupMemberDTO> listCommunityActiveUserAddress(CommunityAuthUserAddressCommand cmd, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
-        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(cmd.getUserInfoKeyword(), cmd.getCommunityKeyword(), communityIds,
+        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(cmd.getUserInfoKeyword(),cmd.getIdentifierToken(), cmd.getCommunityKeyword(), communityIds,
                 GroupMemberStatus.ACTIVE.getCode(), locator, pageSize);
         if (memberLogs != null) {
             return memberLogs.stream().map(r -> {
@@ -1736,11 +1737,14 @@ public class CommunityServiceImpl implements CommunityService {
             Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
             c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
 
-            if (StringUtils.isNotBlank(cmd.getUserInfoKeyword())) {
+            if (StringUtils.isNotBlank(cmd.getUserInfoKeyword()) || StringUtils.isNotBlank(cmd.getIdentifierToken())) {
                 String keyword = "%" + cmd.getUserInfoKeyword() + "%";
                 query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID));
                 query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_USERS.ID));
-                Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword).or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword));
+                Condition condition = Tables.EH_USERS.NICK_NAME.like(keyword);
+                if (StringUtils.isNotBlank(cmd.getIdentifierToken())) {
+                    condition.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%"+cmd.getIdentifierToken()+"%"));
+                }
                 query.addConditions(condition);
             }
             if (StringUtils.isNotBlank(cmd.getCommunityKeyword())) {
@@ -1807,8 +1811,8 @@ public class CommunityServiceImpl implements CommunityService {
         return dto;
     }
 
-    private List<GroupMemberDTO> listCommunityRejectUserAddress(String userInfoKeyword, String communityKeyword, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
-        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(userInfoKeyword, communityKeyword,
+    private List<GroupMemberDTO> listCommunityRejectUserAddress(String userInfoKeyword, String identifierToken, String communityKeyword, List<Long> communityIds, CrossShardListingLocator locator, int pageSize) {
+        List<GroupMemberLog> memberLogs = groupMemberLogProvider.queryGroupMemberLog(userInfoKeyword,identifierToken, communityKeyword,
                 communityIds, GroupMemberStatus.REJECT.getCode(), locator, pageSize);
         if (memberLogs != null) {
             return memberLogs.stream().map(r -> {
@@ -3637,7 +3641,7 @@ public class CommunityServiceImpl implements CommunityService {
         // 人员主动退出公司的记录也需要在项目管理的用户认证的已同意标签下显示 add by xq.tian 2017/07/12
         List<OrganizationMember> organizationMembers = null;
         if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
-            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), locator, pageSize);
+            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getUserInfoKeyword(),cmd.getIdentifierToken(), cmd.getOrgNameKeyword(), locator, pageSize);
             if (memberLogList != null) {
                 organizationMembers = memberLogList.stream()
                         .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
@@ -3671,7 +3675,7 @@ public class CommunityServiceImpl implements CommunityService {
             }
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
-                    cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
+                    cmd.getUserInfoKeyword(), cmd.getIdentifierToken(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
 			LOGGER.debug("wait approve organizationMembers cmd:" + cmd);
 			LOGGER.debug("wait approve organizationMembers size " + organizationMembers.size());
         }
@@ -3690,6 +3694,7 @@ public class CommunityServiceImpl implements CommunityService {
                     UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                     dto.setOperatorName(operator != null ? operator.getNickName() : "");
                     dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+                    dto.setOperateType(OperateType.MANUAL.getCode());
                 } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
                     // FIXME 临时解决   2017/07/27  xq.tian
                     dto.setOperatorName("通过公司邮箱认证");

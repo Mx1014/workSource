@@ -6811,14 +6811,23 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     @Override
     public void leaveForEnterpriseContact(LeaveEnterpriseCommand cmd) {
+
         User user = UserContext.current().getUser();
         long userId = user.getId();
         String tag = "leaveEnterpriseContact";
+        // 判断是否为管理员，如果是管理员，不允许退出公司 add by yanlong.liang 20180723
+        if (rolePrivilegeService.checkIsSystemOrAppAdmin(cmd.getEnterpriseId(),userId)) {
+            LOGGER.error("user is administrator", userId);
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_USER_IS_ADMINISTRATOR,
+                    "user is administrator, can't leave");
+        }
 
         Long enterpriseId = cmd.getEnterpriseId();
 
         //退出公司 add by sfyan20170428
         leaveOrganizaitonByUserId(userId, enterpriseId, userId);
+        // 退出公司后，取消公司门禁 add by yanlong.liang 20180723
+        this.doorAccessService.deleteAuthWhenLeaveFromOrg(user.getNamespaceId(),enterpriseId,userId);
 //        OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), userId, userId, tag);
 //        member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 //        updateEnterpriseContactStatus(userId, member);
