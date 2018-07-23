@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -736,6 +737,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
+    @Transactional
     public void saveGeneralForm(PostGeneralFormValCommand cmd) {
 
         //先新建表单字段的集合
