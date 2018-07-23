@@ -263,13 +263,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 		}
 
-		if(9L == dto.getTaskCategoryId()){
-//			投诉建议不显示费用清单
-			dto.setFeeModel("0");
-		}else{
-			dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel","0"));
-		}
-
+		if (null != dto.getTaskCategoryId())
+			dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel" + dto.getTaskCategoryId(),"0"));
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
