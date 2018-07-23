@@ -2591,7 +2591,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(bill)
                 .where(bill.CONTRACT_NUM.eq(contractNum))
                 .fetch(bill.ID);
-        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID)
                 .from(t,t1)
                 .where(t.BILL_ID.in(fetch))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
@@ -2609,6 +2609,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
+                    dto.setChargingItemId(r.getValue(t1.ID));
                     set.add(dto);
                     return null;
                 });
@@ -2617,7 +2618,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(bill)
                 .where(bill.CONTRACT_ID.eq(contractId))
                 .fetch(bill.ID);
-        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID)
                 .from(t,t1)
                 .where(t.BILL_ID.in(fetch1))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
@@ -2634,10 +2635,10 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
+                    dto.setChargingItemId(r.getValue(t1.ID));
                     set.add(dto);
                     return null;
                 });
-
         return set.stream().collect(Collectors.toList());
     }
 

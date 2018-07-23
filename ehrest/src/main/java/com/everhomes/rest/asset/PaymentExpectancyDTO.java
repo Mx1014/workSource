@@ -28,11 +28,18 @@ public class PaymentExpectancyDTO {
     private String dueDateStr;
 
     private Long billItemId;
+    
+    private Long chargingItemId;
+    
+	public Long getChargingItemId() {
+		return chargingItemId;
+	}
 
+	public void setChargingItemId(Long chargingItemId) {
+		this.chargingItemId = chargingItemId;
+	}
 
-
-
-    @Override
+	@Override
     public int hashCode() {
         return getBillItemId() != null ? getBillItemId().hashCode() : 0;
     }
