@@ -17,7 +17,5 @@ create table `eh_general_form_val_requests`
    primary key (id)
 );ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_val_requests in dev mode';
 
-ALTER TABLE eh_general_form_vals ADD community_id  BIGINT NULL COMMENT '项目id';
-ALTER TABLE eh_general_approvals ADD community_id  BIGINT NULL COMMENT '项目id';
 
 -- --------------------- SECTION END ---------------------------------------------------------

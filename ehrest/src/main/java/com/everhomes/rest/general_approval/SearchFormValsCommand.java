@@ -7,6 +7,8 @@ import java.util.List;
  * <ul>
  *     <li>formOriginId: 表单id</li>
  *     <li>formVersion: 表单版本</li>
+ *     <li>ownerId[Long]: 将communityId存入ownerId</li>
+ *     <li>ownerType[String]: 存入'communityId' </li>
  *     <li>filteredFields: 过滤的字段列表 {@link com.everhomes.rest.general_approval.SearchGeneralFormItem}</li>
  *     <li>displayFields: 需要显示的列表 {@link com.everhomes.rest.general_approval.SearchGeneralFormItem}</li>
  *     <li>pageAnchor: pageAnchor</li>
@@ -15,6 +17,8 @@ import java.util.List;
 public class SearchFormValsCommand {
     private Long formOriginId;
     private Long formVersion;
+    private Long ownerId;
+    private Long ownerType;
     private List<SearchGeneralFormItem> filteredFields;
     private List<SearchGeneralFormItem> displayFields;
     private Long pageAnchor;
@@ -34,6 +38,22 @@ public class SearchFormValsCommand {
 
     public void setFormVersion(Long formVersion) {
         this.formVersion = formVersion;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Long getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(Long ownerType) {
+        this.ownerType = ownerType;
     }
 
     public List<SearchGeneralFormItem> getFilteredFields() {

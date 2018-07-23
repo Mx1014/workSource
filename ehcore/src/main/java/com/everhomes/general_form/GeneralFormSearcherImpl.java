@@ -108,6 +108,8 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         FilterBuilder nfb = null;
         fb = FilterBuilders.termFilter("formOriginId", cmd.getFormOriginId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("formVersion", cmd.getFormVersion()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
 
         if(cmd.getDisplayFields().size() > 0){
             List<String> displayFieldNames = cmd.getDisplayFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
