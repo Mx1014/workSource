@@ -35,7 +35,7 @@ import java.util.Map;
 public interface UserService {
     SignupToken signup(SignupCommand cmd, HttpServletRequest request);
     UserIdentifier findIdentifierByToken(Integer namespaceId, SignupToken signupToken);
-    void resendVerificationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request);
+    void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request);
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
 
@@ -68,7 +68,7 @@ public interface UserService {
     List<UserIdentifierDTO> listUserIdentifiers();
     void deleteUserIdentifier(long identifierId);
 
-    void resendVerificationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
+    void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
 
     void resendVerficationCodeByApp(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
     void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
