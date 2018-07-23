@@ -63,8 +63,17 @@ public interface ArchivesProvider {
 
     List<ArchivesNotifications> listArchivesNotifications(Integer weekDay, Integer time);
 
+    /* 同步数据接口 start */
     List<OrganizationMemberDetails> listDetailsWithoutCheckInTime();
 
     OrganizationMember findOrganizationMemberWithoutStatusByDetailId(Long detailId);
+
+    List<Long> listDismissalDetailIds();
+
+    List<OrganizationMemberDetails> listDetailsWithoutDismissalStatus(List<Long> detailIds);
+
+    OrganizationMember findOrganizationMemberWithStatusByDetailId(Long detailId);
+
+    /* 同步数据接口 end */
 
 }

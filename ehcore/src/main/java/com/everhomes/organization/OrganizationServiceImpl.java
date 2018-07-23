@@ -400,7 +400,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -1959,6 +1958,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 enterpriseCustomer.setContactAddress(organizationDetail.getAddress());
                 enterpriseCustomer.setLatitude(organizationDetail.getLatitude());
                 enterpriseCustomer.setLongitude(organizationDetail.getLongitude());
+                enterpriseCustomer.setCorpEmail(organizationDetail.getEmailDomain());
                 enterpriseCustomerProvider.createEnterpriseCustomer(enterpriseCustomer);
                 enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
 
@@ -6224,8 +6224,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
+        //  兼容 admin/org/listOrganizationPersonnels 接口, 给一个固定的类型
+        if(cmd.getFilterScopeTypes() == null)
+            cmd.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CURRENT.getCode()));
 
-/*
+        /*
         VisibleFlag visibleFlag;
         if (VisibleFlag.fromCode(cmd.getVisibleFlag()) != VisibleFlag.SHOW)
             visibleFlag = VisibleFlag.ALL;
@@ -6235,7 +6238,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else if (null != VisibleFlag.fromCode(cmd.getVisibleFlag())) {
             visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
         }
-*/
+        */
 
         List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(cmd.getKeywords(), cmd.getIsSignedup(), locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0), cmd.getTargetTypes());
         if (0 == organizationMembers.size()) {

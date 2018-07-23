@@ -82,7 +82,7 @@ public class DebugExcelUtil {
         }
         // 遍历集合数据，产生数据行
         if (data != null && data.size() > 0) {
-            int index = 1;
+            int index = initIndex;
             for (List<String> rowContent : data) {
                 row = sheet.createRow(index+1);
                 row.setRowStyle(style);

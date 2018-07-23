@@ -193,6 +193,8 @@ public interface Rentalv2Provider {
 
 	List<RentalCell> getRentalCellsByIds(List<Long> cellIds);
 
+	List<RentalCell> getRentalCellsByRange(Long minId,Long maxId);
+
 	Double countRentalSiteBillBySiteRuleId(Long cellId);
 
 	Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules);

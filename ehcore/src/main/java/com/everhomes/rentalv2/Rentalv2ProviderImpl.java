@@ -2194,7 +2194,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return query.fetch().map(r -> ConvertHelper.convert(r, RentalCell.class));
 	}
-	
+
+	@Override
+	public List<RentalCell> getRentalCellsByRange(Long minId, Long maxId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
+		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.ge(minId));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.le(maxId));
+		return query.fetch().map(r -> ConvertHelper.convert(r, RentalCell.class));
+	}
+
 	@Override
 	public void createRentalResourceType(RentalResourceType rentalResourceType) {
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2ResourceTypes.class));

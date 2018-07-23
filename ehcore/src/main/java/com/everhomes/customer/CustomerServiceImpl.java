@@ -242,7 +242,6 @@ import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.FieldGroupDTO;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
@@ -799,6 +798,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (org != null && OrganizationStatus.ACTIVE.equals(OrganizationStatus.fromCode(org.getStatus()))) {
             //已存在则更新 地址、官网地址、企业logo   postUri  hotline bannerUri
             org.setStringTag1(customer.getCorpEmail());
+            org.setEmailDomain(customer.getCorpEmail());
             org.setWebsite(customer.getCorpWebsite());
             org.setUnifiedSocialCreditCode(customer.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(org);
@@ -806,6 +806,7 @@ public class CustomerServiceImpl implements CustomerService {
             if (detail != null) {
                 detail.setMemberCount(customer.getCorpEmployeeAmount() == null ? null : customer.getCorpEmployeeAmount().longValue());
                 detail.setStringTag1(customer.getCorpEmail());
+                detail.setEmailDomain(customer.getCorpEmail());
                 detail.setDescription(customer.getCorpDescription());
                 detail.setCheckinDate(customer.getCorpEntryDate());
                 detail.setPostUri(customer.getPostUri());
@@ -839,6 +840,7 @@ public class CustomerServiceImpl implements CustomerService {
             // 企业管理中无该organization  则新建一个
             CreateEnterpriseCommand command = new CreateEnterpriseCommand();
             command.setName(customer.getName());
+            command.setEmailDomain(customer.getCorpEmail());
             command.setNamespaceId(customer.getNamespaceId());
             command.setAvatar(customer.getCorpLogoUri());
             command.setCommunityId(customer.getCommunityId());

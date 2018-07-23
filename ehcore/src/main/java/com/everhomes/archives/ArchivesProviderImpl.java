@@ -8,6 +8,8 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.archives.ArchivesOperationStatus;
+import com.everhomes.rest.organization.EmployeeStatus;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -376,6 +378,31 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
+        return query.fetchAnyInto(OrganizationMember.class);
+    }
+
+    @Override
+    public List<Long> listDismissalDetailIds(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
+        query.addSelect(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DETAIL_ID);
+        return query.fetchInto(Long.class);
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> listDetailsWithoutDismissalStatus(List<Long> detailIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.notIn(detailIds));
+        return query.fetchInto(OrganizationMemberDetails.class);
+    }
+
+    @Override
+    public OrganizationMember findOrganizationMemberWithStatusByDetailId(Long detailId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
         return query.fetchAnyInto(OrganizationMember.class);
     }
 }

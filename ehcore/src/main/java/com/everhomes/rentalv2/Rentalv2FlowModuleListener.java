@@ -97,7 +97,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		if(null != flowCase.getReferId()){
 			order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
 		}
-		if (order.getStatus()==SiteBillStatus.PAYINGFINAL.getCode() && order.getStatus()!=SiteBillStatus.APPROVING.getCode()) {
+		if (order.getStatus()==SiteBillStatus.PAYINGFINAL.getCode() || order.getStatus()==SiteBillStatus.APPROVING.getCode()) {
 			order.setStatus(SiteBillStatus.FAIL.getCode());
 			rentalv2Provider.updateRentalBill(order);
 		}
