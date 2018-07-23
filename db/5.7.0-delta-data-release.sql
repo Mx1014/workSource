@@ -751,7 +751,7 @@ INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ( 'r
 update eh_locale_strings set text = '免费物资' where scope = 'rental.flow' and `code` = 'goodItem';
 update eh_locale_strings set text = '付费商品' where scope = 'rental.flow' and `code` = 'item';
 update eh_locale_strings set text = '预订数量' where scope = 'rental.flow' and `code` = 'count';
-update eh_locale_strings set text = '使用时间' where scope = 'rental.flow' and `code` = 'useDetail';
+update eh_locale_strings set text = '预订时间' where scope = 'rental.flow' and `code` = 'useDetail';
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ( 'rental.notification', '13', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。');
 
 SET @ns_id = 0;
