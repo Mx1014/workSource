@@ -9070,6 +9070,8 @@ public class PunchServiceImpl implements PunchService {
         } else {
             dto1.setClockStatus(pl.getStatus());
         }
+        dto1.setWifiInfo(pl.getWifiInfo());
+        dto1.setLocationInfo(pl.getLocationInfo());
 //		dto1.setApprovalStatus(pl.getApprovalStatus());
         PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(pl.getUserId(), pl.getEnterpriseId(),
                 pl.getPunchDate(), pl.getPunchIntervalNo(), pl.getPunchType());
