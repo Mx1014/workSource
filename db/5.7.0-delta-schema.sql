@@ -14,7 +14,7 @@ ALTER TABLE eh_terminal_day_statistics ADD COLUMN average_active_user_change_rat
 CREATE TABLE `eh_service_agreement` (
 
   `id` INT(11)  NOT NULL COMMENT '主键',
-  `namespace_id` INT(11) NOT NULL  COMMENT '域空间ID',
+  `namespace_id` INT(11) NOT NULL  COMMENT '域空间ID',in
   `agreement_content` MEDIUMTEXT  COMMENT '协议内容',
 
   PRIMARY KEY(`id`)
@@ -236,7 +236,7 @@ ALTER TABLE `eh_rentalv2_price_rules`
 ADD COLUMN `approving_user_original_price`  decimal(10,2) NULL AFTER `approving_user_workday_price`;
 
 ALTER TABLE `eh_rentalv2_cells`
-ADD INDEX `cell_id` (`id`) ;
+ADD UNIQUE INDEX `u_eh_cell_id` (`id`) ;
 -- end
 
 -- 通用脚本
