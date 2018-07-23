@@ -25,9 +25,6 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.message.MessageRecordDto;
-import com.everhomes.rest.message.MessageRecordStatus;
-import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.BlockingEventCommand;
 import com.everhomes.rest.messaging.GetSercetKeyForScanCommand;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -307,7 +304,7 @@ public class UserController extends ControllerBase {
 		}
 
         int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
+		this.userService.resendVerificationCode(namespaceId, token, cmd.getRegionCode(), request);
 		return new RestResponse("OK");
 	}
 
@@ -330,7 +327,7 @@ public class UserController extends ControllerBase {
         }
 
         int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
+        this.userService.resendVerificationCode(namespaceId, token, cmd.getRegionCode(), request);
         return new RestResponse("OK");
     }
 
@@ -768,7 +765,7 @@ public class UserController extends ControllerBase {
 	public RestResponse resendByVerifyCodeByIdentifier(@Valid ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request){
 		assert StringUtils.isNotEmpty(cmd.getIdentifier());
 
-		userService.resendVerficationCode(cmd, request);
+		userService.resendVerificationCode(cmd, request);
 		return new RestResponse("OK");
 	}
 
@@ -785,7 +782,7 @@ public class UserController extends ControllerBase {
     public RestResponse resendVerificationCodeByIdentifierAndAppKey(@Valid ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request){
         assert StringUtils.isNotEmpty(cmd.getIdentifier());
 
-        userService.resendVerficationCode(cmd, request);
+        userService.resendVerificationCode(cmd, request);
         return new RestResponse("OK");
     }
 
