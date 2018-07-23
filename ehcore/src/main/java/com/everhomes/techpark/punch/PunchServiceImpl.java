@@ -8961,9 +8961,8 @@ public class PunchServiceImpl implements PunchService {
     				PunchLogDTO dto = convertPunchLog2DTO(pl); 
     	            intervalDTO.getPunchLogs().add(dto);
     			}else{
-    				PunchLogDTO dto = new PunchLogDTO();
-    				dto.setPunchType(PunchType.OVERTIME_ON_DUTY.getCode());
-    	            intervalDTO.getPunchLogs().add(dto);
+    				//如果找不到上班卡就退出循环
+    				break;
     			}
     			pl = findPunchLog(punchLogs, PunchType.OVERTIME_OFF_DUTY.getCode(), punchIntervalNo);
     			if(null != pl){
