@@ -4094,6 +4094,10 @@ public class CommunityServiceImpl implements CommunityService {
 						buildingProject.setProjectId(building.getId());
 						buildingProject.setProjectName(building.getName());
 						buildingProject.setProjectType(EntityType.BUILDING.getCode());
+						Community community = communityProvider.findCommunityById(building.getCommunityId());
+						if (community != null) {
+							buildingProject.setCommunityType(community.getCommunityType());
+						}
 						buildingProjects.add(buildingProject);
 					}
 				}

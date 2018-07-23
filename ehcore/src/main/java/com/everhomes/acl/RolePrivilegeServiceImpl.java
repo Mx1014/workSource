@@ -2815,7 +2815,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					if(EntityType.COMMUNITY == EntityType.fromCode(r.getResourceType())){
 						Community community = communityProvider.findCommunityById(r.getResourceId());
 						if(community != null){
-							dto.setProjectName(community.getName());
+                            dto.setCommunityType(community.getCommunityType());
+                            dto.setProjectName(community.getName());
 							//获取园区下的子项目
 							ListChildProjectCommand cmd = new ListChildProjectCommand();
 							cmd.setProjectType(EntityType.COMMUNITY.getCode());
