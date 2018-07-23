@@ -9130,11 +9130,12 @@ public class PunchServiceImpl implements PunchService {
     	PunchOvertimeRule por = getPunchOvertimeRuleByPunchDayType(pr, ptr.getPunchDayType());
     	if (por == null) {
     		//加班规则未开启的
-            if (pr.getRuleType().equals(PunchRuleType.GUDING.getCode())) {
-                result.setPunchType(PunchType.NOT_WORKDAY.getCode());
-            } else {
-                //没排班
-                result.setPunchType(PunchType.MEIPAIBAN.getCode());
+    		result.setPunchType(PunchType.NOT_WORKDAY.getCode());
+            if (pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
+                //ptr的id 是空 就是 没排班
+            	if(ptr.getId() == null){
+            		result.setPunchType(PunchType.MEIPAIBAN.getCode());
+                }
             }
             result.setPunchIntervalNo(0);
             return result;
