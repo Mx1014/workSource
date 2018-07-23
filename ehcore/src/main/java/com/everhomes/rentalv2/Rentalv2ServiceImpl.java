@@ -3542,10 +3542,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		List<Long> ids = result.stream().map(r->r.getId()).collect(Collectors.toList());
 		if (!ids.isEmpty()) {
 			List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
-			for (RentalCell c1 : result)
+			for (int i = 0;i<result.size();i++)
 				for (RentalCell c2 : dbCells) {
-					if (c2.getId().equals(c1.getId())) {
-						c1 = c2;
+					if (c2.getId().equals(result.get(i).getId())) {
+						result.set(i,c2);
 					}
 				}
 		}
