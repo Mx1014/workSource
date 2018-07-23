@@ -2860,7 +2860,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setRentalBills(new ArrayList<>());
 		for (RentalOrder bill : billList) {
 			RentalBillDTO dto = processOrderDTO(bill);
-			  
+			if (dto.getStatus().equals(SiteBillStatus.FAIL.getCode()) && dto.getPaidPrice()!=null && dto.getPaidPrice().compareTo(new BigDecimal(0))>0)
+				dto.setStatus(SiteBillStatus.FAIL_PAID.getCode());
 			response.getRentalBills().add(dto);
 		}
 		return response;
@@ -8159,7 +8160,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			String json = StringHelper.toJsonString(billDto);
 			dto.setCustomObject(json);
 		}
-
+		if (dto.getStatus().equals(SiteBillStatus.FAIL.getCode()) && bill.getPaidMoney()!=null && bill.getPaidMoney().compareTo(new BigDecimal(0))>0)
+			dto.setStatus(SiteBillStatus.FAIL_PAID.getCode());
 		return dto;
 	}
 
