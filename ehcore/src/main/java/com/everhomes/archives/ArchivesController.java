@@ -473,4 +473,18 @@ public class ArchivesController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /archives/cleanRedundantArchivesDetails</b>
+     * <p>清除人事档案表中的辣鸡数据</p>
+     */
+    @RequestMapping("cleanRedundantArchivesDetails")
+    @RestReturn(value = String.class)
+    public RestResponse cleanRedundantArchivesDetails(){
+        archivesService.cleanRedundantArchivesDetails();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -793,13 +793,14 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
         SearchTasksResponse response = new SearchTasksResponse();
+        List<PmTaskDTO> dtos = new ArrayList<>();
         List<PmTaskDTO> list = pmTaskSearch.searchAllDocsByType(cmd,pageSize + 1);
 //        List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
 //                cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),cmd.getCreatorType(),
 //                cmd.getPageAnchor(), pageSize+1);
         int listSize = list.size();
         if(listSize > 0){
-            response.setRequests(list.stream().map(t -> {
+            dtos = list.stream().map(t -> {
                 PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
 
                 CategoryDTO taskCategory = createCategoryDTO();
@@ -812,7 +813,8 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 //                }
 
                 return dto;
-            }).collect(Collectors.toList()));
+            }).collect(Collectors.toList());
+            response.setRequests(dtos);
             if(listSize <= pageSize){
                 response.setNextPageAnchor(null);
             }else{

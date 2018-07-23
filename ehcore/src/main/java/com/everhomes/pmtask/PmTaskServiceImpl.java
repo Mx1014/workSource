@@ -1131,8 +1131,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 				Cell cell14 = tempRow.createCell(14);
 				cell14.setCellStyle(style);
-
-				String feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel","");
+				String feeModel = "";
+				if (null != task.getTaskCategoryId())
+					feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel" + task.getTaskCategoryId(),"");
 				if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
 					if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
 //						费用确认后导出费用清单
@@ -3431,14 +3432,22 @@ public class PmTaskServiceImpl implements PmTaskService {
 							for (PostApprovalFormSubformItemValue itemValue : array) {
 								PmTaskOrderDetail product = new PmTaskOrderDetail();
 								List<PostApprovalFormItem> values = itemValue.getValues();
-								product.setTaskId(taskId);
-								product.setProductName(getTextString(getFormItem(values, "物品名称").getFieldValue()));
-								product.setProductPrice(Long.valueOf(getTextString(getFormItem(values, "单价").getFieldValue())) * 100);
-								product.setProductAmount(Integer.valueOf(getTextString(getFormItem(values, "数量").getFieldValue())));
-								productFee += product.getProductPrice() * product.getProductAmount();
-								products.add(product);
+								String pname = getTextString(getFormItem(values, "物品名称").getFieldValue());
+								String pprice = getTextString(getFormItem(values, "单价").getFieldValue());
+								String pamount = getTextString(getFormItem(values, "数量").getFieldValue());
+								if(StringUtils.isNotEmpty(pname) && StringUtils.isNotEmpty(pprice) && StringUtils.isNotEmpty(pamount)){
+									product.setTaskId(taskId);
+									product.setProductName(pname);
+									product.setProductPrice(Long.valueOf(pamount) * 100);
+									product.setProductAmount(Integer.valueOf(pamount));
+									productFee += product.getProductPrice() * product.getProductAmount();
+									products.add(product);
+								} else {
+									LOGGER.info("pmtaskorder useless data,data = {}",itemValue.toString());
+								}
 							}
 						}
+
 					} else if ("总计".equals(item.getFieldName())) {
 						BigDecimal totalamount = BigDecimal.valueOf(Double.valueOf(getTextString(item.getFieldValue())));
 						order.setAmount(totalamount.movePointRight(2).longValue());

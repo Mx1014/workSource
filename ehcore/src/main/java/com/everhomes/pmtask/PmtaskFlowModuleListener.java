@@ -17,6 +17,7 @@ import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
@@ -248,21 +249,22 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			Organization org = organizationProvider.findOrganizationById(dto.getEnterpriseId());
 			if(null != org){
 				dto.setEnterpriseName(org.getName());
-				Address addr =  addressProvider.findAddressById(org.getAddressId());
-				if(null != addr){
-					dto.setEnterpriseAddress(addr.getAddress());
+				List<OrganizationAddress> orgAddrs = organizationProvider.findOrganizationAddressByOrganizationId(org.getId());
+				StringBuffer addrs = new StringBuffer();
+				for (OrganizationAddress orgAddr : orgAddrs){
+					Address addr =  addressProvider.findAddressById(orgAddr.getAddressId());
+					if(null != addr && null != addr.getAddress()){
+						addrs.append(addr.getAddress() + "\n");
+					}
 				}
-
+				if(addrs.length() > 0){
+					dto.setEnterpriseAddress(addrs.substring(0,addrs.length() - 2));
+				}
 			}
 		}
 
-		if(9L == dto.getTaskCategoryId()){
-//			投诉建议不显示费用清单
-			dto.setFeeModel("0");
-		}else{
-			dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel","0"));
-		}
-
+		if (null != dto.getTaskCategoryId())
+			dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel" + dto.getTaskCategoryId(),"0"));
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;

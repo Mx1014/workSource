@@ -357,6 +357,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				// set half day time intervals
 				setRentalRuleTimeIntervals(cmd.getResourceType(), RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rule.getSourceId(), cmd.getHalfDayTimeIntervals());
 
+				//set day open times
+				setRentalDayopenTime(cmd.getOpenTimes(), EhRentalv2Resources.class.getSimpleName(), rule.getSourceId(), rule.getResourceType());
 				//创建资源时分配单元格
 				createResourceCells(cmd.getPriceRules());
 
@@ -1360,6 +1362,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				rSiteDTO.setAvgPriceStr("价格认证可见");
 				return;
 			}
+		}else if (TrueOrFalseFlag.fromCode(rSiteDTO.getUnauthVisible()) != TrueOrFalseFlag.TRUE){
+			rSiteDTO.setAvgPriceStr("价格认证可见");
+			return;
 		}
 
 		if (rSiteDTO.getNeedPay() == NormalFlag.NONEED.getCode()) {
@@ -6657,10 +6662,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					singleCmd.setTimeStep(timeInterval.getTimeStep());
 					singleCmd.setWorkdayPrice(workdayPrice);
 					singleCmd.setInitiatePrice(initiatePrice);
+					singleCmd.setOriginalPrice(priceRule.getOriginalPrice());
 					singleCmd.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
 					singleCmd.setOrgMemberInitiatePrice(orgMemberInitiatePrice);
+					singleCmd.setOrgMemberOriginalPrice(priceRule.getOrgMemberOriginalPrice());
 					singleCmd.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
 					singleCmd.setApprovingUserInitiatePrice(approvingUserInitiatePrice);
+					singleCmd.setApprovingUserOriginalPrice(priceRule.getApprovingUserOriginalPrice());
 
 					singleCmd.setSiteCounts(resource.getResourceCounts());
 					singleCmd.setAutoAssign(resource.getAutoAssign());
@@ -6678,10 +6686,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			singleCmd.setPriceType(priceRule.getPriceType());
 			singleCmd.setWorkdayPrice(workdayPrice);
 			singleCmd.setInitiatePrice(initiatePrice);
+			singleCmd.setOriginalPrice(priceRule.getOriginalPrice());
 			singleCmd.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
 			singleCmd.setOrgMemberInitiatePrice(orgMemberInitiatePrice);
+			singleCmd.setOrgMemberOriginalPrice(priceRule.getOrgMemberOriginalPrice());
 			singleCmd.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
 			singleCmd.setApprovingUserInitiatePrice(approvingUserInitiatePrice);
+			singleCmd.setApprovingUserOriginalPrice(priceRule.getApprovingUserOriginalPrice());
 
 			singleCmd.setSiteCounts(resource.getResourceCounts());
 			singleCmd.setAutoAssign(resource.getAutoAssign());
