@@ -3540,8 +3540,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
 		List<Long> ids = result.stream().map(r->r.getId()).collect(Collectors.toList());
+
 		if (!ids.isEmpty()) {
-			List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
+		    Long minId = ids.stream().min(Long::compareTo).get();
+            Long maxId = ids.stream().max(Long::compareTo).get();
+			List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByRange(minId,maxId);
 			for (int i = 0;i<result.size();i++)
 				for (RentalCell c2 : dbCells) {
 					if (c2.getId().equals(result.get(i).getId())) {
