@@ -522,7 +522,7 @@ public class ForumServiceImpl implements ForumService {
     private Integer getSendMessage(List changeList, Map map, Activity activity){
         Integer code = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (activity.getAllDayFlag() == (byte)1) {
+        if (activity.getAllDayFlag() != null && activity.getAllDayFlag() == (byte)1) {
             sdf = new SimpleDateFormat("yyyy-MM-dd");
         }
         switch (changeList.size()) {
