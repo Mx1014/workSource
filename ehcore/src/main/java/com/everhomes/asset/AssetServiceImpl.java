@@ -4786,38 +4786,6 @@ public class AssetServiceImpl implements AssetService {
 		return judgeAppShowPayResponse;
 	}
 	
-	//add by tangcen 2018年6月12日
-	/**
-	 * costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数
-	 * contractId:要处理的合同id
-	 * endTime:合同实际结束时间
-	 */
-//	@Override
-//	public void deleteUnsettledBillsOnContractId(Byte costGenerationMethod,Long contractId,Timestamp endTime) {
-//		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-//		String endTimeStr = yyyyMMdd.format(endTime);
-//		//得到距离当前时间最近的一条未出账单的相关信息
-//		//PaymentBills bill = assetProvider.getFirstUnsettledBill(contractId);
-//		List<PaymentBills> bills = assetProvider.getUnsettledBillBeforeEndtime(contractId,endTimeStr);
-//		List<Long> billIds = new ArrayList<>();
-//		for (PaymentBills bill : bills) {
-//			billIds.add(bill.getId());
-//		}
-//		if (costGenerationMethod == (byte)0) {
-//			assetProvider.deleteUnsettledBillsOnContractId(contractId,billIds);
-//		}else if (costGenerationMethod == (byte)1) {
-//			PaymentBills bill = bills.get(bills.size()-1);
-//			List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
-//			dealFirstUnsettledBill(bill,endTime);
-//			dealFirstUnsettledBillItems(billItems,endTime);
-//			assetProvider.updatePaymentBills(bill);
-//			assetProvider.deleteUnsettledBillsOnContractId(contractId,billIds);
-//			for (PaymentBillItems paymentBillItems : billItems) {
-//				assetProvider.updatePaymentItem(paymentBillItems);
-//			}
-//		}
-//		
-//	}
 	//add by tangcen 2018年6月21日17:02:54
 	/**
 	 * costGenerationMethod:账单处理方式，0：按计费周期，1：按实际天数

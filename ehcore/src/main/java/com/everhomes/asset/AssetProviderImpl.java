@@ -4928,13 +4928,13 @@ public class AssetProviderImpl implements AssetProvider {
         List<Long> billIds =context.select(billItems.BILL_ID)
 					        		.from(billItems)
 					        		.where(billItems.CONTRACT_ID.eq(contractId))
-					        		.and(billItems.DATE_STR_BEGIN.ge(endTimeStr))
+					        		.and(billItems.DATE_STR_BEGIN.gt(endTimeStr))
 					        		.groupBy(billItems.BILL_ID)
 					        		.fetch(billItems.BILL_ID);
         //删除无效的billItems
         context.delete(billItems)
         		.where(billItems.CONTRACT_ID.eq(contractId))
-        		.and(billItems.DATE_STR_BEGIN.ge(endTimeStr))
+        		.and(billItems.DATE_STR_BEGIN.gt(endTimeStr))
         		.execute();
         //删除无效的账单
         context.delete(bills)
@@ -5593,8 +5593,8 @@ public class AssetProviderImpl implements AssetProvider {
         list = context.select()
 					.from(billItems)
 					.where(billItems.CONTRACT_ID.eq(contractId))
-					.and(billItems.DATE_STR_BEGIN.ge(endTimeStr))
-					.orderBy(billItems.DATE_STR_BEGIN.desc())
+					.and(billItems.DATE_STR_BEGIN.gt(endTimeStr))
+					.orderBy(billItems.DATE_STR_BEGIN.asc())
 					.limit(0,1)
 					.fetchInto(PaymentBillItems.class);
         if (list.size() > 0) {
@@ -5620,7 +5620,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");
         context.delete(billItems)
         		.where(billItems.CONTRACT_ID.eq(contractId))
-        		.and(billItems.DATE_STR_BEGIN.ge(endTimeStr))
+        		.and(billItems.DATE_STR_BEGIN.gt(endTimeStr))
         		.execute();
 		
 	}
