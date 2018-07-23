@@ -390,4 +390,7 @@ public interface AssetProvider {
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
     
     String getProjectNameByBillID(Long billId);
+    PaymentBillItems findFirstBillItemToDelete(Long contractId, String endTimeStr);
+	PaymentBills findBillById(Long billId);
+	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
 }

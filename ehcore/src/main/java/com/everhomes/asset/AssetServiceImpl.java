@@ -4830,25 +4830,59 @@ public class AssetServiceImpl implements AssetService {
 		String endTimeStr = yyyyMMdd.format(endTime);
 		
 		if (costGenerationMethod == (byte)0) {
-			assetProvider.deleteUnsettledBills(contractId,endTimeStr);
-		}else if (costGenerationMethod == (byte)1) {
-			assetProvider.deleteUnsettledBills(contractId,endTimeStr);
 			PaymentBills bill = assetProvider.findLastBill(contractId);
-			List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
-			dealUnsettledBillItems(billItems,endTime);
-			bill.setAmountReceivable(new BigDecimal(0));
-			bill.setAmountReceived(new BigDecimal(0));
-			bill.setAmountOwed(new BigDecimal(0));
-			for (PaymentBillItems billItem : billItems) {
-				bill.setAmountReceivable(bill.getAmountReceivable().add(billItem.getAmountReceivable()));
-				bill.setAmountReceived(bill.getAmountReceived().add(billItem.getAmountReceived()));
-				bill.setAmountOwed(bill.getAmountOwed().add(billItem.getAmountOwed()));
-				assetProvider.updatePaymentItem(billItem);
+			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
+			if (firstBillItemToDelete.getBillId().equals(bill.getId())) {
+				assetProvider.deleteBillItemsAfterDate(contractId, endTimeStr);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				bill.setAmountReceivable(new BigDecimal(0));
+				bill.setAmountReceived(new BigDecimal(0));
+				bill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					bill.setAmountReceivable(bill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					bill.setAmountReceived(bill.getAmountReceived().add(billItem.getAmountReceived()));
+					bill.setAmountOwed(bill.getAmountOwed().add(billItem.getAmountOwed()));
+				}
+				assetProvider.updatePaymentBills(bill);
+			}else {
+				assetProvider.deleteUnsettledBills(contractId,endTimeStr);
 			}
-			assetProvider.updatePaymentBills(bill);
+		}else if (costGenerationMethod == (byte)1) {
+			PaymentBills bill = assetProvider.findLastBill(contractId);
+			PaymentBillItems firstBillItemToDelete = assetProvider.findFirstBillItemToDelete(contractId, endTimeStr);
+			if (firstBillItemToDelete != null && firstBillItemToDelete.getBillId().equals(bill.getId())) {
+				assetProvider.deleteBillItemsAfterDate(contractId, endTimeStr);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(bill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				bill.setAmountReceivable(new BigDecimal(0));
+				bill.setAmountReceived(new BigDecimal(0));
+				bill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					bill.setAmountReceivable(bill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					bill.setAmountReceived(bill.getAmountReceived().add(billItem.getAmountReceived()));
+					bill.setAmountOwed(bill.getAmountOwed().add(billItem.getAmountOwed()));
+					assetProvider.updatePaymentItem(billItem);
+				}
+				assetProvider.updatePaymentBills(bill);
+			}else {
+				assetProvider.deleteUnsettledBills(contractId,endTimeStr);
+				PaymentBills lastBill = assetProvider.findLastBill(contractId);
+				List<PaymentBillItems> billItems = assetProvider.findBillItemsByBillId(lastBill.getId());
+				dealUnsettledBillItems(billItems,endTime);
+				lastBill.setAmountReceivable(new BigDecimal(0));
+				lastBill.setAmountReceived(new BigDecimal(0));
+				lastBill.setAmountOwed(new BigDecimal(0));
+				for (PaymentBillItems billItem : billItems) {
+					lastBill.setAmountReceivable(lastBill.getAmountReceivable().add(billItem.getAmountReceivable()));
+					lastBill.setAmountReceived(lastBill.getAmountReceived().add(billItem.getAmountReceived()));
+					lastBill.setAmountOwed(lastBill.getAmountOwed().add(billItem.getAmountOwed()));
+					assetProvider.updatePaymentItem(billItem);
+				}
+				assetProvider.updatePaymentBills(lastBill);
+			}
 		}
 	}
-	
 	//计算截断后最近的一条未出账单明细  add by tangcen 2018年6月12日
 	private void dealUnsettledBillItems(List<PaymentBillItems> billItems,Timestamp endTime){
 		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");

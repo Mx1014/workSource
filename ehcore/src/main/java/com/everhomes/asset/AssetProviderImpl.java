@@ -4893,7 +4893,6 @@ public class AssetProviderImpl implements AssetProvider {
 		return result;
 	}
 
-	//add by tangcen 2018年6月12日
 	@Override
 	public void updatePaymentBills(PaymentBills bill) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -4942,7 +4941,7 @@ public class AssetProviderImpl implements AssetProvider {
         		.where(bills.ID.in(billIds))
         		.execute();
 	}
-
+	
 	@Override
 	public PaymentBills findLastBill(Long contractId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -5584,6 +5583,46 @@ public class AssetProviderImpl implements AssetProvider {
 	        .and(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_PAYMENT_BILLS.OWNER_ID))
 	        .fetchOne(Tables.EH_COMMUNITIES.NAME);
 		return projectName;
+	}
+
+	@Override
+	public PaymentBillItems findFirstBillItemToDelete(Long contractId,String endTimeStr) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");
+        List<PaymentBillItems> list = new ArrayList<>();
+        list = context.select()
+					.from(billItems)
+					.where(billItems.CONTRACT_ID.eq(contractId))
+					.and(billItems.DATE_STR_BEGIN.ge(endTimeStr))
+					.orderBy(billItems.DATE_STR_BEGIN.desc())
+					.limit(0,1)
+					.fetchInto(PaymentBillItems.class);
+        if (list.size() > 0) {
+        	return list.get(0);
+		}
+        return null;
+	}
+
+	@Override
+	public PaymentBills findBillById(Long billId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetBills.class, billId));
+        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
+        com.everhomes.server.schema.tables.pojos.EhPaymentBills r = dao.findById(billId);
+        if (r != null) {
+			return ConvertHelper.convert(r, PaymentBills.class);
+		}
+		return null;
+	}
+
+	@Override
+	public void deleteBillItemsAfterDate(Long contractId, String endTimeStr) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");
+        context.delete(billItems)
+        		.where(billItems.CONTRACT_ID.eq(contractId))
+        		.and(billItems.DATE_STR_BEGIN.ge(endTimeStr))
+        		.execute();
+		
 	}
 
 }
