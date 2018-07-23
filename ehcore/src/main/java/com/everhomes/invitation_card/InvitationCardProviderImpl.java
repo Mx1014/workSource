@@ -14,7 +14,9 @@ import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class InvitationCardProviderImpl implements InvitationCardProvider {
     @Autowired
     private DbProvider dbProvider;
