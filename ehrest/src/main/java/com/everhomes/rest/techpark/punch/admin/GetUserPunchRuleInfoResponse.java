@@ -116,14 +116,7 @@ public class GetUserPunchRuleInfoResponse {
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;
 	}
-
-	public List<UniongroupTarget> getTargets() {
-		return targets;
-	}
-
-	public void setTargets(List<UniongroupTarget> targets) {
-		this.targets = targets;
-	}
+ 
 
 	public Byte getRuleType() {
 		return ruleType;
@@ -164,14 +157,7 @@ public class GetUserPunchRuleInfoResponse {
 	public void setSpecialDays(List<PunchSpecialDayDTO> specialDays) {
 		this.specialDays = specialDays;
 	}
-
-	public List<PunchSchedulingDTO> getSchedulings() {
-		return schedulings;
-	}
-
-	public void setSchedulings(List<PunchSchedulingDTO> schedulings) {
-		this.schedulings = schedulings;
-	}
+ 
 
 	public Byte getChinaHolidayFlag() {
 		return chinaHolidayFlag;
@@ -221,14 +207,6 @@ public class GetUserPunchRuleInfoResponse {
 		this.operateTime = operateTime;
 	}
 
-
-	public List<UniongroupTarget> getEmployees() {
-		return employees;
-	}
-
-	public void setEmployees(List<UniongroupTarget> employees) {
-		this.employees = employees;
-	}
 
 	public Byte getStatus() {
 		return status;
