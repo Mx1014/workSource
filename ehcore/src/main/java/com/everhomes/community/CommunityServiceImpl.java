@@ -1725,6 +1725,7 @@ public class CommunityServiceImpl implements CommunityService {
                     dto.setAreaName(community.getAreaName());
                     dto.setCommunityName(community.getName());
                 }
+                dto.setOperateType(OperateType.MANUAL.getCode());
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -1762,6 +1763,9 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
         memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
+        for (GroupMemberDTO groupMemberDTO : memberDTOList) {
+            groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
+        }
 		if (memberDTOList != null && memberDTOList.size() > pageSize) {
 			locator.setAnchor(memberDTOList.get(memberDTOList.size() - 1).getId());
 			memberDTOList = memberDTOList.subList(0, pageSize);
@@ -1830,6 +1834,7 @@ public class CommunityServiceImpl implements CommunityService {
                     dto.setAreaName(community.getAreaName());
                     dto.setCommunityName(community.getName());
                 }
+                dto.setOperateType(OperateType.MANUAL.getCode());
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -3698,6 +3703,7 @@ public class CommunityServiceImpl implements CommunityService {
                 } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE){
                     // FIXME 临时解决   2017/07/27  xq.tian
                     dto.setOperatorName("通过公司邮箱认证");
+                    dto.setOperateType(OperateType.NOT_MANUAL.getCode());
                 }
                 if (dto.getOrganizationName() == null || dto.getOrganizationName().isEmpty()) {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());

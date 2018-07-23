@@ -141,6 +141,7 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationPersonnels(Integer namespaceId, String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 
+    List<OrganizationMember> listOrganizationPersonnels(Integer namespaceId, String keywords, String identifierToken, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 
 	Integer countOrganizationPersonnels(Integer namespaceId, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
 

@@ -97,6 +97,7 @@ import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.customer.CustomerType;
@@ -7056,7 +7057,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationMember> organizationMembers = null;
         if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
             List<Long> orgIds = Collections.singletonList(cmd.getOrganizationId());
-            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getKeywords(), null, locator, pageSize);
+            List<OrganizationMemberLog> memberLogList = organizationProvider.listOrganizationMemberLogs(orgIds, cmd.getKeywords(), cmd.getIdentifierToken(),null, locator, pageSize);
             if (memberLogList != null) {
                 organizationMembers = memberLogList.stream()
                         .filter(r -> Objects.equals(r.getOperationType(), OperationType.JOIN.getCode()))
@@ -7085,7 +7086,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         .collect(Collectors.toList());
             }
         } else {
-            organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(), cmd.getKeywords(),
+            organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(), cmd.getIdentifierToken(), cmd.getKeywords(),
                     orgCommoand, cmd.getIsSignedup(), null, locator, pageSize);
         }
 
@@ -7102,9 +7103,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 UserIdentifier operatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(c.getOperatorUid(), IdentifierType.MOBILE.getCode());
                 dto.setOperatorName(operator != null ? operator.getNickName() : "");
                 dto.setOperatorPhone(operatorIdentifier != null ? operatorIdentifier.getIdentifierToken() : "");
+                dto.setOperateType(OperateType.MANUAL.getCode());
             } else if (OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.ACTIVE) {
                 // FIXME 临时解决   2017/07/27  xq.tian
                 dto.setOperatorName("通过公司邮箱认证");
+                dto.setOperateType(OperateType.NOT_MANUAL.getCode());
             }
             if (OrganizationMemberTargetType.fromCode(c.getTargetType()) == OrganizationMemberTargetType.USER) {
                 if (c.getTargetId() != null && c.getTargetId() != 0) {

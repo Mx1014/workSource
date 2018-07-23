@@ -3,13 +3,12 @@ package com.everhomes.rest.community.admin;
 
 /**
  * <ul>审核类型
- * <li>EMAIL(0): 邮箱</li>
+ * <li>NOT_MANUAL(0): 非人工审核(邮箱认证或通讯录导入)</li>
  * <li>MANUAL(1): 人工审核</li>
- * <li>IMPORT(2): 通讯录导入</li>
  * </ul>
  */
 public enum OperateType {
-    EMAIL((byte)0), MANUAL((byte)1), IMPORT((byte) 2);
+    NOT_MANUAL((byte)0), MANUAL((byte)1);
 
     private byte code;
 
