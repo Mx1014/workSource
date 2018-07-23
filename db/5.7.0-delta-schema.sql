@@ -14,7 +14,7 @@ ALTER TABLE eh_terminal_day_statistics ADD COLUMN average_active_user_change_rat
 CREATE TABLE `eh_service_agreement` (
 
   `id` INT(11)  NOT NULL COMMENT '主键',
-  `namespace_id` INT(11) NOT NULL  COMMENT '域空间ID',in
+  `namespace_id` INT(11) NOT NULL  COMMENT '域空间ID',
   `agreement_content` MEDIUMTEXT  COMMENT '协议内容',
 
   PRIMARY KEY(`id`)
