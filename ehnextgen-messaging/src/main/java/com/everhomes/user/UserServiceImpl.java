@@ -11,7 +11,6 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.archives.ArchivesService;
 import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
@@ -73,7 +72,6 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -89,7 +87,6 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
-import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupLocalStringCode;
 import com.everhomes.rest.group.GroupNameEmptyFlag;
@@ -184,9 +181,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
     private static final String SIGN_APP_KEY = "sign.appKey";
     private static final String EXPIRE_TIME = "invitation.expiretime";
-    private static final String YZX_VCODE_TEMPLATE_ID = "yzx.vcode.templateid";
-    private static final String MW_VCODE_TEMPLATE_CONTENT = "mw.vcode.template.content";
-    private static final String VCODE_SEND_TYPE = "sms.handler.type";
 
     private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
     private static final Byte SCENE_EXAMPLE = 5;
@@ -358,16 +352,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     private RolePrivilegeService rolePrivilegeService;
 
     @Autowired
-    private UserPrivilegeMgr userPrivilegeMgr;
-
-    @Autowired
     private GroupService groupService;
 
     @Autowired
     private PictureValidateService pictureValidateService;
-
-    @Autowired
-    private ArchivesService archivesService;
 
     private static final String DEVICE_KEY = "device_login";
 
@@ -660,7 +648,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
     private String convert(String template, Map<String, String> variables, String defaultVal) {
-        String pattern = "\\$\\{(.*?)\\}";
+        String pattern = "\\$\\{(.*?)}";
         Pattern match = Pattern.compile(pattern);
         Matcher m = match.matcher(template);
         while (m.find()) {
@@ -700,7 +688,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
     @Override
-    public void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request) {
+    public void resendVerificationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request) {
         UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
         if (identifier == null) {
             LOGGER.error("User identifier not found in db, signupToken=" + signupToken);
@@ -949,7 +937,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         userProvider.createUserInvitationRoster(roster, identifier.getOwnerUid());
         //update invitation
         Integer invitationCount = invitation.getCurrentInviteCount();
-        invitation.setCurrentInviteCount(invitationCount == null ? 0 : invitationCount.intValue() + 1);
+        invitation.setCurrentInviteCount(invitationCount == null ? 0 : invitationCount + 1);
         userProvider.updateInvitation(ConvertHelper.convert(invitation, UserInvitation.class));
         user.setInvitorUid(invitation.getOwnerUid());
         user.setInviteType(invitation.getInviteType());
@@ -1194,7 +1182,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin foundLogin = null;
         int nextLoginId = 1;
         if (maxLoginId != null) {
-            for (int i = 1; i <= maxLoginId.intValue(); i++) {
+            for (int i = 1; i <= maxLoginId; i++) {
                 String hkeyLogin = String.valueOf(i);
                 Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
                 UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
@@ -1483,7 +1471,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         return login;
     }
 
-    public UserLogin unregisterLoginConnection(UserLogin userLogin) {
+    private UserLogin unregisterLoginConnection(UserLogin userLogin) {
         String userKey = NameMapper.getCacheKey("user", userLogin.getUserId(), null);
         String hkeyLogin = String.valueOf(userLogin.getLoginId());
         Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
@@ -1921,7 +1909,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
     @Override
-    public void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request) {
+    public void resendVerificationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request) {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
         if (userIdentifier == null) {
@@ -2003,7 +1991,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         sendcmd.setNamespaceId(cmd.getNamespaceId());
         sendcmd.setIdentifier(cmd.getIdentifier());
         sendcmd.setRegionCode(cmd.getRegionCode());
-        resendVerficationCode(sendcmd, request);
+        resendVerificationCode(sendcmd, request);
     }
 
     @Override
@@ -2111,7 +2099,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, roleId could not be empty");
 
-        Role role = this.aclProvider.getRoleById(cmd.getRoleId().longValue());
+        Role role = this.aclProvider.getRoleById(cmd.getRoleId());
         if (role == null)
             throw errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2169,10 +2157,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
         LOGGER.info("Find current user family {},query user family {}", currentUserFamilies, queryUserFamilies);
         //if have same family ,the result >0
-        List<Long> queryUserFamilyIds = queryUserFamilies.stream().map(r -> {
-            Long id = r.getId();
-            return id;
-        }).collect(Collectors.toList());
+        List<Long> queryUserFamilyIds = queryUserFamilies.stream().map(FamilyDTO::getId).collect(Collectors.toList());
         List<FamilyDTO> currUserFamilies = new ArrayList<FamilyDTO>();
         for (FamilyDTO family : currentUserFamilies) {
 
@@ -2216,20 +2201,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 info.setHometownName(category.getName());
         }
         List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(queryUser.getId());
-        List<String> phones = identifiers.stream().filter((r) -> {
-            return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE;
-        })
-                .map((r) -> {
-                    return r.getIdentifierToken();
-                })
+        List<String> phones = identifiers.stream().filter((r) -> IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE)
+                .map(EhUserIdentifiers::getIdentifierToken)
                 .collect(Collectors.toList());
         info.setPhones(phones);
-        List<String> emails = identifiers.stream().filter((r) -> {
-            return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL;
-        })
-                .map((r) -> {
-                    return r.getIdentifierToken();
-                })
+        List<String> emails = identifiers.stream().filter((r) -> IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL)
+                .map(EhUserIdentifiers::getIdentifierToken)
                 .collect(Collectors.toList());
         info.setEmails(emails);
 
@@ -2263,12 +2240,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 .collect(Collectors.toList());
         info.setPhones(phones);
 
-        List<String> emails = identifiers.stream().filter((r) -> {
-            return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL;
-        })
-                .map((r) -> {
-                    return r.getIdentifierToken();
-                })
+        List<String> emails = identifiers.stream().filter((r) -> IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.EMAIL)
+                .map(EhUserIdentifiers::getIdentifierToken)
                 .collect(Collectors.toList());
         info.setEmails(emails);
         if (queryUser.getBirthday() != null)
@@ -4914,11 +4887,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (member == null)
             return dto;
         dto.setVisibleFlag(member.getVisibleFlag());
-        if (checkUserPrivilege(UserContext.currentUserId(), dto.getOrganizationId()) || VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.SHOW)
+        if (rolePrivilegeService.checkIsSystemOrAppAdmin(dto.getOrganizationId(), UserContext.currentUserId()) || VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.SHOW)
             dto.setContactToken(memberArchive.getContactToken());
 
         //  7.管理员校验
-        if (checkUserPrivilege(dto.getUserId(), dto.getOrganizationId()))
+        if (rolePrivilegeService.checkIsSystemOrAppAdmin(dto.getOrganizationId(), dto.getUserId()))
             dto.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
         else
             dto.setAdminFlag(TrueOrFalseFlag.FALSE.getCode());
@@ -5850,26 +5823,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				|| resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
 			response.setIsAdmin(ContactAdminFlag.YES.getCode());
 		else
-			response.setIsAdmin(ContactAdminFlag.NO.getCode()); */
+			response.setIsAdmin(ContactAdminFlag.NO.getCode());
+        boolean isAdmin = checkUserPrivilege(UserContext.currentUserId(), enterpriseId);*/
         Long enterpriseId = organizationService.getTopOrganizationId(cmd.getOrganizationId());
-        boolean isAdmin = checkUserPrivilege(UserContext.currentUserId(), enterpriseId);
-        if (isAdmin)
+        if (rolePrivilegeService.checkIsSystemOrAppAdmin(enterpriseId, UserContext.currentUserId()))
             response.setIsAdmin(TrueOrFalseFlag.TRUE.getCode());
         else
             response.setIsAdmin(TrueOrFalseFlag.FALSE.getCode());
         return response;
-    }
-
-    private boolean checkUserPrivilege(Long userId, Long enterpriseId) {
-        if (userId == 0)
-            return false;
-        boolean isAdmin;
-        try {
-            isAdmin = userPrivilegeMgr.checkUserPrivilege(userId, enterpriseId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON, FlowConstants.ORGANIZATION_MODULE, null, null, enterpriseId, null);
-        } catch (Exception e) {
-            isAdmin = false;
-        }
-        return isAdmin;
     }
 
     /**
