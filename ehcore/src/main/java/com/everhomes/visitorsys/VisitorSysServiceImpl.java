@@ -22,6 +22,8 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.CreateLocalVistorCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
@@ -41,6 +43,8 @@ import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.ui.*;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.VisitorsysSearcher;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
@@ -140,6 +144,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private UserPrivilegeMgr userPrivilegeMgr;
     @Autowired
     private VisitorSysMessageReceiverProvider messageReceiverProvider;
+    @Autowired
+    private PortalVersionProvider portalVersionProvider;
+    @Autowired
+    private ServiceModuleAppProvider serviceModuleAppProvider;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -345,24 +353,33 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
         if(!hasSendMessage)
             sendMessageInviter(visitor);//发送消息给邀请者
-        sendMessageToAdmin(visitor);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
+        sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         GetBookedVisitorByIdResponse convert = ConvertHelper.convert(visitor, GetBookedVisitorByIdResponse.class);
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
         return convert;
     }
 
-    private void sendMessageToAdmin(VisitorSysVisitor visitor) {
+    private void sendMessageToAdmin(VisitorSysVisitor visitor,CreateOrUpdateVisitorCommand cmd) {
         VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
         VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
         if(ownerType != VisitorsysOwnerType.COMMUNITY
                 || VisitorsysStatus.WAIT_CONFIRM_VISIT != visitStatus){
             return;
         }
-        String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
-        String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "");
 
-        String url = String.format(contextUrl, homeurl,visitor.getId(),visitor.getNamespaceId());
+        Long appId = cmd.getAppId();
+        if(appId == null) {
+            PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(visitor.getNamespaceId());
+            List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(visitor.getNamespaceId(), releaseVersion == null ? null : releaseVersion.getId(), VisitorsysConstant.COMMUNITY_MODULE_ID);
+            if (serviceModuleApps != null && serviceModuleApps.size() > 0) {
+                appId = serviceModuleApps.get(serviceModuleApps.size()-1).getOriginId();
+            }
+        }
+        String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
+        String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "%s/visitor-management/build/index.html?ns=%s&ownerType=%s&id=%s&appId=%s&status=%s#/visitor-detail#sign_suffix");
+
+        String url = String.format(contextUrl, homeurl,visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),appId,visitor.getVisitStatus());
 
         // 组装路由
         OfficialActionData actionData = new OfficialActionData();
@@ -395,10 +412,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             return;
         for (VisitorSysMessageReceiver receiver : list) {
             try {
-                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                        receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-            }catch (Exception e){
-                LOGGER.error("visitorsys {} send message error",receiver, e);
+                boolean hasPrivilege = userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, appId, null, cmd.getOwnerId());
+                if(hasPrivilege) {
+                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                                receiver.getCreatorUid().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+
+                }
+            } catch (Exception e) {
+                LOGGER.error("visitorsys {} send message error", receiver, e);
             }
         }
 
