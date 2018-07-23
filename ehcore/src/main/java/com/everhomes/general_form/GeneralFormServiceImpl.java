@@ -744,7 +744,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 
         addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
-        GeneralApproval generalApproval = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
+        GeneralApproval generalApproval = generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
         cmd2.setGeneralFormId(generalApproval.getFormOriginId());
         cmd2.setSourceId(source_id);
         cmd2.setSourceType(source_type);

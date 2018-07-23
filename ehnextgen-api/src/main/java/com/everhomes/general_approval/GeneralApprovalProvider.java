@@ -21,6 +21,7 @@ public interface GeneralApprovalProvider {
 
     GeneralApproval getGeneralApprovalByName(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, String approvalName);
 
+    GeneralApproval getGeneralApprovalByNameAndRunning(Integer namespaceId, Long moduleId, Long ownerId, String ownerType);
 
 	GeneralApproval getGeneralApprovalByAttribute(Integer namespaceId, Long ownerId, String attribute);
 

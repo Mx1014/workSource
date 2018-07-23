@@ -36,7 +36,7 @@ public class RequisitionController extends ControllerBase {
     }
 
     /**
-     *
+     * <b>URL: /requisition/createRequisition</b>
      * @param cmd
      * @return
      */
