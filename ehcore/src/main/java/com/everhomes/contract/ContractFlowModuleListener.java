@@ -167,7 +167,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 contractSearcher.feedDoc(contract);
                 //记录合同事件日志，by tangcen
         		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
-//<<<<<<< HEAD
             } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))){
             	if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
 	            	 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
@@ -186,18 +185,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         			contract.setRent(totalAmount);
         			contractProvider.updateContract(contract);
                     contractSearcher.feedDoc(contract);
-        			//=======
-                //记录合同事件日志，by tangcen
-//        		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
-//            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus())) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
-//                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
-//              //查询企业客户信息，客户状态会由已成交客户变为历史客户
-//        		if (contract.getCustomerType()==0) {
-//        			EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(contract.getCustomerId());
-//        			enterpriseCustomer.setLevelItemId(7L);
-//        			enterpriseCustomerProvider.updateEnterpriseCustomer(enterpriseCustomer);
-//        			enterpriseCustomerSearcher.feedDoc(enterpriseCustomer);
-////>>>>>>> master
         		}
             }
         }
