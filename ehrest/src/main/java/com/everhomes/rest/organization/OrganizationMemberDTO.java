@@ -44,7 +44,7 @@ import java.sql.Timestamp;
  * <li>operatorName: 审核人</li>
  * <li>operatorPhone: 审核人电话</li>
  * <li>departmentName: 部门名称</li>
- * <li>operateType: 审核类型</li>
+ * <li>operateType: 审核类型，请参考{@link com.everhomes.rest.community.admin.OperateType}</li>
  * </ul>
  */
 public class OrganizationMemberDTO {

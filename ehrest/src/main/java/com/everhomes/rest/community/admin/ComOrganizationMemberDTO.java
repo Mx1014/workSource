@@ -37,7 +37,7 @@ import java.util.List;
  *     <li>approveTime: 操作(同意、拒绝)时间</li>
  *     <li>operatorName: 操作人名字</li>
  *     <li>operatorPhone: 操作人电话</li>
- *     <li>operateType: 认证方式</li>
+ *     <li>operateType: 认证方式,请参考{@link com.everhomes.rest.community.admin.OperateType}</li>
  * </ul>
  */
 public class ComOrganizationMemberDTO {

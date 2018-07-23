@@ -1675,8 +1675,10 @@ public class CommunityServiceImpl implements CommunityService {
         if (resourceList == null) {
             return new CommunityAuthUserAddressResponse();
         }
-        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
-
+        //不通过域空间查询，通过项目查询 add by yanlong.liang 20180723
+//        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
+        List<Long> communityIds = new ArrayList<>();
+        communityIds.add(cmd.getCommunityId());
         List<Group> groups = groupProvider.listGroupByCommunityIds(communityIds, (loc, query) -> {
             Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
             query.addConditions(c);
@@ -3621,12 +3623,15 @@ public class CommunityServiceImpl implements CommunityService {
 		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
-        if (resourceList == null) {
-            return response;
-        }
-        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+//        if (resourceList == null) {
+//            return response;
+//        }
+        //不通过域空间查询，通过项目查询 add by yanlong.liang 20180723
+//        List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
+        List<Long> communityIds = new ArrayList<>();
+        communityIds.add(cmd.getCommunityId());
         List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(communityIds);
         if (null == orgs || orgs.size() == 0) {
 			LOGGER.debug("orgs is null");
