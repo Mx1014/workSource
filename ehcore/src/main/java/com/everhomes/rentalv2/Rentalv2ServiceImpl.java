@@ -1213,9 +1213,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		for (RentalResource rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, sceneTokenDTO, true);
-
+			//帮客户端处理一下 颠倒按月按周预约规则的位置
+			List<SitePriceRuleDTO> sitePriceRules = rSiteDTO.getSitePriceRules();
+			int i = 0;
+			for (;i<sitePriceRules.size();i++)
+				if (RentalType.MONTH.getCode() == sitePriceRules.get(i).getRentalType())
+					break;
+			int j = 0;
+			for (;j<sitePriceRules.size();j++)
+				if (RentalType.WEEK.getCode() == sitePriceRules.get(j).getRentalType())
+					break;
+			if (i<sitePriceRules.size() && j<sitePriceRules.size()){
+				sitePriceRules.add(sitePriceRules.get(i));
+				sitePriceRules.remove(i);
+			}
 			response.getRentalSites().add(rSiteDTO);
 		}
+
 
 		return response;
 	}
@@ -8948,6 +8962,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		SimpleDateFormat beginTimeSF = new SimpleDateFormat("HH:mm");
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
 		SimpleDateFormat beginMonthSF = new SimpleDateFormat("yyyy-MM-dd");
-		return getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
+		String result = getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
+		result.replaceAll("-","~");//弱智需求。。
+		return result;
 	}
 }
