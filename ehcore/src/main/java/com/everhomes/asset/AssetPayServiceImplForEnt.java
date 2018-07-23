@@ -92,6 +92,7 @@ public class AssetPayServiceImplForEnt implements AssetPayServiceForEnt{
         //4、组装支付方式
         //preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
         preOrderDTO = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+        preOrderDTO.setUserId(cmd.getPayerId());
         
         //5、保存订单信息
         saveOrderRecord(orderCommandResponse, cmd.getOrderId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
