@@ -47,6 +47,9 @@
 -- AUTHOR: yanjun 20180719
 -- REMARK: 请备份 eh_service_modules 表与 eh_web_menus 表
 
+-- AUTHOR: huangmingbo 20180720
+-- REMARK: 执行 /yellowPage/transferTime 参数：201233
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -706,6 +709,7 @@ INSERT INTO eh_locale_strings (id ,scope ,CODE ,locale ,TEXT)
 VALUES( @c_id + 2 , 'pushMessage',2 ,'zh_CN' ,'业务联系人');
 
 DELETE FROM eh_web_menus  WHERE NAME='短信推送' AND data_type='sms-push' AND id=16020400;
+DELETE FROM eh_web_menus  WHERE NAME LIKE '短信推送%' AND data_type='sms-push' AND id=41060000;
 -- end
 
 -- AUTHOR: 马世亨
@@ -835,20 +839,6 @@ INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `fi
 ((@id:=@id+1), '0', 'contract', '105', '29', '物业服务合同', '2', '2', '1', NOW(), NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`, `category_id`) VALUES
 ((@id:=@id+1), '0', 'contract', '105', '30', '车位服务合同', '3', '2', '1', NOW(), NULL, NULL, NULL, NULL, NULL);
-
--- end
-
--- AUTHOR: dingjianmin  20180718
--- REMARK: issue 21713 合同管理V3.0（合同套打）
-SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_service_module_privileges`),0);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21210', '0', '21215', '打印预览', '9', NOW());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@id:=@id+1), '21210', '0', '21216', '编辑、清空数据、打印', '10', NOW());
-
-SET @id = (SELECT MAX(id) from eh_var_fields);
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES
-((@id:=@id+1), 'contract', 'templateId', '关联合同模板', 'String', '15', '/13/15/', '0', NULL, '2', '1', '2017-12-04 20:49:53', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
-INSERT INTO `eh_service_module_functions` (`id`, `module_id`, `privilege_id`, `explain`) VALUES ('21215', '21200', '21215', '打印预览');
-INSERT INTO `eh_service_module_functions` (`id`, `module_id`, `privilege_id`, `explain`) VALUES ('21216', '21200', '21216', '编辑、清空数据、打印');
 
 -- end
 

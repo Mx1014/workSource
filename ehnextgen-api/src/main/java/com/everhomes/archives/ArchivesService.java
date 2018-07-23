@@ -94,7 +94,9 @@ public interface ArchivesService {
 
     void executeArchivesNotification(Integer day, Integer time, LocalDateTime nowDateTime);
 
+    /* 同步数据接口 start */
     void makeArchivesCheckInTime();
 
     void cleanRedundantArchivesDetails();
+    /* 同步数据接口 end */
 }
