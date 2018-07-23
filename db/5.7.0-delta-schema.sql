@@ -235,6 +235,8 @@ ADD COLUMN `org_member_original_price`  decimal(10,2) NULL AFTER `org_member_wor
 ALTER TABLE `eh_rentalv2_price_rules`
 ADD COLUMN `approving_user_original_price`  decimal(10,2) NULL AFTER `approving_user_workday_price`;
 
+ALTER TABLE `eh_rentalv2_cells`
+ADD UNIQUE INDEX `u_eh_cell_id` (`id`) ;
 -- end
 
 -- 通用脚本

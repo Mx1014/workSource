@@ -91,7 +91,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
         //String userPrefix = "EhBizBusinesses";
         String userPrefix = "EhOrganizations";
-        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(userPrefix + cmd.getOrganizationId(), cmd.getCommunityId().toString());
+        List<String> list = new ArrayList<>();
+        list.add("0");
+        if (cmd.getCommunityId() != null)
+             list.add(cmd.getCommunityId().toString());
+        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(userPrefix + cmd.getOrganizationId(), list);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("List rental payee accounts(response), orgnizationId={}, tags={}, response={}", cmd.getOrganizationId(), cmd.getCommunityId(), GsonUtil.toJson(payUserDTOs));
         }
