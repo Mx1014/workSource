@@ -1131,8 +1131,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 				Cell cell14 = tempRow.createCell(14);
 				cell14.setCellStyle(style);
-
-				String feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel","");
+				String feeModel = "";
+				if (null != task.getTaskCategoryId())
+					feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel" + task.getTaskCategoryId(),"");
 				if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
 					if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
 //						费用确认后导出费用清单

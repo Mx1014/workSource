@@ -599,20 +599,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         addAdditionalInfo(roster, user, activity);
         
         activityProvider.createActivityRoster(roster);
-        // 注册成功事件 add by jiarui
-        LocalEventBus.publish(event -> {
-            LocalEventContext localEventcontext = new LocalEventContext();
-            localEventcontext.setUid(UserContext.currentUserId());
-            localEventcontext.setNamespaceId(activity.getNamespaceId());
-            event.setContext(localEventcontext);
-            Map<String, Object> map = new HashMap<>();
-            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
-            map.put("categoryId", activity.getCategoryId());
-            event.setParams(map);
-            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
-            event.setEntityId(UserContext.currentUserId());
-            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
-        });
+//        // 注册成功事件 add by jiarui
+//        LocalEventBus.publish(event -> {
+//            LocalEventContext localEventcontext = new LocalEventContext();
+//            localEventcontext.setUid(UserContext.currentUserId());
+//            localEventcontext.setNamespaceId(activity.getNamespaceId());
+//            event.setContext(localEventcontext);
+//            Map<String, Object> map = new HashMap<>();
+//            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+//            map.put("categoryId", activity.getCategoryId());
+//            event.setParams(map);
+//            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+//            event.setEntityId(UserContext.currentUserId());
+//            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+//        });
 
     }
 

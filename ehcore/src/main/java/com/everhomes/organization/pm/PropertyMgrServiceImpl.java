@@ -1351,7 +1351,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         else if(sendNoticeMode == SendNoticeMode.COMMUNITY){
         	sendNoticeToCommunitsUser(cmd);
         	
-        }else {
+        }
+        //按号码推送
+        else if(sendNoticeMode == SendNoticeMode.MOBILE){
+        	sendNoticeByPhone(cmd, operator);
+        }
+        //此代码目前暂时无用，但后续应该有借鉴之用，暂时不删，前面有很多坑要靠这段代码来填
+        else {
             // 八百年前的代码，看都不想看
             Community community = this.checkCommunity(cmd.getCommunityId());
 
@@ -1644,7 +1650,35 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             smsProvider.sendSms(user.getNamespaceId(), phoneArray, templateScope, templateId, user.getLocale(), variables);
         }
     }
-
+    /**
+     * 按号码发送
+     * @param cmd
+     * @param user
+     */
+    private void sendNoticeByPhone(SendNoticeCommand cmd, User user) {
+    	List<String> phones = cmd.getMobilePhones();
+    	Integer namespaceId = user.getNamespaceId();
+    	 //按电话号码发送
+        if (phones != null && phones.size() > 0) {
+            List<OrganizationMember> members = new ArrayList<>();
+            for (String phone : phones) {
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+                OrganizationMember member = new OrganizationMember();
+                member.setContactToken(phone);
+                member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+                if (null != userIdentifier) {
+                    member.setTargetId(userIdentifier.getOwnerUid());
+                    member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                }
+                members.add(member);
+            }
+            if (members.size() > 0) {
+                this.processSmsByMembers(members, cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), user);
+            }
+        }        
+    }
+    
+    
     private void sendNoticeToCommunityPmOwner(SendNoticeCommand cmd, User user) {
 
         Integer namespaceId = user.getNamespaceId();
