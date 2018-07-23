@@ -1,9 +1,9 @@
 package com.everhomes.general_approval;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 public interface GeneralApprovalValProvider {
 
@@ -20,4 +20,5 @@ public interface GeneralApprovalValProvider {
 
 	GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName);
 
+	GeneralApprovalVal getGeneralApprovalById(Long id);
 }

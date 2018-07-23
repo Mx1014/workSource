@@ -116,7 +116,7 @@ public class RouterBuilder {
         }
 
         Route withParam(String key, Object param) {
-            if (null == param) return this;
+            if (null == param) param = "";
             try {
                 this.params = params.append("&")
                         .append(key).append("=")

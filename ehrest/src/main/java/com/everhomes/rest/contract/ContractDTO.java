@@ -1,14 +1,13 @@
 // @formatter:off
 package com.everhomes.rest.contract;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
-
-import com.everhomes.discover.ItemType;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.util.StringHelper;
 
 /**
  * 
@@ -55,6 +54,8 @@ public class ContractDTO {
 	
 	private Long categoryId;
 	private Long configId;
+	// dynamic field special name
+	private String contractTypeName;
 	
 	
 	public Long getConfigId() {
@@ -303,6 +304,14 @@ public class ContractDTO {
 
 	public void setServiceUserPhone(String serviceUserPhone) {
 		this.serviceUserPhone = serviceUserPhone;
+	}
+
+	public String getContractTypeName() {
+		return contractTypeName;
+	}
+
+	public void setContractTypeName(String contractTypeName) {
+		this.contractTypeName = contractTypeName;
 	}
 
 	@Override

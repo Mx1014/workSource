@@ -1,6 +1,10 @@
 
 package com.everhomes.asset;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1372,20 +1376,6 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
 	}
 	
 	/**
-	 * <p>由于史晗不肯造张江高科的账单数据，所以只能手动造账单数据用于测试新支付</p>
-	 * <b>URL: /asset/createTestZJGKBill</b>
-	 */
-	@RequestMapping("createTestZJGKBill")
-	@RestReturn(value = ListBillsDTO.class)
-	public RestResponse createTestZJGKBill(){
-	    ListBillsDTO dto = assetService.createTestZJGKBill();
-	    RestResponse response = new RestResponse(dto);
-	    response.setErrorDescription("OK");
-	    response.setErrorCode(ErrorCodes.SUCCESS);
-	    return response;
-	}
-	
-	/**
 	 * <b>URL: /asset/isProjectNavigateDefault</b>
 	 * <p>项目导航区分全部、解耦 是否使用默认配置</p>
 	 */
@@ -1467,6 +1457,129 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
         restResponse.setErrorDescription("OK");
         return restResponse;
+    }
+    
+    /**
+     * <p>对公转账：按照账单组展示已出账单</p>
+     * <b>URL: /asset/listSettledBillForEnt</b>
+     */
+    @RequestMapping("listSettledBillForEnt")
+    @RestReturn(value = ListBillsResponse.class)
+    public RestResponse listSettledBillForEnt(ListBillsCommandForEnt cmd) {
+    	ListBillsResponse listBillsResponse = assetService.listBillsForEnt(cmd);
+        RestResponse response = new RestResponse(listBillsResponse);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>对公转账：导出筛选过的所有账单</p>
+     * <b>URL: /asset/exportSettledBillsForEnt</b>
+     */
+    @RequestMapping("exportSettledBillsForEnt")
+    public HttpServletResponse exportSettledBillsForEnt(ListBillsCommandForEnt cmd,HttpServletResponse response) {
+        assetService.exportSettledBillsForEnt(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+    
+    /**
+     * <p>对公转账：结算-账单明细</p>
+     * <b>URL: /asset/listPaymentBillForEnt</b>
+     */
+    @RequestMapping(value = "listPaymentBillForEnt")
+    @RestReturn(ListPaymentBillResp.class)
+    public RestResponse listPaymentBillForEnt(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+        ListPaymentBillResp result = assetService.listPaymentBillForEnt(cmd);
+        RestResponse response = new RestResponse(result);
+        return response;
+    }
+    
+    /**
+     * <p>对公转账：导出筛选过的所有交易明细</p>
+     * <b>URL: /asset/exportOrdersForEnt</b>
+     */
+    @RequestMapping("exportOrdersForEnt")
+    public HttpServletResponse exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response) {
+        assetService.exportOrdersForEnt(cmd,response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+    
+    /**
+     * <p>对公转账：信息列表</p>
+     * <b>URL: /asset/publicTransferBill</b>
+     */
+    @RequestMapping("publicTransferBill")
+    @RestReturn(value = PublicTransferBillRespForEnt.class)
+    public RestResponse publicTransferBill(PublicTransferBillCmdForEnt cmd) {
+    	PublicTransferBillRespForEnt listPaymentBillResp = assetService.publicTransferBillForEnt(cmd);
+        RestResponse restResponse = new RestResponse(listPaymentBillResp);
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return restResponse;
+    }
+    
+    /**
+     * <p>对公转账：展示账单组列表</p>
+     * <b>URL: /asset/listBillGroupsForEnt</b>
+     */
+    @RequestMapping("listBillGroupsForEnt")
+    @RestReturn(value = ListBillGroupsDTO.class, collection = true)
+    public RestResponse listBillGroupsForEnt(OwnerIdentityCommand cmd) {
+        List<ListBillGroupsDTO> list = assetService.listBillGroupsForEnt(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>展示账单组对应的减免费项列表</p>
+     * <b>URL: /asset/showCreateBillSubItemList</b>
+     */
+    @RequestMapping("showCreateBillSubItemList")
+    @RestReturn(value = ShowCreateBillSubItemListDTO.class)
+    public RestResponse showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	ShowCreateBillSubItemListDTO dto = assetService.showCreateBillSubItemList(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>批量减免费项</p>
+     * <b>URL: /asset/batchModifyBillSubItem</b>
+     */
+    @RequestMapping("batchModifyBillSubItem")
+    @RestReturn(value = String.class)
+    public RestResponse batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+        assetService.batchModifyBillSubItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
+     * <b>URL: /asset/testLateFine</b>
+     * @throws ParseException 
+     */
+    @RequestMapping("testLateFine")
+    @RestReturn(value = String.class)
+    public RestResponse testLateFine(TestLateFineCommand cmd) throws ParseException {
+    	assetService.testLateFine(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
     }
     
 }

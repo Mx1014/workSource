@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -240,12 +241,17 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 		List<ActivityCategoryDTO> categoryDtos = new ArrayList<>();
 
+		//校验是否所有的子分类都为关闭状态
+		Integer flag = 0;
 		//获取有效的子分类
 		if(config.getCategoryDTOList() != null && config.getCategoryDTOList().size() > 0){
 			for(int i=0; i<config.getCategoryDTOList().size(); i++) {
 				ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
 
 				if (dto.getId() == null){
+				    if (TrueOrFalseFlag.FALSE.getCode().equals(dto.getEnabled())) {
+				        flag++;
+                    }
 					dto.setParentId(config.getCategoryId());
 					categoryDtos.add(dto);
 				}else {
@@ -253,6 +259,9 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 					if(oldCategory != null && oldCategory.getParentId() != null && oldCategory.getParentId().equals(config.getCategoryId())){
 						dto.setParentId(config.getCategoryId());
 						categoryDtos.add(dto);
+                        if (TrueOrFalseFlag.FALSE.getCode().equals(oldCategory.getEnabled())) {
+                            flag++;
+                        }
 					}
 				}
 			}
@@ -260,7 +269,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 
 		//如果没有则增加默认分类、或者子分类关闭
-		if(categoryDtos.size() == 0){
+		if(categoryDtos.size() == 0 || (!CollectionUtils.isEmpty(config.getCategoryDTOList()) && flag.equals(config.getCategoryDTOList().size()))){
 			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
 			newDto.setAllFlag(AllFlagType.YES.getCode());
 			newDto.setName("all");

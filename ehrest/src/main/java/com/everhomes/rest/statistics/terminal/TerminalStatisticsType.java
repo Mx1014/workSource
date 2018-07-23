@@ -1,11 +1,17 @@
 package com.everhomes.rest.statistics.terminal;
 
 public enum TerminalStatisticsType {
-	NEW_USER("new_user"), ACTIVE_USER("active_user"), START("start"), CUMULATIVE_USER("cumulative_user");
+
+	NEW_USER("new_user"),
+	ACTIVE_USER("active_user"),
+	START("start"),
+	CUMULATIVE_USER("cumulative_user"),
+	CUMULATIVE_ACTIVE_USER("cumulative_active_user")
+	;
 
 	private String code;
 
-	private TerminalStatisticsType(String code){
+	TerminalStatisticsType(String code){
 		this.code = code;
 	}
 
@@ -25,5 +31,4 @@ public enum TerminalStatisticsType {
 		}
 		return null;
 	}
-	
 }

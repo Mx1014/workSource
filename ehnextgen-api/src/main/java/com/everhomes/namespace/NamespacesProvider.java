@@ -20,4 +20,5 @@ public interface NamespacesProvider {
 	//获取域空间默认配置蒙版
 	List<MaskDTO> listNamespaceMasks(Integer namespaceId);
 
+    List<NamespaceInfoDTO> listNamespaceByModuleId(Long moduelId);
 }

@@ -1,10 +1,12 @@
 package com.everhomes.rest.statistics.terminal;
 
 public enum TerminalStatisticsTaskStatus {
+
+	CORRECT_USER_ACTIVITY((byte)0),
 	GENERATE_APP_VERSION_CUMULATIVE((byte)10),
-	GENERATE_APP_VERSION_ACTIVE((byte)20),
+	GENERATE_HOUR_STAT((byte)20),
 	GENERATE_DAY_STAT((byte)30),
-	GENERATE_HOUR_STAT((byte)40),
+	GENERATE_APP_VERSION_ACTIVE((byte)40),
 	GENERATE_APP_VERSION_STAT((byte)50),
 	FINISH((byte)100);
 
@@ -24,7 +26,7 @@ public enum TerminalStatisticsTaskStatus {
 		}
 		TerminalStatisticsTaskStatus[] values = TerminalStatisticsTaskStatus.values();
 		for (TerminalStatisticsTaskStatus value : values) {
-			if(value.code == code.byteValue()){
+			if(value.code == code){
 				return value;
 			}
 		}

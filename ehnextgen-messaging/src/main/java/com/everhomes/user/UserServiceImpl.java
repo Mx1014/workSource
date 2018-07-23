@@ -1947,6 +1947,44 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 	}
 
+	@Override
+	public void resendVerficationCodeByApp(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
+		if(userIdentifier==null){
+			LOGGER.error("cannot find user identifierToken.identifierToken={}",cmd.getIdentifier());
+			throw errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
+		}
+
+		//判断手机号的用户与当前用户是否一致
+		if (userIdentifier.getOwnerUid() == null || !userIdentifier.getOwnerUid().equals(UserContext.currentUserId())) {
+			LOGGER.error("phone not match user error");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+					"phone not match user error");
+		}
+
+		if (cmd.getRegionCode() != null && userIdentifier.getRegionCode() != null && !cmd.getRegionCode().equals(userIdentifier.getRegionCode())) {
+			LOGGER.error("phone not match user error");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+					"phone not match user error");
+		}
+
+		this.verifySmsTimes("fogotPasswd", userIdentifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
+
+		String verificationCode = RandomGenerator.getRandomDigitalString(6);
+		userIdentifier.setVerificationCode(verificationCode);
+		userIdentifier.setRegionCode(cmd.getRegionCode());
+		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()), verificationCode);
+
+		this.userProvider.updateIdentifier(userIdentifier);
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
+		}
+	}
 
 
 	@Override
@@ -1966,6 +2004,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		sendcmd.setIdentifier(cmd.getIdentifier());
 		sendcmd.setRegionCode(cmd.getRegionCode());
 		resendVerficationCode(sendcmd, request);
+	}
+
+	@Override
+	public void sendCodeWithPictureValidateByApp(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request) {
+		//校验图片验证码
+		Boolean validateFlag = pictureValidateService.validateCodeByApp(cmd.getPictureCode());
+		if(!validateFlag){
+			LOGGER.error("invalid picture code, validate fail");
+			throw errorWith(PictureValidateServiceErrorCode.SCOPE,
+					PictureValidateServiceErrorCode.ERROR_INVALID_CODE, "invalid picture code");
+		}
+
+		//发送手机验证码
+		ResendVerificationCodeByIdentifierCommand sendcmd = new ResendVerificationCodeByIdentifierCommand();
+		sendcmd.setNamespaceId(cmd.getNamespaceId());
+		sendcmd.setIdentifier(cmd.getIdentifier());
+		sendcmd.setRegionCode(cmd.getRegionCode());
+		resendVerficationCodeByApp(sendcmd, request);
 	}
 
 	@Override
@@ -5635,7 +5691,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		if (DateHelper.currentGMTTime().getTime() - identifier.getNotifyTime().getTime() > 10 * 60000) {
 			LOGGER.error("the verifycode is invalid with timeout");
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-					UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+					UserServiceErrorCode.ERROR_VERIFICATION_CODE_EXPIRED, "Invalid token status");
 		}
 
 		if(namespaceId == null || identifier.getNamespaceId() == null || namespaceId.intValue() != identifier.getNamespaceId().intValue()){
@@ -5644,12 +5700,52 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 					UserServiceErrorCode.ERROR_INVALID_PARAMS, "Invalid namespaceId");
 		}
 
+		//判断手机号的用户与当前用户是否一致
+		if (identifier.getOwnerUid() == null || !identifier.getOwnerUid().equals(UserContext.currentUserId())) {
+            LOGGER.error("phone not match user error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+                    "phone not match user error");
+        }
 
+		if (cmd.getRegionCode() != null && identifier.getRegionCode() != null && !cmd.getRegionCode().equals(identifier.getRegionCode())) {
+            LOGGER.error("phone not match user error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+                    "phone not match user error");
+        }
 		// find user by uid
 		User user = userProvider.findUserById(identifier.getOwnerUid());
 		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
 		userProvider.updateUser(user);
 
+	}
+
+	@Override
+	public void checkVerifyCodeAndResetPasswordWithoutIdentifyToken(CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand cmd) {
+		User user = UserContext.current().getUser();
+		if (user == null) {
+            LOGGER.error("user not exists");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
+                    "user not exists");
+		}
+		UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(user.getId(),user.getNamespaceId());
+		if (userIdentifier == null) {
+            LOGGER.error("userIdentifier not exists");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "userIdentifier not exists");
+        }
+        if (StringUtils.isBlank(userIdentifier.getVerificationCode()) || !userIdentifier.getVerificationCode().equals(cmd.getVerifyCode())) {
+            LOGGER.error("invalid operation,can not find verify information");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+                    "invalid params");
+        }
+        // check the expire time
+        if (DateHelper.currentGMTTime().getTime() - userIdentifier.getNotifyTime().getTime() > 10 * 60000) {
+            LOGGER.error("the verifycode is invalid with timeout");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+        }
+		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
+		userProvider.updateUser(user);
 	}
 
 	@Override
