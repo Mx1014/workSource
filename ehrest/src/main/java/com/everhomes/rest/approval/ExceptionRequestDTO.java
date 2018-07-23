@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  * <li>duration: 申请时长</li> 
  * <li>flowCaseId: 申请工作流id</li> 
  * <li>approvalAttribute: 申请类型 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li> 
+ * <li>status: 申请状态 参考{@link com.everhomes.rest.approval.ApprovalStatus}</li> 
+ * <li>requestTitle: 申请的标题(事假/病假/加班等等)</li> 
  * </ul>
  */
 public class ExceptionRequestDTO {
@@ -33,6 +35,8 @@ public class ExceptionRequestDTO {
     private Double duration;
     private Long flowCaseId;
     private String approvalAttribute; 
+    private Byte status; 
+    private String requestTitle; 
 	
 	public Byte getExceptionRequestType() {
 		return exceptionRequestType;
@@ -125,5 +129,21 @@ public class ExceptionRequestDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public String getRequestTitle() {
+		return requestTitle;
+	}
+
+	public void setRequestTitle(String requestTitle) {
+		this.requestTitle = requestTitle;
 	}
 }

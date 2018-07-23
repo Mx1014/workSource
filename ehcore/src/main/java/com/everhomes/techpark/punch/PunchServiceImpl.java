@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.approval.ApprovalCategoryProvider;
 import com.everhomes.approval.ApprovalOpRequestProvider;
 import com.everhomes.approval.ApprovalRequestDefaultHandler;
@@ -30,6 +31,7 @@ import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalConstants;
 import com.everhomes.general_approval.GeneralApprovalService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -8859,11 +8861,21 @@ public class PunchServiceImpl implements PunchService {
 		        	if(null != request.getEndTime()){
 		        		dto.setEndTime(request.getEndTime().getTime());
 		        	}
+		        	if(request.getApprovalAttribute() != null){
+		        		String attributeLocaleString = localeStringService.getLocalizedString(GeneralApprovalConstants.ATTRIBUTE_SCOPE, request.getApprovalAttribute(), PunchConstants.locale, "");
+		        		if(GeneralApprovalAttribute.fromCode(request.getApprovalAttribute()) == GeneralApprovalAttribute.ASK_FOR_LEAVE){
+		        			ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(request.getCategoryId());
+		        			dto.setRequestTitle(category==null?attributeLocaleString:category.getCategoryName());
+		        		}else{
+		        			dto.setRequestTitle(attributeLocaleString);
+		        		}
+		        	}
 		        	dto.setFlowCaseId(request.getRequestId());
 		        	result.add(dto);
 		        } 
 		    }
 		}
+		
 		return result;
 	}
 
