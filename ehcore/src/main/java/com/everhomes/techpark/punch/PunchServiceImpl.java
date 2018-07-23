@@ -57,7 +57,14 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.*;
+import com.everhomes.rest.approval.ApprovalCategoryDTO;
+import com.everhomes.rest.approval.ApprovalCategoryStatus;
+import com.everhomes.rest.approval.ApprovalCategoryTimeSelectType;
+import com.everhomes.rest.approval.ApprovalCategoryTimeUnit;
+import com.everhomes.rest.approval.ApprovalOwnerType;
+import com.everhomes.rest.approval.ApprovalType;
+import com.everhomes.rest.approval.ExceptionRequestDTO;
+import com.everhomes.rest.approval.ListApprovalCategoryCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
@@ -88,7 +95,6 @@ import com.everhomes.rest.techpark.punch.AddPunchLogShouldPunchTimeCommand;
 import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
 import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
-import com.everhomes.rest.techpark.punch.ApprovalStatus;
 import com.everhomes.rest.techpark.punch.CheckAbnormalStatusResponse;
 import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
 import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
@@ -260,12 +266,11 @@ import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.socialSecurity.SocialSecurityService;
-import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentBaseRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyPunchStatusStatisticsRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatisticsRecordMapper;
-import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsRecordMapper;
 import com.everhomes.techpark.punch.utils.PunchDayParseUtils;
 import com.everhomes.uniongroup.UniongroupConfigureProvider;
 import com.everhomes.uniongroup.UniongroupConfigures;
@@ -12054,19 +12059,30 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public PunchMonthlyStatisticsByMemberResponse monthlyStatisticsByMember(PunchMonthlyStatisticsByMemberCommand cmd) {
-        OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        checkOrganization(cmd.getOrganizationId());
+        cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
+        if (cmd.getUserId() == null) {
+            cmd.setUserId(UserContext.currentUserId());
+        }
+        if (org.springframework.util.StringUtils.isEmpty(cmd.getStatisticsMonth())) {
+            cmd.setStatisticsMonth(monthSF.get().format(new Date()));
+        }
+        OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(cmd.getUserId(), cmd.getOrganizationId());
         MonthlyStatisticsByMemberRecordMapper record = punchProvider.monthlyStatisticsByMember(cmd.getOrganizationId(), cmd.getStatisticsMonth(), organizationMemberDetail.getId());
         PunchMonthlyStatisticsByMemberResponse response = new PunchMonthlyStatisticsByMemberResponse();
         response.setOrganizationId(cmd.getOrganizationId());
         response.setStatisticsMonth(cmd.getStatisticsMonth());
-        response.setUserId(UserContext.currentUserId());
+        response.setUserId(organizationMemberDetail.getTargetId());
         response.setDetailId(organizationMemberDetail.getId());
-        response.setWorkDayCount(record.getWorkCount() != null ? record.getWorkCount() : 0);
-        response.setRestDayCount(record.getRestDayCount() != null ? record.getRestDayCount() : 0);
+        response.setWorkDayCount(0);
+        response.setRestDayCount(0);
 
         if (record == null) {
             return response;
         }
+
+        response.setWorkDayCount(record.getWorkCount() != null ? record.getWorkCount() : 0);
+        response.setRestDayCount(record.getRestDayCount() != null ? record.getRestDayCount() : 0);
         response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
         response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
         return response;
@@ -12074,10 +12090,14 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public PunchMonthlyStatisticsByDepartmentResponse monthlyStatisticsByDepartment(PunchMonthlyStatisticsByDepartmentCommand cmd) {
-        List<Long> deptIds = Arrays.asList(1045731L, 1045699L, 1045695L, 1045687L);
+        checkOrganization(cmd.getOrganizationId());
+        Organization department = checkOrganization(cmd.getDepartmentId());
+        cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
+        if (org.springframework.util.StringUtils.isEmpty(cmd.getStatisticsMonth())) {
+            cmd.setStatisticsMonth(monthSF.get().format(new Date()));
+        }
+        List<Long> deptIds = listChildDepartmentsIncludeSelf(department);
         MonthlyStatisticsByDepartmentRecordMapper record = punchProvider.monthlyStatisticsByDepartment(cmd.getOrganizationId(), cmd.getStatisticsMonth(), deptIds);
-        MonthlyPunchStatusStatisticsRecordMapper r2 = punchProvider.monthlyPunchStatusMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getStatisticsMonth(), deptIds);
-        PunchExceptionRequestStatisticsRecordMapper r3 = punchProvider.monthlyPunchExceptionRequestMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getStatisticsMonth(), deptIds);
 
         PunchMonthlyStatisticsByDepartmentResponse response = new PunchMonthlyStatisticsByDepartmentResponse();
         response.setStatisticsMonth(cmd.getStatisticsMonth());
@@ -12092,16 +12112,32 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public PunchDailyStatisticsByDepartmentResponse dailyStatisticsByDepartment(PunchDailyStatisticsByDepartmentCommand cmd) {
-        List<Long> deptIds = Arrays.asList(1045731L, 1045699L, 1045695L, 1045687L);
-        DailyStatisticsByDepartmentRecordMapper record = punchProvider.dailyStatisticsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getStatisticsDate()), deptIds);
-        DailyPunchStatusStatisticsRecordMapper r2 = punchProvider.dailyPunchStatusMemberCountsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getStatisticsDate()), deptIds);
-        PunchExceptionRequestStatisticsRecordMapper r3 = punchProvider.dailyPunchExceptionRequestMemberCountsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getStatisticsDate()), deptIds);
+        checkOrganization(cmd.getOrganizationId());
+        Organization department = checkOrganization(cmd.getDepartmentId());
+        cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
+        if (cmd.getStatisticsDate() == null) {
+            cmd.setStatisticsDate(System.currentTimeMillis());
+        }
+        List<Long> deptIds = listChildDepartmentsIncludeSelf(department);
+
         PunchDailyStatisticsByDepartmentResponse response = new PunchDailyStatisticsByDepartmentResponse();
         response.setStatisticsDate(cmd.getStatisticsDate());
         response.setDepartmentId(cmd.getDepartmentId());
+        response.setNumOfRest(0);
+        response.setNumOfShouldAttendance(0);
+        response.setNumOfAttendanced(0);
+        response.setRateOfAttendance(0);
+
+        boolean isToday = dateSF.get().format(new Date()).equals(dateSF.get().format(new Date(cmd.getStatisticsDate())));
+        DailyStatisticsByDepartmentBaseRecordMapper record = punchProvider.dailyStatisticsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getStatisticsDate()), deptIds, isToday);
+
         if (record == null) {
             return response;
         }
+        response.setNumOfRest(record.getNumOfRest());
+        response.setNumOfShouldAttendance(record.getNumOfShouldAttendance());
+        response.setNumOfAttendanced(record.getNumOfAttendanced());
+        response.setRateOfAttendance(record.getRateOfAttendance());
         response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
         response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
         return response;
@@ -12180,7 +12216,7 @@ public class PunchServiceImpl implements PunchService {
             case GO_OUT:
             case BUSINESS_TRIP:
 //            	PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit 
-                dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayString(new BigDecimal(r.getDuration()).doubleValue(), dayUnit, hourUnit));
+                dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(new BigDecimal(r.getDuration()).doubleValue(), dayUnit, hourUnit));
                 map = getExceptionBeginEndTimeMap(r); 
                 result = localeTemplateService.getLocaleTemplateString(PunchConstants.EXCEPTION_STATISTIC_SCOPE,
                         PunchConstants.GO_OUT_TEMPLATE_CONTENT, RentalNotificationTemplateCode.locale, map, "");
@@ -12254,5 +12290,17 @@ public class PunchServiceImpl implements PunchService {
         response.setCurrentTimeRuleName(ptr.getName());
 		return response;
     	
+    }
+
+    private List<Long> listChildDepartmentsIncludeSelf(Organization parentDepartment) {
+        List<Organization> children = organizationProvider.listDepartments(parentDepartment.getPath() + "/%", 0, Integer.MAX_VALUE);
+        List<Long> deptIds = new ArrayList<>();
+        if (CollectionUtils.isEmpty(children)) {
+            deptIds.add(parentDepartment.getId());
+        }
+        children.forEach(d -> {
+            deptIds.add(d.getId());
+        });
+        return deptIds;
     }
 }

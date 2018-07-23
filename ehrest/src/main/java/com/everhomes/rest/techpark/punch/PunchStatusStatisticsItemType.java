@@ -11,10 +11,11 @@ package com.everhomes.rest.techpark.punch;
  * <li>REST((byte) 5): 休息</li>
  * <li>ABSENT((byte) 6): 旷工</li>
  * <li>FORGOT_PUNCH((byte) 7): 缺卡（忘记打卡）</li>
+ * <li>CHECKING((byte) 8): 核算中（等价于未到）</li>
  * </ul>
  */
 public enum PunchStatusStatisticsItemType {
-    UNKNOWN((byte) 0), UN_ATTENDANCE((byte) 1), BELATE((byte) 2), LEAVE_EARLY((byte) 3), NORMAL((byte) 4), REST((byte) 5), ABSENT((byte) 6), FORGOT_PUNCH((byte) 7);
+    UNKNOWN((byte) 0), UN_ATTENDANCE((byte) 1), BELATE((byte) 2), LEAVE_EARLY((byte) 3), NORMAL((byte) 4), REST((byte) 5), ABSENT((byte) 6), FORGOT_PUNCH((byte) 7), CHECKING((byte) 8);
     private byte code;
 
     PunchStatusStatisticsItemType(byte code) {
@@ -54,6 +55,8 @@ public enum PunchStatusStatisticsItemType {
                 return "旷工";
             case FORGOT_PUNCH:
                 return "缺卡";
+            case CHECKING:
+                return "核算中";
             default:
                 return "";
         }

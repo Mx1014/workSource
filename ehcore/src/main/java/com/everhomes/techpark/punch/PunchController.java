@@ -572,8 +572,6 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("dailyStatisticsByDepartment")
 	@RestReturn(PunchDailyStatisticsByDepartmentResponse.class)
 	public RestResponse dailyStatisticsByDepartment(PunchDailyStatisticsByDepartmentCommand cmd) {
-		cmd.setOrganizationId(1045660L);
-		cmd.setStatisticsDate(1531756800000L);
 		RestResponse response = new RestResponse(punchService.dailyStatisticsByDepartment(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -587,8 +585,6 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("monthlyStatisticsByDepartment")
 	@RestReturn(PunchMonthlyStatisticsByDepartmentResponse.class)
 	public RestResponse monthlyStatisticsByDepartment(PunchMonthlyStatisticsByDepartmentCommand cmd) {
-		cmd.setOrganizationId(1045660L);
-		cmd.setStatisticsMonth("201807");
 		RestResponse response = new RestResponse(punchService.monthlyStatisticsByDepartment(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -667,8 +663,6 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("monthlyStatisticsByMember")
 	@RestReturn(PunchMonthlyStatisticsByMemberResponse.class)
 	public RestResponse monthlyStatisticsByMember(PunchMonthlyStatisticsByMemberCommand cmd) {
-		cmd.setOrganizationId(1045660L);
-		cmd.setStatisticsMonth("201807");
 		RestResponse response = new RestResponse(punchService.monthlyStatisticsByMember(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
