@@ -5863,4 +5863,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return users;
 	}
+
+    @Override
+    public OrganizationMember findMemberByType(Long userId, Long orgId, String type) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(type))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
 }

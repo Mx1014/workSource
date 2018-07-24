@@ -673,4 +673,6 @@ public interface OrganizationProvider {
 
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIds(
 			List<Long> organizationIds);
+
+    OrganizationMember findMemberByType(Long aLong, Long orgId, String code);
 }

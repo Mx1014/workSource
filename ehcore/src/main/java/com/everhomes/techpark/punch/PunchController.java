@@ -670,6 +670,19 @@ public class PunchController extends ControllerBase {
 	}
 
 	/**
+	 * <p>校验用户的统计权限</p>
+	 * <b>URL: /techpark/punch/checkUserStatisticPrivilege</b>
+	 */
+	@RequestMapping("checkUserStatisticPrivilege")
+	@RestReturn(CheckUserStatisticPrivilegeResponse.class)
+	public RestResponse checkUserStatisticPrivilege(CheckUserStatisticPrivilegeCommand cmd) {
+		RestResponse response = new RestResponse(punchService.checkUserStatisticPrivilege(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <p>获取规则文案URL</p>
 	 * <b>URL: /techpark/punch/getAdjustRuleUrl</b>
 	 */

@@ -266,6 +266,8 @@ import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.socialSecurity.SocialSecurityService;
+import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsHistoryRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsTodayRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentBaseRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyPunchStatusStatisticsRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
@@ -11647,13 +11649,7 @@ public class PunchServiceImpl implements PunchService {
      * */
     public List<PunchMemberDTO> listDailyPunchMemberDTOs(Long orgId, Long deptId, Date queryDate, PunchStatusStatisticsItemType itemType, Integer pageOffset, Integer pageSize){
     	List<PunchMemberDTO> results = new ArrayList<>();
-        List<Long> deptIds = new ArrayList<>();
-        Organization org = this.checkOrganization(deptId);
-        List<Organization> orgs = findSubDepartments(org);
-        deptIds.add(org.getId());
-        for (Organization o : orgs) {
-            deptIds.add(o.getId());
-        }
+        List<Long> deptIds = findSubDepartmentIds(deptId);
         String startDay = dateSF.get().format(queryDate);
         String endDay = dateSF.get().format(queryDate);
 
@@ -11727,24 +11723,44 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchStatusMembersResponse listMembersOfAPunchStatus(
 			ListPunchStatusMembersCommand cmd) {
 		ListPunchStatusMembersResponse response = new ListPunchStatusMembersResponse();
-		//todo 智伟提供一个查•allItems 的接口
+		 
+		PunchStatusStatisticsItemType itmeType = PunchStatusStatisticsItemType.fromCode(cmd.getPunchStatusStatisticsItemType());
 		//如果查询日期是 null设为当天
 		if(cmd.getQueryByDate() == null ){
 			cmd.setQueryByDate(DateHelper.currentGMTTime().getTime());
-		}
-		PunchStatusStatisticsItemType itmeType = PunchStatusStatisticsItemType.fromCode(cmd.getPunchStatusStatisticsItemType());
+		} 
+		List<PunchStatusStatisticsItemDTO> items = null; 
+		  
+		
 		Integer pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset(); 
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
     	List<PunchMemberDTO> results = new ArrayList<>(); 
         //有月查询参数就按月查询,没有就按日查询 
 		if(null != cmd.getQueryByMonth()){
+			MonthlyPunchStatusStatisticsRecordMapper mapper = punchProvider.monthlyPunchStatusMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getQueryByMonth(), findSubDepartmentIds(cmd.getDepartmentId()));
+			items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
 			//按月查询查statistics表 
 			results = listMonthPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), cmd.getQueryByMonth(), itmeType, pageOffset, pageSize + 1);
 		}else  {
+			if(dateSF.get().format(new Date(cmd.getQueryByDate())).equals(dateSF.get().format(DateHelper.currentGMTTime()))){			
+				DailyPunchStatusStatisticsTodayRecordMapper mapper = punchProvider.dailyPunchStatusMemberCountsTodayByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getQueryByDate()), findSubDepartmentIds(cmd.getDepartmentId()));
+				items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
+			}else{
+				DailyPunchStatusStatisticsHistoryRecordMapper mapper = punchProvider.dailyPunchStatusMemberCountsHistoryByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getQueryByDate()), findSubDepartmentIds(cmd.getDepartmentId()));
+				items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
+			} 
 			//按日查询查pdl表
 			Date queryDate = new Date(cmd.getQueryByDate()); 
 			results = listDailyPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), queryDate, itmeType, pageOffset, pageSize + 1); 
 		} 
+		response.setAllItems(items);
+		if(CollectionUtils.isNotEmpty(items)){
+			for(PunchStatusStatisticsItemDTO dto : items){
+				if(itmeType == PunchStatusStatisticsItemType.fromCode(dto.getItemType())){
+					response.setCurrentItem(dto);
+				}
+			}
+		}
 		
 		if (null == results || results.size() == 0)
             return response;
@@ -11793,13 +11809,7 @@ public class PunchServiceImpl implements PunchService {
     private List<PunchMemberDTO> listMonthPunchMemberDTOs(Long organizationId, Long departmentId,
 			String queryByMonth, PunchStatusStatisticsItemType itemType, Integer pageOffset, int pageSize) {
     	List<PunchMemberDTO> results = new ArrayList<>(); 
-    	List<Long> deptIds = new ArrayList<>();
-        Organization org = this.checkOrganization(departmentId);
-        List<Organization> orgs = findSubDepartments(org); 
-        deptIds.add(org.getId());
-        for (Organization o : orgs) {
-            deptIds.add(o.getId());
-        } 
+    	List<Long> deptIds = findSubDepartmentIds(departmentId); 
 	    List<PunchStatistic> punchStatistics = punchProvider.listPunchSatisticsByItemTypeAndDeptIds(organizationId, deptIds, queryByMonth, itemType, pageOffset, pageSize);
 	    if(punchStatistics != null && punchStatistics.size() > 0){
 	    	for(PunchStatistic statistic : punchStatistics){
@@ -11832,6 +11842,17 @@ public class PunchServiceImpl implements PunchService {
 	    	}
 	    }
 	    return results;
+	}
+
+	private List<Long> findSubDepartmentIds(Long departmentId) {
+		List<Long> deptIds = new ArrayList<>();
+        Organization org = this.checkOrganization(departmentId);
+        List<Organization> orgs = findSubDepartments(org); 
+        deptIds.add(org.getId());
+        for (Organization o : orgs) {
+            deptIds.add(o.getId());
+        }
+		return deptIds;
 	}
 
     private PunchMemberDTO convertPSToPunchMemberDTO(PunchStatistic statistic) {
@@ -11901,7 +11922,9 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchExceptionRequestMembersResponse listMembersOfAPunchExceptionRequest(
 			ListPunchExceptionRequestMembersCommand cmd) {
         ListPunchExceptionRequestMembersResponse response = new ListPunchExceptionRequestMembersResponse();
-        //todo 智伟提供一个查•allItems 的接口
+        PunchExceptionRequestStatisticsItemType itemType = PunchExceptionRequestStatisticsItemType.fromCode(cmd.getPunchExceptionRequestStatisticsItemType());
+        List<PunchExceptionRequestStatisticsItemDTO> items = null;
+		 
         GeneralApprovalAttribute approvalAttribute = convertRequestItemTypeToApprovalAttribute(cmd.getPunchExceptionRequestStatisticsItemType());
         if(cmd.getQueryByDate() == null ){
             cmd.setQueryByDate(DateHelper.currentGMTTime().getTime());
@@ -11909,18 +11932,30 @@ public class PunchServiceImpl implements PunchService {
         Integer pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         List<PunchMemberDTO> results = new ArrayList<>();
-        PunchExceptionRequestStatisticsItemType itemType = PunchExceptionRequestStatisticsItemType.fromCode(cmd.getPunchExceptionRequestStatisticsItemType());
         //有月查询参数就按月查询,没有就按日查询 有日查询参数就按参数查询,没有就查当天
         if(null != cmd.getQueryByMonth()){
+        	PunchExceptionRequestStatisticsRecordMapper mapper = punchProvider.monthlyPunchExceptionRequestMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getQueryByMonth(), findSubDepartmentIds(cmd.getDepartmentId()));
+			items = mapper.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
             results = listMonthExceptionPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), cmd.getQueryByMonth(), itemType, pageOffset, pageSize + 1);
         }else if(null != cmd.getQueryByDate()){
-            Date queryDate = new Date(cmd.getQueryByDate());
+            Date queryDate = new Date(cmd.getQueryByDate()); 
+            PunchExceptionRequestStatisticsRecordMapper mapper = punchProvider.dailyPunchExceptionRequestMemberCountsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getQueryByDate()), findSubDepartmentIds(cmd.getDepartmentId()));
+			items = mapper.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
             results = listDailyExceptionMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), queryDate,
                    itemType , pageOffset, pageSize + 1);
         }else{
+        	PunchExceptionRequestStatisticsRecordMapper mapper = punchProvider.dailyPunchExceptionRequestMemberCountsByDepartment(cmd.getOrganizationId(), new java.sql.Date(DateHelper.currentGMTTime().getTime()), findSubDepartmentIds(cmd.getDepartmentId()));
+			items = mapper.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
             results = listTodayExceptionPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), DateHelper.currentGMTTime(), approvalAttribute, pageOffset, pageSize + 1);
         }
-
+        response.setAllItems(items);
+		if(CollectionUtils.isNotEmpty(items)){
+			for(PunchExceptionRequestStatisticsItemDTO dto : items){
+				if(itemType == PunchExceptionRequestStatisticsItemType.fromCode(dto.getItemType())){
+					response.setCurrentItem(dto);
+				}
+			}
+		}
         if (null == results || results.size() == 0)
             return response;
         if (results.size() == pageSize + 1) {
@@ -11955,13 +11990,7 @@ public class PunchServiceImpl implements PunchService {
     }
     private List<PunchMemberDTO> listDailyExceptionMemberDTOs(Long organizationId, Long departmentId, Date queryDate, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
         List<PunchMemberDTO> results = new ArrayList<>();
-        List<Long> deptIds = new ArrayList<>();
-        Organization org = this.checkOrganization(departmentId);
-        List<Organization> orgs = findSubDepartments(org);
-        deptIds.add(org.getId());
-        for (Organization o : orgs) {
-            deptIds.add(o.getId());
-        }
+        List<Long> deptIds = findSubDepartmentIds(departmentId);
         List<PunchDayLog> pdls = punchProvider.listPunchDayLogsByApprovalAttributeAndDeptIds(organizationId, deptIds,
                 new java.sql.Date(queryDate.getTime()), itemType, pageOffset, pageSize);
         if(pdls != null && pdls.size() > 0){
@@ -11990,13 +12019,7 @@ public class PunchServiceImpl implements PunchService {
     private List<PunchMemberDTO> listMonthExceptionPunchMemberDTOs(Long organizationId, Long departmentId, String queryByMonth,
                                 PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize) {
         List<PunchMemberDTO> results = new ArrayList<>();
-        List<Long> deptIds = new ArrayList<>();
-        Organization org = this.checkOrganization(departmentId);
-        List<Organization> orgs = findSubDepartments(org);
-        deptIds.add(org.getId());
-        for (Organization o : orgs) {
-            deptIds.add(o.getId());
-        }
+        List<Long> deptIds = findSubDepartmentIds(departmentId);
         List<PunchStatistic> punchStatistics = punchProvider.listPunchSatisticsByExceptionItemTypeAndDeptIds(organizationId, deptIds, queryByMonth, itemType, pageOffset, pageSize);
         if(punchStatistics != null && punchStatistics.size() > 0){
             for(PunchStatistic statistic : punchStatistics){
@@ -12292,9 +12315,38 @@ public class PunchServiceImpl implements PunchService {
     	
     }
 
+    @Override
+    public CheckUserStatisticPrivilegeResponse checkUserStatisticPrivilege(CheckUserStatisticPrivilegeCommand cmd) {
+
+        CheckUserStatisticPrivilegeResponse response = new CheckUserStatisticPrivilegeResponse();
+        response.setAdminFlag(NormalFlag.NO.getCode());
+        response.setQueryPrivilege(NormalFlag.NO.getCode());
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+        try {
+            if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())
+                    || resolver.checkOrganizationAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
+                response.setAdminFlag(NormalFlag.YES.getCode());
+                response.setQueryPrivilege(NormalFlag.YES.getCode());
+                return response;
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("there is a error when check org admin ", e);
+        }
+        OrganizationMember managerMember = organizationProvider.findMemberByType(UserContext.currentUserId(), cmd.getOrgId(), OrganizationGroupType.MANAGER.getCode());
+        if (null != managerMember) {
+            response.setQueryPrivilege(NormalFlag.YES.getCode());
+            Organization dpt = checkOrganization(managerMember.getOrganizationId());
+            response.setDeptId(dpt.getId());
+            response.setDeptName(dpt.getName());
+        }
+        return response;
+    }
+
     private List<Long> listChildDepartmentsIncludeSelf(Organization parentDepartment) {
-        List<Organization> children = organizationProvider.listDepartments(parentDepartment.getPath() + "/%", 0, Integer.MAX_VALUE);
         List<Long> deptIds = new ArrayList<>();
+        List<Organization> children = organizationProvider.listDepartments(parentDepartment.getPath() + "/%", 0, Integer.MAX_VALUE);
         if (CollectionUtils.isEmpty(children)) {
             deptIds.add(parentDepartment.getId());
         }
