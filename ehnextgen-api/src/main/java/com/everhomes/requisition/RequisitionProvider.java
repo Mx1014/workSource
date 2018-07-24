@@ -24,11 +24,4 @@ public interface RequisitionProvider {
 
     String getNameById(Long requisitionId);
 
-    /**
-     * 根据域空间和moudleId获取正在运行的审批
-     * @param moduleId
-     * @param namespaceId
-     * @return
-     */
-    GeneralApproval getRunnintEApproval(Long moduleId, Integer namespaceId, Long ownerId);
 }
