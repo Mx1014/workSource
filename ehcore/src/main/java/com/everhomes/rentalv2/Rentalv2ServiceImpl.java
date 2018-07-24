@@ -8961,12 +8961,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}).collect(Collectors.toList());
 		if (collect.size() == 0)
 			return "";
-        Collections.sort(collect,(q,p)->q.getId().compareTo(p.getId()));
+        collect.sort(Comparator.comparing(EhRentalv2Cells::getId));
 		SimpleDateFormat beginTimeSF = new SimpleDateFormat("HH:mm");
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
 		SimpleDateFormat beginMonthSF = new SimpleDateFormat("yyyy-MM-dd");
 		String result = getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
-		result.replaceAll("-","~");//弱智需求。。
+		result = result.replaceAll("-","~");//弱智需求。。
 		return result;
 	}
 }
