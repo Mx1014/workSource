@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId : namespaceId</li>
- *     <li>sourcId: 需要更新启用表单的审批项id</li>
+ *     <li>sourcId: 需要更新启用表单的审批项id,暨approvalId</li>
  *     <li>formOriginId: 启用的表单formOriginId</li>
  *     <li>formVersion: 启用的表单的formVersion</li>
  * </ul>
