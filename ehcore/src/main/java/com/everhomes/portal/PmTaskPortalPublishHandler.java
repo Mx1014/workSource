@@ -57,10 +57,8 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
                 configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
             }
         }
-        if(taskCategoryId == 6 ||taskCategoryId == 1){
-            if(null != feeModel){
-                configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel",feeModel.toString());
-            }
+        if(null != taskCategoryId && null != feeModel){
+            configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + taskCategoryId.toString(),feeModel.toString());
         }
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }

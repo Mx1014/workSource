@@ -692,17 +692,21 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             String buildingName = "";
                             for(DynamicColumnDTO column : columns) {
-                                if("addressId".equals(column.getFieldName()) ) {
-                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
-                                    if(address != null) {
-                                        column.setValue(address.getId().toString());
-                                    }
-                                }
                                 if("buildingId".equals(column.getFieldName()) ) {
                                     buildingName = column.getValue();
                                     Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, column.getValue());
                                     if(building != null) {
                                         column.setValue(building.getId().toString());
+                                    }else {
+                                        break;
+                                    }
+                                }
+                                if("addressId".equals(column.getFieldName()) ) {
+                                    Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, buildingName, column.getValue());
+                                    if(address != null) {
+                                        column.setValue(address.getId().toString());
+                                    }else {
+                                        break;
                                     }
                                 }
                                 try {
