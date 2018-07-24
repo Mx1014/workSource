@@ -18,7 +18,6 @@ import java.util.List;
  *     <li>entityId: 用户 ID 或者 选择人员的 ID。新版本不能使用这个值了，用 entitySel 代替</li>
  *     <li>flowEntityType: 客户端对象选择下个节点的用户 ID 或者 用户选择类型 ID 。新版本不能使用这个值了，用 entitySel 代替</li>
  *     <li>entitySel: 具体用户的选择列表 {@link com.everhomes.rest.flow.FlowEntitySel}</li>
- *     <li>evaluate: 评价内容 {@link com.everhomes.rest.flow.FlowPostEvaluateCommand}</li>
  * </ul>
  */
 public class FlowFireButtonCommand {
@@ -40,19 +39,9 @@ public class FlowFireButtonCommand {
     @ItemType(FlowEntitySel.class)
     private List<FlowEntitySel> entitySel;
 
-    private FlowPostEvaluateCommand evaluate;
-
     public FlowFireButtonCommand() {
         images = new ArrayList<>();
         entitySel = new ArrayList<>();
-    }
-
-    public FlowPostEvaluateCommand getEvaluate() {
-        return evaluate;
-    }
-
-    public void setEvaluate(FlowPostEvaluateCommand evaluate) {
-        this.evaluate = evaluate;
     }
 
     public Long getFlowCaseId() {

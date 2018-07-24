@@ -19,21 +19,6 @@ public class GeneralFormController extends ControllerBase {
 
 	@Autowired
 	private GeneralFormService generalFormService;
-//    /**
-//     * <b>URL: /general_form/getTemplateByApprovalId</b>
-//     * <p> 获取表单的信息 </p>
-//     * @return GetTemplateByApprovalIdResponse 表单的数据信息
-//     */
-//    @RequestMapping("getTemplateByApprovalId")
-//    @RestReturn(value=GetTemplateByApprovalIdResponse.class)
-//    public RestResponse getTemplateByApprovalId(@Valid GetTemplateByApprovalIdCommand cmd) {
-//    	GetTemplateByApprovalIdResponse result = generalApprovalService.getTemplateByApprovalId(cmd);
-//    	RestResponse response = new RestResponse(result);
-//    	response.setErrorCode(ErrorCodes.SUCCESS);
-//    	response.setErrorDescription("OK");
-//
-//    	return response;
-//    }
 
 	/**
 	 * <b>URL: /general_form/getTemplateBySourceId</b>
@@ -80,5 +65,20 @@ public class GeneralFormController extends ControllerBase {
 
 		return response;
 	}
+
+    /**
+     * <b>URL: /general_form/getGeneralFormReminder</b>
+     * <p> 表单提醒项</p>
+     */
+    @RequestMapping("getGeneralFormReminder")
+    @RestReturn(value=GeneralFormReminderDTO.class)
+    public RestResponse getGeneralFormReminder(GeneralFormReminderCommand cmd) {
+        GeneralFormReminderDTO dto = generalFormService.getGeneralFormReminder(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
 
 }

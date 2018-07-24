@@ -10,6 +10,9 @@ import java.util.UUID;
 
 
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
@@ -44,8 +47,11 @@ import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
+import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
 import com.everhomes.server.schema.tables.records.EhAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhContractBuildingMappingsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -65,6 +71,9 @@ public class AddressProviderImpl implements AddressProvider {
     
     @Autowired
     private ShardingProvider shardingProvider;
+    
+    @Autowired
+    private ContractProvider contractProvider;
     
     @Override
     public void createAddress(Address address) {
@@ -453,6 +462,8 @@ public class AddressProviderImpl implements AddressProvider {
             query.addConditions(Tables.EH_ADDRESSES.LIVING_STATUS.eq(livingStatus)
                     .or(Tables.EH_ADDRESSES.LIVING_STATUS.isNull()
                             .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus))));
+            //数据重复问题，by-djm
+            query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID));
         }
 
         query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
@@ -696,8 +707,7 @@ public class AddressProviderImpl implements AddressProvider {
 
         return result.get(0).getVersion();
     }
-
-    /**
+/**
      * 根据门牌地址集合addressIds进行批量删除门牌地址
      * @param addressIds
      */
@@ -707,24 +717,124 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         context.delete(Tables.EH_ADDRESSES).where(Tables.EH_ADDRESSES.ID.in(addressIds)).execute();
     }
+	@Override
+	public List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<ContractBuildingMapping> list = new ArrayList<>();
+		
+		context.select()
+				.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+				.fetch()
+				.map(r->{
+					ContractBuildingMapping convert = ConvertHelper.convert(r, ContractBuildingMapping.class);
+					list.add(convert);
+					return null;
+				});
+		return list;
+	}
 
-    /**
-     * 根据id的集合来批量的查询eh_addresses表中信息
-     * @param ids
-     * @return
-     */
+	@Override
+	public void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractBuildingMappings.class, contractBuildingMapping.getId()));
+        
+        EhContractBuildingMappingsDao dao = new EhContractBuildingMappingsDao(context.configuration());
+        dao.update(contractBuildingMapping);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractBuildingMappings.class, contractBuildingMapping.getId());
+	}
+
     @Override
-    public List<Address> findAddressByIds(List<Long> ids,Integer namespaceId){
-        //获取上下文
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Address> addressList = context.select().from(Tables.EH_ADDRESSES)
-                .where(Tables.EH_ADDRESSES.ID.in(ids))
-                .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
-                .fetchInto(Address.class);
-        return addressList;
+    public String getAddressNameById(Long addressId) {
+        return this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ADDRESSES.ADDRESS)
+                .from(Tables.EH_ADDRESSES).where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .fetchOne(Tables.EH_ADDRESSES.ADDRESS);
     }
 
-    /**
+    @Override
+    public int changeAddressLivingStatus(Long addressId, Byte status) {
+//        return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ADDRESSES)
+//                .set(Tables.EH_ADDRESSES.LIVING_STATUS, status.getCode())
+//                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+//                .execute();
+        LOGGER.info("address living status xfesijfisejsj");
+        return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                .set(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS, status)
+                .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+                .execute();
+    }
+
+//    @Override
+//    public Byte getAddressLivingStatus(Long addressId) {
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
+//                .from(Tables.EH_ADDRESSES)
+//                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+//                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
+//        if(aByte == null){
+//            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
+//                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+//                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+//                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
+//        }
+//        if(aByte == null){
+//            aByte = 1;
+//        }
+//        return aByte;
+//    }
+
+	@Override
+	public Byte getAddressLivingStatus(Long addressId, String addressName) {
+		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+	        Byte aByte = context.select(Tables.EH_ADDRESSES.LIVING_STATUS)
+	                .from(Tables.EH_ADDRESSES)
+	                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+	                .and(Tables.EH_ADDRESSES.ADDRESS.eq(addressName))
+	                .fetchOne(Tables.EH_ADDRESSES.LIVING_STATUS);
+	        if(aByte == null){
+	            aByte = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS)
+	                    .from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+	                    .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+	                    .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(addressName))
+	                    .fetchOne(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS);
+	        }
+	        if(aByte == null){
+	            aByte = 1;
+	        }
+	        return aByte;
+	}
+
+	@Override
+	public int changeAddressLivingStatus(Long addressId, String addressName, byte status) {
+		LOGGER.info("address living status xfesijfisejsj");
+        return this.dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+                .set(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS, status)
+                .where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+                .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(addressName))
+                .execute();
+	}
+
+	@Override
+	public Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId,String buildingName, String apartmentName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ADDRESSES)
+	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+	        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
+			.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+			.and(Tables.EH_ADDRESSES.STATUS.ne((byte)0));
+			
+	    Record record = step.fetchAny();
+
+        LOGGER.debug("findAddressByBuildingApartmentName, sql=" + step.getSQL());
+        LOGGER.debug("findAddressByBuildingApartmentName, bindValues=" + step.getBindValues());
+		if (record != null) {
+			return ConvertHelper.convert(record, Address.class);
+		}
+		return null;
+	}
+	
+	    /**
      * 根据buildingName和CommunityId来查询eh_addersses表中的门牌的数量
      * @param buildingName
      * @param communityId
@@ -740,4 +850,5 @@ public class AddressProviderImpl implements AddressProvider {
         return apartmentCount;
 
     }
+
 }

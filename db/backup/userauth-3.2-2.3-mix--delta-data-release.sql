@@ -1,0 +1,1 @@
+UPDATE eh_locale_strings SET TEXT = '该申请已经被处理' WHERE scope = 'organization' AND CODE=500005 AND locale='zh_CN';

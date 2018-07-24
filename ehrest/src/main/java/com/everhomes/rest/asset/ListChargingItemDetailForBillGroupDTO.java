@@ -31,6 +31,15 @@ public class ListChargingItemDetailForBillGroupDTO {
     private List<ChargingItemVariable> variables;
     private Integer monthOffset;
     private Integer dayOffset;
+    private Byte billItemGenerationType;
+
+    public Byte getBillItemGenerationType() {
+        return billItemGenerationType;
+    }
+
+    public void setBillItemGenerationType(Byte billItemGenerationType) {
+        this.billItemGenerationType = billItemGenerationType;
+    }
 
     @Override
     public String toString() {

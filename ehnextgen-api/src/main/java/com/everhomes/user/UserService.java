@@ -59,6 +59,9 @@ public interface UserService {
     void setUserAccountInfo(SetUserAccountInfoCommand cmd);
     CommunityDTO setUserCurrentCommunity(long communityId);
     Long setDefaultCommunity(Long userId, Integer namespaceId);
+
+    Long setDefaultCommunityForWx(Long userId, Integer namespaceId);
+
     void updateUserCurrentCommunityToProfile(Long userId, Long communityId, Integer namespaceId);
 
     List<UserIdentifierDTO> listUserIdentifiers();
@@ -66,7 +69,10 @@ public interface UserService {
 
     void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
 
+    void resendVerficationCodeByApp(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
     void sendCodeWithPictureValidate(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
+
+    void sendCodeWithPictureValidateByApp(SendCodeWithPictureValidateCommand cmd, HttpServletRequest request);
 
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
 
@@ -128,6 +134,7 @@ public interface UserService {
     boolean isValid(LoginToken token);
     LoginToken getLoginToken(HttpServletRequest request);
     UserLogin logonBythirdPartUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response);
+    UserLogin logonBythirdPartAppUser(Integer namespaceId, String userType, String userToken, HttpServletRequest request, HttpServletResponse response);
     /**
      * 注册第三方用户
      * @param user
@@ -135,6 +142,7 @@ public interface UserService {
      * @return 如果创建了新用户则返回true，否则返回false
      */
     boolean signupByThirdparkUser(User user, HttpServletRequest request);
+    User signupByThirdparkUserByApp(User user, HttpServletRequest request);
 	Boolean validateUserPass(ValidatePassCommand passCmd);
 
     List<SceneDTO> listTouristRelatedScenes();
@@ -264,9 +272,15 @@ public interface UserService {
 
     VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
 
+    void verificationCodeForBindPhoneByApp(VerificationCodeForBindPhoneCommand cmd);
+
     UserLogin bindPhone(BindPhoneCommand cmd);
 
+    UserLogin bindPhoneByApp(BindPhoneCommand cmd);
+
     void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
+
+    void checkVerifyCodeAndResetPasswordWithoutIdentifyToken(CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand cmd);
 
     UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd);
 
@@ -337,4 +351,5 @@ public interface UserService {
      * @return
      */
     UserDTO findUserInfoByUserId(UserCouponsCommand cmd);
+	Byte isUserAuth();
 }

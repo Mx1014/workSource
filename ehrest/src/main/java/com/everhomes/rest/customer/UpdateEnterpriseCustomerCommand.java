@@ -1,6 +1,11 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -70,6 +75,7 @@ import java.math.BigDecimal;
  *     <li>longitude: 经度</li>
  *     <li>latitude: 纬度</li>
  *     <li>contactDuty:联系人职务</li>
+ *     <li> checkAuthFlag;:企业后台不校验权限</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -154,6 +160,19 @@ public class UpdateEnterpriseCustomerCommand {
     private Long entrepreneurialCharacteristicsId;
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
+    private Byte deviceType;
+
+
+    private String unifiedSocialCreditCode;
+    private String postUri;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> banner;
+    private String hotline;
+
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
+    private Byte checkAuthFlag;
 
     public Long getCommunityId() {
         return communityId;
@@ -786,6 +805,65 @@ public class UpdateEnterpriseCustomerCommand {
 	public void setContactDuty(String contactDuty) {
 		this.contactDuty = contactDuty;
 	}
-    
-    
+
+    public Byte getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Byte deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public String getUnifiedSocialCreditCode() {
+        return unifiedSocialCreditCode;
+    }
+
+    public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+        this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+    }
+
+    public String getPostUri() {
+        return postUri;
+    }
+
+    public void setPostUri(String postUri) {
+        this.postUri = postUri;
+    }
+
+    public List<AttachmentDescriptor> getBanner() {
+        return banner;
+    }
+
+    public void setBanner(List<AttachmentDescriptor> banner) {
+        this.banner = banner;
+    }
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
+    }
+
+    public Byte getCheckAuthFlag() {
+        return checkAuthFlag;
+    }
+
+    public void setCheckAuthFlag(Byte checkAuthFlag) {
+        this.checkAuthFlag = checkAuthFlag;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

@@ -1,5 +1,6 @@
 package com.everhomes.pmtask;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.FLOW)
@@ -43,6 +45,8 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 	private FlowButtonProvider flowButtonProvider;
 	@Autowired
 	private PortalService portalService;
+	@Autowired
+	private FlowEventLogProvider flowEventLogProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -81,7 +85,10 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			else
 				createFlowCaseCommand.setTitle(taskCategory.getName());
 			createFlowCaseCommand.setServiceType(taskCategory.getName());
-			createFlowCaseCommand.setApplyUserId(UserContext.currentUserId());
+			if (requestorUid!=null)
+				createFlowCaseCommand.setApplyUserId(requestorUid);
+			else
+				createFlowCaseCommand.setApplyUserId(UserContext.currentUserId());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 			createFlowCaseCommand.setReferId(task.getId());
@@ -107,9 +114,8 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			}
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
-			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
 
-			String params = flowNode.getParams();
+
 
 //			if(StringUtils.isBlank(params)) {
 //				LOGGER.error("Invalid flowNode param.");
@@ -119,9 +125,9 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 
 //			JSONObject paramJson = JSONObject.parseObject(params);
 //			String nodeType = paramJson.getString("nodeType");
-
-			task.setStatus(PmTaskFlowStatus.ACCEPTING.getCode());
+			task.setStatus(FlowCaseStatus.PROCESS.getCode());
 			task.setFlowCaseId(flowCase.getId());
+			task.setStatus(flowCase.getStatus());
 			pmTaskProvider.updateTask(task);
 			return task;
 		});

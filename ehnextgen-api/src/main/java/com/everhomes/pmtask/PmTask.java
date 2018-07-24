@@ -11,8 +11,13 @@ public class PmTask extends EhPmTasks {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	public PmTask() {
+		this.setAmount(0L);
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	} 
+	}
+
 }

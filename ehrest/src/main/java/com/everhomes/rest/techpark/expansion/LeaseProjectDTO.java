@@ -22,6 +22,7 @@ public class LeaseProjectDTO {
     private Double latitude;
     private String contactName;
     private String contactPhone;
+    private Long contactUid;
     private String description;
     private String trafficDescription;
     private String posterUri;
@@ -394,5 +395,13 @@ public class LeaseProjectDTO {
 
     public void setEnteredEnterprises(String enteredEnterprises) {
         this.enteredEnterprises = enteredEnterprises;
+    }
+
+    public Long getContactUid() {
+        return contactUid;
+    }
+
+    public void setContactUid(Long contactUid) {
+        this.contactUid = contactUid;
     }
 }

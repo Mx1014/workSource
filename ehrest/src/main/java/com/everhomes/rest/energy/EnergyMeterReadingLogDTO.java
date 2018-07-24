@@ -1,9 +1,11 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -29,7 +31,8 @@ public class EnergyMeterReadingLogDTO {
     private String meterName;
     private Byte meterType;
     private String meterNumber;
-    private String meterAddress;
+    @ItemType(EnergyMeterAddressDTO.class)
+    private List<EnergyMeterAddressDTO> meterAddress;
     private BigDecimal reading;
     private BigDecimal oldReading;
     private String operatorName;
@@ -39,11 +42,14 @@ public class EnergyMeterReadingLogDTO {
 
     private BigDecimal dayPrompt;
     private BigDecimal monthPrompt;
+    private BigDecimal lastReading;
+    private BigDecimal valueDifference;
 
     //离线的用
     private Long communityId;
     private Long organizationId;
     private Integer namespaceId;
+
 
     public Long getCommunityId() {
         return communityId;
@@ -69,11 +75,11 @@ public class EnergyMeterReadingLogDTO {
         this.organizationId = organizationId;
     }
 
-    public String getMeterAddress() {
+    public List<EnergyMeterAddressDTO> getMeterAddress() {
         return meterAddress;
     }
 
-    public void setMeterAddress(String meterAddress) {
+    public void setMeterAddress(List<EnergyMeterAddressDTO> meterAddress) {
         this.meterAddress = meterAddress;
     }
 
@@ -179,6 +185,22 @@ public class EnergyMeterReadingLogDTO {
 
     public void setReading(BigDecimal reading) {
         this.reading = reading;
+    }
+
+    public BigDecimal getLastReading() {
+        return lastReading;
+    }
+
+    public void setLastReading(BigDecimal lastReading) {
+        this.lastReading = lastReading;
+    }
+
+    public BigDecimal getValueDifference() {
+        return valueDifference;
+    }
+
+    public void setValueDifference(BigDecimal valueDifference) {
+        this.valueDifference = valueDifference;
     }
 
     public String toString() {

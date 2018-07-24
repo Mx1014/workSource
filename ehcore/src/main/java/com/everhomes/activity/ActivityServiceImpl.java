@@ -4,6 +4,7 @@ package com.everhomes.activity;
 import ch.hsr.geohash.GeoHash;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
@@ -23,22 +24,155 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
-import com.everhomes.forum.*;
+import com.everhomes.filedownload.TaskService;
+import com.everhomes.forum.Attachment;
+import com.everhomes.forum.ForumProvider;
+import com.everhomes.forum.ForumService;
+import com.everhomes.forum.InteractSetting;
+import com.everhomes.forum.Post;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.order.PayService;
-import com.everhomes.organization.*;
+import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.PaymentType;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rest.activity.*;
+import com.everhomes.rest.activity.ActivityAttachmentDTO;
+import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCancelType;
+import com.everhomes.rest.activity.ActivityCategoryDTO;
+import com.everhomes.rest.activity.ActivityChargeFlag;
+import com.everhomes.rest.activity.ActivityCheckinCommand;
+import com.everhomes.rest.activity.ActivityConfirmCommand;
+import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityGoodsDTO;
+import com.everhomes.rest.activity.ActivityListCommand;
+import com.everhomes.rest.activity.ActivityListResponse;
+import com.everhomes.rest.activity.ActivityLocalStringCode;
+import com.everhomes.rest.activity.ActivityMemberDTO;
+import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
+import com.everhomes.rest.activity.ActivityPayeeDTO;
+import com.everhomes.rest.activity.ActivityPayeeStatusType;
+import com.everhomes.rest.activity.ActivityPostCommand;
+import com.everhomes.rest.activity.ActivityRejectCommand;
+import com.everhomes.rest.activity.ActivityRosterPayFlag;
+import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
+import com.everhomes.rest.activity.ActivityRosterSourceFlag;
+import com.everhomes.rest.activity.ActivityRosterStatus;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.activity.ActivityShareDetailResponse;
+import com.everhomes.rest.activity.ActivitySignupCommand;
+import com.everhomes.rest.activity.ActivitySignupFlag;
+import com.everhomes.rest.activity.ActivityTimeResponse;
+import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityVideoDTO;
+import com.everhomes.rest.activity.ActivityVideoRoomType;
+import com.everhomes.rest.activity.ActivityWarningResponse;
+import com.everhomes.rest.activity.CheckPayeeIsUsefulCommand;
+import com.everhomes.rest.activity.CheckPayeeIsUsefulResponse;
+import com.everhomes.rest.activity.CreateActivityAttachmentCommand;
+import com.everhomes.rest.activity.CreateActivityGoodsCommand;
+import com.everhomes.rest.activity.CreateOrUpdateActivityPayeeCommand;
+import com.everhomes.rest.activity.CreateSignupOrderCommand;
+import com.everhomes.rest.activity.CreateSignupOrderV2Command;
+import com.everhomes.rest.activity.CreateWechatJsSignupOrderCommand;
+import com.everhomes.rest.activity.DeleteActivityAttachmentCommand;
+import com.everhomes.rest.activity.DeleteActivityGoodsCommand;
+import com.everhomes.rest.activity.DeleteSignupInfoCommand;
+import com.everhomes.rest.activity.DownloadActivityAttachmentCommand;
+import com.everhomes.rest.activity.ExportActivityCommand;
+import com.everhomes.rest.activity.ExportOrganizationCommand;
+import com.everhomes.rest.activity.ExportSignupInfoCommand;
+import com.everhomes.rest.activity.ExportTagCommand;
+import com.everhomes.rest.activity.GeoLocation;
+import com.everhomes.rest.activity.GetActivityAchievementCommand;
+import com.everhomes.rest.activity.GetActivityAchievementResponse;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
+import com.everhomes.rest.activity.GetActivityGoodsCommand;
+import com.everhomes.rest.activity.GetActivityPayeeCommand;
+import com.everhomes.rest.activity.GetActivityPayeeDTO;
+import com.everhomes.rest.activity.GetActivityTimeCommand;
+import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.GetRosterOrderSettingCommand;
+import com.everhomes.rest.activity.GetVideoCapabilityCommand;
+import com.everhomes.rest.activity.ImportSignupErrorDTO;
+import com.everhomes.rest.activity.ImportSignupInfoCommand;
+import com.everhomes.rest.activity.ImportSignupInfoResponse;
+import com.everhomes.rest.activity.ListActivitiesByCategoryIdCommand;
+import com.everhomes.rest.activity.ListActivitiesByCategoryIdResponse;
+import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
+import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
+import com.everhomes.rest.activity.ListActivitiesByTagCommand;
+import com.everhomes.rest.activity.ListActivitiesCommand;
+import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.activity.ListActivityAttachmentsCommand;
+import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
+import com.everhomes.rest.activity.ListActivityCategoriesCommand;
+import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
+import com.everhomes.rest.activity.ListActivityGoodsCommand;
+import com.everhomes.rest.activity.ListActivityGoodsResponse;
+import com.everhomes.rest.activity.ListActivityPayeeCommand;
+import com.everhomes.rest.activity.ListNearByActivitiesCommand;
+import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
+import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.ListSignupInfoCommand;
+import com.everhomes.rest.activity.ListSignupInfoResponse;
+import com.everhomes.rest.activity.ManualSignupCommand;
+import com.everhomes.rest.activity.RosterOrderSettingDTO;
+import com.everhomes.rest.activity.SetActivityAchievementCommand;
+import com.everhomes.rest.activity.SetActivityTimeCommand;
+import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
+import com.everhomes.rest.activity.SetActivityWarningCommand;
+import com.everhomes.rest.activity.SetRosterOrderSettingCommand;
+import com.everhomes.rest.activity.SignupErrorHandleType;
+import com.everhomes.rest.activity.SignupInfoDTO;
+import com.everhomes.rest.activity.StatisticsActivityCommand;
+import com.everhomes.rest.activity.StatisticsActivityDTO;
+import com.everhomes.rest.activity.StatisticsActivityResponse;
+import com.everhomes.rest.activity.StatisticsOrderByFlag;
+import com.everhomes.rest.activity.StatisticsOrganizationCommand;
+import com.everhomes.rest.activity.StatisticsOrganizationDTO;
+import com.everhomes.rest.activity.StatisticsOrganizationResponse;
+import com.everhomes.rest.activity.StatisticsSummaryCommand;
+import com.everhomes.rest.activity.StatisticsSummaryResponse;
+import com.everhomes.rest.activity.StatisticsTagCommand;
+import com.everhomes.rest.activity.StatisticsTagDTO;
+import com.everhomes.rest.activity.StatisticsTagResponse;
+import com.everhomes.rest.activity.UpdateActivityGoodsCommand;
+import com.everhomes.rest.activity.UpdateSignupInfoCommand;
+import com.everhomes.rest.activity.UserAuthFlag;
+import com.everhomes.rest.activity.VertifyPersonByPhoneCommand;
+import com.everhomes.rest.activity.VideoCallbackCommand;
+import com.everhomes.rest.activity.VideoCapabilityResponse;
+import com.everhomes.rest.activity.VideoManufacturerType;
+import com.everhomes.rest.activity.VideoState;
+import com.everhomes.rest.activity.VideoSupportType;
+import com.everhomes.rest.activity.WechatSignupFlag;
+import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -50,15 +184,55 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.forum.*;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
+import com.everhomes.rest.forum.AttachmentDTO;
+import com.everhomes.rest.forum.ForumConstants;
+import com.everhomes.rest.forum.ForumModuleType;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.InteractFlag;
+import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.PostCloneFlag;
+import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PostFavoriteFlag;
+import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.RouterMetaObject;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.CreateWechatJsPayOrderCmd;
+import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
+import com.everhomes.rest.order.OrderPaymentStatus;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PayServiceErrorCode;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
+import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.*;
-import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
@@ -66,24 +240,56 @@ import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.sensitiveWord.FilterWordsCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
 import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
-import com.everhomes.rest.ui.user.*;
-import com.everhomes.rest.user.*;
+import com.everhomes.rest.ui.user.ActivityLocationScope;
+import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
+import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserFavoriteDTO;
+import com.everhomes.rest.user.UserFavoriteTargetType;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.sensitiveWord.SensitiveWordService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
+import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.SortOrder;
+import com.everhomes.util.StatusChecker;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.VersionRange;
+import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -97,9 +303,15 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -112,9 +324,13 @@ import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -122,7 +338,19 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -251,15 +479,25 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 	private RosterPayTimeoutService rosterPayTimeoutService;
 
 	@Autowired
-	private PayService payService;
+    private PayService payServiceV2;
 
+    @Value("${server.contextPath:}")
+    private String contextPath;
+	
+	@Autowired
+    private NamespaceProvider namespaceProvider;
+
+    @Autowired
+    private SensitiveWordService sensitiveWordService;
+
+    @Autowired
+    private TaskService taskService;
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
     }
-    
     @Override  
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
@@ -279,7 +517,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         activity.setNamespaceId(namespaceId);
         activity.setGuest(cmd.getGuest());
-        
+
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
         
@@ -340,7 +578,10 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         //add by xiongying, 添加类型id， 20161117
         activity.setCategoryId(cmd.getCategoryId());
         activity.setContentCategoryId(cmd.getContentCategoryId());
-        
+
+        //add by liangyanlong, 增加企业ID，用户付款时，查询付款方.
+        activity.setOrganizationId(cmd.getOrganizationId());
+
         activityProvider.createActity(activity);
         createScheduleForActivity(activity);
         
@@ -361,7 +602,21 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         addAdditionalInfo(roster, user, activity);
         
         activityProvider.createActivityRoster(roster);
-        
+//        // 注册成功事件 add by jiarui
+//        LocalEventBus.publish(event -> {
+//            LocalEventContext localEventcontext = new LocalEventContext();
+//            localEventcontext.setUid(UserContext.currentUserId());
+//            localEventcontext.setNamespaceId(activity.getNamespaceId());
+//            event.setContext(localEventcontext);
+//            Map<String, Object> map = new HashMap<>();
+//            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+//            map.put("categoryId", activity.getCategoryId());
+//            event.setParams(map);
+//            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+//            event.setEntityId(UserContext.currentUserId());
+//            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+//        });
+
     }
 
     //活动报名
@@ -509,6 +764,9 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
                 //add by yanjun 20170512
                 dto.setUserRosterId(roster.getId());
 
+                //add by jiarui  20180716
+                syncToPotentialCustomer(temp1,roster);
+
                 //Send message to creator
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("userName", user.getNickName());
@@ -569,6 +827,23 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         // activitySignPoints(cmd.getActivityId());
     	return tuple.first();
 	 }
+
+    private void syncToPotentialCustomer(Activity activity,ActivityRoster roster) {
+        // 同步线索客户 add by jiarui
+        LocalEventBus.publish(event -> {
+            LocalEventContext localEventcontext = new LocalEventContext();
+            localEventcontext.setUid(UserContext.currentUserId());
+            localEventcontext.setNamespaceId(activity.getNamespaceId());
+            event.setContext(localEventcontext);
+            Map<String, Object> map = new HashMap<>();
+            map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+            map.put("categoryId", activity.getCategoryId());
+            event.setParams(map);
+            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+            event.setEntityId(UserContext.currentUserId());
+            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+        });
+    }
 
 
 	/*private void activitySignPoints(Long activityId){
@@ -747,99 +1022,255 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 		
 		return dto;
 	}
+    //更换使用新的支付V3
+//	@Override
+//	public PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd) {
+//
+//
+//		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+//		if(roster == null){
+//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+//					"no roster.");
+//		}
+//		Activity activity = activityProvider.findActivityById(roster.getActivityId());
+//		if(activity == null){
+//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+//					"no activity.");
+//		}
+//
+//		PreOrderCommand preOrderCommand = new PreOrderCommand();
+//
+//		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+//		preOrderCommand.setOrderId(roster.getOrderNo());
+//		Long amount = payService.changePayAmount(activity.getChargePrice());
+//		preOrderCommand.setAmount(amount);
+//
+//		preOrderCommand.setPayerId(roster.getUid());
+//		preOrderCommand.setNamespaceId(activity.getNamespaceId());
+//
+//		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+//		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+//		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+//		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+//
+//
+//		preOrderCommand.setExpiration(expiredTime);
+//
+//
+//		preOrderCommand.setClientAppName(cmd.getClientAppName());
+//
+//		//微信公众号支付，重新设置ClientName，设置支付方式和参数
+//		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
+//
+//			if(preOrderCommand.getClientAppName() == null){
+//				Integer namespaceId = UserContext.getCurrentNamespaceId();
+//				preOrderCommand.setClientAppName("wechat_" + namespaceId);
+//			}
+//			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+//			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//			paymentParamsDTO.setPayType("no_credit");
+//			User user = UserContext.current().getUser();
+//			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+//		}
+//
+//
+//		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+//
+//		return callBack;
+//	}
 
-	@Override
-	public PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd) {
+    @Override
+    public PreOrderDTO createSignupOrderV3(CreateSignupOrderV2Command cmd) {
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        if (roster.getPayOrderId() != null) {
+            activityProvider.deleteRoster(roster);
+            roster.setId(null);
+            roster.setPayOrderId(null);
+            Long orderNo = this.onlinePayService.createBillId(DateHelper
+                    .currentGMTTime().getTime());
+            roster.setOrderNo(orderNo);
+            activityProvider.createActivityRoster(roster);
+        }
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
 
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+        setPreOrder(cmd,createOrderCommand,roster,activity);
 
-		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-		if(roster == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-					"no roster.");
-		}
-		Activity activity = activityProvider.findActivityById(roster.getActivityId());
-		if(activity == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-					"no activity.");
-		}
+        PreOrderDTO callback = new PreOrderDTO();
+        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
+        callback = ConvertHelper.convert(response, PreOrderDTO.class);
+        callback.setExpiredIntervalTime(response.getExpirationMillis());
 
-		PreOrderCommand preOrderCommand = new PreOrderCommand();
+        //组装支付方式
+        List<PayMethodDTO> list = new ArrayList<>();
+        String format = "{\"getOrderInfoUrl\":\"%s\"}";
+        for (com.everhomes.pay.order.PayMethodDTO p : response.getPaymentMethods()) {
+            PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+            payMethodDTO.setPaymentName(p.getPaymentName());
+            payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
+            String paymentLogo = contentServerService.parserUri(p.getPaymentLogo());
+            payMethodDTO.setPaymentLogo(paymentLogo);
+            payMethodDTO.setPaymentType(p.getPaymentType());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = p.getPaymentParams();
+            if(bizPaymentParamsDTO != null) {
+                paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+            }
+            payMethodDTO.setPaymentParams(paymentParamsDTO);
+            list.add(payMethodDTO);
+        }
+        callback.setPayMethod(list);
+        roster.setPayOrderId(callback.getOrderId());
+        activityProvider.updateRoster(roster);
+        return callback;
+    }
 
-		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
-		preOrderCommand.setOrderId(roster.getOrderNo());
-		Long amount = payService.changePayAmount(activity.getChargePrice());
-		preOrderCommand.setAmount(amount);
+    private void setPreOrder(CreateSignupOrderV2Command cmd, CreateOrderCommand createOrderCommand, ActivityRoster roster, Activity activity) {
+        createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
+        createOrderCommand.setBizOrderNum("activity"+roster.getOrderNo().toString());
 
-		preOrderCommand.setPayerId(roster.getUid());
-		preOrderCommand.setNamespaceId(activity.getNamespaceId());
+        BigDecimal amout = activity.getChargePrice();
+        if(amout == null){
+            createOrderCommand.setAmount(0L);
+        }
+        createOrderCommand.setAmount(amout.multiply(new BigDecimal(100)).longValue());
 
-		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
-		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
-		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+        //付款方账号
+        Long payerId = UserContext.currentUserId();
+        PayUserDTO payUserDTO = checkAndCreatePaymentUser(payerId,UserContext.getCurrentNamespaceId());
+        createOrderCommand.setPayerUserId(payUserDTO.getId());
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(activity.getCategoryId(), activity.getNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(),activity.getNamespaceId());
+        if (activityBizPayee == null) {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no payee.");
+        }
+        //收款方账号
+        createOrderCommand.setPayeeUserId(activityBizPayee.getBizPayeeId());
+        GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+        timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+        Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
 
+        createOrderCommand.setOrderType(com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+        createOrderCommand.setExpirationMillis(expiredTime);
+        createOrderCommand.setGoodsName("活动报名");
+        createOrderCommand.setSourceType(1);
+        createOrderCommand.setClientAppName(cmd.getClientAppName());
+        createOrderCommand.setOrderRemark1("活动报名");
+        createOrderCommand.setExtendInfo("应用名称："+activityCategories.getName()+"；活动名称："+activity.getSubject());
+        createOrderCommand.setExtendInfo(activityCategories.getName());
+        //微信公众号支付，重新设置ClientName，设置支付方式和参数
+        if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
+            createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+            PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+            paymentParamsDTO.setPayType("no_credit");
+            User user = UserContext.current().getUser();
+            paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+            Map<String, String> flattenMap = new HashMap<>();
+            StringHelper.toStringMap(null, paymentParamsDTO, flattenMap);
+            createOrderCommand.setPaymentParams(flattenMap);
+            createOrderCommand.setCommitFlag(1);
+        }
 
-		preOrderCommand.setExpiration(expiredTime);
+        String homeUrl = configurationProvider.getValue("home.url", "");
+        String backUri = configurationProvider.getValue("pay.v2.callback.url.activity", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        createOrderCommand.setBackUrl(backUrl);
+    }
 
+    private PayUserDTO checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
+        User userById = userProvider.findUserById(UserContext.currentUserId());
+        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), UserContext.getCurrentNamespaceId());
+        String userIdenify = null;
+        if(userIdentifier != null) {
+            userIdenify = userIdentifier.getIdentifierToken();
+        }
+        PayUserDTO payUserDTO = new PayUserDTO();
+        //根据支付帐号ID列表查询帐号信息
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("checkAndCreatePaymentUser request={}", payerId);
+        }
+        String payerid = OwnerType.USER.getCode()+payerId;
+        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(payerid);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("checkAndCreatePaymentUser response={}", payUserDTOs);
+        }
+        if(payUserDTOs == null || payUserDTOs.size() == 0){
+            //创建个人账号
+            payUserDTO = payServiceV2.createPersonalPayUserIfAbsent(payerId.toString(), "NS"+namespaceId.toString());
+            String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
+        }else {
+            payUserDTO = payUserDTOs.get(0);
+        }
+        return payUserDTO;
+    }
 
-		preOrderCommand.setClientAppName(cmd.getClientAppName());
+    private OrderCommandResponse createPreOrder(CreateOrderCommand cmd) {
+        CreateOrderRestResponse createOrderRestResponse = new CreateOrderRestResponse();
+        if (cmd.getPaymentType() != null && PaymentType.WECHAT_JS_ORG_PAY.getCode() == cmd.getPaymentType()) {
+            createOrderRestResponse = this.payServiceV2.createCustomOrder(cmd);
+        }else {
+            createOrderRestResponse = this.payServiceV2.createPurchaseOrder(cmd);
+        }
+        PreOrderDTO callback = new PreOrderDTO();
+        if (createOrderRestResponse.getErrorCode() != 200) {
+            LOGGER.error("create order fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "create order fail");
+        }
+        OrderCommandResponse response = createOrderRestResponse.getResponse();
 
-		//微信公众号支付，重新设置ClientName，设置支付方式和参数
-		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
+        return response;
+    }
 
-			if(preOrderCommand.getClientAppName() == null){
-				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				preOrderCommand.setClientAppName("wechat_" + namespaceId);
-			}
-			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
-			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-			paymentParamsDTO.setPayType("no_credit");
-			User user = UserContext.current().getUser();
-			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
-		}
-
-
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-
-		return callBack;
-	}
-
-	@Override
+    @Override
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
-//		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
-
-		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-		if(roster == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-					"no roster.");
-		}
-		Activity activity = activityProvider.findActivityById(roster.getActivityId());
-		if(activity == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-					"no activity.");
-		}
-
-		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
-
-		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
-		orderCmdBody.setBody(orderCmd);
-
-		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
-
-		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
-
-		if(response.getResult()){
-			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
-					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
-			return response.getBody();
-		}
-		else{
-			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
-					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
-					"CreateWechatJsPayOrder error");
-		}
+        CreateSignupOrderV2Command createSignupOrderV2Command = new CreateSignupOrderV2Command();
+        createSignupOrderV2Command.setActivityId(cmd.getActivityId());
+        createSignupOrderV2Command.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+        ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+        if(roster == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+                    "no roster.");
+        }
+        if (roster.getPayOrderId() != null) {
+            activityProvider.deleteRoster(roster);
+            roster.setId(null);
+            roster.setPayOrderId(null);
+            Long orderNo = this.onlinePayService.createBillId(DateHelper
+                    .currentGMTTime().getTime());
+            roster.setOrderNo(orderNo);
+            activityProvider.createActivityRoster(roster);
+        }
+        Activity activity = activityProvider.findActivityById(roster.getActivityId());
+        if(activity == null){
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+                    "no activity.");
+        }
+        CreateOrderCommand  createOrderCommand = new CreateOrderCommand();
+        setPreOrder(createSignupOrderV2Command,createOrderCommand,roster,activity);
+        LOGGER.info("createPreOrder createOrderCommand={}",createOrderCommand);
+        OrderCommandResponse response = this.createPreOrder(createOrderCommand);
+        CreateWechatJsPayOrderResp callback = new CreateWechatJsPayOrderResp();
+        callback = ConvertHelper.convert(response,CreateWechatJsPayOrderResp.class);
+        callback.setPayNo(response.getOrderId().toString());
+        roster.setPayOrderId(response.getOrderId());
+        activityProvider.updateRoster(roster);
+        return callback;
 	}
 
 
@@ -957,6 +1388,20 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 	            //createActivityRoster(roster);
 	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
+                // 注册成功事件 add by jiarui
+                LocalEventBus.publish(event -> {
+                    LocalEventContext localEventcontext = new LocalEventContext();
+                    localEventcontext.setUid(UserContext.currentUserId());
+                    localEventcontext.setNamespaceId(activity.getNamespaceId());
+                    event.setContext(localEventcontext);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(EntityType.ACTIVITY_ROSTER.getCode(), roster);
+                    map.put("categoryId", activity.getCategoryId());
+                    event.setParams(map);
+                    event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+                    event.setEntityId(UserContext.currentUserId());
+                    event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
+                });
 
 				LOGGER.info("manualSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
@@ -1163,6 +1608,20 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
                             event.setEntityType(EhActivities.class.getSimpleName());
                             event.setEntityId(activity.getId());
                             event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.dft());
+                        });
+                        // 注册成功事件 add by jiarui
+                        LocalEventBus.publish(event -> {
+                            LocalEventContext localEventcontext = new LocalEventContext();
+                            localEventcontext.setUid(UserContext.currentUserId());
+                            localEventcontext.setNamespaceId(activity.getNamespaceId());
+                            event.setContext(localEventcontext);
+                            Map<String, Object> map = new HashMap<>();
+                            map.put(EntityType.ACTIVITY_ROSTER.getCode(), r);
+                            map.put("categoryId", activity.getCategoryId());
+                            event.setParams(map);
+                            event.setEntityType(EntityType.ACTIVITY_ROSTER.getCode());
+                            event.setEntityId(UserContext.currentUserId());
+                            event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ROSTER_CREATE.dft());
                         });
 					}
 				});
@@ -1746,12 +2205,14 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
     	}
     	roster.setGender(signupInfoDTO.getGender());
     	roster.setCommunityName(signupInfoDTO.getCommunityName());
-    	if(roster.getOrganizationName() == null){
-    		roster.setOrganizationName(signupInfoDTO.getOrganizationName());
-    	}
-    	if(roster.getPosition() == null){
-    		roster.setPosition(signupInfoDTO.getPosition());
-    	}
+
+    	//产品沟通不默认设置公司和职位，因为小区场景默认是没有公司和职位的  add by yanjun 20180515
+//    	if(roster.getOrganizationName() == null){
+//    		roster.setOrganizationName(signupInfoDTO.getOrganizationName());
+//    	}
+//    	if(roster.getPosition() == null){
+//    		roster.setPosition(signupInfoDTO.getPosition());
+//    	}
     	if(roster.getEmail() == null){
     		roster.setEmail(signupInfoDTO.getEmail());
     	}
@@ -1940,9 +2401,12 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 		//支付时是不同的版本，此处也要按不同的版本做处理，当前有版本1、2，默认是老版本1 edit by yanjun 20170919
 		if(ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V1){
 			refundV1(activity, roster, userId, refoundOrderNo);
-		}else{
-			refundV2(activity, roster, userId, refoundOrderNo);
-		}
+		}else {
+            Long orderId = refundV3(activity, roster, userId);
+            if (orderId != null) {
+                roster.setRefundPayOrderId(orderId);
+            }
+        }
 
 		roster.setPayFlag(ActivityRosterPayFlag.REFUND.getCode());
 		roster.setRefundOrderNo(refoundOrderNo);
@@ -1996,23 +2460,57 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 		}
 
 	}
+    //更换使用新的退款V3
+//	private void refundV2(Activity activity, ActivityRoster roster, Long userId, Long refoundOrderNo){
+//		Long amount = payService.changePayAmount(roster.getPayAmount());
+//		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode(), roster.getOrderNo(), refoundOrderNo, amount);
+//
+//		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+//			LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+//					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+//		} else{
+//			LOGGER.error("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+//					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+//			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+//					RentalServiceErrorCode.ERROR_REFUND_ERROR,
+//					"bill  refound error");
+//		}
+//
+//	}
+    private Long refundV3(Activity activity, ActivityRoster roster, Long userId){
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand();
+        BigDecimal amount = activity.getChargePrice();
+        if(amount == null){
+            createOrderCommand.setAmount(0L);
+        }
+        createOrderCommand.setAmount(amount.multiply(new BigDecimal(100)).longValue());
+        createOrderCommand.setRefundOrderId(roster.getPayOrderId());
+        Long orderNo = this.onlinePayService.createBillId(DateHelper
+                .currentGMTTime().getTime());
+        createOrderCommand.setBizOrderNum("activity"+orderNo);
+        createOrderCommand.setAccountCode("NS"+UserContext.getCurrentNamespaceId().toString());
+        createOrderCommand.setSourceType(1);
+        String homeUrl = configurationProvider.getValue("home.url", "");
+        String backUri = configurationProvider.getValue("pay.v2.callback.url.activity", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        createOrderCommand.setBackUrl(backUrl);
+        CreateOrderRestResponse refundResponse = payServiceV2.createRefundOrder(createOrderCommand);
 
-	private void refundV2(Activity activity, ActivityRoster roster, Long userId, Long refoundOrderNo){
-		Long amount = payService.changePayAmount(roster.getPayAmount());
-		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode(), roster.getOrderNo(), refoundOrderNo, amount);
-
-		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-			LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
-					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
-		} else{
-			LOGGER.error("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
-					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFUND_ERROR,
-					"bill  refound error");
-		}
-
-	}
+        if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+            LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+        } else{
+            LOGGER.error("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+                    roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill  refound error");
+        }
+        if (refundResponse.getResponse() != null) {
+            return refundResponse.getResponse().getOrderId();
+        }
+        return null;
+    }
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
 		App app = appProvider.findAppByKey(cmd.getAppKey());
@@ -5428,7 +5926,20 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
-
+        //敏感词过滤 start add by yanlong.liang 20180626
+        Post post = this.forumProvider.findPostById(activity.getPostId());
+        FilterWordsCommand command = new FilterWordsCommand();
+        if (post != null) {
+            command.setCommunityId(post.getVisibleRegionId());
+            command.setModuleType(post.getModuleType());
+        }
+        List<String> list = new ArrayList<>();
+        if (!StringUtils.isEmpty(cmd.getAchievement()) && !"link".equals(cmd.getAchievementType())) {
+            list.add(cmd.getAchievement());
+        }
+        command.setTextList(list);
+        this.sensitiveWordService.filterWords(command);
+        // 敏感词过滤 end
         activity.setAchievement(cmd.getAchievement());
         activity.setAchievementType(cmd.getAchievementType());
         activity.setAchievementRichtextUrl(cmd.getAchievementRichtextUrl());
@@ -5519,10 +6030,39 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         activityProvider.updateActivityAttachment(attachment);
     }
 
+
+    private void filterGoods(ActivityGoods goods) {
+        Activity activity = activityProvider.findActivityById(goods.getActivityId());
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", goods.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + goods.getActivityId());
+        }
+        //敏感词过滤 start add by yanlong.liang 20180626
+        Post post = this.forumProvider.findPostById(activity.getPostId());
+        FilterWordsCommand command = new FilterWordsCommand();
+        if (post != null) {
+            command.setCommunityId(post.getVisibleRegionId());
+            command.setModuleType(post.getModuleType());
+        }
+        List<String> list = new ArrayList<>();
+        if (!StringUtils.isEmpty(goods.getName())) {
+            list.add(goods.getName());
+        }
+        if (!StringUtils.isEmpty(goods.getHandlers())) {
+            list.add(goods.getHandlers());
+        }
+        command.setTextList(list);
+        this.sensitiveWordService.filterWords(command);
+        // 敏感词过滤 end
+    }
     @Override
     public void createActivityGoods(CreateActivityGoodsCommand cmd) {
         ActivityGoods goods = ConvertHelper.convert(cmd, ActivityGoods.class);
         goods.setCreatorUid(UserContext.current().getUser().getId());
+
+        filterGoods(goods);
+
         activityProvider.createActivityGoods(goods);
     }
 
@@ -5540,6 +6080,8 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         goods.setQuantity(cmd.getQuantity());
         goods.setTotalPrice(cmd.getTotalPrice());
         goods.setHandlers(cmd.getHandlers());
+
+        filterGoods(goods);
 
         activityProvider.updateActivityGoods(goods);
     }
@@ -6064,6 +6606,263 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 		}
 		
 	}
+
+    @Override
+    public GetActivityPayeeDTO getActivityPayee(GetActivityPayeeCommand cmd) {
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "CategoryId cannot be null.");
+        }
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+	    ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
+        GetActivityPayeeDTO activityPayeeDTO = new GetActivityPayeeDTO();
+        if (activityBizPayee != null) {
+            activityPayeeDTO.setAccountId(activityBizPayee.getBizPayeeId());
+        }
+        return activityPayeeDTO;
+    }
+
+    @Override
+    public List<ActivityPayeeDTO> listActivityPayee(ListActivityPayeeCommand cmd) {
+        if (cmd.getOrganizationId() == null) {
+            LOGGER.error("organizationId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "organizationId cannot be null.");
+        }
+	    List<ActivityPayeeDTO> dtoList = new ArrayList<>();
+	    String prefix = OwnerType.ORGANIZATION.getCode();
+	    List<PayUserDTO> list = this.payServiceV2.getPayUserList(prefix + cmd.getOrganizationId().toString(), String.valueOf(0));
+	    if (list != null && list.size() > 0) {
+            for (PayUserDTO r : list) {
+                ActivityPayeeDTO activityPayeeDTO = new ActivityPayeeDTO();
+                activityPayeeDTO.setAccountId(r.getId());
+                activityPayeeDTO.setAccountName(r.getRemark());
+                Integer userType = r.getUserType();
+                if(userType != null && userType.equals(2)) {
+                    activityPayeeDTO.setAccountType(OwnerType.ORGANIZATION.getCode());
+                    activityPayeeDTO.setAccountAliasName(r.getUserAliasName());
+                } else {
+                    activityPayeeDTO.setAccountType(OwnerType.USER.getCode());
+                    activityPayeeDTO.setAccountAliasName(r.getUserName());
+                }
+                // 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                Integer registerStatus = r.getRegisterStatus();
+                if(registerStatus != null && registerStatus.intValue() == 1) {
+                    activityPayeeDTO.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+                } else {
+                    activityPayeeDTO.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                }
+                dtoList.add(activityPayeeDTO);
+            }
+        }
+        return dtoList;
+    }
+
+    @Override
+    public void createOrUpdateActivityPayee(CreateOrUpdateActivityPayeeCommand cmd) {
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "CategoryId cannot be null.");
+        }
+        if (cmd.getPayeeId() == null) {
+            LOGGER.error("payeeId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "payeeId cannot be null.");
+        }
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
+        if (activityBizPayee == null) {
+            ActivityBizPayee persist = new ActivityBizPayee();
+            persist.setNamespaceId(UserContext.getCurrentNamespaceId());
+            persist.setBizPayeeType(OwnerType.ORGANIZATION.getCode());
+            persist.setOwnerId(activityCategories.getId());
+            persist.setBizPayeeId(cmd.getPayeeId());
+            this.activityProvider.CreateActivityPayee(persist);
+        }else {
+            if (activityBizPayee.getBizPayeeId() != cmd.getPayeeId()) {
+                activityBizPayee.setBizPayeeId(cmd.getPayeeId());
+                this.activityProvider.updateActivityPayee(activityBizPayee);
+            }
+        }
+    }
+
+    @Override
+    public CheckPayeeIsUsefulResponse checkPayeeIsUseful(CheckPayeeIsUsefulCommand cmd) {
+        if (cmd.getCategoryId() == null) {
+            LOGGER.error("CategoryId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "CategoryId cannot be null.");
+        }
+        CheckPayeeIsUsefulResponse checkPayeeIsUsefulResponse = new CheckPayeeIsUsefulResponse();
+        checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.NULL.getCode());
+
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+        if (activityCategories == null) {
+            LOGGER.error("activityCategories cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "activityCategories cannot be null.");
+        }
+
+        ActivityBizPayee activityBizPayee = this.activityProvider.getActivityPayee(activityCategories.getId(), UserContext.getCurrentNamespaceId());
+        if (activityBizPayee == null) {
+            return checkPayeeIsUsefulResponse;
+        }
+        List<Long> idList = new ArrayList<>();
+        idList.add(activityBizPayee.getBizPayeeId());
+        List<PayUserDTO> list = this.payServiceV2.listPayUsersByIds(idList);
+        if (list != null && list.size() > 0) {
+            PayUserDTO payUserDTO = (PayUserDTO)list.get(0);
+            if (payUserDTO.getRegisterStatus() == 0) {
+                checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.UNDER_REVIEW.getCode());
+                return checkPayeeIsUsefulResponse;
+            }
+            if (payUserDTO.getRegisterStatus() == 1) {
+                checkPayeeIsUsefulResponse.setPayeeAccountStatus(ActivityPayeeStatusType.IN_USE.getCode());
+                return checkPayeeIsUsefulResponse;
+            }
+        }
+        return checkPayeeIsUsefulResponse;
+    }
+
+    @Override
+    public void payNotify(OrderPaymentNotificationCommand cmd) {
+        ActivitySignupOrderV2CallBackHandler handler = PlatformContext.getComponent(
+                PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
+        }
+        if(cmd == null || cmd.getPaymentErrorCode() != "200") {
+            LOGGER.error("payNotify fail, cmd={}", cmd);
+        }
+        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+        if(orderType != null) {
+            switch (orderType) {
+                case PURCHACE:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //支付成功
+                        handler.paySuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.FAILED.getCode()){
+                        //支付失败
+                        handler.payFail(srvCmd);
+                    }
+                    break;
+                case REFUND:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //退款成功
+                        handler.refundSuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //退款失败
+                        handler.refundFail(srvCmd);
+                    }
+                    break;
+                default:
+                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+            }
+        }else {
+            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+        }
+    }
+
+    @Override
+    public void exportActivity(ExportActivityCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if(cmd.getStartTime() != null){
+            params.put("startTime", cmd.getStartTime());
+        }
+        if(cmd.getEndTime() != null){
+            params.put("endTime", cmd.getEndTime());
+        }
+
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_活动报名_" + fileNameSdf.format(cmd.getStartTime()) + "_" +fileNameSdf.format(cmd.getEndTime()) +".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityApplyExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
+    public void exportOrganization(ExportOrganizationCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityOrganizationList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_企业报名_" + fileNameSdf.format(new Date()) +".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityOrganizationExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
+
+    @Override
+    public void exportTag(ExportTagCommand cmd) {
+
+        Map<String, Object> params = new HashMap();
+
+        //如果是null的话会被传成“null”
+        if(cmd.getNamespaceId() != null){
+            params.put("namespaceId", cmd.getNamespaceId());
+        }
+        if (cmd.getCategoryId() != null) {
+            params.put("categoryId", cmd.getCategoryId());
+        }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String fileName = "activityTagList";
+        Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+        ActivityCategories activityCategories = this.activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), cmd.getNamespaceId());
+        if (namespace != null && activityCategories != null) {
+            fileName = namespace.getName() + "_" + activityCategories.getName();
+        }
+        SimpleDateFormat fileNameSdf = new SimpleDateFormat("yyyyMMdd");
+        fileName += "_标签统计_" + fileNameSdf.format(new Date())+".xlsx";
+
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivityTagExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new Date());
+
+    }
 
 //	@Override
 //	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {

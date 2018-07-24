@@ -2,9 +2,7 @@ package com.everhomes.rentalv2.order_handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.parking.ParkingLot;
-import com.everhomes.parking.ParkingProvider;
-import com.everhomes.parking.ParkingSpace;
+import com.everhomes.parking.*;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rest.parking.ParkingSpaceStatus;
 import com.everhomes.rest.rentalv2.*;
@@ -35,6 +33,8 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     private Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
     @Autowired
     private RentalCommonServiceImpl rentalCommonService;
+    @Autowired
+    private ParkingBusinessPayeeAccountProvider parkingBusinessPayeeAccountProvider;
 
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long now) {
@@ -158,17 +158,26 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
                 lockOrderResourceStatus(order);
                 handler.autoUpdateOrderSpaceSendMessage(order);
             }else {
-                rentalCommonService.refundOrder(order, System.currentTimeMillis(), order.getPaidMoney());
                 order.setStatus(SiteBillStatus.FAIL.getCode());
                 rentalv2Provider.updateRentalBill(order);
-
                 handler.autoCancelOrderSendMessage(order);
+                if (order.getPaidMoney().compareTo(new BigDecimal(0))>0)
+                    rentalCommonService.refundOrder(order, System.currentTimeMillis(), order.getPaidMoney());
             }
         }else {
             order.setStatus(SiteBillStatus.IN_USING.getCode());
             rentalv2Provider.updateRentalBill(order);
             lockOrderResourceStatus(order);
         }
+    }
+
+    @Override
+    public Long getAccountId(RentalOrder order) {
+        List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, order.getNamespaceId(), "community",
+                order.getCommunityId(), order.getRentalResourceId(), "vipParking");
+        if (accounts != null && accounts.size()>0)
+            return  accounts.get(0).getPayeeId();
+        return null;
     }
 
     @Override

@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.util.List;
-
 import com.everhomes.aclink.AclinkUser;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -12,6 +10,9 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserDTO;
 import com.everhomes.rest.user.UserInvitationsDTO;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface UserProvider {
     void createUser(User user);
@@ -40,9 +41,11 @@ public interface UserProvider {
 
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
     /**根据域空间id和注册的手机号来查询对应的注册信息**/
+    List<User> listUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
+
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
-
+    UserIdentifier findClaimingIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus);
 
     void createUserGroup(UserGroup userGroup);
@@ -146,6 +149,8 @@ public interface UserProvider {
     TargetDTO findUserByTokenAndName(String tel, String targetName);
 	
 	TargetDTO findUserByToken(String tel,Integer namespaceId);
+	
+	TargetDTO findUserTargetById(Long userId) ;
 
     /**
      * 查询非当前userId的正常用户数据
@@ -201,5 +206,13 @@ public interface UserProvider {
      * @return
      */
     String findContactTokenByOwnerUidAndNamespaceId(Long ownerUid , Integer namespaceId);
+    String findUserTokenOfUser(Long userId);
+
+    UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
+            String identifierToken, Integer namespaceId);
+
+    Integer countUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
+
+    String getNickNameByUid(Long creatorUid);
 
 }

@@ -13,7 +13,7 @@ import java.util.List;
  *
  */
 @Component("flow-variable-text-button-msg-curr-processors-name")
-public class FlowVarsTextButtonCurrentAllProcessorsName implements FlowVariableTextResolver {
+public class FlowVarsTextButtonCurrentAllProcessorsName extends FlowVarsButtonMsgCurrentProcessors implements FlowVariableTextResolver {
 
 	@Autowired
 	FlowService flowService;
@@ -23,41 +23,25 @@ public class FlowVarsTextButtonCurrentAllProcessorsName implements FlowVariableT
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
+		List<Long> userIdList = variableUserResolve(ctx, null, null, null, null, 10);
 
-	    //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
-        long stepCount = ctx.getFlowCase().getStepCount() - 1L;
-        // 如果下一个节点还是当前节点，说明stepCount也没变，所以不用减 1
-        if (ctx.getCurrentNode() != null && ctx.getCurrentNode().equals(ctx.getNextNode())) {
-            stepCount = ctx.getFlowCase().getStepCount();
-        }
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        for (Long uid : userIdList) {
+			UserInfo ui = flowService.getUserInfoInContext(ctx, uid);
+			if(ui != null) {
+				sb.append(ui.getNickName()).append(", ");
 
-        List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
-		        ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId()
-				, stepCount);
-		String txt = "";
-		int i = 0;
-		
-		if(logs != null && logs.size() > 0) {
-			for(FlowEventLog log : logs) {
-				if(log.getFlowUserId() != null && log.getFlowUserId() > 0) {
-					UserInfo ui = flowService.getUserInfoInContext(ctx, log.getFlowUserId());
-					if(ui != null) {
-                        txt += ui.getNickName() + ", ";
-						
-						i++;
-						if(i >= 3) {
-							break;
-						}	
-					}
-					
+				i++;
+				if(i >= 3) {
+					break;
 				}
 			}
 		}
-		
-		if(txt.length() > 2) {
-			txt = txt.substring(0, txt.length()-2);
-		}
-		return txt;
-	}
 
+		if(sb.length() > 2) {
+			return sb.substring(0, sb.length()-2);
+		}
+		return sb.toString();
+	}
 }

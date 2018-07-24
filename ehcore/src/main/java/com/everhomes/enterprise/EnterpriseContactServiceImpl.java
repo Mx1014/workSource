@@ -1165,7 +1165,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                     "Enterprise contact target user id can not be null");
         }
         
-        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(targetId, enterpriseId);
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByUIdAndOrgId(targetId, enterpriseId);
         if(member == null) {
             LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid 
                 + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
@@ -1762,7 +1762,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			cmd.setTargetId(user.getId());
 		}
 		// Check exists
-		OrganizationMember organizationmember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getTargetId(), cmd.getOrganizationId());
+		OrganizationMember organizationmember = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getTargetId(), cmd.getOrganizationId());
 		if (null != organizationmember) {
 			// Should response error hear
 			// contact.setId(existContact.getId());

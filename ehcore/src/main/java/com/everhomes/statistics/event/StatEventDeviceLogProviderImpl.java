@@ -7,11 +7,14 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhStatEventDeviceLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhStatEventDeviceLogs;
+import com.everhomes.server.schema.tables.records.EhStatEventDeviceLogsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -45,6 +48,20 @@ public class StatEventDeviceLogProviderImpl implements StatEventDeviceLogProvide
     @Override
     public StatEventDeviceLog findStatEventDeviceLogById(Long id) {
         return ConvertHelper.convert(dao().findById(id), StatEventDeviceLog.class);
+    }
+
+    @Override
+    public Long findUidByDeviceId(String deviceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhStatEventDeviceLogsRecord> query = context.selectQuery(Tables.EH_STAT_EVENT_DEVICE_LOGS);
+        query.addConditions(Tables.EH_STAT_EVENT_DEVICE_LOGS.DEVICE_ID.eq(deviceId));
+        query.addOrderBy(Tables.EH_STAT_EVENT_DEVICE_LOGS.CREATE_TIME.desc());
+        query.addLimit(1);
+        EhStatEventDeviceLogsRecord any = query.fetchAny();
+        if (any != null) {
+            return any.getUid();
+        }
+        return null;
     }
 
     // @Override

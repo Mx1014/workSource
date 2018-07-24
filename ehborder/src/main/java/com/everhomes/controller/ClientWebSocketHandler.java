@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.everhomes.rest.message.MessageRecordSenderTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.PongMessage;
@@ -90,18 +90,26 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         if (message instanceof TextMessage) {
             //LOGGER.info("Received client message. session= " + session.getId() + ", message: " + message.getPayload());
 
-            PduFrame frame = PduFrame.fromJson((String)message.getPayload());
-            if(frame == null) {
-                LOGGER.error("Unrecognized client message, session=" + session.getId() + ", payload=" + message.getPayload());
-                return;
+            try {
+                if("Ping".equalsIgnoreCase((String)message.getPayload())) {
+                    return;
+                }
+                PduFrame frame = PduFrame.fromJson((String)message.getPayload());
+                if(frame == null) {
+                    LOGGER.error("Unrecognized client message, session=" + session.getId() + ", payload=" + message.getPayload());
+                    return;
+                }
+                
+                if(frame.getName() == null || frame.getName().isEmpty()) {
+                    LOGGER.error("Missing name in frame, session=" + session.getId() + ", payload=" + message.getPayload());
+                    return;
+                }
+                
+                NamedHandlerDispatcher.invokeHandler(this, frame.getName(), session, frame);    
+            } catch(Exception ex) {
+                LOGGER.error("unknown error", ex);
             }
             
-            if(frame.getName() == null || frame.getName().isEmpty()) {
-                LOGGER.error("Missing name in frame, session=" + session.getId() + ", payload=" + message.getPayload());
-                return;
-            }
-            
-            NamedHandlerDispatcher.invokeHandler(this, frame.getName(), session, frame);
         }
         else if (message instanceof PongMessage) {
             handlePongMessage(session, (PongMessage) message);
@@ -183,17 +191,19 @@ public class ClientWebSocketHandler implements WebSocketHandler {
        String frameJson = pdu.getEncodedFrame();
        if(session != null) {
            TextMessage msg = new TextMessage(frameJson);
-           try {
-               synchronized(session) {
-                   session.sendMessage(msg);
-               }
-               if(LOGGER.isDebugEnabled()) {
-                   LOGGER.debug("Forward message, session=" + session.getId() + ", token=" + token + ", json=" + frameJson);
-               }
-               this.updateSessionSendTick(session);
-           } catch(IOException e) {
-               LOGGER.warn("Unable to send message to client, session=" + session.getId() + ", json=" + frameJson, e);
-           }
+//           try {
+//               synchronized(session) {
+//                   session.sendMessage(msg);
+//               }
+//               if(LOGGER.isDebugEnabled()) {
+//                   LOGGER.debug("Forward message, session=" + session.getId() + ", token=" + token + ", json=" + frameJson);
+//               }
+//               this.updateSessionSendTick(session);
+//           } catch(IOException e) {
+//               LOGGER.warn("Unable to send message to client, session=" + session.getId() + ", json=" + frameJson, e);
+//           }
+           WebSocketSessionProxy.sendMessage(session,msg, MessageRecordSenderTag.FORWARD_EVENT.getCode(), sessionToTokenMap.get(session));
+           this.updateSessionSendTick(session);
        } else {
            LOGGER.warn("Session is null, loginToken=" + token + ", json=" + frameJson);
        }
@@ -310,19 +320,22 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     if(borderId == id) {
                         registerSession(cmd.getLoginToken(), session);
                     }
-                    
+
                     PduFrame pdu = new PduFrame();
                     RegistedOkResponse respPdu = new RegistedOkResponse();
                     pdu.setPayload(respPdu);
+
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), MessageRecordSenderTag.REGISTER_LOGIN.getCode(), sessionToTokenMap.get(session));
+                    tearDown = false;
                     
-                    try {
-                        synchronized(session) {
-                            session.sendMessage(new TextMessage(pdu.toJson()));
-                            tearDown = false;
-                        }
-                    } catch (IOException e) {
-                        LOGGER.error("Send registedOk message error, session=" + session.getId());
-                    }
+//                    try {
+//                        synchronized(session) {
+//                            session.sendMessage(new TextMessage(pdu.toJson()));
+//                            tearDown = false;
+//                        }
+//                    } catch (IOException e) {
+//                        LOGGER.error("Send registedOk message error, session=" + session.getId());
+//                    }
                     
                 } else {
                     LOGGER.error("Invalid REST call response, session=" + session.getId());
@@ -383,14 +396,16 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
                     pdu.setPayload(clientPdu);
                     pdu.setAppId(appId);
-                    try {
-                        synchronized(session) {
-                            session.sendMessage(new TextMessage(pdu.toJson()));
-                        }
-                    } catch (IOException e) {
-                        LOGGER.error("Session send error, session=" + session.getId() + ", appId= " + appId.toString(), e);
-                        tearDownSession(session);
-                    }
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.toJson()), MessageRecordSenderTag.APPIDSTATUS.getCode(), sessionToTokenMap.get(session));
+
+//                    try {
+//                        synchronized(session) {
+//                            session.sendMessage(new TextMessage(pdu.toJson()));
+//                        }
+//                    } catch (IOException e) {
+//                        LOGGER.error("Session send error, session=" + session.getId() + ", appId= " + appId.toString(), e);
+//                        tearDownSession(session);
+//                    }
                 }
             }
 
@@ -462,4 +477,5 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     private void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
         LOGGER.info("Got pong message from " + session.getId());
     }
+
 }

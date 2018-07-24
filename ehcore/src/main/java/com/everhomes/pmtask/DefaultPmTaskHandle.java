@@ -1,49 +1,34 @@
 package com.everhomes.pmtask;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-
-
-
-
-
-
-
-import java.util.stream.Collectors;
-
-import com.everhomes.flow.FlowCase;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.flow.FlowEvaluate;
+import com.everhomes.flow.FlowEvaluateProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	
@@ -62,6 +47,10 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	PmTaskCommonServiceImpl pmTaskCommonService;
 	@Autowired
 	private FlowService flowService;
+	@Autowired
+	private ServiceModuleService serviceModuleService;
+	@Autowired
+	private FlowEvaluateProvider flowEvaluateProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -232,8 +221,18 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 			}
 
 		}
-		List<Category> list = categoryProvider.listTaskCategories(namespaceId,cmd.getOwnerType(),cmd.getOwnerId(),
-				parentId, cmd.getKeyword(), cmd.getPageAnchor(), cmd.getPageSize());
+		List<Category> list = new ArrayList<>();
+		List<Long> ownIds = this.getOwnerIds(cmd);
+		if (ownIds.size() > 1){
+			for (Long ownId : ownIds) {
+				list.addAll(categoryProvider.listTaskCategories(namespaceId,cmd.getOwnerType(),ownId,
+						parentId, cmd.getKeyword(), null, null));
+			}
+		} else {
+			list.addAll(categoryProvider.listTaskCategories(namespaceId,cmd.getOwnerType(),cmd.getOwnerId(),
+					parentId, cmd.getKeyword(), cmd.getPageAnchor(), cmd.getPageSize()));
+		}
+
 		int size = list.size();
 		if(size > 0){
     		response.setRequests(list.stream().map(r -> {
@@ -308,12 +307,15 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getCreatorType(),
-				cmd.getPageAnchor(), pageSize+1);
+		List<PmTaskDTO> dtos = new ArrayList<>();
+//		V3.5修改兼容查询域空间下全部项目
+		List<PmTaskDTO> list = pmTaskSearch.searchAllDocsByType(cmd,pageSize + 1);
+//		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
+//				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getCreatorType(),
+//				cmd.getPageAnchor(), pageSize+1);
 		int listSize = list.size();
 		if (listSize > 0) {
-    		response.setRequests(list.stream().map(t -> {
+    		dtos = list.stream().map(t -> {
     			PmTask task = pmTaskProvider.findTaskById(t.getId());
     			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
     			if(task != null) {
@@ -323,20 +325,20 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 						dto.setTaskCategoryId(taskCategory.getId());
 						dto.setTaskCategoryName(taskCategory.getName());
 					}
-
-					if (null!=task.getFlowCaseId()) {
-						FlowCase flowCase = flowService.getFlowCaseById(task.getFlowCaseId());
-						if (flowCase!=null)
-							dto.setStatus(flowCase.getStatus());
-					}
 				}
 				
 				if (dto.getOrganizationUid()==0)
 					dto.setOrganizationUid(null);
 
+//				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(t.getId());
+//				if(null != order){
+//					dto.setAmount(order.getAmount());
+//				}
+
     			return dto;
-    		}).collect(Collectors.toList()));
-    		if(response.getRequests() != null && response.getRequests().size() > pageSize){
+    		}).collect(Collectors.toList());
+    		response.setRequests(dtos);
+    		if(response.getRequests().size() > 0 && response.getRequests().size() > pageSize){
 				response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
 				response.getRequests().remove(list.get(listSize-1));
         	}else{
@@ -347,7 +349,27 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		return response;
 	}
 
-//	@Override
+	@Override
+	public Object getThirdAddress(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object createThirdTask(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object listThirdTasks(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object getThirdTaskDetail(HttpServletRequest req) {
+		return null;
+	}
+
+	//	@Override
 //	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 //		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 //		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -424,4 +446,19 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 				"non-privileged.");
     }
+
+	private List<Long> getOwnerIds(ListTaskCategoriesCommand cmd){
+		List<Long> ownerIds = new ArrayList<>();
+		if(null == cmd.getOwnerId() || -1L == cmd.getOwnerId()){
+			ListUserRelatedProjectByModuleCommand cmd1 = new ListUserRelatedProjectByModuleCommand();
+			cmd1.setModuleId(20100L);
+//			cmd1.setAppId(cmd.getAppId());
+//			cmd1.setOrganizationId(cmd.getCurrentPMId());
+			List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
+			ownerIds.addAll(dtos.stream().map(elem -> elem.getProjectId()).collect(Collectors.toList()));
+		} else {
+			ownerIds.add(cmd.getOwnerId());
+		}
+		return ownerIds;
+	}
 }

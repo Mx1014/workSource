@@ -3,6 +3,7 @@ package com.everhomes.serviceModuleApp;
 
 import java.util.List;
 
+
 public interface ServiceModuleAppProvider {
 
 	void createServiceModuleApp(ServiceModuleApp serviceModuleApp);

@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.assetPayment;
 
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -17,6 +19,53 @@ import java.util.List;
  */
 
 public class ExcelMultipleSheetTest {
+    @Test
+    public void foo(){
+        Node a = new Node("a", 1);
+        Node b = new Node("b", 2);
+        a.setNode(b);
+        Node conver = ConvertHelper.convert(a, Node.class);
+        System.out.println(conver);
+    }
+    class Node{
+        private String gg;
+        private int wp;
+        private Node node;
+
+        @Override
+        public String toString() {
+            return StringHelper.toJsonString(this);
+        }
+
+        public Node(String gg, int wp) {
+            this.gg = gg;
+            this.wp = wp;
+        }
+
+        public String getGg() {
+            return gg;
+        }
+
+        public void setGg(String gg) {
+            this.gg = gg;
+        }
+
+        public int getWp() {
+            return wp;
+        }
+
+        public void setWp(int wp) {
+            this.wp = wp;
+        }
+
+        public Node getNode() {
+            return node;
+        }
+
+        public void setNode(Node node) {
+            this.node = node;
+        }
+    }
     @Test
     @SuppressWarnings("unchecked")
     public void fun() {

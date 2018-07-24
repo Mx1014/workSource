@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.aclink;
 
 import java.util.Arrays;
@@ -352,6 +353,24 @@ public class CmdUtil {
             } catch (Exception e) {
                 LOGGER.error("setServerKeyCmd()..." + e.toString());
             }
+        }
+        return null;
+    }
+    
+    public static byte[] forwardCmd(byte[] msg) {
+        byte cmd = 0x10;
+        byte ver = 0x0;
+        try {
+            if (null != msg) {
+                byte[] serverkeyEncryptPaddingResult = addPaddingTo16Bytes(msg);
+                byte[] resultArr = new byte[2 + serverkeyEncryptPaddingResult.length];
+                resultArr[0] = cmd;
+                resultArr[1] = ver;
+                System.arraycopy(serverkeyEncryptPaddingResult, 0, resultArr, 2, serverkeyEncryptPaddingResult.length);
+                return resultArr;
+            }
+        } catch (Exception e) {
+            LOGGER.error("openDoorCmd error", e);
         }
         return null;
     }

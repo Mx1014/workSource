@@ -15,7 +15,8 @@ public enum NewServiceAllianceCustomField {
 	JUMPTYPE("integral_tag1", "integralTag1", Tables.EH_SERVICE_ALLIANCES.INTEGRAL_TAG1),
 	EMAIL("string_tag1", "stringTag1", Tables.EH_SERVICE_ALLIANCES.STRING_TAG1),
 	TEMPLATETYPE("string_tag2", "stringTag2", Tables.EH_SERVICE_ALLIANCES.STRING_TAG2),
-    JUMPID("integral_tag2", "integralTag2", Tables.EH_SERVICE_ALLIANCES.INTEGRAL_TAG2);
+    JUMPID("integral_tag2", "integralTag2", Tables.EH_SERVICE_ALLIANCES.INTEGRAL_TAG2),
+	ENABLEPROVIDER("integral_tag3", "integralTag3", Tables.EH_SERVICE_ALLIANCES.INTEGRAL_TAG3);
     
     private String fieldName;
     private String propertyName;

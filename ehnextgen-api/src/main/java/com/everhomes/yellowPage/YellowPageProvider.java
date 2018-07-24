@@ -23,14 +23,11 @@ public interface YellowPageProvider {
 			String serviceType, String keywords);
 	
 	
-	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
-												String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords,Condition conditionOR );
+	List<ServiceAlliances> queryServiceAllianceAdmin(CrossShardListingLocator locator, int pageSize,
+												String ownerType, Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords,  Byte displayFlag);
 
-	/**
-	 * add by dengs,20170428 不仅查小区，也查询物业公司下的 服务联盟机构
-	 */
-	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
-			String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords,Long organizationId,String organizationType);
+	List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
+			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords);
 
 	void createYellowPage(YellowPage yellowPage);
 
@@ -100,7 +97,7 @@ public interface YellowPageProvider {
 	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
 
 
-	List<JumpModuleDTO> jumpModules(Integer namespaceId);
+	List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString);
 	
 	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
 
@@ -152,4 +149,5 @@ public interface YellowPageProvider {
 
 
 	List<ServiceAlliances> findOldFormServiceAlliance();
+
 }

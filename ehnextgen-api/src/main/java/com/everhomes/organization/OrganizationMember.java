@@ -27,8 +27,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private Date employmentTime;
 
-    private Integer profileIntegrity;
-
     private Date checkInTime;
 
 	private Byte employeeType;
@@ -123,14 +121,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     public void setEmploymentTime(Date employmentTime) {
         this.employmentTime = employmentTime;
-    }
-
-    public Integer getProfileIntegrity() {
-        return profileIntegrity;
-    }
-
-    public void setProfileIntegrity(Integer profileIntegrity) {
-        this.profileIntegrity = profileIntegrity;
     }
 
 	public Byte getEmployeeType() {

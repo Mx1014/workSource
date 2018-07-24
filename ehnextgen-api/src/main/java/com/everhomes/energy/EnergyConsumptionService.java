@@ -1,11 +1,72 @@
 
 package com.everhomes.energy;
 
-import com.everhomes.rest.energy.*;
+import com.everhomes.rest.energy.BatchReadEnergyMeterCommand;
+import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
+import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterDefaultSettingCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.CreateEnergyTaskCommand;
+import com.everhomes.rest.energy.DelelteEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterFormulaCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
+import com.everhomes.rest.energy.DeleteEnergyPlanCommand;
+import com.everhomes.rest.energy.EnergyCommunityYoyStatDTO;
+import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
+import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
+import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
+import com.everhomes.rest.energy.EnergyMeterDTO;
+import com.everhomes.rest.energy.EnergyMeterDefaultSettingDTO;
+import com.everhomes.rest.energy.EnergyMeterDefaultSettingTemplateDTO;
+import com.everhomes.rest.energy.EnergyMeterFormulaDTO;
+import com.everhomes.rest.energy.EnergyMeterPriceConfigDTO;
+import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
+import com.everhomes.rest.energy.EnergyMeterSettingLogDTO;
+import com.everhomes.rest.energy.EnergyPlanDTO;
+import com.everhomes.rest.energy.EnergyStatByYearDTO;
+import com.everhomes.rest.energy.EnergyStatCommand;
+import com.everhomes.rest.energy.EnergyStatDTO;
+import com.everhomes.rest.energy.ExportEnergyMeterQRCodeCommand;
+import com.everhomes.rest.energy.FindEnergyMeterByQRCodeCommand;
+import com.everhomes.rest.energy.FindEnergyPlanDetailsCommand;
+import com.everhomes.rest.energy.GetEnergyMeterCommand;
+import com.everhomes.rest.energy.GetEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.GetEnergyMeterQRCodeCommand;
+import com.everhomes.rest.energy.ImportEnergyMeterCommand;
+import com.everhomes.rest.energy.ImportTasksByEnergyPlanCommand;
+import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
+import com.everhomes.rest.energy.ListEnergyMeterCategoriesCommand;
+import com.everhomes.rest.energy.ListEnergyMeterChangeLogsCommand;
+import com.everhomes.rest.energy.ListEnergyMeterFormulasCommand;
+import com.everhomes.rest.energy.ListEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.ListEnergyMeterSettingLogsCommand;
+import com.everhomes.rest.energy.ListEnergyPlanMetersCommand;
+import com.everhomes.rest.energy.ListEnergyPlanMetersResponse;
+import com.everhomes.rest.energy.ListUserEnergyPlanTasksCommand;
+import com.everhomes.rest.energy.ListUserEnergyPlanTasksResponse;
+import com.everhomes.rest.energy.ReadEnergyMeterCommand;
+import com.everhomes.rest.energy.ReadTaskMeterCommand;
+import com.everhomes.rest.energy.ReadTaskMeterOfflineCommand;
+import com.everhomes.rest.energy.ReadTaskMeterOfflineResponse;
+import com.everhomes.rest.energy.SearchEnergyMeterCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
+import com.everhomes.rest.energy.SearchEnergyMeterResponse;
+import com.everhomes.rest.energy.SearchTasksByEnergyPlanCommand;
+import com.everhomes.rest.energy.SetEnergyPlanMeterOrderCommand;
+import com.everhomes.rest.energy.SyncOfflineDataCommand;
+import com.everhomes.rest.energy.SyncOfflineDataResponse;
+import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterPriceConfigCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
+import com.everhomes.rest.energy.UpdateEnergyPlanCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
-
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
@@ -273,4 +334,8 @@ public interface EnergyConsumptionService {
     ImportFileTaskDTO importTasksByEnergyPlan(ImportTasksByEnergyPlanCommand cmd, MultipartFile mfile, Long userId);
 
     SyncOfflineDataResponse syncOfflineData(SyncOfflineDataCommand cmd);
+
+    void meterAutoReading(Boolean createPlanFlag);
+
+    void addMeterPeriodTaskById(Long meterId);
 }

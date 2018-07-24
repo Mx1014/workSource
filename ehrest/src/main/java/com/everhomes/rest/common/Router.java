@@ -2,7 +2,11 @@
 package com.everhomes.rest.common;
 
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.meeting.MeetingRecordDetailActionData;
+import com.everhomes.rest.meeting.MeetingReservationDetailActionData;
 import com.everhomes.rest.notice.EnterpriseNoticeDetailActionData;
+import com.everhomes.rest.remind.SelfRemindDetailActionData;
+import com.everhomes.rest.remind.TrackRemindDetailActionData;
 import com.everhomes.rest.workReport.WorkReportDetailsActionData;
 
 /**
@@ -266,7 +270,25 @@ public enum Router {
      * enterprise-notice
      */
     ENTERPRISE_NOTICE_DETAIL(
-            "zl://enterprise-bulletin/detail", EnterpriseNoticeDetailActionData.class);
+            "zl://enterprise-bulletin/detail", EnterpriseNoticeDetailActionData.class),
+
+    /**
+     * calendar-remind
+     */
+    SELF_CALENDAR_REMIND_DETAIL(
+            "zl://remind/create", SelfRemindDetailActionData.class),
+
+    /**
+     * calendar-remind
+     */
+    SHARED_CALENDAR_REMIND_DETAIL(
+            "zl://remind/share-detail", TrackRemindDetailActionData.class),
+
+    MEETING_RESERVATION_DETAIL(
+            "zl://meeting-reservation/meeting-detail", MeetingReservationDetailActionData.class),
+
+    MEETING_RECORD_DETAIL(
+            "zl://meeting-reservation/meeting-recordDetail", MeetingRecordDetailActionData.class);
 
     // 此actionType不是必须的，
     // 有这个字段只是为了将之前的actionType形式的转换成router形式时的对照

@@ -2,14 +2,18 @@ package com.everhomes.rest.officecubicle;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+
 /**
  * <ul> 
  * <li>id: siteid</li>
  * <li>spaceId: 空间id</li>
- * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室 {@link com.everhomes.rest.officecubicle.OfficeRentType}</li>  
- * <li>positionNums: 工位数量</li> 
+ * <li>rentType: 租赁类别:1-开放式（默认space_type 1）,2-办公室 {@link com.everhomes.rest.officecubicle.OfficeRentType}</li>
+ * <li>spaceType: 空间类别:1-工位,2-面积 </li>
  * <li>name: 空间名称</li>
- * <li>size: 场所大小，rentType=2-办公室 来说面积是平米</li>
+ * <li>positionNums: 工位数量</li>
+ * <li>unitPrice: 单位价格 </li>
+ * <li>size: 场所大小 - 对于工位是个数，对于面积是平米</li>
  * </ul>
  */
 public class OfficeCategoryDTO {
@@ -21,6 +25,7 @@ public class OfficeCategoryDTO {
     private String name;
 
     private Integer positionNums;
+    private BigDecimal unitPrice;
 	private Integer size;
 	
 	public Integer getPositionNums() {
@@ -37,6 +42,14 @@ public class OfficeCategoryDTO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public BigDecimal getUnitPrice() {
+		return unitPrice;
+	}
+
+	public void setUnitPrice(BigDecimal unitPrice) {
+		this.unitPrice = unitPrice;
 	}
 
 	@Override

@@ -3,16 +3,21 @@ package com.everhomes.pmtask;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionStringVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
@@ -47,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +81,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private ConfigurationProvider configProvider;
+	private ConfigurationProvider configurationProvider;
 	@Autowired
 	private PmTaskService pmTaskService;
 	@Autowired
@@ -86,7 +92,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private PortalService portalService;
 	@Autowired
 	private OrganizationProvider organizationProvider;
-
+	@Autowired
+	private AddressProvider addressProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -102,12 +109,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStart(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		task.setStatus(FlowCaseStatus.ABSORTED.getCode());
+		pmTaskProvider.updateTask(task);
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	//状态改变之后
@@ -152,40 +164,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 			LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 
-			if ("ACCEPTING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
-
-			}else if ("ASSIGNING".equals(nodeType)) {
-
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
-
-			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
-				pmTaskProvider.updateTask(task);
-
-				//TODO: 同步数据到科技园 （当受理之后才同步） 此处由于不好获取工作流中分配的人，所以当节点值（ASSIGNING）待分配时
-				//应项目经理需求，关掉同步数据到科技园 modify by sw 20171214
-				// 在fireButton存在eh_pm_task_logs表中，onFlowCaseStateChanged方法是状态已经更新之后，此处节点值是当前节点的下一个节点
-//				Integer namespaceId = UserContext.getCurrentNamespaceId();
-//				if(namespaceId == 1000000) {
-//					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
-//					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.PROCESSING.getCode());
-//					if (null != logs && logs.size() != 0) {
-//						for (PmTaskLog r: logs) {
-//							if (null != r.getTargetId()) {
-//								synchronizedTaskToTechpark(task, r.getTargetId(), flow.getOrganizationId());
-//								break;
-//							}
-//						}
-//					}
-//				}
-			}else if ("COMPLETED".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				pmTaskProvider.updateTask(task);
-			}else if ("HANDOVER".equals(nodeType)) {
+			if ("HANDOVER".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 				//通知第三方 config表中配置api请求地址
@@ -216,11 +195,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 				task.setIfUseFeelist((byte)1);
 			}
-		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-
-			task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
-			pmTaskProvider.updateTask(task);
 		}
+		pmTaskProvider.updateTask(task);
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
@@ -229,7 +205,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		task.setStatus(FlowCaseStatus.FINISHED.getCode());
+		pmTaskProvider.updateTask(task);
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 	}
 
 	@Override
@@ -260,10 +242,29 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			dto = handler.getTaskDetail(cmd);
 		}else {
 			dto = pmTaskCommonService.getTaskDetail(cmd, false);
-
 		}
 
+//		企业名称和楼栋门牌
+		if(null != dto.getEnterpriseId() && dto.getEnterpriseId() > 0){
+			Organization org = organizationProvider.findOrganizationById(dto.getEnterpriseId());
+			if(null != org){
+				dto.setEnterpriseName(org.getName());
+				List<OrganizationAddress> orgAddrs = organizationProvider.findOrganizationAddressByOrganizationId(org.getId());
+				StringBuffer addrs = new StringBuffer();
+				for (OrganizationAddress orgAddr : orgAddrs){
+					Address addr =  addressProvider.findAddressById(orgAddr.getAddressId());
+					if(null != addr && null != addr.getAddress()){
+						addrs.append(addr.getAddress() + "\n");
+					}
+				}
+				if(addrs.length() > 0){
+					dto.setEnterpriseAddress(addrs.substring(0,addrs.length() - 2));
+				}
+			}
+		}
 
+		if (null != dto.getTaskCategoryId())
+			dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel" + dto.getTaskCategoryId(),"0"));
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
@@ -336,18 +337,35 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setValue(dto.getRequestorPhone());
 		entities.add(e);
 
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("发起人");
-		e.setValue(name);
-		entities.add(e);
+		if(null != dto.getEnterpriseId() && dto.getEnterpriseId() > 0){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("企业名称");
+			e.setValue(dto.getEnterpriseName());
+			entities.add(e);
 
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("发起人电话");
-		e.setValue(phone);
-		entities.add(e);
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("楼栋门牌");
+			e.setValue(dto.getEnterpriseAddress());
+			entities.add(e);
+		}
 
+
+//		代发情况才显示
+		if (task.getOrganizationUid() != null) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("发起人");
+			e.setValue(name);
+			entities.add(e);
+
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("发起人电话");
+			e.setValue(phone);
+			entities.add(e);
+		}
 
 		//TODO:为科兴与一碑对接
 		if(dto.getNamespaceId() == 999983 &&
@@ -359,49 +377,95 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
-		//填写费用清单
-		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
-		if (task.getIfUseFeelist()!=null && task.getIfUseFeelist()==1)
-			if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
-				if (list!=null && list.size()>0){
-					e = new FlowCaseEntity();
-					e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-					e.setKey("费用清单");
-					String content = "";
-					List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
-							.collect(Collectors.toList());
-					content += "本次服务的费用清单如下，请进行确认\n";
-					Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
-					content += "总计:"+total+"元\n";
-					Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
-					content += "服务费:"+total+"元\n";
-					content += "物品费:"+(total-serviceFee)+"元\n";
-					PostApprovalFormItem subForm = getFormItem(items,"物品");
-					if (subForm!=null) {
-						PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
-						List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
-						if (array.size()!=0) {
-							content += "物品费详情：\n";
-							Gson g=new Gson();
-							for (PostApprovalFormSubformItemValue itemValue : array){
-								List<PostApprovalFormItem> values = itemValue.getValues();
-								content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
-								content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
-								content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
-										getTextString(getFormItem(values,"数量").getFieldValue())+")";
-							}
-							content += "如对上述费用有疑义请附言说明";
-						}
-					}
-					e.setValue(content);
-					entities.add(e);
-				}else {
+		PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+		List<PmTaskOrderDetail> products = pmTaskProvider.findOrderDetailsByTaskId(null,null,null,task.getId());
+		PmTaskOrderDTO orderdto = new PmTaskOrderDTO();
+		if(null != order){
+			orderdto = ConvertHelper.convert(order,PmTaskOrderDTO.class);
+			orderdto.setProducts(products.stream().map(r->ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
+
+			if (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode())){
+				if (null != orderdto.getServiceFee()){
 					e = new FlowCaseEntity();
 					e.setEntityType(FlowCaseEntityType.LIST.getCode());
-					e.setKey("费用清单");
-					e.setValue("本次服务没有产生维修费");
+					e.setKey("服务费");
+					BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+					e.setValue(serviceFee.movePointLeft(2).toString() + "元");
 					entities.add(e);
 				}
+				if(null != products && products.size() > 0){
+					e = new FlowCaseEntity();
+					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+					e.setKey("物品费");
+					BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+					e.setValue(productFee.movePointLeft(2).toString() + "元");
+					entities.add(e);
+				}
+			}
+		}
+
+
+
+
+		//填写费用清单
+//		List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals(EntityType.PM_TASK.getCode(),task.getId());
+//		if (task.getIfUseFeelist()!=null && task.getIfUseFeelist()==1)
+//			if (flowCase.getStatus() == FlowCaseStatus.FINISHED.getCode())
+//				if (products!=null && products.size()>0){
+//					e = new FlowCaseEntity();
+//					e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+//					e.setKey("费用清单");
+//					String content = "";
+//					List<PostApprovalFormItem> items = list.stream().map(p->ConvertHelper.convert(p, PostApprovalFormItem.class))
+//							.collect(Collectors.toList());
+//					content += "本次服务的费用清单如下，请进行确认\n";
+//					Long total = Long.valueOf(getTextString(getFormItem(items,"总计").getFieldValue()));
+//					BigDecimal total = BigDecimal.valueOf(order.getAmount());
+//					content += "总计:"+total.movePointLeft(2).toString()+"元\n";
+//					Long serviceFee = Long.valueOf(getTextString(getFormItem(items,"服务费").getFieldValue()));
+//					BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+//					content += "服务费:"+serviceFee.movePointLeft(2).toString()+"元\n";
+//					BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+//					content += "物品费:"+ productFee.movePointLeft(2) +"元\n";
+//					PostApprovalFormItem subForm = getFormItem(items,"物品");
+//					if (subForm!=null) {
+//						PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
+//						List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
+//						if (array.size()!=0) {
+//							content += "物品费详情：\n";
+//							Gson g=new Gson();
+//							for (PostApprovalFormSubformItemValue itemValue : array){
+//								List<PostApprovalFormItem> values = itemValue.getValues();
+//								content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
+//								content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
+//								content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
+//										getTextString(getFormItem(values,"数量").getFieldValue())+")";
+//							}
+//							content += "如对上述费用有疑义请附言说明";
+//						}
+//					}
+//					if (order.getProductFee().doubleValue() > 0){
+//						content += "物品费详情：\n";
+//						for (PmTaskOrderDetail r : products) {
+//							BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+//							BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+//							content += r.getProductName() + ":";
+//							content += price.multiply(amount).movePointLeft(2).toString() + "元";
+//							content += "(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")";
+//						}
+//					}
+//					content += "如对上述费用有疑义请附言说明";
+//					e.setValue(content);
+//					entities.add(e);
+//				}else {
+//					e = new FlowCaseEntity();
+//					e.setEntityType(FlowCaseEntityType.LIST.getCode());
+//					e.setKey("费用清单");
+//					e.setValue("本次服务没有产生维修费");
+//					entities.add(e);
+//				}
+
+		pmTaskProvider.findPmTaskOrderById(task.getId());
 		JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(dto));
 		jo.put("formUrl",processFormURL(EntityType.PM_TASK.getCode(),""+task.getId(),FlowOwnerType.PMTASK.getCode(),"","费用确认"));
 		if (flowUserType!=null)
@@ -523,12 +587,23 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
-				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+				task.setStatus(FlowCaseStatus.FINISHED.getCode());
 				pmTaskProvider.updateTask(task);
 				pmTaskSearch.feedDoc(task);
 			}
 		}else if(FlowStepType.NO_STEP.getCode().equals(stepType)) {
-			if ("MOTIFYFEE".equals(nodeType)) {
+//			按钮参数
+			String btnParam = ctx.getFlowGraph().getGraphButton(ctx.getCurrentEvent().getFiredButtonId()).getFlowButton().getParam();
+			String btnNodeType = "";
+			if (!StringUtils.isBlank(btnParam)) {
+				JSONObject paramJson = JSONObject.parseObject(btnParam);
+				btnNodeType = paramJson.getString("nodeType");
+			}
+//			发起人
+//			ctx.getFlowCase().getApplyUserId();
+//			处理人
+//			ctx.getOperator().getId();
+			if ("MOTIFYFEE".equals(btnNodeType)) {
 				FlowGraphEvent evt = ctx.getCurrentEvent();
 				if (FlowUserType.APPLIER.equals(evt.getUserType())){
 					LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
@@ -541,7 +616,37 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					dto.setStepCount(flowCase.getStepCount());
 					flowService.processAutoStep(dto);
 				}
+			} else if ("CONFIRMFEE".equals(btnNodeType)){
+// TODO: 2018/7/11 支付
+				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+				PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+				task.setAmount(order.getAmount());
+				pmTaskProvider.updateTask(task);
+				pmTaskSearch.feedDoc(task);
+
+				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+				FlowAutoStepDTO dto = new FlowAutoStepDTO();
+				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+				dto.setFlowCaseId(flowCase.getId());
+				dto.setFlowMainId(flowCase.getFlowMainId());
+				dto.setFlowNodeId(flowCase.getCurrentNodeId());
+				dto.setFlowVersion(flowCase.getFlowVersion());
+				dto.setStepCount(flowCase.getStepCount());
+				flowService.processAutoStep(dto);
+			} else if ("NEEDFEE".equals(btnNodeType)){
+				LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+				FlowAutoStepDTO dto = new FlowAutoStepDTO();
+				dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+				dto.setFlowCaseId(flowCase.getId());
+				dto.setFlowMainId(flowCase.getFlowMainId());
+				dto.setFlowNodeId(flowCase.getCurrentNodeId());
+				dto.setFlowVersion(flowCase.getFlowVersion());
+				dto.setStepCount(flowCase.getStepCount());
+				flowService.processAutoStep(dto);
 			}
+
+
 		}
 
 	}
@@ -665,9 +770,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
 		ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
 		dto.setOptions(new ArrayList<>());
-		response.getRequests().forEach(p->{
-			dto.getOptions().add(p.getName());
-		});
+		response.getRequests().forEach(p-> dto.getOptions().add(p.getName()));
 		list.add(dto);
 		return list;
 	}
@@ -683,5 +786,18 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			return flowConditionStringVariable;
 		}
 		return null;
+	}
+
+	@Override
+	public void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates) {
+	    Long flowCaseId = evaluates.get(0).getFlowCaseId();
+	    if(null != flowCaseId){
+	        PmTask task = pmTaskProvider.findTaskByFlowCaseId(flowCaseId);
+	        Double avgEval = evaluates.stream().collect(Collectors.averagingDouble(FlowEvaluate::getStar));
+	        BigDecimal avg = BigDecimal.valueOf(avgEval);
+	        task.setStar(avg.setScale(1).toString());
+	        pmTaskProvider.updateTask(task);
+            pmTaskSearch.feedDoc(task);
+        }
 	}
 }

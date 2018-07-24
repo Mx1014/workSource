@@ -1399,6 +1399,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
                 //如果没有id ,说明是新建的setting,同时创建一个payment
                 socialSecuritySettingProvider.createSocialSecuritySetting(setting);
                 String payMonth = findPaymentMonth(detail.getOrganizationId());
+                if (null == payMonth)
+                	payMonth = monthSF.get().format(DateHelper.currentGMTTime());
                 SocialSecurityPayment payment = processSocialSecurityPayment(setting, payMonth, NormalFlag.NO.getCode());
                 socialSecurityPaymentProvider.createSocialSecurityPayment(payment);
             } else {
@@ -1669,33 +1671,36 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             if (null == dpt) {
                 continue;
             }
-            calculateSocialSecurityDptReports(dpt, month);
+            calculateSocialSecurityDptReports(ownerId, dpt, month);
         }
 
     }
 
-    private void calculateSocialSecurityDptReports(Organization dpt, String month) {
-        List<Organization> dptOrgs = findOrganizationDpts(dpt);
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        List<Long> orgIds = new ArrayList<Long>();
-        orgIds.add(dpt.getId());
-        for (Organization o : dptOrgs) {
-            orgIds.add(o.getId());
-        }
+    private void calculateSocialSecurityDptReports(Long ownerId, Organization dpt, String month) {
+//        List<Organization> dptOrgs = findOrganizationDpts(dpt);
+//        CrossShardListingLocator locator = new CrossShardListingLocator();
+//        List<Long> orgIds = new ArrayList<Long>();
+//        orgIds.add(dpt.getId());
+//        for (Organization o : dptOrgs) {
+//            orgIds.add(o.getId());
+//        }
 //        List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null, orgIds,
 //                OrganizationMemberStatus.ACTIVE.getCode(), null, locator, Integer.MAX_VALUE - 1);
         ListSocialSecurityPaymentsCommand cmd = new ListSocialSecurityPaymentsCommand();
-        cmd.setOwnerId(dpt.getDirectlyEnterpriseId());
-        cmd.setDeptId(dpt.getId());
+        Long dptId = null;
+        if(!dpt.getId().equals(ownerId)){
+        	dptId = dpt.getId();	
+        }
         cmd.setPageSize(Integer.MAX_VALUE - 1);
-        cmd.setAccumulationFundStatus(NormalFlag.YES.getCode());
-
-        List<SocialSecurityEmployeeDTO> result = listSocialSecurityEmployees(cmd);
+        List<OrganizationMemberDetails> records = archivesService.queryArchivesEmployees(new ListingLocator(), ownerId, dptId, (locator, query) -> {
+            query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME.desc()); 
+            return query;
+        });
         List<Long> detailIds = new ArrayList<>();
-        if (null != result) {
-            for (SocialSecurityEmployeeDTO member : result) {
-                if (null != member.getDetailId()) {
-                    detailIds.add(member.getDetailId());
+        if (null != records) {
+            for (OrganizationMemberDetails member : records) {
+                if (null != member.getId()) {
+                    detailIds.add(member.getId());
                 }
             }
         }
@@ -2732,11 +2737,11 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null != r.getFileTime()) {
             dto.setFileTime(r.getFileTime().getTime());
         }
-        OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getCreatorUid(), r.getOrganizationId());
+        OrganizationMember detail = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getCreatorUid(), r.getOrganizationId());
         if (null != detail) {
             dto.setCreatorName(detail.getContactName());
         }
-        detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getFileUid(), r.getOrganizationId());
+        detail = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getFileUid(), r.getOrganizationId());
         if (null != detail) {
             dto.setFileName(detail.getContactName());
         }
@@ -2850,7 +2855,7 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
         if (null == uid) {
             return null;
         }
-        OrganizationMember detail = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, ownerId);
+        OrganizationMember detail = organizationProvider.findOrganizationMemberByUIdAndOrgId(uid, ownerId);
         if (null != detail) {
             return detail.getContactName();
         }
@@ -2920,7 +2925,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
 
     }
 
-    private java.sql.Date getTheFirstDate(String m) {
+    @Override
+    public java.sql.Date getTheFirstDate(String m) {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
         try {
@@ -2936,8 +2942,8 @@ public class SocialSecurityServiceImpl implements SocialSecurityService {
             return null;
         }
     }
-
-    private java.sql.Date getTheLastDate(String m) {
+    @Override
+    public java.sql.Date getTheLastDate(String m) {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
         try {

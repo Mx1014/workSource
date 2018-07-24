@@ -2,7 +2,7 @@ package com.everhomes.rest.parking;
 
 public interface ParkingErrorCode {
 
-	String SCOPE = "parking";
+    String SCOPE = "parking";
     int ERROR_PLATE_LENGTH = 10001;  //车牌号长度错误
 
     int ERROR_PLATE_EXIST = 10002;  //车牌已有月卡
@@ -13,15 +13,15 @@ public interface ParkingErrorCode {
     int ERROR_TEMP_FEE = 10010;  //费用已过期
 
     int ERROR_MAX_REQUEST_NUM = 10011;  //抱歉，你申请的月卡数量已到上限
-    
+
     int ERROR_ISSUE_CARD_SURPLUS_NUM = 10012;  //发放月卡资格数量不可大于当前剩余月卡数
 
     int ERROR_ISSUE_CARD_QUEQUE_NUM = 10013;  //发放月卡资格数量不可大于当前排队数
 
     int ERROR_ISSUE_CARD = 10014;  //操作失败，当前无剩余月卡
-    
+
     int ERROR_PROCESS_CARD_SURPLUS_NUM = 10015;  //发放月卡数量不可大于当前剩余月卡数
-    
+
     int ERROR_PROCESS_CARD_QUEQUE_NUM = 10016;  //发放月卡数量不可大于当前待办理月卡数
 
     int ERROR_FLOW_NODE_PARAM = 10017;  //工作流节点参数错误
@@ -33,15 +33,31 @@ public interface ParkingErrorCode {
     int NOT_SUPPORT_APP_RECHARGE = 10020;  //不支持APP缴费
 
     int ERROR_PLATE_REPEAT_ADD = 10021;  //车牌不可重复添加！
+    
 
     int RECHARE_TIME_OUT = 10031;  //获取充值结果超时
 
+    int ERROR_PARKING_TYPE_NOT_FOUND = 10032;  //未查询到月卡类型信息
+    
     //------------------------vip 车位----------------------------
     int ERROR_RAISE_PARKING_LOCK = 10022; // 升起车锁失败
     int ERROR_DOWN_PARKING_LOCK = 10023; //  降下车锁失败
     int ERROR_REPEAT_SPACE_NO = 10124; // 重复车位ID
     int ERROR_REPEAT_LOCK_ID = 10125; //  重复车锁ID
     int ERROR_UNCONN_LOCK_ID = 10126; //  错误的车锁，没有上线，或者id就是错误的
+    int ERROR_GET_TOKEN = 11000; //  获取token失败
+    int ERROR_GET_RESULT = 11010; //  返回参数失败
+    int ERROR_INVITE_FAILD = 12000; //  发起访邀失败
+    int ERROR_GENERATE_ORDER_NO= 13000; //  生成订单编号失败
+    int ERROR_REPEATE_ACCOUNT= 14000; //  重复账号
+    int ERROR_NO_PAYEE_ACCOUNT= 14001; //  未设置收款方账号
+    int ERROR_CREATE_USER_ACCOUNT= 14002; //  创建个人付款账户失败
+    int ERROR_SELF_DEINFE= 69696; //  自定义异常描述
+    int ERROR_SPACE_IN_USE= 1862101; //  车位使用中
+    int ERROR_HUB_IN_USE= 1862102; //  HUB使用中
+
+
+    int ERROR_SELF_DEFINE= 99999; //  自定义异常
 
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";

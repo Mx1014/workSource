@@ -61,7 +61,8 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         cmd3.setValues(cmd.getValues());
 
         //将旧的清单删除
-        generalFormValProvider.deleteGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
+        if(null != pmTask)
+            generalFormValProvider.deleteGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
         generalFormService.addGeneralFormValues(cmd3);
         PostGeneralFormDTO response = ConvertHelper.convert(cmd,PostGeneralFormDTO.class);
         String url ="";
@@ -137,9 +138,9 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
 
         String content = "";
         content += "本次服务的费用清单如下，请进行确认\n";
-        Long total = Long.valueOf(getTextString(getFormItem(cmd.getValues(),"总计").getFieldValue()));
+        Double total = Double.valueOf(getTextString(getFormItem(cmd.getValues(),"总计").getFieldValue()));
         content += "总计:"+total+"元\n";
-        Long serviceFee = Long.valueOf(getTextString(getFormItem(cmd.getValues(),"服务费").getFieldValue()));
+        Double serviceFee = Double.valueOf(getTextString(getFormItem(cmd.getValues(),"服务费").getFieldValue()));
         content += "服务费:"+serviceFee+"元\n";
         content += "物品费:"+(total-serviceFee)+"元\n";
         PostApprovalFormItem subForm = getFormItem(cmd.getValues(),"物品");
@@ -148,7 +149,6 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
             List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
             if (array.size()!=0) {
                 content += "物品费详情：\n";
-                Gson g=new Gson();
                 for (PostApprovalFormSubformItemValue itemValue : array){
                     List<PostApprovalFormItem> values = itemValue.getValues();
                     content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
@@ -156,9 +156,10 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
                     content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
                             getTextString(getFormItem(values,"数量").getFieldValue())+")\n";
                 }
-                content += "如对上述费用有疑义请附言说明";
+
             }
         }
+        content += "如对上述费用有疑义请附言说明";
         log.setLogContent(content);
         eventLogs.add(log);
         dto.setEventLogs(eventLogs);

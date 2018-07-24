@@ -12,7 +12,7 @@ package com.everhomes.rest.energy;
  */
 public enum EnergyMeterSettingType {
 
-    PRICE((byte)1), RATE((byte)2), AMOUNT_FORMULA((byte)3), COST_FORMULA((byte)4), DAY_PROMPT((byte)5), MONTH_PROMPT((byte)6);
+    PRICE((byte)1), RATE((byte)2), AMOUNT_FORMULA((byte)3), COST_FORMULA((byte)4), DAY_PROMPT((byte)5), MONTH_PROMPT((byte)6),BURDEN_RATE((byte)7);
 
     private Byte code;
 

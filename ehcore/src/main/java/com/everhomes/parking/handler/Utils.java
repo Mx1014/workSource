@@ -20,6 +20,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -47,6 +48,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class Utils {
 
+
     public static class MimeType {
         public static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
         public static final String APPLICATION_JSON = "application/json";
@@ -58,6 +60,7 @@ public class Utils {
         public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
         public static final String DATE = "yyyy-MM-dd";
         public static final String DATE_TIME_STR = "yyyyMMddHHmmss";
+        public static final String DATE_HOUR_MINUTE = "yyyy-MM-dd HH:mm";
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
@@ -121,8 +124,16 @@ public class Utils {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
-    static Long getLongByAddNatureMonth(Long source, int month) {
-
+    /**
+     * 计算从soucre之后month个月的月底
+     * @param source 时间戳
+     * @param month 月数量
+     * @param isIgnoreLastDay
+     *          是否忽略最后一天，true:如果是最后一天,不会忽略，如source是5月31日，month是2个月，那么计算的结果是6月30日
+     *                          false:如果是最后一天,忽略，如source是5月31日，month是2个月，那么计算的结果是7月31日
+     * @return
+     */
+    static Long getLongByAddNatureMonth(Long source, int month, boolean isIgnoreLastDay) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(source);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
@@ -131,7 +142,7 @@ public class Utils {
         //精确到秒,毫秒记为0，mysql不能存储毫秒，会自动转成秒，999ms 会转成 1S
         calendar.set(Calendar.MILLISECOND, 0);
 
-        if(isLastDayOfMonth(calendar)){
+        if(isLastDayOfMonth(calendar) && !isIgnoreLastDay){
             calendar.add(Calendar.MONTH, month);
             int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             calendar.set(Calendar.DAY_OF_MONTH, d);
@@ -142,6 +153,17 @@ public class Utils {
         }
 
         return calendar.getTimeInMillis();
+    }
+
+    /**
+     * 计算从soucre之后month个月的月底
+     * @param source 时间戳
+     * @param month 月数量
+     *              如果是最后一天,忽略，如source是5月31日，month是2个月，那么计算的结果是7月31日
+     * @return
+     */
+    static Long getLongByAddNatureMonth(Long source, int month) {
+        return getLongByAddNatureMonth(source,month,false);
     }
 
     static Long getFirstDayOfMonth(Long time) {
@@ -217,6 +239,60 @@ public class Utils {
         return new Timestamp(calendar.getTimeInMillis());
     }
 
+    /**
+     * 中百畅停车场，要求月卡时间计算为当月时间
+     * @param source
+     * @param month
+     * @return
+     */
+    static Timestamp getTimestampByAddThisMonth(long source, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source+1000);
+        calendar.add(Calendar.MONTH,month);
+        calendar.add(Calendar.DAY_OF_MONTH,-1);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    /**
+     * 中天停车场，要求月卡时间计算为30天
+     * @param source
+     * @param month
+     * @return
+     */
+    static Timestamp getTimestampByAddThirtyDays(long source, int month) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source+1000);
+        calendar.add(Calendar.DAY_OF_MONTH,30*month-1);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+
+    public static Boolean isLastDayOfMonth(long now) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(now);
+        return isLastDayOfMonth(calendar);
+    }
+
+    /**
+     *
+     * @param source
+     * @param month
+     * @return
+     */
+    static Long getTimestampByAddRealMonth(Long source,int month){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.MONTH,month);
+
+        return calendar.getTimeInMillis();
+    }
+
     //获取到月底的天数
     static int getDaysToEndOfMonth(Calendar calendar){
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)-calendar.get(Calendar.DAY_OF_MONTH);
@@ -236,9 +312,25 @@ public class Utils {
         return ts;
     }
 
+    static Timestamp strToTimeStamp(String str, String style) {
+        return new Timestamp(strToLong(str,style));
+    }
+
     static String dateToStr(Date date, String style) {
         SimpleDateFormat sdf = new SimpleDateFormat(style);
         return sdf.format(date);
+    }
+    public static String longToString(long time, String style) {
+        return dateToStr(new Date(time),style);
+    }
+
+    static Long subtractionTime(Long startTime, String endtimeStamp) {
+        Long enttime = strToLong(endtimeStamp, DateStyle.DATE_TIME);
+        return subtractionTime(startTime,enttime);
+    }
+
+    static Long subtractionTime(long startTime, long endtime) {
+        return (endtime-startTime)/(60*1000);
     }
 
     /**
@@ -251,6 +343,19 @@ public class Utils {
         //设置body json格式
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_JSON);
+        return post(url, param, headers);
+    }
+
+    /**
+     *
+     * @param url
+     * @param param urlencoded
+     * @return
+     */
+    public static String postUrlencoded(String url, Map<String,String> param) {
+        //设置body json格式
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, MimeType.APPLICATION_FORM_URLENCODED);
         return post(url, param, headers);
     }
     
@@ -485,4 +590,50 @@ public class Utils {
 
         return result;
     }
+
+    public static String get(Map<String,Object> map,String url) {
+        String result = null;
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpclient = null;
+        StringBuffer urlparam=new StringBuffer(url).append("?");
+        ArrayList<NameValuePair> list = new ArrayList<NameValuePair>();
+        if(map!=null) {
+            Set set = map.entrySet();
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                urlparam.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+            }
+        }
+        String geturl = urlparam.toString().substring(0,urlparam.length()-1);
+        LOGGER.info("The request info, geturl={}", geturl);
+        try {
+            httpclient = HttpClients.createDefault();
+            response = httpclient.execute(new HttpGet(geturl));
+            StatusLine statusLine = response.getStatusLine();
+            LOGGER.info("Parking responseCode={}, responseProtocol={}", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+            int status = statusLine.getStatusCode();
+
+            if(status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+
+                if (null != entity) {
+                      result = EntityUtils.toString(entity);
+                }
+            }
+
+        } catch (IOException e) {
+            LOGGER.error("The request error, geturl={}", geturl, e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "The request error.");
+        } finally {
+            close(response, httpclient);
+        }
+        LOGGER.info("Result from third, geturl={}, result={}", geturl, result);
+
+        return result;
+    }
+
+//    public static void main(String[] args) {
+//        Timestamp timestampByAddThirtyDays = Utils.getTimestampByAddThirtyDays(1517469829000L, 1);
+//        System.out.println(timestampByAddThirtyDays);
+//    }
 }

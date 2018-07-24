@@ -3,6 +3,8 @@ package com.everhomes.portal;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.WebMenu;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.configuration.ConfigurationsProvider;
 import com.everhomes.pmtask.PmTaskProvider;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,6 +35,8 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     private PmTaskProvider pmTaskProvider;
     @Autowired
     private WebMenuPrivilegeProvider webMenuProvider;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
@@ -42,6 +47,19 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //        }else{
 //            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel);
 //        }
+        Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
+        Byte agentSwitch = pmTaskInstanceConfig.getAgentSwitch();
+        Byte feeModel = pmTaskInstanceConfig.getFeeModel();
+        if(null != taskCategoryId && null != agentSwitch){
+            if(0 == agentSwitch.byteValue()){
+                configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
+            } else if (1 == agentSwitch.byteValue()){
+                configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
+            }
+        }
+        if(null != taskCategoryId && null != feeModel){
+            configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + taskCategoryId.toString(),feeModel.toString());
+        }
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
 
@@ -92,20 +110,25 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig){
 
         if(moudleId.equals(FlowConstants.PM_TASK_MODULE)){
-            JSONObject json = JSONObject.parseObject(instanceConfig);
-            String url = json.getString("url");
-            String[] arrs = url.split("&");
-            for (String s: arrs) {
-                int spe = s.indexOf("=");
-                String key = s.substring(0, spe);
-                String value = s.substring(spe + 1);
-                if ("taskCategoryId".equals(key)) {
-                    return value;
-                }
+            PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
+            Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
+            if(null != taskCategoryId){
+                return String.valueOf(taskCategoryId);
             }
+//            else{
+//                String str = json.getString("url");
+//                String[] strs = str.split("&");
+//                for(String elem : strs){
+//                    if(elem.indexOf("taskCategoryId") > -1){
+//                        String[] pair = elem.split("=");
+//                        return pair[1];
+//                    }
+//                }
+//            }
         }
 
-        return instanceConfig;
+        //edit by 马世亨
+        return null;
     }
 
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){

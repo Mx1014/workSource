@@ -265,7 +265,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 				cmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
         }
         
-        if(cmd.getTag() != null) {
+        if(StringUtils.isBlank(post.getTag()) && cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
 
@@ -356,7 +356,8 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         
         //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天
 		//产品要求：去除“官方活动”这个条件，对所有活动适应    add by yanjun 20170629
-        try {
+		//去除创建时间为开始时间之前一天这个设置 add by yanlong.liang 20180614
+/*        try {
         	if(null != cmd.getStartTime()){
         		SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         		Date startTime= f.parse(cmd.getStartTime());
@@ -366,8 +367,8 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         	}
         	
         } catch (ParseException e) {
-        	post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        }
+        }*/
+		post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         //发布活动的时候没有选择是否支持微信，则选择改与空间默认的， add by yanjun 20170627
         if(cmd.getWechatSignup() == null){

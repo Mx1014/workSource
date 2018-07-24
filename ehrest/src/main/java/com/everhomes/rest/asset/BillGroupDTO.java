@@ -12,6 +12,7 @@ import java.util.List;
  * <li>billGroupName:账单组名称</li>
  * <li>billItemDTOList:账单组收费项目的集合，参考{@link com.everhomes.rest.asset.BillItemDTO}</li>
  * <li>exemptionItemDTOList:减免项集合，参考{@link com.everhomes.rest.asset.ExemptionItemDTO}</li>
+ * <li>subItemDTOList:减免费项的集合，参考{@link com.everhomes.rest.asset.SubItemDTO}</li>
  *</ul>
  */
 public class BillGroupDTO {
@@ -21,6 +22,15 @@ public class BillGroupDTO {
     @ItemType(ExemptionItemDTO.class)
     private List<ExemptionItemDTO> exemptionItemDTOList;
     private String billGroupName;
+    @ItemType(SubItemDTO.class)
+    private List<SubItemDTO> subItemDTOList;
+
+    public BillGroupDTO(CreateBillCommand cmd) {
+        cmd.setBillGroupDTO(this);
+    }
+
+    public BillGroupDTO() {
+    }
 
     public List<BillItemDTO> getBillItemDTOList() {
         return billItemDTOList;
@@ -53,4 +63,12 @@ public class BillGroupDTO {
     public void setExemptionItemDTOList(List<ExemptionItemDTO> exemptionItemDTOList) {
         this.exemptionItemDTOList = exemptionItemDTOList;
     }
+
+	public List<SubItemDTO> getSubItemDTOList() {
+		return subItemDTOList;
+	}
+
+	public void setSubItemDTOList(List<SubItemDTO> subItemDTOList) {
+		this.subItemDTOList = subItemDTOList;
+	}
 }

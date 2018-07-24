@@ -8,17 +8,21 @@ import com.everhomes.util.Tuple;
 import java.util.List;
 
 /**
- * 业务模块必须实现的接口
+ * 对接工作流的业务模块需要实现的接口
  * @author janson
- *
  */
 public interface FlowModuleListener {
 
 	/**
 	 * 模块初始化
+	 * @return 返回模块信息
 	 */
 	FlowModuleInfo initModule();
 
+    /**
+     * 当对应的模块新创建一个工作流的时候会触发该方法
+     * @param flow  新创建的工作流
+     */
 	default void onFlowCreating(Flow flow) { }
 
     /**
@@ -28,69 +32,83 @@ public interface FlowModuleListener {
 	    return null;
 	}
 
-	/**
-	 * 当 FlowCase 开始运行时
+    /**
+     * 任务创建之前触发调用
+     */
+    default void onFlowCaseCreating(FlowCase flowCase) { }
+
+    /**
+     * 任务创建之后触发调用
+     */
+    default void onFlowCaseCreated(FlowCase flowCase) { }
+
+    /**
+	 * 一旦创建 flowCase 被创建成功就会触发此方法的调用
 	 */
 	default void onFlowCaseStart(FlowCaseState ctx) { }
 
 	/**
-	 * 当 FlowCase 被异常终止时
+	 * 当用户触发<b>终止</b>按钮或者程序触发 flowCase 终止，会触发该方法的调用
 	 */
-	default void onFlowCaseAbsorted(FlowCaseState ctx) { }
+	void onFlowCaseAbsorted(FlowCaseState ctx);
 
-	/**
-	 * 当 FlowCase 状态态变化时
-	 */
-	default void onFlowCaseStateChanged(FlowCaseState ctx) { }
+    /**
+     * 当用户触发按钮或者程序触发 flowCase 正常结束，会触发该方法的调用
+     */
+	void onFlowCaseEnd(FlowCaseState ctx);
 
-	/**
-	 * 当 FlowCase 整个运行周期结束时
-	 */
-	default void onFlowCaseEnd(FlowCaseState ctx) { }
+    /**
+     * 当用户触发按钮或程序触发导致 flowCase 节点改变时，会触发该方法的调用，同时包含终止和正常结束情况
+     */
+    default void onFlowCaseStateChanged(FlowCaseState ctx) { }
 
-	/**
-	 * 当执行某一个动作时，比如前置脚本被运行时调用
+    /**
+	 * 当执行某一个动作时，比如前置脚本被运行时调用, not used
 	 */
 	default void onFlowCaseActionFired(FlowCaseState ctx) { }
 
 	/**
-	 * FlowCase 的描述性内容
+	 * 用于在任务列表显示任务的摘要信息，返回的字符串会直接显示在客户端或者web, 如果需要换行请用 ‘\n’
+     * @param flowCase 任务
+     * @param flowUserType 当前用户的身份：申请人、处理人、督办人
 	 */
-	String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType);
+	default String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
+        return flowCase.getContent();
+	}
 
-	/**
-	 * FlowCase 的详细信息列表
-	 */
+    /**
+     * 用于任务的详情显示
+     * @param flowCase 任务
+     * @param flowUserType 当前用户的身份：申请人、处理人、督办人
+     */
 	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
 
     /**
-     * 当按钮事件触发的时候
+     * 当按钮被点击时触发该方法调用
      */
     void onFlowButtonFired(FlowCaseState ctx);
 
-	default void onFlowCaseCreating(FlowCase flowCase) { }
-
-	default void onFlowCaseCreated(FlowCase flowCase) { }
-
 	/**
-	 * 发短信
+	 * 配置了短信的工作流填充短信变量
 	 */
 	default void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables) { }
 
     /**
-     * 发送消息前业务可以对消息进行自定义
+     * 配置了消息的工作流可以在消息发送前对消息进行自定义
      */
     default void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto) { }
 
     /**
-     * 任务跟踪里的自定义变量渲染
+     * 任务跟踪里的模块自定义变量渲染
+     * @param ctx 上下文
+     * @param variableName  自定义变量名称
      */
-    default String onFlowVariableRender(FlowCaseState ctx, String variable) {
+    default String onFlowVariableRender(FlowCaseState ctx, String variableName) {
         return null;
     }
 
     /**
-     * 获取条件节点的变量列表
+     * 条件节点的变量列表
      * @param flowEntityType FlowEntityType.FLOW_CONDITION
      * @param ownerId 目前为 null
      * @param ownerType 目前为 null
@@ -99,30 +117,46 @@ public interface FlowModuleListener {
         return null;
     }
 
-    /*default List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
-
-     }
-     */
-
     /**
-     * 从工作流界面扫描二维码
+     * 从工作流任务详情界面触发二维码扫描
      */
     default void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) { }
 
     /**
-     * 这个和上面的是不一样的
+     * 条件节点的变量渲染为真实的值
+     * @param ctx 上下文
+     * @param variableName 条件变量名称
+     * @param extra 附加信息 {@link com.everhomes.rest.flow.FlowConditionVariableDTO#extra}
+     * @return  返回 FlowConditionVariable 的具体实现类, 比如 FlowConditionStringVariable
      */
-    default List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
-        return null;
-    }
-
-    /**
-     * 条件节点的变量渲染
-     */
-    default FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra) { return null;}
+    default FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variableName, String extra) { return null;}
 
     /**
      * 需要在工作流里使用表单功能，需要实现此方法
      */
     default List<FlowFormDTO> listFlowForms(Flow flow) {return null;}
+
+    /**
+     * 给任务发表评价时触发该方法调用
+     * @param ctx   上下文
+     * @param evaluates 评价列表
+     */
+    default void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates) {
+
+    }
+
+    /**
+     * 工作流的状态改变时触发该方法调用
+     * @param flow  工作流
+     */
+    default void onFlowStateChanged(Flow flow) {
+
+    }
+
+    /**
+     * 工作流启用之前触发调用
+     */
+    default void onFlowStateChanging(Flow flow) {
+
+    }
 }

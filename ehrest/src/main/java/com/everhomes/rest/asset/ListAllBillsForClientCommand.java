@@ -11,6 +11,24 @@ public class ListAllBillsForClientCommand {
     private String ownerType;
     private String targetType;
     private Long targetId;
+    private Byte isOnlyOwedBill;
+    private Long billGroupId;
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
+
+    public Byte getIsOnlyOwedBill() {
+        return isOnlyOwedBill;
+    }
+
+    public void setIsOnlyOwedBill(Byte isOnlyOwedBill) {
+        this.isOnlyOwedBill = isOnlyOwedBill;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

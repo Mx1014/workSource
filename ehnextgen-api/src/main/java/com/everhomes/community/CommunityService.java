@@ -157,4 +157,9 @@ public interface CommunityService {
 	void changeOrganizationCommunities(ChangeOrganizationCommunitiesCommand cmd);
 
 	void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId);
+	
+		//导入项目信息
+	ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile multipartFile);
+
+
 }

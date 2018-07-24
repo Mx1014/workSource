@@ -1,6 +1,11 @@
 //@formatter:off
 package com.everhomes.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.*;
+import javax.management.RuntimeErrorException;
 import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,8 +16,14 @@ import java.util.regex.Pattern;
 
 
 public class CalculatorUtil {
+    private static Logger LOGGER = LoggerFactory.getLogger(CalculatorUtil.class);
 
     public static BigDecimal arithmetic(String exp){
+        //增加校验算式的合法性
+        if(exp.matches(wrongExp)){
+            LOGGER.error("payment expectancies calculation incorrect, expression illegal = {}",exp);
+            throw new RuntimeException("账单计算错误，公式错误"+exp);
+        }
         if(!exp.matches(numberString)){
             String result = parseExp(exp).replaceAll("[\\[\\]]", "");
             return new BigDecimal(result);
@@ -20,6 +31,16 @@ public class CalculatorUtil {
             return new BigDecimal(exp);
         }
     }
+    /**
+     * 增加一个公式校验,但没有校验大小括号，虽然符合业务场景，先不用 by wentian
+     *
+     */
+    private static String legalExp="^(([0-9]+.?[0-9]*)[\\+\\-\\*\\/]([0-9]+.?[0-9]*))+$";
+    /**
+     * "*1"会造成死循环，增加一个校验 by wentian
+     *
+     */
+    private static String wrongExp="^[\\+\\-\\*\\/].*";
     /**
      * 最小计数单位
      *
@@ -56,7 +77,6 @@ public class CalculatorUtil {
      * @return
      */
     private static String parseExp(String expression){
-        //半边括号 直接跑异常
         if(expression.matches(baseParentheses)){
             throw new RuntimeException("计算公式存在错误，自由半边括号！");
         }

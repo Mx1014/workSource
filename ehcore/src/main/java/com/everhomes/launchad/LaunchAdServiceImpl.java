@@ -64,6 +64,13 @@ public class LaunchAdServiceImpl implements LaunchAdService {
         return new LaunchAdDTO();
     }
 
+    /*private LaunchAdDTO toClientLaunchAdDTO(LaunchAd launchAd) {
+        LaunchAdDTO launchAdDTO = this.toLaunchAdDTO(launchAd);
+        // 分钟化秒
+        launchAdDTO.setDisplayInterval(launchAd.getDisplayInterval() != null ? launchAd.getDisplayInterval() * 60 : 0);
+        return launchAdDTO;
+    }*/
+
     @Override
     public LaunchAdDTO createOrUpdateLaunchAd(CreateOrUpdateLaunchAdCommand cmd) {
         LaunchAd launchAd = launchAdProvider.findById(cmd.getId());
@@ -84,6 +91,7 @@ public class LaunchAdServiceImpl implements LaunchAdService {
         launchAd.setTimesPerDay(cmd.getTimesPerDay());
         launchAd.setTargetType(cmd.getTargetType());
         launchAd.setTargetData(cmd.getTargetData());
+        launchAd.setResourceName(cmd.getResourceName());
 
         // 原来的和现在的不同才去修改
         if (!Objects.equals(launchAd.getContentUriOrigin(), cmd.getContentUriOrigin())) {
@@ -150,16 +158,21 @@ public class LaunchAdServiceImpl implements LaunchAdService {
                 zipData.putNextEntry(new ZipEntry(resource.getResourceName()));
 
                 int len;
-                byte[] buf = new byte[1024];
+                byte[] buf = new byte[4096];
                 while ((len = boi.read(buf)) != -1) {
                     zipData.write(buf, 0, len);
                 }
                 zipData.closeEntry();
+                zipData.finish();
+                zipData.close();
+                boi.close();
+                byteData.close();
                 return new ByteArrayInputStream(byteData.toByteArray());
             });
 
             String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-            UploadCsFileResponse csFileResponse = contentServerService.uploadFileToContentServer(fileStream, "LaunchAd.zip", token);
+            String fileName = "LaunchAd_" + System.currentTimeMillis() + ".zip";
+            UploadCsFileResponse csFileResponse = contentServerService.uploadFileToContentServer(fileStream, fileName, token);
             return csFileResponse.getResponse().getUri();
         } catch (Exception e) {
             LOGGER.error("Zip content error", e);
@@ -194,9 +207,5 @@ public class LaunchAdServiceImpl implements LaunchAdService {
             LOGGER.error("Parse launch ad uri error {}", e);
         }
         return null;
-    }
-
-    private Integer currNamespaceId() {
-        return UserContext.getCurrentNamespaceId();
     }
 }

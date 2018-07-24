@@ -9,6 +9,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -20,6 +21,8 @@ import com.everhomes.organization.OrganizationJobPositionMap;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.pmNotify.PmNotifyRecord;
+import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
@@ -43,6 +46,15 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
+import com.everhomes.rest.pmNotify.PmNotifyReceiver;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverDTO;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
+import com.everhomes.rest.pmNotify.PmNotifyType;
+import com.everhomes.rest.pmNotify.ReceiverName;
+import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.quality.BatchUpdateQualitySpecificationsCommand;
@@ -275,6 +287,11 @@ public class QualityServiceImpl implements QualityService {
 	@Autowired
 	private ServiceModuleService serviceModuleService;
 
+	@Autowired
+	private EquipmentService equipmentService;
+	@Autowired
+	private PmNotifyService pmNotifyService;
+
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
 
@@ -444,21 +461,29 @@ public class QualityServiceImpl implements QualityService {
         	executiveGroup = new ArrayList<>();
     		reviewGroup = new ArrayList<>();
 
-			for(StandardGroupDTO group : groupList) {
+			for (StandardGroupDTO group : groupList) {
 				QualityInspectionStandardGroupMap map = new QualityInspectionStandardGroupMap();
-				 map.setStandardId(standard.getId());
-				 map.setGroupType(group.getGroupType());
-				 map.setGroupId(group.getGroupId());
-				 map.setPositionId(group.getPositionId());
-				 if(group.getInspectorUid() != null)
-					 map.setInspectorUid(group.getInspectorUid());
-				 qualityProvider.createQualityInspectionStandardGroupMap(map);
-				 if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-					 executiveGroup.add(map);
-				 }
-				 if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-					 reviewGroup.add(map);
-				 }
+				map.setStandardId(standard.getId());
+				map.setGroupType(group.getGroupType());
+				map.setGroupId(group.getGroupId());
+				map.setPositionId(group.getPositionId());
+				if (group.getInspectorUid() != null) {
+					map.setInspectorUid(group.getInspectorUid());
+					if (null == map.getGroupId()) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(group.getInspectorUid());
+						if (members != null && members.size() > 0) {
+							map.setGroupId(members.get(0).getOrganizationId());
+						}
+					}
+
+				}
+				qualityProvider.createQualityInspectionStandardGroupMap(map);
+				if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+					executiveGroup.add(map);
+				}
+				if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+					reviewGroup.add(map);
+				}
 			}
 
 			standard.setExecutiveGroup(executiveGroup);
@@ -1099,7 +1124,7 @@ Long nextPageAnchor = null;
 					LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 				}
 				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+					/*List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if(LOGGER.isInfoEnabled()) {
 						LOGGER.info("listUserRelateGroups, OrganizationJobPositionMaps = {}" + maps);
 					}
@@ -1118,6 +1143,29 @@ Long nextPageAnchor = null;
 //								groupDtos.add(group);
 //							}
 							//取path后的第一个路径 为顶层公司 by xiongying 20170323
+							String[] path = organization.getPath().split("/");
+							Long organizationId = Long.valueOf(path[1]);
+							ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+							topGroup.setGroupId(organizationId);
+							topGroup.setPositionId(map.getJobPositionId());
+							groupDtos.add(topGroup);
+						}
+
+					}*/
+					//部门岗位
+					ExecuteGroupAndPosition departmentGroup = new ExecuteGroupAndPosition();
+					departmentGroup.setGroupId(organization.getParentId());
+					departmentGroup.setPositionId(organization.getId());
+					groupDtos.add(departmentGroup);
+
+					//通用岗位
+					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+					if (LOGGER.isInfoEnabled()) {
+						LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}", organization.getId(), maps);
+					}
+
+					if (maps != null && maps.size() > 0) {
+						for (OrganizationJobPositionMap map : maps) {
 							String[] path = organization.getPath().split("/");
 							Long organizationId = Long.valueOf(path[1]);
 							ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
@@ -1208,8 +1256,8 @@ Long nextPageAnchor = null;
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);
 
 			//塞执行组名
-			String executiveGroupName = getGroupName(r.getExecutiveGroupId(), r.getExecutivePositionId());
-			dto.setExecutiveGroupName(executiveGroupName);
+//			String executiveGroupName = getGroupName(r.getExecutiveGroupId(), r.getExecutivePositionId(),r.get);
+//			dto.setExecutiveGroupName(executiveGroupName);
 			Community community = communityProvider.findCommunityById(r.getTargetId());
 			if(community != null) {
 				dto.setTargetName(community.getName());
@@ -1326,7 +1374,7 @@ Long nextPageAnchor = null;
 			}
 
 			if(r.getExecutorId() != null && r.getExecutorId() != 0) {
-				OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getOwnerId());
+				OrganizationMember executor = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getExecutorId(), r.getOwnerId());
 	        	if(executor != null) {
 	        		dto.setExecutorName(executor.getContactName());
 	        	}
@@ -1334,7 +1382,7 @@ Long nextPageAnchor = null;
 
 
         	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
-        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), r.getOwnerId());
+        		OrganizationMember operator = organizationProvider.findOrganizationMemberByUIdAndOrgId(r.getOperatorId(), r.getOwnerId());
             	if(operator != null) {
             		dto.setOperatorName(operator.getContactName());
             	}
@@ -1452,7 +1500,7 @@ Long nextPageAnchor = null;
 				 && cmd.getEndTime() != null) {
 			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
 			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(user.getId());
-//			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+//			OrganizationMember operator = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), task.getOwnerId());
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operators.get(0).getContactName());
 		    map.put("taskName", task.getTaskName());
@@ -1465,7 +1513,7 @@ Long nextPageAnchor = null;
 
 			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
 			List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(cmd.getOperatorId());
-//			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
+//			OrganizationMember target = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getOperatorId(), task.getOwnerId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
 			msgMap.put("operator", operators.get(0).getContactName());
 			msgMap.put("target", targets.get(0).getContactName());
@@ -1523,7 +1571,7 @@ Long nextPageAnchor = null;
 			map.put("taskNumber", task.getTaskNumber());
 			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
-//			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+//			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), task.getOwnerId());
 			if(members != null) {
 				map.put("userName", members.get(0).getContactName());
 			} else {
@@ -1624,7 +1672,7 @@ Long nextPageAnchor = null;
 	private String getLocalRecordMessage(List<OrganizationMember> operators, String taskName, Long operatorId, Long endTime) {
 		//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
 		List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(operatorId);
-//			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
+//			OrganizationMember target = organizationProvider.findOrganizationMemberByUIdAndOrgId(cmd.getOperatorId(), task.getOwnerId());
 		Map<String, Object> msgMap = new HashMap<>();
 		if (operators != null && operators.size() > 0) {
 			msgMap.put("operator", operators.get(0).getContactName());
@@ -1734,55 +1782,88 @@ Long nextPageAnchor = null;
 			task.setTaskName(standard.getName());
 			task.setTaskType((byte) 1);
 			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-//			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
-//
-//				task.setExecutiveGroupId(executiveGroup.getGroupId());
-//				task.setExecutivePositionId(executiveGroup.getPositionId());
-//				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(executiveGroup.getInspectorUid()
-//																	, executiveGroup.getGroupId());
-//				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(
-//														executiveGroup.getGroupId(), OrganizationMemberGroupType.HECHA.getCode());
-//				if(members != null) {
-//					task.setExecutorType(member.getTargetType());
-//					task.setExecutorId(member.getTargetId());
-				List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
+			List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
 
-				if(timeRanges != null && timeRanges.size() > 0) {
-					for(TimeRangeDTO timeRange : timeRanges) {
-						this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
-							String duration = timeRange.getDuration();
-							String start = timeRange.getStartTime();
-							String str = day + " " + start;
-							Timestamp startTime = strToTimestamp(str);
-							Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
-							task.setExecutiveStartTime(startTime);
-							task.setExecutiveExpireTime(expiredTime);
-							long now = System.currentTimeMillis();
-							String taskNum = timestampToStr(new Timestamp(now)) + now;
-							task.setTaskNumber(taskNum);
-							qualityProvider.createVerificationTasks(task);
-							taskSearcher.feedDoc(task);
-						});
-					}
-
+			if (timeRanges != null && timeRanges.size() > 0) {
+				for (TimeRangeDTO timeRange : timeRanges) {
+					this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(() -> {
+						String duration = timeRange.getDuration();
+						String start = timeRange.getStartTime();
+						String str = day + " " + start;
+						Timestamp startTime = strToTimestamp(str);
+						Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+						task.setExecutiveStartTime(startTime);
+						task.setExecutiveExpireTime(expiredTime);
+						long now = System.currentTimeMillis();
+						String taskNum = timestampToStr(new Timestamp(now)) + now;
+						task.setTaskNumber(taskNum);
+						qualityProvider.createVerificationTasks(task);
+						taskSearcher.feedDoc(task);
+					});
 				}
 
-//				} else {
-//					LOGGER.error("the group which id="+executiveGroup.getGroupId()+" don't have any hecha member!");
-////					throw RuntimeErrorException
-////							.errorWith(
-////									QualityServiceErrorCode.SCOPE,
-////									QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY,
-////									localeStringService.getLocalizedString(
-////											String.valueOf(QualityServiceErrorCode.SCOPE),
-////											String.valueOf(QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY),
-////											UserContext.current().getUser().getLocale(),
-////											"the group don't have any hecha member!"));
-//
-//				}
-
 			}
-//		}
+
+			ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
+			command.setCommunityId(task.getTargetId());
+			command.setNamespaceId(task.getNamespaceId());
+			command.setOwnerType(EntityType.QUALITY_TASK.getCode());
+			//此处为拿到自定义通知参数的接收人ids
+			List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
+			if (paramDTOs != null && paramDTOs.size() > 0) {
+				for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
+					List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
+					if (receivers != null && receivers.size() > 0) {
+						PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
+						PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+						List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
+						receivers.forEach(receiver -> {
+							PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+							if (receiver != null) {
+								pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
+								if (receiver.getReceivers() != null) {
+									List<Long> ids = receiver.getReceivers()
+											.stream().map(ReceiverName::getId)
+											.collect(Collectors.toList());
+									pmNotifyReceiver.setReceiverIds(ids);
+								}
+								pmNotifyReceivers.add(pmNotifyReceiver);
+							}
+						});
+						receiverList.setReceivers(pmNotifyReceivers);
+						record.setReceiverJson(receiverList.toString());
+						record.setOwnerType(EntityType.QUALITY_TASK.getCode());
+						record.setOwnerId(task.getId());
+
+						//notify_time
+						PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
+						switch (notify) {
+							case BEFORE_START:
+								Timestamp starttime = minusMinutes(task.getExecutiveStartTime(), notifyParamDTO.getNotifyTickMinutes());
+								record.setNotifyTime(starttime);
+								break;
+							case BEFORE_DELAY:
+								Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
+								record.setNotifyTime(delaytime);
+								break;
+							case AFTER_DELAY:
+								record.setNotifyTime(task.getExecutiveExpireTime());
+								break;
+							default:
+								break;
+						}
+						pmNotifyService.pushPmNotifyRecord(record);
+					}
+				}
+			}
+		}
+	}
+
+	private Timestamp minusMinutes(Timestamp startTime, Integer minus) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startTime);
+		calendar.add(Calendar.MINUTE, -minus);
+		return new Timestamp(calendar.getTimeInMillis());
 	}
 
 
@@ -2072,28 +2153,39 @@ Long nextPageAnchor = null;
 
 	}
 
-	private String getGroupName(Long groupId, Long positionId) {
+	private String getGroupName(Long groupId, Long positionId,Long inspectorUid) {
 		StringBuilder sb = new StringBuilder();
 		Organization group = organizationProvider.findOrganizationById(groupId);
-		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(positionId);
-		if(group != null) {
+		OrganizationJobPosition position = null;
+		if (group != null) {
 			sb.append(group.getName());
-
+		}
+		Organization departPosition = organizationProvider.findOrganizationById(positionId);
+		if (departPosition != null) {
+			position = new OrganizationJobPosition();
+			position.setName(departPosition.getName());
+		}else {
+			position = organizationProvider.findOrganizationJobPositionById(positionId);
 		}
 
 		if(position != null) {
 			if(sb.length() > 0) {
 				sb.append("-");
 				sb.append(position.getName());
-
 			} else {
 				sb.append(position.getName());
 
 			}
 		}
-
-		return sb.toString();
+		if (inspectorUid != null && inspectorUid != 0) {
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(inspectorUid);
+			if (members != null && members.size() > 0) {
+				sb.append(members.get(0).getContactName());
+			}
+		}
+			return sb.toString();
 	}
+
 
 	private QualityStandardsDTO converStandardToDto(QualityInspectionStandards standard) {
 		processRepeatSetting(standard);
@@ -2111,7 +2203,7 @@ Long nextPageAnchor = null;
 
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
 
-			String groupName = getGroupName(r.getGroupId(), r.getPositionId());
+			String groupName = getGroupName(r.getGroupId(), r.getPositionId(),r.getInspectorUid());
 			dto.setGroupName(groupName);
         	return dto;
         }).collect(Collectors.toList());
@@ -2119,7 +2211,7 @@ Long nextPageAnchor = null;
 		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
 
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
-			String groupName = getGroupName(r.getGroupId(), r.getPositionId());
+			String groupName = getGroupName(r.getGroupId(), r.getPositionId(),r.getInspectorUid());
 			dto.setGroupName(groupName);
 
         	return dto;
@@ -3699,7 +3791,7 @@ Long nextPageAnchor = null;
 
 	private SampleQualityInspectionDTO convertQualityInspectionSampleToDTO(QualityInspectionSamples sample) {
 		SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(sample.getCreatorUid(), sample.getOwnerId());
+		OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(sample.getCreatorUid(), sample.getOwnerId());
 		if(member != null) {
 			dto.setCreatorName(member.getContactName());
 		}
@@ -4710,13 +4802,17 @@ Long nextPageAnchor = null;
 			List<QualityInspectionStandardGroupMap> executiveGroups = removeDuplicatedStandardGroups(standards);
 			if (executiveGroups != null && executiveGroups.size() > 0) {
 				executiveGroups.forEach((executiveGroup) -> {
-					if (executiveGroup.getPositionId() == null || executiveGroup.getPositionId() == 0) {
+					if ((executiveGroup.getPositionId() == null || executiveGroup.getPositionId() == 0) && executiveGroup.getInspectorUid() == 0) {
 						Organization group = organizationProvider.findOrganizationById(executiveGroup.getGroupId());
 						List<String> groupTypes = new ArrayList<>();
 						groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
 						groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(group.getPath()+"%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+						String groupPath = "";
+						if (group != null) {
+							groupPath = group.getPath();
+						}
+						List<Organization> organizations = organizationProvider.listOrganizationByGroupTypesAndPath(groupPath + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
 						if (organizations != null) {
 							organizations.forEach((o) -> {
 								organizationList.add(ConvertHelper.convert(o, OrganizationDTO.class));
@@ -4725,6 +4821,15 @@ Long nextPageAnchor = null;
 									memberList.addAll(members.stream().map((m) -> ConvertHelper.convert(m, OrganizationMemberDTO.class)).collect(Collectors.toList()));
 								}
 							});
+						}
+					} else if (executiveGroup.getInspectorUid() != 0) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(executiveGroup.getInspectorUid());
+						if (members != null && members.size() > 0) {
+							Organization group = organizationProvider.findOrganizationById(members.get(0).getOrganizationId());
+							memberList.add(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
+							if (group != null){
+								organizationList.add(ConvertHelper.convert(group, OrganizationDTO.class));
+							}
 						}
 					} else {
 						//岗位下所有的人
@@ -5061,7 +5166,7 @@ Long nextPageAnchor = null;
 		}
 		//具体结果集
 		OfflineReportDetailDTO reportDetailDTO = taskDetailMaps.get(task.getId());
-		// send message to processor and bind recored mesaage to record
+		// send message to processor and bind record and message to record
 		if (!StringUtils.isNullOrEmpty(taskDTO.getOperatorType()) && taskDTO.getOperatorId() != null && taskDTO.getProcessExpireTime() != null) {
 			sendMessageToProcessor(task, taskDTO, record);
 		} else {
@@ -5142,5 +5247,62 @@ Long nextPageAnchor = null;
 			}
 
 		}
+	}
+
+	@Override
+	public void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		equipmentService.deletePmNotifyParams(cmd);
+
+	}
+
+	@Override
+	public List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
+		return  equipmentService.listPmNotifyParams(cmd);
+	}
+
+	@Override
+	public void setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
+		equipmentService.setPmNotifyParams(cmd);
+	}
+
+	@Override
+	public Set<Long> getTaskGroupUsers(Long ownerId) {
+		QualityInspectionTasks tasks = qualityProvider.findVerificationTaskById(ownerId);
+		List<QualityInspectionStandardGroupMap> groupMaps = qualityProvider.listPlanGroupMapsByPlanId(tasks.getStandardId());
+		//增加具体到个人
+		if(groupMaps!=null && groupMaps.size()>0){
+			Set<Long> userIds = new HashSet<>();
+			groupMaps.forEach(map -> {
+				//部门
+				if (map.getPositionId() == null || map.getPositionId() == 0L) {
+					if (map.getGroupId() != null && map.getGroupId() != 0L) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembers(map.getGroupId(), null);
+						if (members != null) {
+							for (OrganizationMember member : members) {
+								userIds.add(member.getTargetId());
+							}
+						} else {
+							//增加具体到个人
+							userIds.add(map.getInspectorUid());
+						}
+					}
+
+				} else {
+					//通用岗位
+					ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+					command.setOrganizationId(map.getGroupId());
+					command.setJobPositionId(map.getPositionId());
+					List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+
+					if (contacts != null && contacts.size() > 0) {
+						for (OrganizationContactDTO contact : contacts) {
+							userIds.add(contact.getTargetId());
+						}
+					}
+				}
+			});
+			return userIds;
+		}
+		return null;
 	}
 }

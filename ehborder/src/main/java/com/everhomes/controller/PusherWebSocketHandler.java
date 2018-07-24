@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.everhomes.rest.message.MessageRecordSenderTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -329,14 +330,15 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     PduFrame pdu = new PduFrame();
                     pdu.setName("MESSAGES");
                     pdu.setPayLoadForString(result.getBody());
-                    try {
-                        synchronized(session) {
-                            session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
-                        }
-                        LOGGER.info("Restcall pusher/recentMessages, session=" + session.getId() + ", deviceId=" + dev.getDeviceId() + ", param=" + params);
-                    } catch (IOException e) {
-                        LOGGER.error("Session send error, session=" + session.getId() + ", deviceId=" + dev.getDeviceId(), e);
-                    }
+                    WebSocketSessionProxy.sendMessage(session, new TextMessage(pdu.getEncodedPayload()), MessageRecordSenderTag.NOTIFY_REQUEST.getCode(), dev.getDeviceId());
+//                    try {
+//                        synchronized(session) {
+//                            session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+//                        }
+//                        LOGGER.info("Restcall pusher/recentMessages, session=" + session.getId() + ", deviceId=" + dev.getDeviceId() + ", param=" + params);
+//                    } catch (IOException e) {
+//                        LOGGER.error("Session send error, session=" + session.getId() + ", deviceId=" + dev.getDeviceId(), e);
+//                    }
                     
                 }
                 @Override
@@ -398,16 +400,18 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             resp.setContent("notify");
             PduFrame pdu = new PduFrame();
             pdu.setPayload(resp);
-            try {
-                synchronized(clientSession) {
-                  clientSession.sendMessage(new TextMessage(pdu.toJson()));
-                }
-                if(LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Forward unicast message to client sucessfully, session=" + clientSession.getId() + ", deviceId=" + deviceId);
-                }
-            } catch (IOException e) {
-                    LOGGER.error("Forward unicast message to client error, session=" + clientSession.getId() + ", deviceId=" + deviceId, e);
-               }
+            WebSocketSessionProxy.sendMessage(clientSession, new TextMessage(pdu.toJson()), MessageRecordSenderTag.NOTIFY_EVENT.getCode(), deviceId);
+
+//            try {
+//                synchronized(clientSession) {
+//                  clientSession.sendMessage(new TextMessage(pdu.toJson()));
+//                }
+//                if(LOGGER.isInfoEnabled()) {
+//                    LOGGER.info("Forward unicast message to client sucessfully, session=" + clientSession.getId() + ", deviceId=" + deviceId);
+//                }
+//            } catch (IOException e) {
+//                    LOGGER.error("Forward unicast message to client error, session=" + clientSession.getId() + ", deviceId=" + deviceId, e);
+//               }
         }
         
         //pduServer.getNotification();

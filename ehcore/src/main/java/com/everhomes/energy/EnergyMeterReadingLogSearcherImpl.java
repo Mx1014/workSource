@@ -1,6 +1,7 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.energy.EnergyMeterAddressDTO;
 import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
 import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
@@ -9,8 +10,8 @@ import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -19,7 +20,14 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.AndFilterBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.TermFilterBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -58,6 +66,12 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private EnergyMeterTaskProvider taskProvider;
+
+    @Autowired
+    private EnergyMeterReadingLogProvider energyMeterReadingLogProvider;
 
     // @Autowired
     // private EnergyMeterChangeLogProvider changeLogProvider;
@@ -114,10 +128,19 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
                 builder.field("meterNumber", meter.getMeterNumber());
 
                 List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
-                if(existAddress != null && existAddress.size() > 0) {
-                    builder.field("buildingId", existAddress.get(0).getBuildingId());
-                    builder.field("addressId", existAddress.get(0).getAddressId());
-                    builder.field("address", existAddress.get(0).getBuildingName()+"-"+existAddress.get(0).getApartmentName());
+                List<String> addressList = new ArrayList<>();
+                List<String> buildingList = new ArrayList<>();
+                if(existAddress!=null && existAddress.size()>0){
+                    existAddress.forEach((r)->{
+                        addressList.add(r.getAddressId().toString());
+                        buildingList.add(r.getBuildingId().toString());
+                    });
+                    if (!buildingList.isEmpty()) {
+                        builder.field("buildingId", String.join("|", buildingList));
+                    }
+                    if (!addressList.isEmpty()) {
+                        builder.field("addressId", String.join("|", addressList));
+                    }
                 }
             }
 
@@ -160,7 +183,17 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
 //                    .field("meterNumber", 5.0f)
-                    .field("meterName", 5.0f);
+                    .field("meterName", 5.0f)
+                    .field("taskName.pinyin_prefix", 2.0f)
+                    .field("taskName.pinyin_gram", 1.0f);
+        }
+        if (cmd.getAddressId() != null) {
+            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
+            qb = QueryBuilders.boolQuery().must(qb).must(operatorNameQuery);
+        }
+        if (cmd.getBuildingId() != null) {
+            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
+            qb = QueryBuilders.boolQuery().must(qb).must(operatorNameQuery);
         }
 
         if (StringUtils.isNotEmpty(cmd.getOperatorName())) {
@@ -192,16 +225,6 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         if (cmd.getMeterId() != null) {
             TermFilterBuilder meterIdTerm = FilterBuilders.termFilter("meterId", cmd.getMeterId());
             filterBuilders.add(meterIdTerm);
-        }
-
-        if (cmd.getBuildingId() != null) {
-            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
-            filterBuilders.add(buildingIdFilter);
-        }
-
-        if (cmd.getAddressId() != null) {
-            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
-            filterBuilders.add(addressIdFilter);
         }
         RangeFilterBuilder rangeTimeTerm = new RangeFilterBuilder("operateTime");
         if (cmd.getStartTime() != null) {
@@ -267,12 +290,30 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setOperateTime(operateTime != null ? new Timestamp(Long.valueOf(operateTime.toString())) : null);
             dto.setOperatorName((String)source.get("operatorName"));
             dto.setMeterNumber((String)source.get("meterNumber"));
-            Object address = source.get("address");
-            dto.setMeterAddress(address != null ? String.valueOf(source.get("address")) : "");
-
+            List<EnergyMeterAddressDTO> addressDTOS = populateEnergyMeterAddresses(Long.valueOf(source.get("meterId").toString()));
+            dto.setMeterAddress(addressDTOS);
+            EnergyMeterReadingLog log = energyMeterReadingLogProvider.getEnergyMeterReadingLogById(dto.getId());
+            if (log != null) {
+                EnergyMeterTask task = taskProvider.findEnergyMeterTaskById(log.getTaskId());
+                if (task != null) {
+                    dto.setLastReading(task.getLastTaskReading());
+                    dto.setValueDifference(dto.getReading().subtract(dto.getLastReading()));
+                }
+            }
             dtoList.add(dto);
         }
         return dtoList;
+    }
+
+    private List<EnergyMeterAddressDTO> populateEnergyMeterAddresses(Long meterId) {
+        Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
+        List<EnergyMeterAddressDTO> dtos = new ArrayList<>();
+        if(existAddress != null && existAddress.size() > 0) {
+            existAddress.forEach((id, meterAddress) -> {
+                dtos.add(ConvertHelper.convert(meterAddress, EnergyMeterAddressDTO.class));
+            });
+        }
+        return dtos;
     }
 
     @Override

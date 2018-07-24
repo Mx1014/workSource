@@ -160,4 +160,37 @@ public interface SalaryService {
     OutputStream getDepartStatisticsOutPut(Long ownerId, String month, Long taskId, Integer namespaceId);
 
     GetSalaryTaskStatusResponse getSalaryTaskStatus(GetSalaryTaskStatusCommand cmd);
+
+	public ListYearPayslipSummaryResponse listYearPayslipSummary(ListYearPayslipSummaryCommand cmd);
+
+
+	public ImportPayslipResponse importPayslip(MultipartFile[] files, ImportPayslipCommand cmd);
+
+
+	public SendPayslipResponse sendPayslip(SendPayslipCommand cmd);
+
+
+	public ListMonthPayslipSummaryResponse listMonthPayslipSummary(ListMonthPayslipSummaryCommand cmd);
+
+
+	public ListSendPayslipDetailsResponse listSendPayslipDetails(ListSendPayslipDetailsCommand cmd);
+
+
+	public void resendPayslip(ResendPayslipCommand cmd);
+
+
+	public void revokePayslip(RevokePayslipCommand cmd);
+
+
+	public void deletePayslip(DeletePayslipCommand cmd);
+
+
+	public ListUserPayslipsResponse listUserPayslips(ListUserPayslipsCommand cmd);
+
+
+	public ListPayslipsDetailResponse listPayslipsDetail(ListPayslipsDetailCommand cmd);
+
+
+	public void confirmPayslip(ConfirmPayslipCommand cmd);
+
 }

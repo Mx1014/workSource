@@ -429,7 +429,8 @@ public interface RolePrivilegeService {
 	// 获取所有应用管理员的targetIds
 	List<Long> listServiceModuleAppsAdministratorTargetIds(ListServiceModuleAdministratorsCommand cmd);
 
-	List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects);
+//TODO  冲突，先注释
+//	List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects);
 
 	OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd);
 
@@ -440,4 +441,8 @@ public interface RolePrivilegeService {
 	GetPersonelInfoByTokenResponse getPersonelInfoByToken(GetPersonelInfoByTokenCommand cmd);
 
 	void updateTopAdminstrator(CreateOrganizationAdminCommand cmd);
+
+	String findTopAdminByOrgId(FindTopAdminByOrgIdCommand cmd);
+
+	boolean checkIsSystemOrAppAdmin(Long orgId, Long userId);
 }

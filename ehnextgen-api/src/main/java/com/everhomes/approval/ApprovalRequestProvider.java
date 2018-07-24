@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.util.List;
 
 import com.everhomes.rest.approval.ApprovalRequestCondition;
+import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.user.User;
 
 public interface ApprovalRequestProvider {
@@ -37,4 +38,7 @@ public interface ApprovalRequestProvider {
 	Double countOvertimeDurationByUserAndMonth(Long userId, String ownerType, Long ownerId,
 											   String punchMonth);
 
+	int countAbnormalUserRequest(Long creatorId, Long ownerId, java.util.Date start, java.util.Date end);
+
+	List<PunchExceptionRequest> listOvertimeDurationByOwnerAndMonth(String ownerType, Long organizationId, List<String> months);
 }

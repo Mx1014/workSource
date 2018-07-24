@@ -1,5 +1,6 @@
 package com.everhomes.portal;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bigcollection.Accessor;
@@ -57,9 +58,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 
 
     @Autowired
-    private CommunityProvider communityProvider;
-    
-    @Autowired
     private OrganizationProvider organizationProvider;
 
     @Autowired
@@ -83,11 +81,17 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             ServiceAllianceCategories serviceAllianceCategories = createServiceAlliance(namespaceId, serviceAllianceInstanceConfig.getDetailFlag(), itemLabel);
             serviceAllianceInstanceConfig.setType(serviceAllianceCategories.getId());
         }else{
-            updateServiceAlliance(namespaceId, serviceAllianceInstanceConfig.getType(), serviceAllianceInstanceConfig.getDetailFlag(), itemLabel);
+            updateServiceAlliance(namespaceId, serviceAllianceInstanceConfig, itemLabel);
         }
+        
         return StringHelper.toJsonString(serviceAllianceInstanceConfig);
     }
 
+    /* 
+     * actionData 为业务配置时在前端传入
+     * 最后返回业务需要保存的config
+     * 注：当该域空间没有layout的时候会调用
+     */
     @Override
     public String getAppInstanceConfig(Integer namespaceId, String actionData) {
         ServiceAllianceActionData serviceAllianceActionData = (ServiceAllianceActionData)StringHelper.fromJsonString(actionData, ServiceAllianceActionData.class);
@@ -96,6 +100,9 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         serviceAllianceInstanceConfig.setType(serviceAllianceActionData.getParentId());
         serviceAllianceInstanceConfig.setEntryId(serviceAllianceActionData.getParentId());
         serviceAllianceInstanceConfig.setDisplayType(serviceAllianceActionData.getDisplayType());
+        serviceAllianceInstanceConfig.setEnableComment(serviceAllianceActionData.getEnableComment());
+        serviceAllianceInstanceConfig.setEnableProvider(serviceAllianceActionData.getEnableProvider());
+        
         if(null == rule){
             serviceAllianceInstanceConfig.setDetailFlag(DetailFlag.NO.getCode());
         }else{
@@ -104,15 +111,48 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         return StringHelper.toJsonString(serviceAllianceInstanceConfig);
     }
 
+    /* 
+     * 获取需要展示在客户端的config
+     */
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
-        ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = (ServiceAllianceInstanceConfig)StringHelper.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
-        ServiceAllianceActionData serviceAllianceActionData = new ServiceAllianceActionData();
-        serviceAllianceActionData.setType(serviceAllianceInstanceConfig.getType());
-        serviceAllianceActionData.setParentId(serviceAllianceInstanceConfig.getType());
-        serviceAllianceActionData.setDisplayType(serviceAllianceInstanceConfig.getDisplayType());
-        return StringHelper.toJsonString(serviceAllianceActionData);
-    }
+	public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    	
+		ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
+				.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
+		
+		if ("native".equals(config.getAppType())) {
+			return buildNativeActionData(namespaceId, config);
+		}
+		
+		JSONObject json = new JSONObject();
+		json.put("url", buildRenderUrl(namespaceId, config));
+		return json.toJSONString();
+	}
+    
+    
+	private String buildNativeActionData(Integer namespaceId, ServiceAllianceInstanceConfig config) {
+		
+		ServiceAllianceActionData serviceAllianceActionData = new ServiceAllianceActionData();
+		serviceAllianceActionData.setType(config.getType());
+		serviceAllianceActionData.setParentId(config.getType());
+		serviceAllianceActionData.setDisplayType(config.getDisplayType());
+		serviceAllianceActionData.setEnableComment(config.getEnableComment());
+		return StringHelper.toJsonString(serviceAllianceActionData);
+	}
+
+	private String buildRenderUrl(Integer namespaceId, ServiceAllianceInstanceConfig config) {
+
+		// 服务联盟v3.4 web化之后，直接设置为跳转链接即可
+		// http://dev15.zuolin.com/service-alliance-web/build/index.html#/home/filterlist?displayType=filterlist&parentId=213729&enableComment=1#sign_suffix
+		StringBuilder url = new StringBuilder();
+		url.append("${home.url}/service-alliance-web/build/index.html#/home/" + config.getDisplayType());
+		url.append("?displayType=" + config.getDisplayType());
+		url.append("&parentId=" + config.getType());
+		url.append("&enableComment=" + config.getEnableComment());
+		url.append("#sign_suffix");
+
+		return url.toString();
+	}
 
     private ServiceAllianceCategories createServiceAlliance(Integer namespaceId, Byte detailFlag, String name){
         User user = UserContext.current().getUser();
@@ -287,7 +327,21 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
         return Integer.valueOf(value);
 	}
 
-	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, Long type, Byte detailFlag, String name){
+	/**
+	 * 更新服务联盟配置项，可以在发布时，
+	 * 将业务的配置，使用这个方法进行更新
+	 * @param namespaceId
+	 * @param config
+	 * @param name
+	 * @return
+	 */
+	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, ServiceAllianceInstanceConfig config, String name){
+		
+		Long type = config.getType();
+		Byte detailFlag = config.getDetailFlag();
+		Byte enableComment = config.getEnableComment(); //是否允许评论
+		Byte enableProvider = config.getEnableProvider(); //是否打开供应商开关
+		
         ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(type);
 //        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
         List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, "PM", null,null,new CrossShardListingLocator(), 10);
@@ -302,11 +356,16 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             }
             yellowPageProvider.updateServiceAllianceCategory(serviceAllianceCategories);
 
+           
             ServiceAlliances serviceAlliances = yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organization.getId(), type);
             if(null != serviceAlliances){
+            	//更新现有配置
                 serviceAlliances.setName(name);
                 serviceAlliances.setDisplayName(name);
+                serviceAlliances.setEnableComment(enableComment);
+                serviceAlliances.setEnableProvider(enableProvider);
                 yellowPageProvider.updateServiceAlliances(serviceAlliances);
+                
             }else{
                 LOGGER.error("serviceAlliances is null. pmId = {}, type = {}", organization.getId(), type);
             }

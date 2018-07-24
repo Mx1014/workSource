@@ -8,12 +8,137 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CreateApartmentCommand;
+import com.everhomes.rest.address.DeleteApartmentCommand;
+import com.everhomes.rest.address.GetApartmentDetailCommand;
+import com.everhomes.rest.address.GetApartmentDetailResponse;
+import com.everhomes.rest.address.ListApartmentsCommand;
+import com.everhomes.rest.address.ListApartmentsResponse;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsResponse;
+import com.everhomes.rest.address.UpdateApartmentCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.AddOrganizationOwnerCarUserCommand;
+import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
+import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
+import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DefaultChargingItemDTO;
+import com.everhomes.rest.organization.pm.DeleteDefaultChargingItemCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAttachmentCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerBehaviorCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.DeletePmBillCommand;
+import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeleteRelationOfOrganizationOwnerAndCarCommand;
+import com.everhomes.rest.organization.pm.ExportOrganizationOwnerCarsCommand;
+import com.everhomes.rest.organization.pm.ExportOrganizationsOwnersCommand;
+import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
+import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
+import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
+import com.everhomes.rest.organization.pm.FindPmBillByOrderNoCommand;
+import com.everhomes.rest.organization.pm.GetFamilyStatisticCommand;
+import com.everhomes.rest.organization.pm.GetFamilyStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.GetOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.GetOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommand;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
+import com.everhomes.rest.organization.pm.GetRequestInfoCommand;
+import com.everhomes.rest.organization.pm.GetRequestInfoResponse;
+import com.everhomes.rest.organization.pm.ImportOrganizationOwnerCarsCommand;
+import com.everhomes.rest.organization.pm.ImportOrganizationsOwnersCommand;
+import com.everhomes.rest.organization.pm.ImportPmBillsCommand;
+import com.everhomes.rest.organization.pm.InsertPmBillCommand;
+import com.everhomes.rest.organization.pm.InsertPmBillsCommand;
+import com.everhomes.rest.organization.pm.ListApartmentOrganizationOwnerBehaviorsCommand;
+import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommand;
+import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListDefaultChargingItemsCommand;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommand;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerAddressesCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerAttachmentsCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerBehaviorsCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarByOrgOwnerCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarResponse;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarsByAddressCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticByAgeDTO;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerTypesCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersByCarCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
+import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListParkingCardCategoriesCommand;
+import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropAddressMappingCommand;
+import com.everhomes.rest.organization.pm.ListPropAddressMappingCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropCommunityAddressCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropMemberCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.OnlinePayPmBillCommand;
+import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAttachmentDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerCarAttachmentDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerCarDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerTypeDTO;
+import com.everhomes.rest.organization.pm.OweFamilyDTO;
+import com.everhomes.rest.organization.pm.ParkingCardCategoryDTO;
+import com.everhomes.rest.organization.pm.PayPmBillByAddressIdCommand;
+import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
+import com.everhomes.rest.organization.pm.PmBillsDTO;
+import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
+import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
+import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnersByconditionCommand;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
+import com.everhomes.rest.organization.pm.SendNoticeCommand;
+import com.everhomes.rest.organization.pm.SendNoticeToPmAdminCommand;
+import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
+import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
+import com.everhomes.rest.organization.pm.SetOrganizationOwnerAsCarPrimaryCommand;
+import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
+import com.everhomes.rest.organization.pm.UpdateDefaultChargingItemCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressAuthTypeCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressStatusCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
+import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
+import com.everhomes.rest.organization.pm.UploadOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
@@ -386,15 +511,15 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}*/
 	/**
-	 * <b>URL: /pm/sendNoticeToFamily</b>
+	 * <b>URL: /pm/sendNotice</b>
 	 * 物业一键推送消息（是左邻用户则发消息、不是左邻用户则发短信）。
 	 * 按小区，楼栋，门牌号范围
 	 */
 	//checked
-	@RequestMapping("sendNoticeToFamily")
+	@RequestMapping("sendNotice")
 	@RestReturn(value= java.lang.String.class)
-	public RestResponse sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
-		propertyMgrService.sendNoticeToFamily(cmd);
+	public RestResponse sendNotice(SendNoticeCommand cmd) {
+		propertyMgrService.sendNotice(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1046,6 +1171,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping("listPropApartments")
 	@RestReturn(value=ListPropApartmentsResponse.class)
 	public RestResponse listPropApartments(@Valid ListPropApartmentsByKeywordCommand cmd) {
+		// TODO: 2018/6/12 增加返回参数，是否和预定有关联；增加请求参数，根据居住状态来查询  done
 		ListPropApartmentsResponse results =  propertyMgrService.listNewPropApartmentsByKeyword(cmd);
 		RestResponse response = new RestResponse(results);
 
@@ -1482,7 +1608,7 @@ public class PropertyMgrController extends ControllerBase {
 
 	@RequestMapping("sendNoticeToOrganizationMember")
     @RestReturn(value= java.lang.String.class)
-    public RestResponse sendNoticeToOrganizationMember(@Valid PropCommunityBuildAddessCommand cmd){
+    public RestResponse sendNoticeToOrganizationMember(@Valid SendNoticeCommand cmd){
 		propertyMgrService.sendNoticeToOrganizationMember(cmd,UserContext.current().getUser());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1955,12 +2081,10 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>导入业主信息</p>
 	 */
 	@RequestMapping(value="importOrganizationOwners", method = RequestMethod.POST)
-	@RestReturn(value=String.class)
+	@RestReturn(ImportFileTaskDTO.class)
 	public RestResponse importOrganizationOwners(ImportOrganizationsOwnersCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
         checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.CUSTOMER_IMPORT);
-
-        propertyMgrService.importOrganizationOwners(cmd, files);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(propertyMgrService.importOrganizationOwners(cmd, files));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -2118,5 +2242,72 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse listDefaultChargingItems(ListDefaultChargingItemsCommand cmd){
 		return new RestResponse(propertyMgrService.listDefaultChargingItems(cmd));
 	}
+	// TODO: 2018/6/12 done
+	/**
+	 * <p>list all reservations given addresses</p>
+	 * <b>URL: /pm/listReservations</b>
+	 */
+	@RequestMapping("listReservations")
+	@RestReturn(value = ListReservationsDTO.class, collection = true)
+	public RestResponse listReservations(ListReservationsCommand cmd){
+	    List<ListReservationsDTO> list = propertyMgrService.listReservations(cmd);
+		RestResponse response = new RestResponse(list);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
+	// TODO: 2018/6/12
+	/**
+	 * <p>create a reservation on a given address for a given enterprise customer</p>
+	 * <b>URL: /pm/createReservation</b>
+	 */
+	@RequestMapping("createReservation")
+	public RestResponse createReservation(CreateReservationCommand cmd){
+		propertyMgrService.createReservation(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+		// TODO: 2018/6/12
+	/**
+	 * <p>update a reservation </p>
+	 * <b>URL: /pm/updateReservation</b>
+	 */
+	@RequestMapping("updateReservation")
+	public RestResponse updateReservation(UpdateReservationCommand cmd){
+		propertyMgrService.updateReservation(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	// TODO: 2018/6/12 done
+	/**
+	 * <p>delete an reservation</p>
+	 * <b>URL: /pm/deleteReservation</b>
+	 */
+	@RequestMapping("deleteReservation")
+	public RestResponse deleteReservation(DeleteReservationCommand cmd){
+		propertyMgrService.deleteReservation(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	// TODO: 2018/6/13
+	/**
+	 * <p>cancel an reservation</p>
+	 * <b>URL: /pm/cancelReservation</b>
+	 */
+	@RequestMapping("cancelReservation")
+	public RestResponse cancelReservation(CancelReservationCommand cmd){
+	    propertyMgrService.cancelReservation(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

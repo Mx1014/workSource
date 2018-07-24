@@ -1,12 +1,12 @@
 package com.everhomes.rest.techpark.expansion;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 public class EnterpriseDetailDTO {
 	private Long id;
@@ -20,6 +20,8 @@ public class EnterpriseDetailDTO {
     private String geohash;
     private String avatarUri;
     private String avatarUrl;
+    private String posturi;
+    private String posturl;
     private Timestamp createTime;
     @ItemType(EnterpriseAttachmentDTO.class)
     private List<EnterpriseAttachmentDTO> attachments;
@@ -166,6 +168,22 @@ public class EnterpriseDetailDTO {
 
 	public void setAddresses(List<AddressDTO> addresses) {
 		this.addresses = addresses;
+	}
+
+	public String getPosturi() {
+		return posturi;
+	}
+
+	public void setPosturi(String posturi) {
+		this.posturi = posturi;
+	}
+
+	public String getPosturl() {
+		return posturl;
+	}
+
+	public void setPosturl(String posturl) {
+		this.posturl = posturl;
 	}
 
 	@Override

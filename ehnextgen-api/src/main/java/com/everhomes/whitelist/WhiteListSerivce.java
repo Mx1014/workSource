@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.whitelist;
 
+import com.everhomes.rest.whitelist.*;
+
 public interface WhiteListSerivce {
 
     void createWhiteList(CreateWhiteListCommand cmd);

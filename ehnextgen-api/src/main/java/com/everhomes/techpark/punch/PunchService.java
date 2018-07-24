@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
 
@@ -266,5 +266,37 @@ public interface PunchService {
 			String userName, String ownerType, Long ownerId, Long taskId, Long userId);
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
-			String userName, String ownerType, Long ownerId, Long taskId);
+			String userName, String ownerType, Long ownerId, Long taskId, Long monthReportId);
+
+	public ListVacationBalancesResponse listVacationBalances(ListVacationBalancesCommand cmd);
+
+	public void updateVacationBalances(UpdateVacationBalancesCommand cmd);
+
+	public void batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd);
+
+	public ListVacationBalanceLogsResponse listVacationBalanceLogs(ListVacationBalanceLogsCommand cmd);
+
+	public void exportVacationBalances(ExportVacationBalancesCommand cmd);
+
+	public ImportFileTaskDTO importVacationBalances(MultipartFile[] files, ImportVacationBalancesCommand cmd);
+
+	OutputStream getVacationBalanceOutputStream(Long ownerId, Long taskId);
+
+	ArrayList processImportExcel2ArrayList(MultipartFile[] files);
+	
+	void addPunchLogShouldPunchTime(AddPunchLogShouldPunchTimeCommand cmd);
+
+	void refreshMonthReport(String month);
+
+	public ListPunchMonthReportsResponse listPunchMonthReports(ListPunchMonthReportsCommand cmd);
+
+
+	public void updateMonthReport(UpdateMonthReportCommand cmd);
+
+
+	public GetMonthReportProcessResponse getMonthReportProcess(GetMonthReportProcessCommand cmd);
+
+
+	public void fileMonthReport(FileMonthReportCommand cmd);
+
 }

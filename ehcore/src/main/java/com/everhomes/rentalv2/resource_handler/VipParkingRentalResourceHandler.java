@@ -163,7 +163,7 @@ public class VipParkingRentalResourceHandler implements RentalResourceHandler {
         row.createCell(++i).setCellValue(parkingInfo.getSpaceNo());
         //预约开始时间
         if(null!=dto.getCreateTime())
-            row.createCell(++i).setCellValue(datetimeSF.get().format(new Timestamp(dto.getCreateTime())));
+            row.createCell(++i).setCellValue(datetimeSF.get().format(new Timestamp(dto.getStartTime())));
         else
             row.createCell(++i).setCellValue("");
         //预约结束时间

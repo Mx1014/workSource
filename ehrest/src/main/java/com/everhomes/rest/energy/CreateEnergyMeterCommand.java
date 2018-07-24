@@ -29,6 +29,7 @@ import java.util.List;
  *     <li>configId: 价格方案id </li>
  *     <li>ownerType: 所属组织类型</li>
  *     <li>addresses: 表记所属楼栋门牌</li>
+ *     <li>autoFlag: 是否自动抄表</li>
  * </ul>
  */
 public class CreateEnergyMeterCommand {
@@ -53,6 +54,8 @@ public class CreateEnergyMeterCommand {
     @ItemType(EnergyMeterAddressDTO.class)
     private List<EnergyMeterAddressDTO> addresses;
     private Integer namespaceId;
+
+    private Byte autoFlag;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -204,6 +207,14 @@ public class CreateEnergyMeterCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Byte getAutoFlag() {
+        return autoFlag;
+    }
+
+    public void setAutoFlag(Byte autoFlag) {
+        this.autoFlag = autoFlag;
     }
 
     @Override

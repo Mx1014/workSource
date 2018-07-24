@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>billId:账单id</li>
  * <li>targetType:客户类型，个人eh_user;企业：eh_organization</li>
  * <li>organizationId:</li>
+ * <li>billGroupId:账单组id</li>
  *</ul>
  */
 public class BillIdCommand {
@@ -18,6 +19,7 @@ public class BillIdCommand {
     private String billId;
     private String targetType;
     private Long organizationId;
+    private Long billGroupId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -32,7 +34,13 @@ public class BillIdCommand {
         return StringHelper.toJsonString(this);
     }
 
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
 
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
 
     public String getTargetType() {
         return targetType;

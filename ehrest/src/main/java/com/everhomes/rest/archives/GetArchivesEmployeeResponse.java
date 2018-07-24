@@ -10,7 +10,7 @@ import java.util.List;
  * <ul>
  * <li>employeeCase: 员工状况</li>
  * <li>avatar: 员工头像</li>
- * <li>form: 档案详情表单(包含字段名、组名及值) 参考{@link com.everhomes.rest.general_approval.GeneralFormDTO}</li>
+ * <li>form: 档案详情表单(包含字段名、组名及值) 参考{@link com.everhomes.rest.archives.ArchivesFormDTO}</li>
  * <li>departmentIds: 员工部门ids</li>
  * <li>jobPositionIds: 员工岗位ids</li>
  * <li>jobLevelIds: 员工职级ids</li>
@@ -23,16 +23,16 @@ public class GetArchivesEmployeeResponse {
 
     private String avatar;
 
-    private GeneralFormDTO form;
+    private ArchivesFormDTO form;
 
-    @ItemType(Long.class)
+   /* @ItemType(Long.class)
     private List<Long> departmentIds;
 
     @ItemType(Long.class)
     private List<Long> jobPositionIds;
 
     @ItemType(Long.class)
-    private List<Long> jobLevelIds;
+    private List<Long> jobLevelIds;*/
 
     @ItemType(ArchivesLogDTO.class)
     public List<ArchivesLogDTO> logs;
@@ -56,15 +56,23 @@ public class GetArchivesEmployeeResponse {
         this.avatar = avatar;
     }
 
-    public GeneralFormDTO getForm() {
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public ArchivesFormDTO getForm() {
         return form;
     }
 
-    public void setForm(GeneralFormDTO form) {
+    public void setForm(ArchivesFormDTO form) {
         this.form = form;
     }
 
-    public List<Long> getDepartmentIds() {
+    /*public List<Long> getDepartmentIds() {
         return departmentIds;
     }
 
@@ -86,7 +94,7 @@ public class GetArchivesEmployeeResponse {
 
     public void setJobLevelIds(List<Long> jobLevelIds) {
         this.jobLevelIds = jobLevelIds;
-    }
+    }*/
 
     public List<ArchivesLogDTO> getLogs() {
         return logs;

@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface FlowListenerManager {
 
-	int getListenerSize();
-
 	/**
 	 * 当 FlowCase 开始运行时
 	 * @param ctx
@@ -90,4 +88,10 @@ public interface FlowListenerManager {
     FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String extra);
 
     List<FlowFormDTO> listFlowForms(Flow flow);
+
+    void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates);
+
+	void onFlowStateChanged(Flow flow);
+
+    void onFlowStateChanging(Flow flow);
 }

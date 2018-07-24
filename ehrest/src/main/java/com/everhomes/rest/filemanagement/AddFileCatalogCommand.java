@@ -1,12 +1,16 @@
 package com.everhomes.rest.filemanagement;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  * <li>ownerId: 场景id</li>
  * <li>ownerType: 场景类型</li>
  * <li>catalogName: 目录名称</li>
+ * <li>scopes: 选择对象列表 参考{@link com.everhomes.rest.filemanagement.FileCatalogScopeDTO}</li>
  * </ul>
  */
 public class AddFileCatalogCommand {
@@ -16,6 +20,9 @@ public class AddFileCatalogCommand {
     private String ownerType;
 
     private String catalogName;
+
+    @ItemType(FileCatalogScopeDTO.class)
+    private List<FileCatalogScopeDTO> scopes;
 
     public AddFileCatalogCommand() {
     }
@@ -42,6 +49,14 @@ public class AddFileCatalogCommand {
 
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
+    }
+
+    public List<FileCatalogScopeDTO> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<FileCatalogScopeDTO> scopes) {
+        this.scopes = scopes;
     }
 
     @Override

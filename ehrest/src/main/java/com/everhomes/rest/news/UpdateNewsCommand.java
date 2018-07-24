@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 参数
+ * <li>id: news id</li>
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
  * <li>categoryId: 新闻类型ID</li>
@@ -58,7 +59,9 @@ public class UpdateNewsCommand {
     private String visibleType;
 	private byte status;
 	private Long currentPMId;
+    @NotNull
 	private Long currentProjectId;
+    @NotNull
 	private Long appId;
 
 	public Long getAppId() {

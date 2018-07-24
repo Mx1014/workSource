@@ -5,11 +5,15 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmtask.*;
 
 public interface PmTaskService {
@@ -27,7 +31,7 @@ public interface PmTaskService {
 //	void assignTask(AssignTaskCommand cmd);
 
 	ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd);
-	
+
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
@@ -99,4 +103,51 @@ public interface PmTaskService {
 	void syncTaskStatistics(HttpServletResponse resp);
 
 	void syncCategories();
+
+	PmTaskStatDTO getStatSurvey(GetTaskStatCommand cmd);
+
+	List<PmTaskStatSubDTO> getStatByCategory(GetTaskStatCommand cmd);
+
+	List<PmTaskStatDTO> getStatByCreator(GetTaskStatCommand cmd);
+
+	List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd);
+
+	List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd);
+
+	void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp);
+
+	Object getThirdAddress(HttpServletRequest req);
+
+	Object createThirdTask(HttpServletRequest req);
+
+	Object listThirdTasks(HttpServletRequest req);
+
+	Object getThirdTaskDetail(HttpServletRequest req);
+
+    List<SearchTasksByOrgDTO> listTasksByOrg(SearchTasksByOrgCommand cmd17);
+
+    List<SearchTasksByOrgDTO> searchOrgTasks(SearchOrgTasksCommand cmd);
+	List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd);
+
+//	----------------------------------------- 3.7 -----------------------------------------
+	PmTaskConfigDTO setPmTaskConfig(SetPmTaskConfigCommand cmd);
+
+	PmTaskConfigDTO searchPmTaskConfigByProject(GetPmTaskConfigCommand cmd);
+
+	void createOrderDetails(CreateOrderDetailsCommand cmd);
+
+	void modifyOrderDetails(CreateOrderDetailsCommand cmd);
+
+	PmTaskOrderDTO searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd);
+
+	void syncOrderDetails();
+
+	void clearOrderDetails();
+
+	List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
+
+	PreOrderDTO payBills(CreatePmTaskOrderCommand cmd);
+
+	void payNotify(OrderPaymentNotificationCommand cmd);
+
 }

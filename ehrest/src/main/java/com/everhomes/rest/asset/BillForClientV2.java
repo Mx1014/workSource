@@ -5,6 +5,14 @@ package com.everhomes.rest.asset;
  * Created by Wentian Wang on 2017/11/17.
  */
 
+/**
+ *<ul>
+ * <li>billDuration:账期</li>
+ * <li>amountReceivable:应缴金额</li>
+ * <li>amountOwed:待缴金额</li>
+ * <li>billId:账单ID</li>
+ *</ul>
+ */
 public class BillForClientV2 {
     private String billDuration;
     private String amountReceivable;

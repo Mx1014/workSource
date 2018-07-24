@@ -7,6 +7,7 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 
 import java.util.List;
+import java.util.Set;
 
 public interface FlowEventLogProvider {
 
@@ -28,7 +29,7 @@ public interface FlowEventLogProvider {
 	List<FlowCaseDetail> findProcessorFlowCases(ListingLocator locator,
                                                 int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
 
-	List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, List<FlowUserType> flowUserTypes);
+	List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, Set<FlowUserType> flowUserTypes);
 
 	List<FlowEventLog> findStepEventLogs(Long caseId);
 

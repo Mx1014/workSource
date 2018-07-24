@@ -1,6 +1,10 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
+import java.nio.ByteBuffer;
+
 public class DataUtil {
+	private static ByteBuffer buffer = ByteBuffer.allocate(8);
     /**
      * int到byte[]
      *
@@ -82,6 +86,15 @@ public class DataUtil {
         }
         return null;
     }
+    
+    public static long byteArrayToLong(byte[] bytes) {  
+		long result = 0;
+		for (int i = 0; i < bytes.length; i++) {
+			long paramLong = (bytes[i] & 0xff) << (8 * (bytes.length - i - 1));
+			result = result | paramLong;
+		}
+		return result;  
+    } 
 
 //    public static byte[] getByte(String data) {
 //        int len = data.length();

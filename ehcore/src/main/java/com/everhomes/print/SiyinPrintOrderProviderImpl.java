@@ -6,6 +6,11 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.parking.ParkingErrorCode;
+import com.everhomes.util.RuntimeErrorException;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
@@ -47,6 +52,8 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	@Autowired
     private ScheduleProvider scheduleProvider;
 
+	@Autowired
+	public com.everhomes.paySDK.api.PayService sdkPayService;
     @PostConstruct
     public void setup(){
         //启动定时任务
@@ -245,5 +252,26 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc()).limit(pageSize)
 				.fetch()
 				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+	}
+
+	@Override
+	public ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String userId, String accountCode, String userIdentifier, Object o, Object o1, Object o2) {
+		String payerid = OwnerType.USER.getCode()+userId;
+		LOGGER.info("createPersonalPayUserIfAbsent payerid = {}, accountCode = {}, userIdenify={}",payerid,accountCode,userIdentifier);
+		PayUserDTO payUserList = sdkPayService.createPersonalPayUserIfAbsent(payerid, accountCode);
+		if(payUserList==null){
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
+					"创建个人付款账户失败");
+		}
+		String s = sdkPayService.bandPhone(payUserList.getId(), userIdentifier);
+		ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+		dto.setAccountId(payUserList.getId());
+		dto.setAccountType(payUserList.getUserType()==2? OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
+		dto.setAccountName(payUserList.getUserName());
+		dto.setAccountAliasName(payUserList.getUserAliasName());
+		if(payUserList.getRegisterStatus()!=null) {
+			dto.setAccountStatus(Byte.valueOf(payUserList.getRegisterStatus() + ""));
+		}
+		return dto;
 	}
 }

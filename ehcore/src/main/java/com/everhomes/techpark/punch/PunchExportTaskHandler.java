@@ -50,11 +50,18 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         if (params.get("ownerType") != null) {
             ownerType = String.valueOf(params.get("ownerType"));
         }
-        String userName = (String) params.get("userName");
+        String userName = null;
+        if (params.get("userName") != null) {
+            userName = String.valueOf(params.get("userName"));
+        }
         String reportType = (String) params.get("reportType");
         Long ownerId = null;
         if (params.get("ownerId") != null) {
             ownerId = Long.valueOf(String.valueOf(params.get("ownerId")));
+        }
+        Long monthReportId = null;
+        if (params.get("monthReportId") != null) {
+        	monthReportId = Long.valueOf(String.valueOf(params.get("monthReportId")));
         }
         Long startDay = null;
         if (params.get("startDay") != null) {
@@ -92,12 +99,15 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         Long taskId = (Long) params.get("taskId");
         OutputStream outputStream = null;
         if (reportType.equals("exportPunchStatistics")) {
-            outputStream = punchService.getPunchStatisticsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId);
+            outputStream = punchService.getPunchStatisticsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId, monthReportId);
         } else if (reportType.equals("exportPunchDetails")) {
             outputStream = punchService.getPunchDetailsOutputStream(startDay, endDay, exceptionStatus, userName, ownerType, ownerId, taskId, userId);
         } else if (reportType.equals("exportPunchScheduling")) {
             outputStream = punchService.getPunchSchedulingOutputStream(queryTime, employees, timeRules, taskId);
+        }else if (reportType.equals("exportVacationBalances")) {
+            outputStream = punchService.getVacationBalanceOutputStream(ownerId, taskId);
         }
+        taskService.updateTaskProcess(taskId, 99);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }

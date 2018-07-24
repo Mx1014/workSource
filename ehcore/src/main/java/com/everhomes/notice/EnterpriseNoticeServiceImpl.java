@@ -162,10 +162,10 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         if (EnterpriseNoticeContentType.fromCode(cmd.getContentType()) == null) {
             cmd.setContentType(EnterpriseNoticeContentType.TEXT.getCode());
         }
-        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH));
-        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH));
-        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE));
-        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH));
+        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH, true));
+        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH, false));
+        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE, true));
+        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH, true));
         EnterpriseNotice sendEnterpriseNotice = dbProvider.execute((TransactionStatus status) -> {
             Integer namespaceId = UserContext.getCurrentNamespaceId();
             if (namespaceId == null) {
@@ -276,10 +276,10 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
             }
             return null;
         }
-        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH));
-        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH));
-        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE));
-        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH));
+        cmd.setTitle(splitLongString(cmd.getTitle(), TITLE_MAX_LENGTH, true));
+        cmd.setContent(splitLongString(cmd.getContent(), CONTENT_MAX_LENGTH, false));
+        cmd.setSummary(splitLongString(cmd.getSummary(), SUMMARY_CONTENT_MAX_SIZE, true));
+        cmd.setPublisher(splitLongString(cmd.getPublisher(), PUBLISHER_MAX_LENGTH, true));
         dbProvider.execute((TransactionStatus status) -> {
             updateEnterpriseNotice.setTitle(cmd.getTitle());
             updateEnterpriseNotice.setSummary(cmd.getSummary());
@@ -530,11 +530,11 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
     }
 
     // 当字符串超过最大限制时，将此截取到最大长度
-    private String splitLongString(String original, int maxLength) {
+    private String splitLongString(String original, int maxLength, boolean trim) {
         if (!StringUtils.hasText(original)) {
             return null;
         }
-        String newString = original.trim();
+        String newString = trim ? original.trim() : original;
         if (newString.length() <= maxLength) {
             return newString;
         }

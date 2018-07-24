@@ -9,6 +9,6 @@ public interface BlacklistNotificationTemplateCode {
 
     int JOIN_USER_BLACKLIST = 1;  //加入黑名单
 
-    int RELIEVE_USER_BLACKLIST = 1;  // 解除黑名单
+    int RELIEVE_USER_BLACKLIST = 2;  // 解除黑名单
 
 }

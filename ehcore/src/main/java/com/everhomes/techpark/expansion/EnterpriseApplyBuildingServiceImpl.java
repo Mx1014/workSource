@@ -86,7 +86,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,cmd.getCommunityId());//楼栋介绍权限
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -357,6 +357,14 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}).collect(Collectors.toList());
 
 		enterpriseApplyBuildingProvider.createLeaseBuildings(leaseBuildings);
+
+		leaseBuildings = existLeaseBuildings.stream().filter(r->
+		buildings.stream().noneMatch(e->e.getId().equals(r.getBuildingId()))).collect(Collectors.toList());
+		if (leaseBuildings != null)
+			for (LeaseBuilding leaseBuilding:leaseBuildings){
+				leaseBuilding.setStatus(LeaseBulidingStatus.INACTIVE.getCode());
+				enterpriseApplyBuildingProvider.updateLeaseBuilding(leaseBuilding);
+			}
 	}
 
 	@Override
@@ -389,6 +397,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			if (cmd.getCurrentProjectId()!=null) {
 				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null, cmd.getCurrentProjectId());//项目介绍权限
+				authCommunities = new ArrayList<>();
 				authCommunities.add(cmd.getCurrentProjectId());
 			}else{//项目导航为全部 找出授权的项目
 				ListUserRelatedProjectByModuleCommand cmd2 = new ListUserRelatedProjectByModuleCommand();
@@ -400,6 +409,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 					authCommunities = dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toSet());
 			}
 		}
+
 
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);

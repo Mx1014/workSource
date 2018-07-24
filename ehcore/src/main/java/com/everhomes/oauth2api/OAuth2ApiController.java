@@ -6,10 +6,11 @@ import com.everhomes.oauth2.AccessToken;
 import com.everhomes.oauth2.OAuth2AuthenticationType;
 import com.everhomes.oauth2.OAuth2UserContext;
 import com.everhomes.oauth2.RequireOAuth2Authentication;
+import com.everhomes.oauthapi.OAuth2ApiService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserInfoDTO;
-import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * This controller contains APIs that returns user information to third-party applications through
@@ -33,7 +35,7 @@ public class OAuth2ApiController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2ApiController.class);
 
     @Autowired
-    private UserService userService;
+    private OAuth2ApiService oAuth2ApiService;
 
     /**
      * <b>URL: /oauth2api/getUserInfo</b>
@@ -43,7 +45,7 @@ public class OAuth2ApiController extends ControllerBase {
     @RestReturn(value=UserInfo.class)
     public RestResponse getUserInfo(HttpServletRequest request, HttpServletResponse response) {
         AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
-        UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
+        UserInfo info = this.oAuth2ApiService.getUserInfoForInternal(accessToken.getGrantorUid());
         return new RestResponse(info);
     }
 
@@ -55,17 +57,19 @@ public class OAuth2ApiController extends ControllerBase {
     @RestReturn(value=UserInfoDTO.class)
     public RestResponse userInfo() {
         AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
-        UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
-        UserInfoDTO dto = sensitiveClean(info);
-        return new RestResponse(dto);
+        UserInfoDTO info = this.oAuth2ApiService.getUserInfoForThird(accessToken.getGrantorUid());
+        return new RestResponse(info);
     }
 
-    private UserInfoDTO sensitiveClean(UserInfo info) {
-        UserInfoDTO dto = new UserInfoDTO();
-        dto.setAvatarUrl(info.getAvatarUrl());
-        dto.setNickName(info.getNickName());
-        dto.setAccountName(info.getAccountName());
-        dto.setPhone((info.getPhones() != null && info.getPhones().size() > 0) ? info.getPhones().iterator().next() : null);
-        return dto;
+    /**
+     * <b>URL: /oauth2api/trd/authenticationInfo</b>
+     * <p>用户认证信息</p>
+     */
+    @RequestMapping("trd/authenticationInfo")
+    @RestReturn(value=OrganizationMemberDTO.class, collection = true)
+    public RestResponse authenticationInfo() {
+        AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
+        List<OrganizationMemberDTO> members = oAuth2ApiService.getAuthenticationInfo(accessToken.getGrantorUid());
+        return new RestResponse(members);
     }
 }

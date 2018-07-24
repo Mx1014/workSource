@@ -10,10 +10,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFDataFormat;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -23,6 +20,7 @@ import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xq.tian on 2016/9/8.
@@ -61,14 +59,27 @@ public class ExcelUtils {
     private boolean needTitleRemark = false;
     //是否需要标注必填项
     private boolean needMandatoryTitle = false;
+    //说明的背景颜色
+    private Short titleRemarkBackGroundColorIndex = null;
+    //标题的北京颜色
+    private Short headerBackGroundColorIndex = null;
 
     private XSSFWorkbook workbook = null;
+
+    // 导出的格式均为文本 added by wentian 2018/4/9
+    private boolean isCellStylePureString = false;
+
+    public ExcelUtils setIsCellStylePureString(boolean flag){
+        this.isCellStylePureString = flag;
+        return this;
+    }
 
     public ExcelUtils(String fileDir, String sheetName) {
         this.fileDir = fileDir;
         this.sheetName = sheetName;
         workbook = new XSSFWorkbook();
     }
+
 
     public ExcelUtils(HttpServletResponse response, String fileName, String sheetName) {
         this.response = response;
@@ -84,6 +95,16 @@ public class ExcelUtils {
      */
     public ExcelUtils setTitleFontType(String titleFontType) {
         this.titleFontType = titleFontType;
+        return this;
+    }
+
+    public ExcelUtils setTitleRemarkColorIndex(Short index){
+        this.titleRemarkBackGroundColorIndex = index;
+        return this;
+    }
+
+    public ExcelUtils setHeaderColorIndex(Short index){
+        this.headerBackGroundColorIndex = index;
         return this;
     }
 
@@ -158,7 +179,17 @@ public class ExcelUtils {
      */
     public void writeExcel(String[] propertyNames, String[] titleName, int[] columnSizes, List<?> dataList) {
         try (OutputStream out = getOutputStream();) {
-            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, columnSizes, dataList);
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, false, columnSizes, dataList);
+            out.write(excelStream.toByteArray());
+            out.flush();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    // 重载，可以在必填项前加星号
+    public void writeExcel(String[] propertyNames, String[] titleName, boolean withStar, int[] columnSizes, List<?> dataList) {
+        try (OutputStream out = getOutputStream();) {
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, withStar, columnSizes, dataList);
             out.write(excelStream.toByteArray());
             out.flush();
         } catch (Exception ex) {
@@ -173,7 +204,7 @@ public class ExcelUtils {
 
 	public OutputStream getOutputStream(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes, List<?> dataList){
         try {
-            ByteArrayOutputStream excelStream = buildExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), false, ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
             return excelStream;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -183,7 +214,7 @@ public class ExcelUtils {
 
 	public OutputStream getOutputStream(String[] propertyNames, String[] titleNames, int[] titleSize, List<?> dataList){
         try {
-            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleNames, titleSize, dataList);
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleNames, false, titleSize, dataList);
             return excelStream;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -208,29 +239,49 @@ public class ExcelUtils {
         response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
     }
 
-    private ByteArrayOutputStream buildExcel(String[] propertyNames, String[] titleNames, int[] titleSize, List<?> dataList) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
+    private ByteArrayOutputStream buildExcel(String[] propertyNames, String[] titleNames, boolean withStarAhead, int[] titleSize, List<?> dataList) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
         Sheet sheet = workbook.createSheet(this.sheetName);
         // 表头
         Row titleNameRow = sheet.createRow(0);
         // 设置样式
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         setTitleFont(titleStyle);
+        // 设置为纯文本 by wentian
+        XSSFDataFormat format = workbook.createDataFormat();
+        if(isCellStylePureString == true){
+            titleStyle.setDataFormat(format.getFormat("@"));
+        }
+
+
+        if(headerBackGroundColorIndex != null){
+            titleStyle.setFillBackgroundColor(headerBackGroundColorIndex.shortValue());
+        }
         // 若含有必填项的样式
         XSSFCellStyle mandatoryTitleStyle = workbook.createCellStyle();
         setMandatoryTitleFont(mandatoryTitleStyle);
+        if(headerBackGroundColorIndex != null){
+            mandatoryTitleStyle.setFillBackgroundColor(headerBackGroundColorIndex.shortValue());
+        }
+        if(isCellStylePureString == true){
+            mandatoryTitleStyle.setDataFormat(format.getFormat("@"));
+        }
+
 
         if (needSequenceColumn) {
             Cell numberColumn = titleNameRow.createCell(0);
             numberColumn.setCellStyle(titleStyle);
             numberColumn.setCellValue(StringEscapeUtils.unescapeJava("\\u5e8f\\u53f7"));
         }
-
         for (int i = 0; i < titleNames.length; i++) {
-            sheet.setColumnWidth(needSequenceColumn ? i + 1 : i, titleSize[i] * 256);    //设置宽度
+            sheet.setColumnWidth(needSequenceColumn ? i + 1 : i, titleSize == null ? 20 * 256 : titleSize[i] * 256);    //设置宽度
             Cell cell = titleNameRow.createCell(needSequenceColumn ? i + 1 : i);
             if (needMandatoryTitle) {
-                if (mandatoryTitle.get(i) == 1)
+                if (mandatoryTitle.get(i) == 1){
                     cell.setCellStyle(mandatoryTitleStyle);
+                    if(withStarAhead){
+                        titleNames[i] = "*"+titleNames[i];
+                    }
+                }
             } else
                 cell.setCellStyle(titleStyle);
             cell.setCellValue(titleNames[i]);
@@ -239,6 +290,14 @@ public class ExcelUtils {
         // 内容样式
         XSSFCellStyle contentStyle = workbook.createCellStyle();
         setContentFont(contentStyle);
+        if(isCellStylePureString == true){
+            contentStyle.setDataFormat(format.getFormat("@"));
+            //每一列都做个默认文本
+            for(int i = 0; i < titleNames.length; i ++){
+                sheet.setDefaultColumnStyle(i, contentStyle);
+            }
+
+        }
 
         if (dataList != null && dataList.size() > 0 && propertyNames.length > 0) {
             for (int rowIndex = 1; rowIndex <= dataList.size(); rowIndex++) {
@@ -258,29 +317,36 @@ public class ExcelUtils {
                         //使首字母大写
                         String UTitle = StringUtils.capitalize(title); // 使其首字母大写;
                         String methodName = "get" + UTitle;
-                        // 设置要执行的方法
-                        Method method = clazz.getMethod(methodName);
-                        //获取返回类型
-                        String returnType = method.getReturnType().getName();
+                        //由于导出的账单组费项是动态的，原有的对象属性get/set不满足要求，采用map处理动态字段
+                        if(obj instanceof Map) {
+                        	Map map = (Map) obj;
+                        	String data = (String) map.get(title);
+                        	cell.setCellValue(data);
+                        }else {
+                        	// 设置要执行的方法
+                            Method method = clazz.getMethod(methodName);
+                            //获取返回类型
+                            String returnType = method.getReturnType().getName();
 
-                        Object ret = method.invoke(obj);
-                        String data = ret == null ? "" : ret.toString();
-                        if (!"".equals(data)) {
-                            switch (returnType) {
-                                case "int":
-                                    cell.setCellValue(Integer.parseInt(data));
-                                    break;
-                                case "long":
-                                    cell.setCellValue(Long.parseLong(data));
-                                    break;
-                                case "float":
-                                    cell.setCellValue(Float.parseFloat(data));
-                                    break;
-                                case "double":
-                                    cell.setCellValue(Double.parseDouble(data));
-                                    break;
-                                default:
-                                    cell.setCellValue(data);
+                            Object ret = method.invoke(obj);
+                            String data = ret == null ? "" : ret.toString();
+                            if (!"".equals(data)) {
+                                switch (returnType) {
+                                    case "int":
+                                        cell.setCellValue(Integer.parseInt(data));
+                                        break;
+                                    case "long":
+                                        cell.setCellValue(Long.parseLong(data));
+                                        break;
+                                    case "float":
+                                        cell.setCellValue(Float.parseFloat(data));
+                                        break;
+                                    case "double":
+                                        cell.setCellValue(Double.parseDouble(data));
+                                        break;
+                                    default:
+                                        cell.setCellValue(data);
+                                }
                             }
                         }
                     }
@@ -297,7 +363,7 @@ public class ExcelUtils {
     /**
      * 设置首行备注
      */
-    private void addTitleRemark(XSSFWorkbook workbook,short titleRemarkCellHeight){
+    private void addTitleRemark(XSSFWorkbook workbook,short titleRemarkCellHeight ){
         Sheet sheet = workbook.getSheet(this.sheetName);
         sheet.shiftRows(0,sheet.getLastRowNum(),1,true,false);
         // 合并首行单元格
@@ -308,6 +374,9 @@ public class ExcelUtils {
         // 设置样式
         XSSFCellStyle titleRemarkStyle = workbook.createCellStyle();
         setTitleRemarkFont(titleRemarkStyle);
+        if(titleRemarkBackGroundColorIndex != null){
+            titleRemarkStyle.setFillBackgroundColor(titleRemarkBackGroundColorIndex.shortValue());
+        }
         // 加入内容
         Cell cell = titleRemarkRow.createCell(0);
         cell.setCellStyle(titleRemarkStyle);

@@ -1,14 +1,56 @@
 package com.everhomes.techpark.expansion;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
 import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.organization.GetOrganizationDetailByIdCommand;
-import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.techpark.expansion.AddLeaseIssuerCommand;
+import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
+import com.everhomes.rest.techpark.expansion.CheckIsLeaseIssuerCommand;
+import com.everhomes.rest.techpark.expansion.CheckIsLeaseIssuerDTO;
+import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.DeleteLeaseIssuerCommand;
+import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
+import com.everhomes.rest.techpark.expansion.FindLeasePromotionByIdCommand;
+import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
+import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
+import com.everhomes.rest.techpark.expansion.GetLeasePromotionConfigCommand;
+import com.everhomes.rest.techpark.expansion.GetLeasePromotionRequestFormCommand;
+import com.everhomes.rest.techpark.expansion.LeaseFormRequestDTO;
+import com.everhomes.rest.techpark.expansion.LeasePromotionConfigDTO;
+import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
+import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailCommand;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
+import com.everhomes.rest.techpark.expansion.ListLeaseIssuerApartmentsCommand;
+import com.everhomes.rest.techpark.expansion.ListLeaseIssuerBuildingsCommand;
+import com.everhomes.rest.techpark.expansion.ListLeaseIssuerBuildingsResponse;
+import com.everhomes.rest.techpark.expansion.ListLeaseIssuersCommand;
+import com.everhomes.rest.techpark.expansion.ListLeaseIssuersResponse;
+import com.everhomes.rest.techpark.expansion.SetLeasePromotionConfigCommand;
+import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
+import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionOrderCommand;
+import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionRequestFormCommand;
+import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.mysql.jdbc.StringUtils;
@@ -17,19 +59,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.RestDoc;
-import com.everhomes.discover.RestReturn;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.util.ConvertHelper;
-
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestDoc(value = "entry controller", site = "ehcore")
 @RestController
@@ -54,7 +87,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=ListEnterpriseDetailResponse.class)
 	public RestResponse listEnterprisesAbstract(ListEnterpriseDetailCommand cmd){
 		ListEnterprisesCommand command = ConvertHelper.convert(cmd, ListEnterprisesCommand.class);
-		command.setPageSize(100000);
+		if (cmd.getAllFlag() != null){
+			command.setPageSize(100000);
+		}
 		RestResponse response = new RestResponse(organizationService.listEnterprisesAbstract(command));
 
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -332,6 +367,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 */
 	@RequestMapping("getLeasePromotionConfig")
 	@RestReturn(value=LeasePromotionConfigDTO.class)
+    @RequireAuthentication(value = false)
 	public RestResponse getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd){
 
 		LeasePromotionConfigDTO dto = enterpriseApplyEntryService.getLeasePromotionConfig(cmd);

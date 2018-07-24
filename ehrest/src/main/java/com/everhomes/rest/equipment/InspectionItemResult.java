@@ -1,8 +1,8 @@
 package com.everhomes.rest.equipment;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -46,6 +46,8 @@ public class InspectionItemResult {
 	private String itemValue;
 	
 	private Byte normalFlag;
+
+	private String valueJason;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -142,7 +144,16 @@ public class InspectionItemResult {
 	public void setNormalFlag(Byte normalFlag) {
 		this.normalFlag = normalFlag;
 	}
-	
+
+
+	public String getValueJason() {
+		return valueJason;
+	}
+
+	public void setValueJason(String valueJason) {
+		this.valueJason = valueJason;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

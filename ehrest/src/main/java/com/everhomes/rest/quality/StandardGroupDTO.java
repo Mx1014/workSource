@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>id: 主键id</li>
  *  <li>standardId: 标准id</li>
- *  <li>groupType: 业务组类型 com.everhomes.rest.quality.QualityGroupType</li>
+ *  <li>groupType: 业务组类型 {@link com.everhomes.rest.quality.QualityGroupType}</li>
  *  <li>groupId: 业务组id</li>
  *  <li>positionId: 通用岗位id</li>
  *  <li>groupName: 业务组组名</li>

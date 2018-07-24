@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 public class GetFlowCaseTrackCommand {
 
     @NotNull private Long flowCaseId;
+    private String flowUserType;
 
     public Long getFlowCaseId() {
         return flowCaseId;
@@ -19,6 +20,14 @@ public class GetFlowCaseTrackCommand {
 
     public void setFlowCaseId(Long flowCaseId) {
         this.flowCaseId = flowCaseId;
+    }
+
+    public String getFlowUserType() {
+        return flowUserType;
+    }
+
+    public void setFlowUserType(String flowUserType) {
+        this.flowUserType = flowUserType;
     }
 
     @Override

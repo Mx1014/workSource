@@ -19,7 +19,18 @@ public class UpdatePortalLayoutCommand {
 
 	private String description;
 
+
 	private Long bgColor;
+	public UpdatePortalLayoutCommand() {
+
+	}
+
+	public UpdatePortalLayoutCommand(Long id, String label, String description) {
+		super();
+		this.id = id;
+		this.label = label;
+		this.description = description;
+	}
 
 	public Long getId() {
 		return id;

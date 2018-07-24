@@ -35,7 +35,7 @@ public class FormFieldSingleLineTextProcessor implements FormFieldProcessor {
         dto.setFieldType(fieldDTO.getFieldType());
         dto.setDisplayName(fieldDTO.getFieldDisplayName());
         dto.setName(fieldDTO.getFieldName());
-        dto.setExtra("11111111");
+        // dto.setExtra("11111111");
 
         dto.setOperators(FormFieldOperator.getSupportOperatorList(GeneralFormFieldType.SINGLE_LINE_TEXT).stream().map(FlowConditionRelationalOperatorType::getCode).collect(Collectors.toList()));
 

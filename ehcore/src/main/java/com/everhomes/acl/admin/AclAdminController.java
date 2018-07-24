@@ -369,5 +369,19 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/acl/findTopAdminByOrgId</b>
+     * <p>找到公司的超级管理员</p>
+     */
+    @RequestMapping("findTopAdminByOrgId")
+    @RestReturn(value=String.class)
+    public RestResponse findTopAdminByOrgId(FindTopAdminByOrgIdCommand cmd) {
+    	rolePrivilegeService.findTopAdminByOrgId(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

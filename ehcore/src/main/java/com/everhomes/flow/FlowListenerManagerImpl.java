@@ -6,6 +6,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +22,36 @@ import java.util.stream.Collectors;
 
 @Component
 public class FlowListenerManagerImpl implements FlowListenerManager, ApplicationListener<ContextRefreshedEvent> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowListenerManagerImpl.class);
 
-    @Autowired
-    private List<FlowModuleListener> allListeners;
+    @Autowired(required = false)
+    private List<FlowModuleListener> moduleListeners;
+
+    @Autowired(required = false)
+    private List<FlowFunctionListener> functionListeners;
 
     @Autowired
     private FlowService flowService;
 
-    private Map<Long, FlowModuleInst> moduleMap = new HashMap<Long, FlowModuleInst>();
+    private Map<Long, FlowModuleInst> moduleMap = new HashMap<>();
 
-    public FlowListenerManagerImpl() {
-
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if (event.getApplicationContext().getParent() != null) {
+            return;
+        }
+        for (FlowModuleListener listener : moduleListeners) {
+            try {
+                FlowModuleInfo info = listener.initModule();
+                FlowModuleInst inst = new FlowModuleInst();
+                inst.setInfo(info);
+                inst.setModuleListener(listener);
+                moduleMap.put(info.getModuleId(), inst);
+            } catch (Exception ex) {
+                LOGGER.error("module init error cls=" + listener.getClass(), ex);
+            }
+        }
     }
 
     @Override
@@ -58,7 +77,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 
         FlowModuleInst inst = moduleMap.get(module.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowCreating(flow);
             } catch (Exception e) {
@@ -72,7 +91,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowCaseStart(ctx);
             } catch (Exception e) {
@@ -82,16 +101,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public int getListenerSize() {
-        return allListeners.size();
-    }
-
-    @Override
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowCaseAbsorted(ctx);
             } catch (Exception e) {
@@ -105,7 +119,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowCaseStateChanged(ctx);
             } catch (Exception e) {
@@ -119,7 +133,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowButtonFired(ctx);
             } catch (Exception e) {
@@ -133,7 +147,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowCaseEnd(ctx);
             } catch (Exception e) {
@@ -147,7 +161,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowCaseActionFired(ctx);
             } catch (Exception e) {
@@ -160,7 +174,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             String briefRender = null;
             try {
                 briefRender = listener.onFlowCaseBriefRender(flowCase, flowUserType);
@@ -176,7 +190,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             List<FlowCaseEntity> entities = null;
             try {
                 entities = listener.onFlowCaseDetailRender(flowCase, flowUserType);
@@ -192,7 +206,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowSMSVariableRender(ctx, templateId, variables);
             } catch (Exception e) {
@@ -206,7 +220,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowMessageSend(ctx, messageDto);
             } catch (Exception e) {
@@ -220,7 +234,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             String value = null;
             try {
                 value = listener.onFlowVariableRender(ctx, variable);
@@ -258,7 +272,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     private List<FlowServiceTypeDTO> listFlowServiceTypesFromListener(FlowModuleInst moduleInst, Integer namespaceId, String ownerType, Long ownerId) {
-        FlowModuleListener listener = moduleInst.getListener();
+        FlowModuleListener listener = moduleInst.getModuleListener();
         try {
             return listener.listServiceTypes(namespaceId, ownerType, ownerId);
         } catch (Exception e) {
@@ -271,7 +285,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         FlowModuleInst inst = moduleMap.get(flow.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             List<FlowConditionVariableDTO> dtoList = null;
             try {
                 dtoList = listener.listFlowConditionVariables(flow, flowEntityType, ownerType, ownerId);
@@ -290,7 +304,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             FlowConditionVariable conditionVariable = null;
             try {
                 conditionVariable = listener.onFlowConditionVariableRender(ctx, variable, extra);
@@ -306,7 +320,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     public List<FlowFormDTO> listFlowForms(Flow flow) {
         FlowModuleInst inst = moduleMap.get(flow.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             List<FlowFormDTO> flowForms = null;
             try {
                 flowForms = listener.listFlowForms(flow);
@@ -319,26 +333,50 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) {
-        FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
+    public void onFlowCaseEvaluate(FlowCaseState ctx, List<FlowEvaluate> evaluates) {
+        FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
-            listener.onScanQRCode(flowCase, qrCode, currentUserId);
+            FlowModuleListener listener = inst.getModuleListener();
+            try {
+                listener.onFlowCaseEvaluate(ctx, evaluates);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
         }
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        for (FlowModuleListener listener : allListeners) {
+    public void onFlowStateChanged(Flow flow) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getModuleListener();
             try {
-                FlowModuleInfo info = listener.initModule();
-                FlowModuleInst inst = new FlowModuleInst();
-                inst.setInfo(info);
-                inst.setListener(listener);
-                moduleMap.put(info.getModuleId(), inst);//TODO support TreeSet for listeners ?
-            } catch (Exception ex) {
-                LOGGER.error("module init error cls=" + listener.getClass(), ex);
+                listener.onFlowStateChanged(flow);
+            } catch (Exception e) {
+                wrapError(e, listener);
             }
+        }
+    }
+
+    @Override
+    public void onFlowStateChanging(Flow flow) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getModuleListener();
+            try {
+                listener.onFlowStateChanging(flow);
+            } catch (Exception e) {
+                wrapError(e, listener);
+            }
+        }
+    }
+
+    @Override
+    public void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) {
+        FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getModuleListener();
+            listener.onScanQRCode(flowCase, qrCode, currentUserId);
         }
     }
 
@@ -346,7 +384,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     public void onFlowCaseCreating(FlowCase flowCase) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowCaseCreating(flowCase);
             } catch (Exception e) {
@@ -359,7 +397,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     public void onFlowCaseCreated(FlowCase flowCase) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
+            FlowModuleListener listener = inst.getModuleListener();
             try {
                 listener.onFlowCaseCreated(flowCase);
             } catch (Exception e) {

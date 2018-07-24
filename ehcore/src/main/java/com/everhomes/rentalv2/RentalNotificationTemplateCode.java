@@ -30,6 +30,7 @@ public interface RentalNotificationTemplateCode {
     int SYSTEM_AUTO_CANCEL_ORDER = 20; //系统自动取消订单并退款成功：尊敬的用户，您预约的VIP车位（“停车场名称”“车位编号”车位：“开始时间” - “结束时间”）由于前序订单使用超时，且无其他空闲车位可更换，已自动取消并全额退款，为此我们深感抱歉，期待下次为您服务。
     int SYSTEM_AUTO_UPDATE_SPACE = 21; //订单变更通知：尊敬的用户，您预约的VIP车位（“停车场名称”“车位编号”车位：“开始时间” - “结束时间”）由于前序订单使用超时，系统自动为您更换至“车位编号”车位，给您带来的不便我们深感抱歉，感谢您的使用。
     int RENTAL_ORDER_USE_DETAIL = 22; // 资源订单使用详情 VIP车位（${parkingLotName}${spaceNo}车位：${startTime} - ${endTime}）
+    int RENTAL_ORDER_TIME_UP = 23;//尊敬的用户，您预约的${useDetail}剩余使用时长：15分钟，如需延时，请前往APP进行操作，否则超时系统将继续计时计费，感谢您的使用。
 
     String locale = "zh_CN";
 
@@ -40,5 +41,6 @@ public interface RentalNotificationTemplateCode {
     //local string table
     int RENTAL_TEXT_REMARK = 10; // 资源提交信息   请输入备注
     int RENTAL_SHOW_CONTENT = 11; // 资源提交信息  请输入显示内容
-    int RENTAL_ORDER_NOT_REFUND_TIP = 12; // 不支持退款的提示信息
+    int RENTAL_ORDER_NOT_REFUND_TIP = 12; // 不支持退款的提示信息 亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。确认要取消订单吗？
+    int RENTAL_ORDER_NOT_REFUND_TIP2 = 13; // 不支持退款的提示信息 亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。
 }

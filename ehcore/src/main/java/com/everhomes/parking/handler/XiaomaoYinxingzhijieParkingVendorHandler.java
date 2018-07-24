@@ -142,12 +142,12 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
             dto.setCardType(rate.getCardType());
 //            dto.setMonthCount(rate.getMonthCount());
             dto.setMonthCount(BigDecimal.valueOf(requestMonthCount));
-            dto.setPrice(rate.getPrice().divide(rate.getMonthCount()));
+            dto.setPrice(rate.getPrice().divide(rate.getMonthCount(),OPEN_CARD_RETAIN_DECIMAL, RoundingMode.UP));
 
             dto.setPlateNumber(cmd.getPlateNumber());
             long now = System.currentTimeMillis();
             dto.setOpenDate(now);
-            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
             if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
                 dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
             }else {
@@ -210,8 +210,10 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
         for(YinxingzhijieXiaomaoCardType t: types) {
             if(t.getStandardId().equals(r.getCardType())) {
                 temp = t;
+                break;
             }
         }
+        
         dto.setCardTypeId(temp.getStandardId());
         dto.setCardType(temp.getStandardType());
         dto.setRateToken(r.getId().toString());
@@ -236,14 +238,14 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
     private boolean payTempCardFee(ParkingRechargeOrder order) {
         TreeMap<String,String> params = new TreeMap();
         params.put("plateNo", order.getPlateNumber());
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         params.put("orderId", order.getOrderToken());
         params.put("payMoney", order.getPrice().setScale(2).toString());
         String result = post(POSTCHARGE, params);
-        order.setErrorDescription(result);//data 缴费记录号 存储
+        order.setErrorDescriptionJson(result);//data 缴费记录号 存储
 
         JSONObject jsonObject = JSONObject.parseObject(result);
         Object obj = jsonObject.get("flag");
+        order.setErrorDescription(jsonObject.getString("message"));
         if(null != obj ) {
             int resCode = (int) obj;
             if(resCode == 1) {
@@ -263,7 +265,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
         }
 
         Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
-        Timestamp timestampEnd = Utils.getTimestampByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue());
+        Timestamp timestampEnd = new Timestamp(Utils.getLongByAddNatureMonth(timestampStart.getTime(), order.getMonthCount().intValue(),true));
         order.setStartPeriod(timestampStart);
         order.setEndPeriod(timestampEnd);
 
@@ -334,6 +336,7 @@ public class XiaomaoYinxingzhijieParkingVendorHandler extends DefaultParkingVend
             order.setEndPeriod(timestampEnd);
 
             YinxingzhijieXiaomaoJsonEntity<?> entity = JSONObject.parseObject(json, YinxingzhijieXiaomaoJsonEntity.class);
+            order.setErrorDescription(entity!=null?entity.getMessage():null);
             if (entity.isSuccess()){
                 return true;
             }

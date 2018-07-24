@@ -12,6 +12,8 @@ import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.organization.pm.OrganizationOwnerType;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -37,6 +39,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 import net.greghaines.jesque.Job;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +89,8 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private PortalService portalService;
+	@Autowired
+    private PropertyMgrProvider propertyMgrProvider;
 	
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -144,19 +149,20 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	@Override
 	public RelocationRequestDTO getRelocationRequestDetail(GetRelocationRequestDetailCommand cmd) {
 
-		RelocationRequest request = relocationProvider.findRelocationRequestById(cmd.getId());
-
-		if (null == request) {
-			LOGGER.error("RelocationRequest not found.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"RelocationRequest not found.");
-		}
-
-		RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
-
-		populateRequestDTO(request, dto);
-
-		return dto;
+        RelocationRequest request = relocationProvider.findRelocationRequestById(cmd.getId());
+        if (null == request) {
+            LOGGER.error("RelocationRequest not found.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "RelocationRequest not found.");
+        }
+        RelocationRequestDTO dto = ConvertHelper.convert(request, RelocationRequestDTO.class);
+        populateRequestDTO(request, dto);
+//      小区场景查询客户类型
+        if (null != request.getOrgOwnerTypeId()) {
+            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(request.getOrgOwnerTypeId());
+            dto.setOrgOwnerType(ownerType.getDisplayName());
+        }
+        return dto;
 	}
 
 	private void populateRequestDTO(RelocationRequest request, RelocationRequestDTO dto) {
@@ -166,11 +172,17 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 			List<RelocationRequestAttachment> attachments = relocationProvider.listRelocationRequestAttachments(
 					EntityType.RELOCATION_REQUEST_ITEM.getCode(), r.getId());
-			itemDTO.setAttachments(attachments.stream().map(a -> {
-				AttachmentDescriptor ad = ConvertHelper.convert(a, AttachmentDescriptor.class);
-				ad.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.USER.getCode(), a.getCreatorUid()));
-				return ad;
-			}).collect(Collectors.toList()));
+//			itemDTO.setAttachments(attachments.stream().map(a -> {
+//				AttachmentDescriptor ad = ConvertHelper.convert(a, AttachmentDescriptor.class);
+//				ad.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.USER.getCode(), a.getCreatorUid()));
+//				return ad;
+//			}).collect(Collectors.toList()));
+			if(attachments.size() == 1){
+				RelocationRequestAttachment att = attachments.get(0);
+				AttachmentDescriptor ad = ConvertHelper.convert(att, AttachmentDescriptor.class);
+				ad.setContentUrl(contentServerService.parserUri(att.getContentUri(), EntityType.USER.getCode(), att.getCreatorUid()));
+				itemDTO.setAttachment(ad);
+			}
 
 			return itemDTO;
 		}).collect(Collectors.toList()));
@@ -244,13 +256,18 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		RelocationRequest request = ConvertHelper.convert(cmd, RelocationRequest.class);
 		request.setRelocationDate(new Timestamp(cmd.getRelocationDate()));
 
+		if(StringUtils.isNotEmpty(cmd.getOrgOwnerType())){
+//		    小区场景
+            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(cmd.getOrgOwnerType());
+            request.setOrgOwnerTypeId(ownerType.getId());
+        }
+
 		OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
 		if (null == orgRequest) {
 			LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"OrganizationCommunityRequest not found.");
 		}
-
 		request.setOwnerId(orgRequest.getCommunityId());
 		request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
 
@@ -271,14 +288,20 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 					item.setItemQuantity(r.getItemQuantity());
 					relocationProvider.createRelocationRequestItem(item);
 
-					List<AttachmentDescriptor> attachments = r.getAttachments();
-					if (null != attachments) {
-						attachments.forEach(a -> {
-							RelocationRequestAttachment att = ConvertHelper.convert(a, RelocationRequestAttachment.class);
-							att.setOwnerType(EntityType.RELOCATION_REQUEST_ITEM.getCode());
-							att.setOwnerId(item.getId());
-							relocationProvider.createRelocationRequestAttachment(att);
-						});
+//					List<AttachmentDescriptor> attachments = r.getAttachments();
+//					if (null != attachments) {
+//						attachments.forEach(a -> {
+//							RelocationRequestAttachment att = ConvertHelper.convert(a, RelocationRequestAttachment.class);
+//							att.setOwnerType(EntityType.RELOCATION_REQUEST_ITEM.getCode());
+//							att.setOwnerId(item.getId());
+//							relocationProvider.createRelocationRequestAttachment(att);
+//						});
+//					}
+					if(null != r.getAttachment()){
+						RelocationRequestAttachment att = ConvertHelper.convert(r.getAttachment(), RelocationRequestAttachment.class);
+						att.setOwnerType(EntityType.RELOCATION_REQUEST_ITEM.getCode());
+						att.setOwnerId(item.getId());
+						relocationProvider.createRelocationRequestAttachment(att);
 					}
 				});
 			}

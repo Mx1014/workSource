@@ -1,0 +1,1 @@
+ALTER TABLE `eh_contract_param_group_map` ADD COLUMN `user_id` BIGINT DEFAULT 0 COMMENT '用户id';

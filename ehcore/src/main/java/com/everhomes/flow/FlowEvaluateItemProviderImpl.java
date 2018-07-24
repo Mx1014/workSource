@@ -117,8 +117,11 @@ public class FlowEvaluateItemProviderImpl implements FlowEvaluateItemProvider {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(
 					ListingLocator locator, SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_MAIN_ID.eq(flowId));
-				query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_VERSION.eq(flowVer));
+				if(null != flowId)
+			        query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_MAIN_ID.eq(flowId));
+				if(null != flowVer)
+				    query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_VERSION.eq(flowVer));
+				query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_CASE_ID.isNull());
 				return query;
 			}
     		
@@ -143,5 +146,14 @@ public class FlowEvaluateItemProviderImpl implements FlowEvaluateItemProvider {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEvaluateItems.class));
     	EhFlowEvaluateItemsDao dao = new EhFlowEvaluateItemsDao(context.configuration());
     	dao.insert(objs.toArray(new FlowEvaluateItem[objs.size()]));
+    }
+
+    @Override
+    public List<FlowEvaluateItem> findFlowEvaluateItemsByFlowCase(Long flowCaseId) {
+        ListingLocator locator = new ListingLocator();
+        return queryFlowEvaluateItems(locator, 100, (locator1, query) -> {
+            query.addConditions(Tables.EH_FLOW_EVALUATE_ITEMS.FLOW_CASE_ID.eq(flowCaseId));
+            return query;
+        });
     }
 }

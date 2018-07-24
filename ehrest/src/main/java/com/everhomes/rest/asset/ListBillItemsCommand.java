@@ -22,6 +22,15 @@ public class ListBillItemsCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private String targetType;
+    private Long billGroupId;
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
 
     @Override
     public String toString() {

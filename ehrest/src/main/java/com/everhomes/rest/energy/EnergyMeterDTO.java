@@ -33,6 +33,7 @@ import java.util.List;
  *     <li>addresses: 表记所属楼栋门牌</li>
  *     <li>assignedPlan: 是否关联计划</li>
  *     <li>planName: 关联计划名称列表</li>
+ *     <li>autoFlag: 是否自动抄表的</li>
  * </ul>
  */
 public class EnergyMeterDTO {
@@ -65,6 +66,8 @@ public class EnergyMeterDTO {
     private EnergyMeterPriceConfigDTO priceConfig;
     @ItemType(EnergyMeterAddressDTO.class)
     private List<EnergyMeterAddressDTO> addresses;
+
+    private Byte autoFlag;
 
     public List<String> getPlanName() {
         return planName;
@@ -264,6 +267,14 @@ public class EnergyMeterDTO {
 
     public void setPriceConfig(EnergyMeterPriceConfigDTO priceConfig) {
         this.priceConfig = priceConfig;
+    }
+
+    public Byte getAutoFlag() {
+        return autoFlag;
+    }
+
+    public void setAutoFlag(Byte autoFlag) {
+        this.autoFlag = autoFlag;
     }
 
     @Override

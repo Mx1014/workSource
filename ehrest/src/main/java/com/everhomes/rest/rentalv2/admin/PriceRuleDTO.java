@@ -38,10 +38,13 @@ public class PriceRuleDTO {
 	private Byte rentalType;
 	private Byte priceType;
 	private BigDecimal workdayPrice;
+	private BigDecimal originalPrice;
 	private BigDecimal initiatePrice;
 	private BigDecimal orgMemberWorkdayPrice;
+	private BigDecimal orgMemberOriginalPrice;
 	private BigDecimal orgMemberInitiatePrice;
 	private BigDecimal approvingUserWorkdayPrice;
+	private BigDecimal approvingUserOriginalPrice;
 	private BigDecimal approvingUserInitiatePrice;
 	private Byte discountType;
 	private BigDecimal fullPrice;
@@ -256,4 +259,27 @@ public class PriceRuleDTO {
 		this.approvingUserDiscountRatio = approvingUserDiscountRatio;
 	}
 
+	public BigDecimal getOriginalPrice() {
+		return originalPrice;
+	}
+
+	public void setOriginalPrice(BigDecimal originalPrice) {
+		this.originalPrice = originalPrice;
+	}
+
+	public BigDecimal getOrgMemberOriginalPrice() {
+		return orgMemberOriginalPrice;
+	}
+
+	public void setOrgMemberOriginalPrice(BigDecimal orgMemberOriginalPrice) {
+		this.orgMemberOriginalPrice = orgMemberOriginalPrice;
+	}
+
+	public BigDecimal getApprovingUserOriginalPrice() {
+		return approvingUserOriginalPrice;
+	}
+
+	public void setApprovingUserOriginalPrice(BigDecimal approvingUserOriginalPrice) {
+		this.approvingUserOriginalPrice = approvingUserOriginalPrice;
+	}
 }

@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.UUID;
 
 import com.everhomes.rest.forum.NeedTemporaryType;
+import com.everhomes.rest.forum.PostCloneFlag;
 import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -42,16 +45,6 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhActivityAttachments;
-import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
-import com.everhomes.server.schema.tables.pojos.EhActivityGoods;
-import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
-import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
-import com.everhomes.server.schema.tables.records.EhActivityAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhActivityCategoriesRecord;
-import com.everhomes.server.schema.tables.records.EhActivityGoodsRecord;
-import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
@@ -98,11 +91,12 @@ public class ActivityProviderImpl implements ActivityProivider {
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
         //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天  add by yanjun
-    	if(activity.getOfficialFlag() == OfficialFlag.YES.getCode() && null != activity.getStartTime()){
-        	if(activity.getStartTime().before(DateHelper.currentGMTTime())){
-        		activity.setCreateTime(new Timestamp(activity.getStartTime().getTime() - 24*60*60*1000));
-        	}
-    	}
+        //去除创建时间为开始时间之前一天这个设置 add by yanlong.liang 20180614
+//    	if(activity.getOfficialFlag() == OfficialFlag.YES.getCode() && null != activity.getStartTime()){
+//        	if(activity.getStartTime().before(DateHelper.currentGMTTime())){
+//        		activity.setCreateTime(new Timestamp(activity.getStartTime().getTime() - 24*60*60*1000));
+//        	}
+//    	}
         
         activity.setUpdateTime(activity.getCreateTime());
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
@@ -341,7 +335,24 @@ public class ActivityProviderImpl implements ActivityProivider {
                 });
         return rosters[0];
     }
-    
+
+    @Override
+    public ActivityRoster findRosterByPayOrderId(Long payOrderId) {
+        ActivityRoster[] rosters = new ActivityRoster[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),null,
+                (context, obj) -> {
+                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
+                            .where(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()))
+                            .and(Tables.EH_ACTIVITY_ROSTER.PAY_ORDER_ID.eq(payOrderId)).fetch().forEach(item -> {
+                        rosters[0] = ConvertHelper.convert(item, ActivityRoster.class);
+                    });
+                    if (rosters[0] != null)
+                        return false;
+                    return true;
+                });
+        return rosters[0];
+    }
+
 
     @Override
     public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId, boolean onlyConfirm) {
@@ -760,6 +771,45 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
+    public ActivityBizPayee getActivityPayee(Long categoryId, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityBizPayee.class));
+        SelectQuery<EhActivityBizPayeeRecord> query = context.selectQuery(Tables.EH_ACTIVITY_BIZ_PAYEE);
+        if (categoryId != null) {
+            query.addConditions(Tables.EH_ACTIVITY_BIZ_PAYEE.OWNER_ID.eq(categoryId));
+        }
+        if (namespaceId != null) {
+            query.addConditions(Tables.EH_ACTIVITY_BIZ_PAYEE.NAMESPACE_ID.eq(namespaceId));
+        }
+        EhActivityBizPayeeRecord activityBizPayee = query.fetchOne();
+        if (activityBizPayee == null) {
+            return null;
+        }
+        return ConvertHelper.convert(activityBizPayee, ActivityBizPayee.class);
+    }
+
+    @Override
+    public void CreateActivityPayee(ActivityBizPayee activityBizPayee) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhActivityBizPayee.class));
+        activityBizPayee.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityBizPayeeDao dao = new EhActivityBizPayeeDao(context.configuration());
+        dao.insert(activityBizPayee);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, ActivityBizPayee.class, null);
+
+    }
+
+    @Override
+    public void updateActivityPayee(ActivityBizPayee activityBizPayee) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityBizPayeeDao dao = new EhActivityBizPayeeDao(context.configuration());
+        dao.update(activityBizPayee);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, ActivityBizPayee.class, null);
+    }
+
+    @Override
     public Long findActivityCategoriesMaxEntryId(Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class));
         return context.select(DSL.max(Tables.EH_ACTIVITY_CATEGORIES.ENTRY_ID))
@@ -1108,7 +1158,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 					if(contentCategoryId != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
-					
+					//统计时，只统计real贴和normal贴
+					Condition cloneCondition = Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode());
+					cloneCondition  =cloneCondition.or(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.REAL.getCode()));
+					condition = condition.and(cloneCondition);
 					if(isDelete){
 						condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.INACTIVE.getCode()));
 						if(startTime != null && endTime != null){
@@ -1220,6 +1273,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 					if(contentCategoryId != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
+                    //统计时，只统计real贴和normal贴
+                    Condition cloneCondition = Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode());
+                    cloneCondition  =cloneCondition.or(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.REAL.getCode()));
+                    condition = condition.and(cloneCondition);
 
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 					if(startTime != null && endTime != null){
@@ -1323,7 +1380,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 					if(contentCategoryId != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
-					
+                    //统计时，只统计real贴和normal贴
+                    Condition cloneCondition = Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode());
+                    cloneCondition  =cloneCondition.or(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.REAL.getCode()));
+                    condition = condition.and(cloneCondition);
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 
 					List<Object[]> list = context.select(Tables.EH_ACTIVITIES.TAG, DSL.count())
@@ -1353,7 +1413,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 					if(contentCategoryId != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
-					
+                    //统计时，只统计real贴和normal贴
+                    Condition cloneCondition = Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode());
+                    cloneCondition  =cloneCondition.or(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.REAL.getCode()));
+                    condition = condition.and(cloneCondition);
 					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 

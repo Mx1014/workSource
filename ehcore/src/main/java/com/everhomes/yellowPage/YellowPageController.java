@@ -4,6 +4,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.servicehotline.GetChatGroupListCommand;
+import com.everhomes.rest.servicehotline.GetChatGroupListResponse;
+import com.everhomes.rest.servicehotline.GetChatRecordListCommand;
+import com.everhomes.rest.servicehotline.GetChatRecordListResponse;
 import com.everhomes.rest.yellowPage.*;
 import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.ReserveRequestInfoSearcher;
@@ -24,28 +28,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/yellowPage")
 public class YellowPageController  extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageController.class);
-    
-    private static final String DEFAULT_SORT = "default_order";
 
     @Autowired
     private YellowPageService yellowPageService;
 
 	@Autowired
-	private YellowPageProvider yellowPageProvider;
+	private AllianceOnlineServiceI allianceOnlineService;
 	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
 	
-	@Autowired
-	private SettleRequestInfoSearcher settleRequestInfoSearcher;
-
-    @Autowired
-	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
-
-    @Autowired
-    private ReserveRequestInfoSearcher reserveRequestInfoSearcher;
-
 	@RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
     @RestReturn(value=YellowPageDTO.class)
@@ -360,9 +352,9 @@ public class YellowPageController  extends ControllerBase {
      */
     @RequestMapping("listJumpModules")
     @RestReturn(value = JumpModuleDTO.class, collection = true)
-    public RestResponse listJumpModules() {
+    public RestResponse listJumpModules(ListJumpModulesCommand cmd) {
 
-        List<JumpModuleDTO> resp = this.yellowPageService.listJumpModules();
+        List<JumpModuleDTO> resp = this.yellowPageService.listJumpModules(cmd);
 
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -521,5 +513,263 @@ public class YellowPageController  extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+    
+    
+    /**
+   	 * <b>URL: /yellowPage/listServiceAllianceProviders</b> 
+   	 * <p> 获取服务商  </p>
+   	 */
+   	@RequestMapping("listServiceAllianceProviders")
+   	@RestReturn(value = ListServiceAllianceProvidersResponse.class)
+   	public RestResponse listServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd) {
+   		ListServiceAllianceProvidersResponse resp = yellowPageService.listServiceAllianceProviders(cmd);
+    	RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+   	
+    /**
+   	 * <b>URL: /yellowPage/addServiceAllianceProvider</b> 
+   	 * <p> 增加服务商  </p>
+   	 */
+    @RequestMapping("addServiceAllianceProvider")
+    @RestReturn(value=String.class)
+    public RestResponse addServiceAllianceProvider(@Valid AddServiceAllianceProviderCommand cmd) {
+    	 yellowPageService.addServiceAllianceProvider(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/deleteServiceAllianceProvider</b> 
+   	 * <p> 删除服务商  </p>
+   	 */
+    @RequestMapping("deleteServiceAllianceProvider")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceAllianceProvider(@Valid DeleteServiceAllianceProviderCommand cmd) {
+    	 yellowPageService.deleteServiceAllianceProvider(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    
+    /**
+   	 * <b>URL: /yellowPage/updateServiceAllianceProvider</b> 
+   	 * <p> 更新服务商  </p>
+   	 */
+    @RequestMapping("updateServiceAllianceProvider")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceAllianceProvider(@Valid UpdateServiceAllianceProviderCommand cmd) {
+    	 yellowPageService.updateServiceAllianceProvider(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/applyExtraAllianceEvent</b> 
+   	 * <p> 申请新的事件  用于工作流中新增</p>
+   	 */
+    @RequestMapping("applyExtraAllianceEvent")
+    @RestReturn(value=String.class)
+    public RestResponse applyExtraAllianceEvent(@Valid ApplyExtraAllianceEventCommand cmd) {
+    	 yellowPageService.applyExtraAllianceEvent(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/getExtraAllianceEvent</b> 
+   	 * <p> 获取新建的事件</p>
+   	 */
+    @RequestMapping("getExtraAllianceEvent")
+   	@RestReturn(value = GetExtraAllianceEventResponse.class)
+	public RestResponse getExtraAllianceEvent(@Valid GetExtraAllianceEventCommand cmd) {
+		GetExtraAllianceEventResponse resp = yellowPageService.getExtraAllianceEvent(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    
+    /**
+   	 * <b>URL: /yellowPage/exportServiceAllianceProviders</b> 
+   	 * <p> 导出服务商信息  </p>
+   	 */
+   	@RequestMapping("exportServiceAllianceProviders")
+   	@RestReturn(value = String.class)
+   	public RestResponse exportServiceAllianceProviders(ListServiceAllianceProvidersCommand cmd,  HttpServletResponse httpResp) {
+   		yellowPageService.exportServiceAllianceProviders(cmd, httpResp);
+        return new RestResponse();
+    }
+   	
+    /**
+   	 * <b>URL: /yellowPage/listOnlineServices</b> 
+   	 * <p> 获取某个服务的客服列表  </p>
+   	 */
+   	@RequestMapping("listOnlineServices")
+   	@RestReturn(value = ListOnlineServicesResponse.class)
+	public RestResponse listOnlineServices(ListOnlineServicesCommand cmd) {
+   		ListOnlineServicesResponse resp = yellowPageService.listOnlineServices(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+   	
+   	
+	/**
+	 * <b>URL: /yellowPage/getChatGroupList</b>
+     * <p>获取所有会话列表</p>
+     * <p>根据条件获取会话列表。 相同的两个人的会话定义为一个会话。</p>
+     * <p>例： 客服A与用户A的有100条聊天记录，归为 “客服A-用户A”一个会话</p>
+	 * <p>客服A与用户B的有1条聊天记录，归为 “客服A-用户B”一个会话</p>
+	 * <p>客服A与用户C的无聊天记录，不属于会话。</p>
+	 */
+	@RequestMapping("getChatGroupList")
+	@RestReturn(value=GetChatGroupListResponse.class)
+	public RestResponse getChatGroupList(@Valid GetChatGroupListCommand cmd) {
+		GetChatGroupListResponse chatGroup = allianceOnlineService.getChatGroupList(cmd);
+		RestResponse response =  new RestResponse(chatGroup);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/getChatRecordList</b>
+     * <p>获取单个客服与用户的聊天记录</p>
+	 */
+	@RequestMapping("getChatRecordList")
+	@RestReturn(value=GetChatRecordListResponse.class)
+	public RestResponse getChatRecordList(@Valid GetChatRecordListCommand cmd) {
+		GetChatRecordListResponse chatRecordList = allianceOnlineService.getChatRecordList(cmd);
+		RestResponse response =  new RestResponse(chatRecordList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	/**
+	 * <b>URL: /yellowPage/exportChatRecordList</b>
+     * <p>导出单个客服与用户的聊天记录</p>
+	 */
+    @RequestMapping("exportChatRecordList")
+    @RestReturn(value = String.class)
+	public RestResponse exportChatRecordList(GetChatRecordListCommand cmd, HttpServletResponse httpResponse) {
+		allianceOnlineService.exportChatRecordList(cmd, httpResponse);
+		return new RestResponse();
+	}
+    
+	/**
+	 * <b>URL: /yellowPage/exportMultiChatRecordList</b>
+     * <p>导出多个客服与用户的聊天记录</p>
+	 */
+    @RequestMapping("exportMultiChatRecordList")
+    @RestReturn(value = String.class)
+	public RestResponse exportMultiChatRecordList(GetChatGroupListCommand cmd, HttpServletResponse httpResponse) {
+		allianceOnlineService.exportMultiChatRecordList(cmd, httpResponse);
+		return new RestResponse();
+	}
+    
+    
+	/**
+	 * <b>URL: /yellowPage/updateAllianceTag</b>
+	 * <p>
+	 * 新建/修改标签
+	 * </p>
+	 */
+	@RequestMapping("updateAllianceTag")
+	@RestReturn(String.class)
+	public RestResponse updateAllianceTag(UpdateAllianceTagCommand cmd){
+		yellowPageService.updateAllianceTag(cmd);
 
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /yellowPage/getAllianceTagList</b>
+	 * <p>
+	 * 查询标签
+	 * </p>
+	 */
+	@RequestMapping("getAllianceTagList")
+	@RestReturn(GetAllianceTagResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getAllianceTagList(GetAllianceTagCommand cmd){
+		GetAllianceTagResponse resp = yellowPageService.getAllianceTagList(cmd);
+
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+   	 * <b>URL: /yellowPage/transferPosterUriToAttachment</b> 
+   	 * <p> 图片数据迁移，将服务的首页图片保存至attachments中  </p>
+   	 */
+   	@RequestMapping("transferPosterUriToAttachment")
+   	@RestReturn(value = String.class)
+	public RestResponse transferPosterUriToAttachment(GetExtraAllianceEventCommand cmd) {
+
+		RestResponse rsp = new RestResponse();
+		if (cmd.getEventId() == null || !cmd.getEventId().equals(1802L)) {
+			return rsp;
+		}
+
+		String ret = yellowPageService.transferPosterUriToAttachment();
+		rsp.setErrorCode(ErrorCodes.SUCCESS);
+		rsp.setErrorDescription(ret);
+		return rsp;
+	}
+
+   	
+    /**
+   	 * <b>URL: /yellowPage/transferLaunchPadItems</b> 
+   	 * <p> 服务联盟web化，launch pad item迁移  </p>
+   	 */
+   	@RequestMapping("transferLaunchPadItems")
+   	@RestReturn(value = String.class)
+	public RestResponse transferLaunchPadItems(GetExtraAllianceEventCommand cmd) {
+
+		RestResponse rsp = new RestResponse();
+		if (cmd.getEventId() == null || !cmd.getEventId().equals(1802L)) {
+			return rsp;
+		}
+
+		String ret = yellowPageService.transferLaunchPadItems();
+		rsp.setErrorCode(ErrorCodes.SUCCESS);
+		rsp.setErrorDescription(ret);
+		return rsp;
+	}
+   	
+    /**
+   	 * <b>URL: /yellowPage/transferTime</b> 
+   	 */
+   	@RequestMapping("transferTime")
+   	@RestReturn(value = String.class)
+	public RestResponse transferTime(GetExtraAllianceEventCommand cmd) {
+
+		RestResponse rsp = new RestResponse();
+		String ret = yellowPageService.transferTime(cmd.getEventId());
+		rsp.setErrorCode(ErrorCodes.SUCCESS);
+		rsp.setErrorDescription(ret);
+		return rsp;
+	}
+    
+    
 }

@@ -1,76 +1,84 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
- *     <li>communityId: 客户所属园区id</li>
- *     <li>customerNumber: 客户编码</li>
- *     <li>name: 客户名称</li>
- *     <li>nickName: 客户昵称</li>
- *     <li>categoryItemId: 客户类型id</li>
- *     <li>categoryItemName: 客户类型名</li>
- *     <li>levelItemId: 客户级别id</li>
- *     <li>levelItemName: 客户级别名</li>
- *     <li>sourceItemId: 来源途径id</li>
- *     <li>sourceItemName: 来源途径名</li>
- *     <li>contactAvatarUri: 联系人头像</li>
- *     <li>contactName: 联系人名称</li>
- *     <li>contactGenderItemId: 联系人性别id</li>
- *     <li>contactGenderItemName: 联系人性别名</li>
- *     <li>contactMobile: 联系人手机号码</li>
- *     <li>contactPhone: 联系人座机号码</li>
- *     <li>contactOffficePhone: 办公电话</li>
- *     <li>contactFamilyPhone: 家庭电话</li>
- *     <li>contactEmail: 电子邮件</li>
- *     <li>contactFax: 传真</li>
- *     <li>contactAddressId: 地址id</li>
- *     <li>contactAddress: 地址</li>
- *     <li>corpEmail: 企业邮箱</li>
- *     <li>corpWebsite: 企业网址</li>
- *     <li>corpRegAddress: 企业注册地址</li>
- *     <li>corpOpAddress: 企业运营地址</li>
- *     <li>corpLegalPerson: 法人代表</li>
- *     <li>corpRegCapital: 注册资金(万元)</li>
- *     <li>corpNatureItemId: 企业性质id</li>
- *     <li>corpNatureItemName: 企业性质</li>
- *     <li>corpScale: 企业规模</li>
- *     <li>corpIndustryItemId: 行业类型id</li>
- *     <li>corpIndustryItemName: 行业类型</li>
- *     <li>corpPurposeItemId: 企业定位id</li>
- *     <li>corpPurposeItemName: 企业定位</li>
- *     <li>corpAnnualTurnover: 年营业额（万元）</li>
- *     <li>corpBusinessScope: 营业范围</li>
- *     <li>corpBusinessLicense: 营业执照号</li>
- *     <li>corpSiteArea: 场地面积</li>
- *     <li>corpEntryDate: 入住园区日期</li>
- *     <li>corpProductCategoryItemId: 产品类型id</li>
- *     <li>corpProductCategoryItemName: 产品类型</li>
- *     <li>corpProductDesc: 主要技术及产品</li>
- *     <li>corpQualificationItemId: 企业资质认证id</li>
- *     <li>corpQualificationItemName: 企业资质认证</li>
- *     <li>corpLogoUri: 企业LOGO</li>
- *     <li>corpDescription: 企业简介</li>
- *     <li>corpEmployeeAmount: 员工总数</li>
- *     <li>corpEmployeeAmountMale: 男员工总数</li>
- *     <li>corpEmployeeAmountFemale: 女员工总数</li>
- *     <li>corpEmployeeAmountRd: 研发员工总数</li>
- *     <li>corpEmployeeReturneeRate: 海归人数占比(%)</li>
- *     <li>corpEmployeeAverageAge: 员工平均年龄</li>
- *     <li>corpManagerAverageAge: 高管平均年龄</li>
- *     <li>managerName: 总经理名称</li>
- *     <li>managerPhone: 总经理电话</li>
- *     <li>managerEmail: 总经理邮箱</li>
- *     <li>remark: 备注</li>
- *     <li>trackingUid: 跟进人UID</li>
- *     <li>propertyArea: 资产面积</li>
- *     <li>propertyUnitPrice: 资产单价</li>
- *     <li>propertyType: 资产类型</li>
- *     <li>longitude: 经度</li>
- *     <li>latitude: 纬度</li>
- *     <li>contactDuty:联系人职务</li>
- *     <li>namespaceId:域空间ID</li>
+ * <li>communityId: 客户所属园区id</li>
+ * <li>customerNumber: 客户编码</li>
+ * <li>name: 客户名称</li>
+ * <li>nickName: 客户昵称</li>
+ * <li>categoryItemId: 客户类型id</li>
+ * <li>categoryItemName: 客户类型名</li>
+ * <li>levelItemId: 客户级别id</li>
+ * <li>levelItemName: 客户级别名</li>
+ * <li>sourceItemId: 来源途径id</li>
+ * <li>sourceItemName: 来源途径名</li>
+ * <li>contactAvatarUri: 联系人头像</li>
+ * <li>contactName: 联系人名称</li>
+ * <li>contactGenderItemId: 联系人性别id</li>
+ * <li>contactGenderItemName: 联系人性别名</li>
+ * <li>contactMobile: 联系人手机号码</li>
+ * <li>contactPhone: 联系人座机号码</li>
+ * <li>contactOffficePhone: 办公电话</li>
+ * <li>contactFamilyPhone: 家庭电话</li>
+ * <li>contactEmail: 电子邮件</li>
+ * <li>contactFax: 传真</li>
+ * <li>contactAddressId: 地址id</li>
+ * <li>contactAddress: 地址</li>
+ * <li>corpEmail: 企业邮箱</li>
+ * <li>corpWebsite: 企业网址</li>
+ * <li>corpRegAddress: 企业注册地址</li>
+ * <li>corpOpAddress: 企业运营地址</li>
+ * <li>corpLegalPerson: 法人代表</li>
+ * <li>corpRegCapital: 注册资金(万元)</li>
+ * <li>corpNatureItemId: 企业性质id</li>
+ * <li>corpNatureItemName: 企业性质</li>
+ * <li>corpScale: 企业规模</li>
+ * <li>corpIndustryItemId: 行业类型id</li>
+ * <li>corpIndustryItemName: 行业类型</li>
+ * <li>corpPurposeItemId: 企业定位id</li>
+ * <li>corpPurposeItemName: 企业定位</li>
+ * <li>corpAnnualTurnover: 年营业额（万元）</li>
+ * <li>corpBusinessScope: 营业范围</li>
+ * <li>corpBusinessLicense: 营业执照号</li>
+ * <li>corpSiteArea: 场地面积</li>
+ * <li>corpEntryDate: 入住园区日期</li>
+ * <li>corpProductCategoryItemId: 产品类型id</li>
+ * <li>corpProductCategoryItemName: 产品类型</li>
+ * <li>corpProductDesc: 主要技术及产品</li>
+ * <li>corpQualificationItemId: 企业资质认证id</li>
+ * <li>corpQualificationItemName: 企业资质认证</li>
+ * <li>corpLogoUri: 企业LOGO</li>
+ * <li>corpDescription: 企业简介</li>
+ * <li>corpEmployeeAmount: 员工总数</li>
+ * <li>corpEmployeeAmountMale: 男员工总数</li>
+ * <li>corpEmployeeAmountFemale: 女员工总数</li>
+ * <li>corpEmployeeAmountRd: 研发员工总数</li>
+ * <li>corpEmployeeReturneeRate: 海归人数占比(%)</li>
+ * <li>corpEmployeeAverageAge: 员工平均年龄</li>
+ * <li>corpManagerAverageAge: 高管平均年龄</li>
+ * <li>managerName: 总经理名称</li>
+ * <li>managerPhone: 总经理电话</li>
+ * <li>managerEmail: 总经理邮箱</li>
+ * <li>remark: 备注</li>
+ * <li>trackingUid: 跟进人UID</li>
+ * <li>propertyArea: 资产面积</li>
+ * <li>propertyUnitPrice: 资产单价</li>
+ * <li>propertyType: 资产类型</li>
+ * <li>longitude: 经度</li>
+ * <li>latitude: 纬度</li>
+ * <li>contactDuty:联系人职务</li>
+ * <li>namespaceId:域空间ID</li>
+ * <li>unifiedSocialCreditCode:统一社会信用代码</li>
+ * <li>postUri:标题图</li>
+ * <li>banner:banner图</li>
+ * <li>hotline:咨询电话</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -135,7 +143,7 @@ public class CreateEnterpriseCustomerCommand {
     private String managerPhone;
     private String managerEmail;
     private String remark;
-    
+
     private Long trackingUid;
     private Double propertyArea;
     private Double propertyUnitPrice;
@@ -153,6 +161,23 @@ public class CreateEnterpriseCustomerCommand {
     private Long entrepreneurialCharacteristicsId;
     private Long serialEntrepreneurId;
     private BigDecimal riskInvestmentAmount;
+    private Byte  deviceType;
+
+    private String unifiedSocialCreditCode;
+    private String postUri;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> banner;
+    private String hotline;
+    //potential data primary key
+    private Long sourceId;
+    //service alliance activity
+    private String sourceType;
+
+    private Long originPotentialSourceId;
+
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
 
     public Long getOrgId() {
         return orgId;
@@ -435,7 +460,6 @@ public class CreateEnterpriseCustomerCommand {
     }
 
 
-
     public Long getCorpEntryDate() {
         return corpEntryDate;
     }
@@ -709,70 +733,137 @@ public class CreateEnterpriseCustomerCommand {
         this.sourceItemName = sourceItemName;
     }
 
-	public Long getTrackingUid() {
-		return trackingUid;
-	}
+    public Long getTrackingUid() {
+        return trackingUid;
+    }
 
-	public void setTrackingUid(Long trackingUid) {
-		this.trackingUid = trackingUid;
-	}
+    public void setTrackingUid(Long trackingUid) {
+        this.trackingUid = trackingUid;
+    }
 
-	public Double getPropertyArea() {
-		return propertyArea;
-	}
+    public Double getPropertyArea() {
+        return propertyArea;
+    }
 
-	public void setPropertyArea(Double propertyArea) {
-		this.propertyArea = propertyArea;
-	}
+    public void setPropertyArea(Double propertyArea) {
+        this.propertyArea = propertyArea;
+    }
 
-	public Double getPropertyUnitPrice() {
-		return propertyUnitPrice;
-	}
+    public Double getPropertyUnitPrice() {
+        return propertyUnitPrice;
+    }
 
-	public void setPropertyUnitPrice(Double propertyUnitPrice) {
-		this.propertyUnitPrice = propertyUnitPrice;
-	}
+    public void setPropertyUnitPrice(Double propertyUnitPrice) {
+        this.propertyUnitPrice = propertyUnitPrice;
+    }
 
-	public Long getPropertyType() {
-		return propertyType;
-	}
+    public Long getPropertyType() {
+        return propertyType;
+    }
 
-	public void setPropertyType(Long propertyType) {
-		this.propertyType = propertyType;
-	}
+    public void setPropertyType(Long propertyType) {
+        this.propertyType = propertyType;
+    }
 
-	public Double getLongitude() {
-		return longitude;
-	}
+    public Double getLongitude() {
+        return longitude;
+    }
 
-	public void setLongitude(Double longitude) {
-		this.longitude = longitude;
-	}
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
 
-	public Double getLatitude() {
-		return latitude;
-	}
+    public Double getLatitude() {
+        return latitude;
+    }
 
-	public void setLatitude(Double latitude) {
-		this.latitude = latitude;
-	}
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
 
-	public String getContactDuty() {
-		return contactDuty;
-	}
+    public String getContactDuty() {
+        return contactDuty;
+    }
 
-	public void setContactDuty(String contactDuty) {
-		this.contactDuty = contactDuty;
-	}
+    public void setContactDuty(String contactDuty) {
+        this.contactDuty = contactDuty;
+    }
 
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-	
-    
-    
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getUnifiedSocialCreditCode() {
+        return unifiedSocialCreditCode;
+    }
+
+    public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+        this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+    }
+
+    public String getPostUri() {
+        return postUri;
+    }
+
+    public void setPostUri(String postUri) {
+        this.postUri = postUri;
+    }
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
+    }
+
+
+    public List<AttachmentDescriptor> getBanner() {
+        return banner;
+    }
+
+    public void setBanner(List<AttachmentDescriptor> banner) {
+        this.banner = banner;
+    }
+
+    public Byte getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Byte deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

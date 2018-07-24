@@ -18,6 +18,7 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.relocation.*;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
@@ -52,7 +53,12 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
-
+//      获取工作流
+        FlowCase flowCase = ctx.getFlowCase();
+//      获取任务修改状态
+        RelocationRequest bean = relocationProvider.findRelocationRequestById(flowCase.getReferId());
+        bean.setStatus(FlowCaseStatus.ABSORTED.getCode());
+        relocationProvider.updateRelocationRequest(bean);
     }
 
     @Override
@@ -129,7 +135,6 @@ public class RelocationFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
-
     }
 
     @Override

@@ -231,6 +231,7 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 		order.setErrorDescription(result);//data 缴费记录号 存储
 
 		GuangDaWeGuResponse<Integer> entity = JSONObject.parseObject(result, new TypeReference<GuangDaWeGuResponse<Integer>>() {});
+		order.setErrorDescription(entity!=null?entity.getErrorMsg():null);
 		if(null != entity && entity.isSuccess()) {
 			return true;
 		}
@@ -279,7 +280,7 @@ public class GuangDaWeGuParkingVendorHandler extends DefaultParkingVendorHandler
 			order.setErrorDescription(result); //data 缴费记录号 存储
 
 			GuangDaWeGuResponse<Integer> response = JSONObject.parseObject(result, new TypeReference<GuangDaWeGuResponse<Integer>>() {});
-
+			order.setErrorDescription(response!=null?response.getErrorMsg():null);
 			if(response.isSuccess()){
 				order.setStartPeriod(new Timestamp(second));
 				order.setEndPeriod(new Timestamp(newEndTime));

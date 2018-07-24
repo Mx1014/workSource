@@ -7,14 +7,15 @@ package com.everhomes.rest.approval;
  * <li>TIMES: t-当期倍率</li>
  * <li>AMOUNT: a-每日或每月读表差</li>
  * <li>REAL_AMOUNT: ra-每日或每月计算用量值</li>
+ * <li>BURDEN_RATE: br-分摊比例</li>
  * </ul>
  */
 public enum MeterFormulaVariable {
-	PRICE("p"), TIMES("t"),AMOUNT("a"), REAL_AMOUNT("ra");
+	PRICE("p"), TIMES("t"),AMOUNT("a"), REAL_AMOUNT("ra"),BURDEN_RATE("br");
 	
 	private String code;
 	
-	private MeterFormulaVariable(String code) {
+	MeterFormulaVariable(String code) {
 		this.code = code;
 	}
 	

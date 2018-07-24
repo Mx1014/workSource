@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: 模块应用id</li>
  * <li>name: 应用名称</li>
  * <li>instanceConfig: 应用参数配置，比如活动，服务联盟就要特殊的参数配置</li>
+ * <li>accessControlType: 权限控制类型 1-全部, 2-登录, 3-认证 参考{@link com.everhomes.rest.module.AccessControlType}</li>
  * </ul>
  */
 public class UpdateServiceModuleAppCommand {
@@ -24,6 +25,8 @@ public class UpdateServiceModuleAppCommand {
 	private String customTag;
 
 	private String customPath;
+
+	private Byte accessControlType;
 
 	public UpdateServiceModuleAppCommand() {
 
@@ -87,5 +90,13 @@ public class UpdateServiceModuleAppCommand {
 
 	public void setCustomPath(String customPath) {
 		this.customPath = customPath;
+	}
+
+	public Byte getAccessControlType() {
+		return accessControlType;
+	}
+
+	public void setAccessControlType(Byte accessControlType) {
+		this.accessControlType = accessControlType;
 	}
 }

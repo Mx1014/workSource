@@ -11,6 +11,9 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId: ownerId</li>
  * <li>organizationId: 机构id</li>
  * <li>contactToken: 管理员手机号</li>
+ * <li>communityId: 小区id</li>
+ * <li>namespaceId:namespaceId </li>
+ * <li>customerId:  customer organization之间的映射关系</li>
  * </ul>
  */
 public class DeleteOrganizationAdminCommand {
@@ -28,6 +31,12 @@ public class DeleteOrganizationAdminCommand {
 	private String contactToken;
 
 	private Long userId;
+
+	private  Long communityId;
+
+	private Integer namespaceId;
+
+	private Long customerId;
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -67,6 +76,31 @@ public class DeleteOrganizationAdminCommand {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
 	}
 
 	@Override

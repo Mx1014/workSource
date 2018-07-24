@@ -19,6 +19,8 @@ public class DeleteEnterpriseCustomerCommand {
 
     private Long orgId;
 
+    private Byte deviceType;
+
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -49,6 +51,14 @@ public class DeleteEnterpriseCustomerCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Byte getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Byte deviceType) {
+        this.deviceType = deviceType;
     }
 
     @Override

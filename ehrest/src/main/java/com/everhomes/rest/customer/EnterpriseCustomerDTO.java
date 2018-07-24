@@ -1,8 +1,12 @@
 package com.everhomes.rest.customer;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -69,6 +73,7 @@ import java.sql.Timestamp;
  *     <li>remark: 备注</li>
  *     <li>trackingUid: 跟进人UID</li>
  *     <li>trackingName: 跟进人姓名</li>
+ *     <li>trackingPhone: 跟进人电话</li>
  *     <li>propertyArea: 资产面积</li>
  *     <li>propertyUnitPrice: 资产单价</li>
  *     <li>propertyType: 资产类型</li>
@@ -76,12 +81,15 @@ import java.sql.Timestamp;
  *     <li>longitude: 经度</li>
  *     <li>latitude: 纬度</li>
  *     <li>contactDuty: 联系人职务</li>
+ *     <li>signedUpCount: 注册人数</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
 public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>{
     private Long id;
+    private Long enterpriseId;
     private Long organizationId;
+    private Long communityId;
     private String customerNumber;
     private String name;
     private String nickName;
@@ -170,6 +178,35 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
     private String serialEntrepreneurName;
     private BigDecimal riskInvestmentAmount;
     private Boolean thirdPartFlag = false;
+
+    private Integer trackingPeriod;
+    private String deviceType;
+    private String trackingPhone;
+    private String hotline;
+    private String unifiedSocialCreditCode;
+    private Integer signedUpCount;
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> banner;
+    private String postUri;
+    private String postUrl;
+    private Long sourceId;
+    private String sourceType;
+    @ItemType(OrganizationContactDTO.class)
+    private List<OrganizationContactDTO> enterpriseAdmins;
+    @ItemType(CustomerEntryInfoDTO.class)
+    private  List<CustomerEntryInfoDTO> entryInfos;
+
+    @ItemType(CustomerAttachmentDTO.class)
+    private List<CustomerAttachmentDTO> attachments;
+
+
+    public Long getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
+    }
 
     public Boolean getThirdPartFlag() {
         return thirdPartFlag;
@@ -875,7 +912,127 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 		this.contactDuty = contactDuty;
 	}
 
-	@Override
+    public String getTrackingPhone() {
+        return trackingPhone;
+    }
+
+    public void setTrackingPhone(String trackingPhone) {
+        this.trackingPhone = trackingPhone;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public Integer getTrackingPeriod() {
+        return trackingPeriod;
+    }
+
+    public void setTrackingPeriod(Integer trackingPeriod) {
+        this.trackingPeriod = trackingPeriod;
+    }
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
+    }
+
+    public String getUnifiedSocialCreditCode() {
+        return unifiedSocialCreditCode;
+    }
+
+    public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+        this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+    }
+
+    public List<AttachmentDescriptor> getBanner() {
+        return banner;
+    }
+
+    public void setBanner(List<AttachmentDescriptor> banner) {
+        this.banner = banner;
+    }
+
+    public String getPostUri() {
+        return postUri;
+    }
+
+    public void setPostUri(String postUri) {
+        this.postUri = postUri;
+    }
+
+    public List<OrganizationContactDTO> getEnterpriseAdmins() {
+        return enterpriseAdmins;
+    }
+
+    public void setEnterpriseAdmins(List<OrganizationContactDTO> enterpriseAdmins) {
+        this.enterpriseAdmins = enterpriseAdmins;
+    }
+
+    public List<CustomerEntryInfoDTO> getEntryInfos() {
+        return entryInfos;
+    }
+
+    public void setEntryInfos(List<CustomerEntryInfoDTO> entryInfos) {
+        this.entryInfos = entryInfos;
+    }
+
+    public String getPostUrl() {
+        return postUrl;
+    }
+
+    public void setPostUrl(String postUrl) {
+        this.postUrl = postUrl;
+    }
+
+    public Integer getSignedUpCount() {
+        return signedUpCount;
+    }
+
+    public void setSignedUpCount(Integer signedUpCount) {
+        this.signedUpCount = signedUpCount;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public List<CustomerAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<CustomerAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    @Override
 	public int compareTo(EnterpriseCustomerDTO o) {
 		return o.getId() - this.getId() >= 0 ? 1 : -1;
 	}

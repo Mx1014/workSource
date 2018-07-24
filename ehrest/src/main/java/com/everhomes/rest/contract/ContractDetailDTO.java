@@ -1,10 +1,10 @@
 package com.everhomes.rest.contract;
 
-import com.everhomes.discover.ItemType;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+
+import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
@@ -62,6 +62,9 @@ import java.util.List;
  *     <li>denunciationName: 退约人姓名</li>
  *     <li>denunciationTime: 退约时间</li>
  *     <li>buildingRename: 房间别名</li>
+ *     <li>contractTemplate: 合同模板信息{@link com.everhomes.rest.contract.ContractTemplateDTO}</li>
+ *     <li>templateId: 合同模板id</li>
+ *     <li>templateName: 合同模板名称</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -120,7 +123,6 @@ public class ContractDetailDTO {
     private String layoutName;
     private String settled;
     private Byte status;
-
     private BigDecimal remainingAmount;
     private Long bidItemId;
     private Long createOrgId;
@@ -144,13 +146,60 @@ public class ContractDetailDTO {
     private BigDecimal lumpSumPayment;
     private String treatyParticulars;
     private Byte paymentFlag;
+    private Long templateId;
+    private String templateName;
 
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> adjusts;
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
+    
+    public String getTemplateName() {
+		return templateName;
+	}
 
-    public List<ContractChargingChangeDTO> getAdjusts() {
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+		
+    //add by tangcen
+    private Long communityId;
+    private Integer namespaceId;
+    private Long categoryId;
+    
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public List<ContractChargingChangeDTO> getAdjusts() {
         return adjusts;
     }
 
@@ -825,4 +874,5 @@ public class ContractDetailDTO {
     public void setApplicationTheme(String applicationTheme) {
         this.applicationTheme = applicationTheme;
     }
+
 }

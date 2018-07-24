@@ -11,4 +11,15 @@ public interface ArchivesTemplateCode {
 
 	static final int ARCHIVES_DEPARTMENT_CHANGE = 4;	//	用户部门的变动信息记录
 
+	static final int ARCHIVES_REMIND_BEGINNING = 5;		//	人事提醒开头
+
+	static final int ARCHIVES_REMIND_EMPLOYMENT = 6;	//	人事转正提醒
+
+	static final int ARCHIVES_REMIND_CONTRACT = 7;		//	人事合同到期提醒
+
+	static final int ARCHIVES_REMIND_ID	= 8;			//	人事身份证到期提醒
+
+	static final int ARCHIVES_REMIND_ANNIVERSARY = 9;	//	人事周年提醒
+
+	static final int ARCHIVES_REMIND_BIRTH = 10;		//	人事生日提醒
 }

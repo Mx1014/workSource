@@ -84,6 +84,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    private EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider;
 
 
     @Autowired
@@ -153,7 +155,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(applyEntry.getApplyUserId(), IdentifierType.MOBILE.getCode());
 
             map.put("contactPhone", defaultIfNull(userIdentifier.getIdentifierToken(), ""));
-            map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
+            //map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
 
             map.put("sourceType", defaultIfNull(enterpriseApplyEntryService.getSourceTypeName(applyEntry.getSourceType()), ""));
 
@@ -249,9 +251,15 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
 
             Address address = addressProvider.findAddressById(applyEntry.getAddressId());
+            LeasePromotionConfig leasePromotionConfig = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(applyEntry.getNamespaceId(), LeasePromotionConfigType.HIDE_ADDRESS_FLAG.getCode(),
+                    applyEntry.getCategoryId());
+
             String apartmentName = defaultIfNull(leasePromotion.getApartmentName(), "");
             if (null != address) {
                 apartmentName = address.getApartmentName();
+            }
+            if (leasePromotionConfig != null && "1".equals(leasePromotionConfig.getConfigValue())) { //隐藏门牌
+                apartmentName = "";
             }
             buildingName = buildingName + apartmentName;
         } else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(applyEntry.getSourceType())) {

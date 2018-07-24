@@ -59,6 +59,7 @@ public class ContractScheduleJob extends QuartzJobBean {
     public static final String SCHEDELE_NAME = "contract-";
 
     public static String CRON_EXPRESSION = "0 0 2 * * ?";
+    //public static String CRON_EXPRESSION = "0 10 * * * ?";
 
     @Autowired
     private ScheduleProvider scheduleProvider;
@@ -106,9 +107,9 @@ public class ContractScheduleJob extends QuartzJobBean {
                     return;
                 }
 
-                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId);
+                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId, null,null);
                 if(communityExist == null && communityId != null) {
-                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null);
+                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null,null,null);
                 }
                 ContractParam param = communityExist;
 
@@ -160,7 +161,7 @@ public class ContractScheduleJob extends QuartzJobBean {
                                             if(userIds.size() > 0) {
                                                 String notifyText = getNotifyMessage(contract.getName(), contract.getContractEndDate());
                                                 userIds.forEach(userId -> {
-                                                    sendMessageToUser(userId, notifyText);
+                                                    sendMessageToUser (userId, notifyText);
                                                 });
                                             }
 
@@ -189,14 +190,20 @@ public class ContractScheduleJob extends QuartzJobBean {
                                             if(maps != null && maps.size() > 0) {
                                                 Set<Long> userIds = new HashSet<Long>();
                                                 maps.forEach(map -> {
-                                                    //目前只有部门， 先不考虑岗位
-                                                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(map.getGroupId());
-                                                    if(members != null && members.size() > 0) {
-                                                        members.forEach(member -> {
-                                                            userIds.add(member.getTargetId());
-                                                        });
-
-                                                    }
+                                                	List<OrganizationMember> members = null;
+                                                	if (map.getGroupId()!=null && map.getGroupId()!=0) {
+                                                		//按部门找人
+                                                		members = organizationProvider.listOrganizationMembersByOrgId(map.getGroupId());
+                                                		findUser(userIds, members);
+													}else if(map.getPositionId()!=null && map.getPositionId()!=0){
+														//按岗位找人
+														members = organizationProvider.listOrganizationMembersByOrgId(map.getPositionId());
+														findUser(userIds, members);
+													}else if(map.getUserId()!= null && map.getUserId()!=0){
+														//直接找到人
+														userIds.add(map.getUserId());
+													}
+                                                    
                                                 });
                                                 LOGGER.debug("ContractScheduleJob userIds: {}", StringHelper.toJsonString(userIds));
                                                 if(userIds.size() > 0) {
@@ -217,7 +224,15 @@ public class ContractScheduleJob extends QuartzJobBean {
             });
         }
     }
-
+    
+    private void findUser(Set<Long> userIds,List<OrganizationMember> members){
+    	if(members != null && members.size() > 0) {
+            members.forEach(member -> {
+                userIds.add(member.getTargetId());
+            });
+        }
+    }
+    
     private String getMessage(String contractName, Timestamp time, BigDecimal amount, String scope, String locale, int code) {
         Map<String, Object> notifyMap = new HashMap<String, Object>();
         notifyMap.put("contractName", contractName);

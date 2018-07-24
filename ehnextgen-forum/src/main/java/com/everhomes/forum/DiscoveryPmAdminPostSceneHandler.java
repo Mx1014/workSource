@@ -245,26 +245,27 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 filterList.add(cmntyGroupFilterDto);
 
                 // 公司管理的全部小区
-                TopicFilterDTO cmntyAllFilterDto = new TopicFilterDTO();
-                cmntyAllFilterDto.setId(menuId++);
-                cmntyAllFilterDto.setParentId(group2Id);
-                code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
-                menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-                cmntyAllFilterDto.setName(menuName);
-                cmntyAllFilterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
-                if (hasDefault) {
-                    cmntyAllFilterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-                } else {
-                    cmntyAllFilterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
-                    hasDefault = true;
-                }
-                actionUrl = String.format("%s%s?organizationId=%s&mixType=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath,
-                        "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.COMMUNITY_ALL.getCode(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
-                cmntyAllFilterDto.setActionUrl(actionUrl);
-                avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
-                cmntyAllFilterDto.setAvatar(avatarUri);
-                cmntyAllFilterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
-                filterList.add(cmntyAllFilterDto);
+                // 军哥说不允许出现全部 这个数据 add by yanlong.liang 2018-07-20
+//                TopicFilterDTO cmntyAllFilterDto = new TopicFilterDTO();
+//                cmntyAllFilterDto.setId(menuId++);
+//                cmntyAllFilterDto.setParentId(group2Id);
+//                code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
+//                menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+//                cmntyAllFilterDto.setName(menuName);
+//                cmntyAllFilterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
+//                if (hasDefault) {
+//                    cmntyAllFilterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
+//                } else {
+//                    cmntyAllFilterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
+//                    hasDefault = true;
+//                }
+//                actionUrl = String.format("%s%s?organizationId=%s&mixType=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath,
+//                        "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.COMMUNITY_ALL.getCode(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+//                cmntyAllFilterDto.setActionUrl(actionUrl);
+//                avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
+//                cmntyAllFilterDto.setAvatar(avatarUri);
+//                cmntyAllFilterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+//                filterList.add(cmntyAllFilterDto);
 
                 // 公司管理的各个小区
                 filterList.addAll(tmpFilterList);

@@ -14,7 +14,9 @@ package com.everhomes.rest.parking;
  * <li>ZHONG_BAI_CHANG("ZHONG_BAI_CHANG"): 中百畅(广兴源)</li>
  * <li>GUANG_DA_WE_GU("GUANG_DA_WE_GU"): 光大we谷停车场</li>
  * <li>KEXIN_XIAOMAO("KEXIN_XIAOMAO"): 科兴正中时代广场停车场(小猫)</li>
+ * <li>YINXINGZHIJIE_TECHPARK("YINXINGZHIJIE_TECHPARK"): 银星科技园停车场</li>
  * <li>YINXINGZHIJIE_XIAOMAO("YINXINGZHIJIE_XIAOMAO"): 银星工业区停车场</li>
+ * <li>ELIVE_JIESHUN("ELIVE_JIESHUN"): 住总停车场</li>
  * </ul>
  */
 public enum ParkingLotVendor {
@@ -31,8 +33,17 @@ public enum ParkingLotVendor {
     ZHONG_BAI_CHANG("ZHONG_BAI_CHANG"),
     GUANG_DA_WE_GU("GUANG_DA_WE_GU"),
     KEXIN_XIAOMAO("KEXIN_XIAOMAO"),
-    YINXINGZHIJIE_XIAOMAO("YINXINGZHIJIE_XIAOMAO");
-    
+    YINXINGZHIJIE_XIAOMAO("YINXINGZHIJIE_XIAOMAO"),
+    YINXINGZHIJIE_TECHPARK("YINXINGZHIJIE_TECHPARK"),
+    ELIVE_JIESHUN("ELIVE_JIESHUN"),
+    BEE_KANGLI("BEE_KANGLI"),
+	BEE_ZHONGTIAN("BEE_ZHONGTIAN"),
+	BEE_SUBONE("BEE_SUBONE"),
+	BEE_SUBTWO("BEE_SUBTWO"),
+	BEE_SUBTHREE("BEE_SUBTHREE"),
+	BEE_SUBFOUR("BEE_SUBFOUR"),
+	BEE_SUBFIVE("BEE_SUBFIVE");
+
     private String code;
     private ParkingLotVendor(String code) {
         this.code = code;

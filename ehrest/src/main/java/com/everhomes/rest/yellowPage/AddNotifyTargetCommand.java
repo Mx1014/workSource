@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  *  <li>contactToken: 手机号或邮箱地址</li>
  *  <li>contactType: 推送类型</li>
  *  <li>categoryId: 服务联盟大类id</li>
+ *  <li>appId: 应用id</li>
+ *  <li>currentPMId: 管理公司id</li>
  * </ul>
  */
 public class AddNotifyTargetCommand {
@@ -28,6 +30,26 @@ public class AddNotifyTargetCommand {
 	private Byte contactType;
 	@NotNull
 	private Long categoryId;
+	@NotNull
+	private Long appId;	
+	@NotNull
+	private Long currentPMId;
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Long getCurrentPMId() {
+		return currentPMId;
+	}
+
+	public void setCurrentPMId(Long currentPMId) {
+		this.currentPMId = currentPMId;
+	}
 
 	public String getOwnerType() {
 		return ownerType;

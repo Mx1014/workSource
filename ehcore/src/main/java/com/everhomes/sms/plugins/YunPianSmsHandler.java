@@ -95,8 +95,10 @@ public class YunPianSmsHandler extends BaseSmsHandler {
      * {"code":0,"msg":"发送成功","count":1,"fee":0.05,"unit":"RMB","mobile":"13246687272","sid":21364791658}
      */
     @Override
-    List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope,
-                              int templateId, String templateLocale, String content, RspMessage rspMessage) {
+    List<SmsLog> buildSmsLogs(
+            Integer namespaceId, String[] phoneNumbers, String templateScope,
+                              int templateId,
+                              String templateLocale, String content, RspMessage rspMessage) {
         List<SmsLog> smsLogs = new ArrayList<>(phoneNumbers.length);
         SendResult res = new SendResult();
         String result = "failed";
@@ -148,7 +150,8 @@ public class YunPianSmsHandler extends BaseSmsHandler {
     }
 
     private List<SmsLog> error(Integer namespaceId, String[] phoneNumbers, String templateScope,
-                               int templateId, String templateLocale, String content, String result) {
+                               int templateId,
+                               String templateLocale, String content, String result) {
         List<SmsLog> smsLogs = new ArrayList<>(phoneNumbers.length);
         for (String phoneNumber : phoneNumbers) {
             smsLogs.add(getSmsErrorLog(namespaceId, phoneNumber, templateScope, templateId, templateLocale, content, result));
@@ -204,7 +207,8 @@ public class YunPianSmsHandler extends BaseSmsHandler {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         List<ReportResult> reportList = null;
         try {
-            reportList = gson.fromJson(URLDecoder.decode(smsStatuses[0], "UTF-8"), new TypeToken<List<ReportResult>>(){}.getType());
+            reportList = gson.fromJson(
+                    URLDecoder.decode(smsStatuses[0], "UTF-8"), new TypeToken<List<ReportResult>>(){}.getType());
         } catch (Exception e) {
             e.printStackTrace();
         }

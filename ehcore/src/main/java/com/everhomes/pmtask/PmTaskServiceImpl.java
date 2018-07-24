@@ -1,13 +1,13 @@
 package com.everhomes.pmtask;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,23 +18,64 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
-import com.everhomes.core.AppConfig;
-import com.everhomes.family.Family;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.module.ServiceModuleService;
-import com.everhomes.namespace.*;
-import com.everhomes.organization.*;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceDetail;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.order.PayProvider;
+import com.everhomes.order.PaymentOrderRecord;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.CreateOrderCommand;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
+import com.everhomes.pay.user.ListBusinessUsersCommand;
+import com.everhomes.paySDK.api.PayService;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.address.*;
-import com.everhomes.rest.blacklist.BlacklistErrorCode;
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
@@ -44,17 +85,43 @@ import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.*;
 
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.order.*;
+import com.everhomes.rest.organization.OrgAddressDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.user.*;
-import com.everhomes.util.DateHelper;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.doc.DocUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -65,40 +132,50 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
@@ -123,15 +200,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private LocaleTemplateService localeTemplateService;
-	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
 	private CommunityProvider communityProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	@Autowired
-	private SmsProvider smsProvider;
 	@Autowired
     private DbProvider dbProvider;
 	@Autowired
@@ -143,13 +216,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private NamespaceResourceProvider namespaceResourceProvider;
 	@Autowired
-	private PmTaskCommonServiceImpl pmTaskCommonService;
-	@Autowired
 	private FlowService flowService;
-	@Autowired
-	private FlowNodeProvider flowNodeProvider;
-	@Autowired
-	private BuildingProvider buildingProvider;
 	@Autowired
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
@@ -167,16 +234,45 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private CommunityService communityService;
 	@Autowired
-	private PortalService portalService;
-	@Autowired
 	private UserService userService;
 	@Autowired
 	private AddressService addressService;
+	@Autowired
+	private FlowEvaluateProvider flowEvaluateProvider;
+	@Autowired
+	private FlowEvaluateItemProvider flowEvaluateItemProvider;
+	@Autowired
+	private PayService payService;
+	@Autowired
+    private PayProvider payProvider;
+	@Autowired
+	private ContentServerService contentServerService;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	private FlowEventLogProvider flowEventLogProvider;
+
+
+	@Value("${server.contextPath:}")
+	private String CONTEXT_PATH;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+//		查询用户全部项目权限
+		ListUserRelatedProjectByModuleCommand cmd1 = new ListUserRelatedProjectByModuleCommand();
+		cmd1.setUserId(UserContext.currentUserId());
+		cmd1.setAppId(cmd.getAppId());
+		cmd1.setModuleId(20100L);
+		List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
+
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020140L, cmd.getAppId(), null,cmd.getCurrentProjectId());//任务列表权限
+			if(-1L == cmd.getCurrentProjectId()){
+				projects.forEach(r -> {
+					userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020140L, cmd.getAppId(), null,r.getProjectId());//任务列表权限
+				});
+			} else {
+				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020140L, cmd.getAppId(), null,cmd.getCurrentProjectId());//任务列表权限
+			}
 		}
 		Integer namespaceId = cmd.getNamespaceId();
 		if (null == namespaceId) {
@@ -944,13 +1040,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp, HttpServletRequest req) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		if(null == cmd.getPageSize())
-			cmd.setPageSize(100000);
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
-				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),cmd.getCreatorType(), cmd.getPageAnchor(), cmd.getPageSize());
-		
-		
+			cmd.setPageSize(99999);
+		List<PmTaskDTO> list = this.searchTasks(cmd).getRequests();
 		Workbook wb = null;
 		InputStream in;
 		LOGGER.debug("!!!!!!!!!!!!!!!"+this.getClass().getResource("").getPath());
@@ -1032,6 +1124,61 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 				PmTaskFlowStatus flowStatus = PmTaskFlowStatus.fromCode(task.getStatus());
 				cell9.setCellValue(null != flowStatus ? flowStatus.getDescription() : "");
+
+				Cell cell10 = tempRow.createCell(10);
+				cell10.setCellStyle(style);
+				cell10.setCellValue(null == task.getStar() ? "-" : task.getStar());
+
+				Cell cell11 = tempRow.createCell(11);
+				cell11.setCellStyle(style);
+
+				Cell cell12 = tempRow.createCell(12);
+				cell12.setCellStyle(style);
+
+				Cell cell13 = tempRow.createCell(13);
+				cell13.setCellStyle(style);
+
+				Cell cell14 = tempRow.createCell(14);
+				cell14.setCellStyle(style);
+				String feeModel = "";
+				if (null != task.getTaskCategoryId())
+					feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel" + task.getTaskCategoryId(),"");
+				if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
+					if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
+//						费用确认后导出费用清单
+						PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(task.getId());
+						if(null != order){
+							BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+							BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+							BigDecimal totalAmount = BigDecimal.valueOf(order.getAmount());
+
+
+							cell11.setCellValue(serviceFee.movePointLeft(2).toString());
+
+
+							cell12.setCellValue(productFee.movePointLeft(2).toString());
+
+							List<PmTaskOrderDetail> products = pmTaskProvider.findOrderDetailsByTaskId(null,null,null,task.getId());
+							StringBuffer content = new StringBuffer();
+							if(null != products && products.size() > 0){
+								for (PmTaskOrderDetail r : products) {
+									BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+									BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+									content.append(r.getProductName() + ":");
+									content.append(price.multiply(amount).movePointLeft(2).toString() + "元");
+									content.append("(" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + ")\n");
+								}
+							}
+
+
+							cell13.setCellValue(content.toString());
+
+
+							cell14.setCellValue(totalAmount.movePointLeft(2).toString());
+						}
+
+					}
+				}
 
 			}
 
@@ -1378,11 +1525,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer processedCount = pmTaskProvider.countTask(communityId, PmTaskFlowStatus.COMPLETED.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
 		Integer closeCount = pmTaskProvider.countTask(communityId, PmTaskFlowStatus.INACTIVE.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
 		
-		Integer star1 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)1, startDate, endDate);
-		Integer star2 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)2, startDate, endDate);
-		Integer star3 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)3, startDate, endDate);
-		Integer star4 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)4, startDate, endDate);
-		Integer star5 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)5, startDate, endDate);
+		Integer star1 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, "1", startDate, endDate);
+		Integer star2 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, "2", startDate, endDate);
+		Integer star3 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, "3", startDate, endDate);
+		Integer star4 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, "4", startDate, endDate);
+		Integer star5 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, "5", startDate, endDate);
 		
 		statistics.setTaskCategoryId(taskCategoryId);
 		statistics.setCategoryId(categoryId);
@@ -1721,7 +1868,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //
 //		List<OrganizationMember> organizationMembers = new ArrayList<>();
 //		for(PmTaskTarget t: targets) {
-//			OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(t.getTargetId(), cmd.getOrganizationId());
+//			OrganizationMember m = organizationProvider.findOrganizationMemberByUIdAndOrgId(t.getTargetId(), cmd.getOrganizationId());
 //			if(null != m)
 //				organizationMembers.add(m);
 //		}
@@ -2193,7 +2340,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<OrgAddressDTO> addressDTOs = convertAddress(organizations, communityId);
 			//选一个公司获得通讯录名字
 			if (organizations.size()>0){
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),organizations.get(0).getId());
+				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(),organizations.get(0).getId());
 				response.setUserName(member.getContactName());
 			}
 			response.setOrganizationList(addressDTOs);
@@ -2282,11 +2429,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public GetIfHideRepresentResponse getIfHideRepresent(GetIfHideRepresentCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null ? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		GetIfHideRepresentResponse response = new GetIfHideRepresentResponse();
-		response.setIfHide(configProvider.getIntValue(namespaceId,"pmtask.hide.represent",0));
+		if(null == cmd.getAppId()) {
+			LOGGER.error("Invalid appId parameter.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid appId parameter.");
+		}
+		String colName = "pmtask.hide.represent.";
+		colName += cmd.getAppId().toString();
+		response.setIfHide(configProvider.getIntValue(namespaceId,colName,0));
 
 //		SceneTokenDTO sceneTokenDTO = null;
 //		if (null != cmd.getSceneToken()) {
 //			User user = UserContext.current().getUser();
+
+
 //			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 //		}
 //		Integer ifAdmain = 1;
@@ -2473,6 +2629,105 @@ public class PmTaskServiceImpl implements PmTaskService {
 		});
 	}
 
+	@Override
+	public Object getThirdAddress(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.getThirdAddress(req);
+	}
+
+	@Override
+	public Object createThirdTask(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.createThirdTask(req);
+	}
+
+	@Override
+	public Object listThirdTasks(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.listThirdTasks(req);
+	}
+
+	@Override
+	public Object getThirdTaskDetail(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.getThirdTaskDetail(req);
+	}
+	// 查找报修公司的报修记录, 对接不查
+	@Override
+	public List<SearchTasksByOrgDTO> listTasksByOrg(SearchTasksByOrgCommand cmd17) {
+		List<SearchTasksByOrgDTO> ret = new ArrayList<>();
+		List<PmTask> list = pmTaskProvider.findTasksByOrg(cmd17.getCommunityId(), cmd17.getNamespaceId(), cmd17.getOrganizationId(),null);
+		for(PmTask task : list){
+			SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
+			dto.setBuildingName(task.getBuildingName());
+			dto.setCreateTime(task.getCreateTime());
+			dto.setRequestorName(task.getRequestorName());
+			dto.setRequestorPhone(task.getRequestorPhone());
+			if(task.getStatus()==1){
+				dto.setStatus("待处理");
+			}else if(task.getStatus()==2){
+				dto.setStatus("处理中");
+			} else if (task.getStatus() == 3) {
+				dto.setStatus("已取消");
+			} else if (task.getStatus() == 4) {
+				dto.setStatus("已完成");
+			}
+			dto.setTaskCategoryName(categoryProvider.findCategoryById(task.getTaskCategoryId()).getName());
+			dto.setContent(task.getContent());
+			if (task.getOrganizationUid() == null || task.getOrganizationUid() == 0) {
+				dto.setPmTaskSource("用户发起");
+			} else {
+				dto.setPmTaskSource("员工代发");
+			}
+
+			ret.add(dto);
+		}
+		return ret;
+	}
+
+	@Override
+	public List<SearchTasksByOrgDTO> searchOrgTasks(SearchOrgTasksCommand cmd) {
+		List<SearchTasksByOrgDTO> ret = new ArrayList<>();
+		List<PmTask> list = pmTaskProvider.findTasksByOrg(cmd.getCommunityId(),cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getTaskCategoryId());
+		if (list != null && list.size() > 0) {
+			list.forEach(r -> {
+				SearchTasksByOrgDTO dto = new SearchTasksByOrgDTO();
+				if(r.getStatus()==1){
+					dto.setStatus("待处理");
+				}else if(r.getStatus()==2){
+					dto.setStatus("处理中");
+				}else if(r.getStatus()==3){
+					dto.setStatus("已取消");
+				}else if(r.getStatus()==4){
+					dto.setStatus("已完成");
+				}
+
+				dto.setRequestorPhone(r.getRequestorPhone());
+				dto.setRequestorName(r.getRequestorName());
+				if (r.getOrganizationUid() == null || r.getOrganizationUid() == 0) {
+					dto.setPmTaskSource("用户发起");
+				} else {
+					dto.setPmTaskSource("员工代发");
+				}
+				dto.setCreateTime(r.getCreateTime());
+				dto.setBuildingName(r.getBuildingName());
+				dto.setTaskCategoryName(categoryProvider.findCategoryById(r.getTaskCategoryId()).getName());
+				dto.setContent(r.getContent());
+				dto.setFlowCaseId(r.getFlowCaseId());
+				ret.add(dto);
+			});
+		}
+		return ret;
+	}
+
 	public static String computeSignature(Map<String, String> params, String secretKey) {
 		assert (params != null);
 		assert (secretKey != null);
@@ -2614,12 +2869,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 			dataMap.put("organizationName", "");
 		}
 
-		Category category = categoryProvider.findCategoryById(dto.getCategoryId());
+		if(null != dto.getCategoryId()){
+			Category category = categoryProvider.findCategoryById(dto.getCategoryId());
 
-		if(category != null) {
-			dataMap.put("categoryName",category.getName());
-		} else {
-			dataMap.put("categoryName","");
+			if(category != null) {
+				dataMap.put("categoryName",category.getName());
+			} else {
+				dataMap.put("categoryName","");
+			}
 		}
 
 		dataMap.put("content",dto.getContent());
@@ -2693,13 +2950,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
 				Byte flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				switch (state){
-					case UNPROCESSED: flowCaseStatus = FlowCaseStatus.INITIAL.getCode();break;
-					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());break;
-					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break;
-                    case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break; //已关闭
-                    case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());break;
+					case UNPROCESSED: break;
+					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break;
+					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
+                    case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
+                    case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
 					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				}
+				task.setStatus(flowCaseStatus);
 				pmTaskProvider.updateTask(task);
 				if (flowCaseStatus == FlowCaseStatus.ABSORTED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
 					cancelTask(task.getId());
@@ -2786,4 +3044,1026 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 		});
 	}
+
+	@Override
+	public PmTaskStatDTO getStatSurvey(GetTaskStatCommand cmd) {
+		this.checkNamespaceId(cmd.getNamespaceId());
+//		查询报修任务
+		List<PmTask> list = this.getSurveyData(cmd);
+//		聚合统计
+		Map<Byte,Long> result = list.stream().collect(Collectors.groupingBy(PmTask::getStatus,Collectors.counting()));
+//		构建响应数据对象
+		PmTaskStatDTO pmTaskStatDTO = new PmTaskStatDTO();
+		result.entrySet().forEach(elem ->{
+			if(FlowCaseStatus.PROCESS.getCode() == elem.getKey().byteValue())
+				pmTaskStatDTO.setProcessing(elem.getValue().intValue());
+			if(FlowCaseStatus.ABSORTED.getCode() == elem.getKey().byteValue())
+				pmTaskStatDTO.setClose(elem.getValue().intValue());
+			if(FlowCaseStatus.FINISHED.getCode() == elem.getKey().byteValue())
+				pmTaskStatDTO.setComplete(elem.getValue().intValue());
+		});
+		pmTaskStatDTO.setTotal(pmTaskStatDTO.getProcessing() + pmTaskStatDTO.getClose() + pmTaskStatDTO.getComplete());
+		return pmTaskStatDTO;
+	}
+
+	@Override
+	public List<PmTaskStatSubDTO> getStatByCategory(GetTaskStatCommand cmd) {
+		this.checkNamespaceId(cmd.getNamespaceId());
+//		查询报修任务
+		List<PmTask> list = this.getSurveyData(cmd);
+//		聚合统计
+		Map<Long,Map<Long,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getTaskCategoryId)));
+//		构建响应数据对象
+		List<PmTaskStatSubDTO> dtoList = new ArrayList<>();
+		for (Map.Entry<Long,Map<Long,List<PmTask>>> elem: result.entrySet()) {
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			for (Map.Entry<Long,List<PmTask>> elem1:elem.getValue().entrySet()
+				 ) {
+				PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
+				bean.setOwnerId(elem.getKey());
+				bean.setOwnerName(null != community ? community.getName() : "");
+				//为科兴与一碑对接
+				if(cmd.getNamespaceId() == 999983 && null != cmd.getAppId() &&
+						cmd.getAppId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+					bean.setType("物业报修");
+				}else{
+					Category category = categoryProvider.findCategoryById(elem1.getKey());
+					bean.setType(null != category ? category.getName() : "");
+				}
+				bean.setTotal(elem1.getValue().size());
+				dtoList.add(bean);
+			}
+		}
+		return dtoList;
+	}
+
+	@Override
+	public List<PmTaskStatDTO> getStatByCreator(GetTaskStatCommand cmd) {
+		this.checkNamespaceId(cmd.getNamespaceId());
+//		查询报修任务
+		List<PmTask> list = this.getSurveyData(cmd);
+//		聚合统计
+		Map<Long,Integer> initCount = new HashMap<>();
+		Map<Long,Integer> agentCount = new HashMap<>();
+		list.forEach(elem -> {
+			if(!initCount.keySet().contains(elem.getOwnerId())){
+				initCount.put(elem.getOwnerId(),0);
+				agentCount.put(elem.getOwnerId(),0);
+			}
+			if(null == elem.getOrganizationUid() || 0 == elem.getOrganizationUid()){
+				initCount.put(elem.getOwnerId(),initCount.get(elem.getOwnerId())+1);
+			}else{
+				agentCount.put(elem.getOwnerId(),agentCount.get(elem.getOwnerId())+1);
+			}
+		});
+//		构建响应数据对象
+		List<PmTaskStatDTO> dtolist = initCount.entrySet().stream().map(elem ->{
+			PmTaskStatDTO bean = new PmTaskStatDTO();
+			bean.setNamespaceId(cmd.getNamespaceId());
+			bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
+			bean.setOwnerId(elem.getKey());
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			if(null != community)
+				bean.setOwnerName(community.getName());
+			else
+				bean.setOwnerName("");
+			bean.setInit(elem.getValue());
+			bean.setAgent(agentCount.get(elem.getKey()));
+			bean.setTotal(bean.getInit() + bean.getAgent());
+			return bean;
+		}).collect(Collectors.toList());
+		return dtolist;
+	}
+
+	@Override
+	public List<PmTaskStatDTO> getStatByStatus(GetTaskStatCommand cmd) {
+		this.checkNamespaceId(cmd.getNamespaceId());
+//		查询报修任务
+		List<PmTask> list = this.getSurveyData(cmd);
+		Map<Long,Map<Byte,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getStatus)));
+		List<PmTaskStatDTO> dtolist = new ArrayList<>();
+		for (Map.Entry<Long,Map<Byte,List<PmTask>>> elem : result.entrySet()) {
+			PmTaskStatDTO bean = new PmTaskStatDTO();
+			bean.setOwnerId(elem.getKey());
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			bean.setOwnerName(null != community ? community.getName() : "");
+			for (Map.Entry<Byte,List<PmTask>> elem1 : elem.getValue().entrySet()) {
+				if(FlowCaseStatus.PROCESS.getCode() == elem1.getKey().byteValue())
+					bean.setProcessing(elem1.getValue().size());
+				if(FlowCaseStatus.ABSORTED.getCode() == elem1.getKey().byteValue())
+					bean.setClose(elem1.getValue().size());
+				if(FlowCaseStatus.FINISHED.getCode() == elem1.getKey().byteValue())
+					bean.setComplete(elem1.getValue().size());
+			}
+			bean.setTotal(bean.getProcessing() + bean.getClose() + bean.getComplete());
+			dtolist.add(bean);
+		}
+		return dtolist;
+	}
+
+	@Override
+	public List<PmTaskStatSubDTO> getStatByArea(GetTaskStatCommand cmd) {
+		this.checkNamespaceId(cmd.getNamespaceId());
+//		查询报修任务
+		List<PmTask> list = this.getSurveyData(cmd);
+//		聚合统计
+		Map<Long,Map<String,List<PmTask>>> result = list.stream().collect(Collectors.groupingBy(PmTask::getOwnerId,Collectors.groupingBy(PmTask::getBuildingName)));
+//		构建响应数据对象
+		List<PmTaskStatSubDTO> dtolist = new ArrayList<>();
+		for(Map.Entry<Long,Map<String,List<PmTask>>> elem : result.entrySet()){
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			for(Map.Entry<String,List<PmTask>> elem1 : elem.getValue().entrySet()){
+				PmTaskStatSubDTO bean = new PmTaskStatSubDTO();
+				bean.setNamespaceId(cmd.getNamespaceId());
+				bean.setOwnerType(null != cmd.getOwnerType() ? cmd.getOwnerType() : "");
+				bean.setOwnerId(elem.getKey());
+				bean.setOwnerName(null != community ? community.getName() : "");
+				bean.setType(elem1.getKey());
+				bean.setTotal(elem1.getValue().size());
+				dtolist.add(bean);
+			}
+		}
+		return dtolist;
+	}
+
+	@Override
+	public void exportTaskStat(GetTaskStatCommand cmd, HttpServletResponse resp) {
+
+		Integer exportType = cmd.getExportType();
+		if(null == exportType){
+			LOGGER.error("ExportType cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ExportType cannot be null.");
+		}
+
+		XSSFWorkbook wb = new XSSFWorkbook();
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		Sheet sheet = wb.createSheet("task");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+
+//		1 导出按类型统计数据 2 导出按来源统计数据 3 导出按状态统计数据 4 导出按区域统计数据
+		switch (exportType){
+			case 1 : this.exportTaskStatByCategory(cmd,sheet);break;
+			case 2 : this.exportTaskStatByCreator(cmd,sheet);break;
+			case 3 : this.exportTaskStatByStatus(cmd,sheet);break;
+			case 4 : this.exportTaskStatByArea(cmd,sheet);break;
+            case 5 : this.exportTaskEval(cmd,sheet);break;
+		}
+
+		exportExcel(wb, resp);
+
+	}
+
+	@Override
+	public List<PmTaskEvalStatDTO> getEvalStat(GetEvalStatCommand cmd) {
+		List<PmTaskEvalStatDTO> dtos = new ArrayList<>();
+//		取当前项目启用工作流
+		Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(),20100L,cmd.getModuleType(),cmd.getOwnerId(),cmd.getOwnerType());
+		if(null == flow || !flow.getAllowFlowCaseEndEvaluate().equals((byte) 1)){
+//			不设置评价返回空列表
+			return dtos;
+		}
+//		取评价项目
+		List<FlowEvaluateItem> evalItems = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getFlowMainId(),flow.getFlowVersion());
+		List<String> evalItemNameList = evalItems.stream().map(r -> r.getName()).collect(Collectors.toList());
+		List<FlowEvaluateItem> allEvalItems = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getFlowMainId(),null);
+		List<FlowEvaluateItem> tagEvalItems = allEvalItems.stream().filter(r -> evalItemNameList.contains(r.getName())).collect(Collectors.toList());
+		Map<String,List<FlowEvaluateItem>> gbName = tagEvalItems.stream().collect(Collectors.groupingBy(FlowEvaluateItem::getName));
+//		取工作流下所有评价
+		List<FlowEvaluate> evals =  flowEvaluateProvider.findEvaluatesByFlowMainId(flow.getFlowMainId(),null,cmd.getBeginTime(),cmd.getEndTime());
+//		根据评价项目分组
+	 	Map<Long,List<FlowEvaluate>> evalgroupsById = evals.stream().collect(Collectors.groupingBy(FlowEvaluate::getEvaluateItemId));
+	 	Map<String,List<FlowEvaluate>> evalgroupsByName = new HashMap<>();
+	 	gbName.forEach((s, flowEvaluateItems) -> {
+			List<FlowEvaluate> templist = new ArrayList<>();
+	 		flowEvaluateItems.forEach(r-> {
+	 			if(null != evalgroupsById.get(r.getId()))
+					templist.addAll(evalgroupsById.get(r.getId()));
+			});
+	 		evalgroupsByName.put(s,templist);
+		});
+//		统计运算
+	 	evalItems.forEach(item -> {
+			PmTaskEvalStatDTO stat = new PmTaskEvalStatDTO();
+			List<FlowEvaluate> evalgroup = evalgroupsByName.get(item.getName());
+			if(null != evalgroup){
+				int total = evalgroup.size();
+				if(total > 0){
+					stat.setEvalName(item.getName());
+					BigDecimal totalstar;
+					Map<Byte,List<FlowEvaluate>> stargroups = evalgroup.stream().collect(Collectors.groupingBy(FlowEvaluate::getStar));
+					stargroups.entrySet().forEach(star -> {
+						switch (star.getKey()){
+							case (byte) 1 : stat.setAmount1(star.getValue().size()); break;
+							case (byte) 2 : stat.setAmount2(star.getValue().size()); break;
+							case (byte) 3 : stat.setAmount3(star.getValue().size()); break;
+							case (byte) 4 : stat.setAmount4(star.getValue().size()); break;
+							case (byte) 5 : stat.setAmount5(star.getValue().size()); break;
+						}
+					});
+					stat.setTotalAmount(total);
+					totalstar = BigDecimal.valueOf(stat.getAmount1() + stat.getAmount2() * 2 + stat.getAmount3() * 3 + stat.getAmount4() * 4 + stat.getAmount5() * 5);
+					stat.setEvalAvg(totalstar.divide(BigDecimal.valueOf(total),1,BigDecimal.ROUND_HALF_UP).toString());
+					dtos.add(stat);
+				}
+			}
+		});
+		return dtos;
+	}
+
+//	----------------------------------------- 3.7 -----------------------------------------
+
+	@Override
+	public PmTaskConfigDTO setPmTaskConfig(SetPmTaskConfigCommand cmd) {
+		User user = UserContext.current().getUser();
+		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
+		if(null != result){
+			if(null != cmd.getContentHint())
+				result.setContentHint(cmd.getContentHint());
+			else
+				result.setContentHint("");
+			if(null != cmd.getPaymentFlag())
+				result.setPaymentFlag(cmd.getPaymentFlag());
+			if(null != cmd.getPaymentAccount())
+				result.setPaymentAccount(cmd.getPaymentAccount());
+			if(null != cmd.getPaymentAccountType()){
+				result.setPaymentAccountType(cmd.getPaymentAccountType());
+			}
+			result.setUpdaterId(user.getId());
+			result = pmTaskProvider.updatePmTaskConfig(result);
+		} else {
+			result = ConvertHelper.convert(cmd, PmTaskConfig.class);
+			result.setCreatorId(user.getId());
+			result = pmTaskProvider.createPmTaskConfig(result);
+		}
+		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
+	}
+
+	@Override
+	public PmTaskConfigDTO searchPmTaskConfigByProject(GetPmTaskConfigCommand cmd) {
+		if(null == cmd.getId() && (null == cmd.getNamespaceId() && null == cmd.getOwnerId())){
+			LOGGER.error("Invalid parameter, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter.");
+		}
+		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
+		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
+	}
+
+	@Override
+	public void createOrderDetails(CreateOrderDetailsCommand cmd) {
+		User user = UserContext.current().getUser();
+		Integer namespaceId = cmd.getNamespaceId();
+		String ownerType = cmd.getOwnerType();
+		Long ownerId = cmd.getOwnerId();
+		Long taskId = cmd.getTaskId();
+//		创建订单
+		PmTaskOrder order = ConvertHelper.convert(cmd,PmTaskOrder.class);
+		Long serviceFee = order.getServiceFee();
+		if(null != serviceFee)
+			order.setServiceFee(serviceFee);
+		Long productFee = 0L;
+		if(null != cmd.getOrderDetails()){
+			productFee = cmd.getOrderDetails().stream().mapToLong(r -> r.getProductAmount() * r.getProductPrice()).sum();
+		}
+		order.setProductFee(productFee);
+		order.setAmount(serviceFee + productFee);
+		order.setStatus((byte)0);
+		order = this.pmTaskProvider.createPmTaskOrder(order);
+		Long orderId = order.getId();
+		if(null != cmd.getOrderDetails()){
+//			创建订单明细
+			List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
+				PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
+				bean.setNamespaceId(namespaceId);
+				bean.setOwnerType(ownerType);
+				bean.setOwnerId(ownerId);
+				bean.setTaskId(taskId);
+				bean.setOrderId(orderId);
+				return bean;
+			}).collect(Collectors.toList());
+			this.pmTaskProvider.createOrderDetails(details);
+		}
+
+		this.FlowStepOrderDetailsOperate(taskId,user.getId(),user.getNickName(),FlowStepType.APPROVE_STEP.getCode());
+//		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+//		handler.createOrderDetails(taskId,user.getId(),user.getNickName());
+
+	}
+
+	@Override
+	public void modifyOrderDetails(CreateOrderDetailsCommand cmd) {
+		User user = UserContext.current().getUser();
+		Integer namespaceId = cmd.getNamespaceId();
+		String ownerType = cmd.getOwnerType();
+		Long ownerId = cmd.getOwnerId();
+		Long taskId = cmd.getTaskId();
+		Long serviceFee = cmd.getServiceFee();
+		Long productFee = 0L;
+//		修改订单
+		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(taskId);
+		if(null != serviceFee)
+			order.setServiceFee(serviceFee);
+		if(null != cmd.getOrderDetails() && cmd.getOrderDetails().size() > 0){
+			productFee = cmd.getOrderDetails().stream().mapToLong(r -> r.getProductAmount() * r.getProductPrice()).sum();
+		}
+		order.setProductFee(productFee);
+		order.setAmount(serviceFee + productFee);
+		order = this.pmTaskProvider.updatePmTaskOrder(order);
+		Long orderId = order.getId();
+		this.pmTaskProvider.deleteOrderDetailsByOrderId(orderId);
+		if(null != cmd.getOrderDetails() && cmd.getOrderDetails().size() > 0){
+//		创建订单明细
+			List<PmTaskOrderDetail> details = cmd.getOrderDetails().stream().map(r->{
+				PmTaskOrderDetail bean = ConvertHelper.convert(r,PmTaskOrderDetail.class);
+				bean.setNamespaceId(namespaceId);
+				bean.setOwnerType(ownerType);
+				bean.setOwnerId(ownerId);
+				bean.setTaskId(taskId);
+				bean.setOrderId(orderId);
+				return bean;
+			}).collect(Collectors.toList());
+			this.pmTaskProvider.createOrderDetails(details);
+		}
+
+		this.FlowStepOrderDetailsOperate(taskId,user.getId(),user.getNickName(),FlowStepType.NO_STEP.getCode());
+	}
+
+	@Override
+	public PmTaskOrderDTO searchOrderDetailsByTaskId(GetOrderDetailsCommand cmd) {
+		PmTask task = this.pmTaskProvider.findTaskById(cmd.getTaskId());
+		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
+		PmTaskOrderDTO dto = new PmTaskOrderDTO();
+		List<PmTaskOrderDetailDTO> products = new ArrayList<>();
+		if(null != order)
+			dto = ConvertHelper.convert(order, PmTaskOrderDTO.class);
+
+		List<PmTaskOrderDetail> result = this.pmTaskProvider.findOrderDetailsByTaskId(null, null, null, cmd.getTaskId());
+		if(null != result && result.size() > 0){
+			products.addAll(result.stream().map(r -> ConvertHelper.convert(r,PmTaskOrderDetailDTO.class)).collect(Collectors.toList()));
+		}
+		dto.setProducts(products);
+		if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
+			dto.setIsConfirmed((byte)1);
+		} else {
+			dto.setIsConfirmed((byte)0);
+		}
+		return dto;
+	}
+
+	@Override
+	public void syncOrderDetails() {
+		Integer amount = generalFormValProvider.queryAmount("EhPmTasks",null);
+		Integer pageSize = 10000;
+		Long pageAnchor = 0L;
+		Integer loopTime = amount/pageSize + 1;
+
+		for (int i = 0 ; i < loopTime ; i++){
+			List<GeneralFormVal> list = generalFormValProvider.queryGeneralFormVals("EhPmTasks",null,pageAnchor,pageSize);
+			pageAnchor = list.get(list.size() - 1).getId();
+			Map<Long,List<GeneralFormVal>> taskMap = list.stream().collect(Collectors.groupingBy(GeneralFormVal::getSourceId));
+			taskMap.forEach((taskId,task) ->{
+				PmTaskOrder order = new PmTaskOrder();
+				order.setTaskId(taskId);
+				Long productFee = 0L;
+				List<PmTaskOrderDetail> products = new ArrayList<>();
+				for (GeneralFormVal item : task){
+					if ("USER_NAME".equals(item.getFieldName())) {
+
+					} else if ("USER_PHONE".equals(item.getFieldName())) {
+
+					} else if ("USER_COMPANY".equals(item.getFieldName())) {
+
+					} else if ("USER_ADDRESS".equals(item.getFieldName())) {
+
+					} else if ("服务费".equals(item.getFieldName())) {
+						BigDecimal serviceFee = BigDecimal.valueOf(Double.valueOf(getTextString(item.getFieldValue())));
+						order.setServiceFee(serviceFee.movePointRight(2).longValue());
+					} else if ("物品".equals(item.getFieldName())) {
+						PostApprovalFormSubformValue subFormValue = JSON.parseObject(item.getFieldValue(), PostApprovalFormSubformValue.class);
+						List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
+						if (array.size()!=0) {
+							products = new ArrayList<>();
+							for (PostApprovalFormSubformItemValue itemValue : array) {
+								PmTaskOrderDetail product = new PmTaskOrderDetail();
+								List<PostApprovalFormItem> values = itemValue.getValues();
+								String pname = getTextString(getFormItem(values, "物品名称").getFieldValue());
+								String pprice = getTextString(getFormItem(values, "单价").getFieldValue());
+								String pamount = getTextString(getFormItem(values, "数量").getFieldValue());
+								if(StringUtils.isNotEmpty(pname) && StringUtils.isNotEmpty(pprice) && StringUtils.isNotEmpty(pamount)){
+									product.setTaskId(taskId);
+									product.setProductName(pname);
+									product.setProductPrice(Long.valueOf(pamount) * 100);
+									product.setProductAmount(Integer.valueOf(pamount));
+									productFee += product.getProductPrice() * product.getProductAmount();
+									products.add(product);
+								} else {
+									LOGGER.info("pmtaskorder useless data,data = {}",itemValue.toString());
+								}
+							}
+						}
+
+					} else if ("总计".equals(item.getFieldName())) {
+						BigDecimal totalamount = BigDecimal.valueOf(Double.valueOf(getTextString(item.getFieldValue())));
+						order.setAmount(totalamount.movePointRight(2).longValue());
+					}
+				}
+				order.setProductFee(productFee);
+				order = pmTaskProvider.createPmTaskOrder(order);
+				Long orderId = order.getId();
+				if(products.size() > 0){
+					products = products.stream().map(r->{
+						r.setOrderId(orderId);
+						return r;
+					}).collect(Collectors.toList());
+					pmTaskProvider.createOrderDetails(products);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void clearOrderDetails() {
+		this.pmTaskProvider.clearOrderDetails();
+	}
+
+	@Override
+	public List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd) {
+		ListBusinessUsersCommand cmdPay = new ListBusinessUsersCommand();
+		if(null == cmd.getOrganizationId()){
+			LOGGER.error("Invalid OrganizationId, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid OrganizationId.");
+		}
+		// 给支付系统的bizUserId的形式：EhOrganizations1037001
+		String userPrefix = "EhOrganizations";
+		cmdPay.setBizUserId(userPrefix + cmd.getOrganizationId());
+		List<String> tags = new ArrayList<>();
+		tags.add("0");
+		if(null == cmd.getCommunityId() || cmd.getCommunityId().equals(-1L)) {
+			cmdPay.setTag1s(tags);
+		} else {
+			tags.add(String.valueOf(cmd.getCommunityId()));
+			cmdPay.setTag1s(tags);
+		}
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("List biz payee accounts(request), orgnizationId={}, tags={}, cmd={}", cmd.getOrganizationId(), tags, cmdPay);
+		}
+		List<PayUserDTO> payUserDTOs = payService.getPayUserList(cmdPay.getBizUserId(), cmdPay.getTag1s());
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("List biz payee accounts(response), orgnizationId={}, tags={}, response={}", cmd.getOrganizationId(), tags, GsonUtil.toJson(payUserDTOs));
+		}
+		List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();
+		if(payUserDTOs != null){
+			for(PayUserDTO payUserDTO : payUserDTOs) {
+				ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
+				// 支付系统中的用户ID
+				dto.setAccountId(payUserDTO.getId());
+				// 用户向支付系统注册帐号时填写的帐号名称
+				dto.setAccountName(payUserDTO.getRemark());
+				dto.setAccountAliasName(payUserDTO.getUserAliasName());//企业名称（认证企业）
+				// 帐号类型，1-个人帐号、2-企业帐号
+				Integer userType = payUserDTO.getUserType();
+				if(userType != null && userType.equals(2)) {
+					dto.setAccountType(OwnerType.ORGANIZATION.getCode());
+				} else {
+					dto.setAccountType(OwnerType.USER.getCode());
+				}
+				// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+				Integer registerStatus = payUserDTO.getRegisterStatus();
+				if(registerStatus != null && registerStatus.intValue() == 1) {
+					dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+				} else {
+					dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+				}
+				result.add(dto);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public PreOrderDTO payBills(CreatePmTaskOrderCommand cmd) {
+
+		PreOrderDTO preOrderDTO = null;
+		//1、检查买方（付款方）是否有会员，无则创建
+		User userById = userProvider.findUserById(UserContext.currentUserId());
+		UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
+		String userIdenify = null;
+		if(userIdentifier != null) {
+			userIdenify = userIdentifier.getIdentifierToken();
+		}
+		PayUserDTO payUserDTO = checkAndCreatePaymentUser(cmd.getPayerId().toString(), "NS" + cmd.getNamespaceId().toString(), userIdenify, null, null, null);
+		if(payUserDTO != null) {
+			cmd.setPayerId(payUserDTO.getId());
+		}else {
+			LOGGER.error("payerUserId no find, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+					"payerUserId no find");
+		}
+
+		//2、收款方是否有会员，无则报错
+		Long taskCategoryId = 6L;
+		if(999983 == cmd.getNamespaceId())
+			taskCategoryId = 1L;
+		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),taskCategoryId);
+		Long payeeUserId = pmTaskConfig.getPaymentAccount();
+		if(payeeUserId == null) {
+			LOGGER.error("payeeUserId no find, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+					"payeeUserId no find");
+		}
+
+		//3、组装报文，发起下单请求
+		PmTaskOrder order = pmTaskProvider.findPmTaskOrderById(cmd.getOrderId());
+		Long amount = order.getAmount();
+		CreateOrderCommand cmdPay = this.CreateOrderCommand(cmd);
+		cmdPay.setPayeeUserId(payeeUserId);
+		cmdPay.setAmount(amount);
+		CreateOrderRestResponse response = payService.createPurchaseOrder(cmdPay);
+		if(!response.getErrorCode().equals(200)) {
+			LOGGER.error("create order fail");
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+					"create order fail");
+		}
+
+		//4、组装支付方式
+		preOrderDTO = orderCommandResponseToDto(response.getResponse());
+		preOrderDTO.setAmount(amount);
+		preOrderDTO.setOrderId(order.getId());
+
+		//5、保存订单信息
+		saveOrderRecord(order.getId(), response.getResponse());
+
+		//6、返回
+		return preOrderDTO;
+	}
+
+	@Override
+	public void payNotify(OrderPaymentNotificationCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payNotify-command=" + GsonUtil.toJson(cmd));
+        }
+        //if(cmd == null || cmd.getPaymentErrorCode() != "200") {
+        if(cmd == null) {
+            LOGGER.error("payNotify fail, cmd={}", cmd);
+        }
+        //检查订单是否存在
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderNum(cmd.getBizOrderNum());
+        if(orderRecord == null){
+            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not find order record");
+        }
+        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
+        cmd.setOrderId(orderRecord.getOrderId());
+        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+        if(orderType != null) {
+            switch (orderType) {
+                case PURCHACE:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //支付成功
+						String BizOrderNum = cmd.getBizOrderNum();
+						Integer idx = BizOrderNum.indexOf(OrderType.OrderTypeEnum.PMTASK_CODE.getV2code());
+						if(idx > -1){
+							Long orderId = Long.valueOf(BizOrderNum.substring(idx + 3));
+							PmTaskOrder order = pmTaskProvider.findPmTaskOrderById(orderId);
+							order.setStatus((byte)1);
+							pmTaskProvider.updatePmTaskOrder(order);
+						}
+                    }
+//                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+//                        //支付失败
+//                        handler.payFail(srvCmd);
+//                    }
+                    break;
+//                case REFUND:
+//                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+//                        //退款成功
+//                        handler.refundSuccess(srvCmd);
+//                    }
+//                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+//                        //退款失败
+//                        handler.refundFail(srvCmd);
+//                    }
+//                    break;
+                default:
+                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
+            }
+        }else {
+            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
+        }
+	}
+
+	private void exportTaskStatByCategory(GetTaskStatCommand cmd, Sheet sheet){
+	    List<PmTaskStatSubDTO> datalist = this.getStatByCategory(cmd);
+        List<String> titles = new ArrayList<>();
+		datalist.forEach(elem ->{
+			if (!titles.contains(elem.getType())){
+				titles.add(elem.getType());
+			}
+		});
+		Map<Long,Map<String,Integer>> datamap = new HashMap<>();
+		datalist.forEach(elem->{
+            if(datamap.keySet().contains(elem.getOwnerId())) {
+                Map<String, Integer> elemmap = datamap.get(elem.getOwnerId());
+                elemmap.put(elem.getType(), elem.getTotal());
+            } else {
+                Map<String, Integer> elemmap = new HashMap<>();
+                elemmap.put(elem.getType(),elem.getTotal());
+                datamap.put(elem.getOwnerId(),elemmap);
+            }
+        });
+		Row row = sheet.createRow(0);
+		int columnnum = 0;
+		int rownum = 1;
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("項目名稱");
+		tableHead.addAll(titles);
+		tableHead.add("合计");
+		for(String th:tableHead){
+			row.createCell(columnnum++).setCellValue(th);
+		}
+		for (Map.Entry<Long, Map<String, Integer>> elem : datamap.entrySet()) {
+			Row temprow = sheet.createRow(rownum);
+			temprow.createCell(0).setCellValue(rownum++);
+			Community community = communityProvider.findCommunityById(elem.getKey());
+			if(null != community)
+				temprow.createCell(1).setCellValue(community.getName());
+			else
+				temprow.createCell(1).setCellValue("");
+			int n = 2;
+			int sum = 0;
+			for (String title: titles) {
+				int amount = 0;
+				if(null != elem.getValue().get(title)) {
+					amount = elem.getValue().get(title);
+				}
+				sum += amount;
+				temprow.createCell(n++).setCellValue(amount);
+			}
+			temprow.createCell(n).setCellValue(sum);
+		}
+	}
+
+	private void exportTaskStatByCreator(GetTaskStatCommand cmd,Sheet sheet){
+		List<PmTaskStatDTO> datalist = this.getStatByCreator(cmd);
+
+		int rownum = 0;
+		Row row = sheet.createRow(rownum++);
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("项目名称");
+		tableHead.add("用户发起");
+		tableHead.add("员工代发");
+		tableHead.add("合计");
+		int colnum = 0;
+		for(String th:tableHead){
+			row.createCell(colnum++).setCellValue(th);
+		}
+		for (PmTaskStatDTO bean : datalist) {
+			Row tempRow = sheet.createRow(rownum);
+			tempRow.createCell(0).setCellValue(rownum++);
+			tempRow.createCell(1).setCellValue(null == bean.getOwnerName() ? "" : bean.getOwnerName());
+			tempRow.createCell(2).setCellValue(bean.getInit());
+			tempRow.createCell(3).setCellValue(bean.getAgent());
+			tempRow.createCell(4).setCellValue(bean.getTotal());
+		}
+
+	}
+	private void exportTaskStatByStatus(GetTaskStatCommand cmd,Sheet sheet){
+		List<PmTaskStatDTO> datalist = this.getStatByStatus(cmd);
+
+		int rownum = 0;
+		Row row = sheet.createRow(rownum++);
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("项目名称");
+		tableHead.add("处理完成");
+		tableHead.add("处理中");
+		tableHead.add("已取消");
+		tableHead.add("合计");
+		int colnum = 0;
+		for(String th:tableHead){
+			row.createCell(colnum++).setCellValue(th);
+		}
+		for (PmTaskStatDTO bean : datalist) {
+			Row tempRow = sheet.createRow(rownum);
+			tempRow.createCell(0).setCellValue(rownum++);
+			tempRow.createCell(1).setCellValue(null == bean.getOwnerName() ? "" : bean.getOwnerName());
+			tempRow.createCell(2).setCellValue(bean.getComplete());
+			tempRow.createCell(3).setCellValue(bean.getProcessing());
+			tempRow.createCell(4).setCellValue(bean.getClose());
+			tempRow.createCell(5).setCellValue(bean.getTotal());
+		}
+
+	}
+	private void exportTaskStatByArea(GetTaskStatCommand cmd,Sheet sheet){
+		List<PmTaskStatSubDTO> datalist = this.getStatByArea(cmd);
+
+		int rownum = 0;
+		int sum = 0;
+		Row row = sheet.createRow(rownum++);
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("楼栋名称");
+		tableHead.add("提单数量");
+		int colnum = 0;
+		for(String th:tableHead){
+			row.createCell(colnum++).setCellValue(th);
+		}
+		for (PmTaskStatSubDTO bean : datalist) {
+			Row tempRow = sheet.createRow(rownum);
+			tempRow.createCell(0).setCellValue(rownum++);
+			tempRow.createCell(1).setCellValue(null == bean.getType() ? "" : bean.getType());
+			tempRow.createCell(2).setCellValue(bean.getTotal());
+			sum += bean.getTotal();
+		}
+		Row lastRow	= sheet.createRow(rownum++);
+		lastRow.createCell(1).setCellValue("合计");
+		lastRow.createCell(2).setCellValue(sum);
+	}
+
+	private void exportTaskEval(GetTaskStatCommand cmd,Sheet sheet){
+	    GetEvalStatCommand cmd1 = ConvertHelper.convert(cmd,GetEvalStatCommand.class);
+	    cmd1.setBeginTime(cmd.getDateStart());
+	    cmd1.setEndTime(cmd.getDateEnd());
+	    cmd1.setOwnerType("PMTASK");
+		if (9L == cmd.getAppId()) {
+			cmd1.setModuleType("suggestion");
+		} else {
+			cmd1.setModuleType("any-module");
+		}
+	    cmd1.setProjectId(cmd.getOwnerId());
+	    cmd1.setProjectType("EhCommunities");
+	    List<PmTaskEvalStatDTO> datalist = this.getEvalStat(cmd1);
+
+		int rownum = 0;
+		Row row = sheet.createRow(rownum++);
+		List<String> tableHead = new LinkedList<>();
+		tableHead.add("序号");
+		tableHead.add("评价项");
+		tableHead.add("非常好(5分)");
+		tableHead.add("很好(4分)");
+		tableHead.add("一般(3分)");
+		tableHead.add("很差(2分)");
+		tableHead.add("非常差(1分)");
+		tableHead.add("合计");
+		tableHead.add("平均分");
+		int colnum = 0;
+		for(String th:tableHead){
+			row.createCell(colnum++).setCellValue(th);
+		}
+		for (PmTaskEvalStatDTO bean : datalist) {
+			Row tempRow = sheet.createRow(rownum);
+			tempRow.createCell(0).setCellValue(rownum++);
+			tempRow.createCell(1).setCellValue(bean.getEvalName());
+			tempRow.createCell(2).setCellValue(bean.getAmount5());
+			tempRow.createCell(3).setCellValue(bean.getAmount4());
+			tempRow.createCell(4).setCellValue(bean.getAmount3());
+			tempRow.createCell(5).setCellValue(bean.getAmount2());
+			tempRow.createCell(6).setCellValue(bean.getAmount1());
+			tempRow.createCell(7).setCellValue(bean.getTotalAmount());
+			tempRow.createCell(8).setCellValue(bean.getEvalAvg());
+		}
+    }
+
+	private List<PmTask> getSurveyData(GetTaskStatCommand cmd){
+		List<Long> ownerIds = this.getOwnerIds(cmd);
+//		模块权限校验
+		if(cmd.getCurrentPMId()!=null && cmd.getOriginId()!=null){
+			ownerIds.forEach(r -> userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 2010020190L, cmd.getOriginId(), null,r));
+		}
+//		查询数据
+//		List<Category> categories = categoryProvider.listTaskCategoriesByparentId(cmd.getNamespaceId(),cmd.getOwnerType(),ownerIds,cmd.getAppId());
+//		List<Long> categoryIds = categories.stream().map(r -> r.getId()).collect(Collectors.toList());
+//		List<PmTask> list = pmTaskProvider.listTaskByStat(cmd.getNamespaceId(),ownerIds,new Timestamp(cmd.getDateStart()),new Timestamp(cmd.getDateEnd()),categoryIds);
+
+		SearchTasksCommand cmd1 = new SearchTasksCommand();
+		cmd1.setNamespaceId(cmd.getNamespaceId());
+		cmd1.setOwnerType(cmd.getOwnerType());
+		cmd1.setOwnerId(cmd.getOwnerId());
+		cmd1.setStartDate(cmd.getDateStart());
+		cmd1.setEndDate(cmd.getDateEnd());
+		cmd1.setTaskCategoryId(cmd.getAppId());
+		cmd1.setAppId(cmd.getOriginId());
+		cmd1.setCurrentPMId(cmd.getCurrentPMId());
+		cmd1.setCurrentProjectId(cmd.getOwnerId());
+		List<PmTaskDTO> list = this.searchTasks(cmd1).getRequests();
+		return null != list ? list.stream().map(r -> ConvertHelper.convert(r,PmTask.class)).collect(Collectors.toList()) : new ArrayList<>();
+	}
+
+	/**
+	 * 当ownerId为-1是查找用户所有项目
+	 * @param cmd
+	 * @return
+	 */
+	private List<Long> getOwnerIds(GetTaskStatCommand cmd){
+		List<Long> ownerIds = new ArrayList<>();
+		if(null == cmd.getOwnerId() || -1L == cmd.getOwnerId()){
+			ListUserRelatedProjectByModuleCommand cmd1 = new ListUserRelatedProjectByModuleCommand();
+			cmd1.setModuleId(20100L);
+//			cmd1.setAppId(cmd.getAppId());
+			cmd1.setOrganizationId(cmd.getCurrentPMId());
+			List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
+			ownerIds.addAll(dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList()));
+		} else {
+			ownerIds.add(cmd.getOwnerId());
+		}
+		return ownerIds;
+	}
+
+	//检查买方（付款方）会员，无则创建
+	private PayUserDTO checkAndCreatePaymentUser(String userId, String accountCode,String userIdenify, String tag1, String tag2, String tag3){
+		PayUserDTO payUserDTO = new PayUserDTO();
+		String payerid = OwnerType.USER.getCode()+userId;
+		//根据tag查询支付帐号
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("getPayUserList payerid={}", payerid);
+		}
+		List<PayUserDTO> payUserDTOs = payService.getPayUserList(payerid);
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("getPayUserList response={}", payUserDTOs);
+		}
+		if(payUserDTOs == null || payUserDTOs.size() == 0){
+			//创建个人账号
+			LOGGER.info("createPersonalPayUserIfAbsent payerid = {}, accountCode = {}, userIdenify={}",payerid,accountCode,userIdenify);
+			payUserDTO = payService.createPersonalPayUserIfAbsent(payerid, accountCode);
+			if(payUserDTO==null){
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_USER_ACCOUNT,
+						"创建个人付款账户失败");
+			}
+			String s = payService.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
+		}else {
+			payUserDTO = payUserDTOs.get(0);
+		}
+		return payUserDTO;
+	}
+	private CreateOrderCommand CreateOrderCommand(CreatePmTaskOrderCommand cmd){
+
+		CreateOrderCommand createOrderCmd = new CreateOrderCommand();
+		//业务系统中的订单号，请在整个业务系统中约定好唯一规则；
+		String BizOrderNum  = getOrderNum(cmd.getOrderId(),OrderType.OrderTypeEnum.PMTASK_CODE.getPycode());
+		LOGGER.info("BizOrderNum is = {} "+BizOrderNum);
+		createOrderCmd.setBizOrderNum(BizOrderNum);
+		createOrderCmd.setClientAppName(cmd.getClientAppName());
+		createOrderCmd.setPayerUserId(cmd.getPayerId());//付款方ID
+//		createOrderCmd.setPaymentParams(flattenMap);
+		createOrderCmd.setPaymentType(cmd.getPaymentType());
+//		设置回调地址
+		String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+		String backUri = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.pmtask", "");
+		String backUrl = homeUrl + CONTEXT_PATH + backUri;
+		createOrderCmd.setBackUrl(backUrl);
+//		createOrderCmd.setExtendInfo(cmd.getExtendInfo());
+		createOrderCmd.setGoodsName("物业缴费");
+		createOrderCmd.setGoodsDescription(null);
+		createOrderCmd.setIndustryName(null);
+		createOrderCmd.setIndustryCode(null);
+		createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
+		createOrderCmd.setOrderRemark1(String.valueOf(OrderType.OrderTypeEnum.PMTASK_CODE.getPycode()));
+		createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
+		createOrderCmd.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
+		createOrderCmd.setOrderRemark4(null);
+		createOrderCmd.setOrderRemark5(null);
+		if(UserContext.getCurrentNamespaceId() != null) {
+			createOrderCmd.setAccountCode("NS" + UserContext.getCurrentNamespaceId().toString());
+		}
+		return createOrderCmd;
+	}
+	private String getOrderNum(Long orderId, String orderType) {
+		String v2code = OrderType.OrderTypeEnum.getV2codeByPyCode(orderType);
+		DecimalFormat df = new DecimalFormat("00000000000000000");
+		String orderIdStr = df.format(orderId);
+		if(orderIdStr!=null && orderIdStr.length()>17){
+			orderIdStr = orderIdStr.substring(2);
+		}
+		return v2code+orderIdStr;
+	}
+
+	private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse){
+		PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
+		List<PayMethodDTO> payMethods = new ArrayList<>();//业务系统自己的支付方式格式
+		List<com.everhomes.pay.order.PayMethodDTO> bizPayMethods = orderCommandResponse.getPaymentMethods();//支付系统传回来的支付方式
+		String format = "{\"getOrderInfoUrl\":\"%s\"}";
+		for(com.everhomes.pay.order.PayMethodDTO bizPayMethod : bizPayMethods) {
+			PayMethodDTO payMethodDTO = new PayMethodDTO();//支付方式
+			payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
+			payMethodDTO.setExtendInfo(String.format(format, orderCommandResponse.getOrderPaymentStatusQueryUrl()));
+			String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
+			payMethodDTO.setPaymentLogo(paymentLogo);
+			payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
+			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+			com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
+			if(bizPaymentParamsDTO != null) {
+				paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
+			}
+			payMethodDTO.setPaymentParams(paymentParamsDTO);
+			payMethods.add(payMethodDTO);
+		}
+		dto.setPayMethod(payMethods);
+		dto.setExpiredIntervalTime(orderCommandResponse.getExpirationMillis());
+		return dto;
+	}
+
+	private void saveOrderRecord(Long orderId, OrderCommandResponse orderCommandResponse) {
+		PmTaskOrder record = this.pmTaskProvider.findPmTaskOrderById(orderId);
+		record.setBizOrderNum(orderCommandResponse.getBizOrderNum());
+		record.setOrderCommitNonce(orderCommandResponse.getOrderCommitNonce());
+		record.setOrderCommitTimestamp(orderCommandResponse.getOrderCommitTimestamp());
+		record.setOrderCommitToken(orderCommandResponse.getOrderCommitToken());
+		record.setOrderCommitUrl(orderCommandResponse.getOrderCommitUrl());
+		record.setPayInfo(orderCommandResponse.getPayInfo());
+		this.pmTaskProvider.updatePmTaskOrder(record);
+	}
+
+	private PostApprovalFormItem getFormItem(List<PostApprovalFormItem> values,String name){
+		for (PostApprovalFormItem p:values)
+			if (p.getFieldName().equals(name))
+				return p;
+		return null;
+	}
+
+	private String getTextString(String json){
+		if (StringUtils.isEmpty(json))
+			return "";
+		return JSONObject.parseObject(json).getString("text");
+	}
+
+	private void FlowStepOrderDetailsOperate(Long taskId, Long operatorId, String operatorName, String stepType){
+		FlowCase mainFlowCase = this.flowCaseProvider.findFlowCaseByReferId(taskId,"EhPmTasks",20100L);
+		FlowCaseTree flowCaseTrees = flowService.getProcessingFlowCaseTree(mainFlowCase.getId());
+		List<FlowCaseTree> flowCases = flowCaseTrees.getLeafNodes();
+		FlowCase flowCase = flowCases.get(flowCases.size() - 1).getFlowCase();
+		LOGGER.info("nextStep:"+JSONObject.toJSONString(flowCase));
+		FlowAutoStepDTO dto = new FlowAutoStepDTO();
+		dto.setAutoStepType(stepType);
+		dto.setEventType(FlowEventType.STEP_MODULE.getCode());
+
+		dto.setFlowCaseId(flowCase.getId());
+		dto.setFlowMainId(flowCase.getFlowMainId());
+		dto.setFlowNodeId(flowCase.getCurrentNodeId());
+		dto.setFlowVersion(flowCase.getFlowVersion());
+		dto.setStepCount(flowCase.getStepCount());
+
+		FlowEventLog log = new FlowEventLog();
+		log.setId(flowEventLogProvider.getNextId());
+		log.setFlowMainId(flowCase.getFlowMainId());
+		log.setFlowVersion(flowCase.getFlowVersion());
+		log.setNamespaceId(flowCase.getNamespaceId());
+		log.setFlowNodeId(flowCase.getCurrentNodeId());
+		log.setFlowCaseId(flowCase.getId());
+		log.setStepCount(flowCase.getStepCount());
+		log.setSubjectId(0L);
+		log.setParentId(0L);
+		log.setFlowUserId(operatorId);
+		log.setFlowUserName(operatorName);
+		log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+		log.setButtonFiredStep(FlowStepType.NO_STEP.getCode());
+		log.setTrackerApplier(1L); // 申请人可以看到此条log，为0则看不到
+		log.setTrackerProcessor(1L);// 处理人可以看到此条log，为0则看不到
+
+		PmTaskOrder order = this.pmTaskProvider.findPmTaskOrderByTaskId(taskId);
+		List<PmTaskOrderDetail> products = this.pmTaskProvider.findOrderDetailsByTaskId(null,null,null,taskId);
+		String content = "";
+		if(null != order){
+			content += "本次服务的费用清单如下，请进行确认\n";
+			BigDecimal total = BigDecimal.valueOf(order.getAmount());
+			content += "总计："+total.movePointLeft(2).toString()+"元\n";
+			BigDecimal serviceFee = BigDecimal.valueOf(order.getServiceFee());
+			content += "服务费："+serviceFee.movePointLeft(2).toString()+"元\n";
+			BigDecimal productFee = BigDecimal.valueOf(order.getProductFee());
+			content += "物品费："+ productFee.movePointLeft(2) +"元\n";
+			if(null != products && products.size() > 0){
+				content += "物品费详情：\n";
+				for (PmTaskOrderDetail r : products) {
+					BigDecimal price = BigDecimal.valueOf(r.getProductPrice());
+					BigDecimal amount = BigDecimal.valueOf(r.getProductAmount());
+					content += r.getProductName() + "：";
+					content += price.multiply(amount).movePointLeft(2).toString() + "元";
+					content += "（" + price.movePointLeft(2).toString() + "元*" + amount.intValue() + "）\n";
+				}
+			}
+			content += "如对上述费用有疑义请附言说明";
+		}else{
+			content = "本次服务没有产生维修费";
+		}
+
+		log.setLogContent(content);
+		List<FlowEventLog> logList = new ArrayList<>(1);
+		logList.add(log);
+		dto.setEventLogs(logList);
+
+		flowService.processAutoStep(dto);
+	}
+
 }

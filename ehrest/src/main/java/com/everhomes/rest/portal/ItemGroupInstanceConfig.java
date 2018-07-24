@@ -4,20 +4,25 @@ package com.everhomes.rest.portal;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
  * <ul>
- * <li>columnCount: 列数</li>
- * <li>margin: 外边距</li>
- * <li>padding: 内边距</li>
- * <li>backgroundColor: 底色</li>
- * <li>titleFlag: 是否有标题</li>
- * <li>title: 标题</li>
- * <li>titleUri: 标题uri</li>
- * <li>newsSize: 最大显示条目</li>
- * <li>timeWidgetStyle: 时间样式</li>
- * <li>moduleAppId: 入口id</li>
- * <li>rowCount: 行高度</li>
- * <li>bizUrl: 电商url</li>
+ *     <li>columnCount: 列数</li>
+ *     <li>margin: 外边距</li>
+ *     <li>padding: 内边距</li>
+ *     <li>backgroundColor: 底色</li>
+ *     <li>titleFlag: 是否有标题</li>
+ *     <li>title: 标题</li>
+ *     <li>titleUri: 标题uri</li>
+ *     <li>titleUrl: titleUrl</li>
+ *     <li>newsSize: 最大显示条目</li>
+ *     <li>timeWidgetStyle: 时间样式</li>
+ *     <li>moduleAppId: 入口id</li>
+ *     <li>rowCount: 行高度</li>
+ *     <li>bizUrl: 电商url</li>
+ *     <li>iconUri: iconUri（当前公告栏左边图标使用）</li>
+ *     <li>iconUrl: iconUrl（当前公告栏左边图标使用）</li>
+ *     <li>noticeCount: noticeCount</li>
+ *     <li>style: style</li>
+ *     <li>shadow: shadow</li>
  * </ul>
  */
 public class ItemGroupInstanceConfig {
@@ -47,6 +52,16 @@ public class ItemGroupInstanceConfig {
 	private Integer rowCount;
 
 	private String bizUrl;
+
+	private Integer noticeCount;
+
+	private Byte style;
+
+	private String iconUri;
+
+	private String iconUrl;
+
+	private Byte shadow;
 
 	public Integer getColumnCount() {
 		return columnCount;
@@ -150,6 +165,46 @@ public class ItemGroupInstanceConfig {
 
 	public void setBizUrl(String bizUrl) {
 		this.bizUrl = bizUrl;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
+
+	public Integer getNoticeCount() {
+		return noticeCount;
+	}
+
+	public void setNoticeCount(Integer noticeCount) {
+		this.noticeCount = noticeCount;
+	}
+
+	public Byte getStyle() {
+		return style;
+	}
+
+	public void setStyle(Byte style) {
+		this.style = style;
+	}
+
+	public Byte getShadow() {
+		return shadow;
+	}
+
+	public void setShadow(Byte shadow) {
+		this.shadow = shadow;
 	}
 
 	@Override

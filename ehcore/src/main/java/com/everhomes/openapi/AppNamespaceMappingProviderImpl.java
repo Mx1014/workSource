@@ -1,23 +1,26 @@
 // @formatter:off
 package com.everhomes.openapi;
 
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import com.everhomes.app.App;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.schema.tables.EhApps;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAppNamespaceMappingsDao;
 import com.everhomes.server.schema.tables.pojos.EhAppNamespaceMappings;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class AppNamespaceMappingProviderImpl implements AppNamespaceMappingProvider {
@@ -50,24 +53,59 @@ public class AppNamespaceMappingProviderImpl implements AppNamespaceMappingProvi
 	}
 	
 	@Override
-	public List<AppNamespaceMapping> listAppNamespaceMapping() {
-		return getReadOnlyContext().select().from(Tables.EH_APP_NAMESPACE_MAPPINGS)
-				.orderBy(Tables.EH_APP_NAMESPACE_MAPPINGS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, AppNamespaceMapping.class));
+	public List<AppNamespaceMapping> listAppNamespaceMapping(Integer namespaceId, int pageSize, ListingLocator locator) {
+        com.everhomes.server.schema.tables.EhAppNamespaceMappings t = Tables.EH_APP_NAMESPACE_MAPPINGS;
+        SelectQuery<Record> query = getReadOnlyContext().select().from(t).getQuery();
+
+        if (namespaceId != null) {
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        }
+
+        if (locator.getAnchor() != null) {
+            query.addConditions(t.ID.le(locator.getAnchor()));
+        }
+
+        if (pageSize > 0) {
+            query.addLimit(pageSize + 1);
+        }
+        query.addOrderBy(t.ID.desc());
+
+        List<AppNamespaceMapping> list = query.fetchInto(AppNamespaceMapping.class);
+        if (list.size() > pageSize && pageSize > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
 	}
 	
 	@Override
 	public AppNamespaceMapping findAppNamespaceMappingByAppKey(String appKey) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_APP_NAMESPACE_MAPPINGS)
 			.where(Tables.EH_APP_NAMESPACE_MAPPINGS.APP_KEY.eq(appKey))
-			.fetchOne();
+			.fetchAny();
 		if (record != null) {
 			return ConvertHelper.convert(record, AppNamespaceMapping.class);
 		}
 		return null;
 	}
 
-	private EhAppNamespaceMappingsDao getReadWriteDao() {
+    @Override
+    public List<App> listAppsByAppKey(List<String> appKeys) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhApps t = com.everhomes.schema.Tables.EH_APPS;
+        return context.selectFrom(t)
+                .where(t.APP_KEY.in(appKeys))
+                .fetchInto(App.class);
+    }
+
+    @Override
+    public void deleteNamespaceMapping(AppNamespaceMapping mapping) {
+        getReadWriteDao().delete(mapping);
+    }
+
+    private EhAppNamespaceMappingsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
 

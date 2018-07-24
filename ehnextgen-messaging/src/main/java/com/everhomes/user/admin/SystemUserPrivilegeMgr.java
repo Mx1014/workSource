@@ -17,6 +17,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.acl.ServiceModuleCategory;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.IncludeChildFlagType;
@@ -38,6 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
+import com.everhomes.util.RuntimeErrorException;
+
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -127,6 +133,24 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             descriptors.add(descriptor);
         }
         return aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors);
+    }
+    
+    private ServiceModule findPrefixServiceModule(Long subModuleId, int cnt) {
+    	ServiceModule module = serviceModuleProvider.findServiceModuleById(subModuleId);
+    	if(module == null) {
+    		return null;
+    	} else if(ServiceModuleCategory.MODULE.getCode().equals(module.getCategory())) {
+    		return module;
+    	} else if(cnt > 50 || module.getId().equals(subModuleId) || module.getParentId() == null || module.getParentId().equals(0l)) {
+    		//loop detach
+    		return null;
+    	} else {
+    		return findPrefixServiceModule(module.getParentId(), cnt+1);
+    	}
+    }
+    
+    private ServiceModule findPrefixServiceModule(Long subModuleId) {
+    	return findPrefixServiceModule(subModuleId, 0);
     }
 
     //by lei.lv 没有模块管理员了，只保留检查接口，随时可能干掉
@@ -222,8 +246,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         if(0 < serviceModules.size()){
             ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
             p_moduleId = module.getId();
-            if(module.getLevel() > 2){
-                p_moduleId = module.getParentId();
+            if(!ServiceModuleCategory.MODULE.getCode().equals(module.getCategory())){
+            	ServiceModule pmodule = findPrefixServiceModule(module.getParentId());
+            	if(pmodule != null) {
+            		p_moduleId = pmodule.getId();
+            	}
             }
         }
         // 查询app关联的moduleId

@@ -5,7 +5,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul> 
  * <li>SERVICE_HOTLINE:  1服务热线</li>
- * <li>ZHUANSHU_SERVICE: 2专属客服</li> 
+ * <li>ZHUANSHU_SERVICE: 2专属客服</li>
+ * </ul>
  */
 public enum ServiceType {
 	SERVICE_HOTLINE((byte) 1), ZHUANSHU_SERVICE((byte) (1<<1)) ;

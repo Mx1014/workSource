@@ -196,7 +196,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), null,0L);//申请记录
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), null,cmd.getCommunityId());//申请记录
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -822,7 +822,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);//房源招租权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,cmd.getCommunityId());//房源招租权限
 		}
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -1186,14 +1186,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	private List<ProjectDTO> getProjectDTOs(Long id) {
 		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeasePromotionCommunities(id);
-		Map<Long, Community> temp = communityProvider.listCommunitiesByIds(communityIds);
-		return temp.values().stream().map(r -> {
-			ProjectDTO projectDTO = new ProjectDTO();
-			projectDTO.setProjectId(r.getId());
-			projectDTO.setProjectName(r.getName());
+		if (communityIds!=null && communityIds.size()>0) {
+			Map<Long, Community> temp = communityProvider.listCommunitiesByIds(communityIds);
+			return temp.values().stream().map(r -> {
+				ProjectDTO projectDTO = new ProjectDTO();
+				projectDTO.setProjectId(r.getId());
+				projectDTO.setProjectName(r.getName());
 
-			return projectDTO;
-		}).collect(Collectors.toList());
+				return projectDTO;
+			}).collect(Collectors.toList());
+		}else
+			return null;
 	}
 
 	@Override
@@ -1446,6 +1449,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		dto.setAreaSearchFlag(LeasePromotionFlag.DISABLED.getCode());
 		dto.setConsultFlag(LeasePromotionFlag.DISABLED.getCode());
 		dto.setBuildingIntroduceFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setHideAddressFlag(LeasePromotionFlag.DISABLED.getCode());
 		String[] defaultNames = {"项目介绍","房源招租"};
 		String[] defaultOrders = {"1","2"};
 		dto.setDisplayNames(Arrays.stream(defaultNames).collect(Collectors.toList()));
@@ -1464,6 +1468,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					case AREA_SEARCH_FLAG: dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
 					case CONSULT_FLAG: dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
 					case BUILDING_INTRODUCE_FLAG: dto.setBuildingIntroduceFlag(Byte.valueOf(c.getConfigValue())); break;
+					case HIDE_ADDRESS_FLAG: dto.setHideAddressFlag(Byte.valueOf(c.getConfigValue()));break;
 					case DISPLAY_NAME_STR:
 						String displayNameStr = c.getConfigValue();
 						String[] names = displayNameStr.split(",");

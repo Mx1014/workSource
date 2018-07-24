@@ -97,7 +97,10 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 			else
 				createFlowCaseCommand.setTitle(taskCategory.getName());
 			createFlowCaseCommand.setServiceType(taskCategory.getName());
-			createFlowCaseCommand.setApplyUserId(UserContext.currentUserId());
+			if (requestorUid!=null)
+				createFlowCaseCommand.setApplyUserId(requestorUid);
+			else
+				createFlowCaseCommand.setApplyUserId(UserContext.currentUserId());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 			createFlowCaseCommand.setReferId(task.getId());
@@ -123,9 +126,6 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 			}
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
-			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-
-			String params = flowNode.getParams();
 
 //			if(StringUtils.isBlank(params)) {
 //				LOGGER.error("Invalid flowNode param.");
@@ -135,8 +135,7 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 
 //			JSONObject paramJson = JSONObject.parseObject(params);
 //			String nodeType = paramJson.getString("nodeType");
-
-			task.setStatus(PmTaskFlowStatus.ACCEPTING.getCode());
+			task.setStatus(FlowCaseStatus.PROCESS.getCode());
 			task.setFlowCaseId(flowCase.getId());
 			pmTaskProvider.updateTask(task);
 			return task;

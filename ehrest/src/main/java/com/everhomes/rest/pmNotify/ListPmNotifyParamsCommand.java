@@ -14,6 +14,8 @@ public class ListPmNotifyParamsCommand {
 
     private Long communityId;
 
+    private String ownerType;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -28,6 +30,14 @@ public class ListPmNotifyParamsCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

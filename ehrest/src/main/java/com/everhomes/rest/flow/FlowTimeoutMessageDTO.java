@@ -3,6 +3,7 @@ package com.everhomes.rest.flow;
 import com.everhomes.util.StringHelper;
 
 public class FlowTimeoutMessageDTO {
+
 	private Long flowCaseId;
 	private Long flowNodeId;
 	private Long flowTargetId;

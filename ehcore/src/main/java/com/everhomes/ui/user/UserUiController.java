@@ -83,7 +83,7 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping(value = "listContactsByScene")
     @RestReturn(value = ListContactBySceneRespose.class)
-    public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
+    public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd){
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
 // 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 		Long organizationId = UserContext.current().getAppContext().getOrganizationId();
@@ -91,19 +91,18 @@ public class UserUiController extends ControllerBase {
 
  	    List<SceneContactDTO> dtos = null;
 		//if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-			//兼容老版本的app by sfyan 20161020
+		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+			//	兼容老版本的app by sf.yan 20161020
 			if(null == cmd.getOrganizationId()){
-				//cmd.setOrganizationId(sceneToken.getEntityId());
-				cmd.setOrganizationId(organizationId);
+				cmd.setOrganizationId(sceneToken.getEntityId());
 			}
 			command.setOrganizationId(cmd.getOrganizationId());
-			command.setPageSize(100000);
+			command.setPageSize(Integer.MAX_VALUE - 1);
 			command.setIsSignedup(cmd.getIsSignedup());
-			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
-			    command.setVisibleFlag(VisibleFlag.ALL.getCode());
-			ListOrganizationContactCommandResponse res1 = organizationService.listOrganizationContacts(command);
-			List<OrganizationContactDTO> members = res1.getMembers();
+/*			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
+			    command.setVisibleFlag(VisibleFlag.ALL.getCode());*/
+			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
+			List<OrganizationContactDTO> members = res.getMembers();
 			if(null != members){
 				dtos = members.stream().map(r->{
 					SceneContactDTO dto = new SceneContactDTO();
@@ -115,14 +114,13 @@ public class UserUiController extends ControllerBase {
 					dto.setInitial(r.getInitial());
 					dto.setFullInitial(r.getFullInitial());
 					dto.setFullPinyin(r.getFullPinyin());
-					//增加岗位显示与 detailId added by R 20120713
+					//增加岗位显示与 detailId added by ryan 20120713
 					dto.setJobPosition(r.getJobPosition());
 					dto.setDetailId(r.getDetailId());
 					dto.setVisibleFlag(r.getVisibleFlag());
 					return dto;
 				}).collect(Collectors.toList());
 			}
-			 
 		//}
 
 		//List<FamilyMemberDTO> resp = null;
@@ -144,7 +142,6 @@ public class UserUiController extends ControllerBase {
 //			// 群聊里只看同一个家庭的人  edit by yanjun 20170803
 //			resp = familyService.listFamilyMembersByFamilyId(sceneToken.getEntityId(), 0, 100000);
 //		}
- 	    
 // 	    if(null != resp &&  0 != resp.size()){
 // 	    	dtos = resp.stream().map(r->{
 //				SceneContactDTO dto = new SceneContactDTO();
@@ -326,7 +323,7 @@ public class UserUiController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /ui/user/checkContactAdmin </b>
-	 * <p>判断用户是否为管理员</p>
+	 * <p>判断用户是否拥有通讯录权限</p>
 	 */
 	@RequestMapping("checkContactAdmin")
 	@RestReturn(value=CheckContactAdminResponse.class)

@@ -19,6 +19,8 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
@@ -38,10 +40,14 @@ import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.google.gson.reflect.TypeToken;
 import org.jooq.*;
+import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +77,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	private PortalVersionProvider portalVersionProvider;
 	@Autowired
 	private PortalService portalService;
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 	@Autowired
 	private OrganizationAppProvider organizationAppProvider;

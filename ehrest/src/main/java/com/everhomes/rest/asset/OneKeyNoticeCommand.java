@@ -42,6 +42,15 @@ public class OneKeyNoticeCommand {
     private Byte billStatus;
     private String targetName;
     private String billGroupName;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     private Long billGroupId;
     private String buildingName;

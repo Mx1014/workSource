@@ -45,8 +45,8 @@ public class ResourceTimeRuleDTO {
     private Long beginDate;
     private Long endDate;
 
-    private Double dayOpenTime;
-    private Double dayCloseTime;
+    @ItemType(RentalOpenTimeDTO.class)
+    private List<RentalOpenTimeDTO> openTimes;
 
     @ItemType(Long.class)
     private List<Long> closeDates;
@@ -153,20 +153,12 @@ public class ResourceTimeRuleDTO {
         this.endDate = endDate;
     }
 
-    public Double getDayOpenTime() {
-        return dayOpenTime;
+    public List<RentalOpenTimeDTO> getOpenTimes() {
+        return openTimes;
     }
 
-    public void setDayOpenTime(Double dayOpenTime) {
-        this.dayOpenTime = dayOpenTime;
-    }
-
-    public Double getDayCloseTime() {
-        return dayCloseTime;
-    }
-
-    public void setDayCloseTime(Double dayCloseTime) {
-        this.dayCloseTime = dayCloseTime;
+    public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
+        this.openTimes = openTimes;
     }
 
     public List<Long> getCloseDates() {

@@ -20,6 +20,7 @@ public class LeaseBuildingDTO {
     private String aliasName;
     private String managerName;
     private String managerContact;
+    private Long managerUid;
     private Double longitude;
     private Double latitude;
     private String address;
@@ -267,6 +268,14 @@ public class LeaseBuildingDTO {
 
     public void setCommunityName(String communityName) {
         this.communityName = communityName;
+    }
+
+    public Long getManagerUid() {
+        return managerUid;
+    }
+
+    public void setManagerUid(Long managerUid) {
+        this.managerUid = managerUid;
     }
 
     @Override

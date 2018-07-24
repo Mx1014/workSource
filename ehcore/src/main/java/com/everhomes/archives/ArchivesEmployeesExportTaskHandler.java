@@ -23,7 +23,7 @@ public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandl
     private TaskService taskService;
 
     @Autowired
-    private ArchivesService archivesService;
+    private ArchivesDTSService archivesDTSService;
 
     @Override
     public void beforeExecute(Map<String, Object> params) {
@@ -43,7 +43,9 @@ public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandl
         String keywords = null;
         if(params.get("keywords") != null)
             keywords = (String) params.get("keywords");
-        Integer namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
+        Integer namespaceId = null;
+        if(params.get("keywords") != null)
+            namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
         Long userId = (Long) params.get("userId");
 
         //  set the basic data
@@ -63,7 +65,7 @@ public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandl
 
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
-        OutputStream outputStream = archivesService.getArchivesEmployeesExportStream(cmd, taskId);
+        OutputStream outputStream = archivesDTSService.getArchivesEmployeesExportStream(cmd, taskId);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
         taskService.processUpdateTask(taskId, fileLocationDTO);
     }

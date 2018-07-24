@@ -1252,8 +1252,6 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	ListScriptsCommand sc = new ListScriptsCommand();
     	sc.setEntityId(flow.getFlowMainId());
     	sc.setEntityType(FlowEntityType.FLOW.getCode());
-    	ListScriptsResponse scResp = flowService.listScripts(sc);
-    	Assert.assertTrue(scResp.getScripts().size() > 0);
     }
 
     @Test

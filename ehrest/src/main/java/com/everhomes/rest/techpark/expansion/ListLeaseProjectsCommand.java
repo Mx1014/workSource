@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
+ * <li>communityId: 给客户端进行可见范围筛选</li>
 */
 public class ListLeaseProjectsCommand {
     private Integer namespaceId;
@@ -52,6 +53,7 @@ public class ListLeaseProjectsCommand {
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
+
 
     @Override
     public String toString() {

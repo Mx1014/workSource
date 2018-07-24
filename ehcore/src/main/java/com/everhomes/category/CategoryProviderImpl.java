@@ -1,26 +1,6 @@
 // @formatter:off
 package com.everhomes.category;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.SortField;
-import org.jooq.impl.DefaultRecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -38,6 +18,20 @@ import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -419,6 +413,24 @@ public class CategoryProviderImpl implements CategoryProvider {
 		
 		return null;
 	}
-    
-    
+
+    @Override
+    public List<Category> listTaskCategoriesByparentId(Integer namespaceId, String ownerType, List<Long> ownerIds, Long parentId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+        SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
+        if(null != namespaceId)
+            query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if (null!=ownerType)
+            query.addConditions(Tables.EH_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        if (null!=ownerIds && ownerIds.size() > 0)
+            query.addConditions(Tables.EH_CATEGORIES.OWNER_ID.in(ownerIds));
+        if(null != parentId)
+            query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
+        query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_CATEGORIES.ID.asc());
+        List<Category> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, Category.class))
+                .collect(Collectors.toList());
+
+        return result;
+    }
 }

@@ -148,4 +148,12 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider, Appli
         
         return objs;
     }
+
+    @Override
+    public List<LocaleTemplate> findLocaleTemplateByCode(String ... scopes) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return dslContext.selectFrom(Tables.EH_LOCALE_TEMPLATES)
+                .where(Tables.EH_LOCALE_TEMPLATES.SCOPE.in(scopes))
+                .fetchInto(LocaleTemplate.class);
+    }
 }

@@ -10,8 +10,13 @@ import java.util.stream.Collectors;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.pmtask.PmTaskAppType;
 import com.everhomes.rest.pmtask.PmtaskCreatorType;
+import com.everhomes.rest.pmtask.SearchTasksCommand;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -49,6 +54,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 	private PmTaskProvider pmTaskProvider;
     @Autowired
     private CategoryProvider categoryProvider;
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
 	@Override
 	public String getIndexType() {
@@ -74,6 +81,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("requestorPhone", task.getRequestorPhone());
             b.field("buildingName", task.getBuildingName());
             b.field("organizationUid",task.getOrganizationUid()==null?0:task.getOrganizationUid());
+            b.field("star",task.getStar());
+            b.field("amount",task.getAmount());
 
             Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
             //多入口查全部数据
@@ -153,13 +162,14 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     }
 
     @Override
-    public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, 
+    public List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate,
     		Long endDate, Long addressId, String buildingName,Byte creatorType, Long pageAnchor, Integer pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         
         FilterBuilder fb;
 //      int namespaceId = UserContext.getCurrentNamespaceId();
+
         fb = FilterBuilders.termFilter("ownerId", ownerId);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", ownerType));
         
@@ -243,6 +253,108 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         
         return dtos;        
     }
+
+    @Override
+    public List<PmTaskDTO> searchAllDocsByType(SearchTasksCommand cmd, Integer pageSize) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+
+        FilterBuilder fb;
+//      int namespaceId = UserContext.getCurrentNamespaceId();
+        List<Long> ownerIds = new ArrayList<>();
+        if(-1L == cmd.getOwnerId()){
+            ListUserRelatedProjectByModuleCommand cmd1 = new ListUserRelatedProjectByModuleCommand();
+            cmd1.setModuleId(20100L);
+            cmd1.setAppId(cmd.getAppId());
+            cmd1.setOrganizationId(cmd.getCurrentPMId());
+            List<ProjectDTO> dtos = serviceModuleService.listUserRelatedProjectByModuleId(cmd1);
+            ownerIds.addAll(dtos.stream().map(elem ->{return elem.getProjectId();}).collect(Collectors.toList()));
+            fb = FilterBuilders.inFilter("ownerId",ownerIds.toArray());
+        } else{
+            fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
+        }
+
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+
+        BoolQueryBuilder qb;
+        //http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-dis-max-query.html
+        //http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html
+        qb = QueryBuilders.boolQuery();
+
+        if(StringUtils.isNotBlank(cmd.getKeyword())){
+            MultiMatchQueryBuilder mb = QueryBuilders.multiMatchQuery(cmd.getKeyword(),"requestorName","requestorPhone","content");
+            qb = qb.must(mb);
+        }
+
+        RangeQueryBuilder rb = null;
+        if(null != cmd.getPageAnchor()){
+            rb = QueryBuilders.rangeQuery("createTime").lte(cmd.getPageAnchor());
+            qb = qb.must(rb);
+        }
+        if(null != cmd.getStartDate()){
+            rb = QueryBuilders.rangeQuery("createTime").gt(cmd.getStartDate());
+        }
+        if(null != cmd.getEndDate()){
+            if(null == rb)
+                rb = QueryBuilders.rangeQuery("createTime");
+            rb.lt(cmd.getEndDate());
+            qb = qb.must(rb);
+        }
+        if (null!= cmd.getCreatorType()){
+            if (cmd.getCreatorType().equals(PmtaskCreatorType.SELF.getCode()))
+                rb = QueryBuilders.rangeQuery("organizationUid").lte(0l);
+            if (cmd.getCreatorType().equals(PmtaskCreatorType.OTHERS.getCode()))
+                rb = QueryBuilders.rangeQuery("organizationUid").gt(0l);
+            qb = qb.must(rb);
+        }
+
+        if(StringUtils.isNotBlank(cmd.getBuildingName())){
+            QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getBuildingName()).field("buildingName");
+            qb = qb.must(sb);
+        }
+
+        if(null != cmd.getTaskCategoryId()){
+            if (Arrays.asList(PmTaskAppType.TYPES).contains(cmd.getTaskCategoryId())) {
+                QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getTaskCategoryId().toString()).field("appType");
+                qb = qb.must(sb);
+            }else {
+                QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getTaskCategoryId().toString()).field("taskCategoryId");
+                qb = qb.must(sb);
+            }
+        }
+
+        if(null != cmd.getStatus()){
+            QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getStatus().toString()).field("status");
+            qb = qb.must(sb);
+        }
+
+        if(null != cmd.getAddressId()){
+            QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getAddressId().toString()).field("addressId");
+            qb = qb.must(sb);
+        }
+
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        if(null != pageSize)
+            builder.setSize(pageSize);
+        builder.setQuery(qb).setPostFilter(fb);
+        // builder.addSort("createTime", SortOrder.ASC);
+        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Search pm tasks, builder={}", builder);
+        }
+
+        SearchResponse rsp = builder.execute().actionGet();
+
+        List<PmTaskDTO> dtos = new ArrayList<>();
+        SearchHit[] docs = rsp.getHits().getHits();
+        for (SearchHit sd : docs) {
+            PmTaskDTO d = readDoc(sd.getSource(), sd.getId());
+            if(null != d) {
+                dtos.add(d);
+            }
+        }
+
+        return dtos;
+    }
     
     private PmTaskDTO readDoc(Map<String, Object> source, String idAsStr) {
         try {
@@ -262,6 +374,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
             doc.setBuildingName((String)source.get("buildingName"));
             doc.setOrganizationUid(SearchUtils.getLongField(source.get("organizationUid")));
+            doc.setStar( null != source.get("star") ? (String)source.get("star"):"");
+            doc.setAmount(SearchUtils.getLongField(source.get("amount")));
             
             return doc;
         }catch (Exception ex) {

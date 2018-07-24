@@ -111,6 +111,10 @@ public class StatEventStatisticProviderImpl implements StatEventStatisticProvide
         fields.add(DSL.sum(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.TOTAL_COUNT)).as("totalCountTimes"));
         fields.addAll(Arrays.asList(orderByIdDescTable.fields()));
 
+        return getStatEventStatistics(context, orderByIdDescTable, portalStatIdList, fields);
+    }
+
+    private List<StatEventStatistic> getStatEventStatistics(DSLContext context, Table<EhStatEventStatisticsRecord> orderByIdDescTable, SelectConditionStep<Record1<Long>> portalStatIdList, List<Field<?>> fields) {
         return context.select(fields)
                 .from(orderByIdDescTable)
                 .where(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.EVENT_PORTAL_STAT_ID).in(portalStatIdList))
@@ -192,16 +196,7 @@ public class StatEventStatisticProviderImpl implements StatEventStatisticProvide
         fields.add(DSL.sum(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.TOTAL_COUNT)).as("totalCountTimes"));
         fields.addAll(Arrays.asList(orderByIdDescTable.fields()));
 
-        return context.select(fields)
-                .from(orderByIdDescTable)
-                .where(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.EVENT_PORTAL_STAT_ID).in(portalStatIdList))
-                .groupBy(orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.OWNER_TYPE), orderByIdDescTable.field(Tables.EH_STAT_EVENT_STATISTICS.OWNER_ID))
-                .fetch().map(r -> {
-                    StatEventStatistic stat = r.into(StatEventStatistic.class);
-                    BigDecimal totalCountTimes = r.getValue(DSL.fieldByName(BigDecimal.class, "totalCountTimes"));
-                    stat.setTotalCount(totalCountTimes.longValue());
-                    return stat;
-                });
+        return getStatEventStatistics(context, orderByIdDescTable, portalStatIdList, fields);
     }
 
     private EhStatEventStatisticsDao rwDao() {

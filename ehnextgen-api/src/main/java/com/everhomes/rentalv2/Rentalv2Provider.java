@@ -6,6 +6,8 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.rentalv2.MaxMinPrice;
+import com.everhomes.rest.rentalv2.RentalStatisticsDTO;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2DayopenTime;
 
 public interface Rentalv2Provider {
 
@@ -18,6 +20,10 @@ public interface Rentalv2Provider {
 	void createRentalSiteRule(RentalCell rsr);
 
 	Long createRentalOrder(RentalOrder rentalBill);
+
+	Long createRentalOrderStatistics(RentalOrderStatistics statistics);
+
+	void deleteRentalOrderStatisticsByOrderId(Long orderId);
 
 	Long createRentalItemBill(RentalItemsOrder rib);
 
@@ -59,13 +65,17 @@ public interface Rentalv2Provider {
 	List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId);
+	List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId ,ListingLocator locator, Integer pageSize );
 	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
 
+	List<RentalOrder> listActiveBillsByInterval(Long rentalSiteId,Long startTime, Long endTime);
 
-	List<RentalOrder> listSuccessRentalBills();
+	List<RentalOrder> listTargetRentalBills(Byte status);
 	
 	List<RentalResource> findRentalSites(Long resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize, Byte status,List<Long>  siteIds,Long communityId);
+
+	List<RentalResource> findRentalSitesByCommunityId(String resouceType,Long resourceTypeId,Long communityId);
 
 	List<RentalOrder> listRentalBills(Long ownerId, String ownerType,
 			String siteType, Long rentalSiteId, Long beginDate, Long endDate);
@@ -84,6 +94,8 @@ public interface Rentalv2Provider {
 
 	void createRentalCloseDate(RentalCloseDate rcd);
 
+	void createRentalDayopenTime(RentalDayopenTime rdt);
+
 	void createRentalConfigAttachment(RentalConfigAttachment rca);
 
 	RentalDefaultRule getRentalDefaultRule(String ownerType, Long ownerId, String resourceType, Long resourceTypeId,
@@ -97,6 +109,8 @@ public interface Rentalv2Provider {
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String resourceType, String ownerType, Long ownerId,Byte attachmentType);
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids);
+
+	List<RentalDayopenTime> queryRentalDayopenTimeByOwner(String resourceType, String ownerType, Long ownerId,Byte rentalType);
 
 	void createRentalSiteOwner(RentalSiteRange siteOwner);
 
@@ -120,6 +134,8 @@ public interface Rentalv2Provider {
 
 	Integer deleteRentalConfigAttachmentsByOwnerId(String resourceType, String ownerType, Long id,Byte attachmentType);
 
+	Integer deleteRentalDayopenTimeByOwnerId(String resourceType, String ownerType, Long id);
+
 	List<RentalSiteRange> findRentalSiteOwnersBySiteId(String resourceType, Long siteId);
 
 	Integer countRentalSiteItemRentalCount(List<Long> rentalBillIds);
@@ -137,6 +153,8 @@ public interface Rentalv2Provider {
 	RentalRefundOrder getRentalRefundOrderById(Long rentalRefundOrderId);
 
 	RentalRefundOrder getRentalRefundOrderByRefundNo(String refundOrderNo);
+
+	RentalRefundOrder getRentalRefundOrderByOrderNo(String orderNo);
 
 	RentalResourceType getRentalResourceTypeById(Long rentalResourceTypeId);
 
@@ -168,6 +186,8 @@ public interface Rentalv2Provider {
 	List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds);
 
 	List<RentalCell> getRentalCellsByIds(List<Long> cellIds);
+
+	List<RentalCell> getRentalCellsByRange(Long minId,Long maxId);
 
 	Double countRentalSiteBillBySiteRuleId(Long cellId);
 
@@ -201,4 +221,20 @@ public interface Rentalv2Provider {
 											   Long rentalSiteId, String spaceNo);
 	List<String> listParkingNoInUsed(Integer namespaceId, Long resourceTypeId, String resourceType,
 									 Long rentalSiteId,List<Long> cellIds);
+
+	BigDecimal countRentalBillAmount(String resourceType,Long resourceTypeId,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
+
+	List<RentalStatisticsDTO> listRentalBillAmountByOrgId(String resourceType, Long resourceTypeId, Long communityId,
+														  Long startTime, Long endTime, Integer order);
+
+	Integer countRentalBillNum(String resourceType,Long resourceTypeId,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
+
+	List<RentalStatisticsDTO> listRentalBillNumByOrgId(String resourceType, Long resourceTypeId,Long communityId,
+													   Long startTime, Long endTime,Integer order);
+
+	Long countRentalBillValidTime(String resourceType,Long resourceTypeId,Long communityId,Long startTime, Long endTime,Long rentalSiteId,Long orgId);
+
+	List<RentalStatisticsDTO> listRentalBillValidTimeByOrgId(String resourceType, Long resourceTypeId,Long communityId,
+															 Long startTime, Long endTime,Integer order);
+	String getHolidayCloseDate (Byte holidayType);
 }

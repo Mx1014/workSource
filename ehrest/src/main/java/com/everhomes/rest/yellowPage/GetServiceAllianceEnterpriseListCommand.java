@@ -1,7 +1,11 @@
 package com.everhomes.rest.yellowPage;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.common.TagSearchItem;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,9 +16,12 @@ import com.everhomes.util.StringHelper;
  *  <li>parentId: 父id</li>
  *  <li>type:类型  </li>
  *  <li>categoryId: 所属服务联盟类型id</li>
- *  <li>nextPageAnchor: 下一页锚点</li>
+ *  <li>displayFlag: 是否启用 0-不启用 1-启用 传空则表示所有</li>
+ *  <li>nextPageAnchor: 下一页锚点(旧版本使用)</li>
+ *  <li>pageAnchor: 下一页锚点（新版本使用）</li>
  *  <li>pageSize: 每页的数量</li>
  *  <li>sourceRequestType: 客户端或者web端 ,web端请务必传值。 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType}</li>
+ *  <li>tagItems: 传过来的筛选列表（list）。 参考 {@link com.everhomes.rest.common.TagSearchItem}</li>
  * </ul>
  */
 public class GetServiceAllianceEnterpriseListCommand {
@@ -31,13 +38,22 @@ public class GetServiceAllianceEnterpriseListCommand {
 
 	private Long nextPageAnchor;
 
+	private Long pageAnchor;
+	
 	private Integer pageSize;
+	
+	private Byte displayFlag;
 
 	private Long categoryId;
 	
 	private Long type;
 	
 	private Byte sourceRequestType;
+	
+	@ItemType(TagSearchItem.class)
+	private List<TagSearchItem> tagItems;
+	
+	
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
@@ -108,6 +124,9 @@ public class GetServiceAllianceEnterpriseListCommand {
 
 
 	public Long getNextPageAnchor() {
+		if (null == nextPageAnchor) {
+			return pageAnchor;
+		}
 		return nextPageAnchor;
 	}
 
@@ -151,4 +170,33 @@ public class GetServiceAllianceEnterpriseListCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Byte getDisplayFlag() {
+		return displayFlag;
+	}
+
+	public void setDisplayFlag(Byte displayFlag) {
+		this.displayFlag = displayFlag;
+	}
+
+
+	public Long getPageAnchor() {
+		if (null == pageAnchor) {
+			return nextPageAnchor;
+		}
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public List<TagSearchItem> getTagItems() {
+		return tagItems;
+	}
+
+	public void setTagItems(List<TagSearchItem> tagItems) {
+		this.tagItems = tagItems;
+
+	}
 }

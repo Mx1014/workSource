@@ -7,12 +7,22 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:  
  * <li>organizationId: 公司id</li>
+ * <li>categoryId: 合同类型categoryId，用于多入口</li>
  * </ul>
  */
 public class ListContractsByOraganizationIdCommand {
 
 	private Long organizationId;
-	
+
+	private Long categoryId;
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
 	public ListContractsByOraganizationIdCommand() {
 
 	}

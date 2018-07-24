@@ -3,8 +3,54 @@ package com.everhomes.entity;
 
 import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.techpark.expansion.LeasePromotion;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhAppUrls;
+import com.everhomes.server.schema.tables.pojos.EhAuthorizationRelations;
+import com.everhomes.server.schema.tables.pojos.EhBuildings;
+import com.everhomes.server.schema.tables.pojos.EhCategories;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhCommunityApprove;
+import com.everhomes.server.schema.tables.pojos.EhContracts;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
+import com.everhomes.server.schema.tables.pojos.EhDomains;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterTasks;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+import com.everhomes.server.schema.tables.pojos.EhForums;
+import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalVals;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
+import com.everhomes.server.schema.tables.pojos.EhLeaseProjects;
+import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
+import com.everhomes.server.schema.tables.pojos.EhNews;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.pojos.EhParkingCarVerifications;
+import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
+import com.everhomes.server.schema.tables.pojos.EhParkingClearanceLogs;
+import com.everhomes.server.schema.tables.pojos.EhParkingLots;
+import com.everhomes.server.schema.tables.pojos.EhPaymentApplications;
+import com.everhomes.server.schema.tables.pojos.EhPmTasks;
+import com.everhomes.server.schema.tables.pojos.EhPortalItemCategories;
+import com.everhomes.server.schema.tables.pojos.EhPortalItemGroups;
+import com.everhomes.server.schema.tables.pojos.EhPortalItems;
+import com.everhomes.server.schema.tables.pojos.EhPortalLayouts;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
+import com.everhomes.server.schema.tables.pojos.EhRegions;
+import com.everhomes.server.schema.tables.pojos.EhRelocationRequestItems;
+import com.everhomes.server.schema.tables.pojos.EhRelocationRequests;
+import com.everhomes.server.schema.tables.pojos.EhResourceCategories;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
+import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
+import com.everhomes.server.schema.tables.pojos.EhServiceModules;
+import com.everhomes.server.schema.tables.pojos.EhTalentRequests;
+import com.everhomes.server.schema.tables.pojos.EhUserImpersonations;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseRequests;
 
 /**
  * <p>实体类型:</p>
@@ -74,6 +120,7 @@ public enum EntityType {
 	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
 
 	EQUIPMENT_TASK(EhEquipmentInspectionTasks.class.getSimpleName()),
+	QUALITY_TASK(EhQualityInspectionTasks.class.getSimpleName()),
     CHILD_PROJECT("child_project"),
     LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName()),
 
@@ -86,7 +133,9 @@ public enum EntityType {
     RELOCATION_REQUEST(EhRelocationRequests.class.getSimpleName()),
     RELOCATION_REQUEST_ITEM(EhRelocationRequestItems.class.getSimpleName()),
     DOMAIN(EhDomains.class.getSimpleName()),
-    PAYMENT_APPLICATION(EhPaymentApplications.class.getSimpleName());
+    PAYMENT_APPLICATION(EhPaymentApplications.class.getSimpleName()),
+    GENERAL_APPROVAL_VAL(EhGeneralApprovalVals.class.getSimpleName()),
+    ACTIVITY_ROSTER(EhActivityRoster.class.getSimpleName());
 
 
 

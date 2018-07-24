@@ -1,11 +1,15 @@
+// @formatter:off
 package com.everhomes.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.web.socket.WebSocketSession;
 
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.util.StringHelper;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -63,6 +67,10 @@ public class AclinkWebSocketState {
             
             AclinkWebSocketMessage cmd = new AclinkWebSocketMessage();
             cmd.setId(this.getId());
+            //by liuyilin 20180419 TODO local server syncWebsocketMessages
+            if(this.getUuid().length() == 6){
+            	cmd.setType(1);
+            }
             handler.nextMessage(cmd, session, this);
             this.loopCnt++;
         }
@@ -91,6 +99,17 @@ public class AclinkWebSocketState {
             handler.nextMessage(cmd, session, this);
             this.loopCnt++;
         }
+    }
+    
+    public void onRequest(byte[] buf, WebSocketSession session, AclinkWebSocketHandler handler){
+    	AclinkWebSocketMessage cmd = new AclinkWebSocketMessage();
+        cmd.setId(this.getId());
+        cmd.setSeq(new Long(0));
+        cmd.setType(new Integer(0));
+        cmd.setPayload(Base64.encodeBase64String(buf));
+        Map<String, String> params = new HashMap<String, String>();
+        StringHelper.toStringMap(null, cmd, params);
+        handler.excuteMessage(params, session, this, "/aclink/excuteMessage");
     }
     
     public void onServerMessage(AclinkWebSocketMessage cmd, WebSocketSession session, AclinkWebSocketHandler handler) {

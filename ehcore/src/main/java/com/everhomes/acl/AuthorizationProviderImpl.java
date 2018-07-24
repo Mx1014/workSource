@@ -496,7 +496,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 				}
 
 				if(null != appId){
-					query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_APP_ID.eq(appId));
+				    //如果是指定应用搜索，则寻找所有应用或者指定此应用的条目。
+					query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_APP_ID.eq(appId).or(Tables.EH_AUTHORIZATIONS.MODULE_APP_ID.eq(0l)));
 				}
 
 				if(!StringUtils.isEmpty(moduleControlType)){

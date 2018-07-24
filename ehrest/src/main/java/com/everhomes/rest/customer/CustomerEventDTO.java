@@ -1,8 +1,8 @@
 package com.everhomes.rest.customer;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -24,8 +24,11 @@ public class CustomerEventDTO {
     private Long creatorUid;
     private String creatorName;
     private Timestamp createTime;
+    private String operateTime;
     private String content;
-    
+    private Byte deviceType;
+    private String sourceType;
+
 
     public Long getId() {
 		return id;
@@ -90,6 +93,30 @@ public class CustomerEventDTO {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public Byte getDeviceType() {
+		return deviceType;
+	}
+
+	public void setDeviceType(Byte deviceType) {
+		this.deviceType = deviceType;
+	}
+
+	public String getOperateTime() {
+		return operateTime;
+	}
+
+	public void setOperateTime(String operateTime) {
+		this.operateTime = operateTime;
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
 	}
 
 	@Override

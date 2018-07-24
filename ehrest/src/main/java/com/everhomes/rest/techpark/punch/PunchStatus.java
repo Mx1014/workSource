@@ -38,7 +38,10 @@ public enum PunchStatus {
         return this.code;
     }
     
-    public static PunchStatus fromCode(byte code) {
+    public static PunchStatus fromCode(Byte code) {
+        if (null == code) {
+            return null;
+        }
         for(PunchStatus t : PunchStatus.values()) {
             if (t.code == code) {
                 return t;

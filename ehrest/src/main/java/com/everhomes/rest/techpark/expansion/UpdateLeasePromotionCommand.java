@@ -46,6 +46,7 @@ public class UpdateLeasePromotionCommand {
 	private String   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
+	private Long contactUid;
 	private String   description;
 	private Long enterTime;
 
@@ -248,6 +249,14 @@ public class UpdateLeasePromotionCommand {
 
 	public void setHouseResourceType(String houseResourceType) {
 		this.houseResourceType = houseResourceType;
+	}
+
+	public Long getContactUid() {
+		return contactUid;
+	}
+
+	public void setContactUid(Long contactUid) {
+		this.contactUid = contactUid;
 	}
 
 	@Override

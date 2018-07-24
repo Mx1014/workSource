@@ -6,6 +6,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.portal.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,9 +16,12 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/portal")
 public class PortalController extends ControllerBase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PortalController.class);
 	
 	@Autowired
 	private PortalService portalService;
@@ -619,7 +624,7 @@ public class PortalController extends ControllerBase {
 	 */
 	@RequestMapping("syncLaunchPadData")
 	@RestReturn(String.class)
-	public RestResponse syncLaunchPadData(SyncLaunchPadDataCommand cmd){
+	public RestResponse syncLaunchPadData(@Valid SyncLaunchPadDataCommand cmd){
 
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
@@ -670,6 +675,8 @@ public class PortalController extends ControllerBase {
 	public RestResponse revertVersion(RevertVersionCommand cmd){
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		LOGGER.info("revertVersion time = {}, cmd = {}", System.currentTimeMillis(), cmd);
 
 		portalService.revertVersion(cmd);
 		RestResponse response = new RestResponse();

@@ -23,7 +23,15 @@ public class ModifyChargingStandardCommand {
     private Long ownerId;
     private String ownerType;
     private Integer namespaceId;
+    private Byte useUnitPrice;
 
+    public Byte getUseUnitPrice() {
+        return useUnitPrice;
+    }
+
+    public void setUseUnitPrice(Byte useUnitPrice) {
+        this.useUnitPrice = useUnitPrice;
+    }
 
     @Override
     public String toString() {

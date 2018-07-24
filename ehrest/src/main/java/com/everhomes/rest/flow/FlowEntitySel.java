@@ -15,6 +15,14 @@ public class FlowEntitySel {
 	private Long entityId;
 	private String flowEntityType;
 
+	public FlowEntitySel() {
+	}
+
+	public FlowEntitySel(Long entityId, String flowEntityType) {
+		this.entityId = entityId;
+		this.flowEntityType = flowEntityType;
+	}
+
 	public Long getEntityId() {
 		return entityId;
 	}

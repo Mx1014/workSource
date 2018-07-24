@@ -134,7 +134,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             if (cmd.getReportType() != null)
                 report.setReportType(cmd.getReportType());
             report.setFormOriginId(cmd.getFormOriginId());
-            if(cmd.getFormOriginId().longValue() == 0)
+            if (cmd.getFormOriginId() == 0)
                 report.setStatus(WorkReportStatus.VALID.getCode());
             report.setFormVersion(cmd.getFormVersion());
             report.setOperatorUserId(userId);
@@ -161,38 +161,37 @@ public class WorkReportServiceImpl implements WorkReportService {
         List<Long> detailIds = new ArrayList<>();
         List<Long> organizationIds = new ArrayList<>();
 
-        if (scopes == null)
-            return;
+        if (scopes != null && scopes.size() > 0)
+            for (WorkReportScopeMapDTO dto : scopes) {
+                //  in order to record those ids.
+                if (dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
+                    organizationIds.add(dto.getSourceId());
+                else if (dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
+                    detailIds.add(dto.getSourceId());
 
-        for (WorkReportScopeMapDTO dto : scopes) {
-            //  in order to record those ids.
-            if (dto.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
-                organizationIds.add(dto.getSourceId());
-            else if (dto.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
-                detailIds.add(dto.getSourceId());
-
-            WorkReportScopeMap scopeMap = workReportProvider.getWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
-            if (scopeMap != null) {
-                scopeMap.setSourceDescription(dto.getSourceDescription());
-                scopeMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                workReportProvider.updateWorkReportScopeMap(scopeMap);
-            } else {
-                scopeMap = new WorkReportScopeMap();
-                scopeMap.setNamespaceId(UserContext.getCurrentNamespaceId());
-                scopeMap.setReportId(reportId);
-                scopeMap.setSourceType(dto.getSourceType());
-                scopeMap.setSourceId(dto.getSourceId());
-                scopeMap.setSourceDescription(dto.getSourceDescription());
-                workReportProvider.createWorkReportScopeMap(scopeMap);
+                WorkReportScopeMap scopeMap = workReportProvider.getWorkReportScopeMapBySourceId(reportId, dto.getSourceId());
+                if (scopeMap != null) {
+                    scopeMap.setSourceDescription(dto.getSourceDescription());
+                    scopeMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    workReportProvider.updateWorkReportScopeMap(scopeMap);
+                } else {
+                    scopeMap = new WorkReportScopeMap();
+                    scopeMap.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    scopeMap.setReportId(reportId);
+                    scopeMap.setSourceType(dto.getSourceType());
+                    scopeMap.setSourceId(dto.getSourceId());
+                    scopeMap.setSourceDescription(dto.getSourceDescription());
+                    workReportProvider.createWorkReportScopeMap(scopeMap);
+                }
             }
-        }
+
         //  remove the extra scope.
         if (detailIds.size() == 0)
             detailIds.add(0L);
-        workReportProvider.deleteOddWorkReportDetailScope(namespaceId, reportId, detailIds);
+        workReportProvider.deleteOddWorkReportScope(namespaceId, reportId, UniongroupTargetType.MEMBERDETAIL.getCode(), detailIds);
         if (organizationIds.size() == 0)
             organizationIds.add(0L);
-        workReportProvider.deleteOddWorkReportOrganizationScope(namespaceId, reportId, organizationIds);
+        workReportProvider.deleteOddWorkReportScope(namespaceId, reportId, UniongroupTargetType.ORGANIZATION.getCode(), organizationIds);
     }
 
     @Override
@@ -264,13 +263,10 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
 
-    public List<WorkReportScopeMapDTO> listWorkReportScopes(Long reportId) {
+    private List<WorkReportScopeMapDTO> listWorkReportScopes(Long reportId) {
         List<WorkReportScopeMap> results = workReportProvider.listWorkReportScopesMap(reportId);
         if (results != null && results.size() > 0) {
-            return results.stream().map(r -> {
-                WorkReportScopeMapDTO dto = ConvertHelper.convert(r, WorkReportScopeMapDTO.class);
-                return dto;
-            }).collect(Collectors.toList());
+            return results.stream().map(r -> ConvertHelper.convert(r, WorkReportScopeMapDTO.class)).collect(Collectors.toList());
         }
         return null;
     }
@@ -300,12 +296,12 @@ public class WorkReportServiceImpl implements WorkReportService {
         if (templates != null && templates.size() > 0) {
             dbProvider.execute((TransactionStatus status) -> {
                 for (WorkReportTemplate template : templates) {
-                    if (template.getFormTemplateId().longValue() == 0)
+                    if (template.getFormTemplateId() == 0)
                         createWorkReportByTemplate(template, null, cmd);
                     else {
                         CreateFormTemplatesCommand command = ConvertHelper.convert(cmd, CreateFormTemplatesCommand.class);
-                        Long formOriginId = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), command);
-                        createWorkReportByTemplate(template, formOriginId, cmd);
+                        GeneralFormDTO form = generalFormService.createGeneralFormByTemplate(template.getFormTemplateId(), command);
+                        createWorkReportByTemplate(template, form, cmd);
                     }
                 }
                 return null;
@@ -313,7 +309,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
     }
 
-    private void createWorkReportByTemplate(WorkReportTemplate template, Long formOriginId, CreateWorkReportTemplatesCommand cmd) {
+    private void createWorkReportByTemplate(WorkReportTemplate template, GeneralFormDTO form, CreateWorkReportTemplatesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.currentUserId();
         WorkReport report = workReportProvider.getWorkReportByTemplateId(UserContext.getCurrentNamespaceId(),
@@ -325,8 +321,10 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setReportType(template.getReportType());
             report.setOperatorUserId(userId);
             report.setOperatorName(fixUpUserName(userId, cmd.getOwnerId()));
-            if (formOriginId != null)
-                report.setFormOriginId(formOriginId);
+            if (form != null) {
+                report.setFormOriginId(form.getFormOriginId());
+                report.setFormVersion(form.getFormVersion());
+            }
             workReportProvider.updateWorkReport(report);
         } else {
             //  otherwise, create the report.
@@ -338,8 +336,10 @@ public class WorkReportServiceImpl implements WorkReportService {
             report.setStatus(WorkReportStatus.RUNNING.getCode());
             report.setOperatorUserId(userId);
             report.setOperatorName(fixUpUserName(userId, cmd.getOwnerId()));
-            if (formOriginId != null)
-                report.setFormOriginId(formOriginId);
+            if (form != null) {
+                report.setFormOriginId(form.getFormOriginId());
+                report.setFormVersion(form.getFormVersion());
+            }
             report.setReportTemplateId(template.getId());
             createWorkReport(report, cmd.getOrganizationId(), namespaceId);
         }
@@ -350,6 +350,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         ListWorkReportsResponse response = new ListWorkReportsResponse();
         Long userId = UserContext.currentUserId();
         OrganizationMember member = getMemberDepartmentByUserId(userId, cmd.getOwnerId());
+        if (member == null)
+            member = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, cmd.getOwnerId());
         List<WorkReportDTO> reports = new ArrayList<>();
         cmd.setPageSize(10000000);
         
@@ -365,15 +367,15 @@ public class WorkReportServiceImpl implements WorkReportService {
 
         //  filter the result and return back to the user.
         if (results != null && results.size() > 0) {
-            results.forEach(r -> {
+            for (WorkReport result : results) {
                 WorkReportDTO dto = new WorkReportDTO();
-                dto.setReportName(r.getReportName());
-                dto.setReportId(r.getId());
-                dto.setReportType(r.getReportType());
+                dto.setReportName(result.getReportName());
+                dto.setReportId(result.getId());
+                dto.setReportType(result.getReportType());
                 //  check the scope.
-                if (checkTheScope(r.getId(), member2))
+                if (checkTheScope(result.getId(), member))
                     reports.add(dto);
-            });
+            }
         }
 
         response.setReports(reports);
@@ -383,15 +385,17 @@ public class WorkReportServiceImpl implements WorkReportService {
     private boolean checkTheScope(Long reportId, OrganizationMember member) {
         //  1.check the user id list.
         //  2.check the user's department.
-        if(member == null)
+        if (member == null)
             return false;
         List<WorkReportScopeMapDTO> scopes = listWorkReportScopes(reportId);
+        if (scopes == null || scopes.size() == 0)
+            return false;
         List<Long> scopeUserIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.MEMBERDETAIL.getCode()))
-                .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
+                .map(WorkReportScopeMapDTO::getSourceId).collect(Collectors.toList());
         List<Long> scopeDepartmentIds = scopes.stream()
                 .filter(p1 -> p1.getSourceType().equals(UniongroupTargetType.ORGANIZATION.getCode()))
-                .map(p2 -> p2.getSourceId()).collect(Collectors.toList());
+                .map(WorkReportScopeMapDTO::getSourceId).collect(Collectors.toList());
         if (scopeUserIds.contains(member.getDetailId()))
             return true;
         for (Long departmentId : scopeDepartmentIds)
@@ -408,10 +412,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         return "";
     }
 
-    @Override
-    public OrganizationMember getMemberDepartmentByUserId(Long userId, Long ownerId) {
-        OrganizationMember member = organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, ownerId);
-        return member;
+    private OrganizationMember getMemberDepartmentByUserId(Long userId, Long ownerId) {
+        return organizationProvider.findDepartmentMemberByTargetIdAndOrgId(userId, ownerId);
     }
 
     @Override
@@ -710,7 +712,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         }
     }
 
-    public List<SceneContactDTO> listWorkReportValReceivers(Long reportValId) {
+    private List<SceneContactDTO> listWorkReportValReceivers(Long reportValId) {
         List<WorkReportValReceiverMap> results = workReportValProvider.listReportValReceiversByValId(reportValId);
         if (results != null && results.size() > 0) {
             return results.stream().map(r -> {
@@ -736,7 +738,7 @@ public class WorkReportServiceImpl implements WorkReportService {
             cmd.setPageOffset(1);
         if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
-        List<Long> applierIds = Arrays.asList(applierId);
+        List<Long> applierIds = Collections.singletonList(applierId);
 
         //  calculate the pageOffset.
         Integer pageOffset = (cmd.getPageOffset() - 1) * cmd.getPageSize();
@@ -773,14 +775,14 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     private String convertReceiversToNames(List<SceneContactDTO> receivers) {
-        String names = "";
+        StringBuilder names = new StringBuilder();
         if (receivers != null && receivers.size() > 0) {
             for (SceneContactDTO dto : receivers) {
-                names += dto.getContactName() + ",";
+                names.append(dto.getContactName()).append(",");
             }
-            names = names.substring(0, names.length() - 1);
+            names = new StringBuilder(names.substring(0, names.length() - 1));
         }
-        return names;
+        return names.toString();
     }
 
     @Override
@@ -831,8 +833,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     @Override
     public Integer countUnReadWorkReportsVal() {
         User user = UserContext.current().getUser();
-        Integer count = workReportValProvider.countUnReadWorkReportsVal(user.getNamespaceId(), user.getId());
-        return count;
+        return workReportValProvider.countUnReadWorkReportsVal(user.getNamespaceId(), user.getId());
     }
 
     @Override

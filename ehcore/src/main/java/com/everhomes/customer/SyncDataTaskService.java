@@ -15,4 +15,6 @@ public interface SyncDataTaskService {
     SyncDataResponse getSyncDataResult(Long taskId);
 
     ListCommunitySyncResultResponse listCommunitySyncResult(Long communityId, String syncType, Integer pageSize, Long pageAnchor);
+
+    String syncHasViewed(Long communityId, String syncType);
 }

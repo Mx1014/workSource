@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>formOriginId: 表单id</li>
+ * <li>namespaceId: 域空间id</li>
  * <li>detailId: 员工id</li>
  * <li>organizationId: 公司id</li>
  * <li>avatar: 员工头像</li>
@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class UpdateArchivesEmployeeCommand {
 
-    private Long formOriginId;
+    private Integer namespaceId;
 
     private Long detailId;
 
@@ -33,12 +33,12 @@ public class UpdateArchivesEmployeeCommand {
     public UpdateArchivesEmployeeCommand() {
     }
 
-    public Long getFormOriginId() {
-        return formOriginId;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setFormOriginId(Long formOriginId) {
-        this.formOriginId = formOriginId;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getDetailId() {

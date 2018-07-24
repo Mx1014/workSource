@@ -13,4 +13,7 @@ public interface ServiceAllianceApplicationRecordProvider {
 
 	List<ServiceAllianceApplicationRecord> listServiceAllianceApplicationRecord(Long pageAnchor, Integer pageSize);
 
+	List<ServiceAllianceApplicationRecord> listServiceAllianceApplicationRecordByEnterpriseId(Long enterpriseId,
+			Long pageAnchor, Integer pageSize);
+
 }

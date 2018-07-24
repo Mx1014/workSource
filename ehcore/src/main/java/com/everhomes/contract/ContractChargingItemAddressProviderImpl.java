@@ -1,7 +1,5 @@
 package com.everhomes.contract;
 
-import com.everhomes.contract.ContractChargingItemAddress;
-import com.everhomes.contract.ContractChargingItemAddressProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -12,9 +10,7 @@ import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.energy.EnergyMeterType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhContractAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhContractChargingItemAddressesDao;
-import com.everhomes.server.schema.tables.pojos.EhContractAttachments;
 import com.everhomes.server.schema.tables.pojos.EhContractChargingItemAddresses;
 import com.everhomes.server.schema.tables.records.EhContractChargingItemAddressesRecord;
 import com.everhomes.user.UserContext;
@@ -32,7 +28,6 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/16.
@@ -127,11 +122,27 @@ public class ContractChargingItemAddressProviderImpl implements ContractCharging
             if(EnergyMeterType.ELECTRIC.equals(EnergyMeterType.fromCode(meterType))) {
                 query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
                         Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
-                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("电费"));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("自用电费"));
             } else if(EnergyMeterType.WATER.equals(EnergyMeterType.fromCode(meterType))) {
                 query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
                         Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
-                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("水费"));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("自用水费"));
+            }else if(EnergyMeterType.COMMON_WATER.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("公摊水费"));
+            }else if(EnergyMeterType.COMMON_ELECTRIC.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("公摊电费"));
+            }else if(EnergyMeterType.ADVERTISEMENT.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("广告费"));
+            }else if(EnergyMeterType.AIR_CONDITIONER.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_CONTRACT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("空调费"));
             }
         }
 

@@ -45,4 +45,11 @@ public interface OfficeCubicleProvider {
 	List<OfficeCubicleSpace> listEmptyOwnerSpace();
 
     List<OfficeCubicleOrder> listEmptyOwnerOrders();
+
+	List<OfficeCubicleSpace> listAllSpaces(long pageAnchor, int pageSize);
+
+	List<OfficeCubicleSpace> querySpacesByCityName(String ownerType, Long ownerId, String provinceName, String cityName,
+			CrossShardListingLocator locator, int i, Integer namespaceId);
+
+	void updateSpaceByProvinceAndCity(Integer currentNamespaceId, String provinceName, String cityName);
 }

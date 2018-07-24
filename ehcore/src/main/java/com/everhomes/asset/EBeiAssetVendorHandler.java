@@ -26,7 +26,7 @@ import java.util.*;
  * Created by ying.xiong on 2017/4/12.
  */
 @Component(AssetVendorHandler.ASSET_VENDOR_PREFIX + "EBEI")
-public class EBeiAssetVendorHandler implements AssetVendorHandler {
+public class EBeiAssetVendorHandler extends AssetVendorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(EBeiAssetVendorHandler.class);
 
     @Autowired
@@ -97,7 +97,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
-                    Long templateVersion, Long organizationId, String dateStr, Long tenantId, String tenantType, Long addressId) {
+                                                   Long templateVersion, Long organizationId, String dateStr, Long tenantId, String tenantType, Long addressId) {
         GetPmKeXingBillCommand command = new GetPmKeXingBillCommand();
         command.setOrganizationId(organizationId);
         command.setDateStr(dateStr);
@@ -131,7 +131,25 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Long pageAnchor, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
+    public List<ListBillsDTO> listBills(Integer currentNamespaceId, ListBillsResponse response, ListBillsCommand cmd) {
+        //修改传递参数为一个对象，卸货
+        String contractNum = cmd.getContractNum();
+        Long ownerId = cmd.getOwnerId();
+        String ownerType = cmd.getOwnerType();
+        String buildingName = cmd.getBuildingName();
+        String apartmentName = cmd.getApartmentName();
+        Long addressId = cmd.getAddressId();
+        String billGroupName = cmd.getBillGroupName();
+        Long billGroupId = cmd.getBillGroupId();
+        Byte billStatus = cmd.getBillStatus();
+        String dateStrBegin = cmd.getDateStrBegin();
+        String dateStrEnd = cmd.getDateStrEnd();
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        String targetName = cmd.getTargetName();
+        Byte status = cmd.getStatus();
+        String targetType = cmd.getTargetType();
+        //卸货完毕
         List<ListBillsDTO> list = new ArrayList<>();
         if(targetType!=null && targetType.equals(AssetPaymentConstants.EH_USER)) {
             return list;
@@ -165,6 +183,8 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setNoticeTel(source.getNoticeTels());
             dto.setOwnerType("community");
             dto.setDateStr(source.getChargePeriod());
+            dto.setDateStrBegin(source.getChargePeriod());//为了兼容账单开始时间
+            dto.setDateStrEnd(source.getChargePeriod());//为了兼容账单结束时间
             dto.setTargetName(source.getCustomerName());
 //            dto.setTargetId();
             dto.setTargetType("eh_organization");
@@ -203,7 +223,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response) {
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize,Long ownerId, ListBillItemsResponse response, Long billGroupid) {
         List<BillDTO> list = new ArrayList<>();
         if (pageOffSet == null) {
             pageOffSet = 1;
@@ -231,7 +251,6 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             dto.setApartmentName(source.getBuildingRename());
             dto.setBuildingName(source.getBuildingRename());
             dto.setTargetType("eh_organization");
-
             list.add(dto);
         }
         if(res.getHasNextPag().equals("1")){
@@ -241,21 +260,21 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
+    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes, Long billGroupId) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId) {
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId, Integer namespaceId) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId, String targetType,Long organizationId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         BigDecimal amountReceivable = new BigDecimal("0");
         BigDecimal amountOwed = new BigDecimal("0");
@@ -312,7 +331,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId) {
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId, Long billGroupId) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -340,7 +359,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public void deleteBill(String l) {
+    public void deleteBill(String billId, Long billGroupId) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -544,6 +563,20 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return list;
     }
 
+    @Override
+    public void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
@@ -556,3 +589,4 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         return null;
     }
 }
+

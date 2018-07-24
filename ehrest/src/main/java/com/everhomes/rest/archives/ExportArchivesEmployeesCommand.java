@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>formOriginId: 表单 id</li>
+ * <li>namespaceId: 域空间id(异步导出使用)</li>
  * <li>organizationId: 公司 id</li>
  * <li>keywords: 搜索关键词</li>
  * <li>namespaceId: 域空间id(异步导出使用)</li>
@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ExportArchivesEmployeesCommand {
 
-    private Long formOriginId;
+    private Integer namespaceId;
 
     private Long organizationId;
 
@@ -21,14 +21,6 @@ public class ExportArchivesEmployeesCommand {
     private Integer namespaceId;
 
     public ExportArchivesEmployeesCommand() {
-    }
-
-    public Long getFormOriginId() {
-        return formOriginId;
-    }
-
-    public void setFormOriginId(Long formOriginId) {
-        this.formOriginId = formOriginId;
     }
 
     public Long getOrganizationId() {

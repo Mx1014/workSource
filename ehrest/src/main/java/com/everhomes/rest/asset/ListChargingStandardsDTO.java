@@ -33,7 +33,15 @@ public class ListChargingStandardsDTO {
     private List<String> variableNames;
     private BigDecimal suggestUnitPrice;
     private Integer areaSizeType;
+    private Byte useUnitPrice;
 
+    public Byte getUseUnitPrice() {
+        return useUnitPrice;
+    }
+
+    public void setUseUnitPrice(Byte useUnitPrice) {
+        this.useUnitPrice = useUnitPrice;
+    }
 
     @Override
     public String toString() {

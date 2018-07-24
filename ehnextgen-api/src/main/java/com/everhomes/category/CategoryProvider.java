@@ -29,4 +29,7 @@ public interface CategoryProvider {
     List<Category> listTaskCategories(Integer namespaceId,String ownerType,Long ownerId, Long parentId, String keyword,
                                       Long pageAnchor, Integer pageSize);
 	Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId,String ownerType,Long ownerId, String categoryName);
+
+	List<Category> listTaskCategoriesByparentId(Integer namespaceId,String ownerType,List<Long> ownerIds, Long parentId);
+
 }

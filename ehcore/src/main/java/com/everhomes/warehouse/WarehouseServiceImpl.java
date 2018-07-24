@@ -593,18 +593,21 @@ public class WarehouseServiceImpl implements WarehouseService {
             order.setServiceType(cmd.getServiceType());
             warehouseProvider.insertWarehouseOrder(order);
         }
-
-        //改为从request中获取stocks by wentian 2018/4/10
-        List<WarehouseRequestMaterials> warehouseRequestMaterials = warehouseProvider.findAllWarehouseRequestMaterials(cmd.getRequestId());
-        List<WarehouseMaterialStock> stocks = new ArrayList<>();
-        for(WarehouseRequestMaterials material : warehouseRequestMaterials){
-            WarehouseMaterialStock stock = new WarehouseMaterialStock();
-            stock.setAmount(material.getAmount());
-            stock.setMaterialId(material.getMaterialId());
-            stock.setWarehouseId(material.getWarehouseId());
-            stocks.add(stock);
+        if(cmd.getStocks() == null || cmd.getStocks().size() < 1){
+            //改为从request中获取stocks by wentian 因为不同情况的新增和更新都走了此接口，有新的情况添加时此方法会不太明朗 2018/4/10
+            List<WarehouseRequestMaterials> warehouseRequestMaterials = warehouseProvider.findAllWarehouseRequestMaterials(cmd.getRequestId());
+            if(warehouseRequestMaterials.size() > 0){
+                List<WarehouseMaterialStock> stocks = new ArrayList<>();
+                for(WarehouseRequestMaterials material : warehouseRequestMaterials){
+                    WarehouseMaterialStock stock = new WarehouseMaterialStock();
+                    stock.setAmount(material.getAmount());
+                    stock.setMaterialId(material.getMaterialId());
+                    stock.setWarehouseId(material.getWarehouseId());
+                    stocks.add(stock);
+                }
+                cmd.setStocks(stocks);
+            }
         }
-        cmd.setStocks(stocks);
 
         if (cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             cmd.getStocks().forEach(stock -> {
@@ -1640,6 +1643,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
             WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
+            //申请数量
+            dto.setRequestAmount(requestMaterial.getAmount());
             //增加flowCaseId
             //flow case id get
             FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(requestMaterial.getRequestId()

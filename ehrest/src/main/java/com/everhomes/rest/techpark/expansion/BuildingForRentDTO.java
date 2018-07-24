@@ -21,6 +21,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  * <li>rentAreas：招租面积</li>
  * <li>contacts：联系人</li>
  * <li>contactPhone：联系电话</li>
+ * <li>contactUid：联系人id</li>
  * <li>enterTimeFlag：入住时间是否启用 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
  * <li>enterTime：入住时间</li>
  * <li>status：命名空间 参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li>
@@ -59,6 +60,7 @@ public class BuildingForRentDTO {
 	private String   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
+	private Long contactUid;
 	private String   description;
 	private Timestamp enterTime;
 	private Byte     status;
@@ -399,5 +401,13 @@ public class BuildingForRentDTO {
 
 	public void setHouseResourceType(String houseResourceType) {
 		this.houseResourceType = houseResourceType;
+	}
+
+	public Long getContactUid() {
+		return contactUid;
+	}
+
+	public void setContactUid(Long contactUid) {
+		this.contactUid = contactUid;
 	}
 }

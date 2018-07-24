@@ -91,6 +91,8 @@ public class AddDefaultRuleAdminCommand {
 
 	private Double dayOpenTime;
 	private Double dayCloseTime;
+	private Byte holidayOpenFlag;
+	private Byte holidayType;
 
 	@ItemType(Byte.class)
 	private List<Byte> rentalTypes;
@@ -103,20 +105,9 @@ public class AddDefaultRuleAdminCommand {
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
 
-//	@Deprecated
-//	private Byte rentalType;
-//	@Deprecated
-//	private BigDecimal workdayPrice;
-//	@Deprecated
-//	private BigDecimal weekendPrice;
-//	@Deprecated
-//	private BigDecimal orgMemberWorkdayPrice;
-//	@Deprecated
-//	private BigDecimal orgMemberWeekendPrice;
-//	@Deprecated
-//	private BigDecimal approvingUserWorkdayPrice;
-//	@Deprecated
-//	private BigDecimal approvingUserWeekendPrice;
+	@ItemType(RentalOpenTimeDTO.class)
+	private List<RentalOpenTimeDTO> openTimes;
+
 
 	private Byte refundStrategy;
 	private Byte overtimeStrategy;
@@ -379,5 +370,29 @@ public class AddDefaultRuleAdminCommand {
 
 	public void setSiteItems(List<SiteItemDTO> siteItems) {
 		this.siteItems = siteItems;
+	}
+
+	public Byte getHolidayOpenFlag() {
+		return holidayOpenFlag;
+	}
+
+	public void setHolidayOpenFlag(Byte holidayOpenFlag) {
+		this.holidayOpenFlag = holidayOpenFlag;
+	}
+
+	public Byte getHolidayType() {
+		return holidayType;
+	}
+
+	public void setHolidayType(Byte holidayType) {
+		this.holidayType = holidayType;
+	}
+
+	public List<RentalOpenTimeDTO> getOpenTimes() {
+		return openTimes;
+	}
+
+	public void setOpenTimes(List<RentalOpenTimeDTO> openTimes) {
+		this.openTimes = openTimes;
 	}
 }

@@ -78,8 +78,7 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroups.class, null);
     }
 
-    @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
-            @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+    @Caching(evict={@CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
             @CacheEvict(value="listGroupMessageMembers", allEntries=true),
             @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
@@ -94,8 +93,7 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGroups.class, group.getId());
     }
 
-    @Caching(evict={ @CacheEvict(value="Group", key="#group.id"),
-        @CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
+    @Caching(evict={@CacheEvict(value="GroupByCreatorId", key="#group.creatorUid"),
         @CacheEvict(value="listGroupMessageMembers", allEntries=true),
         @CacheEvict(value="GroupByUuid", key="#group.uuid")})
     @Override
@@ -119,7 +117,6 @@ public class GroupProviderImpl implements GroupProvider {
     /**
      * Also used by Enterprise
      */
-    @Cacheable(value = "Group", key="#id", unless="#result == null")
     @Override
     public Group findGroupById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, id));
@@ -456,7 +453,7 @@ public class GroupProviderImpl implements GroupProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
         EhGroupMembersRecord record = (EhGroupMembersRecord)context.select().from(EH_GROUP_MEMBERS)
             .where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
-            .and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(memberType))
+                .and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(memberType))
             .and(EH_GROUP_MEMBERS.MEMBER_ID.eq(memberId))
             .fetchAny();
         return ConvertHelper.convert(record, GroupMember.class);

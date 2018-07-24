@@ -6,7 +6,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.user.User;
@@ -31,6 +30,12 @@ public class ArchivesController extends ControllerBase{
 
     @Autowired
     private ArchivesService archivesService;
+
+    @Autowired
+    private ArchivesFormService archivesFormService;
+
+    @Autowired
+    private ArchivesDTSService archivesDTSService;
 
     /**
      * <b>URL: /archives/addArchivesContact</b>
@@ -111,7 +116,7 @@ public class ArchivesController extends ControllerBase{
     @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importArchivesContacts(ImportArchivesContactsCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
         User user = UserContext.current().getUser();
-        RestResponse response = new RestResponse(archivesService.importArchivesContacts(files[0], user.getId(),user.getNamespaceId(),cmd));
+        RestResponse response = new RestResponse(archivesDTSService.importArchivesContacts(files[0], user.getId(),user.getNamespaceId(),cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -123,7 +128,7 @@ public class ArchivesController extends ControllerBase{
      */
     @RequestMapping("exportArchivesContacts")
     @RestReturn(value = String.class)
-    public RestResponse exportArchivesContacts(ExportArchivesContactsCommand cmd){
+    public RestResponse exportArchivesContacts(ListArchivesContactsCommand cmd){
         archivesService.exportArchivesContacts(cmd);
         return new RestResponse();
     }
@@ -149,7 +154,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("getImportContactsResult")
     @RestReturn(value = ImportFileResponse.class)
     public RestResponse getImportContactsResult(GetImportFileResultCommand cmd) {
-        RestResponse response = new RestResponse(archivesService.getImportContactsResult(cmd));
+        RestResponse response = new RestResponse(archivesDTSService.getImportContactsResult(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -162,7 +167,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("exportImportFileFailResults")
     @RestReturn(value = String.class)
     public RestResponse exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
-        archivesService.exportImportFileFailResults(cmd, httpResponse);
+        archivesDTSService.exportImportFileFailResults(cmd, httpResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -342,10 +347,10 @@ public class ArchivesController extends ControllerBase{
      * <p>10-1.增加、修改档案字段</p>
      */
     @RequestMapping("updateArchivesForm")
-    @RestReturn(value = GeneralFormDTO.class)
+    @RestReturn(value = String.class)
     public RestResponse updateArchivesForm(UpdateArchivesFormCommand cmd){
-        GeneralFormDTO res = archivesService.updateArchivesForm(cmd);
-        RestResponse response = new RestResponse(res);
+        archivesFormService.updateArchivesForm(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -358,17 +363,17 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("getArchivesForm")
     @RestReturn(value = GetArchivesFormResponse.class)
     public RestResponse getArchivesForm(GetArchivesFormCommand cmd){
-        GetArchivesFormResponse res = archivesService.getArchivesForm(cmd);
+        GetArchivesFormResponse res = archivesFormService.getArchivesForm(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
-    /**
+/*    *//**
      * <b>URL: /archives/identifyArchivesForm</b>
      * <p>10-3.识别档案表单id</p>
-     */
+     *//*
     @RequestMapping("identifyArchivesForm")
     @RestReturn(value = ArchivesFromsDTO.class)
     public RestResponse identifyArchivesForm(IdentifyArchivesFormCommand cmd){
@@ -377,7 +382,7 @@ public class ArchivesController extends ControllerBase{
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /archives/importArchivesEmployees</b>
@@ -386,8 +391,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("importArchivesEmployees")
     @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importArchivesEmployees(ImportArchivesEmployeesCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
-        User user = UserContext.current().getUser();
-        RestResponse response = new RestResponse(archivesService.importArchivesEmployees(files[0], user.getId(),user.getNamespaceId(),cmd));
+        RestResponse response = new RestResponse(archivesDTSService.importArchivesEmployees(files[0],cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -400,7 +404,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("exportArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse exportArchivesEmployees(ExportArchivesEmployeesCommand cmd){
-        archivesService.exportArchivesEmployees(cmd);
+        archivesDTSService.exportArchivesEmployees(cmd);
         return new RestResponse();
     }
 
@@ -411,7 +415,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("exportArchivesEmployeesTemplate")
     @RestReturn(value = String.class)
     public RestResponse exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd, HttpServletResponse httpResponse){
-        archivesService.exportArchivesEmployeesTemplate(cmd,httpResponse);
+        archivesDTSService.exportArchivesEmployeesTemplate(cmd,httpResponse);
         return new RestResponse();
     }
 
@@ -422,7 +426,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("getImportEmployeesResult")
     @RestReturn(value = ImportFileResponse.class)
     public RestResponse getImportEmployeesResult(GetImportFileResultCommand cmd) {
-        RestResponse response = new RestResponse(archivesService.getImportEmployeesResult(cmd));
+        RestResponse response = new RestResponse(archivesDTSService.getImportEmployeesResult(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -456,20 +460,28 @@ public class ArchivesController extends ControllerBase{
         return response;
     }
 
-    /*@RequestMapping("testNotification")
+    /**
+     * <b>URL: /archives/makeArchivesCheckInTime</b>
+     * <p>刷入职时间</p>
+     */
+    @RequestMapping("makeArchivesCheckInTime")
     @RestReturn(value = String.class)
-    public RestResponse testNotification(){
-        archivesService.executeArchivesNotification(6, 9, LocalDateTime.now());
+    public RestResponse makeArchivesCheckInTime(){
+        archivesService.makeArchivesCheckInTime();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }*/
+    }
 
-    @RequestMapping("syncArchivesConfigAndLogs")
+    /**
+     * <b>URL: /archives/cleanRedundantArchivesDetails</b>
+     * <p>清除人事档案表中的辣鸡数据</p>
+     */
+    @RequestMapping("cleanRedundantArchivesDetails")
     @RestReturn(value = String.class)
-    public RestResponse syncArchivesConfigAndLogs(){
-        archivesService.syncArchivesConfigAndLogs();
+    public RestResponse cleanRedundantArchivesDetails(){
+        archivesService.cleanRedundantArchivesDetails();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

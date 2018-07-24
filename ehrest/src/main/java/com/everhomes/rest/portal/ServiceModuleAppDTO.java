@@ -40,6 +40,7 @@ import java.util.List;
  *     <li>systemAppFlag: 是否为系统应用，例如“系统管理员”是系统应用，是模块的属性。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>defaultAppFlag: 是否为默认安装应用，可以动态设置。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>serviceModuleEntryDtos: 应用入口信息参考{@link ServiceModuleEntryDTO}</li>
+ *     <li>accessControlType: 权限控制类型 参考{@link com.everhomes.rest.module.AccessControlType}</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -78,6 +79,7 @@ public class ServiceModuleAppDTO {
     private Byte defaultAppFlag;
     private List<ServiceModuleEntryDTO> serviceModuleEntryDtos;
 
+    private Byte accessControlType;
     public Long getId() {
         return id;
     }
@@ -341,4 +343,13 @@ public class ServiceModuleAppDTO {
     public void setServiceModuleEntryDtos(List<ServiceModuleEntryDTO> serviceModuleEntryDtos) {
         this.serviceModuleEntryDtos = serviceModuleEntryDtos;
     }
+	
+	public Byte getAccessControlType() {
+        return accessControlType;
+    }
+
+    public void setAccessControlType(Byte accessControlType) {
+        this.accessControlType = accessControlType;
+    }
+
 }

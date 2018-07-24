@@ -1105,6 +1105,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 				if(!StringUtils.isEmpty(categryName))
 					cond = cond.and(Tables.EH_LAUNCH_PAD_ITEMS.CATEGRY_NAME.eq(categryName));
+
+				//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+				cond = cond.and(launchPadProvider.getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName()));
+
 				query.addConditions(cond);
 				query.addGroupBy(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME);
 				query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER);
@@ -1619,7 +1623,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				if(d.getItemName().equals(o.getItemName())){
 					if(ApplyPolicy.fromCode(o.getApplyPolicy()) == ApplyPolicy.OVERRIDE){
 						d.setDisplayFlag(o.getDisplayFlag());
-						d.setDefaultOrder(o.getDefaultOrder());
+
+						if(ActionType.fromCode(d.getActionType()) == ActionType.MORE_BUTTON || ActionType.fromCode(d.getActionType()) == ActionType.ALL_BUTTON){
+							d.setDefaultOrder(10000);
+						}else {
+							d.setDefaultOrder(o.getDefaultOrder());
+						}
+
 					}
 				}
 			}
@@ -2778,6 +2788,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemDTO.setContentType(searchType.getContentType());
 			dtos.add(itemDTO);
 		});
+
+		refreshActionData(dtos, sceneTokenDto);
+
 		response.setLaunchPadItemDtos(dtos);
 		response.setNextPageAnchor(nextPageAnchor);
 		return response;

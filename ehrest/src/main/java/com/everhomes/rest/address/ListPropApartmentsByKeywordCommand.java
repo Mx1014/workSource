@@ -27,9 +27,19 @@ public class ListPropApartmentsByKeywordCommand {
     
     private Integer namespaceId;
 
-    private Long buildingId;
+    private Byte livingStatus;
+	
+	private Long buildingId;
 
-    public ListPropApartmentsByKeywordCommand() {
+	public Byte getLivingStatus() {
+		return livingStatus;
+	}
+
+	public void setLivingStatus(Byte livingStatus) {
+		this.livingStatus = livingStatus;
+	}
+
+	public ListPropApartmentsByKeywordCommand() {
     }
 
 	public Long getOrganizationId() {

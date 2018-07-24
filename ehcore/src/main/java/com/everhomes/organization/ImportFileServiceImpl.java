@@ -2,7 +2,6 @@ package com.everhomes.organization;
 
 
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -16,6 +15,7 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -28,7 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,11 +54,13 @@ public class ImportFileServiceImpl implements ImportFileService{
         task.setStatus(ImportFileTaskStatus.CREATED.getCode());
         organizationProvider.createImportFileTask(task);
         User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
                 try{
                     UserContext.setCurrentUser(user);
+                    UserContext.setCurrentNamespaceId(namespaceId);
                     task.setStatus(ImportFileTaskStatus.EXECUTING.getCode());
                     organizationProvider.updateImportFileTask(task);
                     ImportFileResponse response = callback.importFile();
@@ -89,7 +94,11 @@ public class ImportFileServiceImpl implements ImportFileService{
                 List<ImportFileResultLog> logs =  response.getLogs();
                 if (logs != null) {
                     for (ImportFileResultLog log : logs) {
-                        log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        if(StringUtils.isNotBlank(log.getFieldName())){
+                            log.setErrorDescription(log.getFieldName() + localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        }else {
+                            log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
+                        }
                     }
                 }
             }
@@ -112,14 +121,28 @@ public class ImportFileServiceImpl implements ImportFileService{
         if(null != overrideTitleMap){
             titleMap = overrideTitleMap;
         }else if(null != result.getTitle()){
-            titleMap = (Map<String, String>) result.getTitle();
+            try{
+                titleMap = (Map<String, String>) result.getTitle();
+            }catch (Exception e){
+                ArrayList<String> titleList = (ArrayList<String>)result.getTitle();
+                for(int i = 0; i < titleList.size(); i++){
+                    titleMap.put(String.valueOf(i), titleList.get(i));
+                }
+            }
         }
+        //在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
+        if (titleMap.containsKey("contactExtraTels")) {
+        	titleMap.remove("contactExtraTels");
+		}
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
             ByteArrayOutputStream out = null;
             XSSFWorkbook wb = new XSSFWorkbook();
             try{
                 String sheetName = "错误数据";
+                if(logs!=null && logs.size()>0 && StringUtils.isNotBlank(logs.get(0).getSheetName())){
+                    sheetName = logs.get(0).getSheetName();
+                }
                 XSSFSheet sheet = wb.createSheet(sheetName);
 
                 XSSFCellStyle style = wb.createCellStyle();// 样式对象
@@ -128,6 +151,9 @@ public class ImportFileServiceImpl implements ImportFileService{
                 font.setFontName("黑体");
                 style.setFont(font);
                 style.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+                // add by jiarui 2018/6/21 format all cell to text
+                XSSFDataFormat format = wb.createDataFormat();
+                style.setDataFormat(format.getFormat("@"));
 
                 XSSFCellStyle centerStyle = wb.createCellStyle();// 样式对象
                 centerStyle.setFont(font);
@@ -156,9 +182,21 @@ public class ImportFileServiceImpl implements ImportFileService{
                     XSSFRow titleRow = sheet.createRow(rowNum ++);
                     titleRow.setRowStyle(titleStyle);
                     ImportFileResultLog log = logs.get(0);
-                    Map<String, String> data = (Map<String, String>) log.getData();
+                    Map<String, String> data = new LinkedHashMap<>();
+                    try{
+                        data = (Map<String, String>) log.getData();
+                    }catch (Exception e){
+                        ArrayList<String> logList = (ArrayList<String>)log.getData();
+                        for(int i = 0; i < logList.size(); i++){
+                            data.put(String.valueOf(i), logList.get(i));
+                        }
+                    }
                     if(data.size() > 0){
                         for (Map.Entry<String, String> entry : data.entrySet()) {
+                        	////在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
+                        	if ("contactExtraTels".equals(entry.getKey())) {
+								continue;
+							}
                             titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getKey()));
                         }
                     }else{
@@ -172,20 +210,39 @@ public class ImportFileServiceImpl implements ImportFileService{
 
                 for (ImportFileResultLog log: logs) {
                     cellNum = 0;
-                    Map<String, Object> data = (Map<String, Object>) log.getData();
+                    Map<String,Object> data = new LinkedHashMap<>();
+                    try{
+                        data = (Map<String, Object>) log.getData();
+                    }catch (Exception e){
+                        ArrayList<String> logList = (ArrayList<String>)log.getData();
+                        for(int i = 0; i < logList.size(); i++){
+                            data.put(String.valueOf(i), logList.get(i));
+                        }
+                    }
+                    //在个人客户管理模块，由于代表手机号码的字段有两个，因此屏蔽掉一个contactExtraTels字段
+                    //把contactToken字段的值改为contactExtraTels，显示多手机号
+                    if (data.containsKey("contactExtraTels")) {
+                    	String contactExtraTels = (String) data.get("contactExtraTels");
+                        List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
+                        String customerExtraTelsForExport = contactExtraTelsList.toString();
+                        data.put("contactToken", customerExtraTelsForExport.substring(1, customerExtraTelsForExport.length()-1));
+					}
+                    
                     XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
                     for (Map.Entry<String, Object> entry : data.entrySet()) {
-                        if(entry.getValue() instanceof List){
-                            String value = "";
-                            for(int i= 0; i < ((List) entry.getValue()).size(); i++){
-                                value += ((List) entry.getValue()).get(i);
-                            }
-                            row.createCell(cellNum ++).setCellValue(value);
-                        }else{
-                            row.createCell(cellNum ++).setCellValue(String.valueOf(entry.getValue()));
-
+                    	//不显示contactExtraTels字段
+                    	if ("contactExtraTels".equals(entry.getKey())) {
+							continue;
+						}
+                    	//modify by rui.jia  20180422
+                        String entryValues = "";
+                        if (entry.getValue() != null && entry.getValue() instanceof Collection) {
+                            entryValues = Arrays.toString(((Collection) entry.getValue()).toArray());
+                        }else {
+                            entryValues = entry.getValue().toString();
                         }
+                        row.createCell(cellNum++).setCellValue(entryValues);
                     }
                     LOGGER.debug("title size ={} .title:{}",titleMap.size(),StringHelper.toJsonString(titleMap));
                     if (StringUtils.isNotBlank(log.getErrorDescription())) {

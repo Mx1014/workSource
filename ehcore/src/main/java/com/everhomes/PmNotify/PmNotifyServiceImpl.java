@@ -1,6 +1,10 @@
 package com.everhomes.PmNotify;
 
-import com.everhomes.energy.*;
+import com.everhomes.energy.EnergyConsumptionService;
+import com.everhomes.energy.EnergyMeter;
+import com.everhomes.energy.EnergyMeterProvider;
+import com.everhomes.energy.EnergyMeterTask;
+import com.everhomes.energy.EnergyMeterTaskProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
@@ -13,6 +17,9 @@ import com.everhomes.pmNotify.PmNotifyLog;
 import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
+import com.everhomes.quality.QualityInspectionTasks;
+import com.everhomes.quality.QualityProvider;
+import com.everhomes.quality.QualityService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.app.AppConstants;
@@ -22,9 +29,16 @@ import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagePersistType;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.pmNotify.*;
+import com.everhomes.rest.pmNotify.PmNotifyMode;
+import com.everhomes.rest.pmNotify.PmNotifyReceiver;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverType;
+import com.everhomes.rest.pmNotify.PmNotifyType;
 import com.everhomes.rest.quality.QualityGroupType;
+import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -46,8 +60,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by ying.xiong on 2017/9/12.
@@ -70,6 +89,8 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private EquipmentService equipmentService;
+    @Autowired
+    private QualityService qualityService;
 
     @Autowired
     private MessagingService messagingService;
@@ -100,6 +121,8 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private EquipmentTasksSearcher equipmentTaskSearchser;
+    @Autowired
+    private QualityProvider qualityProvider;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -224,6 +247,36 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                 taskName = meter.getName();
                 code = EnergyNotificationTemplateCode.ENERGY_TASK_BEFORE_DELAY;
             }
+            //品质核查通知
+            if(EntityType.QUALITY_TASK.getCode().equals(record.getOwnerType())){
+                scope = EquipmentNotificationTemplateCode.SCOPE;
+                QualityInspectionTasks task = qualityProvider.findVerificationTaskById(record.getOwnerId());
+                taskName = task.getTaskName();
+                if(PmNotifyType.BEFORE_START.equals(notify)) {
+                    time = task.getExecutiveStartTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_BEGIN;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_BEFORE_TASK;
+                } else if(PmNotifyType.BEFORE_DELAY.equals(notify)){
+                    //不是待执行不用提醒
+                    if(!(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))) {
+                        return;
+                    }
+                    time = task.getExecutiveExpireTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_DELAY;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_BEFORE_TASK_DELAY;
+                } else if(PmNotifyType.AFTER_DELAY.equals(notify)){
+                    //不是待执行不用提醒
+                    if(!(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.equals(QualityInspectionTaskStatus.fromStatus(task.getStatus())))) {
+                        return;
+                    }
+                    time = task.getExecutiveExpireTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_AFTER_DELAY;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_AFTER_TASK_DELAY;
+                    //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
+                    qualityProvider.closeTask(task);
+//                    equipmentTaskSearchser.feedDoc(task);
+                }
+            }
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("starting proccess sending message to notifyUsers.size={}",notifyUsers.size());
             }
@@ -256,7 +309,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 //                if (LOGGER.isDebugEnabled()) {
 //                    LOGGER.debug("createPmNotifyLog log{}",log.toString());
 //                }
-                pmNotifyProvider.createPmNotifyLog(log);
+//                pmNotifyProvider.createPmNotifyLog(log);
             }
         }
 
@@ -284,6 +337,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.PERSIST_TYPE, String.valueOf(MessagePersistType.LOG.getCode()));
+        messageDto.setMeta(meta);
 
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
@@ -308,6 +364,13 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     if(EntityType.ENERGY_TASK.getCode().equals(ownerType)) {
                         LOGGER.info("processPmNotifyRecord ownerType: EhEnergyMeterTasks");
                         Set<Long> ids = energyConsumptionService.getTaskGroupUsers(ownerId);
+                        if(ids != null && ids.size() > 0) {
+                            userIds.addAll(ids);
+                        }
+                    }
+                    if(EntityType.QUALITY_TASK.getCode().equals(ownerType)) {
+                        LOGGER.info("processPmNotifyRecord ownerType: EhQualityInspectionTasks");
+                        Set<Long> ids = qualityService.getTaskGroupUsers(ownerId);
                         if(ids != null && ids.size() > 0) {
                             userIds.addAll(ids);
                         }

@@ -1,5 +1,7 @@
 package com.everhomes.rest.contract;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>namespaceId: 域空间id</li>
@@ -14,8 +16,17 @@ public class ListApartmentContractsCommand {
     private Long communityId;
 
     private Long addressId;
+    private Long categoryId;
 
-    public Long getAddressId() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Long getAddressId() {
         return addressId;
     }
 
@@ -38,4 +49,9 @@ public class ListApartmentContractsCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

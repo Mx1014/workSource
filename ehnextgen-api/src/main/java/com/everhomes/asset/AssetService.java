@@ -1,13 +1,19 @@
+
 package com.everhomes.asset;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -15,155 +21,216 @@ import java.util.List;
  */
 public interface AssetService {
 
-    List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd);
-    ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd);
-    HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd,HttpServletResponse response);
-    ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
-    AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
-    AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd);
-    AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
-    void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
-    void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
-    void deleteBill(DeleteBillCommand cmd);
-    List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
+	List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd);
 
-    Boolean checkTokenRegister(CheckTokenRegisterCommand cmd);
-    NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
+	ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd);
 
-    AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
-    List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
+	HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response);
 
-    ListBillsResponse listBills(ListBillsCommand cmd);
+	ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
 
-    ListBillItemsResponse listBillItems(ListBillItemsCommand cmd);
+	AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
 
-    void selectNotice(SelectedNoticeCommand cmd);
+	AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd);
 
-    ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
+	AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
 
-    ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
+	void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
 
-    List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
+	void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
 
-    ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
+	void deleteBill(DeleteBillCommand cmd);
 
-    ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
+	List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
 
-    ListBillsDTO createBill(CreateBillCommand cmd);
+	Boolean checkTokenRegister(CheckTokenRegisterCommand cmd);
 
-    void OneKeyNotice(OneKeyNoticeCommand cmd);
+	NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
 
-    ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
+	AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
 
-    List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
+	List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
 
-    void modifyBillStatus(BillIdCommand cmd);
+	ListBillsResponse listBills(ListBillsCommand cmd);
 
-    void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
+	ListBillItemsResponse listBillItems(ListBillItemsCommand cmd);
 
-    List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
+	void selectNotice(SelectedNoticeCommand cmd);
 
-    List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
+	ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
 
-    void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
+	ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
 
-    ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd);
+	List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
 
-    String deleteBill(BillIdCommand cmd);
+	ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
 
-    void deleteBill(PaymentBillItems billItem);
+	ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
 
-    void deleteBill(PaymentExemptionItems exemItem);
+	ListBillsDTO createBill(CreateBillCommand cmd);
 
-    String deleteBillItem(BillItemIdCommand cmd);
+	void OneKeyNotice(OneKeyNoticeCommand cmd);
 
-    String deletExemptionItem(ExemptionItemIdCommand cmd);
+	ListBillDetailResponse listBillDetail(ListBillDetailCommandStr cmd);
 
-    PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd);
+	List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
 
-    void generateBillsOnContractSigned(String contractNum);
+	void modifyBillStatus(BillIdCommand cmd);
 
-    void upodateBillStatusOnContractStatusChange(Long contractId,String targetStatus);
+	void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
 
-    PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd);
+	List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 
-    void exportRentalExcelTemplate(HttpServletResponse response);
+	List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
 
-    FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
+	void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
 
-    void updateBillsToSettled(UpdateBillsToSettled cmd);
+	ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd);
 
-    GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd);
+	String deleteBill(BillIdCommand cmd);
 
-    PaymentBillItems findBillItemById(Long billItemId);
+	void deleteBill(PaymentBillItems billItem);
 
-    PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
+	void deleteBill(PaymentExemptionItems exemItem);
 
-    void updateBillSwitchOnTime();
+	String deleteBillItem(BillItemIdCommand cmd);
 
-    ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
+	String deletExemptionItem(ExemptionItemIdCommand cmd);
 
+	void upodateBillStatusOnContractStatusChange(Long contractId, String targetStatus);
 
-    void configChargingItems(ConfigChargingItemsCommand cmd);
+	PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd);
 
-    void createChargingStandard(CreateChargingStandardCommand cmd);
+	void exportRentalExcelTemplate(HttpServletResponse response);
 
-    void modifyChargingStandard(ModifyChargingStandardCommand cmd);
+	FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
 
-    GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
+	void updateBillsToSettled(UpdateBillsToSettled cmd);
 
-    DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
+	GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd);
 
-    List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
+	PaymentBillItems findBillItemById(Long billItemId);
 
-    List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
+	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
 
-    void createBillGroup(CreateBillGroupCommand cmd);
+	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
-    void modifyBillGroup(ModifyBillGroupCommand cmd);
+	void configChargingItems(ConfigChargingItemsCommand cmd);
 
+	void createChargingStandard(CreateChargingStandardCommand cmd);
 
+	void modifyChargingStandard(ModifyChargingStandardCommand cmd);
 
-    void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
+	GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
-    ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
+	DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
 
-    void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+	List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
-    DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
+	List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
 
+	void createBillGroup(CreateBillGroupCommand cmd);
 
+	void modifyBillGroup(ModifyBillGroupCommand cmd);
 
-    DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd);
+	void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 
+	ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
 
-    ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
+	void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
 
-    PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
+	DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
 
-    List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
+	DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd);
 
-    void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd);
+	ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
+	PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 
-    ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd);
+	List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
-    void autoNoticeConfig(AutoNoticeConfigCommand cmd);
+	void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd);
 
-    void activeAutoBillNotice();
+	ListAutoNoticeConfigResponse listAutoNoticeConfig(ListAutoNoticeConfigCommand cmd);
 
+	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
-    CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
+	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
 
-    List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
+	List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
 
-    List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
+	List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
 
-    FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
+	FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 
-    void syncCustomer(Integer namespaceId);
+	List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
 
-    List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
+	void exportBillTemplates(ExportBillTemplatesCommand cmd, HttpServletResponse response);
 
-    void activeLateFine();
+	BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file);
+
+	void linkCustomerToBill(String code, Long ownerUid, String identifierToken);
+
+	ListPaymentBillResp listBillRelatedTransac(listBillRelatedTransacCommand cmd);
+
+    void reCalBill(ReCalBillCommand cmd);
+
+    void modifySettledBill(ModifySettledBillCommand cmd);
+
+    UploadCertificateInfoDTO uploadCertificate(UploadCertificateCommand cmd);
+
+	UploadCertificateInfoDTO listUploadCertificates(ListUploadCertificatesCommand cmd);
+
+    JudgeAppShowPayResponse judgeAppShowPay(JudgeAppShowPayCommand cmd);
+    
+    void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
+
+    void noticeTrigger(Integer namespaceId);
+    
+    List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
+    
+    /**
+     * 用于接受支付系统的回调信息
+     * @param cmd
+     */
+    void payNotify(OrderPaymentNotificationCommand cmd);
+    	
+    ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd);
+    
+	IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd);
+	
+	void transferOrderPaymentType();
+
+    long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
+
+	void saveInstanceConfig(long categoryId, String ret);
+	
+    //add by tangcen
+	void calculateRentForContract(CalculateRentCommand calculateRentCommand);
+
+	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
+
+	void createAnAppMapping(CreateAnAppMappingCommand cmd);
+
+	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
+    
+    IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
+	
+	ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
+    
+    void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
+    
+    void exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response);
+    
+    public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd);
+    
+    ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
+
+	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
+	
+	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
+
+	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
+
+	void testLateFine(TestLateFineCommand cmd);
 }

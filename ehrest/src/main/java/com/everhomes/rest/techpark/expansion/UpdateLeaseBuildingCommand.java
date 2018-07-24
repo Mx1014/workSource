@@ -19,6 +19,7 @@ public class UpdateLeaseBuildingCommand {
     private String aliasName;
     private String managerName;
     private String managerContact;
+    private Long managerUid;
     private Double longitude;
     private Double latitude;
     private String address;
@@ -197,6 +198,14 @@ public class UpdateLeaseBuildingCommand {
 
     public void setCustomFormFlag(Byte customFormFlag) {
         this.customFormFlag = customFormFlag;
+    }
+
+    public Long getManagerUid() {
+        return managerUid;
+    }
+
+    public void setManagerUid(Long managerUid) {
+        this.managerUid = managerUid;
     }
 
     @Override

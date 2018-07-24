@@ -1,5 +1,6 @@
 package com.everhomes.rest.officecubicle;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -31,6 +32,8 @@ import com.everhomes.util.StringHelper;
  * <li>attachments: banner图的urls{@link com.everhomes.rest.officecubicle.OfficeAttachmentDTO} </li> 
  * <li>categories: 工位空间list{@link com.everhomes.rest.officecubicle.OfficeCategoryDTO}</li> 
  * <li>ranges: 空间可见范围{@link OfficeRangeDTO}</li>
+ * <li>minUnitPrice: 最低价格</li>
+ * <li>allPositionNums: 总工位数量</li>
  * </ul>
  */
 public class OfficeSpaceDTO {
@@ -58,7 +61,25 @@ public class OfficeSpaceDTO {
 	@ItemType(OfficeCategoryDTO.class)
 	private List<OfficeCategoryDTO> categories;
 	private Byte status;
-	
+	private BigDecimal minUnitPrice;
+	private Integer allPositionNums;
+
+	public BigDecimal getMinUnitPrice() {
+		return minUnitPrice;
+	}
+
+	public void setMinUnitPrice(BigDecimal minUnitPrice) {
+		this.minUnitPrice = minUnitPrice;
+	}
+
+	public Integer getAllPositionNums() {
+		return allPositionNums;
+	}
+
+	public void setAllPositionNums(Integer allPositionNums) {
+		this.allPositionNums = allPositionNums;
+	}
+
 	@ItemType(OfficeRangeDTO.class)
 	private List<OfficeRangeDTO> ranges;
 	

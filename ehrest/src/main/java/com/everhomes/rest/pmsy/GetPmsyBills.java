@@ -20,7 +20,7 @@ public class GetPmsyBills {
 	private String projectId;
 	@NotNull
 	private String resourceId;
-	private Long billDateStr;
+	private String billDateStr;
 	
 	public String getCustomerId() {
 		return customerId;
@@ -34,15 +34,6 @@ public class GetPmsyBills {
 	public void setResourceId(String resourceId) {
 		this.resourceId = resourceId;
 	}
-
-	
-	public Long getBillDateStr() {
-		return billDateStr;
-	}
-	public void setBillDateStr(Long billDateStr) {
-		this.billDateStr = billDateStr;
-	}
-	
 	public String getProjectId() {
 		return projectId;
 	}
@@ -53,4 +44,10 @@ public class GetPmsyBills {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public String getBillDateStr() {
+		return billDateStr;
+	}
+	public void setBillDateStr(String billDateStr) {
+		this.billDateStr = billDateStr;
+	}
 }

@@ -40,6 +40,7 @@ public class ParkingLot extends EhParkingLots {
 
     private Byte invoiceFlag;
     private Byte vipParkingFlag;
+    private Byte monthRechargeFlag;
     private byte businessLicenseFlag;
     private Byte identityCardFlag;
 
@@ -180,6 +181,14 @@ public class ParkingLot extends EhParkingLots {
 
     public void setCurrentInfoType(Byte currentInfoType) {
         this.currentInfoType = currentInfoType;
+    }
+
+    public Byte getMonthRechargeFlag() {
+        return monthRechargeFlag;
+    }
+
+    public void setMonthRechargeFlag(Byte monthRechargeFlag) {
+        this.monthRechargeFlag = monthRechargeFlag;
     }
 
     public String getContact() {

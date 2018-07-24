@@ -11,10 +11,12 @@ import javax.validation.constraints.NotNull;
  *     <li>ownerType：账单所属物业公司类型</li>
  *     <li>targetId：账单所属园区id</li>
  *     <li>targetType：账单所属园区类型</li>
+ *     <li>billGroupId：账单组id</li>
  * </ul>
  */
 public class DeleteBillCommand {
     private Long id;
+    private Long billGroupId;
 
     @NotNull
     private Long ownerId;
@@ -66,6 +68,14 @@ public class DeleteBillCommand {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
+    }
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
     }
 
     @Override

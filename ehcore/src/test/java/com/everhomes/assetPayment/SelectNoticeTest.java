@@ -46,7 +46,7 @@ public class SelectNoticeTest extends CoreServerTestCase {
         assetService.selectNotice(cmd);
         System.out.println("method over");
     }
-    @Test
+/*    @Test
     public void sync() throws InterruptedException {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<Community> communities = context.selectFrom(Tables.EH_COMMUNITIES)
@@ -60,5 +60,5 @@ public class SelectNoticeTest extends CoreServerTestCase {
             customerService.syncIndividualCustomers(cmd);
             //customerService.syncEnterpriseCustomers(cmd);
         }
-    }
+    }*/
 }
