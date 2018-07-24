@@ -434,7 +434,7 @@ public abstract class AbstractChatRecordService implements ChatRecordService{
 
 		ChatRecordDTO dto = null;
 		List<ChatRecordDTO> chatRecordDtos = new ArrayList<>(50);
-		for (int i = 0; i < finalMsgSize; i++) {
+		for (int i = finalMsgSize - 1; i >= 0; i--) {
 			dto = new ChatRecordDTO();
 
 			// 填充查询结果
