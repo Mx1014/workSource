@@ -8966,7 +8966,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
 		SimpleDateFormat beginMonthSF = new SimpleDateFormat("yyyy-MM-dd");
 		String result = getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
-		result = result.replaceAll("-","~");//弱智需求。。
+		if (RentalType.HOUR.getCode() == resourceOrders.get(0).getRentalType())
+		    result = result.replaceAll("-","~");//弱智需求。。
 		return result;
 	}
 }
