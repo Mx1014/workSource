@@ -865,6 +865,11 @@ INSERT INTO `eh_archives_form_groups` (`id`, `namespace_id`, `owner_type`, `owne
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'archives', '100014', 'zh_CN', '邮箱重复');
 -- end
+
+-- AUTHOR: dengs 20180724
+-- REMARK: issue-33548 fix 更新一波停车默认缴费来源
+update eh_parking_recharge_orders SET pay_source='app' WHERE pay_source IS NULL;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
