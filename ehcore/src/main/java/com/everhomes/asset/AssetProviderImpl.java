@@ -5439,7 +5439,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        /*DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         boolean alreadyPaired = isAlreadyPaired(cmd.getAssetCategoryId(), cmd.getContractCategoryId());
         if(alreadyPaired){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.SUCCESS, "already paired, no need pair again");
@@ -5479,47 +5479,56 @@ public class AssetProviderImpl implements AssetProvider {
         }else{
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "asset category id and contract id does not exist yes");
-        }
+        }*/
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID, cmd.getContractCategoryId())
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_ORIGINID, cmd.getContractOriginId())
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CHANGEFLAG, cmd.getContractChangeFlag())
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG, cmd.getEnergyFlag())
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
+	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()));
     }
 
-    private boolean isAlreadyPaired(Long assetCategoryId, Long contractCategoryId) {
-        List<Long> fetch = this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
-                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
-                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
-        return fetch.size() > 0;
-    }
-
-    private void deleteByContractAndAsset(Long contractCategoryId, Long assetCategoryId) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        dslContext.delete(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
-                .or(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-                .execute();
-    }
-
-    private Integer findNamespaceByContractId(Long contractCategoryId) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Integer namespaceId = null;
-        List<Integer> fetch = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID)
-                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
-                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID);
-        if(fetch.size() > 0) return fetch.get(0);
-        return null;
-    }
-
-    private Integer findNamespaceByAsset(Long assetCategoryId) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Integer namespaceId = null;
-        List<Integer> fetch = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID)
-                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID);
-        if(fetch.size() > 0) return fetch.get(0);
-        return null;
-    }
+//    private boolean isAlreadyPaired(Long assetCategoryId, Long contractCategoryId) {
+//        List<Long> fetch = this.dbProvider.getDslContext(AccessSpec.readOnly()).select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
+//                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+//                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
+//                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
+//        return fetch.size() > 0;
+//    }
+//
+//    private void deleteByContractAndAsset(Long contractCategoryId, Long assetCategoryId) {
+//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        dslContext.delete(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
+//                .or(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+//                .execute();
+//    }
+//
+//    private Integer findNamespaceByContractId(Long contractCategoryId) {
+//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        Integer namespaceId = null;
+//        List<Integer> fetch = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID)
+//                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(contractCategoryId))
+//                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID);
+//        if(fetch.size() > 0) return fetch.get(0);
+//        return null;
+//    }
+//
+//    private Integer findNamespaceByAsset(Long assetCategoryId) {
+//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        Integer namespaceId = null;
+//        List<Integer> fetch = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID)
+//                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+//                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID);
+//        if(fetch.size() > 0) return fetch.get(0);
+//        return null;
+//    }
 
     @Override
     public boolean checkExistAsset(Long assetCategoryId) {

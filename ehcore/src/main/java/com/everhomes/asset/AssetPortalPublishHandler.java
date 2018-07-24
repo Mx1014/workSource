@@ -115,11 +115,15 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     				Long originId = assetInstanceConfigDTO.getContractOriginId();
     				ServiceModuleApp contractApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
     				if(contractApp != null) {
+    					AssetInstanceConfigDTO contractInstanceConfigDTO = 
+    							(AssetInstanceConfigDTO) StringHelper.fromJsonString(contractApp.getInstanceConfig(), AssetInstanceConfigDTO.class);
     					CreateAnAppMappingCommand cmd = new CreateAnAppMappingCommand();
     					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-    					
-    					
-    					
+    					cmd.setContractCategoryId(contractInstanceConfigDTO.getCategoryId());
+    					cmd.setContractChangeFlag(assetInstanceConfigDTO.getContractChangeFlag());
+    					cmd.setContractOriginId(assetInstanceConfigDTO.getContractOriginId());
+    					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
+    					cmd.setNamespaceId(app.getNamespaceId());
     					assetService.createOrUpdateAnAppMapping(cmd);
     				}
     			}
@@ -128,6 +132,5 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
             LOGGER.error("failed to afterAllAppPulish in AssetPortalHandler, instanceConfig is={}", instanceConfig, e);
             e.printStackTrace();
         }
-		
     }
 }

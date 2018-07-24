@@ -4711,12 +4711,6 @@ public class AssetServiceImpl implements AssetService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "either assetCategoryId or contractCategory is null");
         }
-        boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
-        boolean existContract = assetProvider.checkExistContract(cmd.getContractCategoryId());
-        if(existAsset || existContract){
-             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-                    "asset category or contract category already exist in mapping schema");
-        }
         Long mappingId = assetProvider.checkEnergyFlag(cmd.getNamespaceId());
         mapping.setAssetCategoryId(cmd.getAssetCategoryId());
         mapping.setContractCategoryId(cmd.getContractCategoryId());
@@ -4725,7 +4719,7 @@ public class AssetServiceImpl implements AssetService {
         mapping.setNamespaceId(cmd.getNamespaceId());
         mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
         mapping.setEnergyFlag(AppMappingEnergyFlag.fromCodeDefaultNO(cmd.getEnergyFlag()).getCode());
-        // add relation
+        //add relation
         if(mappingId != null && AppMappingEnergyFlag.fromCodeDefaultNO(mapping.getEnergyFlag()) == AppMappingEnergyFlag.YES){
             assetProvider.changeEnergyFlag(mappingId, AppMappingEnergyFlag.NO);
         }
@@ -5233,24 +5227,14 @@ public class AssetServiceImpl implements AssetService {
                     "either assetCategoryId or contractCategory is null");
         }
         boolean existAsset = assetProvider.checkExistAsset(cmd.getAssetCategoryId());
-        boolean existContract = assetProvider.checkExistContract(cmd.getContractCategoryId());
-        if(existAsset || existContract){
-             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-                    "asset category or contract category already exist in mapping schema");
+        if(existAsset){
+        	//如果已经存在就是更新
+        	UpdateAnAppMappingCommand updateAnAppMappingCommand = ConvertHelper.convert(cmd, UpdateAnAppMappingCommand.class);
+        	updateAnAppMapping(updateAnAppMappingCommand);
+        }else {
+        	//如果不存在就是新增
+        	createAnAppMapping(cmd);
         }
-        Long mappingId = assetProvider.checkEnergyFlag(cmd.getNamespaceId());
-        mapping.setAssetCategoryId(cmd.getAssetCategoryId());
-        mapping.setContractCategoryId(cmd.getContractCategoryId());
-        mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        mapping.setCreateUid(UserContext.currentUserId());
-        mapping.setNamespaceId(cmd.getNamespaceId());
-        mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
-        mapping.setEnergyFlag(AppMappingEnergyFlag.fromCodeDefaultNO(cmd.getEnergyFlag()).getCode());
-        // add relation
-        if(mappingId != null && AppMappingEnergyFlag.fromCodeDefaultNO(mapping.getEnergyFlag()) == AppMappingEnergyFlag.YES){
-            assetProvider.changeEnergyFlag(mappingId, AppMappingEnergyFlag.NO);
-        }
-        assetProvider.insertAppMapping(mapping);
     }
 
 }
