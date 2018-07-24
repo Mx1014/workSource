@@ -509,7 +509,6 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
         //success
         if(cmd.getPaymentStatus() != null) {
-            this.dbProvider.execute((TransactionStatus status) -> {
                 Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
                 RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
                 order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
@@ -549,8 +548,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                     }
                 } else
                     LOGGER.error("待付款订单:id [" + order.getId() + "]状态有问题： 订单状态是：" + order.getStatus());
-                return null;
-            });
+
         }
     }
 
@@ -627,7 +625,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (!PayUtil.verifyCallbackSignature(cmd))
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "signature wrong");
-        this.dbProvider.execute((TransactionStatus status) -> {
+
             Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
             RentalRefundOrder rentalRefundOrder = this.rentalProvider.getRentalRefundOrderByOrderNo(record.getOrderNo().toString());
             RentalOrder bill = this.rentalProvider.findRentalBillById(rentalRefundOrder.getOrderId());
@@ -636,7 +634,6 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             rentalProvider.updateRentalBill(bill);
             rentalProvider.updateRentalRefundOrder(rentalRefundOrder);
 //			rentalService.cancelOrderSendMessage(bill);
-            return null;
-        });
+
     }
 }
