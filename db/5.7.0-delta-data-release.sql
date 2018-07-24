@@ -754,7 +754,7 @@ update eh_locale_strings set text = '预订数量' where scope = 'rental.flow' a
 update eh_locale_strings set text = '预订时间' where scope = 'rental.flow' and `code` = 'useDetail';
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ( 'rental.notification', '13', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。');
 
-update eh_locale_templates set text = '请联系$收款人姓名$（$收款人手机号$）或者前往：$收银台地址$付款。点击手机号码可拨号' where scope = 'rental.flow' and `code` = 2;
+update eh_locale_templates set text = '请联系${offlinePayeeName}（${offlinePayeeContact}）或者前往：${offlineCashierAddress}付款。' where scope = 'rental.flow' and `code` = 2;
 
 SET @ns_id = 0;
 SET @module_id = 40400;
