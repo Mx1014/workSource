@@ -2,11 +2,15 @@
 package com.everhomes.asset;
 
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.rest.asset.AssetInstanceConfigDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.StringHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +25,10 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
 
     @Autowired
     private AssetService assetService;
-
+    
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+    
     // zhang jiang gao ke holds a different uri because in this namespace, the older asset UI is still in use
    @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
@@ -96,5 +103,31 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     @Override
     public String getAppInstanceConfig(Integer namespaceId, String actionData){
        return null;
+    }
+    
+    public void afterAllAppPulish(ServiceModuleApp app){
+    	String instanceConfig = app.getInstanceConfig();
+    	try {
+    		if(instanceConfig != null && instanceConfig != "") {
+    			//格式化instanceConfig的json成对象
+    			AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
+    			if(assetInstanceConfigDTO != null && assetInstanceConfigDTO.getContractOriginId() != null) {
+    				Long originId = assetInstanceConfigDTO.getContractOriginId();
+    				ServiceModuleApp contractApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
+    				if(contractApp != null) {
+    					CreateAnAppMappingCommand cmd = new CreateAnAppMappingCommand();
+    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
+    					
+    					
+    					
+    					assetService.createOrUpdateAnAppMapping(cmd);
+    				}
+    			}
+    		}
+    	}catch (Exception e) {
+            LOGGER.error("failed to afterAllAppPulish in AssetPortalHandler, instanceConfig is={}", instanceConfig, e);
+            e.printStackTrace();
+        }
+		
     }
 }

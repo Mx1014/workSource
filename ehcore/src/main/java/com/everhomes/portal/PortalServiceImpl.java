@@ -1499,6 +1499,16 @@ public class PortalServiceImpl implements PortalService {
 				serviceModuleAppProvider.updateServiceModuleApp(app);
 			}
 		}
+		
+		/**
+	     * 所有应用发布完成之后，再给各个应用发送一个通知
+	     */
+		for(ServiceModuleApp app: apps){
+			PortalPublishHandler handler = getPortalPublishHandler(app.getModuleId());
+			if(null != handler){
+				handler.afterAllAppPulish(app);
+			}
+		}
 
 	}
 

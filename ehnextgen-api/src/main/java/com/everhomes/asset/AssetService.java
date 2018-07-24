@@ -233,4 +233,6 @@ public interface AssetService {
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 
 	void testLateFine(TestLateFineCommand cmd);
+
+	void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
 }
