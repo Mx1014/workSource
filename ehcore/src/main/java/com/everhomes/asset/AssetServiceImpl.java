@@ -4816,12 +4816,14 @@ public class AssetServiceImpl implements AssetService {
     	List<PaymentBillRequest> paymentBillRequests = cmd.getBillList();
         List<String> billIds = new ArrayList<>();
         Long amountsInCents = 0l;
+        Float sumAmountOwed = 0f;
         StringBuffer orderExplain = new StringBuffer();//订单说明，如：2017-06物业费、2017-06租金
         for(PaymentBillRequest paymentBillRequest : paymentBillRequests){
             billIds.add(String.valueOf(paymentBillRequest.getBillId()));
             String amountOwed = String.valueOf(paymentBillRequest.getAmountOwed());
             Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
             amountsInCents += amountOwedInCents.longValue();
+            sumAmountOwed += Float.parseFloat(amountOwed);
             orderExplain.append(paymentBillRequest.getDateStr() + paymentBillRequest.getBillGroupName() + "、");
         }
         //对左邻的用户，直接检查bill的状态即可
@@ -4849,7 +4851,7 @@ public class AssetServiceImpl implements AssetService {
         if(orderExplain != null && orderExplain.length() != 0) {
         	publicTransferBillRespForEnt.setOrderExplain(orderExplain.substring(0, orderExplain.length() - 1));
         }
-        publicTransferBillRespForEnt.setOrderAmount(BigDecimal.valueOf(amountsInCents/100l));
+        publicTransferBillRespForEnt.setOrderAmount(BigDecimal.valueOf(sumAmountOwed).setScale(2, BigDecimal.ROUND_HALF_UP));
         return publicTransferBillRespForEnt;
     }
     
