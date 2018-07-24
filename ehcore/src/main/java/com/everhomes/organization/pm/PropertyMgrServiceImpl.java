@@ -51,6 +51,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.archives.ArchivesNotificationJob;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
@@ -263,6 +265,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateStatisticHelper;
 import com.everhomes.util.PaginationHelper;
@@ -1322,7 +1325,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         cmd.setLogId(logId);
         LOGGER.info("create pushMessageLog and set status waitting  .");
         // 调度执行一键推送
-        Job job = new Job(
+        /*Job job = new Job(
                 SendNoticeAction.class.getName(),
                 StringHelper.toJsonString(cmd),
                 String.valueOf(UserContext.currentUserId()),
@@ -1331,7 +1334,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         );
 
                
-        jesqueClientFactory.getClientPool().enqueue(queueName, job);
+        jesqueClientFactory.getClientPool().enqueue(queueName, job);*/
+        
+        //更换推送方式 add by huangliangming 20180723
+        HashMap<String, Object> paramMap = new HashMap<>();
+        paramMap.put("cmd", StringHelper.toJsonString(cmd));
+        paramMap.put("namespaceId", cmd.getNamespaceId());
+        paramMap.put("operatorUid", String.valueOf(UserContext.currentUserId()));
+        paramMap.put("schema", UserContext.current().getScheme());
+        String triggerName = queueName + System.currentTimeMillis();
+        String jobName = queueName + System.currentTimeMillis();
+        Long time = System.currentTimeMillis()+2*1000;
+        CronDateUtils.getCron(new Timestamp(time));
+        String cronExpression = CronDateUtils.getCron(new Timestamp(time));
+        LOGGER.info("triggerName:[" + triggerName+"];jobName:["+jobName+"];cronExpression:["+cronExpression+"];params:["+paramMap+"].");
+        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, SendNoticeNewAction.class, paramMap);
+        
     }
 
     @Override
