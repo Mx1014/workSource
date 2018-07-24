@@ -1737,6 +1737,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public void checkBlackListForWeb(CheckBlackListForWebCommand cmd) {
+        beforePostForWeb(cmd);
         checkBlackList(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getVisitorPhone(),cmd.getEnterpriseId());
     }
 
