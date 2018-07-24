@@ -7844,6 +7844,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //修改企业客户管理中的状态 by jiarui
                     try {
                         enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(),member.getNamespaceId());
+                        customerProvider.updateCustomerTalentRegisterStatus(member.getContactToken());
                     }catch (Exception e){
                         LOGGER.error("update enterprise customer admin record erro:{}",e);
                     }
