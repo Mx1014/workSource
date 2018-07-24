@@ -1049,7 +1049,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		Sheet sheet = wb.getSheetAt(0);
-		if (null != sheet) {
+		if (null != sheet && null != list) {
 			Row defaultRow = sheet.getRow(4);
 			Cell cell = defaultRow.getCell(1);
 			CellStyle style = cell.getCellStyle();
@@ -1133,7 +1133,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				cell14.setCellStyle(style);
 				String feeModel = "";
 				if (null != task.getTaskCategoryId())
-					feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel" + task.getTaskCategoryId(),"");
+					feeModel = configProvider.getValue(cmd.getNamespaceId(),"pmtask.feeModel." + task.getTaskCategoryId(),"");
 				if(StringUtils.isNotEmpty(feeModel) && "1".equals(feeModel)){
 					if(null != task.getStatus() && (task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode()) || task.getStatus().equals(PmTaskFlowStatus.CONFIRMED.getCode()))){
 //						费用确认后导出费用清单
