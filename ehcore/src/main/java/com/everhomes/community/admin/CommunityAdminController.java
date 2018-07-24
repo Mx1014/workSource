@@ -677,4 +677,18 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/community/checkUserAuditing</b>
+     * <p>判断当前用户是否有审核的权限</p>
+     */
+    @RequestMapping("checkUserAuditing")
+    @RestReturn(CheckUserAuditingAdminResponse.class)
+    public RestResponse checkUserAuditing(@Valid CheckUserAuditingAdminCommand cmd){
+        CheckUserAuditingAdminResponse checkUserAuditingAdminResponse = communityService.checkUserAuditing(cmd);
+        RestResponse response = new RestResponse(checkUserAuditingAdminResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -61,6 +61,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
@@ -71,6 +72,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingExportDetailDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
@@ -114,6 +116,9 @@ import com.everhomes.rest.community.UpdateChildProjectCommand;
 import com.everhomes.rest.community.UpdateCommunityAuthPopupConfigCommand;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.CheckAuditingType;
+import com.everhomes.rest.community.admin.CheckUserAuditingAdminCommand;
+import com.everhomes.rest.community.admin.CheckUserAuditingAdminResponse;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
@@ -211,6 +216,7 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
@@ -355,6 +361,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private EnterpriseCustomerProvider customerProvider;
+
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1669,6 +1678,7 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId());
 		// Long communityId = cmd.getCommunityId();
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
@@ -3620,6 +3630,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId());
 		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
@@ -3730,6 +3741,9 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
+	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId){
+        return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.AUTHENTIFICATION_MODULE_ID, null, null, null,communityId);
+	}
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 
 		if(null == cmd.getUserId() )
@@ -4382,8 +4396,20 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 	}
-	
-	private List<ImportFileResultLog<ImportCommunityDataDTO>> importCommunityDataAdmin(List<ImportCommunityDataDTO> datas,
+
+    @Override
+    public CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd) {
+        CheckUserAuditingAdminResponse response = new CheckUserAuditingAdminResponse();
+        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId());
+        if (isAuditing) {
+            response.setIsAuditing(CheckAuditingType.YES.getCode());
+        }else {
+            response.setIsAuditing(CheckAuditingType.NO.getCode());
+        }
+        return response;
+    }
+
+    private List<ImportFileResultLog<ImportCommunityDataDTO>> importCommunityDataAdmin(List<ImportCommunityDataDTO> datas,
 			Long userId, ImportCommunityCommand cmd) {
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
 		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());

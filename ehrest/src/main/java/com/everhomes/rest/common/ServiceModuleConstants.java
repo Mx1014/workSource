@@ -25,5 +25,6 @@ public interface ServiceModuleConstants {
     long LEASE_PROJECT_MODULE = 40100L;
     long PARKING_MODULE = 40800L;
     long ASSET_MODULE = 20400L;
+    long AUTHENTIFICATION_MODULE_ID = 35000L; // 用户认证模块ID
 
 }

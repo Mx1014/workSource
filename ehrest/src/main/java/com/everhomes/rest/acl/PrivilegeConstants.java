@@ -369,4 +369,9 @@ public interface PrivilegeConstants {
 
     // ------- 启动广告权限 --------
     long LAUNCHAD_ALL = 1090010000L;
+
+    // -----------用户认证-------------
+    long AUTHENTIFICATION_LIST_VIEW = 42007; //查看用户认证列表
+    long AUTHENTIFICATION_AUDITING = 42008;; // 审核权限
+    // ----------用户认证 END----------------
 }
