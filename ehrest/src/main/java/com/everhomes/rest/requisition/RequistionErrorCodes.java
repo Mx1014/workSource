@@ -8,4 +8,7 @@ package com.everhomes.rest.requisition;
 public interface RequistionErrorCodes {
     static final String SCOPE = "requisition";
     static final Integer ERROR_CREATE_FLOW_CASE = 1001;
+
+    static final int ERROR_FORM_PARAM = 1002;  //表单ID及版本参数不全
+    static final int ERROR_APPROVAL_NOT_START = 2001;
 }

@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.rest.requisition.ListRequisitionsDTO;
 
 import java.util.List;
@@ -22,4 +23,12 @@ public interface RequisitionProvider {
     void changeRequisitionStatus2Target(Byte target, Long referId);
 
     String getNameById(Long requisitionId);
+
+    /**
+     * 根据域空间和moudleId获取正在运行的审批
+     * @param moduleId
+     * @param namespaceId
+     * @return
+     */
+    GeneralApproval getRunnintEApproval(Long moduleId, Integer namespaceId, Long ownerId);
 }

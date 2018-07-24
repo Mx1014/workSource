@@ -1,8 +1,10 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.requisition.*;
 import com.everhomes.rest.RestResponse;
@@ -105,4 +107,52 @@ public class RequisitionController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
+
+
+    /**
+     * <b>URL: /requisition/updateInvitationApprovalActiveForm</b>
+     * <p> 根据前端传入的审批项ID : sourceId 和表单ID以及表单版本将该审批下的该表单设为启用 </p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("updateRequisitionApprovalActiveForm")
+    @RestReturn(value=String.class)
+    public RestResponse updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd) {
+        requisitionService.updateRequisitionApprovalActiveForm(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /requisition/updateRequisitionApprovalActiveStatus</b>
+     * <p> 根据前端传入的审批项ID : 更新启用的审批项ID，如果之前有启用的审批项ID则将其停用后，将传入的审批项启用 </p>
+     */
+    @RequestMapping("updateRequisitionApprovalActiveStatus")
+    @RestReturn(value=String.class)
+    public RestResponse updateRequisitionApprovalActiveStatus(UpdateRequisitionActiveStatusCommond cmd) {
+        requisitionService.updateRequisitionApprovalActiveStatus(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /requisition/getRunningRequisitionForm</b>
+     * <p> 前端传入模块ID，后台查找启用的审批流程并根据启用流程查找启用的表单，并返回  </p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("getRunningRequisitionForm")
+    @RestReturn(value=GeneralFormDTO.class)
+    public RestResponse getRunningRequisitionForm(GetRunningRequisitionFormCommond cmd) {
+        GeneralFormDTO dto = requisitionService.getRunningRequisitionForm(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

@@ -7,6 +7,10 @@ import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -14,6 +18,8 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.general_approval.GeneralApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.ListPMOrganizationsCommand;
 import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.requisition.*;
@@ -56,6 +62,10 @@ public class RequisitionServiceImpl implements RequisitionService {
     private OrganizationService organizationService;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
 
     @Override
     public void createRequisition(CreateRequisitionCommand cmd) {
@@ -114,6 +124,7 @@ public class RequisitionServiceImpl implements RequisitionService {
         response.setList(result);
         return response;
     }
+
 
     @Override
     public GetRequisitionDetailResponse getRequisitionDetail(GetRequisitionDetailCommand cmd) {
@@ -190,4 +201,48 @@ public class RequisitionServiceImpl implements RequisitionService {
         }
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.REQUISITION_MODULE, (byte)13, null, null, communityId);
     }
+
+    @Override
+    public void updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd){
+        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
+        if(cmd.getFormOriginId() != null && cmd.getFormOriginId() > 0l && cmd.getFormVersion() > 0 && cmd.getFormVersion() != null) {
+            approval.setFormOriginId(cmd.getFormOriginId());
+            approval.setFormVersion(cmd.getFormVersion());
+            generalApprovalProvider.updateGeneralApproval(approval);
+        }else{
+            LOGGER.error("form origin id or form version param cannot null. form_origin_id : " + cmd.getFormOriginId() + ", form_version : " + cmd.getFormVersion());
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_PARAM, "form origin id or form version param cannot null");
+
+        }
+    }
+
+    @Override
+    public void updateRequisitionApprovalActiveStatus(UpdateRequisitionActiveStatusCommond cmd){
+        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getId());
+        if(cmd.getStatus() != null) {
+            approval.setStatus(cmd.getStatus());
+            if(cmd.getStatus().equals(GeneralApprovalStatus.RUNNING.getCode())){
+                GeneralApproval oldRunning = generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
+                oldRunning.setStatus(GeneralApprovalStatus.INVALID.getCode());
+                this.dbProvider.execute((status) -> {
+                    generalApprovalProvider.updateGeneralApproval(oldRunning);
+                    generalApprovalProvider.updateGeneralApproval(approval);
+                    return null;
+                });
+
+            }else{
+                generalApprovalProvider.updateGeneralApproval(approval);
+            }
+        }
+    }
+
+    @Override
+    public GeneralFormDTO getRunningRequisitionForm(GetRunningRequisitionFormCommond cmd){
+        GeneralApproval runningApproval = generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
+        GeneralForm form = generalFormProvider.getGeneralFormById(runningApproval.getFormOriginId());
+        return ConvertHelper.convert(form, GeneralFormDTO.class);
+    }
+
+
 }
