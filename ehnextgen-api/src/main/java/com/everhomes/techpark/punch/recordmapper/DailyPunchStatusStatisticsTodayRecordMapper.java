@@ -6,7 +6,7 @@ import org.jooq.Record;
 import org.jooq.RecordMapper;
 
 public class DailyPunchStatusStatisticsTodayRecordMapper implements RecordMapper<Record, DailyPunchStatusStatisticsTodayRecordMapper>, PunchStatisticsParser {
-    @PunchStatusStatisticsItem(defaultOrder = 1, type = PunchStatusStatisticsItemType.UN_ATTENDANCE)
+    @PunchStatusStatisticsItem(defaultOrder = 1, type = PunchStatusStatisticsItemType.UN_ARRIVED)
     private Integer unArrivedMemberCount;
 
     @PunchStatusStatisticsItem(defaultOrder = 2, type = PunchStatusStatisticsItemType.BELATE)

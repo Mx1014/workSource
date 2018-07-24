@@ -212,7 +212,7 @@ ALTER TABLE eh_punch_day_logs ADD COLUMN ask_for_leave_request_count INTEGER COM
 ALTER TABLE eh_punch_day_logs ADD COLUMN go_out_request_count INTEGER COMMENT '当天外出申请次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN business_trip_request_count INTEGER COMMENT '当天出差申请次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN overtime_request_count INTEGER COMMENT '当天加班申请次数';
-ALTER TABLE eh_punch_day_logs ADD COLUMN forgot_punch_request_count INTEGER COMMENT '当天异常打卡申请次数';
+ALTER TABLE eh_punch_day_logs ADD COLUMN punch_exception_request_count INTEGER COMMENT '当天异常打卡申请次数';
 
 ALTER TABLE eh_punch_day_log_files ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
 ALTER TABLE eh_punch_day_log_files ADD COLUMN dept_id BIGINT COMMENT '所属部门Id' AFTER enterprise_id;
@@ -226,7 +226,7 @@ ALTER TABLE eh_punch_day_log_files ADD COLUMN ask_for_leave_request_count INTEGE
 ALTER TABLE eh_punch_day_log_files ADD COLUMN go_out_request_count INTEGER COMMENT '当天外出申请次数';
 ALTER TABLE eh_punch_day_log_files ADD COLUMN business_trip_request_count INTEGER COMMENT '当天出差申请次数';
 ALTER TABLE eh_punch_day_log_files ADD COLUMN overtime_request_count INTEGER COMMENT '当天加班申请次数';
-ALTER TABLE eh_punch_day_log_files ADD COLUMN forgot_punch_request_count INTEGER COMMENT '当天异常打卡申请次数';
+ALTER TABLE eh_punch_day_log_files ADD COLUMN punch_exception_request_count INTEGER COMMENT '当天异常打卡申请次数';
 
 
 ALTER TABLE eh_punch_statistics ADD COLUMN rest_day_count INTEGER COMMENT '应休息天数' AFTER outwork_count;
@@ -235,7 +235,7 @@ ALTER TABLE eh_punch_statistics ADD COLUMN ask_for_leave_request_count INTEGER C
 ALTER TABLE eh_punch_statistics ADD COLUMN go_out_request_count INTEGER COMMENT '当月外出申请次数' AFTER ask_for_leave_request_count;
 ALTER TABLE eh_punch_statistics ADD COLUMN business_trip_request_count INTEGER COMMENT '当月出差申请次数' AFTER go_out_request_count;
 ALTER TABLE eh_punch_statistics ADD COLUMN overtime_request_count INTEGER COMMENT '当月加班申请次数' AFTER business_trip_request_count;
-ALTER TABLE eh_punch_statistics ADD COLUMN forgot_punch_request_count INTEGER COMMENT '当月异常打卡申请次数' AFTER overtime_request_count;
+ALTER TABLE eh_punch_statistics ADD COLUMN punch_exception_request_count INTEGER COMMENT '当月异常打卡申请次数' AFTER overtime_request_count;
 
 ALTER TABLE eh_punch_statistic_files ADD COLUMN rest_day_count INTEGER COMMENT '应休息天数' AFTER outwork_count;
 ALTER TABLE eh_punch_statistic_files ADD COLUMN full_normal_flag TINYINT COMMENT '当月是否全勤' AFTER rest_day_count;
@@ -243,4 +243,9 @@ ALTER TABLE eh_punch_statistic_files ADD COLUMN ask_for_leave_request_count INTE
 ALTER TABLE eh_punch_statistic_files ADD COLUMN go_out_request_count INTEGER COMMENT '当月外出申请次数' AFTER ask_for_leave_request_count;
 ALTER TABLE eh_punch_statistic_files ADD COLUMN business_trip_request_count INTEGER COMMENT '当月出差申请次数' AFTER go_out_request_count;
 ALTER TABLE eh_punch_statistic_files ADD COLUMN overtime_request_count INTEGER COMMENT '当月加班申请次数' AFTER business_trip_request_count;
-ALTER TABLE eh_punch_statistic_files ADD COLUMN forgot_punch_request_count INTEGER COMMENT '当月异常打卡申请次数' AFTER overtime_request_count;
+ALTER TABLE eh_punch_statistic_files ADD COLUMN punch_exception_request_count INTEGER COMMENT '当月异常打卡申请次数' AFTER overtime_request_count;
+
+
+ALTER TABLE eh_punch_statistics ADD INDEX i_eh_punch_month_detail_id(`punch_month`,`owner_type`,`owner_id`,`detail_id`);
+ALTER TABLE eh_punch_day_logs DROP INDEX i_eh_enterprise_user_punch_date;
+ALTER TABLE eh_punch_day_logs ADD INDEX i_eh_enterprise_punch_date(`enterprise_id`,`punch_date`);

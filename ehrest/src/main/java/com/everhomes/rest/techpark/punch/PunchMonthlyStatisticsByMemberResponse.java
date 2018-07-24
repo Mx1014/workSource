@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>organizationId: 总公司ID</li>
- * <li>statisticsMonth: 统计月份</li>
+ * <li>statisticsMonth: 统计月份,格式:yyyyMM</li>
  * <li>userId: 用户id</li>
  * <li>detailId: 员工detailId</li>
  * <li>workDayCount: 出勤天数</li>

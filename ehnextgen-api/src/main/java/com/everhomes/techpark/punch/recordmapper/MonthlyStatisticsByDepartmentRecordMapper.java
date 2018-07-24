@@ -35,7 +35,7 @@ public class MonthlyStatisticsByDepartmentRecordMapper implements RecordMapper<R
     private Integer overtimeRequestMemberCount;
 
     @PunchExceptionRequestStatisticsItem(defaultOrder = 5, type = PunchExceptionRequestStatisticsItemType.PUNCH_EXCEPTION)
-    private Integer forgotPunchRequestMemberCount;
+    private Integer punchExceptionRequestCount;
 
     public Integer getBelateMemberCount() {
         return belateMemberCount;
@@ -109,12 +109,12 @@ public class MonthlyStatisticsByDepartmentRecordMapper implements RecordMapper<R
         this.overtimeRequestMemberCount = overtimeRequestMemberCount;
     }
 
-    public Integer getForgotPunchRequestMemberCount() {
-        return forgotPunchRequestMemberCount;
+    public Integer getPunchExceptionRequestCount() {
+        return punchExceptionRequestCount;
     }
 
-    public void setForgotPunchRequestMemberCount(Integer forgotPunchRequestMemberCount) {
-        this.forgotPunchRequestMemberCount = forgotPunchRequestMemberCount;
+    public void setPunchExceptionRequestCount(Integer punchExceptionRequestCount) {
+        this.punchExceptionRequestCount = punchExceptionRequestCount;
     }
 
     @Override
@@ -129,7 +129,7 @@ public class MonthlyStatisticsByDepartmentRecordMapper implements RecordMapper<R
         data.setGoOutRequestMemberCount(record.getValue("goOutRequestMemberCount", Integer.class));
         data.setBusinessTripRequestMemberCount(record.getValue("businessTripRequestMemberCount", Integer.class));
         data.setOvertimeRequestMemberCount(record.getValue("overtimeRequestMemberCount", Integer.class));
-        data.setForgotPunchRequestMemberCount(record.getValue("forgotPunchRequestMemberCount", Integer.class));
+        data.setPunchExceptionRequestCount(record.getValue("punchExceptionRequestCount", Integer.class));
         return data;
     }
 

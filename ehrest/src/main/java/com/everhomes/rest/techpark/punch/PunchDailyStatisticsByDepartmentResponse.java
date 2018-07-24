@@ -9,9 +9,9 @@ import java.util.List;
  * <ul>
  * <li>statisticsDate: 统计日期，时间戳</li>
  * <li>departmentId: 部门id</li>
- * <li>numOfRest: 当日休息的人数</li>
- * <li>numOfShouldAttendance: 当日应到（应出勤）的人数</li>
- * <li>numOfAttendanced: 当日已到（已出勤）的人数</li>
+ * <li>restMemberCount: 当日休息的人数，参考{@link com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemDTO}</li>
+ * <li>shouldArrivedMemberCount: 当日应到（应出勤）的人数，参考{@link com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemDTO}</li>
+ * <li>arrivedMemberCount: 当日已到（已出勤）的人数，参考{@link com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemDTO}</li>
  * <li>rateOfAttendance: 出勤率</li>
  * <li>punchStatusStatisticsList: 未到、迟到、早退等其它出勤统计项，参考{@link com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemDTO}</li>
  * <li>exceptionRequestStatisticsList: 请假、出差等申请统计项，参考{@link com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO}</li>
@@ -20,9 +20,9 @@ import java.util.List;
 public class PunchDailyStatisticsByDepartmentResponse {
     private Long statisticsDate;
     private Long departmentId;
-    private Integer numOfRest;
-    private Integer numOfShouldAttendance;
-    private Integer numOfAttendanced;
+    private PunchStatusStatisticsItemDTO restMemberCount;
+    private PunchStatusStatisticsItemDTO shouldArrivedMemberCount;
+    private PunchStatusStatisticsItemDTO arrivedMemberCount;
     private Integer rateOfAttendance;
 
     private List<PunchStatusStatisticsItemDTO> punchStatusStatisticsList;
@@ -44,28 +44,28 @@ public class PunchDailyStatisticsByDepartmentResponse {
         this.departmentId = departmentId;
     }
 
-    public Integer getNumOfRest() {
-        return numOfRest;
+    public PunchStatusStatisticsItemDTO getRestMemberCount() {
+        return restMemberCount;
     }
 
-    public void setNumOfRest(Integer numOfRest) {
-        this.numOfRest = numOfRest;
+    public void setRestMemberCount(PunchStatusStatisticsItemDTO restMemberCount) {
+        this.restMemberCount = restMemberCount;
     }
 
-    public Integer getNumOfShouldAttendance() {
-        return numOfShouldAttendance;
+    public PunchStatusStatisticsItemDTO getShouldArrivedMemberCount() {
+        return shouldArrivedMemberCount;
     }
 
-    public void setNumOfShouldAttendance(Integer numOfShouldAttendance) {
-        this.numOfShouldAttendance = numOfShouldAttendance;
+    public void setShouldArrivedMemberCount(PunchStatusStatisticsItemDTO shouldArrivedMemberCount) {
+        this.shouldArrivedMemberCount = shouldArrivedMemberCount;
     }
 
-    public Integer getNumOfAttendanced() {
-        return numOfAttendanced;
+    public PunchStatusStatisticsItemDTO getArrivedMemberCount() {
+        return arrivedMemberCount;
     }
 
-    public void setNumOfAttendanced(Integer numOfAttendanced) {
-        this.numOfAttendanced = numOfAttendanced;
+    public void setArrivedMemberCount(PunchStatusStatisticsItemDTO arrivedMemberCount) {
+        this.arrivedMemberCount = arrivedMemberCount;
     }
 
     public Integer getRateOfAttendance() {

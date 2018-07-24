@@ -425,7 +425,7 @@ public interface PunchProvider {
 	List<OrganizationMemberDetails> listExceptionMembersByDate(Long organizationId, Long departmentId, Date startDate, Date endDate, GeneralApprovalAttribute approvalAttribute, Integer pageOffset, int pageSize);
 	MonthlyStatisticsByMemberRecordMapper monthlyStatisticsByMember(Long organizationId, String punchMonth, Long detailId);
 
-	MonthlyStatisticsByDepartmentRecordMapper monthlyStatisticsByDepartment(Long organizationId, String punchMonth, List<Long> deptIds);
+	MonthlyStatisticsByDepartmentRecordMapper monthlyStatisticsByDepartment(Long organizationId, String statisticsMonth, List<Long> deptIds);
 
 	DailyStatisticsByDepartmentBaseRecordMapper dailyStatisticsByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds, boolean isToday);
 
@@ -433,11 +433,11 @@ public interface PunchProvider {
 
 	DailyPunchStatusStatisticsHistoryRecordMapper dailyPunchStatusMemberCountsHistoryByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds);
 
-	MonthlyPunchStatusStatisticsRecordMapper monthlyPunchStatusMemberCountsByDepartment(Long organizationId, String punchMonth, List<Long> deptIds);
+	MonthlyPunchStatusStatisticsRecordMapper monthlyPunchStatusMemberCountsByDepartment(Long organizationId, String statisticsMonth, List<Long> deptIds);
 
 	PunchExceptionRequestStatisticsRecordMapper dailyPunchExceptionRequestMemberCountsByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds);
 
-	PunchExceptionRequestStatisticsRecordMapper monthlyPunchExceptionRequestMemberCountsByDepartment(Long organizationId, String punchMonth, List<Long> deptIds);
+	PunchExceptionRequestStatisticsRecordMapper monthlyPunchExceptionRequestMemberCountsByDepartment(Long organizationId, String statisticsMonth, List<Long> deptIds);
 
 	List<PunchDayLog> listPunchDayLogsByApprovalAttributeAndDeptIds(Long organizationId, List<Long> deptIds, Date queryDate, PunchExceptionRequestStatisticsItemType itemType, Integer pageOffset, int pageSize);
 

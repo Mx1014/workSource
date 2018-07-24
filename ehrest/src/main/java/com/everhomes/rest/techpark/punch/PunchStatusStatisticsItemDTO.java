@@ -15,6 +15,16 @@ public class PunchStatusStatisticsItemDTO {
     private Byte itemType;
     private Integer num;
 
+    public PunchStatusStatisticsItemDTO() {
+
+    }
+
+    public PunchStatusStatisticsItemDTO(String itemName, Byte itemType, Integer num) {
+        this.itemName = itemName;
+        this.itemType = itemType;
+        this.num = num;
+    }
+
     public String getItemName() {
         return itemName;
     }

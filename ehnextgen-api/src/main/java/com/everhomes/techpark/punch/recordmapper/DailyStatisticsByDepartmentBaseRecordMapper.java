@@ -1,38 +1,37 @@
 package com.everhomes.techpark.punch.recordmapper;
 
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType;
 import com.everhomes.util.StringHelper;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
 public class DailyStatisticsByDepartmentBaseRecordMapper implements RecordMapper<Record, DailyStatisticsByDepartmentBaseRecordMapper>, PunchStatisticsParser {
-    private Integer numOfRest;
-    private Integer numOfShouldAttendance;
-    private Integer numOfAttendanced;
+    private Integer restMemberCount;
+    private Integer shouldArrivedMemberCount;
+    private Integer arrivedMemberCount;
     private Integer rateOfAttendance;
 
-    public Integer getNumOfRest() {
-        return numOfRest;
+    public Integer getRestMemberCount() {
+        return restMemberCount;
     }
 
-    public void setNumOfRest(Integer numOfRest) {
-        this.numOfRest = numOfRest;
+    public void setRestMemberCount(Integer restMemberCount) {
+        this.restMemberCount = restMemberCount;
     }
 
-    public Integer getNumOfShouldAttendance() {
-        return numOfShouldAttendance;
+    public Integer getShouldArrivedMemberCount() {
+        return shouldArrivedMemberCount;
     }
 
-    public void setNumOfShouldAttendance(Integer numOfShouldAttendance) {
-        this.numOfShouldAttendance = numOfShouldAttendance;
+    public void setShouldArrivedMemberCount(Integer shouldArrivedMemberCount) {
+        this.shouldArrivedMemberCount = shouldArrivedMemberCount;
     }
 
-    public Integer getNumOfAttendanced() {
-        return numOfAttendanced;
+    public Integer getArrivedMemberCount() {
+        return arrivedMemberCount;
     }
 
-    public void setNumOfAttendanced(Integer numOfAttendanced) {
-        this.numOfAttendanced = numOfAttendanced;
+    public void setArrivedMemberCount(Integer arrivedMemberCount) {
+        this.arrivedMemberCount = arrivedMemberCount;
     }
 
     public Integer getRateOfAttendance() {
@@ -43,60 +42,6 @@ public class DailyStatisticsByDepartmentBaseRecordMapper implements RecordMapper
         this.rateOfAttendance = rateOfAttendance;
     }
 
-    @PunchExceptionRequestStatisticsItem(defaultOrder = 1, type = PunchExceptionRequestStatisticsItemType.ASK_FOR_LEAVE)
-    private Integer askForLeaveRequestMemberCount;
-
-    @PunchExceptionRequestStatisticsItem(defaultOrder = 2, type = PunchExceptionRequestStatisticsItemType.GO_OUT)
-    private Integer goOutRequestMemberCount;
-
-    @PunchExceptionRequestStatisticsItem(defaultOrder = 3, type = PunchExceptionRequestStatisticsItemType.BUSINESS_TRIP)
-    private Integer businessTripRequestMemberCount;
-
-    @PunchExceptionRequestStatisticsItem(defaultOrder = 4, type = PunchExceptionRequestStatisticsItemType.OVERTIME)
-    private Integer overtimeRequestMemberCount;
-
-    @PunchExceptionRequestStatisticsItem(defaultOrder = 5, type = PunchExceptionRequestStatisticsItemType.PUNCH_EXCEPTION)
-    private Integer forgotPunchRequestMemberCount;
-
-    public Integer getAskForLeaveRequestMemberCount() {
-        return askForLeaveRequestMemberCount;
-    }
-
-    public void setAskForLeaveRequestMemberCount(Integer askForLeaveRequestMemberCount) {
-        this.askForLeaveRequestMemberCount = askForLeaveRequestMemberCount;
-    }
-
-    public Integer getGoOutRequestMemberCount() {
-        return goOutRequestMemberCount;
-    }
-
-    public void setGoOutRequestMemberCount(Integer goOutRequestMemberCount) {
-        this.goOutRequestMemberCount = goOutRequestMemberCount;
-    }
-
-    public Integer getBusinessTripRequestMemberCount() {
-        return businessTripRequestMemberCount;
-    }
-
-    public void setBusinessTripRequestMemberCount(Integer businessTripRequestMemberCount) {
-        this.businessTripRequestMemberCount = businessTripRequestMemberCount;
-    }
-
-    public Integer getOvertimeRequestMemberCount() {
-        return overtimeRequestMemberCount;
-    }
-
-    public void setOvertimeRequestMemberCount(Integer overtimeRequestMemberCount) {
-        this.overtimeRequestMemberCount = overtimeRequestMemberCount;
-    }
-
-    public Integer getForgotPunchRequestMemberCount() {
-        return forgotPunchRequestMemberCount;
-    }
-
-    public void setForgotPunchRequestMemberCount(Integer forgotPunchRequestMemberCount) {
-        this.forgotPunchRequestMemberCount = forgotPunchRequestMemberCount;
-    }
 
     @Override
     public DailyStatisticsByDepartmentBaseRecordMapper map(Record record) {

@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>statisticsMonth: 查询的统计月份</li>
+ * <li>statisticsMonth: 查询的统计月份,格式:yyyyMM</li>
  * <li>departmentId: 部门ID</li>
  * <li>punchStatusStatisticsList: 未到、迟到、早退等出勤统计项，参考{@link com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemDTO}</li>
  * <li>exceptionRequestStatisticsList: 请假、出差等申请统计项，参考{@link com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO}</li>

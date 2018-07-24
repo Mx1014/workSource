@@ -273,6 +273,7 @@ import com.everhomes.techpark.punch.recordmapper.MonthlyPunchStatusStatisticsRec
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByDepartmentRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.MonthlyStatisticsByMemberRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatisticsRecordMapper;
+import com.everhomes.techpark.punch.recordmapper.PunchStatisticsParser;
 import com.everhomes.techpark.punch.utils.PunchDayParseUtils;
 import com.everhomes.uniongroup.UniongroupConfigureProvider;
 import com.everhomes.uniongroup.UniongroupConfigures;
@@ -3422,14 +3423,14 @@ public class PunchServiceImpl implements PunchService {
         statistic.setGoOutRequestCount(0);
         statistic.setBusinessTripRequestCount(0);
         statistic.setOvertimeRequestCount(0);
-        statistic.setForgotPunchRequestCount(0);
+        statistic.setPunchExceptionRequestCount(0);
         statistic.setRestDayCount(0);
         statistic.setFullNormalFlag(NormalFlag.YES.getCode());
         statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 
         statistic.setExceptionRequestCounts(punchProvider.countExceptionRequests(statistic.getUserId(), statistic.getOwnerId(), statistic.getPunchMonth(),
                 Arrays.asList(com.everhomes.rest.approval.ApprovalStatus.WAITING_FOR_APPROVING.getCode(), com.everhomes.rest.approval.ApprovalStatus.AGREEMENT.getCode())));
-        statistic.setForgotPunchRequestCount(statistic.getExceptionRequestCounts());
+        statistic.setPunchExceptionRequestCount(statistic.getExceptionRequestCounts());
 
         List<PunchExceptionRequestStatisticsItemDTO> punchExceptionRequestStatisticsItemDTOS = punchProvider.countPunchExceptionRequestBetweenBeginAndEndTime(statistic.getUserId(), statistic.getOwnerId(), null, null);
         punchExceptionRequestCountByPunchMonthStatistics(statistic, punchExceptionRequestStatisticsItemDTOS);
@@ -11594,7 +11595,7 @@ public class PunchServiceImpl implements PunchService {
         pdl.setGoOutRequestCount(0);
         pdl.setOvertimeRequestCount(0);
         pdl.setBusinessTripRequestCount(0);
-        pdl.setForgotPunchRequestCount(0);
+        pdl.setPunchExceptionRequestCount(0);
         if (!CollectionUtils.isEmpty(exceptionRequests)) {
             for (PunchExceptionRequest request : exceptionRequests) {
                 GeneralApprovalAttribute attribute = GeneralApprovalAttribute.fromCode(request.getApprovalAttribute());
@@ -11615,7 +11616,7 @@ public class PunchServiceImpl implements PunchService {
             }
         }
         if (!CollectionUtils.isEmpty(abnormalExceptionRequests)) {
-            pdl.setForgotPunchRequestCount(abnormalExceptionRequests.size());
+            pdl.setPunchExceptionRequestCount(abnormalExceptionRequests.size());
         }
     }
 
@@ -12047,7 +12048,7 @@ public class PunchServiceImpl implements PunchService {
                 result = statistic.getOvertimeRequestCount();
                 break;
             case PUNCH_EXCEPTION:
-                result = statistic.getForgotPunchRequestCount();
+                result = statistic.getPunchExceptionRequestCount();
                 break;
             default:
                 break;
@@ -12082,12 +12083,11 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public PunchMonthlyStatisticsByMemberResponse monthlyStatisticsByMember(PunchMonthlyStatisticsByMemberCommand cmd) {
-        checkOrganization(cmd.getOrganizationId());
         cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
         if (cmd.getUserId() == null) {
             cmd.setUserId(UserContext.currentUserId());
         }
-        if (org.springframework.util.StringUtils.isEmpty(cmd.getStatisticsMonth())) {
+        if (!org.springframework.util.StringUtils.hasText(cmd.getStatisticsMonth())) {
             cmd.setStatisticsMonth(monthSF.get().format(new Date()));
         }
         OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(cmd.getUserId(), cmd.getOrganizationId());
@@ -12113,10 +12113,9 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public PunchMonthlyStatisticsByDepartmentResponse monthlyStatisticsByDepartment(PunchMonthlyStatisticsByDepartmentCommand cmd) {
-        checkOrganization(cmd.getOrganizationId());
         Organization department = checkOrganization(cmd.getDepartmentId());
         cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
-        if (org.springframework.util.StringUtils.isEmpty(cmd.getStatisticsMonth())) {
+        if (!org.springframework.util.StringUtils.hasText(cmd.getStatisticsMonth())) {
             cmd.setStatisticsMonth(monthSF.get().format(new Date()));
         }
         List<Long> deptIds = listChildDepartmentsIncludeSelf(department);
@@ -12135,7 +12134,6 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public PunchDailyStatisticsByDepartmentResponse dailyStatisticsByDepartment(PunchDailyStatisticsByDepartmentCommand cmd) {
-        checkOrganization(cmd.getOrganizationId());
         Organization department = checkOrganization(cmd.getDepartmentId());
         cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
         if (cmd.getStatisticsDate() == null) {
@@ -12143,26 +12141,38 @@ public class PunchServiceImpl implements PunchService {
         }
         List<Long> deptIds = listChildDepartmentsIncludeSelf(department);
 
+        String locale = UserContext.current().getUser().getLocale();
         PunchDailyStatisticsByDepartmentResponse response = new PunchDailyStatisticsByDepartmentResponse();
         response.setStatisticsDate(cmd.getStatisticsDate());
         response.setDepartmentId(cmd.getDepartmentId());
-        response.setNumOfRest(0);
-        response.setNumOfShouldAttendance(0);
-        response.setNumOfAttendanced(0);
         response.setRateOfAttendance(0);
+        response.setRestMemberCount(new PunchStatusStatisticsItemDTO(
+                localeStringService.getLocalizedString(
+                        PunchStatisticsParser.PUNCH_STATUS_STATISTICS_ITEM_NAME_SCOPE, String.valueOf(PunchStatusStatisticsItemType.REST.getCode()), locale, PunchStatusStatisticsItemType.REST.toString()),
+                PunchStatusStatisticsItemType.REST.getCode(), 0)
+        );
+        response.setShouldArrivedMemberCount(new PunchStatusStatisticsItemDTO(
+                localeStringService.getLocalizedString(
+                        PunchStatisticsParser.PUNCH_STATUS_STATISTICS_ITEM_NAME_SCOPE, String.valueOf(PunchStatusStatisticsItemType.SHOULD_ARRIVE.getCode()), locale, PunchStatusStatisticsItemType.SHOULD_ARRIVE.toString()),
+                PunchStatusStatisticsItemType.SHOULD_ARRIVE.getCode(), 0)
+        );
+        response.setArrivedMemberCount(new PunchStatusStatisticsItemDTO(
+                localeStringService.getLocalizedString(
+                        PunchStatisticsParser.PUNCH_STATUS_STATISTICS_ITEM_NAME_SCOPE, String.valueOf(PunchStatusStatisticsItemType.ARRIVED.getCode()), locale, PunchStatusStatisticsItemType.ARRIVED.toString()),
+                PunchStatusStatisticsItemType.ARRIVED.getCode(), 0)
+        );
 
         boolean isToday = dateSF.get().format(new Date()).equals(dateSF.get().format(new Date(cmd.getStatisticsDate())));
         DailyStatisticsByDepartmentBaseRecordMapper record = punchProvider.dailyStatisticsByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getStatisticsDate()), deptIds, isToday);
-
         if (record == null) {
             return response;
         }
-        response.setNumOfRest(record.getNumOfRest());
-        response.setNumOfShouldAttendance(record.getNumOfShouldAttendance());
-        response.setNumOfAttendanced(record.getNumOfAttendanced());
-        response.setRateOfAttendance(record.getRateOfAttendance());
-        response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
-        response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems(localeStringService, UserContext.current().getUser().getLocale()));
+        response.setRateOfAttendance(record.getRateOfAttendance() == null ? 0 : record.getRateOfAttendance());
+        response.getRestMemberCount().setNum(record.getRestMemberCount() == null ? 0 : record.getRestMemberCount());
+        response.getShouldArrivedMemberCount().setNum(record.getShouldArrivedMemberCount() == null ? 0 : record.getShouldArrivedMemberCount());
+        response.getArrivedMemberCount().setNum(record.getArrivedMemberCount() == null ? 0 : record.getArrivedMemberCount());
+        response.setPunchStatusStatisticsList(record.parseToPunchStatusStatisticsItems(localeStringService, locale));
+        response.setExceptionRequestStatisticsList(record.parseToPunchExceptionRequestStatisticsItems(localeStringService, locale));
         return response;
     }
 
@@ -12345,8 +12355,8 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private List<Long> listChildDepartmentsIncludeSelf(Organization parentDepartment) {
+        List<Organization> children = organizationProvider.listDepartments(parentDepartment.getPath() + "/%", null, Integer.MAX_VALUE);
         List<Long> deptIds = new ArrayList<>();
-        List<Organization> children = organizationProvider.listDepartments(parentDepartment.getPath() + "/%", 0, Integer.MAX_VALUE);
         if (CollectionUtils.isEmpty(children)) {
             deptIds.add(parentDepartment.getId());
         }

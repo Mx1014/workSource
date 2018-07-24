@@ -1,15 +1,11 @@
 package com.everhomes.techpark.punch.recordmapper;
 
+import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType;
 import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
 import com.everhomes.util.StringHelper;
 import org.jooq.Record;
 
 public class DailyStatisticsByDepartmentHistoryRecordMapper extends DailyStatisticsByDepartmentBaseRecordMapper {
-    private Integer restMemberCount;
-    private Integer shouldArrivedMemberCount;
-    private Integer actArrivedMemberCount;
-    private Integer unArrivedMemberCount;
-
     @PunchStatusStatisticsItem(defaultOrder = 1, type = PunchStatusStatisticsItemType.ABSENT)
     private Integer absenceMemberCount;
 
@@ -22,37 +18,21 @@ public class DailyStatisticsByDepartmentHistoryRecordMapper extends DailyStatist
     @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.LEAVE_EARLY)
     private Integer leaveEarlyMemberCount;
 
-    public Integer getRestMemberCount() {
-        return restMemberCount;
-    }
+    @PunchExceptionRequestStatisticsItem(defaultOrder = 1, type = PunchExceptionRequestStatisticsItemType.ASK_FOR_LEAVE)
+    private Integer askForLeaveRequestMemberCount;
 
-    public void setRestMemberCount(Integer restMemberCount) {
-        this.restMemberCount = restMemberCount;
-    }
+    @PunchExceptionRequestStatisticsItem(defaultOrder = 2, type = PunchExceptionRequestStatisticsItemType.GO_OUT)
+    private Integer goOutRequestMemberCount;
 
-    public Integer getShouldArrivedMemberCount() {
-        return shouldArrivedMemberCount;
-    }
+    @PunchExceptionRequestStatisticsItem(defaultOrder = 3, type = PunchExceptionRequestStatisticsItemType.BUSINESS_TRIP)
+    private Integer businessTripRequestMemberCount;
 
-    public void setShouldArrivedMemberCount(Integer shouldArrivedMemberCount) {
-        this.shouldArrivedMemberCount = shouldArrivedMemberCount;
-    }
+    @PunchExceptionRequestStatisticsItem(defaultOrder = 4, type = PunchExceptionRequestStatisticsItemType.OVERTIME)
+    private Integer overtimeRequestMemberCount;
 
-    public Integer getActArrivedMemberCount() {
-        return actArrivedMemberCount;
-    }
+    @PunchExceptionRequestStatisticsItem(defaultOrder = 5, type = PunchExceptionRequestStatisticsItemType.PUNCH_EXCEPTION)
+    private Integer punchExceptionRequestCount;
 
-    public void setActArrivedMemberCount(Integer actArrivedMemberCount) {
-        this.actArrivedMemberCount = actArrivedMemberCount;
-    }
-
-    public Integer getUnArrivedMemberCount() {
-        return unArrivedMemberCount;
-    }
-
-    public void setUnArrivedMemberCount(Integer unArrivedMemberCount) {
-        this.unArrivedMemberCount = unArrivedMemberCount;
-    }
 
     public Integer getAbsenceMemberCount() {
         return absenceMemberCount;
@@ -86,14 +66,52 @@ public class DailyStatisticsByDepartmentHistoryRecordMapper extends DailyStatist
         this.leaveEarlyMemberCount = leaveEarlyMemberCount;
     }
 
+    public Integer getAskForLeaveRequestMemberCount() {
+        return askForLeaveRequestMemberCount;
+    }
+
+    public void setAskForLeaveRequestMemberCount(Integer askForLeaveRequestMemberCount) {
+        this.askForLeaveRequestMemberCount = askForLeaveRequestMemberCount;
+    }
+
+    public Integer getGoOutRequestMemberCount() {
+        return goOutRequestMemberCount;
+    }
+
+    public void setGoOutRequestMemberCount(Integer goOutRequestMemberCount) {
+        this.goOutRequestMemberCount = goOutRequestMemberCount;
+    }
+
+    public Integer getBusinessTripRequestMemberCount() {
+        return businessTripRequestMemberCount;
+    }
+
+    public void setBusinessTripRequestMemberCount(Integer businessTripRequestMemberCount) {
+        this.businessTripRequestMemberCount = businessTripRequestMemberCount;
+    }
+
+    public Integer getOvertimeRequestMemberCount() {
+        return overtimeRequestMemberCount;
+    }
+
+    public void setOvertimeRequestMemberCount(Integer overtimeRequestMemberCount) {
+        this.overtimeRequestMemberCount = overtimeRequestMemberCount;
+    }
+
+    public Integer getPunchExceptionRequestCount() {
+        return punchExceptionRequestCount;
+    }
+
+    public void setPunchExceptionRequestCount(Integer punchExceptionRequestCount) {
+        this.punchExceptionRequestCount = punchExceptionRequestCount;
+    }
 
     @Override
     public DailyStatisticsByDepartmentHistoryRecordMapper map(Record record) {
         DailyStatisticsByDepartmentHistoryRecordMapper data = new DailyStatisticsByDepartmentHistoryRecordMapper();
         data.setRestMemberCount(record.getValue("restMemberCount", Integer.class));
         data.setShouldArrivedMemberCount(record.getValue("shouldArrivedMemberCount", Integer.class));
-        data.setActArrivedMemberCount(record.getValue("actArrivedMemberCount", Integer.class));
-        data.setUnArrivedMemberCount(record.getValue("unArrivedMemberCount", Integer.class));
+        data.setArrivedMemberCount(record.getValue("actArrivedMemberCount", Integer.class));
         data.setAbsenceMemberCount(record.getValue("absenceMemberCount", Integer.class));
         data.setForgotPunchMemberCount(record.getValue("forgotPunchMemberCount", Integer.class));
         data.setBelateMemberCount(record.getValue("belateMemberCount", Integer.class));
@@ -102,11 +120,13 @@ public class DailyStatisticsByDepartmentHistoryRecordMapper extends DailyStatist
         data.setGoOutRequestMemberCount(record.getValue("goOutRequestMemberCount", Integer.class));
         data.setBusinessTripRequestMemberCount(record.getValue("businessTripRequestMemberCount", Integer.class));
         data.setOvertimeRequestMemberCount(record.getValue("overtimeRequestMemberCount", Integer.class));
-        data.setForgotPunchRequestMemberCount(record.getValue("forgotPunchRequestMemberCount", Integer.class));
-        data.setNumOfRest(data.getRestMemberCount() == null ? 0 : data.getRestMemberCount());
-        data.setNumOfShouldAttendance(data.getShouldArrivedMemberCount() == null ? 0 : data.getShouldArrivedMemberCount());
-        data.setNumOfAttendanced(data.getActArrivedMemberCount() == null ? 0 : data.getActArrivedMemberCount());
-        data.setRateOfAttendance(data.getShouldArrivedMemberCount() == 0 ? 0 : (int) Math.ceil((double) data.getNumOfAttendanced() * 100 / data.getNumOfShouldAttendance()));
+        data.setPunchExceptionRequestCount(record.getValue("punchExceptionRequestCount", Integer.class));
+        if (data.getShouldArrivedMemberCount() == null || data.getShouldArrivedMemberCount() <= 0
+                || data.getArrivedMemberCount() == null || data.getArrivedMemberCount() <= 0) {
+            data.setRateOfAttendance(0);
+        } else {
+            data.setRateOfAttendance((int) Math.ceil((double) data.getArrivedMemberCount() * 100 / data.getShouldArrivedMemberCount()));
+        }
         return data;
     }
 

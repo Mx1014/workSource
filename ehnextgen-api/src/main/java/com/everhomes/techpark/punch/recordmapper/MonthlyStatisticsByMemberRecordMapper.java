@@ -41,7 +41,7 @@ public class MonthlyStatisticsByMemberRecordMapper implements RecordMapper<Recor
     private Integer overtimeRequestCount;
 
     @PunchExceptionRequestStatisticsItem(defaultOrder = 5, type = PunchExceptionRequestStatisticsItemType.PUNCH_EXCEPTION)
-    private Integer forgotPunchRequestCount;
+    private Integer punchExceptionRequestCount;
 
 
     public Long getId() {
@@ -172,12 +172,12 @@ public class MonthlyStatisticsByMemberRecordMapper implements RecordMapper<Recor
         this.overtimeRequestCount = overtimeRequestCount;
     }
 
-    public Integer getForgotPunchRequestCount() {
-        return forgotPunchRequestCount;
+    public Integer getPunchExceptionRequestCount() {
+        return punchExceptionRequestCount;
     }
 
-    public void setForgotPunchRequestCount(Integer forgotPunchRequestCount) {
-        this.forgotPunchRequestCount = forgotPunchRequestCount;
+    public void setPunchExceptionRequestCount(Integer punchExceptionRequestCount) {
+        this.punchExceptionRequestCount = punchExceptionRequestCount;
     }
 
     @Override
@@ -199,7 +199,7 @@ public class MonthlyStatisticsByMemberRecordMapper implements RecordMapper<Recor
         data.setGoOutRequestCount(record.getValue("goOutRequestCount", Integer.class));
         data.setBusinessTripRequestCount(record.getValue("businessTripRequestCount", Integer.class));
         data.setOvertimeRequestCount(record.getValue("overtimeRequestCount", Integer.class));
-        data.setForgotPunchRequestCount(record.getValue("forgotPunchRequestCount", Integer.class));
+        data.setPunchExceptionRequestCount(record.getValue("punchExceptionRequestCount", Integer.class));
         return data;
     }
 
