@@ -1004,11 +1004,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+		if (namespaceId == 999983 &&
+				(this.isEbeiCategory(cmd.getTaskCategoryId()) || this.isEbeiCategory(cmd.getParentId()))) {
 			handle = PmTaskHandle.EBEI;
 		}
-		
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.listTaskCategories(cmd);
@@ -4046,6 +4046,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		dto.setEventLogs(logList);
 
 		flowService.processAutoStep(dto);
+	}
+
+	private boolean isEbeiCategory(Long categoryId){
+		if(null != categoryId && categoryId.equals(EbeiPmTaskHandle.EBEI_TASK_CATEGORY)){
+			return true;
+		}
+		return false;
 	}
 
 }
