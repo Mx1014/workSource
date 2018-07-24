@@ -737,24 +737,24 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    @Transactional
     public void saveGeneralForm(PostGeneralFormValCommand cmd) {
 
         //先新建表单字段的集合
-        Long source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
-        String source_type = "EhGeneralFormValRequests";
+        this.dbProvider.execute((status) -> {
+            Long source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
+            String source_type = "EhGeneralFormValRequests";
 
 
-        addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
-        GeneralApproval generalApproval = generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
-        cmd2.setGeneralFormId(generalApproval.getFormOriginId());
-        cmd2.setSourceId(source_id);
-        cmd2.setSourceType(source_type);
-        cmd2.setValues(cmd.getValues());
+            addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
+            GeneralApproval generalApproval =generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
 
-
-
-        this.addGeneralFormValues(cmd2);
+            cmd2.setGeneralFormId(generalApproval.getFormOriginId());
+            cmd2.setSourceId(source_id);
+            cmd2.setSourceType(source_type);
+            cmd2.setValues(cmd.getValues());
+            this.addGeneralFormValues(cmd2);
+            return null;
+        });
     }
 
 
