@@ -3564,7 +3564,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		//3、组装报文，发起下单请求
-		PmTaskOrder order = pmTaskProvider.findPmTaskOrderById(cmd.getOrderId());
+		PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
 		Long amount = order.getAmount();
 		CreateOrderCommand cmdPay = this.CreateOrderCommand(cmd);
 		cmdPay.setPayeeUserId(payeeUserId);
