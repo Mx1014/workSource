@@ -3302,17 +3302,17 @@ public class CustomerServiceImpl implements CustomerService {
             }
 
         }
-        if (dto.getTrackingUid() != null) {
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
-            if (null != detail && null != detail.getContactName()) {
-                dto.setTrackingUidName(detail.getContactName()+"("+detail.getContactToken()+")");
-            } else {
-                User user = userProvider.findUserById(dto.getTrackingUid());
-                if (user != null) {
-                    dto.setTrackingUidName(user.getNickName()+"("+user.getIdentifierToken()+")");
-                }
-            }
-        }
+//        if (dto.getTrackingUid() != null) {
+//            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
+//            if (null != detail && null != detail.getContactName()) {
+//                dto.setTrackingUidName(detail.getContactName()+"("+detail.getContactToken()+")");
+//            } else {
+//                User user = userProvider.findUserById(dto.getTrackingUid());
+//                if (user != null) {
+//                    dto.setTrackingUidName(user.getNickName()+"("+user.getIdentifierToken()+")");
+//                }
+//            }
+//        }
         if (dto.getIntentionGrade() != null) {
             Field field = fieldProvider.findField(19L, "intentionGrade");
             if (field != null) {
@@ -3336,11 +3336,11 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setContentImgUrlList(urlList);
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(tracking.getTrackingUid());
         if(members!=null && members.size()>0){
-            dto.setTrackingUidName(members.get(0).getContactName());
+            dto.setTrackingUidName(members.get(0).getContactName() + "(" + members.get(0).getContactToken() + ")");
         }else {
             User user = userProvider.findUserById(tracking.getTrackingUid());
             if(user!=null){
-                dto.setTrackingUidName(user.getNickName());
+                dto.setTrackingUidName(user.getNickName() + "(" + user.getIdentifierToken() + ")");
             }
         }
         return dto;
