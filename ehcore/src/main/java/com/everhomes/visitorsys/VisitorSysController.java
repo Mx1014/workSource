@@ -738,6 +738,7 @@ public class VisitorSysController extends ControllerBase {
 	 */
 	@RequestMapping("checkBlackListForWeb")
 	@RestReturn(String.class)
+	@RequireAuthentication(false)
 	public RestResponse checkBlackListForWeb(CheckBlackListForWebCommand cmd) {
 		visitorSysService.checkBlackListForWeb(cmd);
 
