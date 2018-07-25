@@ -119,7 +119,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             data.setContactName(r.getCells().get("A") != null ? r.getCells().get("A") : "");
             data.setContactEnName(r.getCells().get("B") != null ? r.getCells().get("B") : "");
             data.setGender(r.getCells().get("C") != null ? r.getCells().get("C") : "");
-            data.setContactToken(r.getCells().get("D") != null ? r.getCells().get("D").trim() : "");
+            data.setContactToken(r.getCells().get("D") != null ? r.getCells().get("D") : "");
             data.setContactShortToken(r.getCells().get("E") != null ? r.getCells().get("E") : "");
             data.setWorkEmail(r.getCells().get("F") != null ? r.getCells().get("F") : "");
             data.setDepartment(r.getCells().get("G") != null ? r.getCells().get("G") : "");
