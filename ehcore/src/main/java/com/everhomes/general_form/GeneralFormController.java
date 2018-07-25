@@ -160,15 +160,15 @@ public class GeneralFormController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /general_form/saveGeneralForm</b>
+	 * <b>URL: /general_form/saveGeneralFormFilter</b>
 	 * <p> 用于保存筛选字段，并删除之前的筛选字段记录</p>
 	 * @param cmd
 	 * @return
 	 */
-	@RequestMapping("saveGeneralForm")
+	@RequestMapping("saveGeneralFormFilter")
 	@RestReturn(value=String.class)
-	public RestResponse saveGeneralForm(PostGeneralFormValCommand cmd) {
-		generalFormService.saveGeneralForm(cmd);
+	public RestResponse saveGeneralFormFilter(PostGeneralFormFilterCommand cmd) {
+		generalFormService.saveGeneralFormFilter(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
