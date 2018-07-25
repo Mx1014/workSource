@@ -9,7 +9,14 @@ import com.everhomes.util.StringHelper;
  */
 public class CheckUserStatisticPrivilegeCommand {
     private Long orgId;
+    public CheckUserStatisticPrivilegeCommand() {
+        super();
+    }
 
+    public CheckUserStatisticPrivilegeCommand(Long orgId) {
+        super();
+        this.orgId = orgId;
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

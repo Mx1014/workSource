@@ -11721,61 +11721,65 @@ public class PunchServiceImpl implements PunchService {
     }
 
     @Override
-	public ListPunchStatusMembersResponse listMembersOfAPunchStatus(
-			ListPunchStatusMembersCommand cmd) {
-		ListPunchStatusMembersResponse response = new ListPunchStatusMembersResponse();
-		 
-		PunchStatusStatisticsItemType itmeType = PunchStatusStatisticsItemType.fromCode(cmd.getPunchStatusStatisticsItemType());
-		//如果查询日期是 null设为当天
-		if(cmd.getQueryByDate() == null ){
-			cmd.setQueryByDate(DateHelper.currentGMTTime().getTime());
-		} 
-		List<PunchStatusStatisticsItemDTO> items = null; 
-		  
-		
-		Integer pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset(); 
+    public ListPunchStatusMembersResponse listMembersOfAPunchStatus(
+            ListPunchStatusMembersCommand cmd) {
+        checkUserStatisticPrivilege(cmd.getOrganizationId());
+
+        ListPunchStatusMembersResponse response = new ListPunchStatusMembersResponse();
+
+        PunchStatusStatisticsItemType itmeType = PunchStatusStatisticsItemType.fromCode(cmd.getPunchStatusStatisticsItemType());
+        //如果查询日期是 null设为当天
+        if (cmd.getQueryByDate() == null) {
+            cmd.setQueryByDate(DateHelper.currentGMTTime().getTime());
+        }
+        List<PunchStatusStatisticsItemDTO> items = null;
+
+
+        Integer pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
-    	List<PunchMemberDTO> results = new ArrayList<>(); 
+        List<PunchMemberDTO> results = new ArrayList<>();
         //有月查询参数就按月查询,没有就按日查询 
-		if(null != cmd.getQueryByMonth()){
-			MonthlyPunchStatusStatisticsRecordMapper mapper = punchProvider.monthlyPunchStatusMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getQueryByMonth(), findSubDepartmentIds(cmd.getDepartmentId()));
-			items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
-			//按月查询查statistics表 
-			results = listMonthPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), cmd.getQueryByMonth(), itmeType, pageOffset, pageSize + 1);
-		}else  {
-			if(dateSF.get().format(new Date(cmd.getQueryByDate())).equals(dateSF.get().format(DateHelper.currentGMTTime()))){			
-				DailyPunchStatusStatisticsTodayRecordMapper mapper = punchProvider.dailyPunchStatusMemberCountsTodayByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getQueryByDate()), findSubDepartmentIds(cmd.getDepartmentId()));
-				items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
-			}else{
-				DailyPunchStatusStatisticsHistoryRecordMapper mapper = punchProvider.dailyPunchStatusMemberCountsHistoryByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getQueryByDate()), findSubDepartmentIds(cmd.getDepartmentId()));
-				items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
-			} 
-			//按日查询查pdl表
-			Date queryDate = new Date(cmd.getQueryByDate()); 
-			results = listDailyPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), queryDate, itmeType, pageOffset, pageSize + 1); 
-		} 
-		response.setAllItems(items);
-		if(CollectionUtils.isNotEmpty(items)){
-			for(PunchStatusStatisticsItemDTO dto : items){
-				if(itmeType == PunchStatusStatisticsItemType.fromCode(dto.getItemType())){
-					response.setCurrentItem(dto);
-				}
-			}
-		}
-		
-		if (null == results || results.size() == 0)
+        if (null != cmd.getQueryByMonth()) {
+            MonthlyPunchStatusStatisticsRecordMapper mapper = punchProvider.monthlyPunchStatusMemberCountsByDepartment(cmd.getOrganizationId(), cmd.getQueryByMonth(), findSubDepartmentIds(cmd.getDepartmentId()));
+            items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
+            //按月查询查statistics表
+            results = listMonthPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), cmd.getQueryByMonth(), itmeType, pageOffset, pageSize + 1);
+        } else {
+            if (dateSF.get().format(new Date(cmd.getQueryByDate())).equals(dateSF.get().format(DateHelper.currentGMTTime()))) {
+                DailyPunchStatusStatisticsTodayRecordMapper mapper = punchProvider.dailyPunchStatusMemberCountsTodayByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getQueryByDate()), findSubDepartmentIds(cmd.getDepartmentId()));
+                items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
+            } else {
+                DailyPunchStatusStatisticsHistoryRecordMapper mapper = punchProvider.dailyPunchStatusMemberCountsHistoryByDepartment(cmd.getOrganizationId(), new java.sql.Date(cmd.getQueryByDate()), findSubDepartmentIds(cmd.getDepartmentId()));
+                items = mapper.parseToPunchStatusStatisticsItems(localeStringService, UserContext.current().getUser().getLocale());
+            }
+            //按日查询查pdl表
+            Date queryDate = new Date(cmd.getQueryByDate());
+            results = listDailyPunchMemberDTOs(cmd.getOrganizationId(), cmd.getDepartmentId(), queryDate, itmeType, pageOffset, pageSize + 1);
+        }
+        response.setAllItems(items);
+        if (CollectionUtils.isNotEmpty(items)) {
+            for (PunchStatusStatisticsItemDTO dto : items) {
+                if (itmeType == PunchStatusStatisticsItemType.fromCode(dto.getItemType())) {
+                    response.setCurrentItem(dto);
+                }
+            }
+        }
+
+        if (null == results || results.size() == 0)
             return response;
         if (results.size() == pageSize + 1) {
-            results.remove(pageSize); 
+            results.remove(pageSize);
             response.setNextPageOffset(pageOffset + 1);
         }
         response.setPunchMemberDTOS(results);
-		return response;
-	}
+        return response;
+    }
 
 	@Override
 	public ListPunchMembersResponse listMembersOfDepartment(ListPunchMembersCommand cmd){
-		ListPunchMembersResponse response = new ListPunchMembersResponse();
+        checkUserStatisticPrivilege(cmd.getOrganizationId());
+
+        ListPunchMembersResponse response = new ListPunchMembersResponse();
 		//如果查询日期是当天设为null
 		if(cmd.getQueryByDate() != null && 
 				dateSF.get().format(new Date(cmd.getQueryByDate())).equals(dateSF.get().format(DateHelper.currentGMTTime()))){
@@ -11922,6 +11926,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
 	public ListPunchExceptionRequestMembersResponse listMembersOfAPunchExceptionRequest(
 			ListPunchExceptionRequestMembersCommand cmd) {
+        checkUserStatisticPrivilege(cmd.getOrganizationId());
         ListPunchExceptionRequestMembersResponse response = new ListPunchExceptionRequestMembersResponse();
         PunchExceptionRequestStatisticsItemType itemType = PunchExceptionRequestStatisticsItemType.fromCode(cmd.getPunchExceptionRequestStatisticsItemType());
         List<PunchExceptionRequestStatisticsItemDTO> items = null;
@@ -12083,6 +12088,8 @@ public class PunchServiceImpl implements PunchService {
 
     @Override
     public PunchMonthlyStatisticsByMemberResponse monthlyStatisticsByMember(PunchMonthlyStatisticsByMemberCommand cmd) {
+
+        checkOrganization(cmd.getOrganizationId());
         cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
         if (cmd.getUserId() == null) {
             cmd.setUserId(UserContext.currentUserId());
@@ -12324,7 +12331,13 @@ public class PunchServiceImpl implements PunchService {
 		return response;
     	
     }
-
+    private void checkUserStatisticPrivilege(Long orgId){
+        CheckUserStatisticPrivilegeResponse resp = checkUserStatisticPrivilege(new CheckUserStatisticPrivilegeCommand(orgId));
+        if (NormalFlag.fromCode(resp.getQueryPrivilege()) != NormalFlag.YES) {
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
+                    "check app privilege error");
+        }
+    }
     @Override
     public CheckUserStatisticPrivilegeResponse checkUserStatisticPrivilege(CheckUserStatisticPrivilegeCommand cmd) {
 
