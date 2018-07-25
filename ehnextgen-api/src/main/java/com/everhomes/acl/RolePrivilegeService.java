@@ -430,7 +430,7 @@ public interface RolePrivilegeService {
 	List<Long> listServiceModuleAppsAdministratorTargetIds(ListServiceModuleAdministratorsCommand cmd);
 
 //TODO  冲突，先注释
-//	List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects);
+	List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects);
 
 	OrganizationContactDTO listOrganizationTopAdministrator(ListServiceModuleAdministratorsCommand cmd);
 

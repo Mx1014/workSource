@@ -21,9 +21,6 @@ import com.everhomes.schema.tables.pojos.EhMessages;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.schema.tables.pojos.EhServerShardMap;
 import com.everhomes.server.schema.Tables;
-<<<<<<< HEAD
-import com.everhomes.server.schema.tables.pojos.*;
-=======
 import com.everhomes.server.schema.tables.pojos.EhAclinkFirmware;
 import com.everhomes.server.schema.tables.pojos.EhAclinkLogs;
 import com.everhomes.server.schema.tables.pojos.EhAclinkUndoKey;
@@ -549,7 +546,6 @@ import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.server.schema.tables.pojos.EhYzbDevices;
 import com.everhomes.server.schema.tables.pojos.EhYzxSmsLogs;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
->>>>>>> 5.7.0
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import org.jooq.Field;
@@ -2471,37 +2467,6 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhArchivesDismissEmployees.class, Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.getName(), DEFAULT_MAX_ID, (dbContext) -> {
             return dbContext.select(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ID.max()).from(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES).fetchOne().value1();
-        });
-
-<<<<<<< HEAD
-        syncTableSequence(null, EhGeneralFormGroups.class, Tables.EH_GENERAL_FORM_GROUPS.getName(), DEFAULT_MAX_ID, (dbContext) -> {
-            return dbContext.select(Tables.EH_GENERAL_FORM_GROUPS.ID.max()).from(Tables.EH_GENERAL_FORM_GROUPS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhArchivesForms.class, Tables.EH_ARCHIVES_FORMS.getName(), DEFAULT_MAX_ID, (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_FORMS.ID.max()).from(Tables.EH_ARCHIVES_FORMS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhArchivesConfigurations.class, Tables.EH_ARCHIVES_CONFIGURATIONS.getName(), DEFAULT_MAX_ID, (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_CONFIGURATIONS.ID.max()).from(Tables.EH_ARCHIVES_CONFIGURATIONS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhArchivesLogs.class, Tables.EH_ARCHIVES_LOGS.getName(), DEFAULT_MAX_ID, (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_LOGS.ID.max()).from(Tables.EH_ARCHIVES_LOGS).fetchOne().value1();
-        });
-
-
-
-        syncTableSequence(null, EhPaymentChargingStandards.class, Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(), DEFAULT_MAX_ID, (dbContext) -> {
-=======
-        syncTableSequence(null, EhArchivesForms.class, Tables.EH_ARCHIVES_FORMS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_FORMS.ID.max()).from(Tables.EH_ARCHIVES_FORMS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhPaymentChargingStandards.class, Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(), (dbContext) -> {
->>>>>>> 5.7.0
-            return dbContext.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.max())
-                    .from(Tables.EH_PAYMENT_CHARGING_STANDARDS).fetchOne().value1();
         });
         syncTableSequence(null, EhPaymentChargingStandardsScopes.class, Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getName(), DEFAULT_MAX_ID, (dbContext) -> {
             return dbContext.select(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.ID.max())

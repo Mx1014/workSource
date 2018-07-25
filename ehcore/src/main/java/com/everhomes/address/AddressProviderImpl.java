@@ -851,4 +851,20 @@ public class AddressProviderImpl implements AddressProvider {
 
     }
 
+
+    /**
+     * 根据id的集合来批量的查询eh_addresses表中信息
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Address> findAddressByIds(List<Long> ids,Integer namespaceId){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Address> addressList = context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.in(ids))
+                .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .fetchInto(Address.class);
+        return addressList;
+    }
 }

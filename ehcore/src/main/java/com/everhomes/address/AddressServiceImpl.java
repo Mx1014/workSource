@@ -208,13 +208,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             setup();
         }
     }
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if(event.getApplicationContext().getParent() == null) {
-            setup();
-        }
-    }
     
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
         // TODO monitor changeEnergyMeter notifications for cache invalidation

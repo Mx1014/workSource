@@ -18,6 +18,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuSelectedFlag;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.server.schema.tables.pojos.EhServiceModules;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;

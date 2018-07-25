@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id(异步导出使用)</li>
  * <li>organizationId: 公司 id</li>
  * <li>keywords: 搜索关键词</li>
- * <li>namespaceId: 域空间id(异步导出使用)</li>
  * </ul>
  */
 public class ExportArchivesEmployeesCommand {

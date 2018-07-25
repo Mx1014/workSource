@@ -684,9 +684,7 @@ public interface OrganizationProvider {
 
     List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId);
 
-	Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
-	
-	List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+	//List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
 	List<Organization> listPMOrganizations(Integer namespaceId);
 
@@ -947,11 +945,6 @@ public interface OrganizationProvider {
 	
 	void deleteOrganizationCommunityRequestByCommunityIdAndOrgId(
 			Long communityId, Long organizationId);
-			
-			
-    List<Organization> listPMOrganizations(Integer namespaceId);
-
-    Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId, Long groupId);
 
     OrganizationCommunityRequest getOrganizationRequest(Long organizationId);
 
@@ -965,8 +958,6 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
             Long targetId, Long organizationId);
-    OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
-            Long organizationId, String contactToken);
     
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(
 			String contactPhone, Long organizationId, String memberGroup);

@@ -27,6 +27,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -77,7 +78,6 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
@@ -984,15 +984,15 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     @Override
 	public UserLogin logonDryrun(Integer namespaceId, String userIdentifierToken, String password) {
-		User user = this.userProvider.findUserByAccountName(userIdentifierToken);
+        User user = this.userProvider.findUserByAccountName(userIdentifierToken);
         if (user == null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("findUserByAccountName user is null");
             }
             UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
             if (identifier != null) {
-				user = this.userProvider.findUserById(identifier.getOwnerUid());
-			} else {
+                user = this.userProvider.findUserById(identifier.getOwnerUid());
+            } else {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("findClaimedIdentifierByToken identifier is null");
                 }
@@ -1004,7 +1004,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 && EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash()) /*密码正确*/) {
             return createLogin(user.getNamespaceId(), user, null, null);
         }
-                return null;
+        return null;
+    }
 
     @Override
     public UserLogin logon(int namespaceId, Integer regionCode, String userIdentifierToken, String password, String deviceIdentifier, String pusherIdentify) {

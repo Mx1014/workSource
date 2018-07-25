@@ -5242,79 +5242,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return null;
         return results.get(0);
     }
-
-    public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId)
-                        .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId)))
-
-                .fetchInto(OrganizationMemberDetails.class);
-        if (null == results || results.size() == 0)
-            return null;
-        return results.get(0);
-    }
-
-    @Override
-    public List<Organization> listHeadEnterprises() {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
-                .where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
-        step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
-        return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
-    }
-
-    @Override
-    public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId, List<Long> orgIds,
-                                                           String groupName, Long creatorUid, CrossShardListingLocator locator, Integer pageSize) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
-                .where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
-        if (null != orgIds) {
-            step.and(Tables.EH_ORGANIZATIONS.ID.in(orgIds));
-        }
-        if (!StringUtils.isEmpty(groupName)) {
-            step.and(Tables.EH_ORGANIZATIONS.NAME.like("%" + groupName + "%"));
-        }
-        if (null != creatorUid) {
-            step.and(Tables.EH_ORGANIZATIONS.CREATOR_UID.eq(creatorUid));
-
-        }
-        if (null != organizationId)
-            step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
-        if (null != locator) {
-            step.and(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
-        }
-
-        step.orderBy(Tables.EH_ORGANIZATIONS.ID.asc());
-        if (null != pageSize) {
-            step.limit(pageSize);
-        }
-        return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
-    }
-
-    public List listOrganizationMembersGroupByToken() {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        List<EhOrganizationMembers> list = new ArrayList<>();
-        context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.notEqual(0))
-                .groupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN).having("count(*) > 1").fetch().map(r -> {
-            list.add(ConvertHelper.convert(r, EhOrganizationMembers.class));
-            return null;
-        });
-        return list;
-    }
-
-    @Override
-    public List listOrganizationMemberByToken(String token) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        List<EhOrganizationMembers> list = new ArrayList<>();
-        context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(token))
-                .fetch().map(r -> {
-            list.add(ConvertHelper.convert(r, EhOrganizationMembers.class));
-            return null;
-        });
-        return list;
-    }
 	
 	
     @Override
@@ -5338,60 +5265,60 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
-    @Override
-    public List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//    @Override
+//    public List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//
+//        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).join(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("group_path").like(path + "%");
+//        if (null != groupTypes && groupTypes.size() > 0)
+//            condition = condition.and(t1.field("group_type").in(groupTypes));
+//        if (!StringUtils.isEmpty(keywords)) {
+//            condition = condition.and(t2.field("contact_token").eq(keywords).or(t2.field("contact_name").like(keywords + "%")));
+//        }
+//
+//        if (null != visibleFlag) {
+//            condition = condition.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
+//        }
+//
+//        if (null != locator.getAnchor()) {
+//            condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+//        }
+//        condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+//        List<OrganizationMember> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
+//        if (records != null) {
+//            records.stream().map(r -> {
+//                result.add(ConvertHelper.convert(r, OrganizationMember.class));
+//                return null;
+//            }).collect(Collectors.toList());
+//        }
+//        locator.setAnchor(null);
+//        if (result.size() > pageSize) {
+//            result.remove(result.size() - 1);
+//            locator.setAnchor(result.get(result.size() - 1).getId());
+//        }
+//
+//        return result;
+//    }
 
-        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).join(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("group_path").like(path + "%");
-        if (null != groupTypes && groupTypes.size() > 0)
-            condition = condition.and(t1.field("group_type").in(groupTypes));
-        if (!StringUtils.isEmpty(keywords)) {
-            condition = condition.and(t2.field("contact_token").eq(keywords).or(t2.field("contact_name").like(keywords + "%")));
-        }
-
-        if (null != visibleFlag) {
-            condition = condition.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
-        }
-
-        if (null != locator.getAnchor()) {
-            condition = condition.and(t1.field("id").lt(locator.getAnchor()));
-        }
-        condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        List<OrganizationMember> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, OrganizationMember.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        locator.setAnchor(null);
-        if (result.size() > pageSize) {
-            result.remove(result.size() - 1);
-            locator.setAnchor(result.get(result.size() - 1).getId());
-        }
-
-        return result;
-    }
-
-    /**
-     * 查询非离职状态下所有员工的 detailId
-     * added by R, 20170719
-     */
-    @Override
-    public List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
-                .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
-//                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
-                //	TODO:离职状态人员查询逻辑
-                .fetchInto(Long.class);
-    }
+//    /**
+//     * 查询非离职状态下所有员工的 detailId
+//     * added by R, 20170719
+//     */
+//    @Override
+//    public List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId) {
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//        return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
+//                .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+//                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
+////                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+//                //	TODO:离职状态人员查询逻辑
+//                .fetchInto(Long.class);
+//    }
 
     @Override
     public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId, List<Long> orgIds,
@@ -5445,19 +5372,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return list;
     }
 
-    @Override
-    public List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        List<EhOrganizationMembers> list = new ArrayList<>();
-        context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
-                .where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(token))
-                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + enterpriseId + "%"))
-                .fetch().map(r -> {
-            list.add(ConvertHelper.convert(r, EhOrganizationMembers.class));
-            return null;
-        });
-        return list;
-    }
+//    @Override
+//    public List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId) {
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//        List<EhOrganizationMembers> list = new ArrayList<>();
+//        context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+//                .where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(token))
+//                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + enterpriseId + "%"))
+//                .fetch().map(r -> {
+//            list.add(ConvertHelper.convert(r, EhOrganizationMembers.class));
+//            return null;
+//        });
+//        return list;
+//    }
 
 
     @Override
@@ -5996,11 +5923,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return null;
     }
 
-    @Override
-	public Integer countUserOrganization(Integer namespaceId, Long communityId) {
-		 return countUserOrganization(namespaceId, communityId, null, null, null);
-	}
-
     /**
      * 根据节点编号organizationId和域空间ID来查询节点信息
      * @param organizationId
@@ -6145,7 +6067,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     /**
      * 根据communityId来查询项目和楼栋门牌的关系表eh_communityAndBuilding_relationes
      * 一个项目可能对应多个楼栋和门牌
-     * @param communityId
+     * @param workplaceId
      * @return
      */
     @Override
@@ -6792,5 +6714,4 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return users;
 	}
-
 }

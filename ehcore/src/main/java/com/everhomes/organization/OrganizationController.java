@@ -9,7 +9,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;

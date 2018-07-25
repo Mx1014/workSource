@@ -39,6 +39,7 @@ import com.everhomes.rest.module.ServiceModuleSceneType;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;

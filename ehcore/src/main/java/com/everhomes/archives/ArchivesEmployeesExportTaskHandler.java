@@ -37,9 +37,6 @@ public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandl
         Long organizationId = null;
         if(params.get("organizationId") != null)
             organizationId = (Long) params.get("organizationId");
-        Long formOriginId = null;
-        if(params.get("formOriginId") != null)
-            formOriginId = (Long) params.get("formOriginId");
         String keywords = null;
         if(params.get("keywords") != null)
             keywords = (String) params.get("keywords");
@@ -59,7 +56,6 @@ public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandl
 
         ExportArchivesEmployeesCommand cmd = new ExportArchivesEmployeesCommand();
         cmd.setOrganizationId(organizationId);
-        cmd.setFormOriginId(formOriginId);
         cmd.setKeywords(keywords);
         cmd.setNamespaceId(namespaceId);
 

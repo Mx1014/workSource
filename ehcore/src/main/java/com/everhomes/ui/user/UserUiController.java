@@ -12,6 +12,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.FamilyMemberDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -84,9 +85,9 @@ public class UserUiController extends ControllerBase {
     @RequestMapping(value = "listContactsByScene")
     @RestReturn(value = ListContactBySceneRespose.class)
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd){
-    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+//    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
 // 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-		Long organizationId = UserContext.current().getAppContext().getOrganizationId();
+//		Long organizationId = UserContext.current().getAppContext().getOrganizationId();
 		//SceneTokenDTO sceneToken = SceneTokenGenerator.fromWebToken(cmd.getSceneToken());
 
  	    List<SceneContactDTO> dtos = null;
@@ -94,15 +95,18 @@ public class UserUiController extends ControllerBase {
 		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 			//	兼容老版本的app by sf.yan 20161020
 			if(null == cmd.getOrganizationId()){
-				cmd.setOrganizationId(sceneToken.getEntityId());
+				AppContext appContext = UserContext.current().getAppContext();
+				if(appContext != null){
+					cmd.setOrganizationId(appContext.getOrganizationId());
+				}
 			}
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(Integer.MAX_VALUE - 1);
 			command.setIsSignedup(cmd.getIsSignedup());
 /*			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
 			    command.setVisibleFlag(VisibleFlag.ALL.getCode());*/
-			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
-			List<OrganizationContactDTO> members = res.getMembers();
+			ListOrganizationContactCommandResponse res1 = organizationService.listOrganizationContacts(command);
+			List<OrganizationContactDTO> members = res1.getMembers();
 			if(null != members){
 				dtos = members.stream().map(r->{
 					SceneContactDTO dto = new SceneContactDTO();
@@ -159,7 +163,7 @@ public class UserUiController extends ControllerBase {
 //				return dto;
 //			}).collect(Collectors.toList());
 // 	    }
- 	    
+
 		ListContactBySceneRespose res = new ListContactBySceneRespose();
 		res.setContacts(dtos);
 		RestResponse response = new RestResponse(res);

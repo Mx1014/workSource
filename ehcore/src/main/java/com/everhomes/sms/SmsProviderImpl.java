@@ -70,9 +70,6 @@ public class SmsProviderImpl implements SmsProvider {
     protected LocaleTemplateService localeTemplateService;
 
     @Autowired
-    private WhiteListProvider whiteListProvider;
-
-    @Autowired
     public void setHandlers(Map<String, SmsHandlerResolver> resolverMap) {
         resolverMap.forEach((name, resolver) -> resolvers.put(name, resolver));
     }

@@ -282,9 +282,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private static final long KEY_TICK_ONE_DAY = KEY_TICK_ONE_HOUR*24l;
     private static final long KEY_TICK_7_DAY = KEY_TICK_ONE_DAY*7;
     private static Format huarunDateFormatter = FastDateFormat.getInstance("yyyy-MM-dd");
-<<<<<<< HEAD
-    
-=======
 
 //  大沙河项目 旺龙云对接
     private final static String WANGLONG_APP_ID = "647984150393028609";
@@ -293,7 +290,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private final static String URL_GETAPPINFOS = "http://sdk.api.jia-r.com/projectManage/getAppInfos";
     private final static String URL_GETKEYU = "http://sdk.api.jia-r.com/projectManage/getKeyU";
 
->>>>>>> 5.7.0
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct

@@ -2789,7 +2789,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			dtos.add(itemDTO);
 		});
 
-		refreshActionData(dtos, sceneTokenDto);
+		refreshActionData(dtos);
 
 		response.setLaunchPadItemDtos(dtos);
 		response.setNextPageAnchor(nextPageAnchor);

@@ -2789,7 +2789,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		
 		if(topId != null) {
-		    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUidAndOrgId(topId, cmd.getOrganizationId());
+		    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(topId, cmd.getOrganizationId());
            if(organizationMember != null){
                response.setTopAdminToken(organizationMember.getContactToken());
                response.setTopAdminName(organizationMember.getContactName());

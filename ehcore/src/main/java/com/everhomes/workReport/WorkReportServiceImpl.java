@@ -356,8 +356,8 @@ public class WorkReportServiceImpl implements WorkReportService {
         cmd.setPageSize(10000000);
         
         if(member == null) {
-            member = organizationProvider.findOrganizationMemberByOrgIdAndUId(UserContext.currentUserId(), cmd.getOwnerId());
-        }
+            member = organizationProvider.findOrganizationMemberByUIdAndOrgId(UserContext.currentUserId(), cmd.getOwnerId());
+    }
         final OrganizationMember member2 = member;
 
         //  get all work reports.
