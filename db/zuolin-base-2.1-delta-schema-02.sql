@@ -150,7 +150,9 @@ ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `update_time`  dat
 ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `develop_id`  bigint(20) NULL COMMENT 'developer owner id';
 
 -- 增加 企业超级管理员id、是否开启工作台标志  add by yanjun 20180412
-ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
+
+-- 定制版已经有了ehcore-server-schema.sql
+-- ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
 ALTER TABLE `eh_organizations` ADD COLUMN `work_platform_flag`  tinyint(4) NULL COMMENT 'open work platform flag, 0-no, 1-yes' ;
 
 -- 默认园区标志
