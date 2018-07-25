@@ -3663,8 +3663,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			rsr.setCreatorUid(userId);
 			while (start.before(end)) {
 				rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
+				rsr.setBeginTime(new Timestamp(start.getTime().getTime()));
+                start.add(Calendar.MONTH, 1);
+                rsr.setEndTime(new Timestamp(start.getTime().getTime()));
 				createRSR(rsr, cmd);
-				start.add(Calendar.MONTH, 1);
 			}
 		} else if (cmd.getRentalType().equals(RentalType.WEEK.getCode())) {
 			Calendar temp = Calendar.getInstance();
@@ -3694,8 +3696,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			rsr.setCreatorUid(userId);
 			while (start.before(end)) {
 				rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
+                rsr.setBeginTime(new Timestamp(start.getTime().getTime()));
+                start.add(Calendar.DATE, 7);
+                rsr.setEndTime(new Timestamp(start.getTime().getTime()));
 				createRSR(rsr, cmd);
-				start.add(Calendar.DATE, 7);
 			}
 
 		} else {
@@ -3791,9 +3795,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					} else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
 						// 按日预定
-
-
 						rsr.setResourceRentalDate(Date.valueOf(dateSF.get().format(start.getTime())));
+						rsr.setBeginTime(new Timestamp(start.getTime().getTime()));
+						rsr.setEndTime(new Timestamp(start.getTime().getTime() + 24*3600*1000));
 						createRSR(rsr, cmd);
 					}
 				}
