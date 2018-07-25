@@ -85,6 +85,7 @@ public interface GeneralFormProvider {
 
     List<GeneralFormVal> listGeneralForm(CrossShardListingLocator locator, Integer pageSize);
 
+    void saveGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long FormOriginId, Long FormVersion, String FieldName);
 
 
 }

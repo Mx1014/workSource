@@ -426,4 +426,20 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 
+	@Override
+	public void saveGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long FormOriginId, Long FormVersion, String FieldName){
+		/*Long id = this.sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhGeneralFormFilter.class));
+		group.setId(id);
+		group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		group.setUpdateTime(group.getCreateTime());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
+		dao.insert(group);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhGeneralFormGroups.class, null);
+		return group;*/
+	}
+
+
 }
