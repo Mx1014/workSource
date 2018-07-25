@@ -5,6 +5,19 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
+
+/**
+ * <ul>
+ *     <li>namespaceId : namespaceId</li>
+ *     <li>ownerId : 当前项目的id，communityId</li>
+ *     <li>ownerType : "community"</li>
+ *     <li>moduleId : 当前应用id</li>
+ *     <li>moduleType : 当前应用类型</li>
+ *     <li>formOriginId : 当前生效的表单Id</li>
+ *     <li>formVersion : 当前生效的表单version</li>
+ *     <li>formFields : 当前选中的所有筛选字段</li>
+ * </ul>
+ */
 public class PostGeneralFormFilterCommand {
     private Integer namespaceId;
     private Long ownerId;

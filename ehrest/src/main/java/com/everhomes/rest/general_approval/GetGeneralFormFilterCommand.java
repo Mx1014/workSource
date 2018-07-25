@@ -2,6 +2,17 @@ package com.everhomes.rest.general_approval;
 
 import com.everhomes.util.StringHelper;
 
+
+
+/**
+ * <ul>
+ *     <li>namespaceId : namespaceId</li>
+ *     <li>ownerId : 当前项目的id，communityId</li>
+ *     <li>moduleId : 当前应用id</li>
+ *     <li>formOriginId : 当前生效的表单Id</li>
+ *     <li>formVersion : 当前生效的表单version</li>
+ * </ul>
+ */
 public class GetGeneralFormFilterCommand {
     private Integer namespaceId;
     private Long ownerId;
