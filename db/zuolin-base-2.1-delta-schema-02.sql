@@ -151,7 +151,7 @@ ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `develop_id`  bigint(20) 
 
 -- 增加 企业超级管理员id、是否开启工作台标志  add by yanjun 20180412
 
--- 定制版已经有了ehcore-server-schema.sql
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
 -- ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
 ALTER TABLE `eh_organizations` ADD COLUMN `work_platform_flag`  tinyint(4) NULL COMMENT 'open work platform flag, 0-no, 1-yes' ;
 
@@ -321,26 +321,28 @@ CREATE TABLE `eh_community_bizs` (
   KEY `community_id` (`community_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 通用脚本
--- ADD BY 黄良铭
--- 20180522-huangliangming-配置项管理-#30016
--- 创建配置项信息变更记录表
-CREATE TABLE `eh_configurations_record_change` (
-  `id` INT(11)  NOT NULL COMMENT '主键',
-  `namespace_id` INT(11) NOT NULL COMMENT '域空间ID',
-  `conf_pre_json` VARCHAR(1024)  COMMENT '变动前信息JSON字符串',
-  `conf_aft_json` VARCHAR(1024)  COMMENT '变动后信息JSON字符串',
-  `record_change_type` INT(3) COMMENT '变动类型。0，新增；1，修改；3，删除',
-  `operator_uid` BIGINT(20)   COMMENT '操作人userId',
-  `operate_time` DATETIME    COMMENT '操作时间',
-  `operator_ip` VARCHAR(50)   COMMENT '操作者的IP地址',
 
-  PRIMARY KEY(`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '配置项信息变更记录表';
-
--- 配置项信息表新增一列（字段 ） is_readyonly
-ALTER  TABLE eh_configurations  ADD  is_readonly  INT(3)  COMMENT '是否只读：1，是 ；null 或其他值为 否';
--- END BY 黄良铭
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
+-- -- 通用脚本
+-- -- ADD BY 黄良铭
+-- -- 20180522-huangliangming-配置项管理-#30016
+-- -- 创建配置项信息变更记录表
+-- CREATE TABLE `eh_configurations_record_change` (
+--   `id` INT(11)  NOT NULL COMMENT '主键',
+--   `namespace_id` INT(11) NOT NULL COMMENT '域空间ID',
+--   `conf_pre_json` VARCHAR(1024)  COMMENT '变动前信息JSON字符串',
+--   `conf_aft_json` VARCHAR(1024)  COMMENT '变动后信息JSON字符串',
+--   `record_change_type` INT(3) COMMENT '变动类型。0，新增；1，修改；3，删除',
+--   `operator_uid` BIGINT(20)   COMMENT '操作人userId',
+--   `operate_time` DATETIME    COMMENT '操作时间',
+--   `operator_ip` VARCHAR(50)   COMMENT '操作者的IP地址',
+--
+--   PRIMARY KEY(`id`)
+-- ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '配置项信息变更记录表';
+--
+-- -- 配置项信息表新增一列（字段 ） is_readyonly
+-- ALTER  TABLE eh_configurations  ADD  is_readonly  INT(3)  COMMENT '是否只读：1，是 ；null 或其他值为 否';
+-- -- END BY 黄良铭
 
 
 -- -----------------------------------------------------  以上为 5.6.3 以前的脚本 ----------------------------------------
@@ -348,73 +350,73 @@ ALTER  TABLE eh_configurations  ADD  is_readonly  INT(3)  COMMENT '是否只读�
 -- -----------------------------------------------------  以下为 5.6.3 新增的脚本 ----------------------------------------
 
 
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
+-- -- 人事档案 2.7 (基线已经执行过) start by ryan
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `profile_integrity`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `department`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `department_ids`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position_ids`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level_ids`;
+--
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `check_in_time_index` VARCHAR(64) NOT NULL DEFAULT '0000' COMMENT'only month&day like 0304' AFTER `check_in_time`;
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `birthday_index` VARCHAR(64) COMMENT'only month like 0304' AFTER `birthday`;
+--
+-- ALTER TABLE `eh_archives_notifications` DROP COLUMN `notify_emails`;
+-- ALTER TABLE `eh_archives_notifications` CHANGE COLUMN `notify_hour` `notify_time` INTEGER COMMENT 'the hour of sending notifications';
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `mail_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'email sending, 0-no 1-yes' AFTER `notify_time`;
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `message_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'message sending, 0-no 1-yes' AFTER `mail_flag`;
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `notify_target` TEXT COMMENT 'the target email address' AFTER `message_flag`;
+--
+-- ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time` DATE COMMENT '入职日期';
+-- ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time_index` VARCHAR(64) COMMENT '入职日期索引字段';
+--
+-- -- DROP TABLE IF EXISTS `eh_archives_operational_configurations`;
+-- CREATE TABLE `eh_archives_operational_configurations` (
+-- 	`id` BIGINT NOT NULL,
+-- 	`namespace_id` INT NOT NULL DEFAULT '0',
+-- 	`organization_id` BIGINT NOT NULL DEFAULT '0',
+--   `detail_id` BIGINT NOT NULL COMMENT 'the detail id that belongs to the employee which is the change target',
+--   `operation_type` TINYINT NOT NULL COMMENT 'the type of operation',
+--   `operation_date` DATE COMMENT 'the date of executing the operation',
+--   `additional_info` TEXT COMMENT 'the addition information for the operation',
+--   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-cancel, 1-pending, 2-complete',
+--   `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
+--   `operator_uid` BIGINT DEFAULT NULL COMMENT 'the id of the operator',
+-- 	PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+--
+-- -- DROP TABLE IF EXISTS `eh_archives_operational_logs`;
+-- CREATE TABLE `eh_archives_operational_logs` (
+--   `id` BIGINT NOT NULL COMMENT 'id of the log',
+--   `namespace_id` INT NOT NULL DEFAULT '0',
+--   `organization_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the organization',
+--   `detail_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the detail id that belongs to the employee',
+--   `operation_type` TINYINT NOT NULL COMMENT 'the type of the operate',
+--   `operation_time` DATE NOT NULL COMMENT 'the time of the operate',
+--   `string_tag1` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag2` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag3` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag4` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag5` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag6` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `operator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
+--   `operator_name` VARCHAR(64) NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
+--   `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
+-- 	PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+--
+-- -- end
 
--- 人事档案 2.7 (基线已经执行过) start by ryan
-ALTER TABLE `eh_organization_member_details` DROP COLUMN `profile_integrity`;
-ALTER TABLE `eh_organization_member_details` DROP COLUMN `department`;
-ALTER TABLE `eh_organization_member_details` DROP COLUMN `department_ids`;
-ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position`;
-ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position_ids`;
-ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level`;
-ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level_ids`;
-
-ALTER TABLE `eh_organization_member_details` ADD COLUMN `check_in_time_index` VARCHAR(64) NOT NULL DEFAULT '0000' COMMENT'only month&day like 0304' AFTER `check_in_time`;
-ALTER TABLE `eh_organization_member_details` ADD COLUMN `birthday_index` VARCHAR(64) COMMENT'only month like 0304' AFTER `birthday`;
-
-ALTER TABLE `eh_archives_notifications` DROP COLUMN `notify_emails`;
-ALTER TABLE `eh_archives_notifications` CHANGE COLUMN `notify_hour` `notify_time` INTEGER COMMENT 'the hour of sending notifications';
-ALTER TABLE `eh_archives_notifications` ADD COLUMN `mail_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'email sending, 0-no 1-yes' AFTER `notify_time`;
-ALTER TABLE `eh_archives_notifications` ADD COLUMN `message_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'message sending, 0-no 1-yes' AFTER `mail_flag`;
-ALTER TABLE `eh_archives_notifications` ADD COLUMN `notify_target` TEXT COMMENT 'the target email address' AFTER `message_flag`;
-
-ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time` DATE COMMENT '入职日期';
-ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time_index` VARCHAR(64) COMMENT '入职日期索引字段';
-
--- DROP TABLE IF EXISTS `eh_archives_operational_configurations`;
-CREATE TABLE `eh_archives_operational_configurations` (
-	`id` BIGINT NOT NULL,
-	`namespace_id` INT NOT NULL DEFAULT '0',
-	`organization_id` BIGINT NOT NULL DEFAULT '0',
-  `detail_id` BIGINT NOT NULL COMMENT 'the detail id that belongs to the employee which is the change target',
-  `operation_type` TINYINT NOT NULL COMMENT 'the type of operation',
-  `operation_date` DATE COMMENT 'the date of executing the operation',
-  `additional_info` TEXT COMMENT 'the addition information for the operation',
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-cancel, 1-pending, 2-complete',
-  `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
-  `operator_uid` BIGINT DEFAULT NULL COMMENT 'the id of the operator',
-	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- DROP TABLE IF EXISTS `eh_archives_operational_logs`;
-CREATE TABLE `eh_archives_operational_logs` (
-  `id` BIGINT NOT NULL COMMENT 'id of the log',
-  `namespace_id` INT NOT NULL DEFAULT '0',
-  `organization_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the organization',
-  `detail_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the detail id that belongs to the employee',
-  `operation_type` TINYINT NOT NULL COMMENT 'the type of the operate',
-  `operation_time` DATE NOT NULL COMMENT 'the time of the operate',
-  `string_tag1` VARCHAR(2048) COMMENT 'redundant information for the operate',
-  `string_tag2` VARCHAR(2048) COMMENT 'redundant information for the operate',
-  `string_tag3` VARCHAR(2048) COMMENT 'redundant information for the operate',
-  `string_tag4` VARCHAR(2048) COMMENT 'redundant information for the operate',
-  `string_tag5` VARCHAR(2048) COMMENT 'redundant information for the operate',
-  `string_tag6` VARCHAR(2048) COMMENT 'redundant information for the operate',
-  `operator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
-  `operator_name` VARCHAR(64) NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
-  `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
-	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- end
-
-
--- 下载中心 搬迁代码  by yanjun start
--- 注意：core已经上线过了，此处是搬迁代码过来的。以后合并分支的时候要注意
-
--- 任务中心添加执行开始时间和上传开始时间  add by yanjun 201805241345
-ALTER TABLE `eh_tasks` ADD COLUMN `execute_start_time`  datetime NULL;
-ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
-ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
+-- -- 下载中心 搬迁代码  by yanjun start
+-- -- 注意：core已经上线过了，此处是搬迁代码过来的。以后合并分支的时候要注意
+--
+-- -- 任务中心添加执行开始时间和上传开始时间  add by yanjun 201805241345
+-- ALTER TABLE `eh_tasks` ADD COLUMN `execute_start_time`  datetime NULL;
+-- ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
+-- ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
 
 -- 下载中心 搬迁代码  by yanjun end
 
