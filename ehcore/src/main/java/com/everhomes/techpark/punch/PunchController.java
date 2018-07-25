@@ -11,6 +11,8 @@ import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
 import com.everhomes.rest.techpark.punch.CheckAbnormalStatusResponse;
 import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
 import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
+import com.everhomes.rest.techpark.punch.CheckUserStatisticPrivilegeCommand;
+import com.everhomes.rest.techpark.punch.CheckUserStatisticPrivilegeResponse;
 import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
 import com.everhomes.rest.techpark.punch.GetAdjustRuleUrlResponse;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;

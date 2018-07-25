@@ -91,107 +91,7 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.techpark.punch.AddPunchLogShouldPunchTimeCommand;
-import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
-import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
-import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
-import com.everhomes.rest.techpark.punch.CheckAbnormalStatusResponse;
-import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
-import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
-import com.everhomes.rest.techpark.punch.ClockCode;
-import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.DayStatusDTO;
-import com.everhomes.rest.techpark.punch.ExceptionProcessStatus;
-import com.everhomes.rest.techpark.punch.ExceptionStatus;
-import com.everhomes.rest.techpark.punch.ExtDTO;
-import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
-import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
-import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
-import com.everhomes.rest.techpark.punch.GetOvertimeInfoCommand;
-import com.everhomes.rest.techpark.punch.GetOvertimeInfoResponse;
-import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
-import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
-import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
-import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlCommand;
-import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlResponse;
-import com.everhomes.rest.techpark.punch.HommizationType;
-import com.everhomes.rest.techpark.punch.ListApprovalCategoriesCommand;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListOrganizationPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListOrganizationPunchLogsResponse;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestMembersCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestMembersResponse;
-import com.everhomes.rest.techpark.punch.ListPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchLogsResponse;
-import com.everhomes.rest.techpark.punch.ListPunchMembersCommand;
-import com.everhomes.rest.techpark.punch.ListPunchMembersResponse;
-import com.everhomes.rest.techpark.punch.ListPunchMonthReportsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchMonthReportsResponse;
-import com.everhomes.rest.techpark.punch.ListPunchMonthStatusCommand;
-import com.everhomes.rest.techpark.punch.ListPunchMonthStatusResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatusMembersCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatusMembersResponse;
-import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommand;
-import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommandResponse;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.MonthDayStatusDTO;
-import com.everhomes.rest.techpark.punch.NormalFlag;
-import com.everhomes.rest.techpark.punch.PunchClockCommand;
-import com.everhomes.rest.techpark.punch.PunchClockResponse;
-import com.everhomes.rest.techpark.punch.PunchCountDTO;
-import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentCommand;
-import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentResponse;
-import com.everhomes.rest.techpark.punch.PunchDayType;
-import com.everhomes.rest.techpark.punch.PunchExceptionDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType;
-import com.everhomes.rest.techpark.punch.PunchGeoPointDTO;
-import com.everhomes.rest.techpark.punch.PunchHommizationType;
-import com.everhomes.rest.techpark.punch.PunchIntevalLogDTO;
-import com.everhomes.rest.techpark.punch.PunchLogDTO;
-import com.everhomes.rest.techpark.punch.PunchLogsDay;
-import com.everhomes.rest.techpark.punch.PunchLogsMonthList;
-import com.everhomes.rest.techpark.punch.PunchMemberDTO;
-import com.everhomes.rest.techpark.punch.PunchMonthReportDTO;
-import com.everhomes.rest.techpark.punch.PunchMonthReportStatus;
-import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentCommand;
-import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentResponse;
-import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberCommand;
-import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberResponse;
-import com.everhomes.rest.techpark.punch.PunchOvertimeApprovalType;
-import com.everhomes.rest.techpark.punch.PunchOvertimeRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchOvertimeRuleType;
-import com.everhomes.rest.techpark.punch.PunchOwnerType;
-import com.everhomes.rest.techpark.punch.PunchRquestType;
-import com.everhomes.rest.techpark.punch.PunchRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
-import com.everhomes.rest.techpark.punch.PunchRuleStatus;
-import com.everhomes.rest.techpark.punch.PunchRuleType;
-import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
-import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
-import com.everhomes.rest.techpark.punch.PunchStatus;
-import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
-import com.everhomes.rest.techpark.punch.PunchTimeIntervalDTO;
-import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
-import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
-import com.everhomes.rest.techpark.punch.PunchType;
-import com.everhomes.rest.techpark.punch.PunchUserStatus;
-import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
-import com.everhomes.rest.techpark.punch.ViewFlags;
-import com.everhomes.rest.techpark.punch.ApprovalStatus;
+import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
@@ -1301,31 +1201,31 @@ public class PunchServiceImpl implements PunchService {
         }
 
 
-            if (ptr == null || ptr.getId() == null || ptr.getId() == 0) {
+        if (ptr == null || ptr.getId() == null || ptr.getId() == 0) {
 
-                if (ptr.getId() == 0) {
-                    punchDayLog.setTimeRuleId(0L);
-                    punchDayLog.setTimeRuleName("休息");
-                } else
-                    punchDayLog.setTimeRuleId(null);
-                pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode() + "");
-                pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
-                pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
-                pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
-                pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
-                pdl.setExceptionStatus(null);
-                // 获取加班申请等
-                Timestamp dayStart = new Timestamp(punchDate.getTime());
-                Timestamp dayEnd = new Timestamp(punchDate.getTime() + ONE_DAY_MS);
-                List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, companyId, dayStart, dayEnd);
+            if (ptr.getId() == 0) {
+                punchDayLog.setTimeRuleId(0L);
+                punchDayLog.setTimeRuleName("休息");
+            } else
+                punchDayLog.setTimeRuleId(null);
+            pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode() + "");
+            pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
+            pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+            pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
+            pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
+            pdl.setExceptionStatus(null);
+            // 获取加班申请等
+            Timestamp dayStart = new Timestamp(punchDate.getTime());
+            Timestamp dayEnd = new Timestamp(punchDate.getTime() + ONE_DAY_MS);
+            List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, companyId, dayStart, dayEnd);
 
-                // 当天是休息日，不存在异常打卡申请的数据
-                punchExceptionRequestCountByPunchDayLog(punchDayLog, exceptionRequests, null);
-                // 计算加班时间
-                calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
-                return pdl;
-            }
+            // 当天是休息日，不存在异常打卡申请的数据
+            punchExceptionRequestCountByPunchDayLog(punchDayLog, exceptionRequests, null);
+            // 计算加班时间
+            calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
+            return pdl;
         }
+
         punchDayLog.setTimeRuleName(ptr.getName());
         punchDayLog.setTimeRuleId(ptr.getId());
 
