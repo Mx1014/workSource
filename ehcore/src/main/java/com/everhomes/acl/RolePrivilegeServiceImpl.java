@@ -1501,6 +1501,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	@Deprecated
 	public OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
+		//由于前端没有对手机号作校验，可能会存 在有空格的情况，故在此进行去空格。add by huangliangming
+		if(cmd != null && cmd.getContactToken() != null){
+			cmd.setContactToken(cmd.getContactToken().trim());
+		}
         OrganizationContactDTO contactDTO = dbProvider.execute(
                 r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN, RoleConstants.ENTERPRISE_SUPER_ADMIN));
 		if(contactDTO != null) {

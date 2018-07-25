@@ -905,7 +905,10 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyId', 'yinxingkeji', '银星科技园停车场访问者标识', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyValue', '1f9f1cb5c0d1e752917e1a38b957e33d', '银星科技园停车场加密后的-accessKeyValue', '0', NULL, '1');
 
-
+-- AUTHOR:黄良铭
+-- REMARK: 缺陷 #34288 问题数据处理
+DELETE FROM eh_organization_members  WHERE target_type='UNTRACK' AND contact_token=' 15116329251' AND namespace_id=999990;
+DELETE FROM eh_organization_member_details  WHERE contact_token=' 15116329251' AND namespace_id=999990;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 

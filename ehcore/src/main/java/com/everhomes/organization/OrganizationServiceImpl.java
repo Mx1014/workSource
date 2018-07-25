@@ -5946,6 +5946,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                         //通过认证的同步到企业客户的人才团队中 21710
                         customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
+                        //人事信息中添加入职日期
+                        OrganizationMemberDetails detail = organizationProvider
+                        		.findOrganizationMemberDetailsByOrganizationIdAndContactToken(member.getOrganizationId(), member.getContactToken());
+                        if( detail != null ){
+                        	Date date = new Date();
+                        	detail.setCheckInTime(new java.sql.Date(date.getTime()));
+                        	organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+                        }
+                        
                     }
                 } else {
                     LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
