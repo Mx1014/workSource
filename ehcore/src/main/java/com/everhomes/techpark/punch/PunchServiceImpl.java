@@ -1257,30 +1257,28 @@ public class PunchServiceImpl implements PunchService {
 
         //获取当天的排班
         if (null == ptr) {
-            ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, logDay.getTime(), userId);
+            ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, logDay.getTime(), userId); 
+        }
 
-
-            if (ptr == null || ptr.getId() == null || ptr.getId() == 0) {
-
-                if (ptr.getId() == 0) {
-                    punchDayLog.setTimeRuleId(0L);
-                    punchDayLog.setTimeRuleName("休息");
-                } else
-                    punchDayLog.setTimeRuleId(null);
-                pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode() + "");
-                pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
-                pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
-                pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
-                pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
-                pdl.setExceptionStatus(null);
-                // 获取加班申请等
-                Timestamp dayStart = new Timestamp(punchDate.getTime());
-                Timestamp dayEnd = new Timestamp(punchDate.getTime() + ONE_DAY_MS);
-                List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, companyId, dayStart, dayEnd);
-                // 计算加班时间
-                calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
-                return pdl;
-            }
+        if (ptr == null || ptr.getId() == null || ptr.getId() == 0) {
+            if (ptr.getId() == 0) {
+                punchDayLog.setTimeRuleId(0L);
+                punchDayLog.setTimeRuleName("休息");
+            } else
+                punchDayLog.setTimeRuleId(null);
+            pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode() + "");
+            pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
+            pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+            pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
+            pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
+            pdl.setExceptionStatus(null);
+            // 获取加班申请等
+            Timestamp dayStart = new Timestamp(punchDate.getTime());
+            Timestamp dayEnd = new Timestamp(punchDate.getTime() + ONE_DAY_MS);
+            List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, companyId, dayStart, dayEnd);
+            // 计算加班时间
+            calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
+            return pdl;
         }
         punchDayLog.setTimeRuleName(ptr.getName());
         punchDayLog.setTimeRuleId(ptr.getId());
