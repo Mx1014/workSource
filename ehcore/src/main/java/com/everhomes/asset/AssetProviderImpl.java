@@ -3228,7 +3228,13 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType, byte deCouplingFlag) {
+    public void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag) {
+    	//卸载参数
+    	Long chargingStandardId = cmd.getChargingStandardId();
+    	Long ownerId = cmd.getOwnerId();
+    	String ownerType = cmd.getOwnerType();
+    	Long categoryId = cmd.getCategoryId();
+    	
         DSLContext context = getReadWriteContext();
         EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
         com.everhomes.server.schema.tables.EhPaymentFormula formula = Tables.EH_PAYMENT_FORMULA.as("formula");
@@ -3249,6 +3255,7 @@ public class AssetProviderImpl implements AssetProvider {
                         .set(standardScope.BROTHER_STANDARD_ID,nullId)
                         .where(standardScope.OWNER_ID.eq(ownerId))
                         .and(standardScope.OWNER_TYPE.eq(ownerType))
+                        .and(standardScope.CATEGORY_ID.eq(categoryId))
                         .execute();
             //}
             context.delete(standardScope)
@@ -3336,6 +3343,11 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             return nextGroupId;
         }else if(deCouplingFlag == (byte)0){
+        	//全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
+        	
+        	
+        	
+        	
             //添加
             Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
             InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);

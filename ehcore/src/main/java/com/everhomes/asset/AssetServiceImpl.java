@@ -3470,7 +3470,7 @@ public class AssetServiceImpl implements AssetService {
         // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
-            assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType(),deCouplingFlag);
+            assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
             return dto;
         }
         // 各个：在工作的standard不能删除，不在工作的可以，并且查看是否有bro，有则干掉
@@ -3481,7 +3481,7 @@ public class AssetServiceImpl implements AssetService {
 //            return dto;
 //        }f
         // 对于个体园区，删除c,s,f，对于id为standardid的，顺便查询是否有brother，有则干掉
-        assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType(),deCouplingFlag);
+        assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
 //            dto.setFailCause(AssetPaymentConstants.DELETE_SUCCCESS);
         return dto;
     }
