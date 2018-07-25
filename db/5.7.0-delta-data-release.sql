@@ -874,9 +874,9 @@ update eh_parking_recharge_orders SET pay_source='app' WHERE pay_source IS NULL;
 -- REMARK: issue-34557 企业OA的服务广场功能模块需要配置成认证用户
 UPDATE eh_service_modules SET action_type=70 WHERE id=57000;
 UPDATE eh_service_module_apps SET action_type=70 WHERE module_id=57000;
-UPDATE eh_service_modules SET access_control_type=2 WHERE id IN(50700,52000,53000,59100,54000,55000,57000,59000);
-UPDATE eh_service_module_apps SET access_control_type=2 WHERE module_id IN(50700,52000,53000,59100,54000,55000,57000,59000);
-UPDATE eh_launch_pad_items SET access_control_type=2 WHERE action_type IN(27,65,75,68,69,70,72,73);
+UPDATE eh_service_modules SET access_control_type=2 WHERE id IN(50700,52000,53000,59100,54000,55000,57000,59000,51400);
+UPDATE eh_service_module_apps SET access_control_type=2 WHERE module_id IN(50700,52000,53000,59100,54000,55000,57000,59000,51400);
+UPDATE eh_launch_pad_items SET access_control_type=2 WHERE action_type IN(27,65,75,68,69,70,72,73,74);
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
