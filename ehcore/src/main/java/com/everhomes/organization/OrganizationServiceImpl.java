@@ -6245,7 +6245,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             return response;
         }
 
-        Map<String, OrganizationMember> contact_member = organizationMembers.stream().collect(Collectors.toMap(OrganizationMember::getContactToken, Function.identity()));
+
+        // Map<String, OrganizationMember> contact_member = organizationMembers.stream().collect(Collectors.toMap(OrganizationMember::getContactToken, Function.identity()));
+        // 使用上面的转化方法能够发现环境中的垃圾数据，在下一次下定决心清理垃圾数据时再使用
+        Map<String, OrganizationMember> contact_member = new HashMap<>();
+        organizationMembers.stream().map(r -> {
+            contact_member.put(r.getContactToken(), r);
+            return null;
+        }).collect(Collectors.toList());
         // 开始聚合
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
@@ -7844,6 +7851,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //修改企业客户管理中的状态 by jiarui
                     try {
                         enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecord(member.getContactToken(),member.getNamespaceId());
+                        customerProvider.updateCustomerTalentRegisterStatus(member.getContactToken());
                     }catch (Exception e){
                         LOGGER.error("update enterprise customer admin record erro:{}",e);
                     }

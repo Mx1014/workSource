@@ -754,6 +754,8 @@ update eh_locale_strings set text = '预订数量' where scope = 'rental.flow' a
 update eh_locale_strings set text = '预订时间' where scope = 'rental.flow' and `code` = 'useDetail';
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ( 'rental.notification', '13', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。');
 
+update eh_locale_templates set text = '请联系${offlinePayeeName}（${offlinePayeeContact}）或者前往：${offlineCashierAddress}付款。' where scope = 'rental.flow' and `code` = 2;
+
 SET @ns_id = 0;
 SET @module_id = 40400;
 SET @entity_type = 'flow_button'; -- 节点参数为：flow_node， 按钮参数为：flow_button
@@ -865,6 +867,11 @@ INSERT INTO `eh_archives_form_groups` (`id`, `namespace_id`, `owner_type`, `owne
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'archives', '100014', 'zh_CN', '邮箱重复');
 -- end
+
+-- AUTHOR: dengs 20180724
+-- REMARK: issue-33548 fix 更新一波停车默认缴费来源
+update eh_parking_recharge_orders SET pay_source='app' WHERE pay_source IS NULL;
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
