@@ -255,8 +255,8 @@ public class WorkReportController extends ControllerBase{
      */
     @RequestMapping("countUnReadWorkReportsVal")
     @RestReturn(value=Integer.class)
-    public RestResponse countUnReadWorkReportsVal() {
-        Integer res = workReportService.countUnReadWorkReportsVal();
+    public RestResponse countUnReadWorkReportsVal(WorkReportOrgIdCommand cmd) {
+        Integer res = workReportService.countUnReadWorkReportsVal(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -269,8 +269,8 @@ public class WorkReportController extends ControllerBase{
      */
     @RequestMapping("markWorkReportsValReading")
     @RestReturn(value=String.class)
-    public RestResponse markWorkReportsValReading() {
-        workReportService.markWorkReportsValReading();
+    public RestResponse markWorkReportsValReading(WorkReportOrgIdCommand cmd) {
+        workReportService.markWorkReportsValReading(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

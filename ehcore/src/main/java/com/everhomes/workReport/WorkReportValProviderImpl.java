@@ -206,22 +206,24 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId) {
+    public Integer countUnReadWorkReportsVal(Integer namespaceId, Long organizationId, Long receiverId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS.eq(WorkReportReadStatus.UNREAD.getCode()));
         return query.fetchCount();
     }
 
     @Override
-    public void markWorkReportsValReading(Integer namespaceId, Long receiverId) {
+    public void markWorkReportsValReading(Integer namespaceId, Long organizationId, Long receiverId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         UpdateQuery<EhWorkReportValReceiverMapRecord> query = context.updateQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS, WorkReportReadStatus.READ.getCode());
         query.addValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
         query.execute();
     }

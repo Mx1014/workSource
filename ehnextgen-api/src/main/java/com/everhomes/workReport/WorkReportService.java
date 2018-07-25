@@ -39,9 +39,9 @@ public interface WorkReportService {
 
     ListWorkReportsValResponse listReceivedWorkReportsVal(ListWorkReportsValCommand cmd);
 
-    Integer countUnReadWorkReportsVal();
+    Integer countUnReadWorkReportsVal(WorkReportOrgIdCommand cmd);
 
-    void markWorkReportsValReading();
+    void markWorkReportsValReading(WorkReportOrgIdCommand cmd);
 
     WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd);
 

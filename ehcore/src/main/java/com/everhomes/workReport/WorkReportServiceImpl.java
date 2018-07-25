@@ -30,6 +30,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,15 +59,12 @@ public class WorkReportServiceImpl implements WorkReportService {
     private ContentServerService contentServerService;
 
     @Autowired
-    private ConfigurationProvider configurationProvider;
-
-    @Autowired
     private LocaleTemplateService localeTemplateService;
 
     @Autowired
     private MessagingService messagingService;
 
-    private SimpleDateFormat reportFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private DateTimeFormatter reportFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final String WORK_REPORT = "WORK_REPORT";
 
@@ -217,7 +215,7 @@ public class WorkReportServiceImpl implements WorkReportService {
                 WorkReportDTO dto = ConvertHelper.convert(r, WorkReportDTO.class);
                 dto.setReportId(r.getId());
                 dto.setScopes(listWorkReportScopes(r.getId()));
-                String updateTime = reportFormat.format(r.getUpdateTime());
+                String updateTime = reportFormat.format(r.getUpdateTime().toLocalDateTime());
                 dto.setUpdateInfo(updateTime + " " + r.getOperatorName());
                 reports.add(dto);
             });
@@ -493,6 +491,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, Long applierId, Long organizationId) {
         WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
         receiver.setNamespaceId(namespaceId);
+        receiver.setOrganizationid(organizationId);
         receiver.setReportValId(reportValId);
         receiver.setReceiverUserId(receiverId);
         receiver.setReceiverName(fixUpUserName(receiverId, organizationId));
@@ -826,15 +825,15 @@ public class WorkReportServiceImpl implements WorkReportService {
     }
 
     @Override
-    public Integer countUnReadWorkReportsVal() {
+    public Integer countUnReadWorkReportsVal(WorkReportOrgIdCommand cmd) {
         User user = UserContext.current().getUser();
-        return workReportValProvider.countUnReadWorkReportsVal(user.getNamespaceId(), user.getId());
+        return workReportValProvider.countUnReadWorkReportsVal(cmd.getNamespaceId(), cmd.getOrganizationId(), user.getId());
     }
 
     @Override
-    public void markWorkReportsValReading() {
+    public void markWorkReportsValReading(WorkReportOrgIdCommand cmd) {
         User user = UserContext.current().getUser();
-        workReportValProvider.markWorkReportsValReading(user.getNamespaceId(), user.getId());
+        workReportValProvider.markWorkReportsValReading(cmd.getNamespaceId(), cmd.getOrganizationId(), user.getId());
     }
 
     @Override

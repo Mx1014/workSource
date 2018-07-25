@@ -30,9 +30,9 @@ public interface WorkReportValProvider {
 
     List<WorkReportValReceiverMap> listReportValReceiversByValId(Long reportValId);
 
-    Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId);
+    Integer countUnReadWorkReportsVal(Integer namespaceId, Long organizationId, Long receiverId);
 
-    void markWorkReportsValReading(Integer namespaceId, Long receiverId);
+    void markWorkReportsValReading(Integer namespaceId, Long organizationId, Long receiverId);
 
     Long createWorkReportValComment(WorkReportValComment comment);
 
