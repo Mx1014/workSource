@@ -407,4 +407,6 @@ public interface PunchService {
 
 	GetUserPunchRuleInfoResponse getUserPunchRuleInfo(GetUserPunchRuleInfoCommand cmd);
 
+	String processUserPunchRuleInfoUrl(Long ownerId, Long punchDate);
+
 }

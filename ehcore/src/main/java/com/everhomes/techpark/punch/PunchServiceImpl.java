@@ -270,6 +270,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -304,7 +305,10 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
+import scala.sys.process.processInternal;
+
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -11409,8 +11413,13 @@ public class PunchServiceImpl implements PunchService {
     public GetOvertimeInfoResponse getOvertimeInfo(GetOvertimeInfoCommand cmd){
     	return new GetOvertimeInfoResponse(processOvertimeInfo(cmd.getOwnerId(), UserContext.currentUserId()));
     }
-
-
+    
+    @Override
+    public String processUserPunchRuleInfoUrl(Long ownerId,Long punchDate){
+        String homeUrl = configurationProvider.getValue("home.url", "");
+        return homeUrl + "/mobile/static/oa_punch/punch_rule.html#?ownerId=" + ownerId + "&punchDate=" + punchDate;
+    }
+    
     @Override
     public GetUserPunchRuleInfoResponse getUserPunchRuleInfo(GetUserPunchRuleInfoCommand cmd){
  
