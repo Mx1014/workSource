@@ -115,6 +115,8 @@ import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
 import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
+import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlCommand;
+import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlResponse;
 import com.everhomes.rest.techpark.punch.HommizationType;
 import com.everhomes.rest.techpark.punch.ListApprovalCategoriesCommand;
 import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
@@ -8273,7 +8275,7 @@ public class PunchServiceImpl implements PunchService {
         List<ApprovalCategoryDTO> categories = approvalService.initAndListApprovalCategory(listApprovalCategoryCommand).getCategoryList();
 
         buildMoreInfoOfCurrentUser(cmd.getOwnerId(), categories);
-        return new ListApprovalCategoriesResponse(categories);
+        return new ListApprovalCategoriesResponse(categories, processApprovalCategorieUrl(cmd.getOwnerId(),cmd.getNamespaceId()));
     }
 
     // 生成不同请假类型的提示信息和当前用户的假期余额
@@ -11413,11 +11415,26 @@ public class PunchServiceImpl implements PunchService {
     public GetOvertimeInfoResponse getOvertimeInfo(GetOvertimeInfoCommand cmd){
     	return new GetOvertimeInfoResponse(processOvertimeInfo(cmd.getOwnerId(), UserContext.currentUserId()));
     }
+
+    @Override
+    public String getAdjustRuleUrl(){
+        String homeUrl = configurationProvider.getValue("home.url", "");
+        return homeUrl + "/mobile/static/oa_punch/adjust_rule.html";
+    }
+
+    public String processApprovalCategorieUrl(Long ownerId,Integer namespaceId){
+        String homeUrl = configurationProvider.getValue("home.url", "");
+        return homeUrl + "/mobile/static/oa_punch/remaining_rule.html?ownerId=" + ownerId + "&namespaceId=" + namespaceId;
+    }
     
     @Override
     public String processUserPunchRuleInfoUrl(Long ownerId,Long punchDate){
         String homeUrl = configurationProvider.getValue("home.url", "");
-        return homeUrl + "/mobile/static/oa_punch/punch_rule.html#?ownerId=" + ownerId + "&punchDate=" + punchDate;
+        return homeUrl + "/mobile/static/oa_punch/punch_rule.html?ownerId=" + ownerId + "&punchDate=" + punchDate;
+    }
+    @Override
+    public GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd){
+    	return new GetUserPunchRuleInfoUrlResponse(processUserPunchRuleInfoUrl(cmd.getOwnerId(),cmd.getPunchDate()));
     }
     
     @Override

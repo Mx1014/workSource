@@ -1,4 +1,4 @@
-package com.everhomes.techpark.punch;
+com.everhomes.techpark.punch;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -13,6 +13,7 @@ import com.everhomes.rest.techpark.punch.CheckAbnormalStatusResponse;
 import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
 import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
 import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
+import com.everhomes.rest.techpark.punch.GetAdjustRuleUrlResponse;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
 import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
@@ -22,6 +23,8 @@ import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
 import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
+import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlCommand;
+import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlResponse;
 import com.everhomes.rest.techpark.punch.ListApprovalCategoriesCommand;
 import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
@@ -548,4 +551,26 @@ public class PunchController extends ControllerBase {
 		return new RestResponse(resp);
 	}
 
+	/**
+	 * <p>获取规则文案URL</p>
+	 * <b>URL: /techpark/punch/getAdjustRuleUrl</b>
+	 */
+	@RequestMapping("getAdjustRuleUrl")
+	@RestReturn(GetAdjustRuleUrlResponse.class)
+	public RestResponse getAdjustRuleUrl(){ 
+		return new RestResponse(new GetAdjustRuleUrlResponse(punchService.getAdjustRuleUrl()));
+	}
+
+	/**
+	 * <p>获取请假页面查看详情URL</p>
+	 * <b>URL: /techpark/punch/getUserPunchRuleInfoUrl</b>
+	 */
+	@RequestMapping("getUserPunchRuleInfoUrl")
+	@RestReturn(GetUserPunchRuleInfoUrlResponse.class)
+	public RestResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd){
+		GetUserPunchRuleInfoUrlResponse resp = punchService.getUserPunchRuleInfoUrl(cmd);
+		return new RestResponse(resp);
+	}
+	
+	
 }

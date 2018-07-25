@@ -24,6 +24,8 @@ import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
 import com.everhomes.rest.techpark.punch.GetPunchQRCodeCommand;
+import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlCommand;
+import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlResponse;
 import com.everhomes.rest.techpark.punch.ListApprovalCategoriesCommand;
 import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
@@ -408,5 +410,9 @@ public interface PunchService {
 	GetUserPunchRuleInfoResponse getUserPunchRuleInfo(GetUserPunchRuleInfoCommand cmd);
 
 	String processUserPunchRuleInfoUrl(Long ownerId, Long punchDate);
+
+	GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd);
+
+	String getAdjustRuleUrl();
 
 }
