@@ -138,6 +138,7 @@ CREATE TABLE `eh_contract_events` (
 -- ADD BY 黄明波
 -- issue-29989
 -- 服务联盟v3.4 服务新增客服会话表 add by huangmingbo 2018.07.03
+DROP TABLE IF EXISTS `eh_alliance_online_service`;
 CREATE TABLE `eh_alliance_online_service` (
 	`id` BIGINT(20) NOT NULL,
 	`owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'id of eh_service_alliances',
