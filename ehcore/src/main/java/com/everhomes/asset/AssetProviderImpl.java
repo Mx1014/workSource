@@ -3238,17 +3238,19 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(standard)
                     .where(standard.ID.eq(chargingStandardId))
                     .execute();
-            Long bro = context.select(standardScope.BROTHER_STANDARD_ID)
-                    .from(standardScope)
-                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
-                    .fetchOne(standardScope.BROTHER_STANDARD_ID);
-            if(bro!=null){
+//            Long bro = context.select(standardScope.BROTHER_STANDARD_ID)
+//                    .from(standardScope)
+//                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
+//                    .fetchOne(standardScope.BROTHER_STANDARD_ID);
+            //if(bro!=null){
+            //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
+            //只要做了删除动作，那么该项目下的配置全部解耦
                 context.update(standardScope)
                         .set(standardScope.BROTHER_STANDARD_ID,nullId)
                         .where(standardScope.OWNER_ID.eq(ownerId))
                         .and(standardScope.OWNER_TYPE.eq(ownerType))
                         .execute();
-            }
+            //}
             context.delete(standardScope)
                     .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
                     .execute();
@@ -4184,6 +4186,15 @@ public class AssetProviderImpl implements AssetProvider {
                 //added categoryId constraint
                 .and(itemScope.CATEGORY_ID.eq(categoryId))
                 .execute();
+        //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
+        //只要做了新增动作，那么该项目下的配置全部解耦
+        Long nullId = null;
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+            context.update(standardScope)
+                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
+                    .where(standardScope.OWNER_ID.eq(ownerId))
+                    .and(standardScope.OWNER_TYPE.eq(ownerType))
+                    .execute();
     }
 
     @Override
