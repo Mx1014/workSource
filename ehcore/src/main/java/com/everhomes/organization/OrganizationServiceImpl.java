@@ -9757,6 +9757,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     requestor.getTargetId(), IdentifierTypeEnum.MOBILE.getCode());
             if((userIdentifier != null) && !"".equals(userIdentifier)){
                 metaObject.setPhoneNo(userIdentifier.getIdentifierToken());
+                //申请加入企业消息推送增加区号. add by yanlong.liang 20180725
+                metaObject.setRegionCode(userIdentifier.getRegionCode());
             }
         }
 
