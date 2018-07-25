@@ -21,12 +21,13 @@ create table `eh_general_form_val_requests`
 create table `eh_general_form_filter_user_map`
 (
    `id`                   bigint not null,
-   `owner_id`             bigint comment 'owner_id',
+   `owner_id`             bigint comment 'owner_id' not null,
    `owner_type`           varchar(64) comment 'owner_type',
-   `namespace_id`         int comment 'namespace_id',
-   `module_id`            bigint comment 'module_id',
-   `module_type`          varchar(64) comment 'module_type',
-   `field_name`           varchar(64) comment '被选中的字段名',
+   `namespace_id`         int comment 'namespace_id' not null,
+   `module_id`            bigint comment 'module_id' not null,
+   `module_type`          varchar(64) comment 'module_type' ,
+   `field_name`           varchar(64) comment '被选中的字段名' not null,
+	 `user_uuid`						varchar(128) comment '当前登录的用户用于获取字段' not null,
    primary key (id)
 );ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_filter_user_map in dev mode';
 

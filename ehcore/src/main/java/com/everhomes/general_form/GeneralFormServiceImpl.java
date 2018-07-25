@@ -766,6 +766,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public void saveGeneralFormFilter(PostGeneralFormFilterCommand cmd){
 
+        String UserUuid = UserContext.current().getUser().getUuid();
     }
 
 
