@@ -41,9 +41,6 @@
 -- AUTHOR: ryan荣 20180719
 -- REMARK: 执行 /archives/makeArchivesCheckInTime 接口(可能速度有点慢，但可重复执行)
 
--- AUTHOR: ryan荣 20180719
--- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(执行前请先备份eh_organization_member_details 表, 可能速度有点慢，但可重复执行)
-
 -- AUTHOR: yanjun 20180719
 -- REMARK: 请备份 eh_service_modules 表与 eh_web_menus 表
 
