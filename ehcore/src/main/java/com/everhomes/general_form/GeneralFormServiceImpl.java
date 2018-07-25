@@ -17,6 +17,7 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryServiceImpl;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.user.UserContext;
@@ -759,14 +760,44 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 
     @Override
-    public List<String> getGeneralFormFilter(GetGeneralFormFilterCommand cmd){
-        return null;
+    public List<String> listGeneralFormFilter(GetGeneralFormFilterCommand cmd){
+        List<GeneralFormFilterUserMap> generalFormFilterUserMaps = generalFormProvider.listGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
+                UserContext.current().getUser().getUuid(), cmd.getFormOriginId(), cmd.getFormVersion());
+
+
+        List<String> fieldNames = generalFormFilterUserMaps.stream().map(EhGeneralFormFilterUserMap::getFieldName).collect(Collectors.toList());
+        if(fieldNames.size() > 0){
+            return fieldNames;
+        }else{
+            LOGGER.error("this form not filter");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, GeneralApprovalServiceErrorCode.ERROR_NO_RESULT,
+                    "this form not filter.");
+        }
+
+
+
     }
 
     @Override
     public void saveGeneralFormFilter(PostGeneralFormFilterCommand cmd){
-
         String UserUuid = UserContext.current().getUser().getUuid();
+        if(cmd.getNamespaceId() != null && cmd.getFormFields().size() > 0 && cmd.getFormOriginId() != null && cmd.getFormVersion() != null
+                && cmd.getModuleId() != null && cmd.getOwnerId() != null) {
+            dbProvider.execute(status -> {
+                for(GeneralFormFieldDTO dto: cmd.getFormFields()){
+                    generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
+                            UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                }
+                return null;
+            });
+
+        }else{
+            LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerId: " + cmd.getOwnerId() + ", FormFields size: " + cmd.getFormFields().size() +
+                    ", moduleId: " + cmd.getModuleId() + ", formOriginId: " + cmd.getFormOriginId() + ", formVersion: " + cmd.getFormVersion());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "namespaceId,ownerType,sourceType,ownerId,sourceId cannot be null.");
+        }
+
     }
 
 

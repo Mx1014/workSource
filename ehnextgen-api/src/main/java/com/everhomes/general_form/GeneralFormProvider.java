@@ -87,5 +87,6 @@ public interface GeneralFormProvider {
 
     void saveGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long FormOriginId, Long FormVersion, String FieldName);
 
+    List<GeneralFormFilterUserMap> listGeneralFormFilter(Integer namespaceId, Long moduleId, Long ownerId, String userUuid, Long FormOriginId, Long FormVersion);
 
 }

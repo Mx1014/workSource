@@ -430,42 +430,61 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	@Override
 	public void saveGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion, String fieldName){
 
-
-
-        /*DSLContext context = this.dbProvider.getDslContext(AccessSpec
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhGeneralFormFilterUserMap.class));
         EhGeneralFormFilterUserMapDao dao = new EhGeneralFormFilterUserMapDao(context.configuration());
 
 
+        this.dbProvider.execute((status) -> {
 
-        context.delete(Tables.EH_GENERAL_FORM_FILTER_USER_MAP)
-                .where(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_VERSION.eq(formVersion))
-                .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.OWNER_ID.eq(ownerId))
-                .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.MODULE_ID.eq(moduleId))
-                .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_ORIGIN_ID.eq(formOriginId))
-                .and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.OWNER_TYPE.eq(ownerType))
-                .execute();
+			context.delete(Tables.EH_GENERAL_FORM_FILTER_USER_MAP)
+					.where(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.NAMESPACE_ID.eq(namespaceId))
+					.and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_VERSION.eq(formVersion))
+					.and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.OWNER_ID.eq(ownerId))
+					.and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.MODULE_ID.eq(moduleId))
+					.and(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_ORIGIN_ID.eq(formOriginId))
+					.execute();
 
-		Long id = this.sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhGeneralFormFilterUserMap.class));
+			Long id = this.sequenceProvider.getNextSequence(NameMapper
+					.getSequenceDomainFromTablePojo(EhGeneralFormFilterUserMap.class));
 
 
-		GeneralFormFilterUserMap generalFormFilterUserMap = new GeneralFormFilterUserMap();
-        generalFormFilterUserMap.setId(id);
-        generalFormFilterUserMap.setNamespaceId(namespaceId);
-        generalFormFilterUserMap.setOwnerId(ownerId);
-        generalFormFilterUserMap.setOwnerType(ownerType);
-        generalFormFilterUserMap.setModuleId(moduleId);
-        generalFormFilterUserMap.setModuleType(moduleType);
-        generalFormFilterUserMap.setUserUuid(userUuid);
-        generalFormFilterUserMap.setFieldName(fieldName);
-		generalFormFilterUserMap.setFormOriginId(formOriginId);
-		generalFormFilterUserMap.setFormVersion(formVersion);
+			GeneralFormFilterUserMap generalFormFilterUserMap = new GeneralFormFilterUserMap();
+			generalFormFilterUserMap.setId(id);
+			generalFormFilterUserMap.setNamespaceId(namespaceId);
+			generalFormFilterUserMap.setOwnerId(ownerId);
+			generalFormFilterUserMap.setOwnerType(ownerType);
+			generalFormFilterUserMap.setModuleId(moduleId);
+			generalFormFilterUserMap.setModuleType(moduleType);
+			generalFormFilterUserMap.setUserUuid(userUuid);
+			generalFormFilterUserMap.setFieldName(fieldName);
+			generalFormFilterUserMap.setFormOriginId(formOriginId);
+			generalFormFilterUserMap.setFormVersion(formVersion);
 
-		dao.insert(generalFormFilterUserMap);*/
+			dao.insert(generalFormFilterUserMap);
+			return null;
+		});
 
 	}
+
+	@Override
+	public List<GeneralFormFilterUserMap> listGeneralFormFilter(Integer namespaceId, Long moduleId, Long ownerId, String userUuid, Long FormOriginId, Long FormVersion){
+		List<GeneralFormVal> result = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readWriteWith(EhGeneralFormFilterUserMap.class));
+
+		SelectQuery<EhGeneralFormFilterUserMapRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_FILTER_USER_MAP);
+
+		query.addConditions(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.USER_UUID.eq(userUuid));
+		query.addConditions(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_ORIGIN_ID.eq(FormOriginId));
+		query.addConditions(Tables.EH_GENERAL_FORM_FILTER_USER_MAP.FORM_VERSION.eq(FormVersion));
+
+		return query.fetch().map(r -> {return ConvertHelper.convert(r, GeneralFormFilterUserMap.class);});
+	}
+
 
 
 }

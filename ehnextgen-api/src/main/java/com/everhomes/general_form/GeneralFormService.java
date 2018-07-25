@@ -81,7 +81,7 @@ public interface GeneralFormService {
 	 */
 	void saveGeneralForm(PostGeneralFormValCommand cmd);
 
-	List<String> getGeneralFormFilter(GetGeneralFormFilterCommand cmd);
+	List<String> listGeneralFormFilter(GetGeneralFormFilterCommand cmd);
 
 	void saveGeneralFormFilter(PostGeneralFormFilterCommand cmd);
 

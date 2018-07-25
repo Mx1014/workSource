@@ -8,7 +8,9 @@ import java.util.List;
 public class PostGeneralFormFilterCommand {
     private Integer namespaceId;
     private Long ownerId;
+    private String ownerType;
     private Long moduleId;
+    private String muduleType;
     private Long formOriginId;
     private Long formVersion;
 
@@ -29,6 +31,22 @@ public class PostGeneralFormFilterCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public String getMuduleType() {
+        return muduleType;
+    }
+
+    public void setMuduleType(String muduleType) {
+        this.muduleType = muduleType;
     }
 
     public Long getModuleId() {
