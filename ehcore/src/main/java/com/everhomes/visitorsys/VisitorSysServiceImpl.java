@@ -380,38 +380,36 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "%s/visitor-management/build/index.html?ns=%s&ownerType=%s&id=%s&appId=%s&status=%s#/visitor-detail#sign_suffix");
 
         String url = String.format(contextUrl, homeurl,visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),appId,visitor.getVisitStatus());
-
-        // 组装路由
-        OfficialActionData actionData = new OfficialActionData();
-        actionData.setUrl(url);
-
-        String uri = RouterBuilder.build(Router.BROWSER_I, actionData);
-        RouterMetaObject metaObject = new RouterMetaObject();
-        metaObject.setUrl(uri);
-
-        Map<String, String> meta = new HashMap<String, String>();
-        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_TITLE, "待确认访客"));
-        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
-
-        String detail = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITER_DETAIL, "你有一个访客等待确认");
-        MessageDTO messageDto = new MessageDTO();
-        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), visitor.getInviterId().toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(String.format(detail,visitor.getVisitorName(),visitor.getVisitorPhone()));
-        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        if(null != meta && meta.size() > 0) {
-            messageDto.getMeta().putAll(meta);
-        }
-
         List<VisitorSysMessageReceiver> list = messageReceiverProvider.listVisitorSysMessageReceiverByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
         if(list == null || list.size()==0)
             return;
         for (VisitorSysMessageReceiver receiver : list) {
             try {
+                // 组装路由
+                OfficialActionData actionData = new OfficialActionData();
+                actionData.setUrl(url);
+
+                String uri = RouterBuilder.build(Router.BROWSER_I, actionData);
+                RouterMetaObject metaObject = new RouterMetaObject();
+                metaObject.setUrl(uri);
+
+                Map<String, String> meta = new HashMap<String, String>();
+                meta.put(MessageMetaConstant.MESSAGE_SUBJECT, configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_TITLE, "待确认访客"));
+                meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+                meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+
+                String detail = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_INVITER_DETAIL, "你有一个访客等待确认");
+                MessageDTO messageDto = new MessageDTO();
+                messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), receiver.getCreatorUid().toString()));
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+                messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                messageDto.setBody(detail);
+                messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+                if(null != meta && meta.size() > 0) {
+                    messageDto.getMeta().putAll(meta);
+                }
                 boolean hasPrivilege = userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, appId, null, cmd.getOwnerId());
                 if(hasPrivilege) {
                         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
