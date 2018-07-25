@@ -26,6 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactDescription:部门信息<li/>
  * <li>phoneNo:电话号码</li>
  * <li>regionCode: 区号</li>
+ * <li>organizationId: 申请加入的公司ID</li>
  * </ul>
  */
 public class QuestionMetaObject {
@@ -48,6 +49,15 @@ public class QuestionMetaObject {
     private String contactDescription;
     private String phoneNo;
     private Integer regionCode;
+    private Long organizationId;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Integer getRegionCode() {
         return regionCode;

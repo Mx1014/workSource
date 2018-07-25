@@ -9751,7 +9751,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             metaObject.setRequestId(requestor.getId());
-
+            metaObject.setOrganizationId(requestor.getOrganizationId());
             //根据owner_uid、和identifier_type字段来查询表eh_user_identifiers表
             UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(
                     requestor.getTargetId(), IdentifierTypeEnum.MOBILE.getCode());
