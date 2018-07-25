@@ -61,6 +61,7 @@ public class RelocationCancelAction implements Runnable{
 			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 			stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
 			stepDTO.setStepCount(flowCase.getStepCount());
+			stepDTO.setOperatorId(User.SYSTEM_UID);
 
 			dbProvider.execute(status -> {
 
