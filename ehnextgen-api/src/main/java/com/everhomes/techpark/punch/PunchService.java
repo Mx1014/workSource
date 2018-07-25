@@ -3,6 +3,7 @@ package com.everhomes.techpark.punch;
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.ApprovalCategoryTimeSelectType;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -58,6 +59,7 @@ import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchClockResponse;
 import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentCommand;
 import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentResponse;
+import com.everhomes.rest.techpark.punch.PunchDayLogInitializeCommand;
 import com.everhomes.rest.techpark.punch.PunchLogsDay;
 import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentCommand;
 import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentResponse;
@@ -162,8 +164,7 @@ public interface PunchService {
 
 	public GetPunchNewExceptionCommandResponse getPunchNewException( GetPunchNewExceptionCommand cmd);
 
-	PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
-								   Calendar logDay) throws ParseException;
+	PunchDayLog refreshPunchDayLog(OrganizationMemberDetails memberDetail, Calendar logDay) throws ParseException;
 
 	public PunchLogsDay makePunchLogsDayListInfo(Long userId, Long companyId,
 												 Calendar logDay) throws ParseException;
@@ -239,7 +240,12 @@ public interface PunchService {
 	@Scheduled(cron = "1 0 5 * * ?")
 	void dayRefreshPunchGroupScheduled();
 
+	@Deprecated
 	void dayRefreshLogScheduled();
+
+	void punchDayLogInitialize();
+
+	void punchDayLogInitialize(PunchDayLogInitializeCommand cmd);
 
 	void testDayRefreshLogs(Long runDate);
 

@@ -245,7 +245,9 @@ ALTER TABLE eh_punch_statistic_files ADD COLUMN business_trip_request_count INTE
 ALTER TABLE eh_punch_statistic_files ADD COLUMN overtime_request_count INTEGER COMMENT '当月加班申请次数' AFTER business_trip_request_count;
 ALTER TABLE eh_punch_statistic_files ADD COLUMN punch_exception_request_count INTEGER COMMENT '当月异常打卡申请次数' AFTER overtime_request_count;
 
-
+-- 性能优化
 ALTER TABLE eh_punch_statistics ADD INDEX i_eh_punch_month_detail_id(`punch_month`,`owner_type`,`owner_id`,`detail_id`);
 ALTER TABLE eh_punch_day_logs DROP INDEX i_eh_enterprise_user_punch_date;
-ALTER TABLE eh_punch_day_logs ADD INDEX i_eh_enterprise_punch_date(`enterprise_id`,`punch_date`);
+ALTER TABLE eh_punch_day_logs ADD INDEX i_eh_enterprise_punch_date_user_id(`enterprise_id`,`punch_date`,`user_id`);
+ALTER TABLE eh_punch_day_logs ADD INDEX i_eh_enterprise_punch_date_detail_id(`enterprise_id`,`punch_date`,`detail_id`);
+ALTER TABLE eh_uniongroup_member_details ADD INDEX i_eh_namespace_detail_id_version_code(`namespace_id`,`group_type`,`detail_id`,`version_code`);

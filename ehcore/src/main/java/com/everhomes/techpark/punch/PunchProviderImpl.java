@@ -882,49 +882,33 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public PunchDayLog getDayPunchLogByDate(Long detailId, Long userId, Long companyId,
-                                            String format) {
-
-        Date punchDate = Date.valueOf(format);
-        // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
-        // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+    public PunchDayLog getDayPunchLogByDateAndDetailId(Long detailId, Long companyId, String punchDate) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step = context.select().from(
-                Tables.EH_PUNCH_DAY_LOGS);
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
-//        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId));
-        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(detailId));
-        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(punchDate));
+        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(Date.valueOf(punchDate)));
+        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID.eq(detailId));
+
         step.where(condition);
-        List<PunchDayLog> result = step.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc())
-                .fetch().map((r) -> {
-                    return ConvertHelper.convert(r, PunchDayLog.class);
-                });
-        if (null != result && result.size() > 0)
-            return result.get(0);
+        Record record = step.limit(1).fetchOne();
+        if (record != null) {
+            return ConvertHelper.convert(record, PunchDayLog.class);
+        }
         return null;
     }
-    
-    @Override
-    public PunchDayLog getDayPunchLogByDate( Long userId, Long companyId,
-                                            String format) {
 
-        Date punchDate = Date.valueOf(format);
-        // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
-        // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+    @Override
+    public PunchDayLog getDayPunchLogByDateAndUserId(Long userId, Long companyId, String punchDate) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step = context.select().from(
-                Tables.EH_PUNCH_DAY_LOGS);
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(Date.valueOf(punchDate)));
         condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId));
-        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(punchDate));
         step.where(condition);
-        List<PunchDayLog> result = step.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc())
-                .fetch().map((r) -> {
-                    return ConvertHelper.convert(r, PunchDayLog.class);
-                });
-        if (null != result && result.size() > 0)
-            return result.get(0);
+        Record record = step.limit(1).fetchOne();
+        if (record != null) {
+            return ConvertHelper.convert(record, PunchDayLog.class);
+        }
         return null;
     }
 

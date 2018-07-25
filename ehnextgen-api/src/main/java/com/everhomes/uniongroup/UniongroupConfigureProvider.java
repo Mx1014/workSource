@@ -117,4 +117,6 @@ public interface UniongroupConfigureProvider {
 	List<UniongroupMemberDetail> listUniongroupMemberDetailsByUserName(Long ownerId,
 			String userName, Integer versionCode);
 
+	List<Long> distinctEnterpriseIdsFromUniongroupMemberDetails();
+
 }

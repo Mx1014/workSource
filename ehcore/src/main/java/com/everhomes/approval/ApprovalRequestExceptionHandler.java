@@ -38,8 +38,6 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
-import com.everhomes.rest.techpark.punch.PunchStatus;
-import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
 import com.everhomes.techpark.punch.PunchConstants;
@@ -86,7 +84,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		description.setPunchDate(new Timestamp(content.getPunchDate()));
 		description.setPunchIntervalNo(content.getPunchIntervalNo());
-		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(approvalRequest.getCreatorUid(), 
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDateAndUserId(approvalRequest.getCreatorUid(),
 				approvalRequest.getOwnerId(), dateSF.format(new Date(approvalRequest.getLongTag1())));
 		description.setPunchDetail(processPunchDetail(pdl,content));
 		description.setPunchStatusName(content.getPunchStatusName());
@@ -382,7 +380,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		int code = ApprovalLogTitleTemplateCode.EXCEPTION_MAIN_TITLE; 
 		ApprovalExceptionContent content = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
 		map.put("date",processRequestDate(new Date(a.getLongTag1()) ,content));
-		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(new Date(a.getLongTag1())));
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDateAndUserId(a.getCreatorUid(), a.getOwnerId(), dateSF.format(new Date(a.getLongTag1())));
 		map.put("punchLog",processPunchDetail(pdl,content)) ;
 //		if(null == content || content.getPunchIntervalNo().equals(PunchIntervalNo.ALL_DAY.getCode()))
 			map.put("punchStatus", punchService.statusToString(pdl.getStatus()));
@@ -441,7 +439,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		result.setPunchDate( content.getPunchDate() );
 		result.setPunchIntervalNo(content.getPunchIntervalNo()); 
-		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(approvalRequest.getCreatorUid(), 
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDateAndUserId(approvalRequest.getCreatorUid(),
 				approvalRequest.getOwnerId(), dateSF.format(new Date(approvalRequest.getLongTag1())));
 		result.setPunchDetail(processPunchDetail(pdl,content));
 		result.setPunchStatusName(content.getPunchStatusName());

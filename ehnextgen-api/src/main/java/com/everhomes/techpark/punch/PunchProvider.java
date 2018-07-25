@@ -93,11 +93,9 @@ public interface PunchProvider {
 
 	public void updatePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
 
-	public PunchDayLog getDayPunchLogByDate(Long detailId, Long userId, Long companyId,
-			String format);
+	public PunchDayLog getDayPunchLogByDateAndDetailId(Long detailId, Long companyId, String punchDate);
 
-	public PunchDayLog getDayPunchLogByDate(Long userId, Long companyId,
-			String format);
+	public PunchDayLog getDayPunchLogByDateAndUserId(Long userId, Long companyId, String punchDate);
 	
 	public void createPunchDayLog(PunchDayLog punchDayLog);
 

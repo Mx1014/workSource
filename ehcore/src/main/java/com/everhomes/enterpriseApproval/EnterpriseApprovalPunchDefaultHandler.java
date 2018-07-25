@@ -62,7 +62,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 	@Autowired
 	private ApprovalCategoryProvider approvalCategoryProvider;
 	@Autowired
-	private OrganizationProvider organizationProvider;
+	protected OrganizationProvider organizationProvider;
 	@Autowired
 	private LocaleStringService localeStringService;
 

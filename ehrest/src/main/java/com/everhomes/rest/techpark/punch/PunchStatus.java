@@ -2,6 +2,11 @@ package com.everhomes.rest.techpark.punch;
 
 /**
  * <ul>打卡的状态
+ * <li>NO_ASSIGN_PUNCH_SCHEDULED((byte) -2): 未安排班次</li>
+ * <li>NO_ASSIGN_PUNCH_RULE((byte) -1): 未设置规则</li>
+ *<li>NOTWORKDAY(17): 非工作日无需打卡</li>
+ *<li>NONENTRY(16): 未入职</li>
+ *<li>RESIGNED(15): 已离职</li>
  * <li>NOTWORKDAY(17): 非工作日无需打卡</li>
  * <li>NONENTRY(16): 未入职</li>
  * <li>RESIGNED(15): 已离职</li>
@@ -15,6 +20,8 @@ package com.everhomes.rest.techpark.punch;
  * </ul>
  */
 public enum PunchStatus {
+    NO_ASSIGN_PUNCH_SCHEDULED((byte) -2),
+    NO_ASSIGN_PUNCH_RULE((byte) -1),
     FORGOT_OFF_DUTY((byte) 19),
     // 迟到且缺卡
     BELATE_AND_FORGOT((byte) 18),
