@@ -1,4 +1,4 @@
-com.everhomes.techpark.punch;
+package com.everhomes.techpark.punch;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
