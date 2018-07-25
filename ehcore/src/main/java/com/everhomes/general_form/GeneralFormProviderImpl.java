@@ -11,6 +11,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhGeneralFormFilterUserMapDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormValRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
@@ -427,19 +428,27 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 
 	@Override
-	public void saveGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long FormOriginId, Long FormVersion, String FieldName){
+	public void saveGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion, String fieldName){
 
-		/*Long id = this.sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhGeneralFormFilter.class));
-		group.setId(id);
-		group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		group.setUpdateTime(group.getCreateTime());
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
-		dao.insert(group);
+		Long id = this.sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhGeneralFormFilterUserMap.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhGeneralFormFilterUserMapDao dao = new EhGeneralFormFilterUserMapDao(context.configuration());
 
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhGeneralFormGroups.class, null);
-		return group;*/
+		GeneralFormFilterUserMap generalFormFilterUserMap = new GeneralFormFilterUserMap();
+        generalFormFilterUserMap.setId(id);
+        generalFormFilterUserMap.setNamespaceId(namespaceId);
+        generalFormFilterUserMap.setOwnerId(ownerId);
+        generalFormFilterUserMap.setOwnerType(ownerType);
+        generalFormFilterUserMap.setModuleId(moduleId);
+        generalFormFilterUserMap.setModuleType(moduleType);
+        generalFormFilterUserMap.setUserUuid(userUuid);
+        generalFormFilterUserMap.setFieldName(fieldName);
+		generalFormFilterUserMap.setFormOriginId(formOriginId);
+		generalFormFilterUserMap.setFormVersion(formVersion);
+
+		dao.insert(generalFormFilterUserMap);
+
 	}
 
 

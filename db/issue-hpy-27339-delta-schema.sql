@@ -26,6 +26,8 @@ create table `eh_general_form_filter_user_map`
    `namespace_id`         int comment 'namespace_id' not null,
    `module_id`            bigint comment 'module_id' not null,
    `module_type`          varchar(64) comment 'module_type' ,
+	 `form_origin_id`				bigint comment '关联的表id' not null,
+	 `form_version`					bigint comment '关联的表version' not null,
    `field_name`           varchar(64) comment '被选中的字段名' not null,
 	 `user_uuid`						varchar(128) comment '当前登录的用户用于获取字段' not null,
    primary key (id)
