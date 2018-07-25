@@ -432,7 +432,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+        /*DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhGeneralFormFilterUserMap.class));
         EhGeneralFormFilterUserMapDao dao = new EhGeneralFormFilterUserMapDao(context.configuration());
 
@@ -463,7 +463,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		generalFormFilterUserMap.setFormOriginId(formOriginId);
 		generalFormFilterUserMap.setFormVersion(formVersion);
 
-		dao.insert(generalFormFilterUserMap);
+		dao.insert(generalFormFilterUserMap);*/
 
 	}
 
