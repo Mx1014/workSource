@@ -18,8 +18,6 @@ public class ExportArchivesEmployeesCommand {
 
     private String keywords;
 
-    private Integer namespaceId;
-
     public ExportArchivesEmployeesCommand() {
     }
 

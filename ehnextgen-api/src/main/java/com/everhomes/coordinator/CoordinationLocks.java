@@ -139,7 +139,7 @@ public enum CoordinationLocks {
     MEETING_REMIND("meeting_remind"),
 
     ARCHIVES_CONFIGURATION("archives_configuration"),
-    ARCHIVES_NOTIFICATION("archives_notification")
+    ARCHIVES_NOTIFICATION("archives_notification"),
     VISITOR_SYS_GEN_IN_NO("visitor_sys_gen_in_no"),
     VISITOR_SYS_CONFIG("visitor_sys_config"),
     VISITOR_SYS_LOCATION("visitor_sys_location");

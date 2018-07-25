@@ -208,9 +208,6 @@ public interface UserProvider {
     String findContactTokenByOwnerUidAndNamespaceId(Long ownerUid , Integer namespaceId);
     String findUserTokenOfUser(Long userId);
 
-    UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
-            String identifierToken, Integer namespaceId);
-
     Integer countUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
 
     String getNickNameByUid(Long creatorUid);
