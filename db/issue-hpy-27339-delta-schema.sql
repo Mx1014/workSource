@@ -15,7 +15,7 @@ create table `eh_general_form_val_requests`
    `source_id`            bigint comment 'source_id',
    `source_type`          varchar(64) comment 'source_type',
    primary key (id)
-);ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_val_requests in dev mode';
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_val_requests in dev mode';
 
 
 create table `eh_general_form_filter_user_map`
@@ -29,6 +29,6 @@ create table `eh_general_form_filter_user_map`
    `field_name`           varchar(64) comment '被选中的字段名' not null,
 	 `user_uuid`						varchar(128) comment '当前登录的用户用于获取字段' not null,
    primary key (id)
-);ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_filter_user_map in dev mode';
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_filter_user_map in dev mode';
 
 -- --------------------- SECTION END ---------------------------------------------------------
