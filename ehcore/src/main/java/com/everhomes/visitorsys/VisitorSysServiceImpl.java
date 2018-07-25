@@ -566,7 +566,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             blackList = visitorSysBlackListProvider.findVisitorSysBlackListByPhone(namespaceId, VisitorsysOwnerType.COMMUNITY.getCode(),
                     communityId, visitorPhone);
             if(blackList!=null){
-                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INBLACKLIST_PHONE_ENTERPRISE,
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INBLACKLIST_PHONE_COMMUNITY,
                         "black list community, phone = " + visitorPhone);
             }
         }
