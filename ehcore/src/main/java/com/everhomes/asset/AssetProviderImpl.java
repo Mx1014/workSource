@@ -98,6 +98,9 @@ public class AssetProviderImpl implements AssetProvider {
     
     @Autowired
     private UserProvider userProvider;
+    
+    @Autowired
+    private AssetService assetService;
 
     @Override
     public void creatAssetBill(AssetBill bill) {
@@ -3343,14 +3346,22 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             return nextGroupId;
         }else if(deCouplingFlag == (byte)0){
-        	//全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
-        	
-        	
-        	
-        	
-            //添加
+        	//添加
             Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
-            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            if(cmd.getNamespaceId().equals(cmd.getOwnerId().intValue())){//ownerId为-1代表选择的是全部
+            	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            }else {
+            	//全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
+            	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+            	isProjectNavigateDefaultCmd.setModuleType(AssetModuleType.GROUPS.getCode());
+            	isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+            	isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
+            	isProjectNavigateDefaultCmd.setOwnerType(cmd.getOwnerType());
+            	IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetService.isProjectNavigateDefault(isProjectNavigateDefaultCmd);
+            	if(isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {//1：代表使用默认配置，那么需要同步
+                    InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            	}
+            }
             return nextGroupId;
         }
         return null;
