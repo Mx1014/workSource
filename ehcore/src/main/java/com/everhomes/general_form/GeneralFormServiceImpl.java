@@ -784,9 +784,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         if(cmd.getNamespaceId() != null && cmd.getFormFields().size() > 0 && cmd.getFormOriginId() != null && cmd.getFormVersion() != null
                 && cmd.getModuleId() != null && cmd.getOwnerId() != null) {
             dbProvider.execute(status -> {
+
                 for(GeneralFormFieldDTO dto: cmd.getFormFields()){
-                    generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
-                            UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                    if(StringUtils.isNotBlank(dto.getFieldName())) {
+                        generalFormProvider.saveGeneralFormFilter(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getMuduleType(), cmd.getOwnerId(), cmd.getOwnerType(),
+                                UserUuid, cmd.getFormOriginId(), cmd.getFormVersion(), dto.getFieldName());
+                    }else{
+                        LOGGER.error("getGeneralFormVal false: param cannot be null. ");
+                    }
                 }
                 return null;
             });
