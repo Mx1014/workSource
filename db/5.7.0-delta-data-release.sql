@@ -926,13 +926,6 @@ SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
--- AUTHOR: 黄良铭
--- REMARK: 苹果推送升级兼容旧应用mapper
-SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_bundleid_mapper);
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','develop','com.qinghua.ios.zuolin');
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','appbeta','com.qinghua.ios.zuolin');
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','appstore','com.qinghua.ios.zuolin');
-UPDATE eh_bundleid_mapper ebm SET ebm.bundle_id='com.qinghua.ios' WHERE ebm.namespace_id='999984' AND ebm.identify='appstore';
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
