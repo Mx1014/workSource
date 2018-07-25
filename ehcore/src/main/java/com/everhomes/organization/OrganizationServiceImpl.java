@@ -7193,26 +7193,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhoneWithoutVerifyMember(VerifyPersonnelByPhoneCommand cmd) {
-        VerifyPersonnelByPhoneCommandResponse res = new VerifyPersonnelByPhoneCommandResponse();
-
-        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
-
-        if (null != userIdentifier) {
-            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-            OrganizationMemberDTO dto = new OrganizationMemberDTO();
-            dto.setTargetId(user.getId());
-            dto.setContactToken(userIdentifier.getIdentifierToken());
-            dto.setContactName(user.getNickName());
-            dto.setTargetType(OrganizationMemberTargetType.USER.getCode());
-            res.setDto(dto);
-        }
-        return res;
-    }
-
-    @Override
     public void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd) {
         OrganizationMember member = organizationProvider.findOrganizationMemberById(cmd.getId());
         member.setContactName(cmd.getContactName());

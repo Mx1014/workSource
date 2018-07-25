@@ -835,18 +835,6 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /admin/org/verifyPersonnelByPhoneWithoutVerifyMember</b>
-     * <p>判断成员是否已经存在</p>
-     */
-    @RequestMapping("verifyPersonnelByPhoneWithoutVerifyMember")
-    @RestReturn(value = OrganizationMemberDTO.class)
-    public RestResponse verifyPersonnelByPhoneWithoutVerifyMember(@Valid VerifyPersonnelByPhoneCommand cmd) {
-        RestResponse response = new RestResponse(organizationService.verifyPersonnelByPhone(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
 
     /**
      * <b>URL: /admin/org/createOrganizationAccount</b>
