@@ -5439,48 +5439,48 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void updateAnAppMapping(UpdateAnAppMappingCommand cmd) {
-        /*DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        boolean alreadyPaired = isAlreadyPaired(cmd.getAssetCategoryId(), cmd.getContractCategoryId());
-        if(alreadyPaired){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.SUCCESS, "already paired, no need pair again");
-        }
-        boolean existAsset = checkExistAsset(cmd.getAssetCategoryId());
-        boolean existContract = checkExistContract(cmd.getContractCategoryId());
-        if(existAsset && existContract){
-            Integer namespaceIdAsset = findNamespaceByAsset(cmd.getAssetCategoryId());
-            Integer namespaceIdContract = findNamespaceByContractId(cmd.getContractCategoryId());
-            if(namespaceIdAsset != namespaceIdContract){
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "asset app and contract app do not have the same namespaceId");
-            }
-            AssetModuleAppMapping mapping = new AssetModuleAppMapping();
-            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
-            mapping.setId(nextSequence);
-            mapping.setAssetCategoryId(cmd.getAssetCategoryId());
-            mapping.setContractCategoryId(cmd.getContractCategoryId());
-            mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            mapping.setCreateUid(UserContext.currentUserId());
-            mapping.setNamespaceId(namespaceIdAsset);
-            mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
-            mapping.setEnergyFlag(AppMappingEnergyFlag.NO.getCode());
-            this.dbProvider.execute((status) -> {
-                deleteByContractAndAsset(cmd.getContractCategoryId(), cmd.getAssetCategoryId());
-                insertAppMapping(mapping);
-                return null;
-            });
-        }else if(existAsset && !existContract){
-            dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                    .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID, cmd.getContractCategoryId())
-                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()));
-        }else if(!existAsset && existContract){
-            dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                    .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID, cmd.getAssetCategoryId())
-                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(cmd.getContractCategoryId()));
-        }else{
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "asset category id and contract id does not exist yes");
-        }*/
-    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        boolean alreadyPaired = isAlreadyPaired(cmd.getAssetCategoryId(), cmd.getContractCategoryId());
+//        if(alreadyPaired){
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.SUCCESS, "already paired, no need pair again");
+//        }
+//        boolean existAsset = checkExistAsset(cmd.getAssetCategoryId());
+//        boolean existContract = checkExistContract(cmd.getContractCategoryId());
+//        if(existAsset && existContract){
+//            Integer namespaceIdAsset = findNamespaceByAsset(cmd.getAssetCategoryId());
+//            Integer namespaceIdContract = findNamespaceByContractId(cmd.getContractCategoryId());
+//            if(namespaceIdAsset != namespaceIdContract){
+//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                        "asset app and contract app do not have the same namespaceId");
+//            }
+//            AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+//            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetModuleAppMappings.class));
+//            mapping.setId(nextSequence);
+//            mapping.setAssetCategoryId(cmd.getAssetCategoryId());
+//            mapping.setContractCategoryId(cmd.getContractCategoryId());
+//            mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//            mapping.setCreateUid(UserContext.currentUserId());
+//            mapping.setNamespaceId(namespaceIdAsset);
+//            mapping.setStatus(AppMappingStatus.ACTIVE.getCode());
+//            mapping.setEnergyFlag(AppMappingEnergyFlag.NO.getCode());
+//            this.dbProvider.execute((status) -> {
+//                deleteByContractAndAsset(cmd.getContractCategoryId(), cmd.getAssetCategoryId());
+//                insertAppMapping(mapping);
+//                return null;
+//            });
+//        }else if(existAsset && !existContract){
+//            dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+//                    .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID, cmd.getContractCategoryId())
+//                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()));
+//        }else if(!existAsset && existContract){
+//            dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+//                    .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID, cmd.getAssetCategoryId())
+//                    .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID.eq(cmd.getContractCategoryId()));
+//        }else{
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "asset category id and contract id does not exist yes");
+//        }
+    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
     	dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_CATEGORY_ID, cmd.getContractCategoryId())
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONTRACT_ORIGINID, cmd.getContractOriginId())
@@ -5488,7 +5488,8 @@ public class AssetProviderImpl implements AssetProvider {
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ENERGY_FLAG, cmd.getEnergyFlag())
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
-	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()));
+	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()))
+	        .execute();
     }
 
 //    private boolean isAlreadyPaired(Long assetCategoryId, Long contractCategoryId) {
