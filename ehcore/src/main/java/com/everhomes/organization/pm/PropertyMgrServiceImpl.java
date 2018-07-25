@@ -7068,7 +7068,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
 
     private Address parseAddress(Integer namespaceId, Long communityId, String building, String apartment) {
-        Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+    	//issue-32652,在校验门牌是否存在时，应该去查正常的门牌（status为2）
+//    	Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+//                StringUtils.trimAllWhitespace(apartment));
+    	Address address = addressProvider.findActiveAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
                 StringUtils.trimAllWhitespace(apartment));
         if (address == null) {
             String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);
