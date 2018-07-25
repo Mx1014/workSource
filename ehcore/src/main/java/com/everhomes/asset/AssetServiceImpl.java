@@ -2664,31 +2664,33 @@ public class AssetServiceImpl implements AssetService {
                             LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
                         }
                         String formulaJson = formulas.get(0).getFormulaJson();
-                        formulaJson = formulaJson.replace("qf",amountOwed.toString());
-                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
-                        //开始构造一条滞纳金记录
-                        //查看item是否已经有滞纳金产生了
-                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
-                        boolean isInsert = false;
-                        if(fine == null){
-                            isInsert = true;
-                            fine = new PaymentLateFine();
-                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
-                            fine.setId(nextSequence);
-                            fine.setName(item.getChargingItemName() + "滞纳金");
-                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            fine.setBillId(item.getBillId());
-                            fine.setBillItemId(item.getId());
-                            fine.setCommunityId(item.getOwnerId());
-                            fine.setNamespaceId(item.getNamespaceId());
-                            fine.setCustomerId(item.getTargetId());
-                            fine.setCustomerType(item.getTargetType());
+                        if(formulaJson.contains("qf")) {//issue-34468 【物业缴费】执行接口，报错
+                        	formulaJson = formulaJson.replace("qf",amountOwed.toString());
+	                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+	                        //开始构造一条滞纳金记录
+	                        //查看item是否已经有滞纳金产生了
+	                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+	                        boolean isInsert = false;
+	                        if(fine == null){
+	                            isInsert = true;
+	                            fine = new PaymentLateFine();
+	                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+	                            fine.setId(nextSequence);
+	                            fine.setName(item.getChargingItemName() + "滞纳金");
+	                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                            fine.setBillId(item.getBillId());
+	                            fine.setBillItemId(item.getId());
+	                            fine.setCommunityId(item.getOwnerId());
+	                            fine.setNamespaceId(item.getNamespaceId());
+	                            fine.setCustomerId(item.getTargetId());
+	                            fine.setCustomerType(item.getTargetType());
+	                        }
+	                        fine.setAmount(fineAmount);
+	                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
+	                        // 重新计算下账单
+	                        assetProvider.reCalBillById(item.getBillId());
                         }
-                        fine.setAmount(fineAmount);
-                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
-                        // 重新计算下账单
-                        assetProvider.reCalBillById(item.getBillId());
                     }
                 }
             });
@@ -5190,31 +5192,33 @@ public class AssetServiceImpl implements AssetService {
 	                            LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
 	                        }
 	                        String formulaJson = formulas.get(0).getFormulaJson();
-	                        formulaJson = formulaJson.replace("qf",amountOwed.toString());
-	                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
-	                        //开始构造一条滞纳金记录
-	                        //查看item是否已经有滞纳金产生了
-	                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
-	                        boolean isInsert = false;
-	                        if(fine == null){
-	                            isInsert = true;
-	                            fine = new PaymentLateFine();
-	                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
-	                            fine.setId(nextSequence);
-	                            fine.setName(item.getChargingItemName() + "滞纳金");
-	                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	                            fine.setBillId(item.getBillId());
-	                            fine.setBillItemId(item.getId());
-	                            fine.setCommunityId(item.getOwnerId());
-	                            fine.setNamespaceId(item.getNamespaceId());
-	                            fine.setCustomerId(item.getTargetId());
-	                            fine.setCustomerType(item.getTargetType());
+	                        if(formulaJson.contains("qf")) {//issue-34468 【物业缴费】执行接口，报错
+	                        	formulaJson = formulaJson.replace("qf",amountOwed.toString());
+		                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+		                        //开始构造一条滞纳金记录
+		                        //查看item是否已经有滞纳金产生了
+		                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+		                        boolean isInsert = false;
+		                        if(fine == null){
+		                            isInsert = true;
+		                            fine = new PaymentLateFine();
+		                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+		                            fine.setId(nextSequence);
+		                            fine.setName(item.getChargingItemName() + "滞纳金");
+		                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		                            fine.setBillId(item.getBillId());
+		                            fine.setBillItemId(item.getId());
+		                            fine.setCommunityId(item.getOwnerId());
+		                            fine.setNamespaceId(item.getNamespaceId());
+		                            fine.setCustomerId(item.getTargetId());
+		                            fine.setCustomerType(item.getTargetType());
+		                        }
+		                        fine.setAmount(fineAmount);
+		                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
+		                        // 重新计算下账单
+		                        assetProvider.reCalBillById(item.getBillId());
 	                        }
-	                        fine.setAmount(fineAmount);
-	                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
-	                        // 重新计算下账单
-	                        assetProvider.reCalBillById(item.getBillId());
 	                    }
 	                }
 	            });
