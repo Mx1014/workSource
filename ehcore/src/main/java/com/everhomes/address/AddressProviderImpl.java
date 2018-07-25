@@ -409,7 +409,7 @@ public class AddressProviderImpl implements AddressProvider {
 		}
 		return null;
 	}
-
+	
     @Override
     public Address findActiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

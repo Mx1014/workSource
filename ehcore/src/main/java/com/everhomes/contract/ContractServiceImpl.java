@@ -1256,7 +1256,6 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 				}
 			});
 		}
-		//add by tangcen
 		if (oldApartments.size() == 0) {
 			contractProvider.saveContractEventAboutApartments(ContractTrackingTemplateCode.APARTMENT_ADD,contract,null,newApartments.toString());
 		}else if (newApartments.size() < oldApartments.size()) {
