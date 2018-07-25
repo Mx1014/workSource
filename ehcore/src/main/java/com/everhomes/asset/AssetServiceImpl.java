@@ -4994,7 +4994,19 @@ public class AssetServiceImpl implements AssetService {
         			//如果费项ID相等
         			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
         				//如果费项ID相等，并且费项名称相等，那么说明是费项本身，如果不相等，则说明是费项产生的滞纳金
-        				if(billItemDTO.getBillItemName() != null && billItemDTO.getBillItemName().equals(billItemDTO2.getBillItemName())) {
+        				//if(billItemDTO.getBillItemName() != null && billItemDTO.getBillItemName().equals(billItemDTO2.getBillItemName())) {
+        				//修复issue-34464 新增一条收费项为“租金”的账单，再去修改收费项为“租金1”，再导出，发现金额错位了
+        				if(billItemDTO.getBillItemName() != null && !billItemDTO.getBillItemName().startsWith("滞纳金") && billItemDTO.getBillItemName().endsWith("滞纳金")){
+                            lateFineAmount = lateFineAmount.add(billItemDTO2.getAmountReceivable());
+        					//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
+        					long billId = Long.parseLong(dto.getBillId());
+        					Long chargingItemId = billItemDTO.getBillItemId();
+                        	//根据减免费项配置重新计算待收金额
+                            Boolean isConfigSubtraction = assetProvider.isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
+                            if(isConfigSubtraction) {//如果滞纳金配置了减免费项，那么导出金额置为0
+                            	lateFineAmount = BigDecimal.ZERO;//修复issue-33462
+                            }
+        				}else {
         					//如果费项是一样的，那么导出的时候，对费项做相加
             				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
             				//根据减免费项配置重新计算待收金额
@@ -5003,16 +5015,6 @@ public class AssetServiceImpl implements AssetService {
                             Boolean isConfigSubtraction = assetProvider.isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
                             if(isConfigSubtraction) {//如果费项配置了减免费项，那么导出金额置为0
                             	amountRecivable = BigDecimal.ZERO;//修复issue-33462
-                            }
-        				}else {
-        					lateFineAmount = lateFineAmount.add(billItemDTO2.getAmountReceivable());
-        					//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
-        					long billId = Long.parseLong(dto.getBillId());
-        					Long chargingItemId = billItemDTO.getBillItemId();
-                        	//根据减免费项配置重新计算待收金额
-                            Boolean isConfigSubtraction = assetProvider.isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
-                            if(isConfigSubtraction) {//如果滞纳金配置了减免费项，那么导出金额置为0
-                            	lateFineAmount = BigDecimal.ZERO;//修复issue-33462
                             }
         				}
         			}
