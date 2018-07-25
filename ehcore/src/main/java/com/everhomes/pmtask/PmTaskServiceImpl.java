@@ -3534,6 +3534,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public PreOrderDTO payBills(CreatePmTaskOrderCommand cmd) {
 
+//		cmd.setNamespaceId(1);
+//		cmd.setPayerId(265001L);
 		PreOrderDTO preOrderDTO = null;
 		//1、检查买方（付款方）是否有会员，无则创建
 		User userById = userProvider.findUserById(UserContext.currentUserId());
@@ -3552,22 +3554,24 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		//2、收款方是否有会员，无则报错
-		Long taskCategoryId = 6L;
-		if(999983 == cmd.getNamespaceId())
-			taskCategoryId = 1L;
-		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),taskCategoryId);
-		Long payeeUserId = pmTaskConfig.getPaymentAccount();
-		if(payeeUserId == null) {
-			LOGGER.error("payeeUserId no find, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
-					"payeeUserId no find");
-		}
+//		Long taskCategoryId = 6L;
+//		if(999983 == cmd.getNamespaceId())
+//			taskCategoryId = 1L;
+//		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),taskCategoryId);
+//		Long payeeUserId = pmTaskConfig.getPaymentAccount();
+//		if(payeeUserId == null) {
+//			LOGGER.error("payeeUserId no find, cmd={}", cmd);
+//			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_SERVICE_CONFIG_NO_FIND,
+//					"payeeUserId no find");
+//		}
 
 		//3、组装报文，发起下单请求
 		PmTaskOrder order = pmTaskProvider.findPmTaskOrderByTaskId(cmd.getTaskId());
 		Long amount = order.getAmount();
+		cmd.setOrderId(order.getId());
 		CreateOrderCommand cmdPay = this.CreateOrderCommand(cmd);
-		cmdPay.setPayeeUserId(payeeUserId);
+//		cmdPay.setPayeeUserId(payeeUserId);
+		cmdPay.setPayeeUserId(1006L);
 		cmdPay.setAmount(amount);
 		CreateOrderRestResponse response = payService.createPurchaseOrder(cmdPay);
 		if(!response.getErrorCode().equals(200)) {
