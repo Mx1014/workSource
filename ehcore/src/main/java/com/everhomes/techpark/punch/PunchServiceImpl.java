@@ -8894,10 +8894,10 @@ public class PunchServiceImpl implements PunchService {
             		response = processHolidayPunchIntervalDTO(response, ptr, punchLogs);
             	}
         	}
+            //找到用户当日申请列表
+            List<ExceptionRequestDTO> requestDTOs = listUserException(pDate, userId, cmd.getEnterpriseId(), ptr);
+            response.setRequestDTOs(requestDTOs);
         }
-        //找到用户当日申请列表
-        List<ExceptionRequestDTO> requestDTOs = listUserException(pDate, userId, cmd.getEnterpriseId(), ptr);
-        response.setRequestDTOs(requestDTOs);
 //		}
         return response;
     }
