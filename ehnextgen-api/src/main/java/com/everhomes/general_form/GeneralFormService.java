@@ -75,7 +75,14 @@ public interface GeneralFormService {
 	List<GeneralFormValDTO> getGeneralFormVal(GetGeneralFormValCommand cmd);
 
 
+	/**
+	 * 保存但不提交工作流
+	 * @param cmd
+	 */
 	void saveGeneralForm(PostGeneralFormValCommand cmd);
 
+	List<String> getGeneralFormFilter(GetGeneralFormFilterCommand cmd);
+
+	void saveGeneralFormFilter(PostGeneralFormFilterCommand cmd);
 
 }

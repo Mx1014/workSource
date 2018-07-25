@@ -157,4 +157,22 @@ public class GeneralFormController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+	/**
+	 * <b>URL: /general_form/getGeneralFormFilter</b>
+	 * <p> 用于获取筛选字段</p>
+	 * @param cmd
+	 * @return
+	 */
+	@RequestMapping("getGeneralFormFilter")
+	@RestReturn(value=String.class)
+	public RestResponse getGeneralFormFilter(PostGeneralFormValCommand cmd) {
+		generalFormService.saveGeneralForm(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

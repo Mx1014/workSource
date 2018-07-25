@@ -202,6 +202,9 @@ public class RequisitionServiceImpl implements RequisitionService {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.REQUISITION_MODULE, (byte)13, null, null, communityId);
     }
 
+
+    //新增
+
     @Override
     public void updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd){
         GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());

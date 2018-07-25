@@ -758,5 +758,18 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
 
+    @Override
+    public List<String> getGeneralFormFilter(GetGeneralFormFilterCommand cmd){
+        return null;
+    }
+
+    @Override
+    public void saveGeneralFormFilter(PostGeneralFormFilterCommand cmd){
+
+    }
+
+
+
+
 }
 

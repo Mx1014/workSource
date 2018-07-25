@@ -18,4 +18,16 @@ create table `eh_general_form_val_requests`
 );ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_val_requests in dev mode';
 
 
+create table `eh_general_form_filter_user_map`
+(
+   `id`                   bigint not null,
+   `owner_id`             bigint comment 'owner_id',
+   `owner_type`           varchar(64) comment 'owner_type',
+   `namespace_id`         int comment 'namespace_id',
+   `module_id`            bigint comment 'module_id',
+   `module_type`          varchar(64) comment 'module_type',
+   `field_name`           varchar(64) comment '被选中的字段名',
+   primary key (id)
+);ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_filter_user_map in dev mode';
+
 -- --------------------- SECTION END ---------------------------------------------------------
