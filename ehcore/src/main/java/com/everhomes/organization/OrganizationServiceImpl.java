@@ -12592,7 +12592,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         //深拷贝
         OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
         /**创建/更新detail,并获取detailId**/
-        Long new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, organizationId);
+        // 申请加入企业的时候，不需要在人事档案中新增数据，在审核通过后，再在人事档案中新增数据。 add by yanlong.liang 20180725
+//        Long new_detail_id = getEnableDetailOfOrganizationMember(organizationMember, organizationId);
 
         OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(organizationMember.getContactToken(), organizationId);
 
@@ -12602,7 +12603,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMember.setOrganizationId(organizationId);
             organizationMember.setOperatorUid(user.getId());
             //绑定member表的detail_id
-            organizationMember.setDetailId(new_detail_id);
+//            organizationMember.setDetailId(new_detail_id);
             organizationProvider.createOrganizationMember(organizationMember);
 
             /**创建user_organization的记录（仅当target为user且grouptype为企业时添加）**/
