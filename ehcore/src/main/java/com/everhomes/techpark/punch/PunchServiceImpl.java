@@ -8831,8 +8831,8 @@ public class PunchServiceImpl implements PunchService {
                 punCalendar.setTime(punchTime);
             }
         } else {
-        	pDate = new java.sql.Date(punchTime.getTime());
             punchTime = new Date(cmd.getQueryTime());
+            pDate = new java.sql.Date(punchTime.getTime());
             punCalendar.setTime(punchTime);
         }
         response.setIntervals(new ArrayList<>());
