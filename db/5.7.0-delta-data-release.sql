@@ -47,6 +47,10 @@
 -- AUTHOR: huangmingbo 20180720
 -- REMARK: 执行 /yellowPage/transferTime 参数：201233
 
+-- AUTHOR: 马世亨 20180726
+-- REMARK: 执行 /pmtask/syncOrderDetails
+-- REMARK: ALL SECTION相关脚本update eh_pm_tasks t , eh_pm_task_orders o set t.amount = o.amount where t.status in (4,7) and t.id = o.task_id;
+-- REMARK: 上述脚本请在该接口调用后执行。
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
