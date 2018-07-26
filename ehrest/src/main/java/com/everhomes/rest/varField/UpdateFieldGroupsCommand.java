@@ -27,6 +27,8 @@ public class UpdateFieldGroupsCommand {
 
 	private Long categoryId;
 
+    private Long ownerId;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -65,6 +67,15 @@ public class UpdateFieldGroupsCommand {
 
     public void setGroups(List<ScopeFieldGroupInfo> groups) {
         this.groups = groups;
+    }
+
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

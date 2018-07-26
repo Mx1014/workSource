@@ -25,6 +25,8 @@ public class ListFieldCommand {
 
 	private Long categoryId;
 
+    private Long ownerId;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -63,6 +65,15 @@ public class ListFieldCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override
