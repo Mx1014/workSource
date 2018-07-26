@@ -245,8 +245,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}
 
 //		企业名称和楼栋门牌
-		if(null != dto.getOrganizationId() && dto.getOrganizationId() > 0){
-			Organization org = organizationProvider.findOrganizationById(dto.getOrganizationId());
+		if(null != dto.getEnterpriseId() && dto.getEnterpriseId() > 0){
+			dto.setEnterpriseName("");
+			dto.setEnterpriseAddress("");
+			Organization org = organizationProvider.findOrganizationById(dto.getEnterpriseId());
 			if(null != org){
 				dto.setEnterpriseName(org.getName());
 				List<OrganizationAddress> orgAddrs = organizationProvider.findOrganizationAddressByOrganizationId(org.getId());
@@ -344,7 +346,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setValue(dto.getRequestorPhone());
 		entities.add(e);
 
-		if(null != dto.getOrganizationId() && dto.getOrganizationId() > 0){
+		if(null != dto.getEnterpriseId() && dto.getEnterpriseId() > 0){
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.LIST.getCode());
 			e.setKey("企业名称");

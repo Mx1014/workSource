@@ -773,6 +773,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if (null != userIdentifier) {
 				requestorUid = userIdentifier.getOwnerUid();
 			}
+			cmd.setEnterpriseId(cmd.getOrganizationId());
 			return handler.createTask(cmd, requestorUid, requestorName, requestorPhone);
 		}
 	}
@@ -867,7 +868,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"RequestorName cannot be null.");
 		}
 		checkOrganizationId(cmd.getOrganizationId());
-		
+		cmd.setEnterpriseId(cmd.getOrganizationId());
 		cmd.setAddressType(PmTaskAddressType.FAMILY.getCode());
 
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
