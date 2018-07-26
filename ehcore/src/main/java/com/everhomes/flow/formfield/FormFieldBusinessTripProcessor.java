@@ -69,4 +69,15 @@ public class FormFieldBusinessTripProcessor implements FormFieldProcessor {
         }
         return null;
     }
+
+    @Override
+    public String parseFieldName(Flow flow, String fieldName, String extra) {
+        if ("开始时间".equals(fieldName))
+            return "出差时段";
+        if ("结束时间".equals(fieldName))
+            return "出差时段";
+        if ("出差时长".equals(fieldName))
+            return "出差时段";
+        return fieldName;
+    }
 }

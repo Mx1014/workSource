@@ -58,4 +58,13 @@ public class FormFieldAbnormalPunchProcessor implements FormFieldProcessor {
         }
         return null;
     }
+
+    @Override
+    public String parseFieldName(Flow flow, String fieldName, String extra) {
+        if ("异常日期".equals(fieldName))
+            return "异常时间";
+        if ("异常班次".equals(fieldName))
+            return "异常时间";
+        return fieldName;
+    }
 }
