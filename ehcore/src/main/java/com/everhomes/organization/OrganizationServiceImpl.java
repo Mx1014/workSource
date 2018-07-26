@@ -87,10 +87,12 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.archives.AddArchivesContactCommand;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.comment.AddCommentCommand;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.IncludeChildFlagType;
@@ -245,6 +247,7 @@ import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationAddressesCommand;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.ListUserTaskCommand;
+import com.everhomes.rest.organization.ManageType;
 import com.everhomes.rest.organization.NamespaceOrganizationType;
 import com.everhomes.rest.organization.OperationType;
 import com.everhomes.rest.organization.OrgAddressDTO;
@@ -5921,10 +5924,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 //						"organization member status error.");
 //  HEAD
                     } else {
-                        member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-                        member.setOperatorUid(operatorUid);
-                        member.setApproveTime(System.currentTimeMillis());
-                        updateEnterpriseContactStatus(operator.getId(), member);
+                        //将直接更新状态修改为
+//                        member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+//                        member.setOperatorUid(operatorUid);
+//                        member.setApproveTime(System.currentTimeMillis());
+//                        updateEnterpriseContactStatus(operator.getId(), member);
+                        AddArchivesContactCommand addArchivesContactCommand = ConvertHelper.convert(member, AddArchivesContactCommand.class);
+                        addArchivesContactCommand.setOrganizationId(cmd.getEnterpriseId());
+                        List<Long> departmentIds = new ArrayList<>();
+                        departmentIds.add(cmd.getEnterpriseId());
+                        addArchivesContactCommand.setDepartmentIds(departmentIds);
+                        this.archivesService.addArchivesContact(addArchivesContactCommand);
                         DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
                         sendMessageForContactApproved(member);
                         //记录添加log
@@ -9538,12 +9548,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                     includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
                 }
                 includeList.stream().distinct().forEach(targetId -> {
-                    metaObject.setEnterpriseManageFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(targetId);
                     if (!CollectionUtils.isEmpty(members)) {
                         members.stream().forEach(member -> {
                             if (organizationId.equals(member.getOrganizationId()) && OrganizationMemberGroupType.MANAGER.getCode().equals(member.getGroupType())) {
-                                metaObject.setEnterpriseManageFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+                                metaObject.setEnterpriseManageFlag(ManageType.ENTERPRISE.getCode());
                             }
                         });
                     }
