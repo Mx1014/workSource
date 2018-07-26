@@ -272,7 +272,6 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -307,10 +306,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import scala.sys.process.processInternal;
-
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -8302,14 +8298,18 @@ public class PunchServiceImpl implements PunchService {
             category.setRemainCount(0D);
             int code = ApprovalServiceConstants.TIP_INFO_FOR_APPROVAL_CATEGORY;
 
-            if (ApprovalServiceConstants.ANNUAL_LEAVE.equals(category.getCategoryName()) && punchVacationBalance != null) {
+            if (ApprovalServiceConstants.ANNUAL_LEAVE.equals(category.getCategoryName())) {
                 code = ApprovalServiceConstants.TIP_INFO_FOR_REMAIN_APPROVAL_CATEGORY;
-                category.setRemainCount(punchVacationBalance.getAnnualLeaveBalance());
+                if (punchVacationBalance != null) {
+                    category.setRemainCount(punchVacationBalance.getAnnualLeaveBalance());
+                }
                 category.setRemainCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(category.getRemainCount(), dayUnit, hourUnit));
                 model.put("remainCountDisplay", category.getRemainCountDisplay());
-            } else if (ApprovalServiceConstants.OVERTIME_COMPENSATION.equals(category.getCategoryName()) && punchVacationBalance != null) {
+            } else if (ApprovalServiceConstants.OVERTIME_COMPENSATION.equals(category.getCategoryName())) {
                 code = ApprovalServiceConstants.TIP_INFO_FOR_REMAIN_APPROVAL_CATEGORY;
-                category.setRemainCount(punchVacationBalance.getOvertimeCompensationBalance());
+                if (punchVacationBalance != null) {
+                    category.setRemainCount(punchVacationBalance.getOvertimeCompensationBalance());
+                }
                 category.setRemainCountDisplay(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(category.getRemainCount(), dayUnit, hourUnit));
                 model.put("remainCountDisplay", category.getRemainCountDisplay());
             }
