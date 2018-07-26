@@ -48,17 +48,19 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
             parkingInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         }
 
-        for (ParkingLotFuncConfig parkingLotFuncConfig : parkingInstanceConfig.getParkingLotFuncConfigs()) {
-            ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotFuncConfig.getParkingLotId());
-            ParkingLotConfig config = (ParkingLotConfig)StringHelper.fromJsonString(instanceConfig, ParkingLotConfig.class);
-            if(parkingLot.getFuncList()!=null){
-                setParkingConfig(config, JSONObject.parseArray(parkingLot.getFuncList()),parkingLotFuncConfig.getDockingFuncLists());
-                setParkingConfig(config, JSONObject.parseArray(parkingLot.getFuncList()),parkingLotFuncConfig.getFuncLists());
-            }
-            config.setMonthCardFlag(parkingLotFuncConfig.getEnableMonthCard());
-            config.setFlowMode(config.getFlowMode());
-            parkingProvider.updateParkingLot(parkingLot);
+        if(parkingInstanceConfig.getParkingLotFuncConfigs()!=null) {
+            for (ParkingLotFuncConfig parkingLotFuncConfig : parkingInstanceConfig.getParkingLotFuncConfigs()) {
+                ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotFuncConfig.getParkingLotId());
+                ParkingLotConfig config = (ParkingLotConfig) StringHelper.fromJsonString(instanceConfig, ParkingLotConfig.class);
+                if (parkingLot.getFuncList() != null) {
+                    setParkingConfig(config, JSONObject.parseArray(parkingLot.getFuncList()), parkingLotFuncConfig.getDockingFuncLists());
+                    setParkingConfig(config, JSONObject.parseArray(parkingLot.getFuncList()), parkingLotFuncConfig.getFuncLists());
+                }
+                config.setMonthCardFlag(parkingLotFuncConfig.getEnableMonthCard());
+                config.setFlowMode(config.getFlowMode());
+                parkingProvider.updateParkingLot(parkingLot);
 
+            }
         }
 
         return StringHelper.toJsonString(parkingInstanceConfig);
