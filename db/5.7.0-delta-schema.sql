@@ -37,7 +37,7 @@ CREATE TABLE `eh_customer_attachments` (
   `creator_uid` BIGINT(20) NOT NULL DEFAULT 0,
   `create_time` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业管理1.0 附件表';
 -- end
 
 

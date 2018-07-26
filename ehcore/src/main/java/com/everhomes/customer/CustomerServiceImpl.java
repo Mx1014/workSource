@@ -2443,8 +2443,8 @@ public class CustomerServiceImpl implements CustomerService {
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
         //管理员同步过去
-        dbProvider.execute((TransactionStatus status) -> {
-            List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), OrganizationMemberTargetType.UNTRACK.getCode());
+//        dbProvider.execute((TransactionStatus status) -> {
+            List<CustomerAdminRecord> untrackAdmins = enterpriseCustomerProvider.listEnterpriseCustomerAdminRecords(customer.getId(), null);
             if (untrackAdmins != null && untrackAdmins.size() > 0) {
                 untrackAdmins.forEach((r)->{
                     CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
@@ -2454,11 +2454,12 @@ public class CustomerServiceImpl implements CustomerService {
                     cmd.setNamespaceId(customer.getNamespaceId());
                     rolePrivilegeService.createOrganizationAdmin(cmd);
                 });
-                enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
+//                enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecordByCustomerId(customer.getId(), customer.getNamespaceId());
                 customer.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
             }
-            return null;
-        });
+        refreshCustomerAdminStatus(untrackAdmins);
+//            return null;
+//        });
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
         updateOrganizationAddress(organizationDTO.getId(), entryInfo.getBuildingId(), entryInfo.getAddressId());
@@ -2475,6 +2476,17 @@ public class CustomerServiceImpl implements CustomerService {
             addAttachments(customer.getOrganizationId(), bannerUrls, UserContext.currentUserId());
             Organization createOrganization = organizationProvider.findOrganizationById(customer.getOrganizationId());
             organizationSearcher.feedDoc(createOrganization);
+        }
+    }
+
+    private void refreshCustomerAdminStatus(List<CustomerAdminRecord> untrackAdmins) {
+        if (untrackAdmins != null && untrackAdmins.size() > 0) {
+            untrackAdmins.forEach((a) -> {
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(a.getNamespaceId(), a.getContactToken());
+                if (userIdentifier != null) {
+                    enterpriseCustomerProvider.updateEnterpriseCustomerAdminRecord(a.getContactToken(), a.getNamespaceId());
+                }
+            });
         }
     }
 
