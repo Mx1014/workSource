@@ -9353,11 +9353,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
             metaObject.setRequestInfo(notifyTextForOperator);
 
-            QuestionMetaActionData actionData = new QuestionMetaActionData();
-            actionData.setMetaObject(metaObject);
-
-            String routerUri = RouterBuilder.build(Router.ENTERPRISE_MEMBER_APPLY, actionData);
-            sendRouterEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForOperator, routerUri);
+            sendRouterEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForOperator, metaObject, member.getOrganizationId());
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Send waiting approval message to admin member in organization, userId=" + user.getId()
@@ -9520,7 +9516,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private void sendRouterEnterpriseNotificationUseSystemUser(
-            List<Long> includeList, List<Long> excludeList, String message, String routerUri) {
+            List<Long> includeList, List<Long> excludeList, String message, QuestionMetaObject metaObject, Long organizationId) {
         if (message != null && message.length() != 0) {
             MessageDTO messageDto = new MessageDTO();
             messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -9536,16 +9532,29 @@ public class OrganizationServiceImpl implements OrganizationService {
                 messageDto.getMeta().put(MessageMetaConstant.EXCLUDE,
                         StringHelper.toJsonString(excludeList));
             }
-            RouterMetaObject mo = new RouterMetaObject();
-            mo.setUrl(routerUri);
-            messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-            messageDto.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
 
             if (includeList != null && includeList.size() > 0) {
                 if (excludeList != null && excludeList.size() > 0) {
                     includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
                 }
                 includeList.stream().distinct().forEach(targetId -> {
+                    metaObject.setEnterpriseManageFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(targetId);
+                    if (!CollectionUtils.isEmpty(members)) {
+                        members.stream().forEach(member -> {
+                            if (organizationId.equals(member.getOrganizationId()) && OrganizationMemberGroupType.MANAGER.getCode().equals(member.getGroupType())) {
+                                metaObject.setEnterpriseManageFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+                            }
+                        });
+                    }
+                    QuestionMetaActionData actionData = new QuestionMetaActionData();
+                    actionData.setMetaObject(metaObject);
+
+                    String routerUri = RouterBuilder.build(Router.ENTERPRISE_MEMBER_APPLY, actionData);
+                    RouterMetaObject mo = new RouterMetaObject();
+                    mo.setUrl(routerUri);
+                    messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+                    messageDto.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
                     messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                             AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
@@ -9751,7 +9760,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             metaObject.setRequestId(requestor.getId());
-            metaObject.setOrganizationId(requestor.getOrganizationId());
             //根据owner_uid、和identifier_type字段来查询表eh_user_identifiers表
             UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(
                     requestor.getTargetId(), IdentifierTypeEnum.MOBILE.getCode());

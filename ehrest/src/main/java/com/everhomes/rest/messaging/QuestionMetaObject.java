@@ -26,7 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactDescription:部门信息<li/>
  * <li>phoneNo:电话号码</li>
  * <li>regionCode: 区号</li>
- * <li>organizationId: 申请加入的公司ID</li>
+ * <li>enterpriseManageFlag: 是否为企业管理员,请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class QuestionMetaObject {
@@ -49,14 +49,14 @@ public class QuestionMetaObject {
     private String contactDescription;
     private String phoneNo;
     private Integer regionCode;
-    private Long organizationId;
+    private Byte enterpriseManageFlag;
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Byte getEnterpriseManageFlag() {
+        return enterpriseManageFlag;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setEnterpriseManageFlag(Byte enterpriseManageFlag) {
+        this.enterpriseManageFlag = enterpriseManageFlag;
     }
 
     public Integer getRegionCode() {
