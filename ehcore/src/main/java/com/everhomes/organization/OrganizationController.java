@@ -1646,5 +1646,21 @@ public class OrganizationController extends ControllerBase {
 
 
 
+    /**
+     * <b>URL: /org/listUserOrganizations</b>
+     * <p>查询用户加入的公司</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "/org/listUserOrganizations")
+    @RestReturn(value = ListUserOrganizationsResponse.class)
+    public RestResponse listUserOrganizations(ListUserOrganizationsCommand cmd){
+
+        ListUserOrganizationsResponse res = organizationService.listUserOrganizations(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

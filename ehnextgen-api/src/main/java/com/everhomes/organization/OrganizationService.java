@@ -668,4 +668,6 @@ public interface OrganizationService {
 	void updateCustomerEntryInfo(EnterpriseCustomer customer, OrganizationAddress address);
 
     OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd);
+
+	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
 }
