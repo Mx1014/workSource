@@ -9551,7 +9551,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(targetId);
                     if (!CollectionUtils.isEmpty(members)) {
                         members.stream().forEach(member -> {
-                            if (organizationId.equals(member.getOrganizationId()) && OrganizationMemberGroupType.MANAGER.getCode().equals(member.getGroupType())) {
+                            if (organizationId.equals(member.getOrganizationId()) && OrganizationMemberGroupType.MANAGER.getCode().equals(member.getMemberGroup())) {
                                 metaObject.setEnterpriseManageFlag(ManageType.ENTERPRISE.getCode());
                             }
                         });
