@@ -639,9 +639,9 @@ public class ArchivesServiceImpl implements ArchivesService {
         command.setEmploymentTime(format.format(employee.getEmploymentTime().toLocalDate()));
         command.setEmploymentEvaluation("");
         employArchivesEmployeesConfig(command);
-        //  3-3.查询若存在于离职列表则删除
+        //  4.查询若存在于离职列表则删除
         deleteArchivesDismissEmployees(detailId, cmd.getOrganizationId());
-        //  3-4.增加入职记录
+        //  5.增加入职记录
         addCheckInLogs(detailId, cmd);
 
         dto.setDetailId(employee.getId());
@@ -1269,7 +1269,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                             StringHelper.toJsonString(cmd));
                 }
             }
-            //  3.添加文档
+            //  3.添加记录
             if (TrueOrFalseFlag.fromCode(cmd.getLogFlag()) != TrueOrFalseFlag.FALSE)
                 addEmployLogs(cmd);
             return null;
