@@ -49,4 +49,6 @@ public interface WorkReportValProvider {
     void deleteCommentAttachmentsByCommentId(Integer namespaceId, Long commentId);
 
     List<WorkReportValCommentAttachment> listWorkReportValCommentAttachments(Integer namespaceId, List<Long> commentIds);
+
+    List<WorkReportValReceiverMap> listWorkReportReceivers();
 }

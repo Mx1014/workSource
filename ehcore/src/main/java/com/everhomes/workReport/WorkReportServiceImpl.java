@@ -491,7 +491,7 @@ public class WorkReportServiceImpl implements WorkReportService {
     private WorkReportValReceiverMap packageWorkReportValReceiverMap(Integer namespaceId, Long reportValId, Long receiverId, Long applierId, Long organizationId) {
         WorkReportValReceiverMap receiver = new WorkReportValReceiverMap();
         receiver.setNamespaceId(namespaceId);
-        receiver.setOrganizationid(organizationId);
+        receiver.setOrganizationId(organizationId);
         receiver.setReportValId(reportValId);
         receiver.setReceiverUserId(receiverId);
         receiver.setReceiverName(fixUpUserName(receiverId, organizationId));
@@ -903,4 +903,16 @@ public class WorkReportServiceImpl implements WorkReportService {
         ownerTokenDto.setType(OwnerType.WORK_REPORT.getCode());
         return WebTokenGenerator.getInstance().toWebToken(ownerTokenDto);
     }
+
+
+    @Override
+    public void syncWorkReportReceiver() {
+        List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
+        for(WorkReportValReceiverMap r : receivers){
+            WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
+            r.setOrganizationId(val.getOrganizationId());
+            workReportValProvider.updateWorkReportValReceiverMap(r);
+        }
+    }
+
 }

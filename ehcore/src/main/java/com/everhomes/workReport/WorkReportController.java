@@ -290,4 +290,18 @@ public class WorkReportController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /workReport/syncWorkReportReceiver</b>
+     * <p>同步工作汇报接收人公司信息 </p>
+     */
+    @RequestMapping("syncWorkReportReceiver")
+    @RestReturn(value=String.class)
+    public RestResponse syncWorkReportReceiver() {
+        workReportService.syncWorkReportReceiver();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
