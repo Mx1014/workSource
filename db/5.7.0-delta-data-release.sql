@@ -41,9 +41,6 @@
 -- AUTHOR: ryan荣 20180719
 -- REMARK: 执行 /archives/makeArchivesCheckInTime 接口(可能速度有点慢，但可重复执行)
 
--- AUTHOR: ryan荣 20180719
--- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(执行前请先备份eh_organization_member_details 表, 可能速度有点慢，但可重复执行)
-
 -- AUTHOR: yanjun 20180719
 -- REMARK: 请备份 eh_service_modules 表与 eh_web_menus 表
 
@@ -754,6 +751,8 @@ update eh_locale_strings set text = '预订数量' where scope = 'rental.flow' a
 update eh_locale_strings set text = '预订时间' where scope = 'rental.flow' and `code` = 'useDetail';
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ( 'rental.notification', '13', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。');
 
+update eh_locale_templates set text = '请联系${offlinePayeeName}（${offlinePayeeContact}）或者前往：${offlineCashierAddress}付款。' where scope = 'rental.flow' and `code` = 2;
+
 SET @ns_id = 0;
 SET @module_id = 40400;
 SET @entity_type = 'flow_button'; -- 节点参数为：flow_node， 按钮参数为：flow_button
@@ -865,6 +864,20 @@ INSERT INTO `eh_archives_form_groups` (`id`, `namespace_id`, `owner_type`, `owne
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'archives', '100014', 'zh_CN', '邮箱重复');
 -- end
+
+-- AUTHOR: dengs 20180724
+-- REMARK: issue-33548 fix 更新一波停车默认缴费来源
+update eh_parking_recharge_orders SET pay_source='app' WHERE pay_source IS NULL;
+
+
+-- AUTHOR: 张智伟
+-- REMARK: issue-34557 企业OA的服务广场功能模块需要配置成认证用户
+UPDATE eh_service_modules SET action_type=70 WHERE id=57000;
+UPDATE eh_service_module_apps SET action_type=70 WHERE module_id=57000;
+UPDATE eh_service_modules SET access_control_type=2 WHERE id IN(50700,52000,53000,59100,54000,55000,57000,59000,51400);
+UPDATE eh_service_module_apps SET access_control_type=2 WHERE module_id IN(50700,52000,53000,59100,54000,55000,57000,59000,51400);
+UPDATE eh_launch_pad_items SET access_control_type=2 WHERE action_type IN(27,65,75,68,69,70,72,73,74);
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -889,7 +902,10 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyId', 'yinxingkeji', '银星科技园停车场访问者标识', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyValue', '1f9f1cb5c0d1e752917e1a38b957e33d', '银星科技园停车场加密后的-accessKeyValue', '0', NULL, '1');
 
-
+-- AUTHOR:黄良铭
+-- REMARK: 缺陷 #34288 问题数据处理
+DELETE FROM eh_organization_members  WHERE target_type='UNTRACK' AND contact_token=' 15116329251' AND namespace_id=999990;
+DELETE FROM eh_organization_member_details  WHERE contact_token=' 15116329251' AND namespace_id=999990;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -919,13 +935,6 @@ SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
--- AUTHOR: 黄良铭
--- REMARK: 苹果推送升级兼容旧应用mapper
-SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_bundleid_mapper);
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','develop','com.qinghua.ios.zuolin');
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','appbeta','com.qinghua.ios.zuolin');
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','appstore','com.qinghua.ios.zuolin');
-UPDATE eh_bundleid_mapper ebm SET ebm.bundle_id='com.qinghua.ios' WHERE ebm.namespace_id='999984' AND ebm.identify='appstore';
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

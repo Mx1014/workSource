@@ -1213,20 +1213,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		for (RentalResource rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, sceneTokenDTO, true);
-			//帮客户端处理一下 颠倒按月按周预约规则的位置
-			List<SitePriceRuleDTO> sitePriceRules = rSiteDTO.getSitePriceRules();
-			int i = 0;
-			for (;i<sitePriceRules.size();i++)
-				if (RentalType.MONTH.getCode() == sitePriceRules.get(i).getRentalType())
-					break;
-			int j = 0;
-			for (;j<sitePriceRules.size();j++)
-				if (RentalType.WEEK.getCode() == sitePriceRules.get(j).getRentalType())
-					break;
-			if (i<sitePriceRules.size() && j<sitePriceRules.size()){
-				sitePriceRules.add(sitePriceRules.get(i));
-				sitePriceRules.remove(i);
-			}
+
 			response.getRentalSites().add(rSiteDTO);
 		}
 
@@ -1357,6 +1344,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setOwnerName(ownerCom.getName());
 				rSiteDTO.getOwners().add(dto);
 			}
+		}
+
+		//帮客户端处理一下 颠倒按月按周预约规则的位置
+		List<SitePriceRuleDTO> sitePriceRules = rSiteDTO.getSitePriceRules();
+		int i = 0;
+		for (;i<sitePriceRules.size();i++)
+			if (RentalType.MONTH.getCode() == sitePriceRules.get(i).getRentalType())
+				break;
+		int j = 0;
+		for (;j<sitePriceRules.size();j++)
+			if (RentalType.WEEK.getCode() == sitePriceRules.get(j).getRentalType())
+				break;
+		if (i<sitePriceRules.size() && j<sitePriceRules.size()){
+			sitePriceRules.add(sitePriceRules.get(i));
+			sitePriceRules.remove(i);
 		}
 
 		if (setShowPriceFlag) {
@@ -8961,12 +8963,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}).collect(Collectors.toList());
 		if (collect.size() == 0)
 			return "";
-        Collections.sort(collect,(q,p)->q.getId().compareTo(p.getId()));
+        collect.sort(Comparator.comparing(EhRentalv2Cells::getId));
 		SimpleDateFormat beginTimeSF = new SimpleDateFormat("HH:mm");
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
 		SimpleDateFormat beginMonthSF = new SimpleDateFormat("yyyy-MM-dd");
 		String result = getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
-		result.replaceAll("-","~");//弱智需求。。
+		if (RentalType.HOUR.getCode() == resourceOrders.get(0).getRentalType())
+		    result = result.replaceAll("-","~");//弱智需求。。
 		return result;
 	}
 }

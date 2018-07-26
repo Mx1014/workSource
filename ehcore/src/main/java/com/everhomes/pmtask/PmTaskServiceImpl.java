@@ -1115,9 +1115,34 @@ public class PmTaskServiceImpl implements PmTaskService {
 					cell8.setCellValue(category.getName());
 					Cell cell9 = tempRow.createCell(9);
 					cell9.setCellStyle(style);
-
-					PmTaskFlowStatus flowStatus = PmTaskFlowStatus.fromCode(task.getStatus());
-					cell9.setCellValue(null != flowStatus ? flowStatus.getDescription() : "");
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(task.getId(), "EhPmTasks", 20100L);
+					String status = "";
+					if (null != flowCase) {
+						switch (flowCase.getStatus()) {
+							case (byte) 0:
+								status = "无效";
+								break;
+							case (byte) 1:
+								status = "初始化";
+								break;
+							case (byte) 2:
+								status = "处理中";
+								break;
+							case (byte) 3:
+								status = "已取消";
+								break;
+							case (byte) 4:
+								status = "已完成";
+								break;
+							case (byte) 5:
+								status = "待评价";
+								break;
+							case (byte) 6:
+								status = "暂缓";
+								break;
+						}
+					}
+					cell9.setCellValue(status);
 
 					Cell cell10 = tempRow.createCell(10);
 					cell10.setCellStyle(style);
@@ -3841,6 +3866,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd1.setAppId(cmd.getOriginId());
 		cmd1.setCurrentPMId(cmd.getCurrentPMId());
 		cmd1.setCurrentProjectId(cmd.getOwnerId());
+		cmd1.setPageSize(99999);
 		List<PmTaskDTO> list = this.searchTasks(cmd1).getRequests();
 		return null != list ? list.stream().map(r -> ConvertHelper.convert(r,PmTask.class)).collect(Collectors.toList()) : new ArrayList<>();
 	}

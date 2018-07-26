@@ -3,6 +3,7 @@ package com.everhomes.statistics.terminal;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.sequence.SequenceProvider;
@@ -354,11 +355,13 @@ public class StatTerminalProviderImpl implements StatTerminalProvider {
         com.everhomes.server.schema.tables.EhTerminalAppVersionActives t = Tables.EH_TERMINAL_APP_VERSION_ACTIVES;
         com.everhomes.server.schema.tables.EhUserActivities at = Tables.EH_USER_ACTIVITIES;
 
+        Condition appUser = u.NAMESPACE_USER_TYPE.isNull().and(u.NAMESPACE_USER_TOKEN.eq(""));
+        Condition weiXinUser = u.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode());
+
         List<Long> ids = context.select(u.ID).from(u)
                 .where(u.NAMESPACE_ID.eq(namespaceId))
                 .and(u.STATUS.eq(UserStatus.ACTIVE.getCode()))
-                .and(u.NAMESPACE_USER_TOKEN.eq(""))
-                .and(u.NAMESPACE_USER_TYPE.isNull())
+                .and(appUser.or(weiXinUser))
                 .fetchInto(Long.class);
 
         if (ids.size() == 0) {

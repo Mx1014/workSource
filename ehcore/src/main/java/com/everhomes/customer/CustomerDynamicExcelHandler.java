@@ -939,7 +939,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     for (String buildingNameString : buildingNames) {
                         String buildingName = buildingNameString.split("/")[0];
                         String apartmentName = buildingNameString.split("/")[1];
-                        Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
+                        //issue-32652,在校验门牌是否存在时，应该去查正常的门牌（status为2）
+                        //Address address = addressProvider.findAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
+                        Address address = addressProvider.findActiveAddressByBuildingApartmentName(enterpriseCustomer.getNamespaceId(), enterpriseCustomer.getCommunityId(), buildingName, apartmentName);
                         Building building = communityProvider.findBuildingByCommunityIdAndName(enterpriseCustomer.getCommunityId(), buildingName);
                         if (address == null || building == null) {
                             Map<String, String> dataMap = new LinkedHashMap<>();

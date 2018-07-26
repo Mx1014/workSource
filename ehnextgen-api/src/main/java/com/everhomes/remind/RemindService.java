@@ -6,6 +6,8 @@ import com.everhomes.rest.remind.CreateOrUpdateRemindCategoryCommand;
 import com.everhomes.rest.remind.CreateOrUpdateRemindCommand;
 import com.everhomes.rest.remind.DeleteRemindCategoryCommand;
 import com.everhomes.rest.remind.DeleteRemindCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdResponse;
 import com.everhomes.rest.remind.GetRemindCategoryColorsResponse;
 import com.everhomes.rest.remind.GetRemindCategoryCommand;
 import com.everhomes.rest.remind.GetRemindCommand;
@@ -61,6 +63,8 @@ public interface RemindService {
     void subscribeShareRemind(SubscribeShareRemindCommand cmd);
 
     void unSubscribeShareRemind(UnSubscribeShareRemindCommand cmd);
+
+    GetCurrentUserDetailIdResponse getCurrentUserContactSimpleInfo(GetCurrentUserDetailIdCommand cmd);
 
     void remindSchedule();
 

@@ -9,6 +9,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -2642,6 +2643,9 @@ public class CustomerServiceImpl implements CustomerService {
                     }
                 }
                 dto.setApartmentLivingStatus(address.getLivingStatus());
+                //issue-34394,添加buildingId信息，避免前端无法获取buildingId，导致没办法和楼栋门牌匹配上
+                Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+                dto.setBuildingId(building.getId());
             }
         }
 
@@ -3302,17 +3306,17 @@ public class CustomerServiceImpl implements CustomerService {
             }
 
         }
-        if (dto.getTrackingUid() != null) {
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
-            if (null != detail && null != detail.getContactName()) {
-                dto.setTrackingUidName(detail.getContactName()+"("+detail.getContactToken()+")");
-            } else {
-                User user = userProvider.findUserById(dto.getTrackingUid());
-                if (user != null) {
-                    dto.setTrackingUidName(user.getNickName()+"("+user.getIdentifierToken()+")");
-                }
-            }
-        }
+//        if (dto.getTrackingUid() != null) {
+//            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
+//            if (null != detail && null != detail.getContactName()) {
+//                dto.setTrackingUidName(detail.getContactName()+"("+detail.getContactToken()+")");
+//            } else {
+//                User user = userProvider.findUserById(dto.getTrackingUid());
+//                if (user != null) {
+//                    dto.setTrackingUidName(user.getNickName()+"("+user.getIdentifierToken()+")");
+//                }
+//            }
+//        }
         if (dto.getIntentionGrade() != null) {
             Field field = fieldProvider.findField(19L, "intentionGrade");
             if (field != null) {
@@ -3336,11 +3340,11 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setContentImgUrlList(urlList);
         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(tracking.getTrackingUid());
         if(members!=null && members.size()>0){
-            dto.setTrackingUidName(members.get(0).getContactName());
+            dto.setTrackingUidName(members.get(0).getContactName() + "(" + members.get(0).getContactToken() + ")");
         }else {
             User user = userProvider.findUserById(tracking.getTrackingUid());
             if(user!=null){
-                dto.setTrackingUidName(user.getNickName());
+                dto.setTrackingUidName(user.getNickName() + "(" + user.getIdentifierToken() + ")");
             }
         }
         return dto;
