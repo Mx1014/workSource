@@ -14325,5 +14325,88 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
+    @Override
+    public OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd) {
+
+        OrganizationDTO dto = null;
+
+        if(UserContext.getCurrentNamespaceId() == 2){
+            //标准版
+
+
+
+        }else {
+            //定制版
+
+            List<OrganizationCommunityDTO> organizationCommunities = organizationProvider.findOrganizationCommunityByCommunityId(cmd.getProjectId());
+
+            if(organizationCommunities != null && organizationCommunities.size() > 0){
+                Organization organization = organizationProvider.findOrganizationById(organizationCommunities.get(0).getOrganizationId());
+                dto = ConvertHelper.convert(organization, OrganizationDTO.class);
+            }
+        }
+
+        return dto;
+    }
+
+
+
+    @Override
+    public ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd) {
+
+        Long userId = cmd.getUserId();
+        if(userId == null){
+            userId = UserContext.currentUserId();
+        }
+
+        if(userId == null){
+            return null;
+        }
+
+        List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+        if(orgMembers == null || orgMembers.size() == 0){
+            return null;
+        }
+
+        List<OrganizationDTO> dtos = new ArrayList<>();
+        for (OrganizationMember member : orgMembers) {
+            // 如果机构不存在，则丢弃该成员对应的机构
+            Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+            if (org == null) {
+                LOGGER.error("The member is ignored for organization not found, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId());
+                continue;
+            }
+
+            if (OrganizationGroupType.fromCode(org.getGroupType()) != OrganizationGroupType.ENTERPRISE) {
+                LOGGER.error("The member is ignored for organization group type not matched, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId());
+                continue;
+            }
+
+            //Filter out the inactive organization add by sfyan 20130430
+            OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
+            if (orgStatus != OrganizationStatus.ACTIVE) {
+                LOGGER.error("The member is ignored for organization not active, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() + ", orgStatus" + orgStatus);
+                continue;
+            }
+
+            //Filter out the child organization add by lei.lv 20171124
+            Long parentId = org.getParentId();
+            if (parentId != 0L) {
+                LOGGER.error("The member's organization is child-enterprise, userId=" + userId
+                        + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() + ", orgStatus" + orgStatus);
+                continue;
+            }
+
+            dtos.add(ConvertHelper.convert(org, OrganizationDTO.class));
+        }
+
+        ListUserOrganizationsResponse response = new ListUserOrganizationsResponse();
+        response.setDtos(dtos);
+        return response;
+    }
+
 }
 

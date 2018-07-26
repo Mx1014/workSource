@@ -26,6 +26,7 @@ import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
@@ -722,6 +723,7 @@ public interface OrganizationService {
 	
 	void updateCustomerEntryInfo(EnterpriseCustomer customer, OrganizationAddress address);
 
+    OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd);
 
-
+	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
 }
