@@ -11419,18 +11419,18 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public String getAdjustRuleUrl(){
         String homeUrl = configurationProvider.getValue("home.url", "");
-        return homeUrl + "/mobile/static/oa_punch/adjust_rule.html";
+        return homeUrl + "/mobile/static/oa_punch/adjust_rule.html#sign_suffix";
     }
 
     public String processApprovalCategorieUrl(Long ownerId,Integer namespaceId){
         String homeUrl = configurationProvider.getValue("home.url", "");
-        return homeUrl + "/mobile/static/oa_punch/remaining_rule.html?ownerId=" + ownerId + "&namespaceId=" + namespaceId;
+        return homeUrl + "/mobile/static/oa_punch/remaining_rule.html?ownerId=" + ownerId + "&namespaceId=" + namespaceId +"#sign_suffix";
     }
     
     @Override
     public String processUserPunchRuleInfoUrl(Long ownerId,Long punchDate){
         String homeUrl = configurationProvider.getValue("home.url", "");
-        return homeUrl + "/mobile/static/oa_punch/punch_rule.html?ownerId=" + ownerId + "&punchDate=" + punchDate;
+        return homeUrl + "/mobile/static/oa_punch/punch_rule.html?ownerId=" + ownerId + "&punchDate=" + punchDate +"#sign_suffix";
     }
     @Override
     public GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd){
