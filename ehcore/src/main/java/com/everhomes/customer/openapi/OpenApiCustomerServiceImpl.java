@@ -142,6 +142,9 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
                     entryInfo.setAddressId(address.getId());
                     enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
                     customerService.updateOrganizationAddress(customer.getOrganizationId(),a.getBuildingId(),address.getId());
+                }else {
+                    throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST,
+                            (String.format("address is not exist,buildingName = %s ,addressName = %s",a.getBuildingName(),a.getApartmentName())));
                 }
             });
         }
@@ -214,6 +217,9 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
                     entryInfo.setAddressId(address.getId());
                     enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
                     customerService.updateOrganizationAddress(customer.getOrganizationId(),a.getBuildingId(),address.getId());
+                }else {
+                    throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST,
+                            (String.format("address is not exist,buildingName = %s ,addressName = %s",a.getBuildingName(),a.getApartmentName())));
                 }
             });
         }
