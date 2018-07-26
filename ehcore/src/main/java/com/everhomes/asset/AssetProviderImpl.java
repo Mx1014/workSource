@@ -98,6 +98,9 @@ public class AssetProviderImpl implements AssetProvider {
     
     @Autowired
     private UserProvider userProvider;
+    
+    @Autowired
+    private AssetService assetService;
 
     @Override
     public void creatAssetBill(AssetBill bill) {
@@ -3229,7 +3232,13 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType, byte deCouplingFlag) {
+    public void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag) {
+    	//卸载参数
+    	Long chargingStandardId = cmd.getChargingStandardId();
+    	Long ownerId = cmd.getOwnerId();
+    	String ownerType = cmd.getOwnerType();
+    	Long categoryId = cmd.getCategoryId();
+    	
         DSLContext context = getReadWriteContext();
         EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
         com.everhomes.server.schema.tables.EhPaymentFormula formula = Tables.EH_PAYMENT_FORMULA.as("formula");
@@ -3239,17 +3248,20 @@ public class AssetProviderImpl implements AssetProvider {
             context.delete(standard)
                     .where(standard.ID.eq(chargingStandardId))
                     .execute();
-            Long bro = context.select(standardScope.BROTHER_STANDARD_ID)
-                    .from(standardScope)
-                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
-                    .fetchOne(standardScope.BROTHER_STANDARD_ID);
-            if(bro!=null){
+//            Long bro = context.select(standardScope.BROTHER_STANDARD_ID)
+//                    .from(standardScope)
+//                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
+//                    .fetchOne(standardScope.BROTHER_STANDARD_ID);
+            //if(bro!=null){
+            //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
+            //只要做了删除动作，那么该项目下的配置全部解耦
                 context.update(standardScope)
                         .set(standardScope.BROTHER_STANDARD_ID,nullId)
                         .where(standardScope.OWNER_ID.eq(ownerId))
                         .and(standardScope.OWNER_TYPE.eq(ownerType))
+                        .and(standardScope.CATEGORY_ID.eq(categoryId))
                         .execute();
-            }
+            //}
             context.delete(standardScope)
                     .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
                     .execute();
@@ -3335,9 +3347,22 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             return nextGroupId;
         }else if(deCouplingFlag == (byte)0){
-            //添加
+        	//添加
             Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
-            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            if(cmd.getNamespaceId().equals(cmd.getOwnerId().intValue())){//ownerId为-1代表选择的是全部
+            	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            }else {
+            	//全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
+            	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+            	isProjectNavigateDefaultCmd.setModuleType(AssetModuleType.GROUPS.getCode());
+            	isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+            	isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
+            	isProjectNavigateDefaultCmd.setOwnerType(cmd.getOwnerType());
+            	IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetService.isProjectNavigateDefault(isProjectNavigateDefaultCmd);
+            	if(isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {//1：代表使用默认配置，那么需要同步
+                    InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            	}
+            }
             return nextGroupId;
         }
         return null;
@@ -4185,6 +4210,15 @@ public class AssetProviderImpl implements AssetProvider {
                 //added categoryId constraint
                 .and(itemScope.CATEGORY_ID.eq(categoryId))
                 .execute();
+        //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
+        //只要做了新增动作，那么该项目下的配置全部解耦
+        Long nullId = null;
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+            context.update(standardScope)
+                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
+                    .where(standardScope.OWNER_ID.eq(ownerId))
+                    .and(standardScope.OWNER_TYPE.eq(ownerType))
+                    .execute();
     }
 
     @Override

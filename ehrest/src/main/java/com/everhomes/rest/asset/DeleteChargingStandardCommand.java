@@ -20,6 +20,7 @@ public class DeleteChargingStandardCommand {
     @NotNull
     private Long chargingStandardId;
     private Integer namespaceId;
+    private Long categoryId;
 
     @Override
     public String toString() {
@@ -61,4 +62,12 @@ public class DeleteChargingStandardCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
 }
