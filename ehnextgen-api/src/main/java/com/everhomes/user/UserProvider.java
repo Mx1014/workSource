@@ -40,7 +40,7 @@ public interface UserProvider {
 
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
 
-    List<User> listUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
+    List<User> listAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
 
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
@@ -181,7 +181,7 @@ public interface UserProvider {
     UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
             String identifierToken, Integer namespaceId);
 
-    Integer countUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
+    Integer countAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
 
     String getNickNameByUid(Long creatorUid);
 }

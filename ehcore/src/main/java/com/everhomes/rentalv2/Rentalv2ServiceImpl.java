@@ -1217,6 +1217,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			response.getRentalSites().add(rSiteDTO);
 		}
 
+
 		return response;
 	}
 
@@ -1343,6 +1344,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setOwnerName(ownerCom.getName());
 				rSiteDTO.getOwners().add(dto);
 			}
+		}
+
+		//帮客户端处理一下 颠倒按月按周预约规则的位置
+		List<SitePriceRuleDTO> sitePriceRules = rSiteDTO.getSitePriceRules();
+		int i = 0;
+		for (;i<sitePriceRules.size();i++)
+			if (RentalType.MONTH.getCode() == sitePriceRules.get(i).getRentalType())
+				break;
+		int j = 0;
+		for (;j<sitePriceRules.size();j++)
+			if (RentalType.WEEK.getCode() == sitePriceRules.get(j).getRentalType())
+				break;
+		if (i<sitePriceRules.size() && j<sitePriceRules.size()){
+			sitePriceRules.add(sitePriceRules.get(i));
+			sitePriceRules.remove(i);
 		}
 
 		if (setShowPriceFlag) {
@@ -3526,12 +3542,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
 		List<Long> ids = result.stream().map(r->r.getId()).collect(Collectors.toList());
+
 		if (!ids.isEmpty()) {
-			List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
-			for (RentalCell c1 : result)
+		    Long minId = ids.stream().min(Long::compareTo).get();
+            Long maxId = ids.stream().max(Long::compareTo).get();
+			List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByRange(minId,maxId);
+			for (int i = 0;i<result.size();i++)
 				for (RentalCell c2 : dbCells) {
-					if (c2.getId().equals(c1.getId())) {
-						c1 = c2;
+					if (c2.getId().equals(result.get(i).getId())) {
+						result.set(i,c2);
 					}
 				}
 		}
@@ -8944,10 +8963,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}).collect(Collectors.toList());
 		if (collect.size() == 0)
 			return "";
-        Collections.sort(collect,(q,p)->q.getId().compareTo(p.getId()));
+        collect.sort(Comparator.comparing(EhRentalv2Cells::getId));
 		SimpleDateFormat beginTimeSF = new SimpleDateFormat("HH:mm");
 		SimpleDateFormat beginDateSF = new SimpleDateFormat("MM-dd");
 		SimpleDateFormat beginMonthSF = new SimpleDateFormat("yyyy-MM-dd");
-		return getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
+		String result = getSingleNumberUseDetail(resourceOrders.get(0).getRentalType(),collect,beginTimeSF,beginTimeSF,beginDateSF,beginMonthSF);
+		if (RentalType.HOUR.getCode() == resourceOrders.get(0).getRentalType())
+		    result = result.replaceAll("-","~");//弱智需求。。
+		return result;
 	}
 }

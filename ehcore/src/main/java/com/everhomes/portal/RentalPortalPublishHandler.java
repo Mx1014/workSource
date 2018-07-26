@@ -77,6 +77,7 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
         rentalResourceType.setUnauthVisible(rentalInstanceConfig.getUnauthVisible());
         rentalv2Provider.createRentalResourceType(rentalResourceType);
+        rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         return rentalResourceType;
     }
 
