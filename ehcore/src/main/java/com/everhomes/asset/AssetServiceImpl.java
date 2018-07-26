@@ -4996,7 +4996,7 @@ public class AssetServiceImpl implements AssetService {
         				//如果费项ID相等，并且费项名称相等，那么说明是费项本身，如果不相等，则说明是费项产生的滞纳金
         				//if(billItemDTO.getBillItemName() != null && billItemDTO.getBillItemName().equals(billItemDTO2.getBillItemName())) {
         				//修复issue-34464 新增一条收费项为“租金”的账单，再去修改收费项为“租金1”，再导出，发现金额错位了
-        				if(billItemDTO.getBillItemName() != null && !billItemDTO.getBillItemName().startsWith("滞纳金") && billItemDTO.getBillItemName().endsWith("滞纳金")){
+        				if(billItemDTO2.getBillItemName() != null && !billItemDTO2.getBillItemName().startsWith("滞纳金") && billItemDTO2.getBillItemName().contains("滞纳金")){
                             lateFineAmount = lateFineAmount.add(billItemDTO2.getAmountReceivable());
         					//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
         					long billId = Long.parseLong(dto.getBillId());
