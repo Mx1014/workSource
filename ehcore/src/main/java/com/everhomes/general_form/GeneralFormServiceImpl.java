@@ -117,25 +117,27 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 }
 
                 for (PostApprovalFormItem val : cmd.getValues()) {
-                    GeneralFormVal obj = new GeneralFormVal();
-                    //与表单信息一致
-                    obj.setNamespaceId(form.getNamespaceId());
-                    obj.setOrganizationId(form.getOrganizationId());
-                    obj.setOwnerId(form.getOwnerId());
-                    obj.setOwnerType(form.getOwnerType());
-                    obj.setModuleId(form.getModuleId());
-                    obj.setModuleType(form.getModuleType());
-                    obj.setFormOriginId(form.getFormOriginId());
-                    obj.setFormVersion(form.getFormVersion());
+                    if(StringUtils.isNotBlank(val.getFieldName()) && StringUtils.isNotBlank(val.getFieldType()) && StringUtils.isNotBlank(val.getFieldValue())) {
+                        GeneralFormVal obj = new GeneralFormVal();
+                        //与表单信息一致
+                        obj.setNamespaceId(form.getNamespaceId());
+                        obj.setOrganizationId(form.getOrganizationId());
+                        obj.setOwnerId(form.getOwnerId());
+                        obj.setOwnerType(form.getOwnerType());
+                        obj.setModuleId(form.getModuleId());
+                        obj.setModuleType(form.getModuleType());
+                        obj.setFormOriginId(form.getFormOriginId());
+                        obj.setFormVersion(form.getFormVersion());
 
-                    obj.setSourceType(cmd.getSourceType());
-                    obj.setSourceId(cmd.getSourceId());
-                    obj.setFieldName(val.getFieldName());
-                    obj.setFieldType(val.getFieldType());
-                    obj.setFieldValue(val.getFieldValue());
-                    generalFormValProvider.createGeneralFormVal(obj);
+                        obj.setSourceType(cmd.getSourceType());
+                        obj.setSourceId(cmd.getSourceId());
+                        obj.setFieldName(val.getFieldName());
+                        obj.setFieldType(val.getFieldType());
+                        obj.setFieldValue(val.getFieldValue());
+                        generalFormValProvider.createGeneralFormVal(obj);
 
-                    generalFormSearcher.feedDoc(obj);
+                        generalFormSearcher.feedDoc(obj);
+                    }
                 }
                 return null;
             });
