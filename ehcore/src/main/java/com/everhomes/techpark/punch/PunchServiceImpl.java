@@ -11434,6 +11434,12 @@ public class PunchServiceImpl implements PunchService {
     }
     @Override
     public GetUserPunchRuleInfoUrlResponse getUserPunchRuleInfoUrl(GetUserPunchRuleInfoUrlCommand cmd){
+        PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId(), UserContext.currentUserId());
+        if(null == pr){
+        	throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+					"have no punch rule");
+        }
     	return new GetUserPunchRuleInfoUrlResponse(processUserPunchRuleInfoUrl(cmd.getOwnerId(),cmd.getPunchDate()));
     }
     
