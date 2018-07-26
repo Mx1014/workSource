@@ -12,11 +12,7 @@ import com.everhomes.rest.address.ListBuildingsByKeywordAndNameSpaceCommand;
 import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
-import com.everhomes.rest.enterprise.GetAdminTypeCommand;
-import com.everhomes.rest.enterprise.GetAdminTypeResponse;
-import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
-import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
+import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.incubator.ApplyType;
@@ -1630,5 +1626,25 @@ public class OrganizationController extends ControllerBase {
         
         return response;
     }
+
+    /**
+     * <b>URL: /org/getAuthOrgByProjectIdAndAppId</b>
+     * <p>根据项目id和应用Id，查询管理公司</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping(value = "/org/getAuthOrgByProjectIdAndAppId")
+    @RestReturn(value = OrganizationDTO.class)
+    public RestResponse getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd) {
+
+        OrganizationDTO dto = organizationService.getAuthOrgByProjectIdAndAppId(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
 
 }
