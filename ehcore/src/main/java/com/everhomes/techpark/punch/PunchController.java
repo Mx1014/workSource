@@ -552,7 +552,7 @@ public class PunchController extends ControllerBase {
 	}
 
 	/**
-	 * <p>获取规则文案URL</p>
+	 * <p>获取请假页面查看详情URL</p>
 	 * <b>URL: /techpark/punch/getAdjustRuleUrl</b>
 	 */
 	@RequestMapping("getAdjustRuleUrl")
@@ -562,7 +562,7 @@ public class PunchController extends ControllerBase {
 	}
 
 	/**
-	 * <p>获取请假页面查看详情URL</p>
+	 * <p>获取规则文案URL</p>
 	 * <b>URL: /techpark/punch/getUserPunchRuleInfoUrl</b>
 	 */
 	@RequestMapping("getUserPunchRuleInfoUrl")
