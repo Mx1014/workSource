@@ -35,6 +35,7 @@ public class CreateApartmentCommand {
 	private Long sourceItemId;
 	private Byte decorateStatus;
 	private String orientation;
+	private Long  ownerId;
 
 	public Double getBuildArea() {
 		return buildArea;
@@ -138,6 +139,15 @@ public class CreateApartmentCommand {
 
 	public void setAreaSize(Double areaSize) {
 		this.areaSize = areaSize;
+	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override

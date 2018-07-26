@@ -422,14 +422,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
         Integer result = 0;
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
-        ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
+        ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getCategoryItemId());
         if (categoryItem != null) {
             dto.setCategoryItemName(categoryItem.getItemDisplayName());
         } else {
             dto.setCategoryItemName(null);
         }
 //        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
-        ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
+        ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getLevelItemId());
         if (levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
         } else {
