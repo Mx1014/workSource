@@ -489,6 +489,8 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
                 task.setOrganizationUid(user.getId());
             }
             task.setIfUseFeelist((byte)0);
+//      新增需求人企业Id用于物业线根据企业查询报修任务
+            task.setEnterpriseId(cmd.getEnterpriseId());
 
             pmTaskProvider.createTask(task);
             createFlowCase(task);
