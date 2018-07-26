@@ -494,4 +494,22 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
         return portalService.processServiceModuleAppDTO(app);
     }
+
+
+    @Override
+    public ServiceModuleAppAuthorization findServiceModuleAppAuthorization(Long projectId, Long appId) {
+        List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.PROJECT_ID.eq(projectId));
+                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID.eq(appId));
+                return query;
+            }
+        });
+
+        if(authorizations != null && authorizations.size() == 0){
+            return authorizations.get(0);
+        }
+        return null;
+    }
 }
