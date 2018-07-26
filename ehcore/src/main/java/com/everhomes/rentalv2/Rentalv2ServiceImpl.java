@@ -4864,7 +4864,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 							.append(parseTimeInterval(halfDayIntervals.get(0).getEndTime())).append(separate);
 					builder.append("下午:").append(parseTimeInterval(halfDayIntervals.get(1).getBeginTime())).append("-")
 							.append(parseTimeInterval(halfDayIntervals.get(1).getEndTime())).append(separate);
-					if (rentalType.equals(RentalType.THREETIMEADAY.getCode()) && halfDayIntervals.size()>2)
+					if (halfDayIntervals.size()>2)
 						builder.append("晚上:").append(parseTimeInterval(halfDayIntervals.get(2).getBeginTime())).append("-")
 								.append(parseTimeInterval(halfDayIntervals.get(2).getEndTime())).append(separate);
 					builder.deleteCharAt(builder.length()-1);
@@ -8862,7 +8862,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		closeDates.stream().anyMatch(r-> startTime == r.getCloseDate().getTime()))
 			return response;
 		//每日开放时间
-		RentalType[] iterators = {RentalType.HALFDAY,RentalType.THREETIMEADAY,RentalType.DAY,RentalType.WEEK,RentalType.MONTH};
+		RentalType[] iterators = {RentalType.HALFDAY,RentalType.DAY,RentalType.WEEK,RentalType.MONTH};
 		StringBuilder builder = new StringBuilder();
 		String separate = "注：";
 		for (RentalType iterator:iterators){
@@ -8871,7 +8871,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                 continue;
 			builder.append(separate);
 			switch (iterator){
-				case THREETIMEADAY:
 				case HALFDAY:
 					builder.append("按半天预订时每日开放时间为");
 					break;
