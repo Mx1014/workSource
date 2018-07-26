@@ -878,6 +878,19 @@ UPDATE eh_service_modules SET access_control_type=2 WHERE id IN(50700,52000,5300
 UPDATE eh_service_module_apps SET access_control_type=2 WHERE module_id IN(50700,52000,53000,59100,54000,55000,57000,59000,51400);
 UPDATE eh_launch_pad_items SET access_control_type=2 WHERE action_type IN(27,65,75,68,69,70,72,73,74);
 
+-- AUTHOR: 唐岑 20180726
+-- REMARK: issue-34164：在导入项目的excel模板中，新增经度，纬度，园区类型三个必填字段；添加导入出错提示
+set @id = (select MAX(id) from eh_locale_strings);
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10101', 'zh_CN', '经度不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10102', 'zh_CN', '经度填写格式错误');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10103', 'zh_CN', '经度不在中国经度范围（70-136）内');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10104', 'zh_CN', '纬度不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10105', 'zh_CN', '纬度填写格式错误');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10106', 'zh_CN', '纬度不在中国纬度范围（3-54）内');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10107', 'zh_CN', '园区分类不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10108', 'zh_CN', '园区分类内容填写错误');
+-- end
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
