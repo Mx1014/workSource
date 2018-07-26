@@ -181,7 +181,7 @@ public interface Rentalv2Provider {
 
 //	void updateRentalOrderPayorderMap(RentalOrderPayorderMap orderMap);
 
-	RentalCell getRentalCellById(Long cellId);
+	RentalCell getRentalCellById(Long cellId,Long rentalSiteId);
  
 	void deleteRentalCellsByResourceId(String resourceType, Long rentalSiteId);
 
@@ -195,7 +195,7 @@ public interface Rentalv2Provider {
 
 	List<RentalCell> getRentalCellsByRange(Long minId,Long maxId);
 
-	Double countRentalSiteBillBySiteRuleId(Long cellId);
+	Double countRentalSiteBillBySiteRuleId(Long cellId,Long rentalSiteId);
 
 	Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules);
 

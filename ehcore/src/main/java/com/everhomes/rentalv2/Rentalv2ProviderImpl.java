@@ -109,7 +109,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public void createRentalSiteRule(RentalCell rsr) {
-
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2Cells.class));
+		rsr.setCellId(rsr.getId());
+		rsr.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2CellsRecord record = ConvertHelper.convert(rsr,
 				EhRentalv2CellsRecord.class);
@@ -243,16 +246,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 		
 	@Override
-	public Double countRentalSiteBillBySiteRuleId(Long cellId) {
+	public Double countRentalSiteBillBySiteRuleId(Long cellId,Long rentalSiteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record1<BigDecimal> result = context.select(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT))
-			.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
-			.join(Tables.EH_RENTALV2_ORDERS)
-			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
-			.where(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(cellId))
-			.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()).
-					or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode())))
-			.fetchOne();
+				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
+				.join(Tables.EH_RENTALV2_ORDERS)
+				.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
+				.where(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(cellId))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()).
+						or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode())))
+				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
+				.fetchOne();
 
 		return result == null ? 0D : result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)) == null ? 0D: result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)).doubleValue();
 	}
@@ -1967,7 +1971,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	@Override
 	public void updateRentalSiteRule(RentalCell rsr) {
 		assert (rsr.getId() == null);
-
+		Long tmp = rsr.getId();
+		rsr.setId(rsr.getCellId());
+		rsr.setCellId(tmp);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
 		dao.update(rsr);
@@ -2175,12 +2181,19 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public RentalCell getRentalCellById(Long cellId) {
+	public RentalCell getRentalCellById(Long cellId,Long rentalSiteId) {
 		 
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
-		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
-		EhRentalv2Cells order = dao.findById(cellId);
-		return ConvertHelper.convert(order, RentalCell.class);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.eq(cellId).and(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId)));
+		EhRentalv2CellsRecord record = query.fetchOne();
+		if (record == null)
+			return null;
+		RentalCell cell = ConvertHelper.convert(record, RentalCell.class);
+		Long tmp = cell.getId();
+		cell.setId(cell.getCellId());
+		cell.setCellId(tmp);
+		return cell;
 	}
 
 	@Override
@@ -2190,9 +2203,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 //		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
 //		EhRentalv2Cells order = dao.findById(cellId);
 		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
-		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.in(cellIds));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.in(cellIds));
 
-		return query.fetch().map(r -> ConvertHelper.convert(r, RentalCell.class));
+		return query.fetch().map(r -> { //cell 的id不再作为绝对值 改为根据资源id区分的相对值
+			RentalCell convert = ConvertHelper.convert(r, RentalCell.class);
+			Long tmp = convert.getId();
+			convert.setId(convert.getCellId());
+			convert.setCellId(tmp);
+			return convert;
+		});
 	}
 
 	@Override
@@ -2200,9 +2219,15 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
-		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.ge(minId));
-		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.le(maxId));
-		return query.fetch().map(r -> ConvertHelper.convert(r, RentalCell.class));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.ge(minId));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.le(maxId));
+		return query.fetch().map(r -> {
+			RentalCell convert = ConvertHelper.convert(r, RentalCell.class);
+			Long tmp = convert.getId();
+			convert.setId(convert.getCellId());
+			convert.setCellId(tmp);
+			return convert;
+		});
 	}
 
 	@Override
