@@ -36,6 +36,8 @@ public class UpdateApartmentCommand {
 	private String orientation;
 	private String apartmentFloor;
 
+	private Long ownerId;
+
 	public String getApartmentFloor() {
 		return apartmentFloor;
 	}
@@ -138,6 +140,14 @@ public class UpdateApartmentCommand {
 
 	public void setAreaSize(Double areaSize) {
 		this.areaSize = areaSize;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override

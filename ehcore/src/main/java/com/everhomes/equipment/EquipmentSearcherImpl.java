@@ -148,6 +148,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
         }
+        if(cmd.getOwnerId()!=null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        }
 
         if(cmd.getStatus() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
@@ -312,6 +315,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("namespaceId", equipment.getNamespaceId());
+            b.field("ownerId", equipment.getOwnerId());
             b.field("targetId", equipment.getTargetId());
             b.field("targetType", equipment.getTargetType());
             b.field("status", equipment.getStatus());
