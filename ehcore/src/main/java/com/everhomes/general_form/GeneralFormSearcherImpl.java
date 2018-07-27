@@ -53,12 +53,10 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
     @Override
     public void bulkUpdate(List<GeneralFormVal> generalFormVals) {
         BulkRequestBuilder brb = getClient().prepareBulk();
-        for (GeneralFormVal generalFormVal : generalFormVals) {
-            XContentBuilder source = createDoc(generalFormVal);
-            if(null != source) {
-                LOGGER.info("id:" + generalFormVal.getId());
-                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(generalFormVal.getId().toString()).source(source));
-            }
+        XContentBuilder source = createDoc(generalFormVals);
+        if(null != source) {
+            LOGGER.info("id:" + generalFormVals.iterator().next().getId());
+            brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(generalFormVals.iterator().next().getId().toString()).source(source));
         }
         if (brb.numberOfActions() > 0) {
             brb.execute().actionGet();
@@ -68,9 +66,9 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
 
     @Override
-    public void feedDoc(GeneralFormVal generalFormVal) {
-        XContentBuilder source = createDoc(generalFormVal);
-        feedDoc(generalFormVal.getId().toString(), source);
+    public void feedDoc(List<GeneralFormVal> generalFormVals) {
+        XContentBuilder source = createDoc(generalFormVals);
+        feedDoc(generalFormVals.iterator().next().getId().toString(), source);
     }
 
     @Override

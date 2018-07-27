@@ -116,6 +116,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                     generalFormProvider.updateGeneralForm(form);
                 }
 
+                List<GeneralFormVal> objs = new ArrayList<>();
                 for (PostApprovalFormItem val : cmd.getValues()) {
                     if(StringUtils.isNotBlank(val.getFieldName()) && StringUtils.isNotBlank(val.getFieldType()) && StringUtils.isNotBlank(val.getFieldValue())) {
                         GeneralFormVal obj = new GeneralFormVal();
@@ -135,9 +136,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                         obj.setFieldType(val.getFieldType());
                         obj.setFieldValue(val.getFieldValue());
                         generalFormValProvider.createGeneralFormVal(obj);
-
-                        generalFormSearcher.feedDoc(obj);
+                        objs.add(obj);
                     }
+                    generalFormSearcher.feedDoc(objs);
                 }
                 return null;
             });
@@ -700,8 +701,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         if(cmd.getModuleId() != null && cmd.getNamespaceId() != null) {
             request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
         }else{
-            LOGGER.error("getDefaultFieldsByModuleId false: All param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", organizationId: " + cmd.getOrganizationId() + ", ownerId: " +
-                        cmd.getOwnerId() + "ownerType: " + cmd.getOwnerType() + ", moduleId: " + cmd.getModuleId());
+            LOGGER.error("getDefaultFieldsByModuleId false: All param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", moduleId: " + cmd.getModuleId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"All param cannot be null.");
         }
 

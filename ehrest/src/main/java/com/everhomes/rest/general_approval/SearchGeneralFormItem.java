@@ -1,5 +1,7 @@
 package com.everhomes.rest.general_approval;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *     <li>fieldType: 字段类型 {@link GeneralFormFieldType}</li>
@@ -15,8 +17,8 @@ public class SearchGeneralFormItem {
     private String fieldName;
     private String fieldValue;
     private String displayName;
-    private GeneralFormFieldAttribute fieldAttribute;
-    private SearchGeneralFormFieldExtra fieldExtra;
+    private String fieldAttribute;
+    private String fieldExtra;//"{\"start\":11111111, \"end\":22222}"
 
     public GeneralFormFieldType getFieldType() {
         return fieldType;
@@ -50,31 +52,24 @@ public class SearchGeneralFormItem {
         this.displayName = displayName;
     }
 
-    public GeneralFormFieldAttribute getFieldAttribute() {
+    public String getFieldAttribute() {
         return fieldAttribute;
     }
 
-    public void setFieldAttribute(GeneralFormFieldAttribute fieldAttribute) {
+    public void setFieldAttribute(String fieldAttribute) {
         this.fieldAttribute = fieldAttribute;
     }
 
-    public SearchGeneralFormFieldExtra getFieldExtra() {
+    public String getFieldExtra() {
         return fieldExtra;
     }
 
-    public void setFieldExtra(SearchGeneralFormFieldExtra fieldExtra) {
+    public void setFieldExtra(String fieldExtra) {
         this.fieldExtra = fieldExtra;
     }
 
     @Override
     public String toString() {
-        return "SearchGeneralFormItem{" +
-                "fieldType=" + fieldType +
-                ", fieldName='" + fieldName + '\'' +
-                ", fieldValue='" + fieldValue + '\'' +
-                ", displayName='" + displayName + '\'' +
-                ", fieldAttribute=" + fieldAttribute +
-                ", fieldExtra=" + fieldExtra +
-                '}';
+        return StringHelper.toJsonString(this);
     }
 }

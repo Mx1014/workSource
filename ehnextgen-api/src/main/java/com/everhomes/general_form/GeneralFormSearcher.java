@@ -9,7 +9,7 @@ import java.util.List;
 public interface GeneralFormSearcher {
     void deleteById(Long id);
     void bulkUpdate(List<GeneralFormVal> generalFormVal);
-    void feedDoc(GeneralFormVal generalFormVal);
+    void feedDoc(List<GeneralFormVal> generalFormVals);
     void syncFromDb();
     ListGeneralFormValResponse queryGeneralForm(SearchFormValsCommand cmd);
 }
