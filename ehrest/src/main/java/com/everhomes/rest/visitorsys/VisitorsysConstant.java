@@ -77,5 +77,5 @@ public class VisitorsysConstant {
     public static final long COMMUNITY_MANAGER_MODULE_ID = 42100 ;//园区访客管理模块Id
     public static final long ENTERPRISE_MANAGER_MODULE_ID = 52200 ;//企业访客管理模块Id
 
-    public static final int ERROR_HAS_UPDATE_VISITOR = 071701;//此访客记录已被处理
+    public static final int ERROR_HAS_UPDATE_VISITOR = 71701;//此访客记录已被处理
 }
