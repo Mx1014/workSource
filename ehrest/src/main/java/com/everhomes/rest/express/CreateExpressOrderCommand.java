@@ -36,9 +36,9 @@ import com.everhomes.util.StringHelper;
  * <li>packageType: 封装类型，参考{@link com.everhomes.rest.express.ExpressPackageType}</li>
  * <li>invoiceHead: 发票抬头</li>
  * <li>invoiceFlag: 需要发票，参考{@link com.everhomes.rest.express.ExpressInvoiceFlagType}</li>
- * <li>expressType: 0:物品 1:文件 2:其他  国贸快递专用</li>
- * <li>expressWay: 0:陆运 1:空运  国贸快递专用</li>
- * <li>expressTarget: 0:同城 1:外埠  国贸快递专用</li>
+ * <li>expressType: 0:物品 1:文件 2:其他  国贸快递专用 {@link com.everhomes.rest.express.ExpressTypeType}</li>
+ * <li>expressWay: 0:陆运 1:空运  国贸快递专用 {@link com.everhomes.rest.express.ExpressWayType}</li>
+ * <li>expressTarget: 0:同城 1:外埠  国贸快递专用 {@link com.everhomes.rest.express.ExpressTargetType}</li>
  * <li>expressRemark: 备注 国贸快递专用</li>
  * </ul>
  */
