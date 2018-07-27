@@ -28,6 +28,8 @@ import com.everhomes.rest.remind.CreateOrUpdateRemindCategoryCommand;
 import com.everhomes.rest.remind.CreateOrUpdateRemindCommand;
 import com.everhomes.rest.remind.DeleteRemindCategoryCommand;
 import com.everhomes.rest.remind.DeleteRemindCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdResponse;
 import com.everhomes.rest.remind.GetRemindCategoryColorsResponse;
 import com.everhomes.rest.remind.GetRemindCategoryCommand;
 import com.everhomes.rest.remind.GetRemindCommand;
@@ -991,6 +993,20 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             return;
         }
         remindProvider.deleteRemind(remind);
+    }
+
+    @Override
+    public GetCurrentUserDetailIdResponse getCurrentUserContactSimpleInfo(GetCurrentUserDetailIdCommand cmd) {
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        if (detail == null) {
+            return null;
+        }
+        GetCurrentUserDetailIdResponse response = new GetCurrentUserDetailIdResponse();
+        response.setUserId(detail.getTargetId());
+        response.setDetailId(detail.getId());
+        response.setContactName(detail.getContactName());
+        response.setContactToken(detail.getContactToken());
+        return response;
     }
 
     @Override

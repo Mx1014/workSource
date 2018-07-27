@@ -246,6 +246,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 //		企业名称和楼栋门牌
 		if(null != dto.getEnterpriseId() && dto.getEnterpriseId() > 0){
+			dto.setEnterpriseName("");
+			dto.setEnterpriseAddress("");
 			Organization org = organizationProvider.findOrganizationById(dto.getEnterpriseId());
 			if(null != org){
 				dto.setEnterpriseName(org.getName());
@@ -263,8 +265,15 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 		}
 
-		if (null != dto.getTaskCategoryId())
-			dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel" + dto.getTaskCategoryId(),"0"));
+
+		if (null != flowCase.getModuleType()){
+			if(FlowModuleType.NO_MODULE.getCode().equals(flowCase.getModuleType())){
+				dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel.6","0"));
+			}else if(FlowModuleType.SUGGESTION_MODULE.getCode().equals(flowCase.getModuleType())){
+				dto.setFeeModel(configurationProvider.getValue(dto.getNamespaceId(),"pmtask.feeModel.9","0"));
+			}
+		}
+
 
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;

@@ -179,7 +179,7 @@ public interface AssetProvider {
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
-    void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType,byte deCouplingFlag);
+    void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag);
 
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 

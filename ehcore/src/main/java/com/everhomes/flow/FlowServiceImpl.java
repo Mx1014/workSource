@@ -3703,7 +3703,7 @@ public class FlowServiceImpl implements FlowService {
                     flowEventLogProvider.createFlowEventLogs(flowCaseState.getLogs());
                     flowEventLogProvider.updateFlowEventLogs(flowCaseState.getUpdateLogs());
 
-                    flowEvaluateProvider.createFlowEvaluate(ctx.getFlowEvas());
+                    flowEvaluateProvider.createFlowEvaluate(flowCaseState.getFlowEvas());
                 } else if (ctx.getStepType() != FlowStepType.NO_STEP) {
                     throw new FlowStepBusyException("already step by others, flowCaseId = " + flowCase.getId());
                 } else {
