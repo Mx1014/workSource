@@ -2,13 +2,11 @@ package com.everhomes.general_form;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.rest.general_approval.ListGeneralFormValResponse;
-import com.everhomes.rest.general_approval.SearchFormValsCommand;
-import com.everhomes.rest.general_approval.SearchGeneralFormItem;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -22,6 +20,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,38 +98,48 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
     @Override
     public ListGeneralFormValResponse queryGeneralForm(SearchFormValsCommand cmd) {
-
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
-
-
 
         QueryBuilder qb = null;
 
-
         FilterBuilder fb = null;
         FilterBuilder nfb = null;
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         fb = FilterBuilders.termFilter("formOriginId", cmd.getFormOriginId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("formVersion", cmd.getFormVersion()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
 
-        if(cmd.getDisplayFields().size() > 0){
-            List<String> displayFieldNames = cmd.getDisplayFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
-            List<String> displayFieldValues = cmd.getDisplayFields().stream().map(SearchGeneralFormItem::getFieldValue).collect(Collectors.toList());
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("fieldName", displayFieldNames));
-            qb = QueryBuilders.multiMatchQuery(displayFieldValues).field("fieldValues",1.2f);
-        }
-        if(cmd.getFilteredFields().size() > 0){
-            List<String> filteredFieldNames = cmd.getFilteredFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
-            nfb = FilterBuilders.notFilter(FilterBuilders.termsFilter("fieldName", filteredFieldNames));
-            fb = FilterBuilders.notFilter(nfb);
-        }
+        // if(cmd.getDisplayFields().size() > 0){
+        //     List<String> displayFieldNames = cmd.getDisplayFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
+        //     List<String> displayFieldValues = cmd.getDisplayFields().stream().map(SearchGeneralFormItem::getFieldValue).collect(Collectors.toList());
+        //     fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("fieldName", displayFieldNames));
+        //     qb = QueryBuilders.multiMatchQuery(displayFieldValues).field("fieldValues",1.2f);
+        // }
+        // if(cmd.getFilteredFields().size() > 0){
+        //     List<String> filteredFieldNames = cmd.getFilteredFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
+        //     nfb = FilterBuilders.notFilter(FilterBuilders.termsFilter("fieldName", filteredFieldNames));
+        //     fb = FilterBuilders.notFilter(nfb);
+        // }
 
         if(cmd.getConditionFields().size() > 0){
-
             for(SearchGeneralFormItem item : cmd.getConditionFields()){
                 if(StringUtils.isNotBlank(item.getFieldValue())) {
-                    FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                    GeneralFormFieldType type = GeneralFormFieldType.fromCode(item.getFieldValue());
+                    switch (type) {
+                        case NUMBER_TEXT:
+                        case INTEGER_TEXT:
+                        case DROP_BOX:
+                            FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                            break;
+                        case SINGLE_LINE_TEXT:
+                        case MULTI_LINE_TEXT:
+
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
@@ -163,12 +172,29 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         }
 
         List<GeneralFormValDTO> dtos = new ArrayList<>();
-        List<GeneralFormVal> vals = generalFormProvider.listGeneralFormItemByIds(ids);
-        for(GeneralFormVal val : vals){
-            dtos.add(ConvertHelper.convert(val, GeneralFormValDTO.class));
-        }
 
-        response.setFieldVals(dtos);
+        for (SearchHit hit : rsp.getHits().getHits()) {
+            Object sourceIdObj = hit.getSource().get("sourceId");
+            Object ownerIdObj = hit.getSource().get("ownerId");
+            Object moduleIdObj = hit.getSource().get("moduleId");
+            if (sourceIdObj != null && ownerIdObj != null) {
+                // GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(UserContext.getCurrentNamespaceId(), Long.valueOf(sourceIdObj.toString()), Long.valueOf(ownerIdObj.toString()));
+                Long sourceId = Long.valueOf(sourceIdObj.toString());
+                Long moduleId = Long.valueOf(moduleIdObj.toString());
+                Long ownerId = Long.valueOf(ownerIdObj.toString());
+                List<GeneralFormVal> vals = generalFormProvider.getGeneralFormVal(namespaceId, sourceId, moduleId, ownerId);
+
+                for (GeneralFormVal val : vals) {
+                    GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
+
+                }
+            }
+        }
+        // for(GeneralFormVal val : vals) {
+        //     dtos.add(ConvertHelper.convert(val, GeneralFormValDTO.class));
+        // }
+
+        // response.setFieldVals(dtos);
 
 
         return response;
@@ -180,26 +206,29 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
     }
 
 
-    private XContentBuilder createDoc(GeneralFormVal generalFormVal) {
+    private XContentBuilder createDoc(List<GeneralFormVal> generalFormVal) {
         try {
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
+            
+            if (generalFormVal.size() > 0) {
+                GeneralFormVal first = generalFormVal.iterator().next();
+                // builder.field("id", first.getId());
+                builder.field("organizationId", first.getOrganizationId());
+                builder.field("namespaceId", first.getNamespaceId());
+                builder.field("ownerId", first.getOwnerId());
+                builder.field("ownerType", first.getOwnerType());
+                builder.field("moduleId", first.getModuleId());
+                builder.field("moduleType", first.getModuleType());
+                builder.field("sourceId", first.getSourceId());
+                builder.field("sourceType", first.getSourceType());
+                builder.field("formOriginId", first.getFormOriginId());
+                builder.field("formVersion", first.getFormVersion());
+            }
 
-            builder.field("id", generalFormVal.getId());
-            builder.field("organizationId", generalFormVal.getOrganizationId());
-            builder.field("namespaceId", generalFormVal.getNamespaceId());
-            builder.field("ownerId", generalFormVal.getOwnerId());
-            builder.field("ownerType", generalFormVal.getOwnerType());
-            builder.field("moduleId", generalFormVal.getModuleId());
-            builder.field("moduleType", generalFormVal.getModuleType());
-            builder.field("sourceId", generalFormVal.getSourceId());
-            builder.field("sourceType", generalFormVal.getSourceType());
-            builder.field("formOriginId", generalFormVal.getFormOriginId());
-            builder.field("formVersion", generalFormVal.getFormVersion());
-            builder.field("fieldName", generalFormVal.getFieldName());
-            builder.field("fieldType", generalFormVal.getFieldType());
-            builder.field("fieldValue", generalFormVal.getFieldValue());
-            builder.field("valExtra", generalFormVal.getCreateTime());
+            for (GeneralFormVal val : generalFormVal) {
+                builder.field(val.getFieldName(), val.getFieldValue());
+            }
 
             builder.endObject();
             return builder;

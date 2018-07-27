@@ -15,17 +15,11 @@ import java.util.List;
 public class ListGeneralFormValResponse {
     private Long nextPageAnchor;
 
-    @ItemType(GeneralFormValDTO.class)
-    private List<GeneralFormValDTO> fieldVals;
+    @ItemType(GeneralFormValList.class)
+    private List<GeneralFormValList> fieldVals;
 
     public ListGeneralFormValResponse() {
 
-    }
-
-    public ListGeneralFormValResponse(Long nextPageAnchor, List<GeneralFormValDTO> fieldVals) {
-        super();
-        this.nextPageAnchor = nextPageAnchor;
-        this.fieldVals = fieldVals;
     }
 
     public Long getNextPageAnchor() {
@@ -36,11 +30,11 @@ public class ListGeneralFormValResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<GeneralFormValDTO> getFieldVals() {
+    public List<GeneralFormValList> getFieldVals() {
         return fieldVals;
     }
 
-    public void setFieldVals(List<GeneralFormValDTO> fieldVals) {
+    public void setFieldVals(List<GeneralFormValList> fieldVals) {
         this.fieldVals = fieldVals;
     }
 
