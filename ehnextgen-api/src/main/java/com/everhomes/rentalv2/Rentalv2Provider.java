@@ -181,7 +181,7 @@ public interface Rentalv2Provider {
 
 //	void updateRentalOrderPayorderMap(RentalOrderPayorderMap orderMap);
 
-	RentalCell getRentalCellById(Long cellId,Long rentalSiteId,Byte rentalType);
+	RentalCell getRentalCellById(Long cellId,Long rentalSiteId,Byte rentalType,String resourceType);
  
 	void deleteRentalCellsByResourceId(String resourceType, Long rentalSiteId);
 
@@ -195,7 +195,7 @@ public interface Rentalv2Provider {
 
 	List<RentalCell> getRentalCellsByRange(Long minId,Long maxId);
 
-	Double countRentalSiteBillBySiteRuleId(Long cellId,Long rentalSiteId,Byte rentalType);
+	Double countRentalSiteBillBySiteRuleId(Long cellId,RentalResource rentalResource,Byte rentalType);
 
 	Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules);
 
@@ -203,6 +203,8 @@ public interface Rentalv2Provider {
 
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
+
+	boolean findCellClosedByTimeInterval(String resourceType,Long rentalSiteId,Long startTime,Long endTime);
 
 	RentalResourceType findRentalResourceTypeById(Long resourceTypeId);
 

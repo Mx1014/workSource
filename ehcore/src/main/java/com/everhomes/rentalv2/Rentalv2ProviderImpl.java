@@ -246,7 +246,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 		
 	@Override
-	public Double countRentalSiteBillBySiteRuleId(Long cellId,Long rentalSiteId,Byte rentalType) {
+	public Double countRentalSiteBillBySiteRuleId(Long cellId,RentalResource rentalResource,Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record1<BigDecimal> result = context.select(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT))
 				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
@@ -255,7 +255,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.where(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(cellId))
 				.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()).
 						or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode())))
-				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
+				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
+				.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()))
 				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_TYPE.eq(rentalType))
 				.fetchOne();
 
@@ -411,6 +412,19 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean findCellClosedByTimeInterval(String resourceType, Long rentalSiteId,Long startTime,Long endTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
+				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
+				.and((Tables.EH_RENTALV2_CELLS.BEGIN_TIME.le(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.END_TIME.gt(new Timestamp(startTime))))
+						.or(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.lt(new Timestamp(endTime)).and(Tables.EH_RENTALV2_CELLS.END_TIME.ge(new Timestamp(endTime)))))
+				.fetchAny();
+		return record != null;
 	}
 
 	private Date[] calculateBeginEndDate(RentalResource rentalResource, RentalCell rentalCell) {
@@ -2182,12 +2196,12 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public RentalCell getRentalCellById(Long cellId,Long rentalSiteId,Byte rentalType) {
+	public RentalCell getRentalCellById(Long cellId,Long rentalSiteId,Byte rentalType,String resourceType) {
 		 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
 		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.eq(cellId).and(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
-		.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType)));
+		.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType)).and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType)));
 		EhRentalv2CellsRecord record = query.fetchOne();
 		if (record == null)
 			return null;
