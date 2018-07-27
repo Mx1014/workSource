@@ -49,7 +49,6 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
             dto = ConvertHelper.convert(forms.get(0), GeneralFormDTO.class);
         }else {
             dto = ConvertHelper.convert(getDefaultGeneralForm(cmd.getSourceType()), GeneralFormDTO.class);
-            dto.setFormOriginId(null);
         }
         return dto;
     }
