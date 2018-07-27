@@ -1,13 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.visitorsys;
 
-// @formatter:off
-
-import com.everhomes.util.StringHelper;
-
-import java.sql.Timestamp;
-import java.util.List;package com.everhomes.rest.visitorsys;
-
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
