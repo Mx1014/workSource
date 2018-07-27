@@ -8,6 +8,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
@@ -15,6 +16,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +24,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "ActivitySignup")
+@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP)
 public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
+
+    public static final String GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP = "ActivitySignup";
 
     @Autowired
     private GeneralFormProvider generalFormProvider;
@@ -36,12 +40,16 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-        List<GeneralForm> forms = getGeneralForum(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType());
+        if (StringUtils.isBlank(cmd.getSourceType())) {
+            cmd.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+        }
+        List<GeneralForm> forms = getGeneralForum(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType());
         GeneralFormDTO dto = new GeneralFormDTO();
         if (!CollectionUtils.isEmpty(forms)) {
             dto = ConvertHelper.convert(forms.get(0), GeneralFormDTO.class);
         }else {
-            dto = ConvertHelper.convert(getDefaultGeneralForm(cmd.getOwnerType()), GeneralFormDTO.class);
+            dto = ConvertHelper.convert(getDefaultGeneralForm(cmd.getSourceType()), GeneralFormDTO.class);
+            dto.setFormOriginId(null);
         }
         return dto;
     }
@@ -77,6 +85,7 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
                         query.addConditions(Tables.EH_GENERAL_FORMS.NAMESPACE_ID.eq(namespaceId));
                         query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(ownerId));
                         query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
+                        query.addConditions(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
                         return query;
                     }
                 });
