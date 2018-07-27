@@ -1,9 +1,11 @@
 // @formatter:off
 package com.everhomes.rest.visitorsys;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -14,6 +16,8 @@ import java.sql.Timestamp;
 public class BaseVisitorEnterpriseDTO {
     private Long enterpriseId;
     private String enterpriseName;
+    @ItemType(VisitorSysBuilding.class)
+    private List<VisitorSysBuilding> buildings;
 
     public BaseVisitorEnterpriseDTO(Long enterpriseId, String enterpriseName) {
         this.enterpriseId = enterpriseId;
@@ -21,6 +25,14 @@ public class BaseVisitorEnterpriseDTO {
     }
 
     public BaseVisitorEnterpriseDTO() {
+    }
+
+    public List<VisitorSysBuilding> getBuildings() {
+        return buildings;
+    }
+
+    public void setBuildings(List<VisitorSysBuilding> buildings) {
+        this.buildings = buildings;
     }
 
     public Long getEnterpriseId() {
