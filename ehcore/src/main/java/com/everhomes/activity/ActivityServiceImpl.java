@@ -3,6 +3,7 @@ package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
@@ -58,6 +59,8 @@ import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
@@ -265,6 +268,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
     @Value("${server.contextPath:}")
     private String contextPath;
+
+    @Autowired
+    private GeneralFormService generalFormService;
 
     @Autowired
     private SensitiveWordService sensitiveWordService;
@@ -499,6 +505,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
 //	            activityProvider.createActivityRoster(roster);
                 createActivityRoster(roster);
+
+                //报名对接表单，添加表单值数据
+                addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
+                addGeneralFormValuesCommand.setSourceId(roster.getId());
+                addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                addGeneralFormValuesCommand.setValues(cmd.getValues());
+                this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
 
                 //启动定时器，当时间超过设定时间时，取消订单。 条件与前面设置订单号、订单开始时间一致。放在此处是因为定时器需要rosterId   add by yanjun 20170516
                 if (activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0) {
@@ -1130,6 +1144,15 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	            
 	            //createActivityRoster(roster);
 	            activityProvider.createActivityRoster(roster);
+
+                //报名对接表单，添加表单值数据
+                addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
+                addGeneralFormValuesCommand.setSourceId(roster.getId());
+                addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                addGeneralFormValuesCommand.setValues(cmd.getValues());
+                this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+
 	            activityProvider.updateActivity(activity);
 
 				LOGGER.info("manualSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
@@ -1212,14 +1235,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         roster.setLotteryFlag((byte) 0);
         roster.setPhone(cmd.getPhone());
-        roster.setRealName(cmd.getRealName());
-        roster.setGender(cmd.getGender());
-        roster.setCommunityName(cmd.getCommunityName());
-        roster.setOrganizationName(cmd.getOrganizationName());
-        roster.setPosition(cmd.getPosition());
-        roster.setLeaderFlag(cmd.getLeaderFlag());
+        roster.setRealName(user.getNickName());
+        roster.setGender(user.getGender());
         roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
-        roster.setEmail(cmd.getEmail());
         roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
 
         return roster;
@@ -1919,7 +1937,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     		roster.setRealName(signupInfoDTO.getRealName());
     	}
     	roster.setGender(signupInfoDTO.getGender());
-    	roster.setCommunityName(signupInfoDTO.getCommunityName());
+    	//不需要补充以下数据,通过表单传入.
+//    	roster.setCommunityName(signupInfoDTO.getCommunityName());
 
     	//产品沟通不默认设置公司和职位，因为小区场景默认是没有公司和职位的  add by yanjun 20180515
 //    	if(roster.getOrganizationName() == null){
@@ -1928,10 +1947,10 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //    	if(roster.getPosition() == null){
 //    		roster.setPosition(signupInfoDTO.getPosition());
 //    	}
-    	if(roster.getEmail() == null){
-    		roster.setEmail(signupInfoDTO.getEmail());
-    	}
-    	roster.setLeaderFlag(signupInfoDTO.getLeaderFlag());
+//    	if(roster.getEmail() == null){
+//    		roster.setEmail(signupInfoDTO.getEmail());
+//    	}
+//    	roster.setLeaderFlag(signupInfoDTO.getLeaderFlag());
     	roster.setSourceFlag(ActivityRosterSourceFlag.SELF.getCode());
 	}
     
