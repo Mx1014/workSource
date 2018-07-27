@@ -1760,7 +1760,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		processCells(rs, cmd.getRentalType());
 
-		this.validateRentalBill(cmd.getRules(), rs, rule);
+		this.validateRentalBill(cmd.getRules(), rs, rule, cmd.getRentalType());
 
 		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
 
@@ -1819,7 +1819,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode() + rs.getResourceType() + rs.getId())
 					.enter(() -> {
 						// this.groupProvider.updateGroup(group);
-						this.validateRentalBill(cmd.getRules(), rs, rule);
+						this.validateRentalBill(cmd.getRules(), rs, rule, cmd.getRentalType());
 
 						return this.rentalv2Provider.createRentalOrder(rentalBill);
 					});
@@ -1869,7 +1869,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private void createResourceOrder(List<RentalBillRuleDTO> rules, RentalOrder rentalBill, Map<Long, BigDecimal> cellAmountMap) {
 		for (RentalBillRuleDTO siteRule : rules) {
 
-			RentalCell rentalCell = findRentalSiteRuleById(siteRule.getRuleId(),rentalBill.getRentalResourceId());
+			RentalCell rentalCell = findRentalSiteRuleById(siteRule.getRuleId(),rentalBill.getRentalResourceId(),rentalBill.getRentalType());
 
 			if (null == rentalCell) {
 				continue;
@@ -1924,7 +1924,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter siteRule");
 			}
 
-			RentalCell rentalCell = findRentalSiteRuleById(siteRule.getRuleId(),rs.getId());
+			RentalCell rentalCell = findRentalSiteRuleById(siteRule.getRuleId(),rs.getId(),rentalBill.getRentalType());
 			if (null == rentalCell) {
 				continue;
 			}
@@ -2090,7 +2090,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter siteRule");
 			}
 
-			RentalCell rentalCell = findRentalSiteRuleById(siteRule.getRuleId(),rs.getId());
+			RentalCell rentalCell = findRentalSiteRuleById(siteRule.getRuleId(),rs.getId(),rentalBill.getRentalType());
 			if (null == rentalCell) {
 				continue;
 			}
@@ -2186,7 +2186,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	private void setUseDetailStr(List<RentalBillRuleDTO> rules, RentalResource rs, RentalOrder rentalBill) {
 		//拼装使用详情
-		List<RentalCell> rentalCells = rules.stream().map(r-> findRentalSiteRuleById(r.getRuleId(),rs.getId())).collect(Collectors.toList());
+		List<RentalCell> rentalCells = rules.stream().map(r-> findRentalSiteRuleById(r.getRuleId(),rs.getId(),rentalBill.getRentalType())).
+                collect(Collectors.toList());
 		List<String> resourceNumbers = new ArrayList<>();
 		if(rs.getAutoAssign() == NormalFlag.NEED.getCode())
 			resourceNumbers = rentalCells.stream().map(r->r.getResourceNumber()).distinct().collect(Collectors.toList());
@@ -2459,7 +2460,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				.enter(() -> {
 
 					//验证订单下的资源是否足够
-					this.validateRentalBill(rules, rs, rule);
+					this.validateRentalBill(rules, rs, rule,order.getRentalType());
 
 					//本订单状态置为成功,
 //			order.setStatus(SiteBillStatus.SUCCESS.getCode());
@@ -2806,7 +2807,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public void validateRentalBill(List<RentalBillRuleDTO> ruleDTOs, RentalResource rs,
-								   RentalDefaultRule rule) {
+								   RentalDefaultRule rule,Byte rentalType) {
 
 		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(rs.getResourceType(),
 				PriceRuleType.RESOURCE.getCode(), rs.getId());
@@ -2816,7 +2817,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid param rules");
 			}
-			RentalCell cell = findRentalSiteRuleById(dto.getRuleId(),rs.getId());
+			RentalCell cell = findRentalSiteRuleById(dto.getRuleId(),rs.getId(),rentalType);
 			if (null == cell) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid param rules");
@@ -4180,7 +4181,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						bill.getRentalResourceId())
 						.enter(() -> {
 							List<RentalBillRuleDTO> rules = getBillRules(bill);
-							this.validateRentalBill(rules, rs, rule);
+							this.validateRentalBill(rules, rs, rule,bill.getRentalType());
 							return null;
 						});
 
@@ -6385,7 +6386,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		Double rentedCount;
 		if (priceRules.size() == 1) {
 			// 如果只有一种规则，那就是当前单元格的规则，则按原来的方式计算
-			rentedCount = rentalv2Provider.countRentalSiteBillBySiteRuleId(rentalCell.getId(),rs.getId());
+			rentedCount = rentalv2Provider.countRentalSiteBillBySiteRuleId(rentalCell.getId(),rs.getId(),rentalCell.getRentalType());
 		} else {
 			// 如果超过一种规则，则需要计算其它规则下是否已经占用了此资源（前方高能，即将进入一个极其复杂的方法）
 			rentedCount = rentalv2Provider.countRentalSiteBillOfAllScene(rs, rentalCell, priceRules);
@@ -6942,7 +6943,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			cell.setPricePackageId(cmd.getSitePackageId());
 			cell.setResourceType(cmd.getResourceType());
 			cell.setUserPriceType(cmd.getUserPriceType());
-			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId(),cmd.getResourceId());
+			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId(),cmd.getResourceId(),cell.getRentalType());
 			if (null == dbCell)
 				this.rentalv2Provider.createRentalSiteRule(cell);
 			else
@@ -6974,7 +6975,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//创建单元格
 		processCells(rs, cmd.getRentalType());
 
-		RentalCell choseRSR = findRentalSiteRuleById(cmd.getRuleId(),rs.getId());
+		RentalCell choseRSR = findRentalSiteRuleById(cmd.getRuleId(),rs.getId(), cmd.getRentalType());
 		if (null == choseRSR) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid ruleId parameter in the command");
@@ -7134,11 +7135,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 ////		}
 //	}
 
-	private RentalCell findRentalSiteRuleById(Long ruleId,Long resourceId) {
+	private RentalCell findRentalSiteRuleById(Long ruleId,Long resourceId,Byte rentalType) {
 
 		for (RentalCell cell : cellList.get()) {
 			if (cell.getId().equals(ruleId)) {
-				RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId(),resourceId);
+				RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId(),resourceId,rentalType);
 				if (null != dbCell)
 					cell = dbCell;
 				return cell;
@@ -8326,7 +8327,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		for (int i = 1; i <= cmd.getCellCount().intValue(); i++) {
 
-			RentalCell cell = findRentalSiteRuleById(ruleId + i,rs.getId());
+			RentalCell cell = findRentalSiteRuleById(ruleId + i,rs.getId(), bill.getRentalType());
 			if (null == cell) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid param rules");
@@ -8455,7 +8456,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		for (int i = 1; i <= cellCount.intValue(); i++) {
 
-			RentalCell cell = findRentalSiteRuleById(ruleId + i,rs.getId());
+			RentalCell cell = findRentalSiteRuleById(ruleId + i,rs.getId(), bill.getRentalType());
 			if (null == cell) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid param rules");
@@ -8500,7 +8501,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					.enter(() -> {
 						for (int i = 1; i <= cellCount.intValue(); i++) {
 
-							RentalCell cell = findRentalSiteRuleById(ruleId + i,rs.getId());
+							RentalCell cell = findRentalSiteRuleById(ruleId + i,rs.getId(), bill.getRentalType());
 							if (null == cell) {
 								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 										"Invalid param rules");

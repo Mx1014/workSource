@@ -246,7 +246,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 		
 	@Override
-	public Double countRentalSiteBillBySiteRuleId(Long cellId,Long rentalSiteId) {
+	public Double countRentalSiteBillBySiteRuleId(Long cellId,Long rentalSiteId,Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record1<BigDecimal> result = context.select(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT))
 				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
@@ -256,6 +256,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()).
 						or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode())))
 				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
+				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_TYPE.eq(rentalType))
 				.fetchOne();
 
 		return result == null ? 0D : result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)) == null ? 0D: result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)).doubleValue();
@@ -2181,11 +2182,12 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public RentalCell getRentalCellById(Long cellId,Long rentalSiteId) {
+	public RentalCell getRentalCellById(Long cellId,Long rentalSiteId,Byte rentalType) {
 		 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
-		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.eq(cellId).and(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId)));
+		query.addConditions(Tables.EH_RENTALV2_CELLS.CELL_ID.eq(cellId).and(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
+		.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType)));
 		EhRentalv2CellsRecord record = query.fetchOne();
 		if (record == null)
 			return null;
