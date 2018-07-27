@@ -697,8 +697,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
         GeneralFormTemplate request;
 
-        if(StringUtils.isNotBlank(cmd.getOwnerType()) && cmd.getModuleId() != null && cmd.getNamespaceId() != null &&
-                cmd.getOrganizationId() != null && cmd.getOwnerId() != null) {
+        if(cmd.getModuleId() != null && cmd.getNamespaceId() != null) {
             request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
         }else{
             LOGGER.error("getDefaultFieldsByModuleId false: All param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", organizationId: " + cmd.getOrganizationId() + ", ownerId: " +
