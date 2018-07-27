@@ -15,6 +15,7 @@ public class RentalSiteFileDTO {
     private java.lang.String uri;
     private java.lang.String url;
     private java.lang.String name;
+    private java.lang.String size;
 
     public java.lang.Long getId() {
         return id;
@@ -51,6 +52,14 @@ public class RentalSiteFileDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
     }
 
     @Override

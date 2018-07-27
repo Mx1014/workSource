@@ -6779,6 +6779,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				file.setOwnerId(resource.getId());
 				file.setUri(dto.getUri());
 				file.setName(dto.getName());
+				file.setSize(dto.getSize());
 				file.setResourceType(resource.getResourceType());
 				this.rentalv2Provider.createRentalSiteFile(file);
 			}
@@ -6793,6 +6794,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				file.setOwnerId(order.getId());
 				file.setUri(dto.getUri());
 				file.setName(dto.getName());
+				file.setSize(dto.getSize());
 				file.setResourceType(order.getResourceType());
 				this.rentalv2Provider.createRentalSiteFile(file);
 			}
