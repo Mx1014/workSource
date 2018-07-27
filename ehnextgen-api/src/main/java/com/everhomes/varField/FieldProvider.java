@@ -30,7 +30,7 @@ public interface FieldProvider {
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long ownerId,Long communityId, String moduleName, Long fieldId, String displayName);
-    ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId, Long communityId, String moduleName, Long fieldId, Byte businessValue);
+    ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId,Long ownerId,String ownerType, Long communityId, String moduleName, Long fieldId, Byte businessValue);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long fieldId);
 
     List<FieldItem> listFieldItems(List<Long> fieldIds);

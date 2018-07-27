@@ -139,7 +139,7 @@ public interface EquipmentProvider {
 
 
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
-		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Long offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
+		List<String> targetType, List<Long> targetId,Long ownerId,String owneType, List<Long> executeStandardIds, List<Long> reviewStandardIds, Long offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime);
 
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
@@ -147,11 +147,11 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionTasks> listTaskByIds(List<Long> ids);
 
-	TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime,Integer namespaceId);
+	TasksStatData statDaysEquipmentTasks(Long targetId, String targetType,Long ownerId,String ownerType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime,Integer namespaceId);
 	ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime,Integer namespaceId);
 	List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime);
 
-	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> planIds, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
+	List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> planIds, String targetType, Long targetId,Long ownerId,String ownerType, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime);
 
 	void createEquipmentModelCommunityMap(EquipmentModelCommunityMap map);
 

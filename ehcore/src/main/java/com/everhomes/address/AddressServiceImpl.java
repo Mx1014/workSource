@@ -60,6 +60,7 @@ import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.address.ApartmentAttachmentDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.ApartmentFloorDTO;
+import com.everhomes.rest.address.BetchDisclaimAddressCommand;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.ClaimedAddressInfo;
@@ -155,6 +156,7 @@ import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.collect.Sets;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record2;
@@ -171,7 +173,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -833,7 +834,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         //表eh_addresses和表eh_organization_addresses进行联查
         SelectQuery<Record> query = context.select().from(Tables.EH_ADDRESSES).getQuery();
-        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES,JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
+        query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
         if(cmd.getBuildingName() != null){

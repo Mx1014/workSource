@@ -132,6 +132,9 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
         }
+        if(cmd.getOwnerId()!=null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        }
 
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

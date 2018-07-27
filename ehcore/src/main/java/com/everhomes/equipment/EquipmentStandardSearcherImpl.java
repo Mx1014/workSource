@@ -154,6 +154,10 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 //            }
             fb = FilterBuilders.andFilter(fb, tfb);
         }
+
+        if(cmd.getOwnerId()!=null)
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+
         if(cmd.getStatus() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
 

@@ -587,7 +587,7 @@ public class FieldServiceImpl implements FieldService {
             } else if (namespaceFlag) {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                 if (scopeItems != null && scopeItems.size() < 1) {
-                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId());
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), null, cmd.getCategoryId());
     			}
                 //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
                 /*if (scopeItems != null && scopeItems.size() < 1) {
@@ -598,7 +598,7 @@ public class FieldServiceImpl implements FieldService {
     			}*/
                 //查询表单初始化的数据
                 if (scopeItems != null && scopeItems.size() < 1) {
-                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null);
+                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null,0, null, null);
     			}
 
             } else {
@@ -1314,6 +1314,11 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName, String sheetName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+        // get params ownerId and ownerType
+        PropertyDescriptor dtoDes = new PropertyDescriptor("ownerId", dto.getClass());
+        Long ownerId = (Long)dtoDes.getReadMethod().invoke(dto);
+        PropertyDescriptor dtoDesOwnerType = new PropertyDescriptor("ownerType", dto.getClass());
+        String  ownerType = (String)dtoDes.getReadMethod().invoke(dto);
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method readMethod = pd.getReadMethod();
@@ -1394,7 +1399,7 @@ public class FieldServiceImpl implements FieldService {
                 long l = Long.parseLong(invoke.toString());
                 ScopeFieldItem item = null;
                 if(params.getFieldParamType().equals("customizationSelect")) {
-                    item = fieldProvider.findScopeFieldItemByBusinessValue(namespaceId, communityId, moduleName,field.getFieldId(), (byte)l);
+                    item = fieldProvider.findScopeFieldItemByBusinessValue(namespaceId,ownerId,ownerType,communityId, moduleName,field.getFieldId(), (byte)l);
                 } else {
                     item = findScopeFieldItemByFieldItemId(namespaceId, field.getOwnerId(), communityId, l);
                 }

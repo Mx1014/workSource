@@ -980,7 +980,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> planIds, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
+    public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> planIds, String targetType, Long targetId,Long ownerId,String ownerType, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
         List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -988,6 +988,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.DELAY.getCode()));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+
+        if (ownerId != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+        }
+        if (StringUtils.isNullOrEmpty(ownerType)) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+        }
 
         if (inspectionCategoryId != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
@@ -2490,7 +2497,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     @Cacheable(value = "listEquipmentInspectionTasksUseCache", key = "{#cacheKey}", unless = "#result.size() == 0")
     @Override
     public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
-                                                                               List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds,
+                                                                               List<String> targetType, List<Long> targetId,Long ownerId,String ownerType, List<Long> executeStandardIds, List<Long> reviewStandardIds,
                                                                                Long offset, Integer pageSize, String cacheKey, Byte adminFlag,Timestamp lastSyncTime) {
         long startTime = System.currentTimeMillis();
         List<EquipmentInspectionTasks> result = new ArrayList<>();
@@ -2512,6 +2519,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (targetId != null && targetId.size() > 0)
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetId));
 
+        if (ownerId != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+        }
+        if (StringUtils.isNullOrEmpty(ownerType)) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+        }
         if (inspectionCategoryId != null) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
         }
@@ -2624,8 +2637,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId,
-                                                Timestamp startTime, Timestamp endTime,Integer namespaceId) {
+    public TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long ownerId, String ownerType, Long inspectionCategoryId,
+                                                Timestamp startTime, Timestamp endTime, Integer namespaceId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         TasksStatData resp = new TasksStatData();
@@ -2669,6 +2682,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         if (!StringUtils.isNullOrEmpty(targetType)) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
+        }
+
+        if (ownerId != null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+        }
+        if (!StringUtils.isNullOrEmpty(ownerType)) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
         }
 
         if (inspectionCategoryId != null && inspectionCategoryId != 0L) {

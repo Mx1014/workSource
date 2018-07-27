@@ -3292,13 +3292,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking tracking, Long communityId) {
         CustomerTrackingDTO dto = ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(tracking.getCustomerId());
         if (dto.getTrackingType() != null) {
 //        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
 
             FieldGroup group = fieldProvider.findGroupByGroupLogicName("com.everhomes.customer.CustomerTracking");
             if (group != null) {
                 Field field = fieldProvider.findField(ModuleName.ENTERPRISE_CUSTOMER.getName(), "trackingType", group.getPath());
-                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), field.getId(), dto.getTrackingType().byteValue());
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(),customer.getOwnerId(),customer.getOwnerType(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), field.getId(), dto.getTrackingType().byteValue());
                 if (item != null) {
                     dto.setTrackingTypeName(item.getItemDisplayName());
                 }
@@ -3319,7 +3320,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (dto.getIntentionGrade() != null) {
             Field field = fieldProvider.findField(19L, "intentionGrade");
             if (field != null) {
-                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), field.getId(), dto.getIntentionGrade().byteValue());
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByBusinessValue(tracking.getNamespaceId(),customer.getOwnerId(),customer.getOwnerType(), communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), field.getId(), dto.getIntentionGrade().byteValue());
                 if (item != null) {
                     dto.setIntentionGradeName(item.getItemDisplayName());
                 }

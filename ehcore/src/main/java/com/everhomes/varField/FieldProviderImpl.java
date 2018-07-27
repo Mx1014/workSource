@@ -1,5 +1,6 @@
 package com.everhomes.varField;
 
+import ch.qos.logback.core.util.StringCollectionUtil;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -44,6 +45,7 @@ import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
+import org.apache.poi.util.StringUtil;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -52,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -836,7 +839,7 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId, Long communityId, String moduleName, Long fieldId, Byte businessValue) {
+    public ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId,Long ownerId,String ownerType, Long communityId, String moduleName, Long fieldId, Byte businessValue) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<ScopeFieldItem> item = new ArrayList<>();
         SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
@@ -846,6 +849,12 @@ public class FieldProviderImpl implements FieldProvider {
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.BUSINESS_VALUE.eq(businessValue));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
 
+        if(ownerId!=null){
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
+        }
+        if(org.apache.commons.lang.StringUtils.isNotBlank(ownerType)){
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_TYPE.eq(ownerType));
+        }
         if(communityId != null) {
             query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.eq(communityId));
         }

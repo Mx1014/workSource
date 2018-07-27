@@ -3482,7 +3482,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentInspectionTasks> tasks = null;
 		if (isAdmin) {
 			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), null, cmd.getTargetType(),
-					cmd.getTargetId(), offset, pageSize, AdminFlag.YES.getCode(), startTime);
+					cmd.getTargetId(),cmd.getOwnerId(),cmd.getOwnerType(), offset, pageSize, AdminFlag.YES.getCode(), startTime);
 		}
 		if (!isAdmin) {
 			List<Long> planIds = new ArrayList<>();
@@ -3494,7 +3494,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), planIds, cmd.getTargetType(),
-					cmd.getTargetId(), offset, pageSize, AdminFlag.NO.getCode(), startTime);
+					cmd.getTargetId(),cmd.getOwnerId(),cmd.getOwnerType(), offset, pageSize, AdminFlag.NO.getCode(), startTime);
 		}
 
 		if (tasks.size() > pageSize) {
@@ -3560,7 +3560,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		List<EquipmentInspectionTasks> allTasks = null;
 		if (isAdmin) {
-			allTasks = getAdminEquipmentInspectionTasks(cmd, lastSyncTime, response, pageSize, offset, targetTypes, targetIds);
+			allTasks = getAdminEquipmentInspectionTasks(cmd, lastSyncTime, response, pageSize, offset, targetTypes, targetIds,cmd.getOwnerId(),cmd.getOwnerType());
 		}
 		if (!isAdmin) {
 			allTasks = getNoAdminEquipmentInspectionTasks(cmd, lastSyncTime, response, pageSize, offset, targetTypes, targetIds, userId);
@@ -3630,42 +3630,48 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 
 		String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
-				executePlanIds, reviewPlanIds, offset, pageSize, lastSyncTime, userId);
+				executePlanIds, reviewPlanIds, offset, pageSize, lastSyncTime, userId,cmd.getOwnerId(),cmd.getOwnerType());
 		LOGGER.info("listEquipmentInspectionTasks is not Admin  cacheKey = {}", cacheKey);
 		allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-				targetTypes, targetIds, executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(), lastSyncTime);
+				targetTypes, targetIds, cmd.getOwnerId(),cmd.getOwnerType(),executePlanIds, reviewPlanIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode(), lastSyncTime);
 		if (cmd.getTaskStatus().size() > 1) {
-			populateTaskStatusCount(cmd, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response, targetTypes, targetIds);
+			populateTaskStatusCount(cmd, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response, targetTypes, targetIds,cmd.getOwnerId(),cmd.getOwnerType());
 		} else {
-			populateReviewTaskStatusCount(cmd, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response, targetTypes, targetIds);
+			populateReviewTaskStatusCount(cmd, executePlanIds, reviewPlanIds, AdminFlag.NO.getCode(), response, targetTypes, targetIds,cmd.getOwnerId(),cmd.getOwnerType());
 		}
 		return allTasks;
 	}
 
-	private List<EquipmentInspectionTasks> getAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Long offset, List<String> targetTypes, List<Long> targetIds) {
+	private List<EquipmentInspectionTasks> getAdminEquipmentInspectionTasks(ListEquipmentTasksCommand cmd, Timestamp lastSyncTime, ListEquipmentTasksResponse response, int pageSize, Long offset, List<String> targetTypes, List<Long> targetIds,Long ownerId,String ownerType) {
 		List<EquipmentInspectionTasks> allTasks;
 		String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-				targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L);
+				targetTypes, targetIds, null, null, offset, pageSize, lastSyncTime, 0L,ownerId,ownerType);
 		LOGGER.info("listEquipmentInspectionTasks is  Admin  cacheKey = {}", cacheKey);
 
 		allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-				targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(), lastSyncTime);
+				targetTypes, targetIds,cmd.getOwnerId(),cmd.getOwnerType(), null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode(), lastSyncTime);
 
 		if (cmd.getTaskStatus().size() > 1) {
-			populateTaskStatusCount(cmd, null, null, AdminFlag.YES.getCode(), response, targetTypes, targetIds);
+			populateTaskStatusCount(cmd, null, null, AdminFlag.YES.getCode(), response, targetTypes, targetIds,cmd.getOwnerId(),cmd.getOwnerType());
 		} else {
-			populateReviewTaskStatusCount(cmd, null, null, AdminFlag.YES.getCode(), response, targetTypes, targetIds);
+			populateReviewTaskStatusCount(cmd, null, null, AdminFlag.YES.getCode(), response, targetTypes, targetIds,cmd.getOwnerId(),cmd.getOwnerType());
 		}
 		return allTasks;
 	}
 
-	private void populateReviewTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte isAdmin, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
+	private void populateReviewTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte isAdmin, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds,Long ownerId,String ownerType) {
 		equipmentProvider.populateReviewTaskStatusCount(executePlanIds, reviewPlanIds, isAdmin, response, (loc, query) -> {
 			if (targetTypes.size() > 0)
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
 
 			if (targetIds.size() > 0)
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+			if (ownerId!=null)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+
+			if (StringUtils.isNotBlank(ownerType))
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 
 			if (cmd.getInspectionCategoryId() != null) {
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
@@ -3674,13 +3680,19 @@ public class EquipmentServiceImpl implements EquipmentService {
 		});
 	}
 
-	private void populateTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds) {
+	private void populateTaskStatusCount(ListEquipmentTasksCommand cmd, List<Long> executePlanIds, List<Long> reviewPlanIds, Byte adminFlag, ListEquipmentTasksResponse response, List<String> targetTypes, List<Long> targetIds,Long ownerId,String ownerType) {
 		equipmentProvider.populateTodayTaskStatusCount(executePlanIds, reviewPlanIds, adminFlag, response, (loc, query) -> {
 			if (targetTypes.size() > 0)
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetTypes));
 
 			if (targetIds.size() > 0)
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetIds));
+
+			if (ownerId != null)
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+
+			if (StringUtils.isNotBlank(ownerType))
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 
 			if (cmd.getInspectionCategoryId() != null) {
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(cmd.getInspectionCategoryId()));
@@ -3726,7 +3738,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 	private String convertListEquipmentInspectionTasksCache(List<Byte> taskStatus, Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
-															List<Long> executeStandardIds, List<Long> reviewStandardIds, Long offset, Integer pageSize, Timestamp lastSyncTime, Long userId) {
+															List<Long> executeStandardIds, List<Long> reviewStandardIds, Long offset, Integer pageSize, Timestamp lastSyncTime, Long userId,Long ownerId,String ownerType) {
 
 		StringBuilder sb = new StringBuilder();
 		if (inspectionCategoryId == null) {
@@ -3760,6 +3772,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (lastSyncTime != null) {
 			sb.append(lastSyncTime.toString());
 		}
+		if(ownerId!=null)
+			sb.append(ownerId.toString());
+		if(StringUtils.isNotBlank(ownerType))
+			sb.append(ownerType);
 
 		return sb.toString();
 	}
@@ -4841,7 +4857,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		cal.setTime(new Timestamp(cmd.getDateTime()));
 
-		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),cmd.getOwnerId(),cmd.getOwnerType(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0), cmd.getNamespaceId());
 		//增加统计维修中和维修总数
 		equipmentProvider.statInMaintanceTaskCount(stat, getDayBegin(cal, 0), getDayEnd(cal, 0), cmd);
@@ -4864,7 +4880,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		Calendar endDay = Calendar.getInstance();
-		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),cmd.getOwnerId(),cmd.getOwnerType(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(endDay, 0), cmd.getNamespaceId());
 		//增加统计维修中和维修总数
 //		StatTodayEquipmentTasksCommand command = ConvertHelper.convert(cmd, StatTodayEquipmentTasksCommand.class);
@@ -4894,7 +4910,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if (cmd.getEndTime() != null) {
 			end = new Timestamp((cmd.getEndTime()));
 		}
-		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),cmd.getOwnerId(),cmd.getOwnerType(),
 				cmd.getInspectionCategoryId(), begin, end, cmd.getNamespaceId());
 		StatTodayEquipmentTasksCommand command = ConvertHelper.convert(cmd, StatTodayEquipmentTasksCommand.class);
 		equipmentProvider.statInMaintanceTaskCount(statTasks, begin, end, command);
@@ -5323,7 +5339,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public FieldItemDTO findScopeFieldItemByFieldItemId(findScopeFieldItemCommand cmd) {
-		return ConvertHelper.convert(fieldProvider.findScopeFieldItemByBusinessValue(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getFieldId(), cmd.getBusinessValue()), FieldItemDTO.class);
+		return ConvertHelper.convert(fieldProvider.findScopeFieldItemByBusinessValue(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getFieldId(), cmd.getBusinessValue()), FieldItemDTO.class);
 	}
 
 
