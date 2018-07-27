@@ -661,6 +661,18 @@ UPDATE eh_service_modules SET path = '/200/20000/20400/204021' WHERE id = 204021
 update eh_service_module_apps set module_control_type = 'unlimit_control' where module_id = 41300;
 UPDATE eh_service_modules set module_control_type = 'unlimit_control' where id = 41300;
 
+
+UPDATE eh_web_menus SET path = '/40000020' WHERE id = 40000020;
+UPDATE eh_web_menus SET path = '/40000030' WHERE id = 40000030;
+UPDATE eh_web_menus SET path = '/40000040' WHERE id = 40000040;
+UPDATE eh_web_menus SET path = '/40000050' WHERE id = 40000050;
+UPDATE eh_web_menus SET path = '/40000060' WHERE id = 40000060;
+
+UPDATE eh_web_menus SET path = '/40000030/47000000' WHERE id = 47000000;
+
+UPDATE eh_web_menus set path = '/40000010/53000000/50010000' WHERE id = 50010000;
+UPDATE eh_web_menus set path = '/40000010/53000000/52000000' WHERE id = 52000000;
+
 -- end
 
 -- AUTHOR:jiarui 20180625
