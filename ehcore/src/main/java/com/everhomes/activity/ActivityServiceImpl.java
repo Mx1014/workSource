@@ -4,6 +4,8 @@ package com.everhomes.activity;
 import ch.hsr.geohash.GeoHash;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
@@ -59,6 +61,7 @@ import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -116,6 +119,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -271,6 +275,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
     @Autowired
     private GeneralFormService generalFormService;
+
+    @Autowired
+    private GeneralFormValProvider generalFormValProvider;
 
     @Autowired
     private SensitiveWordService sensitiveWordService;
@@ -1195,7 +1202,11 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		}else {
 			signupInfoDTO.setCreateFlag((byte)0);
 		}
-		
+        GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
+		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
+		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+		List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
+		signupInfoDTO.setValues(values);
 		if(activityRoster.getCreateTime() != null){
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
@@ -1262,29 +1273,31 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	public SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd) {
 		ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()+cmd.getId()).enter(()-> {
 	        return (ActivityRoster)dbProvider.execute((status) -> {
-	        	ActivityRoster roster = convertToRoster(cmd);
+	        	ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
 	        	if (cmd.getCheckinFlag().byteValue() != roster.getCheckinFlag().byteValue()) {
 	        		updateActivityCheckin(roster, cmd.getCheckinFlag());
 	        		roster.setCheckinFlag(cmd.getCheckinFlag());
 	        		roster.setCheckinUid(UserContext.current().getUser().getId());
 	    		}
 	        	activityProvider.updateRoster(roster);
+                List<GeneralFormVal> list = this.generalFormValProvider.queryGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,roster.getId());
+                if (CollectionUtils.isEmpty(list)) {
+                    LOGGER.error("GeneralFormVal is null.");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "GeneralFormVal is null.");
+                }
+                Long formOriginId = list.get(0).getFormOriginId();
+                this.generalFormValProvider.deleteGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,roster.getId());
+                addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                addGeneralFormValuesCommand.setGeneralFormId(formOriginId);
+                addGeneralFormValuesCommand.setSourceId(roster.getId());
+                addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                addGeneralFormValuesCommand.setValues(cmd.getValues());
+                this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
 	        	return roster;
 	        });
 		}).first();
 		return convertActivityRoster(activityRoster, null);
-	}
-
-	private ActivityRoster convertToRoster(UpdateSignupInfoCommand cmd) {
-		ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
-		roster.setRealName(cmd.getRealName());
-		roster.setGender(cmd.getGender());
-		roster.setCommunityName(cmd.getCommunityName());
-		roster.setOrganizationName(cmd.getOrganizationName());
-		roster.setPosition(cmd.getPosition());
-		roster.setLeaderFlag(cmd.getLeaderFlag());
-		roster.setEmail(cmd.getEmail());
-		return roster;
 	}
 
 	private void updateActivityCheckin(ActivityRoster roster, Byte toCheckinFlag) {
@@ -1788,8 +1801,6 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	
 	private SignupInfoDTO convertActivityRosterForExcel(ActivityRoster roster, Activity activity) {
 		SignupInfoDTO signupInfoDTO = convertActivityRoster(roster, activity);
-		signupInfoDTO.setGenderText(UserGender.fromCode(signupInfoDTO.getGender())==null?UserGender.UNDISCLOSURED.getText():UserGender.fromCode(signupInfoDTO.getGender()).getText());
-		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag())==null?TrueOrFalseFlag.FALSE.getText():TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
 		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType())==null?UserAuthFlag.NOT_REGISTER.getText():UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());
 		signupInfoDTO.setSourceFlagText(ActivityRosterSourceFlag.fromCode(signupInfoDTO.getSourceFlag()).getText());
 		//signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag())==null?ConfirmStatus.UN_CONFIRMED.getText():ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
@@ -1933,10 +1944,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     	if(roster.getPhone() == null){
     		roster.setPhone(signupInfoDTO.getPhone());
     	}
-    	if(roster.getRealName() == null){
-    		roster.setRealName(signupInfoDTO.getRealName());
-    	}
-    	roster.setGender(signupInfoDTO.getGender());
+    	roster.setGender(user.getGender());
     	//不需要补充以下数据,通过表单传入.
 //    	roster.setCommunityName(signupInfoDTO.getCommunityName());
 
@@ -1960,35 +1968,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     	if (userIdentifiers != null && userIdentifiers.size() > 0) {
     		signupInfoDTO.setPhone(userIdentifiers.get(0).getIdentifierToken());
 		}
-    	signupInfoDTO.setGender(user.getGender());
-    	signupInfoDTO.setLeaderFlag(user.getExecutiveTag()==null?TrueOrFalseFlag.FALSE.getCode():user.getExecutiveTag());
     	signupInfoDTO.setNickName(user.getNickName());
-    	
-    	OrganizationMember organizationMember = findAnyOrganizationMember(namespaceId, user.getId());
-    	if (organizationMember != null) {
-    		signupInfoDTO.setRealName(organizationMember.getContactName());
-    		Organization organization = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
-    		//如果是职位，取之
-			if (OrganizationGroupType.fromCode(organizationMember.getGroupType()) == OrganizationGroupType.JOB_POSITION) {
-				if (organization != null) {
-					signupInfoDTO.setPosition(organization.getName());
-				}
-			}
-			//找出公司
-			Long organizationId = Long.parseLong(organization.getPath().split("/")[1]);
-			Organization rootOrganization = organizationProvider.findOrganizationById(organizationId);
-			if (rootOrganization != null) {
-				signupInfoDTO.setOrganizationName(rootOrganization.getName());
-				//找出园区
-				OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(rootOrganization.getId());
-				if (organizationCommunityRequest != null) {
-					Community community = communityProvider.findCommunityById(organizationCommunityRequest.getCommunityId());
-					if (community != null) {
-						signupInfoDTO.setCommunityName(community.getName());
-					}
-				}
-			}
-		}
     	
     	return signupInfoDTO;
     }
