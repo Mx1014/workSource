@@ -4027,6 +4027,7 @@ public class AssetProviderImpl implements AssetProvider {
             PaymentChargingItemScope scope = scopes.get(j);
             dto.setChargingItemName(scope.getProjectLevelName());
             dto.setChargingItemId(scope.getChargingItemId());
+            dto.setTaxRate(scope.getTaxRate());//增加税率
             list.add(dto);
         }
         return list;
