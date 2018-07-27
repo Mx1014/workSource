@@ -543,6 +543,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public ListGeneralFormResponse listGeneralForms(ListGeneralFormsCommand cmd) {
 
+        //CrossShardListingLocator locator = new CrossShardListingLocator();
         List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
                 Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
                     @Override
@@ -807,6 +808,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
 
     }
+
+
 
 
 

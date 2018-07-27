@@ -10,6 +10,7 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -29,7 +30,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -121,6 +124,15 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
             List<String> filteredFieldNames = cmd.getFilteredFields().stream().map(SearchGeneralFormItem::getFieldName).collect(Collectors.toList());
             nfb = FilterBuilders.notFilter(FilterBuilders.termsFilter("fieldName", filteredFieldNames));
             fb = FilterBuilders.notFilter(nfb);
+        }
+
+        if(cmd.getConditionFields().size() > 0){
+
+            for(SearchGeneralFormItem item : cmd.getConditionFields()){
+                if(StringUtils.isNotBlank(item.getFieldValue())) {
+                    FilterBuilders.andFilter(fb, FilterBuilders.termsFilter(item.getFieldName(), item.getFieldValue()));
+                }
+            }
         }
         qb = QueryBuilders.filteredQuery(qb, fb);
 

@@ -1,6 +1,8 @@
 package com.everhomes.rest.general_approval;
 
 
+import com.everhomes.util.StringHelper;
+
 import java.util.List;
 
 /**
@@ -21,6 +23,7 @@ public class SearchFormValsCommand {
     private Long ownerType;
     private List<SearchGeneralFormItem> filteredFields;
     private List<SearchGeneralFormItem> displayFields;
+    private List<SearchGeneralFormItem> conditionFields;
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -72,6 +75,14 @@ public class SearchFormValsCommand {
         this.displayFields = displayFields;
     }
 
+    public List<SearchGeneralFormItem> getConditionFields() {
+        return conditionFields;
+    }
+
+    public void setConditionFields(List<SearchGeneralFormItem> conditionFields) {
+        this.conditionFields = conditionFields;
+    }
+
     public Long getPageAnchor() {
         return pageAnchor;
     }
@@ -90,13 +101,6 @@ public class SearchFormValsCommand {
 
     @Override
     public String toString() {
-        return "SearchFormValsCommand{" +
-                "formOriginId=" + formOriginId +
-                ", formVersion=" + formVersion +
-                ", filteredFields=" + filteredFields +
-                ", displayFields=" + displayFields +
-                ", pageAnchor=" + pageAnchor +
-                ", pageSize=" + pageSize +
-                '}';
+        return StringHelper.toJsonString(this);
     }
 }
