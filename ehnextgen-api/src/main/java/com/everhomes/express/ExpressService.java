@@ -3,6 +3,7 @@ package com.everhomes.express;
 
 import java.util.Map;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.express.*;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -105,4 +106,5 @@ public interface ExpressService {
 
 	public PreOrderDTO payExpressOrderV2(PayExpressOrderCommandV2 cmd);
 
+    void notifyExpressOrderPaymentV2(OrderPaymentNotificationCommand cmd);
 }

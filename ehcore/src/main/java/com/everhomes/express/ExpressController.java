@@ -3,8 +3,11 @@ package com.everhomes.express;
 
 import java.util.Map;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.express.*;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -123,6 +126,22 @@ public class ExpressController extends ControllerBase {
 	@RestReturn(PreOrderDTO.class)
 	public RestResponse payExpressOrderV2(PayExpressOrderCommandV2 cmd){
 		return new RestResponse(expressService.payExpressOrderV2(cmd));
+	}
+
+	/**
+	 * <b>URL: /express/notifyParkingRechargeOrderPaymentV2</b>
+	 * <p>9.2. 支付/退款后,支付系统回调</p>
+	 */
+	@RequestMapping("notifyExpressOrderPaymentV2")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(false)
+	public RestResponse notifyExpressOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+
+		expressService.notifyExpressOrderPaymentV2(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**

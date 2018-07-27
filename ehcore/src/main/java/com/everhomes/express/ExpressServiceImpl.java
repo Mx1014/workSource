@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 //import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.Utils;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.express.*;
 import com.everhomes.rest.order.*;
 import com.everhomes.user.*;
@@ -1345,4 +1346,8 @@ public class ExpressServiceImpl implements ExpressService {
 		}).first();
 	}
 
+	@Override
+	public void notifyExpressOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+		
+	}
 }
