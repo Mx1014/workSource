@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
+import com.everhomes.rest.rentalv2.admin.RentalOpenTimeDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul> 
@@ -69,6 +70,7 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	@ItemType(Long.class)
 	private List<Long> dayTimes;
 	private String confirmationPrompt;
+	private String openTimes;
 	
 	@Override
     public String toString() {
@@ -331,7 +333,12 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	public void setDayTimes(List<Long> dayTimes) {
 		this.dayTimes = dayTimes;
 	}
- 
 
- 
+	public String getOpenTimes() {
+		return openTimes;
+	}
+
+	public void setOpenTimes(String openTimes) {
+		this.openTimes = openTimes;
+	}
 }

@@ -181,7 +181,7 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
         			e.printStackTrace();
         		}
         		pdu.setType(1);
-        		pdu.setUuid(server.getUuid());
+        		pdu.setUuid(server.getUuidNum());
             	
             
             	long requestId = LocalSequenceGenerator.getNextSequence();
@@ -212,7 +212,7 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
     			e.printStackTrace();
     		}
     		pdu.setType(1);
-    		pdu.setUuid(server.getUuid());
+    		pdu.setUuid(server.getUuidNum());
         	long requestId = LocalSequenceGenerator.getNextSequence();
         	borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
         }else{

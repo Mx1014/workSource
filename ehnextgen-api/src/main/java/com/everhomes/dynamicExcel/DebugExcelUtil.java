@@ -46,9 +46,10 @@ public class DebugExcelUtil {
         style_m.setWrapText(true);
         //sheet的样式
         CellRangeAddress cra = new CellRangeAddress(0,0,0,11);
-        sheet.addMergedRegion(cra);
+        int initIndex = 0;
         //说明是否添加
         if(!StringUtils.isEmpty(intro)){
+            sheet.addMergedRegion(cra);
             CellStyle introStyle = workbook.createCellStyle();
             introStyle.setWrapText(true);
             introStyle.setAlignment(HorizontalAlignment.LEFT);
@@ -64,10 +65,11 @@ public class DebugExcelUtil {
             introCell.setCellStyle(introStyle);
             introCell.setCellValue(intro);
             introCell.setCellType(CellType.STRING);
+            initIndex = 1;
         }
 
         // 标题构建
-        Row row = sheet.createRow(1);
+        Row row = sheet.createRow(initIndex);
         for (int i = 0; i < fields.size(); i++) {
             Cell cell = row.createCell((short) i);
             DynamicField f = fields.get(i);
@@ -80,7 +82,7 @@ public class DebugExcelUtil {
         }
         // 遍历集合数据，产生数据行
         if (data != null && data.size() > 0) {
-            int index = 1;
+            int index = initIndex;
             for (List<String> rowContent : data) {
                 row = sheet.createRow(index+1);
                 row.setRowStyle(style);

@@ -9,11 +9,12 @@ package com.everhomes.rest.pmtask;
  * <li>4: 已评价，销单</li>
  * <li>5: 未评价，人工销单</li>
  * <li>6: 已取消</li>
+ * <li>7: 已删除</li>
  * </ul>
  */
 public enum EbeiPmTaskStatus {
     UNPROCESSED((byte)1,"未处理"), PROCESSING((byte)2,"处理中"), PROCESSED((byte)3,"已完成"),
-    CLOSED((byte)4,"已评价，销单"), REVISITED((byte)5,"未评价，人工销单"),INACTIVE((byte)6,"已取消");
+    CLOSED((byte)4,"已评价，销单"), REVISITED((byte)5,"未评价，人工销单"),INACTIVE((byte)6,"已取消"),CANCELED((byte)7,"已删除");
 
     private byte code;
     private String desc;

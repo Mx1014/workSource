@@ -77,6 +77,7 @@ public class AddRentalSiteSingleSimpleRule {
 	@ItemType(Long.class)
 	private List<Long> closeDates;
 	private BigDecimal workdayPrice;
+	private BigDecimal originalPrice;
 	private BigDecimal initiatePrice;
 	private Double siteCounts;
 	@ItemType(SiteNumberDTO.class)
@@ -88,9 +89,11 @@ public class AddRentalSiteSingleSimpleRule {
 	private Byte rentalStartTimeFlag;
 	private Byte rentalEndTimeFlag;
 	private BigDecimal orgMemberWorkdayPrice;
+	private BigDecimal orgMemberOriginalPrice;
 	private BigDecimal orgMemberInitiatePrice;
 
 	private BigDecimal approvingUserInitiatePrice;
+	private BigDecimal approvingUserOriginalPrice;
 	private BigDecimal approvingUserWorkdayPrice;
 	private Byte userPriceType;
 
@@ -379,5 +382,29 @@ public class AddRentalSiteSingleSimpleRule {
 
 	public void setUserPriceType(Byte userPriceType) {
 		this.userPriceType = userPriceType;
+	}
+
+	public BigDecimal getOriginalPrice() {
+		return originalPrice;
+	}
+
+	public void setOriginalPrice(BigDecimal originalPrice) {
+		this.originalPrice = originalPrice;
+	}
+
+	public BigDecimal getOrgMemberOriginalPrice() {
+		return orgMemberOriginalPrice;
+	}
+
+	public void setOrgMemberOriginalPrice(BigDecimal orgMemberOriginalPrice) {
+		this.orgMemberOriginalPrice = orgMemberOriginalPrice;
+	}
+
+	public BigDecimal getApprovingUserOriginalPrice() {
+		return approvingUserOriginalPrice;
+	}
+
+	public void setApprovingUserOriginalPrice(BigDecimal approvingUserOriginalPrice) {
+		this.approvingUserOriginalPrice = approvingUserOriginalPrice;
 	}
 }

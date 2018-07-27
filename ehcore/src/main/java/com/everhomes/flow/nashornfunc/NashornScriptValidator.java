@@ -1,8 +1,8 @@
 package com.everhomes.flow.nashornfunc;
 
 import com.everhomes.flow.FlowValidateScript;
-import com.everhomes.flow.NashornEngineService;
-import com.everhomes.flow.NashornScript;
+import com.everhomes.scriptengine.nashorn.NashornEngineService;
+import com.everhomes.scriptengine.nashorn.NashornScript;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,19 +22,15 @@ public class NashornScriptValidator implements NashornScript<Boolean> {
     }
 
     @Override
-    public String getJSFunc() {
-        return "";
-    }
-
-    @Override
     public String getScript() {
         return script.getScript();
     }
 
     @Override
     public Boolean process(NashornEngineService input) {
+        String key = String.format("%s:%s", script.getScriptMainId(), script.getScriptVersion());
         // 编译
-        input.getScriptObjectMirror(script.getScriptMainId(), script.getScriptVersion(), this);
+        input.getScriptObjectMirror(key, this);
         return Boolean.TRUE;
     }
 

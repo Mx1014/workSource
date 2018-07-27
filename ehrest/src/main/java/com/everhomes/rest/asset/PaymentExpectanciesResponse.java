@@ -25,7 +25,6 @@ public class PaymentExpectanciesResponse {
     List<PaymentExpectancyDTO>  list;
     private Integer nextPageOffset;
     private String totalAmount;
-    //add by tangcen
     private Byte generated;
 
     public Byte getGenerated() {

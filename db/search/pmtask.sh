@@ -53,6 +53,9 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/pmtask" -d '
           "organizationUid":{
              "type" : "long",
              "null_value": 0
+          },
+          "star" : {
+              "type" : "String"
           }
         }
       }
