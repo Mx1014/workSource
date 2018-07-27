@@ -129,6 +129,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.startObject();
 
             builder.field("id", customer.getId());
+            builder.field("ownerId", customer.getOwnerId());
             builder.field("communityId", customer.getCommunityId());
             builder.field("namespaceId", customer.getNamespaceId());
             builder.field("name", customer.getName());
