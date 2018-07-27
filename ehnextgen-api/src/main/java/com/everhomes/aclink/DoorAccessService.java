@@ -173,4 +173,6 @@ public interface DoorAccessService {
 	public ListDoorAccessQRKeyResponse listBusAccessQRKey();
 
 	public void updateAccessType(Long doorId, byte doorType);
+
+	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
 }
