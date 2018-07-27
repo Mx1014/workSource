@@ -727,9 +727,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         List<GeneralFormVal> request;
         List<GeneralFormValDTO> result;
 
-        if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null && StringUtils.isNotBlank(cmd.getSourceType()) && StringUtils.isNotBlank(cmd.getOwnerType())){
+        if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null){
 
-            request = generalFormProvider.getGeneralFormVal(cmd.getNamespaceId(), cmd.getSourceId());
+
+            request = generalFormProvider.getGeneralFormVal(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getModuleId(), cmd.getOwnerId());
             return request.stream().map(r -> ConvertHelper.convert(r, GeneralFormValDTO.class)).collect(Collectors.toList());
         }else{
             LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "

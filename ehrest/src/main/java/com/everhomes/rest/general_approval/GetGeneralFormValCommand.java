@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：ownerId</li>
  * <li>sourceId: 资源ID</li>
  * <li>sourceType：资源类型</li>
+ * <li>moduleId: 模块ID</li>
+ * <li>moduleType：模块名称</li>
  * </ul>
  * @author janson
  *
@@ -22,6 +24,8 @@ public class GetGeneralFormValCommand {
 
     private String sourceType;
     private Long sourceId;
+    private String moduleType;
+    private Long moduleId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -41,6 +45,22 @@ public class GetGeneralFormValCommand {
 
     public String getOwnerType() {
         return ownerType;
+    }
+
+    public String getModuleType() {
+        return moduleType;
+    }
+
+    public void setModuleType(String moduleType) {
+        this.moduleType = moduleType;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
     public void setOwnerType(String ownerType) {

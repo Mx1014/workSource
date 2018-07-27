@@ -323,17 +323,15 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public List<GeneralFormVal> getGeneralFormVal(Integer namespaceId, Long sourceId){
-		List<GeneralFormVal> result = new ArrayList<>();
+	public List<GeneralFormVal> getGeneralFormVal(Integer namespaceId, Long sourceId,  Long moduleId, Long ownerId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormVals.class));
 
 		SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
 		query.addConditions(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
-		result = query.fetch().map(r -> {
-			return ConvertHelper.convert(r, GeneralFormVal.class);
-		});
-		return result;
+		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormVal.class));
 	}
 
 	@Override
@@ -358,7 +356,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public GeneralFormValRequest getGeneralFormValsGroup(Integer namespaceId, Long sourceId){
+	public GeneralFormValRequest getGeneralFormValRequest(Integer namespaceId, Long sourceId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
 
 		SelectQuery<EhGeneralFormValRequestsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VAL_REQUESTS);

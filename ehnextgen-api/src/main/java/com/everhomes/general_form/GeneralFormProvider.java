@@ -75,11 +75,11 @@ public interface GeneralFormProvider {
      * @param sourceId
      * @return
      */
-    List<GeneralFormVal> getGeneralFormVal(Integer namespaceId, Long sourceId);
+    List<GeneralFormVal> getGeneralFormVal(Integer namespaceId, Long sourceId,  Long moduleId, Long ownerId);
 
     Long saveGeneralFormValRequest(Integer namespaceId, String sourceType, String ownerType, Long ownerId, Long sourceId);
 
-    GeneralFormValRequest getGeneralFormValsGroup(Integer namespaceId, Long sourceId);
+    GeneralFormValRequest getGeneralFormValRequest(Integer namespaceId, Long sourceId);
 
     List<GeneralFormVal> listGeneralFormItemByIds(List<Long> ids);
 
