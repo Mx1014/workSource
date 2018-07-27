@@ -36,6 +36,10 @@ import com.everhomes.util.StringHelper;
  * <li>packageType: 封装类型，参考{@link com.everhomes.rest.express.ExpressPackageType}</li>
  * <li>invoiceHead: 发票抬头</li>
  * <li>invoiceFlag: 需要发票，参考{@link com.everhomes.rest.express.ExpressInvoiceFlagType}</li>
+ * <li>expressType: 0:物品 1:文件 2:其他  国贸快递专用</li>
+ * <li>expressWay: 0:陆运 1:空运  国贸快递专用</li>
+ * <li>expressTarget: 0:同城 1:外埠  国贸快递专用</li>
+ * <li>expressRemark: 备注 国贸快递专用</li>
  * </ul>
  */
 public class CreateExpressOrderCommand {
@@ -81,6 +85,12 @@ public class CreateExpressOrderCommand {
 	
 	private Byte invoiceFlag;
 
+//	private Long flowCaseId;
+	private Byte expressType;
+	private Byte expressWay;
+	private Byte expressTarget;
+	private String expressRemark;
+
 	public CreateExpressOrderCommand() {
 
 	}
@@ -98,6 +108,46 @@ public class CreateExpressOrderCommand {
 		this.payType = payType;
 		this.internal = internal;
 		this.insuredPrice = insuredPrice;
+	}
+
+//	public Long getFlowCaseId() {
+//		return flowCaseId;
+//	}
+//
+//	public void setFlowCaseId(Long flowCaseId) {
+//		this.flowCaseId = flowCaseId;
+//	}
+
+	public Byte getExpressType() {
+		return expressType;
+	}
+
+	public void setExpressType(Byte expressType) {
+		this.expressType = expressType;
+	}
+
+	public Byte getExpressWay() {
+		return expressWay;
+	}
+
+	public void setExpressWay(Byte expressWay) {
+		this.expressWay = expressWay;
+	}
+
+	public Byte getExpressTarget() {
+		return expressTarget;
+	}
+
+	public void setExpressTarget(Byte expressTarget) {
+		this.expressTarget = expressTarget;
+	}
+
+	public String getExpressRemark() {
+		return expressRemark;
+	}
+
+	public void setExpressRemark(String expressRemark) {
+		this.expressRemark = expressRemark;
 	}
 
 	public String getOwnerType() {

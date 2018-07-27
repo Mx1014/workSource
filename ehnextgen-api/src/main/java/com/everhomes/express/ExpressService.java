@@ -103,6 +103,6 @@ public interface ExpressService {
 
 	public Map<String,String> prePayExpressOrder(PrePayExpressOrderCommand cmd);
 
-//	public PreOrderDTO payExpressOrderV2(PayExpressOrderCommandV2 cmd);
+	public PreOrderDTO payExpressOrderV2(PayExpressOrderCommandV2 cmd);
 
 }

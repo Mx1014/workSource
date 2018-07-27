@@ -116,14 +116,14 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-//	 * <p>9.1. 立即支付 V2</p>
-//	 * <b>URL: /express/payExpressOrderV2</b>
-//	 */
-//	@RequestMapping("payExpressOrderV2")
-//	@RestReturn(PreOrderDTO.class)
-//	public RestResponse payExpressOrderV2(PayExpressOrderCommandV2 cmd){
-////		return new RestResponse(expressService.payExpressOrderV2(cmd));
-//	}
+	 * <p>9.1. 立即支付 V2</p>
+	 * <b>URL: /express/payExpressOrderV2</b>
+	 */
+	@RequestMapping("payExpressOrderV2")
+	@RestReturn(PreOrderDTO.class)
+	public RestResponse payExpressOrderV2(PayExpressOrderCommandV2 cmd){
+		return new RestResponse(expressService.payExpressOrderV2(cmd));
+	}
 
 	/**
 	 * <p>10.出单</p>
