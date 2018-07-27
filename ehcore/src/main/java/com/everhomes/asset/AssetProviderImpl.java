@@ -1927,6 +1927,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t1.OWNER_ID.eq(ownerId))
                 .and(t1.OWNER_TYPE.eq(ownerType))
                 .and(t1.CATEGORY_ID.eq(categoryId))
+                .and(t1.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                 .fetchInto(PaymentChargingItemScope.class);
 
         Byte isSelected = 0;
@@ -1942,6 +1943,7 @@ public class AssetProviderImpl implements AssetProvider {
                     isSelected = 1;
                     dto.setProjectChargingItemName(scope.getProjectLevelName());
                     dto.setIsSelected(isSelected);
+                    dto.setTaxRate(scope.getTaxRate());//增加税率
                     isSelected = 0;
                 }
             }
@@ -3071,8 +3073,15 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds, Long categoryId) {
-        byte de_coupling = 1;
+    public void configChargingItems(ConfigChargingItemsCommand cmd, List<Long> communityIds) {
+        //卸载参数
+    	List<ConfigChargingItems> configChargingItems = cmd.getChargingItemConfigs();
+    	Long communityId = cmd.getOwnerId();
+    	String ownerType = cmd.getOwnerType();
+    	Integer namespaceId = cmd.getNamespaceId();
+    	Long categoryId = cmd.getCategoryId();
+    	
+    	byte de_coupling = 1;
         if(communityIds!=null && communityIds.size() >1){
             for(int i = 0; i < communityIds.size(); i ++){
                 Long cid = communityIds.get(i);
@@ -3135,6 +3144,7 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setProjectLevelName(vo.getProjectChargingItemName());
             scope.setDecouplingFlag(decouplingFlag);
             scope.setDecouplingFlag(decouplingFlag);
+            scope.setTaxRate(vo.getTaxRate());//增加税率
             list.add(scope);
         }
         this.dbProvider.execute((TransactionStatus status) -> {

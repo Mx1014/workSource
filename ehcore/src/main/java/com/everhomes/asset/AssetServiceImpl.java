@@ -3317,7 +3317,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-        assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds, cmd.getCategoryId());
+        assetProvider.configChargingItems(cmd, communityIds);
     }
 
     private List<Long> getAllCommunity(Integer namespaceId,boolean includeNamespace) {
