@@ -18,6 +18,7 @@ import com.atomikos.util.FastDateFormat;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.huarun.*;
 import com.everhomes.aclink.lingling.*;
+import com.everhomes.aclink.uclbrt.UclbrtHttpClient;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
@@ -84,6 +85,7 @@ import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.google.gson.JsonArray;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -105,6 +107,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.hibernate.boot.model.naming.Identifier;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -125,6 +128,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -2578,11 +2582,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Aclink ca = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
         if(null !=ca){
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
-        	qr.setUclbrtParams(paramsDTO);
+        	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
+        	qr.setQrCodeKey(UclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
         	qrKeys.add(qr);
-        }
-        
-        
+        } 
        
     }
     //do huarun qr
