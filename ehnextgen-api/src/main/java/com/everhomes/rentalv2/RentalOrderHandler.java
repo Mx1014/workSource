@@ -44,4 +44,7 @@ public interface RentalOrderHandler {
     public void autoUpdateOrder(RentalOrder order);
 
     public void checkOrderResourceStatus(RentalOrder order);
+
+    //获取收款方账户id
+    public Long getAccountId(RentalOrder order);
 }

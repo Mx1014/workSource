@@ -268,6 +268,13 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
 		Long expireTime = strToLong(oldValidEnd);
+		boolean baseNewestTime = configProvider.getBooleanValue("parking.ketuo.baseNewestTime." + order.getParkingLotId(), false);
+		if(baseNewestTime){
+			Long now = System.currentTimeMillis();
+			if(now>expireTime){
+				expireTime=now;
+			}
+		}
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		Timestamp tempStart = Utils.addSecond(expireTime, 1);
@@ -275,7 +282,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		if(ADD_DISTANCE_MONTH.equals(monthCardTimeArithmetic)) {
 			tempEnd = Utils.getTimestampByAddDistanceMonth(expireTime,order.getMonthCount().intValue());
 		}else{
-			tempEnd = new Timestamp(Utils.getLongByAddNatureMonth(expireTime, order.getMonthCount().intValue(),true));
+			tempEnd = new Timestamp(Utils.getLongByAddNatureMonth(expireTime, order.getMonthCount().intValue()));
 
 		}
 		String validStart = sdf1.format(tempStart);

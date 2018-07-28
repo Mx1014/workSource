@@ -144,4 +144,7 @@ public interface CommunityProvider {
 
     List<Community> listNamespaceCommunities(Integer namespaceId);
     List<Community> listAllCommunitiesWithNamespaceToken();
+    //导入项目信息，查询项目是否存在
+	Community findCommunityByNamespaceIdAndName(Integer namespaceId, String name);
+	Community findCommunityByNumber(String communityNumber, Integer namespaceId);
 }

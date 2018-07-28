@@ -37,7 +37,7 @@ import java.util.*;
 public class SensitiveWordServiceImpl implements SensitiveWordService, ApplicationListener<ContextRefreshedEvent>{
     private static final Logger LOGGER = LoggerFactory.getLogger(SensitiveWordServiceImpl.class);
     private static AhoCorasickDoubleArrayTrie<String> acdat = null;
-
+    private String fileUrl;
     @Autowired
     private SensitiveFilterRecordProvider sensitiveFilterRecordProvider;
     @Autowired
@@ -81,14 +81,26 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
 
         }
         acdat.build(map);
+        fileUrl = cmd.getUrl();
+    }
+
+    //校验是否需要重新构建敏感词库
+    private void checkIsNeededRebuild() {
+        String url = configurationProvider.getValue(0, ConfigConstants.SENSITIVE_URL, "");
+        if (!StringUtils.isBlank(url) && !url.equals(fileUrl)) {
+            InitSensitiveWordTrieCommand cmd = new InitSensitiveWordTrieCommand();
+            cmd.setUrl(url);
+            init(cmd);
+        }
     }
 
     @Override
     public void filterWords(FilterWordsCommand cmd) {
         String settingFlag = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SENSITIVE_SETTING, "");
-        if (StringUtils.isBlank(settingFlag) || "false".equals(settingFlag)) {
+        if ("false".equals(settingFlag)) {
             return;
         }
+        checkIsNeededRebuild();
         if (cmd == null || CollectionUtils.isEmpty(cmd.getTextList())) {
             return;
         }
@@ -212,6 +224,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService, Applicati
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         if (contextRefreshedEvent.getApplicationContext().getParent() == null) {
+            fileUrl = "";
             String url = configurationProvider.getValue(0, ConfigConstants.SENSITIVE_URL, "");
             if (url != null && !StringUtils.isBlank(url)) {
                 InitSensitiveWordTrieCommand cmd = new InitSensitiveWordTrieCommand();

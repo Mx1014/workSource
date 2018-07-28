@@ -711,6 +711,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                     if (cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
                         selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
                     }
+                    // living status没有在java文件和数据库中维护；
+                    // 此处获得的living status不是直接返回前的living status，address表的living status并不是唯一性的资产的‘居住状态’的记录者，
+                    // EH_ORGANIZATION_ADDRESS_MAPPINGS中的living status才是真的living status <- by wentian
+//                    if(cmd.getLivingStatus() != null){
+//                        selectSql = selectSql.and(Tables.EH_ADDRESSES.LIVING_STATUS.eq(cmd.getLivingStatus()));
+//                    }
 
                     selectSql.fetch().map((r) -> {
                         ApartmentDTO apartment = new ApartmentDTO();
@@ -2056,10 +2062,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				errorLogs.add(log);
 				continue;
             }
-			
+            //TODO 可能得增加对NamespaceAddressType和NamespaceAddressToken字段的校验 by tangcen
+            
 			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
 		}
-
         updateCommunityAptCount(community);
         
 		return errorLogs;
@@ -2101,8 +2107,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
-//            address.setNamespaceAddressType(data.getNamespaceAddressType());
-//            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
+            address.setNamespaceAddressType(data.getNamespaceAddressType());
+            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
             address.setOrientation(data.getOrientation());
@@ -2113,8 +2119,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setSharedArea(shareArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
-//            address.setNamespaceAddressType(data.getNamespaceAddressType());
-//            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
+            address.setNamespaceAddressType(data.getNamespaceAddressType());
+            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             if (StringUtils.isNotBlank(data.getOrientation())) {
             	address.setOrientation(data.getOrientation());
@@ -2135,7 +2141,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				data.setBuildingName(trim(r.getA()));
 				data.setApartmentName(trim(r.getB()));
 				data.setStatus(trim(r.getC()));
-
                 //产品变更模板
 //                data.setBuildArea(trim(r.getD()));
                 data.setAreaSize(trim(r.getD()));
@@ -2144,8 +2149,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                 data.setRentArea(trim(r.getG()));
                 data.setOrientation(trim(r.getH()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
-//                data.setNamespaceAddressType(trim(r.getH()));
-//                data.setNamespaceAddressToken(trim(r.getI()));
+                data.setNamespaceAddressType(trim(r.getI()));
+                data.setNamespaceAddressToken(trim(r.getJ()));
 				list.add(data);
 			}
 		}
@@ -2379,8 +2384,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             resp = listMixCommunitiesByDistance(cmd, locator, pageSize);
             return resp;
         } else {
-            results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize + 1);
-
+           // results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize + 1);
+            //update by huanglm ,#22488【iOS&安卓】左上角地址切换不是按照距离最近来排序的 
+        	List<Community> communities = this.listMixCommunitiesByDistanceWithNamespaceId(cmd, locator, pageSize);
+        	//issue-33013(部分解决),communities可能为空，会导致app报开小差，需要做非空判断
+        	if (communities!=null) {
+        		communities.stream().map(r->{
+    				CommunityDTO dto = ConvertHelper.convert(r,CommunityDTO.class);					
+    				results.add(dto);
+    				return null;
+    			}).collect(Collectors.toList());
+			}
+        	
             if (results != null && results.size() > pageSize) {
                 results.remove(results.size() - 1);
                 resp.setNextPageAnchor(results.get(results.size() - 1).getId());
@@ -2511,7 +2526,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             communityIds = resources.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         }
         List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
-
+        
         if(communityIds != null){
             List<CommunityGeoPoint> pointList = this.communityProvider.listCommunityGeoPointByGeoHashInCommunities(cmd.getLatigtue(), cmd.getLongitude(), 5, communityIds);
             if(pointList != null && pointList.size() > 0){

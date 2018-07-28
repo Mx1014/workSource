@@ -13,7 +13,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.order.PayService;
+//import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.activity.*;
@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.Locale;
 
@@ -39,8 +40,8 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingOrderCallBackHandler.class);
 
-	@Autowired
-	private PayService payService;
+//	@Autowired
+//	private PayService payService;
 
 	@Autowired
 	private ParkingProvider parkingProvider;
@@ -84,7 +85,7 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 		LOGGER.info("Parking pay info, cmd={}", cmd);
 
 		Long orderId = cmd.getOrderId();
-		BigDecimal payAmount = payService.changePayAmount(cmd.getAmount());
+		BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
 
 		//支付宝回调时，可能会同时回调多次，
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + orderId).enter(()-> {

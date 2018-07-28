@@ -1,5 +1,11 @@
 package com.everhomes.pusher;
 
+import java.util.Locale;
+
+import org.jooq.tools.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.everhomes.appurl.AppUrlProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.group.Group;
@@ -11,20 +17,25 @@ import com.everhomes.msgbox.Message;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.OpenMsgSessionActionData;
 import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.DeviceMessage;
+import com.everhomes.rest.messaging.DeviceMessageType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessagingErrorCode;
+import com.everhomes.rest.messaging.MessagingLocalStringCode;
+import com.everhomes.rest.messaging.MessagingPriorityConstants;
+import com.everhomes.rest.messaging.UserMessageType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.user.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Locale;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component(PushMessageResolver.PUSH_MESSAGE_RESOLVER_DEFAULT)
 public class DefaultPushMessageResolver implements PushMessageResolver {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPushMessageResolver.class);
+	//private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPushMessageResolver.class);
 	
     @Autowired
     MessagingService messagingService;
@@ -65,7 +76,7 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         
         // 由于eh_locale_strings表没有namespace_id，故只能先把配置项放配置表，
         // 按产品要求每个域空间需要使用不同的标题 BUG:http://devops.lab.everhomes.com/issues/4448  by lqs 20161217
-        Integer namespaceId = destLogin.getNamespaceId();
+      //  Integer namespaceId = destLogin.getNamespaceId();
 //        String messageTitle = this.configurationProvider.getValue(namespaceId, "message.title", "左邻App");        
         
         //去掉title 已有logo和应用名 by xiongying20170110
@@ -97,7 +108,14 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         msg.getMeta().put("messageType", messageType);
 
         String bodyType = msg.getMeta().get("bodyType");
+     
         if(null == bodyType) {
+        	//判断消息内容是否为空，为空且登录用户为系统用户时，则抛出异常  
+        	// add by huanglm  20180607 for 缺陷 #29428
+        	if(StringUtils.isBlank(deviceMessage.getAlert()) &&(destLogin.getUserId() < User.MAX_SYSTEM_USER_ID)){
+        		throw RuntimeErrorException.errorWith(MessagingErrorCode.SCOPE, MessagingErrorCode.NULL_MESSAGE_CODE,
+    					"content is null ");
+        	}
             return deviceMessage;
         }
         
@@ -156,6 +174,13 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
                 break;
             }
         }
+        
+        //判断消息内容是否为空，为空且登录用户为系统用户时，则抛出异常  
+    	// add by huanglm  20180607 for 缺陷 #29428
+    	if(StringUtils.isBlank(deviceMessage.getAlert()) &&(destLogin.getUserId() < User.MAX_SYSTEM_USER_ID)){
+    		throw RuntimeErrorException.errorWith(MessagingErrorCode.SCOPE, MessagingErrorCode.NULL_MESSAGE_CODE,
+					"content is null ");
+    	}
         // 发送者昵称
         String senderName = this.getSenderName(msg);
         deviceMessage.setAlert(senderName + deviceMessage.getAlert());

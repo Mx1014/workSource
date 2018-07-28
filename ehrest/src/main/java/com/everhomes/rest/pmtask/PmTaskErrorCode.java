@@ -33,4 +33,6 @@ public interface PmTaskErrorCode {
     int ERROR_DOWNLOAD = 10015; //下载错误！
     int ERROR_ORDER_ID = 10016; //不存在的orderId
     int ERROR_STATE_ID = 10017;//非法状态
+
+    int ERROR_CREATE_USER_ACCOUNT = 10018;//创建支付账号问题
 }

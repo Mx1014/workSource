@@ -9,6 +9,10 @@ public class AclinkServer extends EhAclinkServers {
 	 * 
 	 */
 	private static final long serialVersionUID = -1030908388740582073L;
+	
+	public String getUuidNum(){
+		return this.getUuid().replace(":","");
+	}
 
 	public AclinkServer() {
 	}

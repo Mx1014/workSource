@@ -81,6 +81,10 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long addressId;
 
+    private Long sourceItemId;
+
+    private String sourceType;
+
     public Long getOwnerId() {
         return ownerId;
     }
@@ -273,6 +277,22 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
+    }
+
+    public Long getSourceItemId() {
+        return sourceItemId;
+    }
+
+    public void setSourceItemId(Long sourceItemId) {
+        this.sourceItemId = sourceItemId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
     }
 
     @Override

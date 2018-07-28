@@ -1,24 +1,32 @@
 package com.everhomes.general_approval;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.general_approval.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.flow.*;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowModuleInfo;
+import com.everhomes.flow.FlowModuleListener;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.rest.flow.*;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
@@ -151,6 +159,16 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Override
     public FlowModuleInfo initModule() {
         return new FlowModuleInfo();
+    }
+
+    @Override
+    public void onFlowCaseAbsorted(FlowCaseState ctx) {
+
+    }
+
+    @Override
+    public void onFlowCaseEnd(FlowCaseState ctx) {
+
     }
 
     @Override

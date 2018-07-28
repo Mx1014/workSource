@@ -222,10 +222,17 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         LOGGER.info("sync for contracts ok");
     }
 
-    private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+    private void checkContractAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId, Byte paymentFlag) {
         ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
         cmd.setNamespaceId(namespaceId);
-        cmd.setModuleId(ServiceModuleConstants.CONTRACT_MODULE);
+        //区分开付款合同和收款合同的moduleid
+        if(paymentFlag == 1) {
+        	//付款合同
+        	cmd.setModuleId(ServiceModuleConstants.PAYMENT_CONTRACT_MODULE);
+        } else {
+        	//收款合同
+        	cmd.setModuleId(ServiceModuleConstants.CONTRACT_MODULE);
+        }
         cmd.setActionType(ActionType.OFFICIAL_URL.getCode());
         ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(cmd);
         Long appId = apps.getServiceModuleApps().get(0).getOriginId();
@@ -245,9 +252,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                     "OrgIdorCommunityId user privilege error");
 		}
         if(cmd.getPaymentFlag() == 1) {
-            checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
+            checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.PAYMENT_CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId(), cmd.getPaymentFlag());
         } else {
-            checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId());
+            checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_LIST, cmd.getOrgId(), cmd.getCommunityId(), cmd.getPaymentFlag());
         }
 
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
@@ -255,10 +262,15 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
-                    .field("name", 1.2f)
-                    .field("customerName", 1.2f)
-                    .field("contractNumber", 1.2f);
+//            qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
+//                    .field("name", 1.2f)
+//                    .field("customerName", 1.2f)
+//                    .field("contractNumber", 1.2f);
+        	String pattern = "*" + cmd.getKeywords() + "*";
+            qb = QueryBuilders.boolQuery()
+            					.should(QueryBuilders.wildcardQuery("name", pattern))
+            					.should(QueryBuilders.wildcardQuery("customerName", pattern))
+            					.should(QueryBuilders.wildcardQuery("contractNumber", pattern));
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
@@ -299,7 +311,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             anchor = cmd.getPageAnchor();
         }
         
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
+        if(cmd.getCategoryId() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
+        }
 
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);

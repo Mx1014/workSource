@@ -93,7 +93,18 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), PortalItemCategory.class);
 	}
-	
+
+
+	@Override
+	public Integer findDefaultOrder(Long itemGroupId) {
+		Integer defaultOrder = getReadOnlyContext().select(Tables.EH_PORTAL_ITEM_CATEGORIES.DEFAULT_ORDER.max())
+				.from(Tables.EH_PORTAL_ITEM_CATEGORIES)
+				.where(Tables.EH_PORTAL_ITEM_CATEGORIES.ITEM_GROUP_ID.eq(itemGroupId))
+				.fetchOne().value1();
+
+		return defaultOrder;
+	}
+
 	@Override
 	public List<PortalItemCategory> listPortalItemCategory(Integer namespaceId, Long itemGroupId) {
 		return listPortalItemCategory(namespaceId, itemGroupId, null);

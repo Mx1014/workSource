@@ -65,7 +65,7 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
 
     @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig) {
-        try {
+    	try {
             JSONObject ret = new JSONObject();
             JSONObject jsonObject = (JSONObject) new JSONParser().parse(instanceConfig);
             String url = (String)jsonObject.get("url");
@@ -76,15 +76,17 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
             }catch (Exception e){
                 categoryId = (String)jsonObject.get("categoryId");
             }
-            String[] split = url.split("\\?");
-            if(split.length != 2){
-                return null;
-           }
-           StringBuilder sb = new StringBuilder();
-           sb.append(split[0] + "?" + "categoryId=" + categoryId + "&" + split[1]);
+            StringBuilder sb = new StringBuilder();
+            if(url != null) {
+            	String[] split = url.split("\\?");
+                if(split.length != 2){
+                    return null;
+               }
+               sb.append(split[0] + "?" + "categoryId=" + categoryId + "&" + split[1]);
+            }
            ret.put("url", sb.toString());
            return ret.toJSONString();
-        } catch (ParseException e) {
+        } catch (Exception e) {
             LOGGER.error("failed to getItemActionData in AssetPortalHandler, instanceConfig is={}", instanceConfig, e);
             e.printStackTrace();
         }

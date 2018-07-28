@@ -1,12 +1,13 @@
 // @formatter:off
 package com.everhomes.controller;
 
-import com.everhomes.rest.aclink.AclinkWebSocketMessage;
-import com.everhomes.rest.aclink.DataUtil;
-import com.everhomes.rest.aclink.DoorAccessDTO;
-import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
-import com.everhomes.rest.rpc.server.AclinkRemotePdu;
-import com.everhomes.util.StringHelper;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +23,12 @@ import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
+import com.everhomes.util.StringHelper;
 
 public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AclinkWebSocketHandler.class);
@@ -134,7 +135,13 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         if(state != null) {
             Map<String, String> params = new HashMap<String, String>();
             params.put("id", state.getId().toString());
-            httpRestCallProvider.restCall("/aclink/disConnected", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+            params.put("uuid", uuid);
+            String coreUrl = "/aclink/disConnected";
+            if(uuid != null && (uuid.length() == 6 || uuid.length() == 12 || uuid.split(":").length == 6)){
+            	//人脸识别内网服务器的连接
+            	coreUrl = "/aclink/serverDisconnected";
+            }
+            httpRestCallProvider.restCall(coreUrl, params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
                 }
@@ -217,17 +224,14 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
       });
     }
     
-    public void excuteMessage(AclinkWebSocketMessage cmd, WebSocketSession session, AclinkWebSocketState state) {
-        Map<String, String> params = new HashMap<String, String>();
-        StringHelper.toStringMap(null, cmd, params);
-        final AclinkWebSocketHandler handler = this;
+    public void excuteMessage(Map<String, String> params, WebSocketSession session, AclinkWebSocketState state, String coreUrl) {
         String uuid = uuidFromSession(session);
         params.put("uuid", uuid);
-        if(cmd.getPayload() != null) {
-            LOGGER.info("Got reply = {}", cmd);    
+        if(params.get("payload") != null) {
+            LOGGER.info("Got reply = {}", params);    
         }
         
-        httpRestCallProvider.restCall("/aclink/excuteMessage", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+        httpRestCallProvider.restCall(coreUrl, params, new ListenableFutureCallback<ResponseEntity<String>> () {
 
         @Override
         public void onSuccess(ResponseEntity<String> result) {
@@ -271,6 +275,12 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         	len = 24;
         }
         
+        //门禁日志 by liuyilin 20180622
+        if((buf.length == 31 || buf.length ==49) && buf[buf.length-21] == (byte) 0xf){
+        	state.onRequest(Arrays.copyOfRange(buf, buf.length-21, buf.length), session, this);
+        	return;
+        }
+        
         byte[] bDataSize = Arrays.copyOfRange(buf, 0, 4);
         int dataSize = DataUtil.byteArrayToInt(bDataSize);
         if(dataSize != len) {
@@ -279,7 +289,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         }
         //硬件数据没有传DataType，在此处先按照CMD进行路由 by liuyilin 20180320
         if(buf[10] == (byte) 0x10){
-        	state.onRequest(buf, session, this);
+        	state.onRequest(Arrays.copyOfRange(buf, 10, buf.length), session, this);
         }else{
         	state.onMessage(buf, session, this);
         }

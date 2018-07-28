@@ -1,7 +1,11 @@
 // @formatter:off
 package com.everhomes.community;
 
-import com.everhomes.acl.*;
+import com.everhomes.acl.Acl;
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.AclRoleDescriptor;
+import com.everhomes.acl.RoleAssignment;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.AssetService;
@@ -13,11 +17,17 @@ import com.everhomes.configuration.Configurations;
 import com.everhomes.configuration.ConfigurationsProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
-import com.everhomes.group.*;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupAdminStatus;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberLog;
+import com.everhomes.group.GroupMemberLogProvider;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -27,46 +37,187 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.namespace.*;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceDetail;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespaceResource;
+import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.organization.*;
-import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberLog;
+import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.*;
-import com.everhomes.rest.admin.NamespaceDTO;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.admin.*;
+import com.everhomes.rest.community.BuildingExportDetailDTO;
+import com.everhomes.rest.community.BuildingServiceErrorCode;
+import com.everhomes.rest.community.BuildingStatus;
+import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
+import com.everhomes.rest.community.CommunityGeoPointDTO;
+import com.everhomes.rest.community.CommunityNotificationTemplateCode;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.CreateChildProjectCommand;
+import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
+import com.everhomes.rest.community.CreateResourceCategoryCommand;
+import com.everhomes.rest.community.DeleteChildProjectCommand;
+import com.everhomes.rest.community.GetBuildingCommand;
+import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.community.GetCommunityByUuidCommand;
+import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
+import com.everhomes.rest.community.GetTreeProjectCategoriesCommand;
+import com.everhomes.rest.community.ImportBuildingDataDTO;
+import com.everhomes.rest.community.ImportCommunityDataDTO;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.community.ListChildProjectCommand;
+import com.everhomes.rest.community.ListCommunitesByStatusCommand;
+import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
+import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByOrgIdCommand;
+import com.everhomes.rest.community.ListCommunitiesByOrgIdResponse;
+import com.everhomes.rest.community.ListResourceCategoryCommand;
+import com.everhomes.rest.community.ResourceCategoryAssignmentDTO;
+import com.everhomes.rest.community.ResourceCategoryDTO;
+import com.everhomes.rest.community.ResourceCategoryErrorCode;
+import com.everhomes.rest.community.ResourceCategoryStatus;
+import com.everhomes.rest.community.ResourceCategoryType;
+import com.everhomes.rest.community.UpdateBuildingOrderCommand;
+import com.everhomes.rest.community.UpdateChildProjectCommand;
+import com.everhomes.rest.community.UpdateCommunityAuthPopupConfigCommand;
+import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
+import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityImportBaseConfigCommand;
+import com.everhomes.rest.community.admin.CommunityImportOrganizationConfigCommand;
+import com.everhomes.rest.community.admin.CommunityManagerDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityUserDto;
+import com.everhomes.rest.community.admin.CommunityUserOrgDetailDTO;
+import com.everhomes.rest.community.admin.CommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
+import com.everhomes.rest.community.admin.CreateCommunityCommand;
+import com.everhomes.rest.community.admin.CreateCommunityResponse;
+import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
+import com.everhomes.rest.community.admin.ImportCommunityCommand;
+import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
+import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsResponse;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdCommand;
+import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
+import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
+import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
+import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
+import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
+import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
+import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
+import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
+import com.everhomes.rest.community.admin.SmsTemplate;
+import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
+import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
+import com.everhomes.rest.community.admin.UserCommunityDTO;
+import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
+import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
+import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.group.*;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupJoinPolicy;
+import com.everhomes.rest.group.GroupMemberDTO;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.group.GroupPostFlag;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.AuthFlag;
+import com.everhomes.rest.organization.ExecutiveFlag;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OperationType;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationCommunityRequestType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.region.RegionServiceErrorCode;
-import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.NamespaceUserType;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserSourceType;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.*;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
 import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
-import com.everhomes.user.*;
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivity;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.userOrganization.UserOrganizations;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.VersionRange;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -75,8 +226,11 @@ import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.JoinType;
@@ -94,7 +248,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -191,6 +352,9 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
     private NamespaceProvider namespaceProvider;
 
+	@Autowired
+	private EnterpriseCustomerProvider customerProvider;
+
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
 
@@ -245,7 +409,14 @@ public class CommunityServiceImpl implements CommunityService {
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 //					"Invalid geoPointList parameter");
 //		}
-
+		//校验名字不能重复
+		Community communityName = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), cmd.getName());
+		if(communityName != null && !communityName.getId().equals(cmd.getId())){
+			LOGGER.error("CommunityName is exist communityId=" + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NAME_EXIST, 
+					"CommunityName is exist.");
+		}
+		
 		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null){
 			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
@@ -981,6 +1152,7 @@ public class CommunityServiceImpl implements CommunityService {
 					});
 				}
 				this.communityProvider.deleteBuilding(building);
+				customerProvider.deleteCustomerEntryInfoByBuildingId(building.getId());
 			}
 			return null;
 		});
@@ -1770,7 +1942,11 @@ public class CommunityServiceImpl implements CommunityService {
 				cond = cond.or(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + cmd.getKeywords() + "%"));
 				query.addConditions(cond);
 			}
+			if (cmd.getStartTime() != null && cmd.getEndTime() != null) {
+                query.addConditions(Tables.EH_GROUP_MEMBERS.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
+                query.addConditions(Tables.EH_GROUP_MEMBERS.CREATE_TIME.le(new Timestamp(cmd.getEndTime())));
 
+            }
             if(null != locator.getAnchor())
             	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
             //query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
@@ -2446,8 +2622,13 @@ public class CommunityServiceImpl implements CommunityService {
 		font.setFontHeightInPoints((short) 16);
 		CellStyle style = wb.createCellStyle();
 		style.setFont(font);
-
-		Sheet sheet = wb.createSheet("parkingRechargeOrders");
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String fileName = "userlist";
+		Namespace namespace  = this.namespaceProvider.findNamespaceById(namespaceId);
+		if (namespace != null) {
+			fileName = namespace.getName()+"用户列表";
+		}
+		Sheet sheet = wb.createSheet(fileName);
 		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
@@ -2529,7 +2710,7 @@ public class CommunityServiceImpl implements CommunityService {
 		try {
 			out = new ByteArrayOutputStream();
 			wb.write(out);
-			DownloadUtils.download(out, response);
+			DownloadUtils.download(out, response,fileName);
 		} catch (IOException e) {
 			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -2586,9 +2767,11 @@ public class CommunityServiceImpl implements CommunityService {
 			StringBuffer address = new StringBuffer();
 			if(dto.getAddressDtos() != null && dto.getAddressDtos().size() > 0){
 				for (AddressDTO addressDTO: dto.getAddressDtos()){
+					//不需要拼接ApartmentName,因为address中已经包含门牌号
+					if (addressDTO == null) {
+					    continue;
+                    }
 					address.append(addressDTO.getAddress());
-					address.append("-");
-					address.append(addressDTO.getApartmentName());
 					address.append("、");
 				}
 			}
@@ -3463,7 +3646,7 @@ public class CommunityServiceImpl implements CommunityService {
                             if (list != null && list.size() > 0) {
                                 list = list.stream()
                                         .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
-                                        .filter(member -> OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER)
+                                        .filter(member -> OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER)                                        
                                         // .limit(1)
                                         .map(member -> {
                                             member.setOperatorUid(r.getOperatorUid());
@@ -3471,6 +3654,10 @@ public class CommunityServiceImpl implements CommunityService {
                                             member.setContactName(r.getContactName());
                                             member.setContactToken(r.getContactToken());
                                             member.setContactDescription(r.getContactDescription());
+                                          //由于一个人可能重复认证（认证了某公司通过后，退出了再重新认证，这时，会有两条认证信息，最极限的情况是除了主键与创建时间，其他信息全相同）
+                                            //所以这种情况没法准备对应信息，但为了ID唯一，不能取没法把握的信息的ID（搞不好他就弄同一个ID了） update by huanglm 20180706
+                                            member.setId(r.getId());
+                                            LOGGER.debug("orgmemberlogId is：{}" , orgIds);
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
@@ -4109,7 +4296,7 @@ public class CommunityServiceImpl implements CommunityService {
         return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
     }
 	
-		@Override
+	@Override
 	public ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd) {
 		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
@@ -4134,6 +4321,363 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return response;
 
+	}
+	
+	//导入项目信息
+	@Override
+	public ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile file) {
+		Long userId = UserContext.current().getUser().getId();
+		ImportFileTask task = new ImportFileTask();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId((cmd.getNamespaceId()).longValue());
+			task.setType(ImportFileTaskType.COMMUNITY.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+					ImportFileResponse response = new ImportFileResponse();
+					List<ImportCommunityDataDTO> datas = handleImportCommunityData(resultList);
+					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
+						response.setTitle(datas.get(0));
+						datas.remove(0);
+					}
+					List<ImportFileResultLog<ImportCommunityDataDTO>> results = importCommunityDataAdmin(datas, userId, cmd);
+					response.setTotalCount((long)datas.size());
+					response.setFailCount((long)results.size());
+					response.setLogs(results);
+					return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+	
+	private List<ImportFileResultLog<ImportCommunityDataDTO>> importCommunityDataAdmin(List<ImportCommunityDataDTO> datas,
+			Long userId, ImportCommunityCommand cmd) {
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
+		
+		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
+		if(orgMem != null) {
+			orgMem.stream().map(r -> {
+				ct.put(r.getContactToken(), r);
+				return null;
+			});
+		}
+		List<ImportFileResultLog<ImportCommunityDataDTO>> list = new ArrayList<>();
+		for (ImportCommunityDataDTO data : datas) {
+			ImportFileResultLog<ImportCommunityDataDTO> log = checkCommunityData(data, cmd.getNamespaceId(), userId);
+			if (log != null) {
+				list.add(log);
+				continue;
+			}
+			
+			Community community = communityProvider.findCommunityByNamespaceIdAndName(cmd.getNamespaceId(), data.getName());
+			if (community == null) {
+				community = new Community();
+				community.setName(data.getName());
+				community.setCommunityNumber(data.getCommunityNumber());
+				community.setAliasName(data.getAliasName());
+				community.setCityName(data.getCityName());
+				community.setAreaName(data.getAreaName());
+				community.setAddress(data.getAddress());
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					community.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
+				if (StringUtils.isNotBlank(data.getRentArea())) {
+					community.setRentArea(Double.valueOf(data.getRentArea()));
+				}
+				if (StringUtils.isNotBlank(data.getCommunityType())) {
+					if (data.getCommunityType().equals("商用")) {
+						community.setCommunityType((byte)1);
+					}
+					if (data.getCommunityType().equals("住宅")) {
+						community.setCommunityType((byte)0);
+					}
+				}
+				//设置默认的forumId，要使用原有的项目里的forumId
+				ListingLocator locator = new ListingLocator();
+				List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
+				if(communities != null && communities.size() > 0){
+					community.setDefaultForumId(communities.get(0).getDefaultForumId());
+					community.setFeedbackForumId(communities.get(0).getFeedbackForumId());
+				}else {
+					community.setDefaultForumId(1L);
+					community.setFeedbackForumId(2L);
+				}
+				community.setCityId(data.getCityId());
+				community.setAreaId(data.getAreaId());
+				//community.setCommunityType((byte)1);
+				community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				community.setAptCount(0);
+				community.setNamespaceId(cmd.getNamespaceId());
+				
+				//插入园区
+				//communityProvider.createCommunity(userId, community);
+				community = createCommunityData(userId, community);
+				//添加企业可见园区,管理公司可以看到添加的园区
+				OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+				organizationCommunity.setCommunityId(community.getId());
+				organizationCommunity.setOrganizationId(cmd.getOrganizationId());
+				organizationProvider.createOrganizationCommunity(organizationCommunity);
+				
+				//园区和域空间关联
+				createNamespaceResource(cmd.getNamespaceId(), community.getId());
+				communitySearcher.feedDoc(community);
+				
+				//创建经纬度数据
+				CommunityGeoPoint geoPoint = new CommunityGeoPoint();
+				geoPoint.setCommunityId(community.getId());
+				geoPoint.setLongitude(Double.valueOf(data.getLongitude()));
+				geoPoint.setLatitude(Double.valueOf(data.getLatitude()));
+				String geohash = GeoHashUtils.encode(Double.valueOf(data.getLatitude()), Double.valueOf(data.getLongitude()));
+				geoPoint.setGeohash(geohash);
+				communityProvider.createCommunityGeoPoint(geoPoint);
+			}else {
+				community.setName(data.getName());
+				if (StringUtils.isNotBlank(data.getCommunityNumber())) {
+					community.setCommunityNumber(data.getCommunityNumber());
+				}
+				if (StringUtils.isNotBlank(data.getAliasName())) {
+					community.setAliasName(data.getAliasName());
+				}
+				if (StringUtils.isNotBlank(data.getCityName())) {
+					community.setCityName(data.getCityName());
+				}
+				if (StringUtils.isNotBlank(data.getAreaName())) {
+					community.setAreaName(data.getAreaName());
+				}
+				if (StringUtils.isNotBlank(data.getAddress())) {
+					community.setAddress(data.getAddress());
+				}
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					community.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
+				if (StringUtils.isNotBlank(data.getRentArea())) {
+					community.setRentArea(Double.valueOf(data.getRentArea()));
+				}
+				if (StringUtils.isNotBlank(data.getCommunityType())) {
+					if (data.getCommunityType().equals("商用")) {
+						community.setCommunityType((byte)1);
+					}
+					if (data.getCommunityType().equals("住宅")) {
+						community.setCommunityType((byte)0);
+					}
+				}
+				community.setCityId(data.getCityId());
+				community.setAreaId(data.getAreaId());
+				
+				communityProvider.updateCommunity(community);
+				communitySearcher.feedDoc(community);
+				
+				
+				CommunityGeoPoint geoPoint = communityProvider.findCommunityGeoPointByCommunityId(community.getId());
+				if (geoPoint != null) {
+					geoPoint.setLongitude(Double.valueOf(data.getLongitude()));
+					geoPoint.setLatitude(Double.valueOf(data.getLatitude()));
+					String geohash = GeoHashUtils.encode(Double.valueOf(data.getLatitude()), Double.valueOf(data.getLongitude()));
+					geoPoint.setGeohash(geohash);
+					communityProvider.updateCommunityGeoPoint(geoPoint);
+				}else {
+					CommunityGeoPoint geo = new CommunityGeoPoint();
+					geo.setCommunityId(community.getId());
+					geo.setLongitude(Double.valueOf(data.getLongitude()));
+					geo.setLatitude(Double.valueOf(data.getLatitude()));
+					String geohash = GeoHashUtils.encode(Double.valueOf(data.getLatitude()), Double.valueOf(data.getLongitude()));
+					geo.setGeohash(geohash);
+					communityProvider.createCommunityGeoPoint(geo);
+				}
+				
+			}
+		}
+		return list;
+	}
+	
+	private Community createCommunityData(Long userId, Community cmd) {
+		//创建社区
+		Community community = ConvertHelper.convert(cmd, Community.class);
+		communityProvider.createCommunity(userId, community);
+		return community;
+	}
+	
+	private ImportFileResultLog<ImportCommunityDataDTO> checkCommunityData(ImportCommunityDataDTO data, Integer namespaceId, Long userId) {
+		ImportFileResultLog<ImportCommunityDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
+		
+		if (StringUtils.isEmpty(data.getName())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_NAME_EMPTY);
+			log.setData(data);
+			log.setErrorLog("Community name cannot be empty");
+			return log;
+		}
+		//检查项目编号,一个域空间下只存在一个项目编号
+		/*if (StringUtils.isNotEmpty(data.getCommunityNumber())) {
+			Community community = communityProvider.findCommunityByNumber(data.getCommunityNumber(), namespaceId);
+			if(community != null) {
+				log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_NUMBER_EXIST);
+				log.setData(data);
+				log.setErrorLog("CommunityNumber exist ");
+				return log;
+			}
+		}*/
+		//正则校验数字
+		if (StringUtils.isNotEmpty(data.getAreaSize())) {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getAreaSize()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_AREASIZE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("AreaSize format is error");
+				return log;
+			}
+		}
+		if (StringUtils.isNotEmpty(data.getRentArea())) {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getRentArea()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_AREASIZE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("AreaSize format is error");
+				return log;
+			}
+		}
+		
+		if (StringUtils.isEmpty(data.getLongitude())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_LONGITUDE_EMPTY);
+			log.setData(data);
+			log.setErrorLog("Community longitude cannot be empty");
+			return log;
+		}else {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getLongitude()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_LONGITUDE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("longitude format is error");
+				return log;
+			}else {
+				if (Double.valueOf(data.getLongitude()).doubleValue() > 136 || Double.valueOf(data.getLongitude()).doubleValue() < 70) {
+					log.setCode(CommunityServiceErrorCode.ERROR_LONGITUDE_RANGE);
+					log.setData(data);
+					log.setErrorLog("longitude range is error");
+					return log;
+				}
+			}
+		}
+		
+		if (StringUtils.isEmpty(data.getLatitude())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_LATITUDE_EMPTY);
+			log.setData(data);
+			log.setErrorLog("Community latitude cannot be empty");
+			return log;
+		}else {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getLatitude()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("latitude format is error");
+				return log;
+			}else {
+				if (Double.valueOf(data.getLatitude()).doubleValue() > 54 || Double.valueOf(data.getLatitude()).doubleValue() < 3) {
+					log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_RANGE);
+					log.setData(data);
+					log.setErrorLog("latitude range is error");
+					return log;
+				}
+			}
+		}
+		
+		if (StringUtils.isEmpty(data.getCommunityType())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_TYPE);
+			log.setData(data);
+			log.setErrorLog("Community type cannot be empty");
+			return log;
+		}else {
+			if (!data.getCommunityType().equals("商用") && !data.getCommunityType().equals("住宅")  ) {
+				log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_TYPE_CONTENT);
+				log.setData(data);
+				log.setErrorLog("Community type content cannot be empty");
+				return log;
+			}
+		}
+		
+		if (StringUtils.isEmpty(data.getAddress()) && (data.getAddress()).length()>50) {
+			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_LENGTH);
+			log.setData(data);
+			log.setErrorLog("address length error");
+			return log;
+		}
+		if (StringUtils.isEmpty(data.getProvinceName()) || StringUtils.isEmpty(data.getCityName()) || StringUtils.isEmpty(data.getAreaName())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_PROVINCECITYAREA_EMPTY);
+			log.setData(data);
+			log.setErrorLog("provinceCityArea name cannot be empty");
+			return log;
+		} else {
+			Long provinceId = null;
+			Long cityId = null;
+			Long areaId = null;
+			try {
+				provinceId = createRegion(userId, namespaceId, getPath(data.getProvinceName()), 0L); // 创建省
+			} catch (Exception e) {
+				log.setCode(CommunityServiceErrorCode.ERROR_PROVINCE_NAME);
+				log.setData(data);
+				log.setErrorLog("province name error");
+				return log;
+			}
+			try {
+				cityId = createRegion(userId, namespaceId, getPath(data.getProvinceName(), data.getCityName()), provinceId); // 创建市
+			} catch (Exception e) {
+				log.setCode(CommunityServiceErrorCode.ERROR_CITY_NAME);
+				log.setData(data);
+				log.setErrorLog("city name errory");
+				return log;
+			}
+			try {
+				areaId = createRegion(userId, namespaceId, getPath(data.getProvinceName(), data.getCityName(), data.getAreaName()), cityId); // 创建区县
+			} catch (Exception e) {
+				log.setCode(CommunityServiceErrorCode.ERROR_AREA_NAME);
+				log.setData(data);
+				log.setErrorLog("area name errory");
+				return log;
+			}
+			data.setCityId(cityId);
+			data.setAreaId(areaId);
+		}
+		
+		return null;
+	}
+	
+	private List<ImportCommunityDataDTO> handleImportCommunityData(List resultList) {
+		List<ImportCommunityDataDTO> list = new ArrayList<>();
+		for(int i = 1; i < resultList.size(); i++) {
+			RowResult r = (RowResult) resultList.get(i);
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
+					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || 
+					StringUtils.isNotBlank(r.getI()) || StringUtils.isNotBlank(r.getJ()) || StringUtils.isNotBlank(r.getK()) || StringUtils.isNotBlank(r.getL())) {
+				ImportCommunityDataDTO data = new ImportCommunityDataDTO();
+				data.setName(trim(r.getA()));
+				data.setCommunityNumber(trim(r.getB()));
+				data.setAliasName(trim(r.getC()));
+				data.setProvinceName(trim(r.getD()));
+				data.setCityName(trim(r.getE()));
+				data.setAreaName(trim(r.getF()));
+				data.setAddress(trim(r.getG()));
+				data.setAreaSize(trim(r.getH()));
+				data.setRentArea(trim(r.getI()));
+				data.setLongitude(trim(r.getJ()));
+				data.setLatitude(trim(r.getK()));
+				data.setCommunityType(trim(r.getL()));
+				list.add(data);
+			}
+		}
+		return list;
 	}
 }
 

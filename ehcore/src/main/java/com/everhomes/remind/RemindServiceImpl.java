@@ -28,6 +28,8 @@ import com.everhomes.rest.remind.CreateOrUpdateRemindCategoryCommand;
 import com.everhomes.rest.remind.CreateOrUpdateRemindCommand;
 import com.everhomes.rest.remind.DeleteRemindCategoryCommand;
 import com.everhomes.rest.remind.DeleteRemindCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdCommand;
+import com.everhomes.rest.remind.GetCurrentUserDetailIdResponse;
 import com.everhomes.rest.remind.GetRemindCategoryColorsResponse;
 import com.everhomes.rest.remind.GetRemindCategoryCommand;
 import com.everhomes.rest.remind.GetRemindCommand;
@@ -512,7 +514,9 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
         if (cmd.getRepeatType() == null) {
             cmd.setRepeatType(RemindRepeatType.NONE.getCode());
         }
-
+        if (cmd.getPlanDate() != null && cmd.getPlanDate() <= 0) {
+            cmd.setPlanDate(null);
+        }
         if (cmd.getId() == null) {
             return createRemind(cmd);
         }
@@ -992,6 +996,20 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
     }
 
     @Override
+    public GetCurrentUserDetailIdResponse getCurrentUserContactSimpleInfo(GetCurrentUserDetailIdCommand cmd) {
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+        if (detail == null) {
+            return null;
+        }
+        GetCurrentUserDetailIdResponse response = new GetCurrentUserDetailIdResponse();
+        response.setUserId(detail.getTargetId());
+        response.setDetailId(detail.getId());
+        response.setContactName(detail.getContactName());
+        response.setContactToken(detail.getContactToken());
+        return response;
+    }
+
+    @Override
     public void remindSchedule() {
         this.coordinationProvider.getNamedLock(CoordinationLocks.REMIND_SCHEDULED.getCode()).tryEnter(() -> {
             LOGGER.info("remindSchedule begin");
@@ -1319,11 +1337,13 @@ public class RemindServiceImpl implements RemindService, ApplicationListener<Con
             String url = null;
             if (remind.getTrackRemindId() != null && remind.getTrackRemindId() > 0) {
                 TrackRemindDetailActionData actionData = new TrackRemindDetailActionData();
+                actionData.setOrganizationId(remind.getOwnerId());
                 actionData.setRemindId(remind.getTrackRemindId());
                 actionData.setRemindUserId(remind.getTrackRemindUserId());
                 url = RouterBuilder.build(Router.SHARED_CALENDAR_REMIND_DETAIL, actionData);
             } else {
                 SelfRemindDetailActionData actionData = new SelfRemindDetailActionData();
+                actionData.setOrganizationId(remind.getOwnerId());
                 actionData.setRemindId(remind.getId());
                 url = RouterBuilder.build(Router.SELF_CALENDAR_REMIND_DETAIL, actionData);
             }

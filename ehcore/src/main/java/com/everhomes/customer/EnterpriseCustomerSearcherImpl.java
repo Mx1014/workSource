@@ -12,11 +12,7 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.customer.CustomerEntryInfoDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -150,6 +146,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
             builder.field("adminFlag" , customer.getAdminFlag());
+            builder.field("sourceItemId" , customer.getSourceItemId());
+            builder.field("sourceId" , customer.getSourceId());
+            builder.field("sourceType" , customer.getSourceType());
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -219,20 +218,16 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             //app端要只根据跟进人名称搜索
             if(StringUtils.isNotEmpty(cmd.getTrackingName())){
-                qb = QueryBuilders.multiMatchQuery(cmd.getTrackingName())
-                        .field("trackingName", 5.5f)
-                        .field("trackingName.pinyin_prefix", 2.0f)
-                        .field("trackingName.pinyin_gram", 1.0f);
+                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackingName");
             }else {
                 qb = QueryBuilders.matchAllQuery();
             }
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 1.5f)
-                    .field("contactName", 1.2f)
-                    .field("contactAddress", 1.2f)
-                    .field("contactPhone", 1.0f)
-                    .field("trackingName" , 1.0f);
+            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("name")
+                    .field("contactName")
+                    .field("contactAddress")
+                    .field("contactMobile")
+                    .field("trackingName");
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
@@ -307,7 +302,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         
         if(null != cmd.getPropertyArea()){
         	RangeFilterBuilder rf = new RangeFilterBuilder("propertyArea");
-        	if(cmd.getPropertyArea().indexOf(",") > -1 && cmd.getPropertyArea().split(",").length == 2){
+        	if(cmd.getPropertyArea().contains(",") && cmd.getPropertyArea().split(",").length == 2){
         		if(null != cmd.getPropertyArea().split(",")[0] && !"@".equals(cmd.getPropertyArea().split(",")[0])){
         			rf.gte(Double.parseDouble(cmd.getPropertyArea().split(",")[0]));
         		}
@@ -320,7 +315,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
         if(null != cmd.getPropertyUnitPrice()){
         	RangeFilterBuilder rf = new RangeFilterBuilder("propertyUnitPrice");
-        	if(cmd.getPropertyUnitPrice().indexOf(",") > -1 && cmd.getPropertyUnitPrice().split(",").length == 2){
+        	if(cmd.getPropertyUnitPrice().contains(",") && cmd.getPropertyUnitPrice().split(",").length == 2){
         		if(null != cmd.getPropertyUnitPrice().split(",")[0] && !"@".equals(cmd.getPropertyUnitPrice().split(",")[0])){
         			rf.gte(Double.parseDouble(cmd.getPropertyUnitPrice().split(",")[0]));
         		}
@@ -329,6 +324,16 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         		}
         		fb = FilterBuilders.andFilter(fb, rf); 
         	}
+        }
+
+        if (cmd.getSourceItemId() != null && StringUtils.isNotBlank(cmd.getSourceType())) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceItemId()));
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceType", cmd.getSourceType()));
+        }
+
+        if(cmd.getSourceItemId()!=null && StringUtils.isBlank(cmd.getSourceType())){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceItemId()));
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.existsFilter("sourceId")));
         }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -380,7 +385,49 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         return response;
     }
 
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> easyQueryEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb = null;
+        String keyWord = cmd.getKeyWord();
+        if(org.jooq.tools.StringUtils.isBlank(keyWord)) {
+            return new ArrayList<>();
+        } else {
+            qb = QueryBuilders.wildcardQuery("name.baidu", keyWord+"*");
+        }
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
+        fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        qb = QueryBuilders.filteredQuery(qb, fb);
+
+        int pageSize = 10;
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setSize(pageSize);
+        builder.setQuery(qb);
+
+        SearchResponse rsp = builder.execute().actionGet();
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("EnterpriseCustomerSearcherImpl query builder: {}, rsp: {}", builder, rsp);
+
+        List<Long> ids = getIds(rsp);
+        if(ids.size() < 1) {
+            return new ArrayList<>();
+        }
+        List<EasySearchEnterpriseCustomersDTO> list = new ArrayList<>();
+
+        return  enterpriseCustomerProvider.listEnterpriseCustomerNameAndId(ids);
+    }
+
+    @Override
+    public List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd) {
+         return enterpriseCustomerProvider.listCommunityEnterpriseCustomers(cmd.getCommunityId(), cmd.getNamespaceId());
+    }
+
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
+        LOGGER.debug("convertToDTO start time :{}",System.currentTimeMillis());
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
         Integer result = 0;
 //        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
@@ -528,6 +575,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
 
+        LOGGER.debug("switch items name end time :{}",System.currentTimeMillis());
+
         //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
         if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
             dto.setThirdPartFlag(true);
@@ -537,6 +586,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setTrackingPhone(members.get(0).getContactToken());
             dto.setTrackingName(dto.getTrackingName());
         }
+        LOGGER.debug("search trackingName from organization  members end time  :{}",System.currentTimeMillis());
         if (customer.getLastTrackingTime() != null) {
             result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
             dto.setTrackingPeriod(result);
@@ -548,6 +598,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         command.setCommunityId(customer.getCommunityId());
         List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
         dto.setEnterpriseAdmins(admins);
+        LOGGER.debug("list organization admins  end time  :{}",System.currentTimeMillis());
         //楼栋门牌
         ListCustomerEntryInfosCommand command1 = new ListCustomerEntryInfosCommand();
         command1.setCommunityId(customer.getCommunityId());
@@ -559,6 +610,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
+        LOGGER.debug("customer entry info list end time  :{}",System.currentTimeMillis());
         return dto;
     }
 
@@ -566,9 +618,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         Map<Long, CustomerEntryInfoDTO> map = new HashMap<>();
         if (entryInfos != null && entryInfos.size() > 0) {
             entryInfos.forEach((e) -> {
-                Address address = addressProvider.findAddressById(e.getAddressId());
-                if (address != null) {
-                    map.putIfAbsent(e.getAddressId(), e);
+                if (e.getAddressId() != null) {
+                    Address address = addressProvider.findAddressById(e.getAddressId());
+                    if (address != null) {
+                        map.putIfAbsent(e.getAddressId(), e);
+                    }
                 }
             });
             return new ArrayList<>(map.values());

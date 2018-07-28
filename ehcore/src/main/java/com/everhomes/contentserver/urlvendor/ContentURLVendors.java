@@ -42,6 +42,9 @@ public class ContentURLVendors implements ContentURLVendor {
     }
 
     public static String evaluateURL(String scheme, String domain, Integer port, String uri, Map<String, Object> uriParams, String vendorName) {
+        if (vendorName == null) {
+            return getInstance().evaluate(scheme, domain, port, uri, uriParams);
+        }
         return evaluate(scheme, domain, port, uri, uriParams, vendorName);
     }
 
