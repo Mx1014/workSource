@@ -34,6 +34,8 @@ import java.util.List;
  * <li>exceptionRequestCounts：异常申请数</li>
  * <li>belateTime：迟到时长</li>
  * <li>leaveEarlyTime：早退时长</li>
+ * <li>forgotPunchCountOnDuty: 上班缺卡次数</li>
+ * <li>forgotPunchCountOffDuty: 下班缺卡次数</li>
  * <li>forgotCount：缺卡次数</li>
  * <li>overtimeTotalWorkdayDisplay: 工作日加班时长，格式：xx小时xx分钟</li>
  * <li>overtimeTotalRestdayDisplay: 休息日加班时长，格式：xx小时xx分钟</li>
@@ -78,6 +80,8 @@ public class PunchCountDTO {
     private String belateTime;
     private String leaveEarlyTime;
 	private Integer forgotCount;
+	private Integer forgotPunchCountOffDuty;
+	private Integer forgotPunchCountOnDuty;
 	private String overtimeTotalWorkdayDisplay;
 	private String overtimeTotalRestdayDisplay;
 	private String overtimeTotalLegalHolidayDisplay;
@@ -347,5 +351,21 @@ public class PunchCountDTO {
 
 	public void setOvertimeTotalLegalHolidayDisplay(String overtimeTotalLegalHolidayDisplay) {
 		this.overtimeTotalLegalHolidayDisplay = overtimeTotalLegalHolidayDisplay;
+	}
+
+	public Integer getForgotPunchCountOffDuty() {
+		return forgotPunchCountOffDuty;
+	}
+
+	public void setForgotPunchCountOffDuty(Integer forgotPunchCountOffDuty) {
+		this.forgotPunchCountOffDuty = forgotPunchCountOffDuty;
+	}
+
+	public Integer getForgotPunchCountOnDuty() {
+		return forgotPunchCountOnDuty;
+	}
+
+	public void setForgotPunchCountOnDuty(Integer forgotPunchCountOnDuty) {
+		this.forgotPunchCountOnDuty = forgotPunchCountOnDuty;
 	}
 }

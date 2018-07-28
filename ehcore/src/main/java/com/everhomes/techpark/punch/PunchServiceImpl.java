@@ -1200,9 +1200,13 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private String processIntevalStatus(String arrStatus, String leaveStatus) {
-        // 上班卡状态是未打卡，则最终状态是旷工
+        // 上班卡状态是未打卡
         if (arrStatus.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
-            return arrStatus;
+            if (leaveStatus.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
+                return String.valueOf(PunchStatus.UNPUNCH.getCode());
+            } else {
+                return String.valueOf(PunchStatus.FORGOT_ON_DUTY.getCode());
+            }
         }
 
         String status = "";
@@ -1210,7 +1214,7 @@ public class PunchServiceImpl implements PunchService {
             if (arrStatus.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
                 status = String.valueOf(PunchStatus.BELATE_AND_FORGOT.getCode());
             } else if (arrStatus.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-                status = String.valueOf(PunchStatus.FORGOT.getCode());
+                status = String.valueOf(PunchStatus.FORGOT_OFF_DUTY.getCode());
             }
         } else if (leaveStatus.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
             if (arrStatus.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
@@ -3365,7 +3369,8 @@ public class PunchServiceImpl implements PunchService {
         statistic.setExceptionRequestCounts(0);
         statistic.setBelateTime(0L);
         statistic.setLeaveEarlyTime(0L);
-        statistic.setForgotCount(0);
+        statistic.setForgotPunchCountOnDuty(0);
+        statistic.setForgotPunchCountOffDuty(0);
         statistic.setOvertimeTotalLegalHoliday(0L);
         statistic.setOvertimeTotalRestday(0L);
         statistic.setOvertimeTotalWorkday(0L);
@@ -3416,7 +3421,9 @@ public class PunchServiceImpl implements PunchService {
                     isAbsence = isAbsence(status);
                     statistic.setBelateCount(statistic.getBelateCount() + belateCount(status));
                     statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + leaveEarlyCount(status));
-                    statistic.setForgotCount(statistic.getForgotCount() + forgotCount(status));
+                    statistic.setForgotPunchCountOnDuty(statistic.getForgotPunchCountOnDuty() + forgotCountOnDuty(status));
+                    statistic.setForgotPunchCountOffDuty(statistic.getForgotPunchCountOffDuty() + forgotCountOffDuty(status));
+
                 } else {
                     if (pdl.getStatusList().equals(String.valueOf(PunchStatus.NOTWORKDAY.getCode()))) {
                         //不上班跳过
@@ -3430,7 +3437,8 @@ public class PunchServiceImpl implements PunchService {
                         isAbsence = isAbsence(new String[]{status});
                         statistic.setBelateCount(statistic.getBelateCount() + belateCount(new String[]{status}));
                         statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + leaveEarlyCount(new String[]{status}));
-                        statistic.setForgotCount(statistic.getForgotCount() + forgotCount(new String[]{status}));
+                        statistic.setForgotPunchCountOnDuty(statistic.getForgotPunchCountOnDuty() + forgotCountOnDuty(new String[]{status}));
+                        statistic.setForgotPunchCountOffDuty(statistic.getForgotPunchCountOffDuty() + forgotCountOffDuty(new String[]{status}));
                         if (status.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))
                                 && ptrDTO != null && ptrDTO.getAfternoonArriveTime() != null && ptrDTO.getNoonLeaveTime() != null) {
                             PunchTimeIntervalDTO dto1 = new PunchTimeIntervalDTO();
@@ -3498,13 +3506,26 @@ public class PunchServiceImpl implements PunchService {
         return NormalFlag.YES.getCode();
     }
 
-    private int forgotCount(String[] status) {
+    private int forgotCountOnDuty(String[] status) {
         if (status == null || status.length == 0) {
             return 0;
         }
         int c = 0;
         for (String s : status) {
-            if (Arrays.asList(String.valueOf(PunchStatus.FORGOT.getCode()), String.valueOf(PunchStatus.BELATE_AND_FORGOT.getCode())).contains(s)) {
+            if (Arrays.asList(String.valueOf(PunchStatus.FORGOT_ON_DUTY.getCode())).contains(s)) {
+                c++;
+            }
+        }
+        return c;
+    }
+
+    private int forgotCountOffDuty(String[] status) {
+        if (status == null || status.length == 0) {
+            return 0;
+        }
+        int c = 0;
+        for (String s : status) {
+            if (Arrays.asList(String.valueOf(PunchStatus.FORGOT_OFF_DUTY.getCode()), String.valueOf(PunchStatus.BELATE_AND_FORGOT.getCode())).contains(s)) {
                 c++;
             }
         }
@@ -3559,7 +3580,9 @@ public class PunchServiceImpl implements PunchService {
             isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
             isNormal = NormalFlag.YES.getCode();
-        } else if (status.equals(String.valueOf(PunchStatus.FORGOT.getCode()))) {
+        } else if (status.equals(String.valueOf(PunchStatus.FORGOT_ON_DUTY.getCode()))) {
+            isNormal = NormalFlag.YES.getCode();
+        } else if (status.equals(String.valueOf(PunchStatus.FORGOT_OFF_DUTY.getCode()))) {
             isNormal = NormalFlag.YES.getCode();
         } else if (status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
             isNormal = NormalFlag.YES.getCode();
@@ -3679,6 +3702,7 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue("迟到时长");
         row.createCell(++i).setCellValue("早退次数");
         row.createCell(++i).setCellValue("早退时长");
+        row.createCell(++i).setCellValue("上班缺卡次数");
         row.createCell(++i).setCellValue("下班缺卡次数");
         row.createCell(++i).setCellValue("设备异常次数");
         row.createCell(++i).setCellValue("异常申请次数");
@@ -3723,7 +3747,8 @@ public class PunchServiceImpl implements PunchService {
         row.createCell(++i).setCellValue(objToString(statistic.getBelateTime()));
         row.createCell(++i).setCellValue(objToString(statistic.getLeaveEarlyCount()));
         row.createCell(++i).setCellValue(objToString(statistic.getLeaveEarlyTime()));
-        row.createCell(++i).setCellValue(objToString(statistic.getForgotCount()));
+        row.createCell(++i).setCellValue(objToString(statistic.getForgotPunchCountOnDuty()));
+        row.createCell(++i).setCellValue(objToString(statistic.getForgotPunchCountOffDuty()));
         row.createCell(++i).setCellValue(objToString(statistic.getDeviceChangeCounts()));
         row.createCell(++i).setCellValue(objToString(statistic.getExceptionRequestCount()));
         row.createCell(++i).setCellValue(statistic.getOvertimeTotalWorkdayDisplay());
@@ -9046,7 +9071,7 @@ public class PunchServiceImpl implements PunchService {
                     } else if (intervalDTO.getStatus().equals(PunchStatus.UNPUNCH.getCode() + "")) {
 //						dto1.setClockStatus(PunchStatus.UNPUNCH.getCode());
 //						dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
-                    } else if (intervalDTO.getStatus().equals(PunchStatus.FORGOT.getCode() + "")) {
+                    } else if (intervalDTO.getStatus().equals(PunchStatus.FORGOT_OFF_DUTY.getCode() + "") || intervalDTO.getStatus().equals(PunchStatus.BELATE_AND_FORGOT.getCode() + "")) {
 //						dto1.setClockStatus(PunchStatus.NORMAL.getCode());
                         dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
                     }

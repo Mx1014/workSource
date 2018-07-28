@@ -199,4 +199,11 @@ ALTER TABLE eh_punch_holidays ADD COLUMN legal_flag TINYINT DEFAULT '0' COMMENT 
 ALTER TABLE eh_punch_exception_requests CHANGE COLUMN duration duration_day DECIMAL(10,4) DEFAULT 0 COMMENT '申请时长-单位天';
 ALTER TABLE eh_punch_exception_requests ADD COLUMN duration_minute BIGINT DEFAULT 0 COMMENT '申请时长-单位分钟';
 
+-- 新增上班缺卡次数、下班缺卡次数统计
+ALTER TABLE eh_punch_statistics CHANGE COLUMN forgot_count forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数';
+ALTER TABLE eh_punch_statistics ADD COLUMN forgot_punch_count_on_duty INTEGER NOT NULL DEFAULT 0 COMMENT '上班缺卡次数' AFTER forgot_punch_count_off_duty;
+
+ALTER TABLE eh_punch_statistic_files CHANGE COLUMN forgot_count forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数';
+ALTER TABLE eh_punch_statistic_files ADD COLUMN forgot_punch_count_on_duty INTEGER NOT NULL DEFAULT 0 COMMENT '上班缺卡次数' AFTER forgot_punch_count_off_duty;
+
 -- END
