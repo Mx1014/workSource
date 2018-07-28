@@ -195,4 +195,8 @@ ALTER TABLE eh_punch_statistic_files ADD COLUMN overtime_total_legal_holiday BIG
 -- 节假日表增加法定假日标识
 ALTER TABLE eh_punch_holidays ADD COLUMN legal_flag TINYINT DEFAULT '0' COMMENT '是否法定假日:1-是 0-否';
 
+-- 考勤异常申请新增字段按天或按分钟为单位保存申请时长
+ALTER TABLE eh_punch_exception_requests CHANGE COLUMN duration duration_day DECIMAL(10,4) DEFAULT 0 COMMENT '申请时长-单位天';
+ALTER TABLE eh_punch_exception_requests ADD COLUMN duration_minute BIGINT DEFAULT 0 COMMENT '申请时长-单位分钟';
+
 -- END

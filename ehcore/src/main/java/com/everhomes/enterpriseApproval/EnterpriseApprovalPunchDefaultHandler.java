@@ -103,7 +103,8 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			ComponentAskForLeaveValue valDTO = JSON.parseObject(val.getFieldStr3(), ComponentAskForLeaveValue.class);
 			request.setBeginTime(parseStartTime(ga.getOrganizationId(), flowCase.getApplyUserId(), valDTO.getStartTime()));
 			request.setEndTime(parseEndTime(ga.getOrganizationId(), flowCase.getApplyUserId(), valDTO.getEndTime()));
-			request.setDuration(valDTO.getDuration());
+			request.setDurationDay(new BigDecimal(String.valueOf(valDTO.getDuration())));
+			request.setDurationMinute(valDTO.getDurationInMinute());
 			request.setCategoryId(valDTO.getRestId());
 		}else if(GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH){
 
@@ -188,9 +189,9 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			return;
 		}
 		if ("ANNUAL_LEAVE".equals(approvalCategory.getHanderType())) {
-			punchService.addVacationBalanceHistoryCount(userId, ga.getOrganizationId(), new BigDecimal(String.valueOf(request.getDuration())), BigDecimal.ZERO);
+			punchService.addVacationBalanceHistoryCount(userId, ga.getOrganizationId(), request.getDurationDay(), BigDecimal.ZERO);
 		} else if ("WORKING_DAY_OFF".equals(approvalCategory.getHanderType())) {
-			punchService.addVacationBalanceHistoryCount(userId, ga.getOrganizationId(), BigDecimal.ZERO, new BigDecimal(String.valueOf(request.getDuration())));
+			punchService.addVacationBalanceHistoryCount(userId, ga.getOrganizationId(), BigDecimal.ZERO, request.getDurationDay());
 		}
 	}
 
@@ -209,10 +210,10 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		updateVacationBalancesCommand.setDetailId(organizationMember.getDetailId());
 		updateVacationBalancesCommand.setDescription(description);
 		if ("ANNUAL_LEAVE".equals(approvalCategory.getHanderType())) {
-			updateVacationBalancesCommand.setAnnualLeaveBalanceCorrection(request.getDuration() * operation);
+			updateVacationBalancesCommand.setAnnualLeaveBalanceCorrection(request.getDurationDay().doubleValue() * operation);
 			punchService.updateVacationBalances(updateVacationBalancesCommand);
 		} else if ("WORKING_DAY_OFF".equals(approvalCategory.getHanderType())) {
-			updateVacationBalancesCommand.setOvertimeCompensationBalanceCorrection(request.getDuration() * operation);
+			updateVacationBalancesCommand.setOvertimeCompensationBalanceCorrection(request.getDurationDay().doubleValue() * operation);
 			punchService.updateVacationBalances(updateVacationBalancesCommand);
 		}
 	}

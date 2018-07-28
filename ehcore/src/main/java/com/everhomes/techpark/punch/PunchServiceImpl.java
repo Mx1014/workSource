@@ -9143,7 +9143,7 @@ public class PunchServiceImpl implements PunchService {
     }
 
     private List<PunchTimeIntervalDTO> findPunchTimeIntervals(PunchTimeRule ptr) {
-        if (null == ptr) {
+        if (null == ptr || ptr.getId() == null || ptr.getId() == 0) {
             return null;
         }
         List<PunchTimeIntervalDTO> timeIntervals = new ArrayList<>();
