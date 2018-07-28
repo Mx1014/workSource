@@ -32,5 +32,11 @@ public interface WarehouseServiceErrorCode {
     static final int ERROR_WAREHOUSE_REQUEST_MATERIAL_SHOULD_LARGER_THAN_ZERO = 10024;//warehouse stock change amount
     static final int ERROR_WAREHOUSE_IS_NOT_ACTIVE = 10025;//warehouse is not active
     static final int ERROR_WAREHOUSE_IS_RUNNING = 10026; // warehouse cannot be deleted when it's enabled;
+    
+    static final int ERROR_MATERIALNUMBE_EMPTY = 10027; 
+    static final int ERROR_AMOUNT_EMPTY = 10028; 
+    static final int ERROR_WAREHOUSENAME_EMPTY = 10029; 
+    static final int ERROR_AMOUNT_FORMAT = 10030; 
+    static final int ERROR_MATERIALNAME_EMPTY = 10031;
 }
 

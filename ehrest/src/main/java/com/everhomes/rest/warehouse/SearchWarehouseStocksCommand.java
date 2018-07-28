@@ -1,5 +1,7 @@
 package com.everhomes.rest.warehouse;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -19,9 +21,14 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchWarehouseStocksCommand {
 
-    private String ownerType;
-
+    @NotNull
+    private Long communityId;
+    @NotNull
+    private Integer namespaceId;
+    @NotNull
     private Long ownerId;
+    
+    private String ownerType;
 
     private Long warehouseId;
 
@@ -36,10 +43,6 @@ public class SearchWarehouseStocksCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
-
-    private Long communityId;
-
-    private Integer namespaceId;
 
     public Integer getNamespaceId() {
         return namespaceId;

@@ -6,6 +6,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.warehouse.SearchWarehouseStocksCommand;
@@ -116,6 +117,10 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
 
     @Override
     public SearchWarehouseStocksResponse query(SearchWarehouseStocksCommand cmd) {
+    	if (cmd.getOwnerId() == null || cmd.getCommunityId() == null) {
+    		throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY,
+                    "OrgIdorCommunityId user privilege error");
+		}
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_MAINTAIN_SEARCH,cmd.getOwnerId());
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
@@ -134,7 +139,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        //fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", Status.ACTIVE.getCode()));
 
@@ -146,7 +151,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseStatus", cmd.getWarehouseStatus()));
         }
 
-        if(cmd.getMaterialNumber() != null) {
+        if(cmd.getMaterialNumber() != null && cmd.getMaterialNumber().length()>0) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
         }
 

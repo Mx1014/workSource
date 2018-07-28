@@ -12,7 +12,7 @@ import java.util.List;
  *     <li>communityId: 园区id</li>
  *     <li>requestType: 操作类型 参考{@link com.everhomes.rest.warehouse.WarehouseStockRequestType}</li>
  *     <li>stocks: 库存列表 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialStock}</li>
- *     <li>serviceType:服务类型，1. 普通入库,2.领用出库，3.采购入库</li>
+ *     <li>serviceType:服务类型，1. 普通入库,2.领用出库，3.采购入库 , 4.批量</li>
  *     <li>namespaceId:域空间id</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.

@@ -7,6 +7,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.warehouse.*;
@@ -741,5 +742,38 @@ public class WarehouseController extends ControllerBase {
         res.setErrorDescription("OK");
         return res;
     }
+    
+    /**
+     * <b>URL: /warehouse/exportStocksByCommunityId</b>
+     * <p>导出库存列表</p>
+     */
+    @RequestMapping("exportStocksByCommunityId")
+    @RestReturn(value = String.class)
+    public RestResponse exportStocksByCommunityId(@Valid SearchWarehouseStocksCommand cmd, HttpServletResponse httpServletResponse) {
+    	warehouseService.exportStocksByCommunityId(cmd, httpServletResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * <b>URL:/warehouse/importStocksData</b>
+     * <p>导入库存信息excel</p>
+     */
+    @RequestMapping("importStocksData")
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importStocksData(@Valid ImportStocksCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+        RestResponse response = new RestResponse(warehouseService.importStocksData(cmd, files[0]));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
