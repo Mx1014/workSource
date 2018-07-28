@@ -103,7 +103,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			ComponentAskForLeaveValue valDTO = JSON.parseObject(val.getFieldStr3(), ComponentAskForLeaveValue.class);
 			request.setBeginTime(parseStartTime(ga.getOrganizationId(), flowCase.getApplyUserId(), valDTO.getStartTime()));
 			request.setEndTime(parseEndTime(ga.getOrganizationId(), flowCase.getApplyUserId(), valDTO.getEndTime()));
-			request.setDurationDay(new BigDecimal(String.valueOf(valDTO.getDuration())));
+			request.setDurationDay(new BigDecimal(String.valueOf(valDTO.getDuration() != null ? valDTO.getDuration() : 0)));
 			request.setDurationMinute(valDTO.getDurationInMinute());
 			request.setCategoryId(valDTO.getRestId());
 		}else if(GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH){
