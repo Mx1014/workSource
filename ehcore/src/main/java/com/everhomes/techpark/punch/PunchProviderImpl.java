@@ -3466,7 +3466,8 @@ public class PunchProviderImpl implements PunchProvider {
                 Tables.EH_PUNCH_DAY_LOG_FILES.NORMAL_FLAG,
                 Tables.EH_PUNCH_DAY_LOG_FILES.BELATE_COUNT,
                 Tables.EH_PUNCH_DAY_LOG_FILES.LEAVE_EARLY_COUNT,
-                Tables.EH_PUNCH_DAY_LOG_FILES.FORGOT_PUNCH_COUNT,
+                Tables.EH_PUNCH_DAY_LOG_FILES.FORGOT_PUNCH_COUNT_ON_DUTY,
+                Tables.EH_PUNCH_DAY_LOG_FILES.FORGOT_PUNCH_COUNT_OFF_DUTY,
                 Tables.EH_PUNCH_DAY_LOG_FILES.ASK_FOR_LEAVE_REQUEST_COUNT,
                 Tables.EH_PUNCH_DAY_LOG_FILES.GO_OUT_REQUEST_COUNT,
                 Tables.EH_PUNCH_DAY_LOG_FILES.BUSINESS_TRIP_REQUEST_COUNT,
@@ -3509,7 +3510,8 @@ public class PunchProviderImpl implements PunchProvider {
                 Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG,
                 Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT,
                 Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT,
-                Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT,
+                Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY,
+                Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY,
                 Tables.EH_PUNCH_DAY_LOGS.ASK_FOR_LEAVE_REQUEST_COUNT,
                 Tables.EH_PUNCH_DAY_LOGS.GO_OUT_REQUEST_COUNT,
                 Tables.EH_PUNCH_DAY_LOGS.BUSINESS_TRIP_REQUEST_COUNT,
@@ -3575,8 +3577,8 @@ public class PunchProviderImpl implements PunchProvider {
     		    Tables.EH_PUNCH_STATISTIC_FILES.DEVICE_CHANGE_COUNTS,
     		    Tables.EH_PUNCH_STATISTIC_FILES.EXCEPTION_REQUEST_COUNTS,
     		    Tables.EH_PUNCH_STATISTIC_FILES.BELATE_TIME,
-    		    Tables.EH_PUNCH_STATISTIC_FILES.LEAVE_EARLY_TIME,
-    		    Tables.EH_PUNCH_STATISTIC_FILES.FORGOT_PUNCH_COUNT_ON_DUTY,
+                Tables.EH_PUNCH_STATISTIC_FILES.LEAVE_EARLY_TIME,
+                Tables.EH_PUNCH_STATISTIC_FILES.FORGOT_PUNCH_COUNT_ON_DUTY,
                 Tables.EH_PUNCH_STATISTIC_FILES.FORGOT_PUNCH_COUNT_OFF_DUTY,
                 Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_TOTAL_WORKDAY,
                 Tables.EH_PUNCH_STATISTIC_FILES.OVERTIME_TOTAL_RESTDAY,
@@ -3617,8 +3619,8 @@ public class PunchProviderImpl implements PunchProvider {
     		    Tables.EH_PUNCH_STATISTICS.EXCEPTION_REQUEST_COUNTS,
     		    Tables.EH_PUNCH_STATISTICS.BELATE_TIME,
     		    Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_TIME,
-                Tables.EH_PUNCH_STATISTIC_FILES.FORGOT_PUNCH_COUNT_ON_DUTY,
-                Tables.EH_PUNCH_STATISTIC_FILES.FORGOT_PUNCH_COUNT_OFF_DUTY,
+    		    Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_ON_DUTY,
+                Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_OFF_DUTY,
                 Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_WORKDAY,
                 Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_RESTDAY,
                 Tables.EH_PUNCH_STATISTICS.OVERTIME_TOTAL_LEGAL_HOLIDAY,
@@ -3767,9 +3769,9 @@ public class PunchProviderImpl implements PunchProvider {
         		case ABSENT:
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
         			break;
-        		case FORGOT_PUNCH:
-        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT.gt(0));
-        			break;
+                case FORGOT_PUNCH:
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)));
+                    break;
     			default:
     				break;
         	}
@@ -3804,9 +3806,9 @@ public class PunchProviderImpl implements PunchProvider {
 	        		case ABSENT:
 	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.ABSENCE_COUNT.gt(0.0));
 	        			break;
-	        		case FORGOT_PUNCH:
-	        			condition = condition.and(Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT.gt(0));
-	        			break;
+                    case FORGOT_PUNCH:
+                        condition = condition.and(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)));
+                        break;
 	    			default:
 	    				break;
 	        	}
@@ -3866,7 +3868,7 @@ public class PunchProviderImpl implements PunchProvider {
                 Tables.EH_PUNCH_STATISTICS.BELATE_COUNT.as("belateCount"),
                 Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_COUNT.as("leaveEarlyCount"),
                 Tables.EH_PUNCH_STATISTICS.ABSENCE_COUNT.as("absenceCount"),
-                Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT.as("forgotCount"),
+                Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_ON_DUTY.add(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_OFF_DUTY).as("forgotCount"),
                 Tables.EH_PUNCH_STATISTICS.ASK_FOR_LEAVE_REQUEST_COUNT.as("askForLeaveRequestCount"),
                 Tables.EH_PUNCH_STATISTICS.GO_OUT_REQUEST_COUNT.as("goOutRequestCount"),
                 Tables.EH_PUNCH_STATISTICS.BUSINESS_TRIP_REQUEST_COUNT.as("businessTripRequestCount"),
@@ -3887,7 +3889,7 @@ public class PunchProviderImpl implements PunchProvider {
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.ABSENCE_COUNT.gt(0D), 1).otherwise(0).sum().as("absenceMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT.gt(0), 1).otherwise(0).sum().as("forgotMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)), 1).otherwise(0).sum().as("forgotMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FULL_NORMAL_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("normalMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.ASK_FOR_LEAVE_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("askForLeaveRequestMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.GO_OUT_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("goOutRequestMemberCount"),
@@ -3913,7 +3915,7 @@ public class PunchProviderImpl implements PunchProvider {
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("absenceMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT.gt(0), 1).otherwise(0).sum().as("forgotPunchMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)), 1).otherwise(0).sum().as("forgotPunchMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ASK_FOR_LEAVE_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("askForLeaveRequestMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.GO_OUT_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("goOutRequestMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BUSINESS_TRIP_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("businessTripRequestMemberCount"),
@@ -3959,7 +3961,7 @@ public class PunchProviderImpl implements PunchProvider {
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("absenceMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT.gt(0), 1).otherwise(0).sum().as("forgotPunchMemberCount")).from(Tables.EH_PUNCH_DAY_LOGS);
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)), 1).otherwise(0).sum().as("forgotPunchMemberCount")).from(Tables.EH_PUNCH_DAY_LOGS);
         Condition condition = Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(statisticsDate)).and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds));
         Record6<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal> record = query.where(condition).fetchOne();
         if (record == null) {
@@ -3975,7 +3977,7 @@ public class PunchProviderImpl implements PunchProvider {
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.ABSENCE_COUNT.gt(0D), 1).otherwise(0).sum().as("absenceMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FORGOT_COUNT.gt(0), 1).otherwise(0).sum().as("forgotPunchMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_STATISTICS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)), 1).otherwise(0).sum().as("forgotPunchMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_STATISTICS.FULL_NORMAL_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("normalMemberCount")
         ).from(Tables.EH_PUNCH_STATISTICS);
         Condition condition = Tables.EH_PUNCH_STATISTICS.OWNER_TYPE.eq("organization").and(Tables.EH_PUNCH_STATISTICS.OWNER_ID.eq(organizationId)).and(Tables.EH_PUNCH_STATISTICS.PUNCH_MONTH.eq(statisticsMonth)).and(Tables.EH_PUNCH_STATISTICS.DEPT_ID.in(deptIds));

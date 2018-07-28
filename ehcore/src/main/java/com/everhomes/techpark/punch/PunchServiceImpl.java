@@ -11577,7 +11577,8 @@ public class PunchServiceImpl implements PunchService {
         pdl.setNormalFlag(isFullNormal(statusList));
         pdl.setBelateCount(belateCount(statusList));
         pdl.setLeaveEarlyCount(leaveEarlyCount(statusList));
-        pdl.setForgotPunchCount(forgotCount(statusList));
+        pdl.setForgotPunchCountOnDuty(forgotCountOnDuty(statusList));
+        pdl.setForgotPunchCountOffDuty(forgotCountOffDuty(statusList));
     }
 
     private void punchExceptionRequestCountByPunchDayLog(PunchDayLog pdl, List<PunchExceptionRequest> exceptionRequests, List<PunchExceptionRequest> abnormalExceptionRequests) {
@@ -11681,7 +11682,7 @@ public class PunchServiceImpl implements PunchService {
                     result = 1;
                     break;
                 case FORGOT_PUNCH:
-                    result = pdl.getForgotPunchCount();
+                    result = pdl.getForgotPunchCountOnDuty() + pdl.getForgotPunchCountOffDuty();
                     break;
                 default:
                     break;
@@ -11827,7 +11828,7 @@ public class PunchServiceImpl implements PunchService {
 		        			dto.setStatisticsCount(statistic.getAbsenceCount().intValue());
 		        			break;
 		        		case FORGOT_PUNCH:
-		        			dto.setStatisticsCount(statistic.getForgotCount());
+                            dto.setStatisticsCount(statistic.getForgotPunchCountOnDuty() + statistic.getForgotPunchCountOffDuty());
 		        			break;
 	        			default:
 	        				break;
@@ -11977,7 +11978,7 @@ public class PunchServiceImpl implements PunchService {
                 result = pdl.getOvertimeRequestCount();
                 break;
             case PUNCH_EXCEPTION:
-                result = pdl.getForgotPunchCount();
+                result = pdl.getPunchExceptionRequestCount();
                 break;
             default:
                 break;
@@ -12245,8 +12246,11 @@ public class PunchServiceImpl implements PunchService {
             case OVERTIME:
             case GO_OUT:
             case BUSINESS_TRIP:
-//            	PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit 
-                dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(new BigDecimal(r.getDuration()).doubleValue(), dayUnit, hourUnit));
+                if (r.getDurationDay() != null && r.getDurationDay().compareTo(BigDecimal.ZERO) > 0) {
+                    dto.setTitle(PunchDayParseUtils.parseDayTimeDisplayStringZeroWithUnit(r.getDurationDay().doubleValue(), dayUnit, hourUnit));
+                } else {
+                    dto.setTitle(PunchDayParseUtils.parseHourMinuteDisplayString(r.getDurationMinute() * 6 * 1000, dayUnit, hourUnit));
+                }
                 map = getExceptionBeginEndTimeMap(r); 
                 result = localeTemplateService.getLocaleTemplateString(PunchConstants.EXCEPTION_STATISTIC_SCOPE,
                         PunchConstants.GO_OUT_TEMPLATE_CONTENT, RentalNotificationTemplateCode.locale, map, "");
