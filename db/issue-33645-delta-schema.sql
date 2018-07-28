@@ -195,6 +195,17 @@ ALTER TABLE eh_punch_statistic_files ADD COLUMN overtime_total_legal_holiday BIG
 -- 节假日表增加法定假日标识
 ALTER TABLE eh_punch_holidays ADD COLUMN legal_flag TINYINT DEFAULT '0' COMMENT '是否法定假日:1-是 0-否';
 
+-- 考勤异常申请新增字段按天或按分钟为单位保存申请时长
+ALTER TABLE eh_punch_exception_requests CHANGE COLUMN duration duration_day DECIMAL(10,4) DEFAULT 0 COMMENT '申请时长-单位天';
+ALTER TABLE eh_punch_exception_requests ADD COLUMN duration_minute BIGINT DEFAULT 0 COMMENT '申请时长-单位分钟';
+
+-- 新增上班缺卡次数、下班缺卡次数统计
+ALTER TABLE eh_punch_statistics CHANGE COLUMN forgot_count forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数';
+ALTER TABLE eh_punch_statistics ADD COLUMN forgot_punch_count_on_duty INTEGER NOT NULL DEFAULT 0 COMMENT '上班缺卡次数' AFTER forgot_punch_count_off_duty;
+
+ALTER TABLE eh_punch_statistic_files CHANGE COLUMN forgot_count forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数';
+ALTER TABLE eh_punch_statistic_files ADD COLUMN forgot_punch_count_on_duty INTEGER NOT NULL DEFAULT 0 COMMENT '上班缺卡次数' AFTER forgot_punch_count_off_duty;
+
 -- END
 -- -----------------------------------------------------------------------------------------------------------------------
 
@@ -207,7 +218,8 @@ ALTER TABLE eh_punch_day_logs ADD COLUMN absent_flag TINYINT COMMENT '是否全�
 ALTER TABLE eh_punch_day_logs ADD COLUMN normal_flag TINYINT COMMENT '全天是否出勤正常，1：是 0：否';
 ALTER TABLE eh_punch_day_logs ADD COLUMN belate_count INTEGER COMMENT '当天迟到次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN leave_early_count INTEGER COMMENT '早退次数';
-ALTER TABLE eh_punch_day_logs ADD COLUMN forgot_punch_count INTEGER COMMENT '当天缺卡次数';
+ALTER TABLE eh_punch_day_logs ADD COLUMN forgot_punch_count_on_duty INTEGER NOT NULL DEFAULT 0 COMMENT '上班缺卡次数' AFTER leave_early_count;
+ALTER TABLE eh_punch_day_logs ADD COLUMN forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数' AFTER forgot_punch_count_on_duty;
 ALTER TABLE eh_punch_day_logs ADD COLUMN ask_for_leave_request_count INTEGER COMMENT '当天请假申请次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN go_out_request_count INTEGER COMMENT '当天外出申请次数';
 ALTER TABLE eh_punch_day_logs ADD COLUMN business_trip_request_count INTEGER COMMENT '当天出差申请次数';
@@ -221,7 +233,8 @@ ALTER TABLE eh_punch_day_log_files ADD COLUMN absent_flag TINYINT COMMENT '是�
 ALTER TABLE eh_punch_day_log_files ADD COLUMN normal_flag TINYINT COMMENT '全天是否出勤正常，1：是 0：否';
 ALTER TABLE eh_punch_day_log_files ADD COLUMN belate_count INTEGER COMMENT '当天迟到次数';
 ALTER TABLE eh_punch_day_log_files ADD COLUMN leave_early_count INTEGER COMMENT '早退次数';
-ALTER TABLE eh_punch_day_log_files ADD COLUMN forgot_punch_count INTEGER COMMENT '当天缺卡次数';
+ALTER TABLE eh_punch_day_log_files ADD COLUMN forgot_punch_count_on_duty INTEGER NOT NULL  DEFAULT 0 COMMENT '上班缺卡次数' AFTER leave_early_count;
+ALTER TABLE eh_punch_day_log_files ADD COLUMN forgot_punch_count_off_duty INTEGER NOT NULL DEFAULT 0 COMMENT '下班缺卡次数' AFTER forgot_punch_count_on_duty;
 ALTER TABLE eh_punch_day_log_files ADD COLUMN ask_for_leave_request_count INTEGER COMMENT '当天请假申请次数';
 ALTER TABLE eh_punch_day_log_files ADD COLUMN go_out_request_count INTEGER COMMENT '当天外出申请次数';
 ALTER TABLE eh_punch_day_log_files ADD COLUMN business_trip_request_count INTEGER COMMENT '当天出差申请次数';
