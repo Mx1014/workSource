@@ -1607,5 +1607,47 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
         return restResponse;
     }
     
+    /**
+     * <p>仅用于手动测试能耗数据</p>
+     * <b>URL: /asset/testEnergy</b>
+     */
+    @RequestMapping("testEnergy")
+    @RestReturn(value = String.class)
+    public RestResponse testEnergy(PaymentExpectanciesCommand cmd) {
+        assetService.paymentExpectanciesCalculate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>未出账单一键转成已出账单功能</p>
+     * <b>URL: /asset/batchUpdateBillsToSettled</b>
+     */
+    @RequestMapping("batchUpdateBillsToSettled")
+    @RestReturn(value = String.class)
+    public RestResponse batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+        assetService.batchUpdateBillsToSettled(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>增加批量将账单转换为已缴的功能</p>
+     * <b>URL: /asset/batchUpdateBillsToPaid</b>
+     */
+    @RequestMapping("batchUpdateBillsToPaid")
+    @RestReturn(value = String.class)
+    public RestResponse batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+        assetService.batchUpdateBillsToPaid(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
 }
 

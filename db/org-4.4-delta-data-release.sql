@@ -1,1 +1,0 @@
-UPDATE `eh_locale_strings` SET `text`='通讯录移除' WHERE `scope` = 'archives' AND `code` = 1001;
