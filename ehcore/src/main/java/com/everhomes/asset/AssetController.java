@@ -1,10 +1,6 @@
 
 package com.everhomes.asset;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1574,8 +1570,50 @@ public RestResponse reCalBill(ReCalBillCommand cmd){
      */
     @RequestMapping("testLateFine")
     @RestReturn(value = String.class)
-    public RestResponse testLateFine(TestLateFineCommand cmd) throws ParseException {
+    public RestResponse testLateFine(TestLateFineCommand cmd){
     	assetService.testLateFine(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>仅用于手动测试能耗数据</p>
+     * <b>URL: /asset/testEnergy</b>
+     */
+    @RequestMapping("testEnergy")
+    @RestReturn(value = String.class)
+    public RestResponse testEnergy(PaymentExpectanciesCommand cmd) {
+        assetService.paymentExpectanciesCalculate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>未出账单一键转成已出账单功能</p>
+     * <b>URL: /asset/batchUpdateBillsToSettled</b>
+     */
+    @RequestMapping("batchUpdateBillsToSettled")
+    @RestReturn(value = String.class)
+    public RestResponse batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+        assetService.batchUpdateBillsToSettled(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+    /**
+     * <p>增加批量将账单转换为已缴的功能</p>
+     * <b>URL: /asset/batchUpdateBillsToPaid</b>
+     */
+    @RequestMapping("batchUpdateBillsToPaid")
+    @RestReturn(value = String.class)
+    public RestResponse batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+        assetService.batchUpdateBillsToPaid(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

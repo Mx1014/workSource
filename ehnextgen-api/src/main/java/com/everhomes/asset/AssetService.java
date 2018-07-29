@@ -233,6 +233,12 @@ public interface AssetService {
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 
 	void testLateFine(TestLateFineCommand cmd);
+	
+	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
+
+	void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd);
+
+	boolean isShowEnergy(Integer namespaceId, Long communityId, long moduleId);	
 
 	void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
 }
