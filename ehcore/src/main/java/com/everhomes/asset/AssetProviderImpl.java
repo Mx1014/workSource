@@ -5822,44 +5822,6 @@ public class AssetProviderImpl implements AssetProvider {
         return vo;
     }
     
-    public AssetPaymentOrder saveAnOrderCopyForEnt(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId,String orderType) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
-        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class));
-        AssetPaymentOrder order = new AssetPaymentOrder();
-        order.setClientAppName(clientAppName);
-        order.setCommunityId(String.valueOf(communityId));
-        order.setContractId(contactNum);
-        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        order.setId(nextOrderId);
-        order.setNamespaceId(namespaceId);
-        // GET THE START TIME AND EXPIRTIME
-        Timestamp startTime = new Timestamp(DateHelper.currentGMTTime().getTime());
-        Calendar c = Calendar.getInstance();
-        //expiretime为妙，所以乘以1000得到milliseconds
-        long l = startTime.getTime() + expireTimePeriod*1000l;
-
-        Timestamp endTime = new Timestamp(l);
-        order.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-        order.setOrderExpireTime(endTime);
-        order.setOrderType(orderType);
-
-        Random r = new Random();
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < 17; i++){
-            sb.append(r.nextInt(10));
-        }
-        order.setOrderNo(Long.parseLong(sb.toString()));
-        order.setUid(UserContext.currentUserId());
-        order.setPayAmount(new BigDecimal(amountOwed));
-        order.setPayerType(payerType);
-        order.setStatus((byte)0);
-        EhAssetPaymentOrderDao dao = new EhAssetPaymentOrderDao(context.configuration());
-        dao.insert(order);
-        return order;
-    }
-    
     public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
     	//卸载参数
     	Long billGroupId = cmd.getBillGroupId();
