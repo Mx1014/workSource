@@ -2714,11 +2714,6 @@ public class AssetServiceImpl implements AssetService {
 	                        // 重新计算下账单
 	                        assetProvider.reCalBillById(item.getBillId());
                         }
-                        fine.setAmount(fineAmount);
-                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
-                        // 重新计算下账单
-                        assetProvider.reCalBillById(item.getBillId());
                     }
                 }
             });
@@ -5276,11 +5271,6 @@ public class AssetServiceImpl implements AssetService {
 		                        // 重新计算下账单
 		                        assetProvider.reCalBillById(item.getBillId());
 	                        }
-	                        fine.setAmount(fineAmount);
-	                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
-	                        // 重新计算下账单
-	                        assetProvider.reCalBillById(item.getBillId());
 	                    }
 	                }
 	            });

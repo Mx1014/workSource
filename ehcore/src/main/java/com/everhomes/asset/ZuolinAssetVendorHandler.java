@@ -14,11 +14,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-<<<<<<< HEAD
 import com.everhomes.module.ServiceModuleService;
-=======
 import com.everhomes.openapi.Contract;
->>>>>>> 5.8.0
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
@@ -647,16 +644,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
     @Override
     public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
-    	// set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
-            // 转换
-            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-            cmd.setCategoryId(assetCategoryId);
-        }
-        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
+    	PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
         if(cmd.getPageSize()==null ||cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
             cmd.setPageSize(20);
         }
@@ -671,10 +659,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             return response;
             //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
-<<<<<<< HEAD
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
-=======
-        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId());
         
         Contract contract = contractProvider.findContractById(cmd.getContractId());
         for (PaymentExpectancyDTO dto : dtos) {
@@ -685,7 +670,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 			dto.setChargingItemName(projectChargingItemName);
 		}
         
->>>>>>> 5.8.0
         if(dtos.size() <= cmd.getPageSize()){
 //            response.setNextPageOffset(cmd.getPageOffset());
             response.setNextPageOffset(null);
