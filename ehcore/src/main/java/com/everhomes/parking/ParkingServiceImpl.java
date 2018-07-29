@@ -707,6 +707,9 @@ public class ParkingServiceImpl implements ParkingService {
 		});
 
 		if (ActivityRosterPayVersionFlag.V1 == version) {
+			parkingRechargeOrder.setInvoiceStatus((byte)0);
+			parkingRechargeOrder.setPaySource(ParkingPaySourceType.APP.getCode());
+			parkingProvider.updateParkingRechargeOrder(parkingRechargeOrder);
 			return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
 		}else {
 			return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName(),parkingLot,cmd.getPaymentType());

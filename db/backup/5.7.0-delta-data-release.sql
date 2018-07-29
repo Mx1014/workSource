@@ -41,15 +41,16 @@
 -- AUTHOR: ryan荣 20180719
 -- REMARK: 执行 /archives/makeArchivesCheckInTime 接口(可能速度有点慢，但可重复执行)
 
--- AUTHOR: ryan荣 20180719
--- REMARK: 执行 /archives/cleanRedundantArchivesDetails 接口(执行前请先备份eh_organization_member_details 表, 可能速度有点慢，但可重复执行)
-
 -- AUTHOR: yanjun 20180719
 -- REMARK: 请备份 eh_service_modules 表与 eh_web_menus 表
 
 -- AUTHOR: huangmingbo 20180720
 -- REMARK: 执行 /yellowPage/transferTime 参数：201233
 
+-- AUTHOR: 马世亨 20180726
+-- REMARK: 执行 /pmtask/syncOrderDetails
+-- REMARK: ALL SECTION相关脚本update eh_pm_tasks t , eh_pm_task_orders o set t.amount = o.amount where t.status in (4,7) and t.id = o.task_id;
+-- REMARK: 上述脚本请在该接口调用后执行。
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -395,7 +396,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15020000', '用户管理', '16020000', NULL, 'user-management', '1', '2', '/16000000/16020000/15020000', 'zuolin', '10', '34000', '2', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030100', '社区管理公司管理', '15030000', NULL, NULL, '0', '2', '/15000000/15300000/15030100', 'zuolin', '1', NULL, '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030200', '物业管理公司', '15030000', NULL, NULL, '0', '2', '/15000000/15300000/15030200', 'zuolin', '2', NULL, '3', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030300', '企业信息', '23010000', NULL, 'customer-management', '1', '2', '/23000000/23010000/15030300', 'zuolin', '100', '21400', '3', 'system', 'module', NULL);
+
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16000000', '园区运营业务', '0', 'operation-business', NULL, '1', '2', '/16000000', 'zuolin', '30', NULL, '1', 'system', 'classify', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16010000', '基础数据管理', '16000000', NULL, NULL, '1', '2', '/16000000/16010000', 'zuolin', '30', NULL, '2', 'system', 'classify', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('16010100', '楼宇资产管理', '16010000', NULL, 'asset-management', '1', '2', '/16000000/16010000/16010100', 'zuolin', '100', '59000', '3', 'system', 'module', NULL);
@@ -570,7 +571,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48010000', '组织架构', '48000000', NULL, 'organization-structure', '1', '2', '/40000010/48000000/48010000', 'park', '10', '50100', '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48020000', '职级管理', '48000000', NULL, 'level-management', '1', '2', '/40000010/48000000/48020000', 'park', '20', '50300', '3', 'system', 'module', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48030000', '员工认证', '48000000', NULL, 'employee-identification', '1', '2', '/40000010/48000000/48030000', 'park', '30', '50500', '3', 'system', 'module', '2');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48035000', '企业后台', '72000000', NULL, 'customer-info', '1', '2', '/70000010/72000000/48035000', 'organization', '30', '21400', '3', 'system', 'module', '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48035000', '企业信息', '72000000', NULL, 'customer-info', '1', '2', '/70000010/72000000/48035000', 'organization', '30', '21400', '3', 'system', 'module', '2');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48040000', '人事档案', '48000000', NULL, 'employee-record', '1', '2', '/40000010/48000000/48040000', 'park', '40', '50400', '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48050000', '打卡考勤', '48000000', NULL, 'attendance-management', '1', '2', '/40000010/48000000/48050000', 'park', '50', '50600', '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48052100', '企业访客', '53000000', NULL, 'visitor-enterprise', '1', '2', '/40000010/53000000/48052100', 'park', '70', '52100', '3', 'system', 'module', NULL);
@@ -660,12 +661,22 @@ UPDATE eh_service_modules SET path = '/200/20000/20400/204021' WHERE id = 204021
 update eh_service_module_apps set module_control_type = 'unlimit_control' where module_id = 41300;
 UPDATE eh_service_modules set module_control_type = 'unlimit_control' where id = 41300;
 
+
+UPDATE eh_web_menus SET path = '/40000020' WHERE id = 40000020;
+UPDATE eh_web_menus SET path = '/40000030' WHERE id = 40000030;
+UPDATE eh_web_menus SET path = '/40000040' WHERE id = 40000040;
+UPDATE eh_web_menus SET path = '/40000050' WHERE id = 40000050;
+UPDATE eh_web_menus SET path = '/40000060' WHERE id = 40000060;
+
+UPDATE eh_web_menus SET path = '/40000030/47000000' WHERE id = 47000000;
+
+UPDATE eh_web_menus set path = '/40000010/53000000/50010000' WHERE id = 50010000;
+UPDATE eh_web_menus set path = '/40000010/53000000/52000000' WHERE id = 52000000;
+
 -- end
 
 -- AUTHOR:jiarui 20180625
--- REMARK:增加企业后台菜单及动态表单附件
-DELETE  FROM  eh_web_menus WHERE  module_id = 21400;
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('48035000', '企业信息', '72000000', NULL, 'customer-info', '1', '2', '/72000000/48035000', 'organization', '3', '21400', '2', 'system', 'module', '2');
+-- REMARK:增加动态表单附件
 SET  @id  = (SELECT max(id) from eh_var_fields);
 INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES ((@id:=@id+1), 'enterprise_customer', 'attachments', '附件', 'List<ContractAttachmentDTO>', '11', '/1/11', '0', NULL, '2', '1', now(), NULL, NULL, '{\"fieldParamType\": \"file\", \"length\": 9}');
 UPDATE  eh_var_fields SET field_param = '{"fieldParamType": "text", "length": 6}' WHERE name LIKE 'corpEmployeeAmount%';
@@ -753,6 +764,8 @@ update eh_locale_strings set text = '付费商品' where scope = 'rental.flow' a
 update eh_locale_strings set text = '预订数量' where scope = 'rental.flow' and `code` = 'count';
 update eh_locale_strings set text = '预订时间' where scope = 'rental.flow' and `code` = 'useDetail';
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ( 'rental.notification', '13', 'zh_CN', '亲爱的用户，为保障资源使用效益，现在取消订单，系统将不予退款，恳请您谅解。');
+
+update eh_locale_templates set text = '请联系${offlinePayeeName}（${offlinePayeeContact}）或者前往：${offlineCashierAddress}付款。' where scope = 'rental.flow' and `code` = 2;
 
 SET @ns_id = 0;
 SET @module_id = 40400;
@@ -865,6 +878,33 @@ INSERT INTO `eh_archives_form_groups` (`id`, `namespace_id`, `owner_type`, `owne
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'archives', '100014', 'zh_CN', '邮箱重复');
 -- end
+
+-- AUTHOR: dengs 20180724
+-- REMARK: issue-33548 fix 更新一波停车默认缴费来源
+update eh_parking_recharge_orders SET pay_source='app' WHERE pay_source IS NULL;
+
+
+-- AUTHOR: 张智伟
+-- REMARK: issue-34557 企业OA的服务广场功能模块需要配置成认证用户
+UPDATE eh_service_modules SET action_type=70 WHERE id=57000;
+UPDATE eh_service_module_apps SET action_type=70 WHERE module_id=57000;
+UPDATE eh_service_modules SET access_control_type=2 WHERE id IN(50700,52000,53000,59100,54000,55000,57000,59000,51400);
+UPDATE eh_service_module_apps SET access_control_type=2 WHERE module_id IN(50700,52000,53000,59100,54000,55000,57000,59000,51400);
+UPDATE eh_launch_pad_items SET access_control_type=2 WHERE action_type IN(27,65,75,68,69,70,72,73,74);
+
+-- AUTHOR: 唐岑 20180726
+-- REMARK: issue-34164：在导入项目的excel模板中，新增经度，纬度，园区类型三个必填字段；添加导入出错提示
+set @id = (select MAX(id) from eh_locale_strings);
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10101', 'zh_CN', '经度不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10102', 'zh_CN', '经度填写格式错误');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10103', 'zh_CN', '经度不在中国经度范围（70-136）内');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10104', 'zh_CN', '纬度不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10105', 'zh_CN', '纬度填写格式错误');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10106', 'zh_CN', '纬度不在中国纬度范围（3-54）内');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10107', 'zh_CN', '园区分类不能为空');
+INSERT INTO  `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@id:=@id+1), 'community', '10108', 'zh_CN', '园区分类内容填写错误');
+-- end
+
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -889,7 +929,10 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyId', 'yinxingkeji', '银星科技园停车场访问者标识', '0', NULL, '1');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.yinxingzhijietechpark.accessKeyValue', '1f9f1cb5c0d1e752917e1a38b957e33d', '银星科技园停车场加密后的-accessKeyValue', '0', NULL, '1');
 
-
+-- AUTHOR:黄良铭
+-- REMARK: 缺陷 #34288 问题数据处理
+DELETE FROM eh_organization_members  WHERE target_type='UNTRACK' AND contact_token=' 15116329251' AND namespace_id=999990;
+DELETE FROM eh_organization_member_details  WHERE contact_token=' 15116329251' AND namespace_id=999990;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -919,13 +962,6 @@ SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14002', 'zh_CN', '创建个人付款账户失败');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_string_id := @locale_string_id + 1), 'parking', '14001', 'zh_CN', '未设置收款方账号');
 
--- AUTHOR: 黄良铭
--- REMARK: 苹果推送升级兼容旧应用mapper
-SET @b_id = (SELECT IFNULL(MAX(id),1) FROM eh_bundleid_mapper);
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','develop','com.qinghua.ios.zuolin');
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','appbeta','com.qinghua.ios.zuolin');
-INSERT INTO `eh_bundleid_mapper` (`id`, `namespace_id`, `identify`, `bundle_id`) VALUES(@b_id:= @b_id +1,'999984','appstore','com.qinghua.ios.zuolin');
-UPDATE eh_bundleid_mapper ebm SET ebm.bundle_id='com.qinghua.ios' WHERE ebm.namespace_id='999984' AND ebm.identify='appstore';
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

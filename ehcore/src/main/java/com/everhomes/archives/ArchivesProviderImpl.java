@@ -402,7 +402,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.notIn(OrganizationMemberStatus.INACTIVE.getCode(),OrganizationMemberStatus.REJECT.getCode()));
         return query.fetchAnyInto(OrganizationMember.class);
     }
 }

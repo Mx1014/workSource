@@ -817,11 +817,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         		        .withKeyID(authKeyId.trim())
         		        .withDefaultTopic(bundleId.trim())
         		        .build();
-        			    if(LOGGER.isDebugEnabled()) {
+        			   // if(LOGGER.isDebugEnabled()) {
     				    	//LOGGER.warn("NotificationResponse:"+result);
     		                LOGGER.info("Pushing message(build client), bundleId=" + bundleId + ", isProductionGateway=" + isProductionGateway + ", authkeyStr=" + authkeyStr
     		                    + ", teamId=" + teamId + ", authKeyId=" + authKeyId);
-    		                    }
+    		                   // }
                 } catch (NetworkIOException e) {
                     LOGGER.warn("apns error and stop it", e);
                 } catch(Exception ex) {

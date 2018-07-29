@@ -4914,11 +4914,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (member == null)
             return dto;
         dto.setVisibleFlag(member.getVisibleFlag());
-        if (checkUserPrivilege(UserContext.currentUserId(), dto.getOrganizationId()) || VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.SHOW)
+        if (rolePrivilegeService.checkIsSystemOrAppAdmin(dto.getOrganizationId(), UserContext.currentUserId()) || VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.SHOW)
             dto.setContactToken(memberArchive.getContactToken());
 
         //  7.管理员校验
-        if (checkUserPrivilege(dto.getUserId(), dto.getOrganizationId()))
+        if (rolePrivilegeService.checkIsSystemOrAppAdmin(dto.getOrganizationId(), dto.getUserId()))
             dto.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
         else
             dto.setAdminFlag(TrueOrFalseFlag.FALSE.getCode());

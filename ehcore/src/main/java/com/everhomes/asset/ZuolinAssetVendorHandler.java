@@ -14,7 +14,11 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+<<<<<<< HEAD
 import com.everhomes.module.ServiceModuleService;
+=======
+import com.everhomes.openapi.Contract;
+>>>>>>> 5.8.0
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
@@ -663,12 +667,25 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         //先查看任务
         Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId(),cmd.getContractNum());
         if(inWork){
-        	//change by tangcen
         	response.setGenerated((byte)0);
             return response;
             //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
+<<<<<<< HEAD
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
+=======
+        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId());
+        
+        Contract contract = contractProvider.findContractById(cmd.getContractId());
+        for (PaymentExpectancyDTO dto : dtos) {
+        	//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+			Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			//显示客户自定义的收费项名称，需要使用缴费应用的categoryId来查
+			String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(contract.getCommunityId(),contract.getNamespaceId(),assetCategoryId,dto.getChargingItemId());
+			dto.setChargingItemName(projectChargingItemName);
+		}
+        
+>>>>>>> 5.8.0
         if(dtos.size() <= cmd.getPageSize()){
 //            response.setNextPageOffset(cmd.getPageOffset());
             response.setNextPageOffset(null);
@@ -679,7 +696,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
         response.setList(dtos);
         response.setTotalAmount(totalAmount.toString());
-        //add by tangcen
         response.setGenerated((byte)1);
         return response;
     }

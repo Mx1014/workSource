@@ -522,7 +522,7 @@ public class ForumServiceImpl implements ForumService {
     private Integer getSendMessage(List changeList, Map map, Activity activity){
         Integer code = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (activity.getAllDayFlag() == (byte)1) {
+        if (activity.getAllDayFlag() != null && activity.getAllDayFlag() == (byte)1) {
             sdf = new SimpleDateFormat("yyyy-MM-dd");
         }
         switch (changeList.size()) {
@@ -5004,7 +5004,19 @@ public class ForumServiceImpl implements ForumService {
         // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
         String creatorNickName = post.getCreatorNickName();
         String creatorAvatar = post.getCreatorAvatar();
-        
+
+        // 无昵称时直接使用USER表中的信息作为发帖人的信息
+        User creator = userProvider.findUserById(post.getCreatorUid());
+        if(creator != null) {
+            // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+                creatorNickName = creator.getNickName();
+            }
+            if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                creatorAvatar = creator.getAvatar();
+            }
+        }
+
         Long forumId = post.getForumId();
         if(forumId != null) {
             // 普通圈使用圈成员的信息
@@ -5022,18 +5034,6 @@ public class ForumServiceImpl implements ForumService {
                         creatorAvatar = member.getMemberAvatar();
                     }
                 }
-            }
-        }
-        
-        // 无昵称时直接使用USER表中的信息作为发帖人的信息
-        User creator = userProvider.findUserById(post.getCreatorUid());
-        if(creator != null) {
-            // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                creatorNickName = creator.getNickName();
-            }
-            if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
-                creatorAvatar = creator.getAvatar();
             }
         }
 

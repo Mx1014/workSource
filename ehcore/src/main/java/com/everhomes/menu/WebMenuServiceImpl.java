@@ -421,7 +421,109 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 
 		WebMenuDTO treeDto = processWebMenus(webMenuDtos, null);
-		return treeDto.getDtos();
+
+
+		List<WebMenuDTO> dtos = treeDto.getDtos();
+
+		addOaDefaultMenu(dtos, webMenuType);
+
+		return dtos;
+
+	}
+
+
+
+	//TODO 临时为"智谷汇"添加“企业办公”下的“协同办公”和“人力资源”资源菜单
+	private void addOaDefaultMenu(List<WebMenuDTO> dtos, String webMenuType){
+
+		if(WebMenuType.fromCode(webMenuType) != WebMenuType.PARK || UserContext.getCurrentNamespaceId() == null || (UserContext.getCurrentNamespaceId() != 999945 && UserContext.getCurrentNamespaceId() != 1)) {
+
+			return;
+
+		}
+
+		// 1. 编辑需要添加的菜单
+
+		WebMenuDTO dto1 = new WebMenuDTO();
+		dto1.setName("协同办公");
+
+		List<WebMenuDTO> dtos1 = new ArrayList<>();
+
+		WebMenuDTO dto11 = new WebMenuDTO();
+		dto11.setName("审批");
+		dto11.setDataType("approval-work");
+		dtos1.add(dto11);
+
+		WebMenuDTO dto12 = new WebMenuDTO();
+		dto12.setName("工作汇报");
+		dto12.setDataType("working-conference");
+		dtos1.add(dto12);
+
+		WebMenuDTO dto13 = new WebMenuDTO();
+		dto13.setName("文档");
+		dto13.setDataType("document-work");
+		dtos1.add(dto13);
+
+		WebMenuDTO dto14 = new WebMenuDTO();
+		dto14.setName("企业公告");
+		dto14.setDataType("notice-work");
+		dtos1.add(dto14);
+
+		WebMenuDTO dto15 = new WebMenuDTO();
+		dto15.setName("日程提醒");
+		dto15.setDataType("time-schedule");
+		dtos1.add(dto15);
+
+		WebMenuDTO dto16 = new WebMenuDTO();
+		dto16.setName("会议预订");
+		dto16.setDataType("meeting-work");
+		dtos1.add(dto16);
+
+		dto1.setDtos(dtos1);
+
+
+		WebMenuDTO dto2 = new WebMenuDTO();
+		dto2.setName("人力资源");
+		List<WebMenuDTO> dtos2 = new ArrayList<>();
+
+		WebMenuDTO dto21 = new WebMenuDTO();
+		dto21.setName("通讯录");
+		dto21.setDataType("address-book");
+		dtos2.add(dto21);
+
+		dto2.setDtos(dtos2);
+
+
+
+		List<WebMenuDTO> defaultDtos = new ArrayList<>();
+		defaultDtos.add(dto1);
+		defaultDtos.add(dto2);
+
+
+		// 2. 加到原有菜单中
+		if(dtos == null){
+			dtos = new ArrayList<>();
+		}
+
+		boolean isExists = false;
+
+		// 原来已经存在企业办公
+		for (WebMenuDTO dto: dtos){
+			if(dto.getId().longValue() == 40000010){
+				dto.getDtos().addAll(0, defaultDtos);
+				isExists = true;
+			}
+		}
+
+		// 原来不存在企业办公
+		if(!isExists){
+			WebMenuDTO dto = new WebMenuDTO();
+			dto.setName("企业办公");
+			dto.setId(40000010L);
+			dto.setDtos(defaultDtos);
+
+			dtos.add(0, dto);
+		}
 
 	}
 

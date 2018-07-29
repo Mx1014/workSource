@@ -142,6 +142,9 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
                     entryInfo.setAddressId(address.getId());
                     enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
                     customerService.updateOrganizationAddress(customer.getOrganizationId(),a.getBuildingId(),address.getId());
+                }else {
+                    throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST,
+                            (String.format("address is not exist,buildingName = %s ,addressName = %s",a.getBuildingName(),a.getApartmentName())));
                 }
             });
         }
@@ -174,6 +177,7 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
     @Override
     public EnterpriseCustomerDTO updateEnterpriseCustomer(OpenApiUpdateCustomerCommand cmd) {
         EnterpriseCustomer customer =  checkEnterpriseCustomer(cmd.getEnterpriseId());
+        checkEnterpriseCustomerAddress(cmd.getAddresses());
         customer.setName(cmd.getCompanyName());
         customer.setContactName(cmd.getContactName());
         customer.setCorpBusinessLicense(cmd.getCorpBusinessLicense());
@@ -181,7 +185,7 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
         customer.setHotline(cmd.getHotline());
         customer.setRemark(cmd.getRemark());
         customer.setName(cmd.getCompanyName());
-        customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
+//        customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
         if (cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
@@ -213,6 +217,9 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
                     entryInfo.setAddressId(address.getId());
                     enterpriseCustomerProvider.createCustomerEntryInfo(entryInfo);
                     customerService.updateOrganizationAddress(customer.getOrganizationId(),a.getBuildingId(),address.getId());
+                }else {
+                    throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_NOT_EXIST,
+                            (String.format("address is not exist,buildingName = %s ,addressName = %s",a.getBuildingName(),a.getApartmentName())));
                 }
             });
         }
