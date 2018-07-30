@@ -33,7 +33,7 @@ public class NavigatorInstanceConfig implements Serializable  {
 
 	private Byte allOrMoreType;
 
-	private String allOrMoreName;
+	private String allOrMoreLabel;
 
 	private String allOrMoreIconUri;
 
@@ -125,12 +125,12 @@ public class NavigatorInstanceConfig implements Serializable  {
 		this.allOrMoreType = allOrMoreType;
 	}
 
-	public String getAllOrMoreName() {
-		return allOrMoreName;
+	public String getAllOrMoreLabel() {
+		return allOrMoreLabel;
 	}
 
-	public void setAllOrMoreName(String allOrMoreName) {
-		this.allOrMoreName = allOrMoreName;
+	public void setAllOrMoreLabel(String allOrMoreLabel) {
+		this.allOrMoreLabel = allOrMoreLabel;
 	}
 
 	public String getAllOrMoreIconUri() {

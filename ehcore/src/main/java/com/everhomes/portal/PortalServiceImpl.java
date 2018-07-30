@@ -1964,19 +1964,16 @@ public class PortalServiceImpl implements PortalService {
 
 		}
 
-		//兼容老数据，记录原来是否已经存在“全部更多”
-		boolean allOrMoreItemFlag = false;
-		for (PortalItem portalItem: portalItems){
-			if(PortalItemStatus.ACTIVE == PortalItemStatus.fromCode(portalItem.getStatus()) && PortalItemActionType.fromCode(portalItem.getActionType()) != PortalItemActionType.ALLORMORE){
-				allOrMoreItemFlag = true;
-			}
-		}
-
-
+		//增加“全部更多”item
+		addAllAndMoreItem(itemGroup.getId(), portalItems);
 
 		for (PortalItem portalItem: portalItems) {
 
-			List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
+
+			List<PortalLaunchPadMapping> mappings = new ArrayList<>();
+			if(portalItem.getId() != null){
+				mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
+			}
 
 			if(null != mappings && mappings.size() > 0){
 				for (PortalLaunchPadMapping mapping: mappings) {
@@ -1991,7 +1988,15 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 			if(PortalItemStatus.ACTIVE == PortalItemStatus.fromCode(portalItem.getStatus())){
-				List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
+				List<PortalContentScope> contentScopes = new ArrayList<>();
+
+				//“全部更多”类型的item发布范围是所有的范围
+				if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
+					contentScopes = getAllScope();
+				}else {
+					portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
+				}
+
 				for (PortalContentScope scope: contentScopes) {
 					LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
 					item.setAppId(AppConstants.APPID_DEFAULT);
@@ -2037,8 +2042,6 @@ public class PortalServiceImpl implements PortalService {
 						item.setAccessControlType(AccessControlType.ALL.getCode());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
 
-						allOrMoreItemFlag = true;
-
 						AllOrMoreActionData data = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 						if(AllOrMoreType.fromCode(data.getType()) == AllOrMoreType.ALL){
 							item.setActionType(ActionType.ALL_BUTTON.getCode());
@@ -2066,28 +2069,77 @@ public class PortalServiceImpl implements PortalService {
 
 					launchPadProvider.createLaunchPadItem(item);
 
-					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
-					mapping.setContentType(EntityType.PORTAL_ITEM.getCode());
-					mapping.setPortalContentId(portalItem.getId());
-					mapping.setLaunchPadContentId(item.getId());
-					mapping.setCreatorUid(user.getId());
-					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
-				}
-			}
-
-			//原来item老数据没有“全部更多”，启用新配置
-			if(!allOrMoreItemFlag){
-				NavigatorInstanceConfig config = (NavigatorInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), NavigatorInstanceConfig.class);
-				if(config != null && TrueOrFalseFlag.fromCode(config.getAllOrMoreFlag()) == TrueOrFalseFlag.TRUE){
+					if(portalItem.getId() != null){
+						PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+						mapping.setContentType(EntityType.PORTAL_ITEM.getCode());
+						mapping.setPortalContentId(portalItem.getId());
+						mapping.setLaunchPadContentId(item.getId());
+						mapping.setCreatorUid(user.getId());
+						portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+					}
 
 				}
-
-
 			}
-
-
 
 		}
+	}
+
+	private void addAllAndMoreItem(Long itemGroupId, List<PortalItem> portalItems){
+
+
+		//兼容老数据，记录原来是否已经存在“全部更多”
+		for (PortalItem portalItem: portalItems){
+			if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE && PortalItemStatus.ACTIVE == PortalItemStatus.fromCode(portalItem.getStatus())){
+				return;
+			}
+		}
+
+
+		//新的配置中设置了开启“全部更多”
+		PortalItemGroup temp = portalItemGroupProvider.findPortalItemGroupById(itemGroupId);
+		NavigatorInstanceConfig config = (NavigatorInstanceConfig)StringHelper.fromJsonString(temp.getInstanceConfig(), NavigatorInstanceConfig.class);
+		if(config != null && TrueOrFalseFlag.fromCode(config.getAllOrMoreFlag()) == TrueOrFalseFlag.TRUE && portalItems.size() > 0){
+
+			PortalItem item = ConvertHelper.convert(portalItems.get(0), PortalItem.class);
+			item.setId(null);
+			item.setLabel(config.getAllOrMoreLabel());
+			item.setName(config.getAllOrMoreLabel());
+			item.setIconUri(config.getAllOrMoreIconUri());
+			item.setActionType(PortalItemActionType.ALLORMORE.getCode());
+			item.setActionData("{\"type\":\" " + config.getAllOrMoreType() + "\"}");
+			item.setDisplayFlag(TrueOrFalseFlag.TRUE.getCode());
+			item.setItemCategoryId(null);
+			item.setDefaultOrder(10000);
+			item.setStatus(PortalItemStatus.ACTIVE.getCode());
+
+			portalItems.add(item);
+		}
+
+	}
+
+
+	private List<PortalContentScope> getAllScope(){
+
+		List<PortalContentScope> contentScopes = new ArrayList<>();
+		PortalContentScope scope1 = new PortalContentScope();
+		scope1.setId(0L);
+		scope1.setScopeType(PortalScopeType.RESIDENTIAL.getCode());
+		contentScopes.add(scope1);
+
+		PortalContentScope scope2 = ConvertHelper.convert(scope1, PortalContentScope.class);
+		scope2.setScopeType(PortalScopeType.COMMERCIAL.getCode());
+		contentScopes.add(scope2);
+
+		PortalContentScope scope3 = ConvertHelper.convert(scope1, PortalContentScope.class);
+		scope3.setScopeType(PortalScopeType.PM.getCode());
+		contentScopes.add(scope3);
+
+		PortalContentScope scope4 = ConvertHelper.convert(scope1, PortalContentScope.class);
+		scope4.setScopeType(PortalScopeType.ORGANIZATION.getCode());
+		contentScopes.add(scope4);
+
+		return contentScopes;
+
 	}
 
 	private void setItemLayoutActionData(LaunchPadItem item, String actionData){
