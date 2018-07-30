@@ -34,6 +34,23 @@ SELECT r.scope,r.code,r.locale,r.text FROM(
 SELECT 'punch.status' AS scope,18 AS code,'zh_CN' AS locale,'迟到且缺卡' AS text UNION ALL
 SELECT 'punch.status' AS scope,19 AS code,'zh_CN' AS locale,'缺卡' AS text UNION ALL
 SELECT 'punch.status' AS scope,-1 AS code,'zh_CN' AS locale,'未设置规则' AS text UNION ALL
-SELECT 'punch.status' AS scope,-2 AS code,'zh_CN' AS locale,'未安排班次' AS text
+SELECT 'punch.status' AS scope,-2 AS code,'zh_CN' AS locale,'未安排班次' AS text UNION ALL
+
+SELECT 'PunchStatusStatisticsItemName' AS scope,1 AS code,'zh_CN' AS locale,'未到' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,2 AS code,'zh_CN' AS locale,'迟到' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,3 AS code,'zh_CN' AS locale,'早退' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,4 AS code,'zh_CN' AS locale,'正常' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,5 AS code,'zh_CN' AS locale,'休息' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,6 AS code,'zh_CN' AS locale,'旷工' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,7 AS code,'zh_CN' AS locale,'缺卡' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,8 AS code,'zh_CN' AS locale,'核算中' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,9 AS code,'zh_CN' AS locale,'应到' AS text UNION ALL
+SELECT 'PunchStatusStatisticsItemName' AS scope,10 AS code,'zh_CN' AS locale,'已到' AS text UNION ALL
+
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,1 AS code,'zh_CN' AS locale,'请假' AS text UNION ALL
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,2 AS code,'zh_CN' AS locale,'外出' AS text UNION ALL
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,3 AS code,'zh_CN' AS locale,'出差' AS text UNION ALL
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,4 AS code,'zh_CN' AS locale,'加班' AS text UNION ALL
+SELECT 'PunchExceptionRequestStatisticsItemName' AS scope,5 AS code,'zh_CN' AS locale,'打卡异常' AS text
 )r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
 WHERE s.id IS NULL;

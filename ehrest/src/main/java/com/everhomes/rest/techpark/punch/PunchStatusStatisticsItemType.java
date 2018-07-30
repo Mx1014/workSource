@@ -3,7 +3,6 @@ package com.everhomes.rest.techpark.punch;
 /**
  * <p>出勤统计的类型</p>
  * <ul>
- * <li>UNKNOWN((byte) 0): 核算中</li>
  * <li>UN_ARRIVED((byte) 1): 未到（未出勤）</li>
  * <li>BELATE((byte) 2): 迟到</li>
  * <li>LEAVE_EARLY((byte) 3): 早退</li>
@@ -13,11 +12,11 @@ package com.everhomes.rest.techpark.punch;
  * <li>FORGOT_PUNCH((byte) 7): 缺卡（忘记打卡）</li>
  * <li>CHECKING((byte) 8): 核算中（等价于未到）</li>
  * <li>SHOULD_ARRIVE((byte) 9): 应到</li>
- * <li>ARRIVED: 已到</li>
+ * <li>ARRIVED((byte) 10): 已到</li>
  * </ul>
  */
 public enum PunchStatusStatisticsItemType {
-    UNKNOWN((byte) 0), UN_ARRIVED((byte) 1), BELATE((byte) 2), LEAVE_EARLY((byte) 3), NORMAL((byte) 4), REST((byte) 5), ABSENT((byte) 6), FORGOT_PUNCH((byte) 7), CHECKING((byte) 8), SHOULD_ARRIVE((byte) 9), ARRIVED((byte) 10);
+    UN_ARRIVED((byte) 1), BELATE((byte) 2), LEAVE_EARLY((byte) 3), NORMAL((byte) 4), REST((byte) 5), ABSENT((byte) 6), FORGOT_PUNCH((byte) 7), CHECKING((byte) 8), SHOULD_ARRIVE((byte) 9), ARRIVED((byte) 10);
     private byte code;
 
     PunchStatusStatisticsItemType(byte code) {
