@@ -2584,7 +2584,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
         	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
         	qr.setQrCodeKey(UclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
-        	qrKeys.add(qr);
+        	if(null != qr.getQrCodeKey()){
+        		qrKeys.add(qr);
+        	}
         } 
        
     }

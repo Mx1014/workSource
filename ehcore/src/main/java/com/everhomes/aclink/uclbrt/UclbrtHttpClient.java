@@ -102,13 +102,21 @@ public class UclbrtHttpClient {
 		try {
 			doc = DocumentHelper.parseText(l);
 			Element rootElt = doc.getRootElement(); 
-            Iterator iter = rootElt.elementIterator("no"); 
+			Iterator iter = rootElt.elementIterator("status"); 
+            if(iter.hasNext()){
+            	   Element ele = (Element) iter.next();
+                   if(!"200".equals(ele.getText())){
+                	   return null;
+                   }
+            }
+            iter = rootElt.elementIterator("no"); 
             if(iter.hasNext()){
             	   Element ele = (Element) iter.next();
                    roomID = ele.getText();
             }
 		} catch (DocumentException e) {
 			LOGGER.error("error uclbrt ", e);
+			return null;
 		}
 		
 		String qr= getQRXML(protocol, ip, port, communityNo, buildNo, floorNo, roomNo, accSid, token,areaCode,mobile,roomID);
@@ -123,6 +131,7 @@ public class UclbrtHttpClient {
             }
 		} catch (DocumentException e) {
 			LOGGER.error("error uclbrt ", e);
+			return null;
 		}
 		return qr;
 		//如果 cardNo 参数为空，则返回该号码下所有房卡， 如果不为空 ，则返回该cardNo 对应的房卡
