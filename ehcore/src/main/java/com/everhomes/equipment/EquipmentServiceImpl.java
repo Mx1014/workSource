@@ -5123,23 +5123,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 		} else {
 			ownerType = EntityType.EQUIPMENT_TASK.getCode();
 		}
-		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId,cmd.getTargetId(),cmd.getTargetType());
+		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId, cmd.getTargetId(), cmd.getTargetType());
 		if (configurations != null && configurations.size() > 0) {
-			List<PmNotifyParamDTO> params = configurations.stream()
+			return configurations.stream()
 					.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
 					.collect(Collectors.toList());
-			return params;
 		} else {
 			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置 ps以后可以再else一下 域空间的没有返回all的
 			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
-				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId,cmd.getTargetId(),cmd.getTargetType());
+				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId, cmd.getTargetId(), cmd.getTargetType());
 				if (namespaceConfigurations != null && namespaceConfigurations.size() > 0) {
-					List<PmNotifyParamDTO> params = namespaceConfigurations.stream()
+					return namespaceConfigurations.stream()
 							.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
 							.collect(Collectors.toList());
-					return params;
 				}
 			}
 		}
@@ -5170,6 +5168,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					receiverList.setReceivers(receivers);
 					configuration.setReceiverJson(receiverList.toString());
 				}
+				// this filed means ownerIa and ownerType
 				configuration.setTargetId(cmd.getTargetId());
 				configuration.setTargetType(cmd.getTargetType());
 				if (params.getId() == null) {
@@ -5181,7 +5180,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 						scopeId = params.getCommunityId();
 					}
-					PmNotifyConfigurations exist = pmNotifyProvider.findScopePmNotifyConfiguration(params.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+					PmNotifyConfigurations exist = pmNotifyProvider.findScopePmNotifyConfiguration(params.getId(), cmd.getOwnerType(), scopeType, scopeId);
 					if (exist != null) {
 						configuration.setCreateTime(exist.getCreateTime());
 						pmNotifyProvider.updatePmNotifyConfigurations(configuration);
@@ -5268,6 +5267,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					referId.add(r.getReferId());
 				}
 			});
+			// make community has their own configurations
 			reviewDate.removeIf((r) -> r.getReferId() != 0L && r.getReferId() != null);
 		}
 		if (reviewDate != null && reviewDate.size() > 0) {

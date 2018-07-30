@@ -147,11 +147,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
-        }else if(cmd.getTargetIds()!=null && cmd.getTargetIds().size()>0){
+        } else if (cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
             // only all scope field term with ownerId followed by this rule
-            FilterBuilder tfb = FilterBuilders.termsFilter("targetId", cmd.getTargetIds());
-            // global data
-            fb =  FilterBuilders.orFilter(tfb, FilterBuilders.andFilter(FilterBuilders.termFilter("ownerId", cmd.getOwnerId()), FilterBuilders.termFilter("targetId", 0)));
+            fb = FilterBuilders.termsFilter("targetId", cmd.getTargetIds());
         }
 
         if(cmd.getStatus() != null)
@@ -322,7 +320,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             b.field("targetType", equipment.getTargetType());
             b.field("status", equipment.getStatus());
             b.field("categoryId", equipment.getCategoryId());
-            b.field("name", equipment.getName()).field("index","not_analyzed");
+            b.field("name", equipment.getName());
             b.field("customNumber", equipment.getCustomNumber());
             b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 
