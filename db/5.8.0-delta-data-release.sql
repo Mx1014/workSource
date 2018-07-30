@@ -2,7 +2,7 @@
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
 -- AUTHOR: 杨崇鑫  20180720
--- REMARK: content图片程序升级，①从本版中的content二进制更新到正式环境中  ②把allowOriginToGet = *加到config.ini配置文件中
+-- REMARK: content图片程序升级，① 从本版中的content二进制更新到正式环境中  ② 把allowOriginToGet = * 加到 config.ini 配置文件中的 system 区域下
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
