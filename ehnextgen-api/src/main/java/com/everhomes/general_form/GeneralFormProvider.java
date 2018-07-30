@@ -80,4 +80,6 @@ public interface GeneralFormProvider {
 
     List<GeneralFormFilterUserMap> listGeneralFormFilter(Integer namespaceId, Long moduleId, Long ownerId, String userUuid, Long FormOriginId, Long FormVersion);
 
+    void updateGeneralFormApprovalStatusById(Long id, Byte status);
+
 }

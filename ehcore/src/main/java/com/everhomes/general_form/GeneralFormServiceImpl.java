@@ -684,10 +684,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public void saveGeneralForm(PostGeneralFormValCommand cmd) {
+    public Long saveGeneralForm(PostGeneralFormValCommand cmd) {
 
         //先新建表单字段的集合
-        this.dbProvider.execute((status) -> {
+        Long sourceId = this.dbProvider.execute((status) -> {
             Long source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
             String source_type = "EhGeneralFormValRequests";
 
@@ -700,8 +700,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             cmd2.setSourceType(source_type);
             cmd2.setValues(cmd.getValues());
             this.addGeneralFormValues(cmd2);
-            return null;
+            return source_id;
         });
+        return sourceId;
     }
 
 

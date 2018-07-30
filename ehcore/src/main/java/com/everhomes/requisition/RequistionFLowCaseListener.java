@@ -2,6 +2,7 @@
 package com.everhomes.requisition;
 
 import com.everhomes.flow.*;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.flow.*;
@@ -29,6 +30,8 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     private RequisitionProvider requisitionProvider;
     @Autowired
     private ServiceModuleProvider serviceModuleProvider;
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
 
 //    @Autowired
 //    private List<RequistionListener> reqListeners;
@@ -64,7 +67,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     public void onFlowCaseEnd(FlowCaseState ctx) {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
-        requisitionProvider.changeRequisitionStatus2Target(RequisitionStatus.FINISH.getCode(),referId);
+        generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.FINISH.getCode());
 //        String owner = requisitionProvider.getOwnerById(referId);
 //        RequistionListener lis = map.get(owner);
 //        lis.onRequisitionEnd();
@@ -74,14 +77,14 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
-        requisitionProvider.changeRequisitionStatus2Target(RequisitionStatus.CANCELED.getCode(),referId);
+        generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.CANCELED.getCode());
     }
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
-        requisitionProvider.changeRequisitionStatus2Target(RequisitionStatus.HANDLING.getCode(),referId);
+        generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.HANDLING.getCode());
     }
 
     @Override

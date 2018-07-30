@@ -69,7 +69,7 @@ public interface GeneralFormService {
 	 * 保存但不提交工作流
 	 * @param cmd
 	 */
-	void saveGeneralForm(PostGeneralFormValCommand cmd);
+	Long saveGeneralForm(PostGeneralFormValCommand cmd);
 
 	List<String> listGeneralFormFilter(GetGeneralFormFilterCommand cmd);
 

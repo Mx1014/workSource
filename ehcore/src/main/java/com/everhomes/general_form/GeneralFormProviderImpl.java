@@ -440,6 +440,17 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		return query.fetch().map(r -> {return ConvertHelper.convert(r, GeneralFormFilterUserMap.class);});
 	}
 
+	@Override
+	public void updateGeneralFormApprovalStatusById(Long id, Byte status){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormValRequests.class));
+		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
+		EhGeneralFormValRequests obj = dao.findById(id);
+
+		obj.setApprovalStatus(status);
+		dao.update(obj);
+
+
+	}
 
 
 }
