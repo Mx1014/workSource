@@ -4769,24 +4769,31 @@ public class AssetProviderImpl implements AssetProvider {
     public void reCalBillById(long billId) {
 //        重新计算账单
         final BigDecimal[] amountReceivable = {new BigDecimal("0")};
+        final BigDecimal[] amountReceivableWithoutTax = {new BigDecimal("0")};
         final BigDecimal[] amountReceived = {new BigDecimal("0")};
+        final BigDecimal[] amountReceivedWithoutTax = {new BigDecimal("0")};
         final BigDecimal[] amountOwed = {new BigDecimal("0")};
+        final BigDecimal[] amountOwedWithoutTax = {new BigDecimal("0")};
         final BigDecimal[] amountExempled = {new BigDecimal("0")};
         final BigDecimal[] amountSupplement = {new BigDecimal("0")};
         BigDecimal zero = new BigDecimal("0");
         getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,
-        		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED,Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID)
+        		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED,Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID,
+        		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE_WITHOUT_TAX,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED_WITHOUT_TAX,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED_WITHOUT_TAX)
                 .from(Tables.EH_PAYMENT_BILL_ITEMS)
                 .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
                 .fetch()
                 .forEach(r -> {
                     amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE));//应收
+                    amountReceivableWithoutTax[0] = amountReceivableWithoutTax[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
                     amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));//已收
+                    amountReceivedWithoutTax[0] = amountReceivedWithoutTax[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED_WITHOUT_TAX));//已收不含税
                     //根据减免费项配置重新计算待收金额
                     Long charingItemId = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
                     Boolean isConfigSubtraction = isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
                     if(!isConfigSubtraction) {//如果费项没有配置减免费项，那么需要相加到待缴金额中
                     	amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED));
+                    	amountOwedWithoutTax[0] = amountOwedWithoutTax[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED_WITHOUT_TAX));
                     }
                 });
         getReadOnlyContext().select(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT)
@@ -4796,6 +4803,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .forEach(r ->{
 //                    amountReceivable[0] = amountReceivable[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
                     amountOwed[0] = amountOwed[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
+                    amountOwedWithoutTax[0] = amountOwedWithoutTax[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
                     if(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT).compareTo(zero) == 1){
                         amountSupplement[0] = amountSupplement[0].add(r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT));
                     }else if (r.getValue(Tables.EH_PAYMENT_EXEMPTION_ITEMS.AMOUNT).compareTo(zero) == -1){
@@ -4817,6 +4825,7 @@ public class AssetProviderImpl implements AssetProvider {
                         Boolean isConfigSubtraction = isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
                         if(!isConfigSubtraction) {//如果滞纳金没有配置减免费项，那么需要相加到待缴金额中
                         	amountOwed[0] = amountOwed[0].add(value);
+                        	amountOwedWithoutTax[0] = amountOwedWithoutTax[0].add(value);
                         }    
                     }
                 });
