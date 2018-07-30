@@ -1087,6 +1087,7 @@ public class AssetServiceImpl implements AssetService {
                     PaymentBillGroup group = exp.getGroup();
                     PaymentChargingItemScope itemScope = exp.getItemScope();
                     PaymentBillGroupRule groupRule = exp.getGroupRule();
+                    List<VariableIdAndValue> variableIdAndValueList = exp.getVariableIdAndValueList();//获取计价条款包裹
                     //资产
                     item.setAddressId(property.getAddressId());
                     item.setBuildingName(property.getBuldingName());
@@ -1126,23 +1127,27 @@ public class AssetServiceImpl implements AssetService {
                     item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    
                     //保存用量 ：物业缴费6.1 add by 杨崇鑫
-                    //创建费项的时候，根据"chargingItemId": 是否相等，判断是否该费项是否有用量数据！
-                    for(int i = 0; i < feesRules.size(); i++) {
-                    	//获取单一包裹
-                        FeeRules rule = feesRules.get(i);
-                        if(rule != null && rule.getChargingItemId() != null && rule.getChargingItemId().equals(item.getChargingItemsId())) {
-                        	List<VariableIdAndValue> variableIdAndValueList = rule.getVariableIdAndValueList();
-                        	for ( int k = 0; k < variableIdAndValueList.size(); k++){
-                        		VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-                        		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("yl")) {
-                        			item.setEnergyConsume(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : null);
-                        		}
-                        	}
-                        }
-                    }
-                    	
+                	for (int k = 0; k < variableIdAndValueList.size(); k++){
+                		VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("yl")) {
+                			item.setEnergyConsume(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : null);
+                		}
+                		if(variableIdAndValue != null && variableIdAndValue.getVaribleIdentifier() != null && variableIdAndValue.getVaribleIdentifier().equals("taxRate")) {
+                			//不含税金额=含税金额/（1+税率）    不含税金额=1000/（1+10%）=909.09
+                			BigDecimal taxRate = new BigDecimal(variableIdAndValue.getVariableValue() != null ? variableIdAndValue.getVariableValue().toString() : "0");
+                			item.setTaxRate(taxRate);
+                			taxRate = taxRate.divide(new BigDecimal(100));
+                			BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;
+                			amountReceivableWithoutTax = item.getAmountReceivable().divide(BigDecimal.ONE.add(taxRate), 2, BigDecimal.ROUND_HALF_UP);
+                			item.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+                			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+                			BigDecimal taxAmount = item.getAmountReceivable().subtract(amountReceivableWithoutTax);
+                			item.setTaxAmount(taxAmount);
+                			item.setAmountOwedWithoutTax(amountReceivableWithoutTax);
+                			item.setAmountReceivedWithoutTax(BigDecimal.ZERO);
+                		}
+                	}
                     //放到数组中去
                     billItemsList.add(item);
                 }
@@ -1491,6 +1496,7 @@ public class AssetServiceImpl implements AssetService {
             BigDecimal amount = calculateFee(var2, days, formula, r,standard, formulaCondition);
             //组装对象
             BillItemsExpectancy obj = new BillItemsExpectancy();
+            obj.setVariableIdAndValueList(var2);//保存计价条款的包裹，以便后面使用
             obj.setProperty(property);
             obj.setGroupRule(groupRule);
             obj.setGroup(group);

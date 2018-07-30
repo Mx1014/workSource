@@ -4776,10 +4776,12 @@ public class AssetProviderImpl implements AssetProvider {
         final BigDecimal[] amountOwedWithoutTax = {new BigDecimal("0")};
         final BigDecimal[] amountExempled = {new BigDecimal("0")};
         final BigDecimal[] amountSupplement = {new BigDecimal("0")};
+        final BigDecimal[] taxAmount = {new BigDecimal("0")};
         BigDecimal zero = new BigDecimal("0");
         getReadOnlyContext().select(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED,
         		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED,Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID,
-        		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE_WITHOUT_TAX,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED_WITHOUT_TAX,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED_WITHOUT_TAX)
+        		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE_WITHOUT_TAX,Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED_WITHOUT_TAX,
+        		Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED_WITHOUT_TAX,Tables.EH_PAYMENT_BILL_ITEMS.TAX_AMOUNT)
                 .from(Tables.EH_PAYMENT_BILL_ITEMS)
                 .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
                 .fetch()
@@ -4791,6 +4793,9 @@ public class AssetProviderImpl implements AssetProvider {
                     amountReceived[0] = amountReceived[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED));//已收
                     if(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED_WITHOUT_TAX) != null) {
                     	amountReceivedWithoutTax[0] = amountReceivedWithoutTax[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED_WITHOUT_TAX));//已收不含税
+                    }
+                    if(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.TAX_AMOUNT) != null) {
+                    	taxAmount[0] = taxAmount[0].add(r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.TAX_AMOUNT));//税额
                     }
                     //根据减免费项配置重新计算待收金额
                     Long charingItemId = r.getValue(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID);
@@ -4845,6 +4850,10 @@ public class AssetProviderImpl implements AssetProvider {
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_EXEMPTION, amountExempled[0])
                     .set(Tables.EH_PAYMENT_BILLS.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
                     .set(Tables.EH_PAYMENT_BILLS.OPERATOR_UID,UserContext.currentUserId())
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE_WITHOUT_TAX, amountReceivableWithoutTax[0])
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED_WITHOUT_TAX, amountOwedWithoutTax[0])
+                    .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVED_WITHOUT_TAX, amountReceivedWithoutTax[0])
+                    .set(Tables.EH_PAYMENT_BILLS.TAX_AMOUNT, taxAmount[0])
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
 
