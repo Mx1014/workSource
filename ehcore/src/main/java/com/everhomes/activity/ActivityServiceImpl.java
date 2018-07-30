@@ -2,7 +2,9 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
@@ -1338,9 +1340,10 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId());
+			List<List<PostApprovalFormItem>> values = new ArrayList<>();
             GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
             GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
+            List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId(),values, form);
 //			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 
 			//检查是否超过报名人数限制, add by tt, 20161012
@@ -1351,19 +1354,26 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 			}
 
 			dbProvider.execute(s->{
-				rosters.forEach(r -> {
+			    for (int i=0;i < rosters.size(); i++) {
+                    ActivityRoster r = rosters.get(i);
+                    ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activity.getId(), r.getPhone(), ActivityRosterStatus.NORMAL.getCode());
+                    if(oldRoster != null){
+                        getNewForImport(oldRoster, r);
+                        activityProvider.updateRoster(oldRoster);
+                    }else {
+                        r.setConfirmUid(user.getId());
+                        r.setActivityId(cmd.getActivityId());
+                        r.setStatus(ActivityRosterStatus.NORMAL.getCode());
+                        activityProvider.createActivityRoster(r);
 
-					ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activity.getId(), r.getPhone(), ActivityRosterStatus.NORMAL.getCode());
-					if(oldRoster != null){
-						getNewForImport(oldRoster, r);
-						activityProvider.updateRoster(oldRoster);
-					}else {
-						r.setConfirmUid(user.getId());
-						r.setActivityId(cmd.getActivityId());
-						r.setStatus(ActivityRosterStatus.NORMAL.getCode());
-						activityProvider.createActivityRoster(r);
-
-						// 报名活动事件
+                        //报名对接表单，添加表单值数据
+                        addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                        addGeneralFormValuesCommand.setGeneralFormId(form.getFormOriginId());
+                        addGeneralFormValuesCommand.setSourceId(r.getId());
+                        addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                        addGeneralFormValuesCommand.setValues(values.get(i));
+                        this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
+                        // 报名活动事件
                         LocalEventBus.publish(event -> {
                             LocalEventContext context = new LocalEventContext();
                             context.setUid(r.getUid());
@@ -1374,8 +1384,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             event.setEntityId(activity.getId());
                             event.setEventName(SystemEvent.ACTIVITY_ACTIVITY_ENTER.dft());
                         });
-					}
-				});
+                    }
+                }
 				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size() - result.getUpdate());
 	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size() - result.getUpdate());
 	            activityProvider.updateActivity(activity);
@@ -1432,7 +1442,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
 	}
 
-	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId) {
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId, List<List<PostApprovalFormItem>> values, GeneralFormDTO form) {
 		@SuppressWarnings("rawtypes")
 		List<ImportSignupErrorDTO> errorLists = new ArrayList<>();
 		ArrayList rows = processorExcel(file);
@@ -1485,17 +1495,18 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	        roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
 	        roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	        roster.setLotteryFlag((byte) 0);
-	        roster.setPhone(row.getA().trim());
-	        roster.setRealName(row.getB().trim());
-	        roster.setGender(getGender(getStrTrim(row.getC())));
-	        roster.setCommunityName(getStrTrim(row.getD()));
-	        roster.setOrganizationName(getStrTrim(row.getE()));
-	        roster.setPosition(getStrTrim(row.getF()));
-	        roster.setLeaderFlag(getLeaderFlag(getStrTrim(row.getG())));
-	        roster.setEmail(getStrTrim(row.getH()));
-	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
-	        
+            roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
+
+            List<PostApprovalFormItem> postApprovalFormItems = new ArrayList<>();
+            for (int j=0;j<row.getCells().size();j++) {
+                PostApprovalFormItem postApprovalFormItem = ConvertHelper.convert(form.getFormFields().get(j),PostApprovalFormItem.class);
+                String value = row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) != null ? row.getCells().get(ArchivesUtil.GetExcelLetter(j + 1)) : "";
+                postApprovalFormItem.setFieldValue(getStrTrim(value));
+                postApprovalFormItems.add(postApprovalFormItem);
+            }
+
 	        rosters.add(roster);
+            values.add(postApprovalFormItems);
 		}
 
 		//保存错误信息
