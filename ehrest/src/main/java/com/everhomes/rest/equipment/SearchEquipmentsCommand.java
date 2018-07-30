@@ -1,8 +1,10 @@
 package com.everhomes.rest.equipment;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -33,7 +35,10 @@ public class SearchEquipmentsCommand {
 	private String ownerType;
 
 	private Long targetId;
-	
+
+	@ItemType(Long.class)
+	private List<Long> targetIds;
+
 	private String targetType;
 	
 	private Byte reviewStatus;
@@ -197,6 +202,14 @@ public class SearchEquipmentsCommand {
 
 	public void setEquipmentIds(String equipmentIds) {
 		this.equipmentIds = equipmentIds;
+	}
+
+	public List<Long> getTargetIds() {
+		return targetIds;
+	}
+
+	public void setTargetIds(List<Long> targetIds) {
+		this.targetIds = targetIds;
 	}
 
 	@Override

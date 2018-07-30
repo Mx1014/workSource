@@ -15,7 +15,7 @@ public class ListPmNotifyParamsCommand {
     private Long communityId;
 
     private String ownerType;
-
+    // organization id
     private Long targetId;
 
     private String targetType;

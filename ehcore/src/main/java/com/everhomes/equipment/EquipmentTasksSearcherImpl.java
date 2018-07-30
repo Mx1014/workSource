@@ -153,10 +153,15 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        }else if(cmd.getTargetIds()!=null && cmd.getTargetIds().size()>0){
+            // only all scope field term with ownerId followed by this rule
+            FilterBuilder tfb = FilterBuilders.termsFilter("targetId", cmd.getTargetIds());
+            // global data
+            fb =  FilterBuilders.orFilter(tfb, FilterBuilders.andFilter(FilterBuilders.termFilter("ownerId", cmd.getOwnerId()), FilterBuilders.termFilter("targetId", 0)));
         }
-        if(cmd.getOwnerId()!=null){
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getTaskType()));
-        }
+//        if(cmd.getOwnerId()!=null){
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getTaskType()));
+//        }
 
 
        // startTime  endTime  status  reviewStatus  taskType

@@ -12,13 +12,6 @@ ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  
 
 
 -- 通用脚本
--- AUHOR:jiarui 20180727
--- REMARK:客户管理增加ownerId ownerype
-ALTER  TABLE  `eh_enterprise_customers` ADD  COLUMN `owner_id` BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
-ALTER  TABLE  `eh_enterprise_customers` ADD  COLUMN `owner_type` VARCHAR(1024) NULL AFTER  `owner_id`;
--- end
-
--- 通用脚本
 -- AUHOR:jiarui 20180730
 -- REMARK:物业巡检通知参数设置增加targetId,targetType
 ALTER  TABLE  `eh_pm_notify_configurations` ADD  COLUMN `target_id` BIGINT(20) NOT NULL COMMENT 'organization id' DEFAULT  0 AFTER  `owner_type`;

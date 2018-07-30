@@ -3,6 +3,7 @@ package com.everhomes.rest.equipment;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -28,6 +29,8 @@ public class SearchEquipmentInspectionPlansCommand {
     private String ownerType;
 
     private Long targetId;
+
+    private List<Long> targetIds;
 
     private String targetType;
 

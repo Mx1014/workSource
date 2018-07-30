@@ -18,7 +18,8 @@ update eh_pm_notify_configurations t1 set target_id = (select t2.id  from eh_org
 update eh_pm_notify_configurations t1 set target_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.scope_id and t2.parent_id = 0 LIMIT 1 ) where t1.scope_type = 1;
 update eh_equipment_inspection_review_date t1 set target_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =(select namespace_id from eh_communities t3 where t3.id = scope_id ) and t2.parent_id = 0 LIMIT 1 ) where t1.scope_type = 2;
 update eh_equipment_inspection_review_date t1 set target_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.scope_id and t2.parent_id = 0 LIMIT 1 ) where t1.scope_type = 1;
-
+update eh_equipment_inspection_review_date set target_type = 'EhOrganizations';
+update eh_pm_notify_configurations set target_type = 'EhOrganizations';
 -- 品质核查 by jiarui  20180730
 update eh_quality_inspection_standards set owner_type ='EhOrganizations';
 update eh_quality_inspection_tasks set owner_type ='EhOrganizations';
@@ -30,5 +31,3 @@ update eh_quality_inspection_sample_community_specification_stat set owner_type 
 update eh_quality_inspection_logs set owner_type ='EhOrganizations';
 update eh_quality_inspection_evaluations set owner_type ='EhOrganizations';
 
--- 企业客户
-update eh_enterprise_customers set owner_type ='EhOrganizations';

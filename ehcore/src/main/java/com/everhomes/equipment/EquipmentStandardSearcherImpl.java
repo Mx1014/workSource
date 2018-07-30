@@ -153,10 +153,12 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
 //                tfb = FilterBuilders.orFilter(tfb, FilterBuilders.termFilter("targetId", 0));
 //            }
             fb = FilterBuilders.andFilter(fb, tfb);
+        }else if(cmd.getTargetIds()!=null && cmd.getTargetIds().size()>0) {
+            // all communities data
+            FilterBuilder tfb = FilterBuilders.termsFilter("targetId", cmd.getTargetIds());
+            // global data
+            fb =  FilterBuilders.orFilter(tfb, FilterBuilders.andFilter(FilterBuilders.termFilter("ownerId", cmd.getOwnerId()), FilterBuilders.termFilter("targetId", 0)));
         }
-
-        if(cmd.getOwnerId()!=null)
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
 
         if(cmd.getStatus() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));

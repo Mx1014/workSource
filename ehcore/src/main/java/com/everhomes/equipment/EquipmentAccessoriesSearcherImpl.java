@@ -131,11 +131,12 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        }else if(cmd.getTargetIds()!=null && cmd.getTargetIds().size()>0){
+            // only all scope field term with ownerId followed by this rule
+            FilterBuilder tfb = FilterBuilders.termsFilter("targetId", cmd.getTargetIds());
+            // global data
+            fb =  FilterBuilders.orFilter(tfb, FilterBuilders.andFilter(FilterBuilders.termFilter("ownerId", cmd.getOwnerId()), FilterBuilders.termFilter("targetId", 0)));
         }
-        if(cmd.getOwnerId()!=null){
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        }
-
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0L;

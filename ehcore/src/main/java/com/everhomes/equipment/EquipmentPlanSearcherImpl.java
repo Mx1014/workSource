@@ -145,9 +145,9 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
         }
 
-        if(cmd.getOwnerId()!=null){
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        }
+//        if(cmd.getOwnerId()!=null){
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        }
 
 
         if(cmd.getInspectionCategoryId()!=null)

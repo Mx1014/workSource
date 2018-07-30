@@ -1,6 +1,9 @@
 package com.everhomes.rest.equipment;
 
+import com.everhomes.discover.ItemType;
+
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -22,6 +25,8 @@ public class SearchEquipmentAccessoriesCommand {
 	private String ownerType;
 
 	private Long targetId;
+	@ItemType(Long.class)
+	private List<Long> targetIds;
 	
 	private String targetType;
 	
@@ -95,5 +100,13 @@ public class SearchEquipmentAccessoriesCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public List<Long> getTargetIds() {
+		return targetIds;
+	}
+
+	public void setTargetIds(List<Long> targetIds) {
+		this.targetIds = targetIds;
 	}
 }
