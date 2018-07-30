@@ -688,18 +688,33 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
         //先新建表单字段的集合
         Long sourceId = this.dbProvider.execute((status) -> {
-            Long source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
+            Long source_id;
+            if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null) {
+                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId());
+            }else{
+                LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
+                        + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "namespaceId,ownerType,sourceType,ownerId,sourceId cannot be null.");
+            }
             String source_type = "EhGeneralFormValRequests";
 
 
             addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
             GeneralApproval generalApproval =generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getOwnerId(), cmd.getOwnerType());
 
-            cmd2.setGeneralFormId(generalApproval.getFormOriginId());
-            cmd2.setSourceId(source_id);
-            cmd2.setSourceType(source_type);
-            cmd2.setValues(cmd.getValues());
-            this.addGeneralFormValues(cmd2);
+            if(generalApproval != null) {
+                cmd2.setGeneralFormId(generalApproval.getFormOriginId());
+                cmd2.setSourceId(source_id);
+                cmd2.setSourceType(source_type);
+                cmd2.setValues(cmd.getValues());
+                this.addGeneralFormValues(cmd2);
+            }else{
+                LOGGER.error("getGeneralApprovalByNameAndRunning false: can not find running approval. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
+                        + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
+                        "getGeneralApprovalByNameAndRunning false: can not find running approval.");
+            }
             return source_id;
         });
         return sourceId;
