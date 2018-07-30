@@ -27,10 +27,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.common.AssociationActionData;
-import com.everhomes.rest.common.MoreActionData;
-import com.everhomes.rest.common.NavigationActionData;
-import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.common.*;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
@@ -64,8 +61,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.lucene.util.UnicodeUtil;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -381,6 +376,14 @@ public class PortalServiceImpl implements PortalService {
 		this.dbProvider.execute((status) -> {
 			if(null != cmd.getLayoutTemplateId()){
 				PortalLayoutTemplate template = portalLayoutTemplateProvider.findPortalLayoutTemplateById(cmd.getLayoutTemplateId());
+
+				//主页签标志，“首页”类型模板默认开启。
+				portalLayout.setType(template.getType());
+				if(PortalLayoutType.fromCode(template.getType()) == PortalLayoutType.SERVICEMARKETLAYOUT){
+					checkIndexPortalLayout(portalLayout.getVersionId(), portalLayout.getType());
+					portalLayout.setIndexFlag(TrueOrFalseFlag.TRUE.getCode());
+				}
+
 				if(null != template && !StringUtils.isEmpty(template.getTemplateJson())){
 					List<PortalItemGroup> groups = new ArrayList<>();
 					PortalLayoutJson layoutJson = (PortalLayoutJson)StringHelper.fromJsonString(template.getTemplateJson(), PortalLayoutJson.class);
@@ -418,11 +421,87 @@ public class PortalServiceImpl implements PortalService {
 	public PortalLayoutDTO updatePortalLayout(UpdatePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
+
+		if(TrueOrFalseFlag.fromCode(cmd.getIndexFlag()) == TrueOrFalseFlag.TRUE){
+			checkIndexPortalLayout(portalLayout.getVersionId(), portalLayout.getType());
+		}
+
 		portalLayout.setLabel(cmd.getLabel());
 		portalLayout.setDescription(cmd.getDescription());
 		portalLayout.setOperatorUid(user.getId());
-		portalLayoutProvider.updatePortalLayout(portalLayout);
+		portalLayout.setIndexFlag(cmd.getIndexFlag());
+
+		dbProvider.execute((status) -> {
+			//主页签标志发生变化，需要对layout和item的location刷新
+			if(TrueOrFalseFlag.fromCode(cmd.getIndexFlag()) != null && TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) != TrueOrFalseFlag.fromCode(cmd.getIndexFlag())){
+
+				if(TrueOrFalseFlag.fromCode(portalLayout.getIndexFlag()) == TrueOrFalseFlag.TRUE){
+					PortalLayoutType portalLayoutType = PortalLayoutType.fromCode(portalLayout.getType());
+					if(portalLayoutType != null){
+						portalLayout.setName(portalLayoutType.getName());
+						portalLayout.setLocation(portalLayoutType.getLocation());
+					}
+				}else {
+					portalLayout.setName(EhPortalLayouts.class.getSimpleName() + portalLayout.getId());
+					portalLayout.setLocation("/" + portalLayout.getName());
+				}
+				refleshItemLocation(portalLayout.getId(), portalLayout.getLocation());
+			}
+
+			portalLayoutProvider.updatePortalLayout(portalLayout);
+			return null;
+		});
+
 		return processPortalLayoutDTO(portalLayout);
+	}
+
+	private void checkIndexPortalLayout(Long versionId, Byte type){
+
+		PortalLayout indexPortalLayout = portalLayoutProvider.findIndexPortalLayout(versionId, type);
+
+		if(indexPortalLayout != null){
+			LOGGER.error("index layout already exists version = {}, type = {}", versionId, type);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"index layout already exists version = {}, type = {}", versionId, type);
+		}
+	}
+
+	private void refleshItemLocation(Long portalLayoutId, String location){
+
+		List<PortalItemGroup> portalItemGroups = portalItemGroupProvider.listPortalItemGroup(portalLayoutId);
+		if(portalItemGroups == null){
+			return;
+		}
+
+		for(PortalItemGroup portalItemGroup: portalItemGroups){
+			List<PortalItem> portalItems = portalItemProvider.listPortalItemByGroupId(portalItemGroup.getId());
+
+			if(portalItems == null){
+				continue;
+			}
+
+			for(PortalItem portalItem: portalItems){
+				portalItem.setItemLocation(location);
+				portalItemProvider.updatePortalItem(portalItem);
+			}
+
+		}
+
+	}
+
+
+	@Override
+	public PortalLayoutDTO findIndexPortalLayout(FindIndexPortalLayoutCommand cmd) {
+
+		if(cmd.getVersionId() == null || PortalLayoutType.fromCode(cmd.getType()) == null){
+			LOGGER.error("error invalid parameter, cmd = {}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error invalid parameter, cmd = {}", cmd);
+		}
+
+		PortalLayout portalLayout = portalLayoutProvider.findIndexPortalLayout(cmd.getVersionId(), cmd.getType());
+
+		return ConvertHelper.convert(portalLayout, PortalLayoutDTO.class);
 	}
 
 	@Override
@@ -1757,7 +1836,6 @@ public class PortalServiceImpl implements PortalService {
 //		}
 	}
 
-
 	private void publishTabItem(PortalItemGroup itemGroup, Long versionId, String location, Byte publishType){
 
 		List<LaunchPadItem> items = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), location);
@@ -1886,6 +1964,16 @@ public class PortalServiceImpl implements PortalService {
 
 		}
 
+		//兼容老数据，记录原来是否已经存在“全部更多”
+		boolean allOrMoreItemFlag = false;
+		for (PortalItem portalItem: portalItems){
+			if(PortalItemStatus.ACTIVE == PortalItemStatus.fromCode(portalItem.getStatus()) && PortalItemActionType.fromCode(portalItem.getActionType()) != PortalItemActionType.ALLORMORE){
+				allOrMoreItemFlag = true;
+			}
+		}
+
+
+
 		for (PortalItem portalItem: portalItems) {
 
 			List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM.getCode(), portalItem.getId(), null);
@@ -1948,6 +2036,9 @@ public class PortalServiceImpl implements PortalService {
 						item.setActionData(portalItem.getActionData());
 						item.setAccessControlType(AccessControlType.ALL.getCode());
 					}else if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
+
+						allOrMoreItemFlag = true;
+
 						AllOrMoreActionData data = (AllOrMoreActionData)StringHelper.fromJsonString(portalItem.getActionData(), AllOrMoreActionData.class);
 						if(AllOrMoreType.fromCode(data.getType()) == AllOrMoreType.ALL){
 							item.setActionType(ActionType.ALL_BUTTON.getCode());
@@ -1983,6 +2074,19 @@ public class PortalServiceImpl implements PortalService {
 					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
 				}
 			}
+
+			//原来item老数据没有“全部更多”，启用新配置
+			if(!allOrMoreItemFlag){
+				NavigatorInstanceConfig config = (NavigatorInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), NavigatorInstanceConfig.class);
+				if(config != null && TrueOrFalseFlag.fromCode(config.getAllOrMoreFlag()) == TrueOrFalseFlag.TRUE){
+
+				}
+
+
+			}
+
+
+
 		}
 	}
 

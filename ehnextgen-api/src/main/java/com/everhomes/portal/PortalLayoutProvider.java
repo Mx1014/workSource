@@ -19,5 +19,7 @@ public interface PortalLayoutProvider {
 
     List<PortalLayout> listPortalLayoutByVersion(Integer namespaceId, Long versionId);
 
+    PortalLayout findIndexPortalLayout(Long versionId, Byte type);
+
     void deleteByVersionId(Long versionId);
 }
