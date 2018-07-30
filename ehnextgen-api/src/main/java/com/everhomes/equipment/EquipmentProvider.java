@@ -217,13 +217,13 @@ public interface EquipmentProvider {
 
 	void updateReviewExpireDays(EquipmentInspectionReviewDate reviewDate);
 
-	void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId);
+	void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId, Long targetId, String targetType);
 
 	void deleteReviewExpireDaysByReferId(Long id);
 
 	EquipmentInspectionReviewDate getEquipmentInspectiomExpireDaysById(Long id);
 
-	List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType);
+	List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType,Long targetId,String targetType);
 
     void deleteEquipmentPlansMapByEquipmentId(Long equipmentId);
 

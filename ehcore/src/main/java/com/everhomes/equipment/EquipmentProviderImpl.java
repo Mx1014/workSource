@@ -3023,11 +3023,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId) {
+    public void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId,Long targetId,String targetType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhEquipmentInspectionReviewDateRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId));
+        if(targetId!=null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_ID.eq(targetId));
+        }
+        if(StringUtils.isNullOrEmpty(targetType)){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_TYPE.eq(targetType));
+        }
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.STATUS.eq(PmNotifyConfigurationStatus.VAILD.getCode()));
         query.fetch().map((r)->{
             deleteReviewExpireDays(r.getId());
@@ -3060,11 +3066,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType) {
+    public List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType,Long targetId,String targetType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionReviewDateRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_TYPE.eq(targetType));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.STATUS.eq(PmNotifyConfigurationStatus.VAILD.getCode()));
         return query.fetchInto(EquipmentInspectionReviewDate.class);
 

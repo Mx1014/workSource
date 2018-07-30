@@ -5216,6 +5216,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			EquipmentInspectionReviewDate reviewDate = new EquipmentInspectionReviewDate();
 			reviewDate.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
 			reviewDate.setReviewExpiredDays(cmd.getReviewExpiredDays());
+			reviewDate.setTargetId(cmd.getTargetId());
+			reviewDate.setTargetType(cmd.getTargetType());
 			if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
 				reviewDate.setScopeId(cmd.getCommunityId());
 				reviewDate.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
@@ -5223,7 +5225,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				reviewDate.setScopeId(cmd.getNamespaceId().longValue());
 				reviewDate.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
 			}
-			equipmentProvider.deleteReviewExpireDaysByScope(reviewDate.getScopeType(), reviewDate.getScopeId());
+			equipmentProvider.deleteReviewExpireDaysByScope(reviewDate.getScopeType(), reviewDate.getScopeId(),cmd.getTargetId(),cmd.getTargetType());
 			if (cmd.getId() == null) {
 				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
 				equipmentProvider.createReviewExpireDays(reviewDate);
@@ -5274,7 +5276,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
 		}
-		List<EquipmentInspectionReviewDate> reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
+		List<EquipmentInspectionReviewDate> reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType,cmd.getTargetId(),cmd.getTargetType());
 		List<Long> referId = new ArrayList<>();
 		if (reviewDate != null && reviewDate.size() > 0) {
 			reviewDate.forEach((r) -> {
@@ -5291,7 +5293,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
-				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType);
+				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType,cmd.getTargetId(),cmd.getTargetType());
 				if (reviewDate != null && reviewDate.size() > 0) {
 					if (!referId.contains(reviewDate.get(0).getId())) {
 						return ConvertHelper.convert(reviewDate.get(0), EquipmentInspectionReviewDateDTO.class);
@@ -6130,6 +6132,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 					SetReviewExpireDaysCommand expireDaysCommand = new SetReviewExpireDaysCommand();
 					expireDaysCommand.setCommunityId(task.getTargetId());
 					expireDaysCommand.setNamespaceId(task.getNamespaceId());
+					expireDaysCommand.setTargetId(task.getOwnerId());
+					expireDaysCommand.setTargetType(task.getOwnerType());
 					EquipmentInspectionReviewDateDTO date = listReviewExpireDays(expireDaysCommand);
 					if (date != null) {
 						task.setReviewExpiredDate(addDays(new Timestamp(DateHelper.currentGMTTime().getTime()), date.getReviewExpiredDays()));
