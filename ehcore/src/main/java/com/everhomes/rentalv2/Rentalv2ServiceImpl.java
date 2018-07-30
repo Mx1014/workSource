@@ -1267,23 +1267,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                 return true;
             }).collect(Collectors.toList());
         }
-        //是否有格子关闭
-        siteIds = siteIds.stream().filter(r-> !rentalv2Provider.findCellClosedByTimeInterval(cmd.getResourceType(),r,cmd.getStartTime(),cmd.getEndTime())).collect(Collectors.toList());
         //是否有不允许预约时间
         siteIds = siteIds.stream().filter(r-> {
             RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
                     cmd.getResourceType(), cmd.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), r);
             java.util.Date now = new java.util.Date();
-            //至多提前时间，筛选开始时间减去至多提前时间，表示最早可以预订的时间
+            //至多提前时间，筛选结束时间减去至多提前时间，表示最早可以预订的时间
             if (NormalFlag.NEED.getCode() == rule.getRentalStartTimeFlag()) {
-                Long time = cmd.getStartTime() - rule.getRentalStartTime();
+                Long time = cmd.getEndTime() - rule.getRentalStartTime();
                 if (now.before(new java.util.Date(time))) {
                     return false;
                 }
             }
-            //至少提前时间，筛选结束时间减去至少提前时间，表示最晚可以预订的时间
+            //至少提前时间，筛选开始时间减去至少提前时间，表示最晚可以预订的时间
             if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
-                Long time = cmd.getEndTime() - rule.getRentalEndTime();
+                Long time = cmd.getStartTime() - rule.getRentalEndTime();
                 if (now.after(new java.util.Date(time))) {
                     return false;
                 }
@@ -1302,6 +1300,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				startTime += Double.valueOf(halfTimeIntervals.get(cmd.getStartTimeAmOrPm()).getBeginTime()*3600*1000).longValue();
 				endTime += Double.valueOf(halfTimeIntervals.get(cmd.getEndTimeAmOrPm()).getBeginTime()*3600*1000).longValue();
 			}
+			//是否有格子被关闭
+			if (rentalv2Provider.findCellClosedByTimeInterval(cmd.getResourceType(),r,startTime,endTime))
+				return false;
+			//是否有格子被预约
 			List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(r, startTime, endTime);
 			if (rentalOrders != null && rentalOrders.size()>0)
 				return false;

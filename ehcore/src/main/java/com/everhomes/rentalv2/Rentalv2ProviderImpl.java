@@ -422,7 +422,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
 				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
 				.and((Tables.EH_RENTALV2_CELLS.BEGIN_TIME.le(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.END_TIME.gt(new Timestamp(startTime))))
-						.or(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.lt(new Timestamp(endTime)).and(Tables.EH_RENTALV2_CELLS.END_TIME.ge(new Timestamp(endTime)))))
+						.or(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.gt(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.lt(new Timestamp(endTime)))))
 				.fetchAny();
 		return record != null;
 	}
@@ -948,10 +948,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				SiteBillStatus.IN_USING.getCode());
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.equal(rentalSiteId));
 		if (null != startTime && null != endTime) {
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.START_TIME.le(new Timestamp(startTime)).
-					or(Tables.EH_RENTALV2_ORDERS.START_TIME.lt(new Timestamp(endTime))));
-			condition = condition.and(Tables.EH_RENTALV2_ORDERS.END_TIME.gt(new Timestamp(startTime)).
-					or(Tables.EH_RENTALV2_ORDERS.END_TIME.ge(new Timestamp(endTime))));
+			condition = condition.and((Tables.EH_RENTALV2_ORDERS.START_TIME.le(new Timestamp(startTime)).and(Tables.EH_RENTALV2_ORDERS.END_TIME.gt(new Timestamp(startTime))))
+					.or(Tables.EH_RENTALV2_ORDERS.START_TIME.gt(new Timestamp(startTime)).and(Tables.EH_RENTALV2_ORDERS.START_TIME.lt(new Timestamp(endTime)))));
 
 		}
 		step.where(condition);
