@@ -237,17 +237,17 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
         map.put("subject", activity.getSubject());
         String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
                 String.valueOf(ActivityLocalStringCode.ACTIVITY_AUTO_CANCEL),
-                UserContext.current().getUser().getLocale(),
+                user.getLocale(),
                 "Activity Have been Cancel");
         Map meta = createActivityRouterMeta(subject);
         final String content = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
         if (activityRosters != null && activityRosters.size() > 0) {
             activityRosters.forEach(r->{
                 if (r.getUid().longValue() != userId.longValue()) {
-                    sendMessageToUser(r.getUid().longValue(), content, null);
+                    sendMessageToUser(r.getUid().longValue(), content, meta);
                 }else{
                     final String creatorContent = localeTemplateService.getLocaleTemplateString(scope, ActivityNotificationTemplateCode.ACTIVITY_CANCEL_SEND_TO_CREATOR, user.getLocale(), map, "");
-                    sendMessageToUser(r.getUid().longValue(), creatorContent, null);
+                    sendMessageToUser(r.getUid().longValue(), creatorContent, meta);
                 }
             });
         }
