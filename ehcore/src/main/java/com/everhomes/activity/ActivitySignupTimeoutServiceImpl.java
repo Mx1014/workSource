@@ -244,10 +244,10 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
         if (activityRosters != null && activityRosters.size() > 0) {
             activityRosters.forEach(r->{
                 if (r.getUid().longValue() != userId.longValue()) {
-                    sendMessageToUser(r.getUid().longValue(), content, meta);
+                    sendMessageToUser(r.getUid().longValue(), content, null);
                 }else{
                     final String creatorContent = localeTemplateService.getLocaleTemplateString(scope, ActivityNotificationTemplateCode.ACTIVITY_CANCEL_SEND_TO_CREATOR, user.getLocale(), map, "");
-                    sendMessageToUser(r.getUid().longValue(), creatorContent, meta);
+                    sendMessageToUser(r.getUid().longValue(), creatorContent, null);
                 }
             });
         }
