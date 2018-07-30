@@ -1338,8 +1338,9 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId(),cmd);
-
+			List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId());
+            GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+            GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
 //			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 
 			//检查是否超过报名人数限制, add by tt, 20161012
@@ -1431,13 +1432,11 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
 	}
 
-	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId,ImportSignupInfoCommand cmd) {
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId) {
 		@SuppressWarnings("rawtypes")
 		List<ImportSignupErrorDTO> errorLists = new ArrayList<>();
 		ArrayList rows = processorExcel(file);
 		List<ActivityRoster> rosters = new ArrayList<>();
-        GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
-        GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
 		//此处添加陈宫失败数，因为过着这个方法后就拿不到总数和失败数了。 add by yajun 20170827
 		result.setTotal(0);
 		result.setFail(0);
