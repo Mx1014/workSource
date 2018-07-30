@@ -2,6 +2,8 @@
 package com.everhomes.requisition;
 
 import com.everhomes.flow.*;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.flow.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,9 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     private FlowService flowService;
     @Autowired
     private RequisitionProvider requisitionProvider;
+    @Autowired
+    private ServiceModuleProvider serviceModuleProvider;
+
 //    @Autowired
 //    private List<RequistionListener> reqListeners;
 //
@@ -34,9 +39,13 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     public FlowModuleInfo initModule() {
         FlowModuleInfo module = new FlowModuleInfo();
         FlowModuleDTO moduleDTO = flowService.getModuleById(FlowConstants.REQUISITION_MODULE);
-        module.setModuleName(moduleDTO.getDisplayName());
-        module.setModuleId(FlowConstants.REQUISITION_MODULE);
-        return module;
+        if (moduleDTO != null) {
+            module.setModuleName(moduleDTO.getDisplayName());
+            module.setModuleId(FlowConstants.REQUISITION_MODULE);
+            return module;
+        }
+
+        return null;
     }
 
     @Override

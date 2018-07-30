@@ -243,8 +243,15 @@ public class RequisitionServiceImpl implements RequisitionService {
     @Override
     public GeneralFormDTO getRunningRequisitionForm(GetRunningRequisitionFormCommond cmd){
         GeneralApproval runningApproval = generalApprovalProvider.getGeneralApprovalByNameAndRunning(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType());
-        GeneralForm form = generalFormProvider.getGeneralFormById(runningApproval.getFormOriginId());
-        return ConvertHelper.convert(form, GeneralFormDTO.class);
+        if(runningApproval != null) {
+            GeneralForm form = generalFormProvider.getGeneralFormById(runningApproval.getFormOriginId());
+            return ConvertHelper.convert(form, GeneralFormDTO.class);
+        }else{
+            LOGGER.error("未找到正在生效的表单，namespaceId:  " + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
+            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                    RequistionErrorCodes.ERROR_FORM_NOT_FIND, "未找到正在生效的表单");
+        }
+
     }
 
 
