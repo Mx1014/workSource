@@ -2117,7 +2117,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 		
 		//正则校验数字
 		if (StringUtils.isNotEmpty(data.getAmount())) {
-			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			String reg = "^\\+?[1-9][0-9]*$";
 			if(!Pattern.compile(reg).matcher(data.getAmount()).find()){
 				log.setCode(WarehouseServiceErrorCode.ERROR_AMOUNT_FORMAT);
 				log.setData(data);

@@ -5,16 +5,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.portal.PortalService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -59,12 +56,6 @@ public class WarehouseController extends ControllerBase {
     @Autowired
     private WarehouseRequestMaterialSearcher warehouseRequestMaterialSearcher;
 
-    @Autowired
-    private UserPrivilegeMgr userPrivilegeMgr;
-
-    @Autowired
-    private PortalService portalService;
-
     /**
      * <b>URL: /warehouse/updateWarehouse</b>
      * <p>创建或修改仓库</p>
@@ -74,7 +65,6 @@ public class WarehouseController extends ControllerBase {
     public RestResponse updateWarehouse(UpdateWarehouseCommand cmd) {
 
         WarehouseDTO warehouse = warehouseService.updateWarehouse(cmd);
-
         RestResponse response = new RestResponse(warehouse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -584,7 +574,8 @@ public class WarehouseController extends ControllerBase {
      * <p>搜索索引同步</p>
      * @return {String.class}
      */
-    @RequestMapping("syncWarehouseMaterialCategoryIndex")
+    @SuppressWarnings("deprecation")
+	@RequestMapping("syncWarehouseMaterialCategoryIndex")
     @RestReturn(value=String.class)
     public RestResponse syncWarehouseMaterialCategoryIndex() {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -602,7 +593,8 @@ public class WarehouseController extends ControllerBase {
      * <p>搜索索引同步</p>
      * @return {String.class}
      */
-    @RequestMapping("syncWarehouseMaterialsIndex")
+    @SuppressWarnings("deprecation")
+	@RequestMapping("syncWarehouseMaterialsIndex")
     @RestReturn(value=String.class)
     public RestResponse syncWarehouseMaterialsIndex() {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -620,7 +612,8 @@ public class WarehouseController extends ControllerBase {
      * <p>搜索索引同步</p>
      * @return {String.class}
      */
-    @RequestMapping("syncWarehouseStockLogIndex")
+    @SuppressWarnings("deprecation")
+	@RequestMapping("syncWarehouseStockLogIndex")
     @RestReturn(value=String.class)
     public RestResponse syncWarehouseStockLogIndex() {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -638,7 +631,8 @@ public class WarehouseController extends ControllerBase {
      * <p>搜索索引同步</p>
      * @return {String.class}
      */
-    @RequestMapping("syncWarehouseStockIndex")
+    @SuppressWarnings("deprecation")
+	@RequestMapping("syncWarehouseStockIndex")
     @RestReturn(value=String.class)
     public RestResponse syncWarehouseStockIndex() {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -656,7 +650,8 @@ public class WarehouseController extends ControllerBase {
      * <p>搜索索引同步</p>
      * @return {String.class}
      */
-    @RequestMapping("syncWarehouseIndex")
+    @SuppressWarnings("deprecation")
+	@RequestMapping("syncWarehouseIndex")
     @RestReturn(value=String.class)
     public RestResponse syncWarehouseIndex() {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -674,7 +669,8 @@ public class WarehouseController extends ControllerBase {
      * <p>搜索索引同步</p>
      * @return {String.class}
      */
-    @RequestMapping("syncWarehouseRequestMaterialIndex")
+    @SuppressWarnings("deprecation")
+	@RequestMapping("syncWarehouseRequestMaterialIndex")
     @RestReturn(value=String.class)
     public RestResponse syncWarehouseRequestMaterialIndex() {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
