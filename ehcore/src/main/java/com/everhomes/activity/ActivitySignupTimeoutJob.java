@@ -51,7 +51,7 @@ public class ActivitySignupTimeoutJob extends QuartzJobBean {
                     Activity activity = this.activityProivider.findSnapshotByPostId(post.getId());
                     if (activity != null) {
                         List<ActivityRoster> rosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
-                        if (rosters != null && post.getMinQuantity() != null && rosters.size() < post.getMinQuantity()) {
+                        if (rosters != null && post.getMinQuantity() != null && rosters.size() -1 < post.getMinQuantity()) {
                             LocalDateTime nowDateTime = LocalDateTime.now();
                             coordinationProvider.getNamedLock(CoordinationLocks.ACTIVITY_SIGNUP_TIMEOUT.getCode()).tryEnter(() -> {
                                 LOGGER.info("ActivitySignupTimeoutJob has been started at " + nowDateTime);
