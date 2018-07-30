@@ -3080,9 +3080,9 @@ public class PunchServiceImpl implements PunchService {
         if (pr == null)
             return null;
         PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, date, userId);
-//        if (ptr == null || ptr.getId() == null || ptr.getId() == 0) {
-//            return null;
-//        }
+        if (ptr == null || ptr.getId() == null || ptr.getId() == 0) {
+            return null;
+        }
         return ptr;
     }
 
@@ -6572,9 +6572,10 @@ public class PunchServiceImpl implements PunchService {
 //        Calendar calendar3 = Calendar.getInstance();
 //        calendar3.set(2018, 6, 5);
 //        refreshDayLogAndMonthStat(505393L, 1045660L, calendar3);
-//        Calendar calendar4 = Calendar.getInstance();
-//        calendar4.set(2018, 6, 6);
-//        refreshDayLogAndMonthStat(505393L, 1045660L, calendar4);
+        Calendar calendar4 = Calendar.getInstance();
+        calendar4.set(2018, 6, 22);
+        OrganizationMemberDetails details = findOrganizationMemberDetailByCacheDetailId(39946L);
+        refreshDayLogAndMonthStat(details, 1045660L, calendar4);
 //        dayRefreshLogScheduled(new Date(runDate));
     }
 
@@ -9244,7 +9245,7 @@ public class PunchServiceImpl implements PunchService {
 
     private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
 		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
-        if (null == ptr) {
+        if (null == ptr || ptr.getId() == null || ptr.getId() == 0) {
             return null;
         }
         if (ptr.getPunchTimesPerDay().intValue() == 2) {
