@@ -6120,11 +6120,11 @@ public class PunchServiceImpl implements PunchService {
 
         dto.setPunchTimesPerDay(r.getPunchTimesPerDay());
         // modify by wh 2017年6月22日 现在都是挂总公司下,用户未必都能通过这种方式查到
-        OrganizationMember member = findOrganizationMemberByUIdCache(dto.getUserId(), r.getEnterpriseId());
+        OrganizationMemberDetails member = findOrganizationMemberByUIdCache(r.getDetailId());
 
         if (null != member) {
             dto.setUserName(member.getContactName());
-            Organization department = getDepartment(member.getNamespaceId(), member.getDetailId());
+            Organization department = getDepartment(member.getNamespaceId(), member.getId());
             if (department != null) {
                 dto.setDeptName(department.getName());
                 dto.setDeptId(department.getId());
@@ -6148,18 +6148,18 @@ public class PunchServiceImpl implements PunchService {
                 || (request.getPunchDate() != null && request.getPunchDate().equals(punchDate));
 	}
 
-	private OrganizationMember findOrganizationMemberByUIdCache(Long userId, Long enterpriseId) {
+    private OrganizationMemberDetails findOrganizationMemberByUIdCache(Long detailId) {
 
-    	 OrganizationMember member = organizationMemberByUIdCache.get().get(enterpriseId+"-"+userId);
-         if (null == member) {
-        	 member =  organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, enterpriseId);
-        	 organizationMemberByUIdCache.get().put(enterpriseId+"-"+userId, member);
-         }
-         return member;
-	}
+        OrganizationMemberDetails member = organizationMemberByUIdCache.get().get(detailId);
+        if (null == member) {
+            member = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            organizationMemberByUIdCache.get().put(detailId, member);
+        }
+        return member;
+    }
 
-	private ThreadLocal<Map<String, OrganizationMember>> organizationMemberByUIdCache = new ThreadLocal<Map<String, OrganizationMember>>() {
-        protected Map<String, OrganizationMember> initialValue() {
+    private ThreadLocal<Map<Long, OrganizationMemberDetails>> organizationMemberByUIdCache = new ThreadLocal<Map<Long, OrganizationMemberDetails>>() {
+        protected Map<Long, OrganizationMemberDetails> initialValue() {
             return new HashMap<>();
         }
     };
