@@ -1190,8 +1190,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				siteIds.add(siteOwner.getRentalResourceId());
 			}
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
-        siteIds = filteRentalSitesByTime(siteIds,cmd);
+
+		//为了降低运算量 在筛选过程前筛一遍 降低资源个数
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
+				locator, Integer.MAX_VALUE, RentalSiteStatus.NORMAL.getCode(), siteIds, cmd.getCommunityId());
+		siteIds = rentalSites.stream().map(RentalResource::getId).collect(Collectors.toList());
+		siteIds = filteRentalSitesByTime(siteIds,cmd);
+        rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
 				locator, pageSize + 1, RentalSiteStatus.NORMAL.getCode(), siteIds, cmd.getCommunityId());
 
 		if (null == rentalSites)
