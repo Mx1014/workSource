@@ -1,7 +1,9 @@
 package com.everhomes.namespace;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.namespace.admin.ListNamespaceByModuleIdCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -92,5 +94,17 @@ public class NamespacesServiceImpl implements NamespacesService {
 		});
 		return namespaceInfoDTO;
 	}
-	
+
+	@Override
+	public List<NamespaceInfoDTO> listNamespaceByModuleId(ListNamespaceByModuleIdCommand cmd) {
+
+		List<NamespaceInfoDTO> dtos;
+		if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != 0){
+			dtos = namespacesProvider.listNamespaceByModuleId(cmd.getModuleId());
+		}else {
+			dtos = namespacesProvider.listNamespace();
+		}
+
+		return dtos;
+	}
 }

@@ -221,6 +221,12 @@ public interface ActivityService {
 
 	void payNotify(OrderPaymentNotificationCommand cmd);
 
+	void exportActivity(ExportActivityCommand cmd);
+
+	void exportOrganization(ExportOrganizationCommand cmd);
+
+	void exportTag(ExportTagCommand cmd);
+
 //	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
 

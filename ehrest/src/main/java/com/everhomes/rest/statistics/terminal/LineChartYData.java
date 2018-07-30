@@ -1,7 +1,7 @@
 package com.everhomes.rest.statistics.terminal;
 
 
-import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -13,11 +13,17 @@ import java.util.List;
 public class LineChartYData {
 
 	private String name;
+	private List<Number> data;
 
-	@ItemType(Double.class)
-	private List<Double> data;
+    public LineChartYData() {
+    }
 
-	public String getName() {
+    public LineChartYData(String name, List<Number> data) {
+        this.name = name;
+        this.data = data;
+    }
+
+    public String getName() {
 		return name;
 	}
 
@@ -25,11 +31,16 @@ public class LineChartYData {
 		this.name = name;
 	}
 
-	public List<Double> getData() {
+	public List<Number> getData() {
 		return data;
 	}
 
-	public void setData(List<Double> data) {
+	public void setData(List<Number> data) {
 		this.data = data;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

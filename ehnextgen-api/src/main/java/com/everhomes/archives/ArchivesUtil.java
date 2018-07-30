@@ -264,7 +264,7 @@ public class ArchivesUtil {
                 else if (value == ArchivesDismissType.FIRE.getCode())
                     return "解雇";
                 else if (value == ArchivesDismissType.OTHER.getCode())
-                    return "其它";
+                    return "其他";
                 else if (value == ArchivesDismissType.RETIRE.getCode())
                     return "退休";
                 break;

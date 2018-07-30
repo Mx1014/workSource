@@ -7,7 +7,6 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.payment_application.PaymentApplicationStatus;
 import com.everhomes.search.PaymentApplicationSearcher;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +59,11 @@ public class PaymentApplicationFlowModuleListener implements FlowModuleListener 
             list.add(dto);
         }
         return list;
+    }
+
+    @Override
+    public void onFlowCaseAbsorted(FlowCaseState ctx) {
+
     }
 
     @Override
