@@ -1226,6 +1226,7 @@ public class PunchServiceImpl implements PunchService {
             return pdl;
         }
 
+        punchDayLog.setSplitDateTime(new Timestamp(punchDate.getTime() + ONE_DAY_MS + (ptr.getDaySplitTimeLong() != null ? ptr.getDaySplitTimeLong() : PunchConstants.DEFAULT_SPLIT_TIME)));
         punchDayLog.setTimeRuleName(ptr.getName());
         punchDayLog.setTimeRuleId(ptr.getId());
 
@@ -6056,7 +6057,7 @@ public class PunchServiceImpl implements PunchService {
         }
         //审批单
         //请假之类的审批单
-        PunchTimeRule ptr = getPunchTimeRuleFromLocalCache(cachePunchTimeRuleMap, r.getTimeRuleId());
+        PunchTimeRule ptr = getPunchTimeRuleFromLocalCache(r.getTimeRuleId());
         if (null != ptr) {
             // 获取上下班时间
             dto.setTimeIntervals(findPunchTimeIntervals(ptr));
@@ -6765,8 +6766,8 @@ public class PunchServiceImpl implements PunchService {
         punchDayLog.setUserId(memberDetail.getTargetId());
         punchDayLog.setDeptId(deptId);
         punchDayLog.setPunchDate(java.sql.Date.valueOf(punCalendar));
-        punchDayLog.setStatus(PunchStatus.NORMAL.getCode());
-        punchDayLog.setStatusList(String.valueOf(PunchStatus.NORMAL.getCode()));
+        punchDayLog.setStatus(PunchStatus.NO_ASSIGN_PUNCH_RULE.getCode());
+        punchDayLog.setStatusList(String.valueOf(PunchStatus.NO_ASSIGN_PUNCH_RULE.getCode()));
         punchDayLog.setApprovalStatusList("");
         punchDayLog.setViewFlag(NormalFlag.YES.getCode());
         punchDayLog.setMorningStatus(NormalFlag.YES.getCode());
@@ -6779,6 +6780,8 @@ public class PunchServiceImpl implements PunchService {
         punchDayLog.setAbsentFlag(NormalFlag.NO.getCode());
         punchDayLog.setNormalFlag(NormalFlag.YES.getCode());
         if (pr != null) {
+            punchDayLog.setStatus(PunchStatus.UNPUNCH.getCode());
+            punchDayLog.setStatusList(String.valueOf(PunchStatus.UNPUNCH.getCode()));
             punchDayLog.setRuleType(pr.getRuleType());
             punchDayLog.setPunchOrganizationId(pr.getPunchOrganizationId());
             PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDateUseDetailId(pr, punchDayLog.getPunchDate(), memberDetail.getId());
@@ -6787,6 +6790,9 @@ public class PunchServiceImpl implements PunchService {
                 punchDayLog.setTimeRuleId(ptr.getId());
                 punchDayLog.setTimeRuleName(ptr.getName());
                 punchDayLog.setRestFlag(NormalFlag.NO.getCode());
+            } else {
+                punchDayLog.setStatus(PunchStatus.NOTWORKDAY.getCode());
+                punchDayLog.setStatusList(String.valueOf(PunchStatus.NOTWORKDAY.getCode()));
             }
         }
         punchDayLog.setCreatorUid(0L);
@@ -9468,10 +9474,10 @@ public class PunchServiceImpl implements PunchService {
         //存放每个公司每个人每天的规则 大小= 日期*公司*公司人数
         Map<String, PunchTimeRule> punchTimeRuleMapUserIdDate = new HashMap<>();
         // 循环每一天的考勤数据 把考勤规则查出来(使用缓存减少IO) 放到map里,供每次打卡查询
-    	for(PunchDayLog dayLog :dayLogs){
-    		PunchTimeRule ptr = getPunchTimeRuleFromLocalCache(punchTimeRuleMapId , dayLog.getTimeRuleId());
-    		punchTimeRuleMapUserIdDate.put(getPtrMapKey(dayLog.getUserId(),dayLog.getEnterpriseId(),dateSF.get().format(dayLog.getPunchDate())), ptr);
-    	}
+        for (PunchDayLog dayLog : dayLogs) {
+            PunchTimeRule ptr = getPunchTimeRuleFromLocalCache(dayLog.getTimeRuleId());
+            punchTimeRuleMapUserIdDate.put(getPtrMapKey(dayLog.getUserId(), dayLog.getEnterpriseId(), dateSF.get().format(dayLog.getPunchDate())), ptr);
+        }
     	for(PunchLog log :logs){
     		if(log.getShouldPunchTime() != null ){
     			continue;
@@ -11001,17 +11007,11 @@ public class PunchServiceImpl implements PunchService {
         return null;
     }
 
-    private PunchTimeRule getPunchTimeRuleFromLocalCache(Map<Long, PunchTimeRule> cachePunchTimeRuleMap, Long timeRuleId) {
-        PunchTimeRule ptr = null;
-        if (cachePunchTimeRuleMap.containsKey(timeRuleId)) {
-            ptr = cachePunchTimeRuleMap.get(timeRuleId);
-        } else {
-            ptr = punchProvider.getPunchTimeRuleById(timeRuleId);
-            if (ptr != null) {
-                cachePunchTimeRuleMap.put(ptr.getId(), ptr);
-            }
+    private PunchTimeRule getPunchTimeRuleFromLocalCache(Long timeRuleId) {
+        if (timeRuleId == null || timeRuleId <= 0) {
+            return null;
         }
-        return ptr;
+        return punchProvider.getPunchTimeRuleById(timeRuleId);
     }
 
     private Organization getOrganizationFromLocalCache(Map<Long, Organization> cacheOrganizationMap, Long punchOrganizationId) {

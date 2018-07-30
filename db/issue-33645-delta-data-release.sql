@@ -26,3 +26,14 @@ SET @max_locale_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
 INSERT INTO `eh_locale_strings` (`id`,scope,CODE,locale,TEXT) VALUE (@max_locale_id:=@max_locale_id+1, 'time.unit', 'date', 'zh_CN', '日');
 INSERT INTO `eh_locale_strings` (`id`,scope,CODE,locale,TEXT) VALUE (@max_locale_id:=@max_locale_id+1, 'punch.punchType', '0', 'zh_CN', '上班');
 INSERT INTO `eh_locale_strings` (`id`,scope,CODE,locale,TEXT) VALUE (@max_locale_id:=@max_locale_id+1, 'punch.punchType', '1', 'zh_CN', '下班');
+
+
+
+INSERT INTO eh_locale_strings(scope,code,locale,text)
+SELECT r.scope,r.code,r.locale,r.text FROM(
+SELECT 'punch.status' AS scope,18 AS code,'zh_CN' AS locale,'迟到且缺卡' AS text UNION ALL
+SELECT 'punch.status' AS scope,19 AS code,'zh_CN' AS locale,'缺卡' AS text UNION ALL
+SELECT 'punch.status' AS scope,-1 AS code,'zh_CN' AS locale,'未设置规则' AS text UNION ALL
+SELECT 'punch.status' AS scope,-2 AS code,'zh_CN' AS locale,'未安排班次' AS text
+)r LEFT JOIN eh_locale_strings s ON r.scope=s.scope AND r.code=s.code AND r.locale=s.locale
+WHERE s.id IS NULL;

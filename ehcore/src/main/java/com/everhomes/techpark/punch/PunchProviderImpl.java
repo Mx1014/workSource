@@ -111,7 +111,7 @@ import org.jooq.Record17;
 import org.jooq.Record2;
 import org.jooq.Record3;
 import org.jooq.Record5;
-import org.jooq.Record6;
+import org.jooq.Record7;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectHavingStep;
@@ -3955,15 +3955,16 @@ public class PunchProviderImpl implements PunchProvider {
     @Override
     public DailyPunchStatusStatisticsHistoryRecordMapper dailyPunchStatusMemberCountsHistoryByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record6<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> query = context.select(
+        SelectJoinStep<Record7<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> query = context.select(
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("restMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("normalMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("absenceMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1).and(Tables.EH_PUNCH_DAY_LOGS.SPLIT_DATE_TIME.lt(new Timestamp(System.currentTimeMillis()))), 1).otherwise(0).sum().as("checkingMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)), 1).otherwise(0).sum().as("forgotPunchMemberCount")).from(Tables.EH_PUNCH_DAY_LOGS);
         Condition condition = Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(statisticsDate)).and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds));
-        Record6<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal> record = query.where(condition).fetchOne();
+        Record7<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal> record = query.where(condition).fetchOne();
         if (record == null) {
             return new DailyPunchStatusStatisticsHistoryRecordMapper();
         }

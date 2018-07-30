@@ -92,7 +92,7 @@ public class DailyPunchStatusStatisticsHistoryRecordMapper implements RecordMapp
         data.setForgotPunchMemberCount(record.getValue("forgotPunchMemberCount", Integer.class));
         data.setNormalMemberCount(record.getValue("normalMemberCount", Integer.class));
         data.setRestMemberCount(record.getValue("restMemberCount", Integer.class));
-        data.setCheckingMemberCount(data.getAbsenceMemberCount());
+        data.setCheckingMemberCount(record.getValue("checkingMemberCount", Integer.class));
         return data;
     }
 
