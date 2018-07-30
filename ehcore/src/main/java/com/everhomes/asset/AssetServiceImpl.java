@@ -4961,7 +4961,13 @@ public class AssetServiceImpl implements AssetService {
         for(BillItemDTO billItemDTO : billItemDTOList){
         	if(billItemDTO.getBillItemId() != null) {
         		propertyNames.add(billItemDTO.getBillItemId().toString());
-                titleName.add(billItemDTO.getBillItemName()+"(元)");
+                titleName.add(billItemDTO.getBillItemName()+"(含税)");
+                titleSize.add(20);
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "-withoutTax");
+                titleName.add(billItemDTO.getBillItemName()+"(不含税)");
+                titleSize.add(20);
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "-taxAmount");
+                titleName.add(billItemDTO.getBillItemName()+"税额");
                 titleSize.add(20);
                 //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
                 if(isShowEnergy(namespaceId, communityId, moduleId)) {
@@ -5028,6 +5034,8 @@ public class AssetServiceImpl implements AssetService {
     		}
             for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
             	BigDecimal amountRecivable = BigDecimal.ZERO;
+            	BigDecimal amountRecivableWithoutTax = BigDecimal.ZERO;//导出增加不含税字段
+            	BigDecimal taxAmount = BigDecimal.ZERO;//导出增加税额字段
             	BigDecimal lateFineAmount = BigDecimal.ZERO;
             	BigDecimal energyConsume = BigDecimal.ZERO;//增加用量
         		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
@@ -5049,6 +5057,12 @@ public class AssetServiceImpl implements AssetService {
         				}else {
         					//如果费项是一样的，那么导出的时候，对费项做相加
             				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+            				if(billItemDTO2.getAmountReceivableWithoutTax() != null) {
+            					amountRecivableWithoutTax = amountRecivableWithoutTax.add(billItemDTO2.getAmountReceivableWithoutTax());//导出增加不含税字段
+            				}
+            				if(billItemDTO2.getTaxAmount() != null) {
+            					taxAmount = taxAmount.add(billItemDTO2.getTaxAmount());//导出增加税额字段 
+            				}
             				//根据减免费项配置重新计算待收金额
             				long billId = Long.parseLong(dto.getBillId());
                             Long charingItemId = billItemDTO.getBillItemId();
@@ -5064,6 +5078,8 @@ public class AssetServiceImpl implements AssetService {
         			}
         		}
         		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-withoutTax", amountRecivableWithoutTax.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-taxAmount", taxAmount.toString());
         		detail.put(billItemDTO.getBillItemId().toString() + "-energyConsume", energyConsume.toString());//增加用量
         		//导出增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
         		detail.put(billItemDTO.getBillItemId().toString() + "LateFine", lateFineAmount.toString());
