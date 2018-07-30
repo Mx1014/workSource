@@ -96,7 +96,7 @@ public class UclbrtHttpClient {
 	@SuppressWarnings("deprecation")
 	public static String TestFuncXML(String protocol,String  ip,String  port,String  communityNo,String  buildNo, String floorNo, String roomNo, String accSid,String  token,String areaCode,String mobile,String begTime,String endTime){
 		String l= getInfoXML(protocol, ip, port, communityNo, buildNo, floorNo, roomNo, accSid, token,areaCode,mobile,begTime,endTime);
-		System.out.println(l);
+		LOGGER.info("ucl 注册 xml " + l);
 		String roomID = null;
 		Document doc = null;
 		try {
@@ -112,7 +112,7 @@ public class UclbrtHttpClient {
 		}
 		
 		String qr= getQRXML(protocol, ip, port, communityNo, buildNo, floorNo, roomNo, accSid, token,areaCode,mobile,roomID);
-
+		LOGGER.info("ucl 获取验证码 xml " + qr);
 		try {
 			doc = DocumentHelper.parseText(qr);
 			Element rootElt = doc.getRootElement(); 
