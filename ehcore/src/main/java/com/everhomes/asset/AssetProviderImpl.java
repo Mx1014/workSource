@@ -1580,7 +1580,7 @@ public class AssetProviderImpl implements AssetProvider {
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
-        		, o.ENERGY_CONSUME)
+        		, o.ENERGY_CONSUME,o.AMOUNT_RECEIVABLE_WITHOUT_TAX)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -1594,6 +1594,7 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setBillItemName(f.getValue(o.CHARGING_ITEM_NAME));
                     itemDTO.setBillItemId(f.getValue(o.ID));
                     itemDTO.setAmountReceivable(f.getValue(o.AMOUNT_RECEIVABLE));
+                    itemDTO.setAmountReceivableWithoutTax(f.getValue(o.AMOUNT_RECEIVABLE_WITHOUT_TAX));//增加应收（不含税）
                     String apartFromAddr = f.getValue(t1.APARTMENT_NAME);
                     String buildingFromAddr = f.getValue(t1.BUILDING_NAME);
                     if(!org.jooq.tools.StringUtils.isBlank(apartFromAddr) || !org.jooq.tools.StringUtils.isBlank(buildingFromAddr)){

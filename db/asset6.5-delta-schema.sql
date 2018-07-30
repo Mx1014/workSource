@@ -12,13 +12,14 @@ ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `tax_rate` DECIMAL(10,2
 ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
 ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
 ALTER TABLE `eh_payment_bills` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
-ALTER TABLE `eh_payment_bills` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_receivable_without_tax;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率' after tax_amount;
 
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）' after amount_receivable;
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）' after amount_received;
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `amount_owed_without_tax` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_owed;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '待收（不含税）' after amount_receivable_without_tax;
-
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_amount` DECIMAL(10,2) COMMENT '税额' after amount_receivable_without_tax;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `tax_rate` DECIMAL(10,2) COMMENT '税率' after tax_amount;
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
