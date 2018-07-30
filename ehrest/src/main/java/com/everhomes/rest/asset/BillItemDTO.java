@@ -43,6 +43,7 @@ public class BillItemDTO {
     private String itemType;//增加费项类型
     private BigDecimal amountReceivableWithoutTax;//增加应收（不含税）
     private BigDecimal taxAmount;//增加税额
+    private BigDecimal taxRate;//增加税率
 
     @Override
     public String toString() {
@@ -180,5 +181,13 @@ public class BillItemDTO {
 
 	public void setTaxAmount(BigDecimal taxAmount) {
 		this.taxAmount = taxAmount;
+	}
+
+	public BigDecimal getTaxRate() {
+		return taxRate;
+	}
+
+	public void setTaxRate(BigDecimal taxRate) {
+		this.taxRate = taxRate;
 	}
 }

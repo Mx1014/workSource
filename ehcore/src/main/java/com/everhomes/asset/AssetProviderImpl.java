@@ -1071,7 +1071,7 @@ public class AssetProviderImpl implements AssetProvider {
         ShowCreateBillDTO response = new ShowCreateBillDTO();
         List<BillItemDTO> list = new ArrayList<>();
         Long categoryId = findCategoryIdFromBillGroup(billGroupId);
-        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID)
+        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID,ci.TAX_RATE)
                 .from(rule,ci)
                 .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
                 .and(rule.OWNERID.eq(ci.OWNER_ID))
@@ -1083,6 +1083,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillItemId(r.getValue(rule.CHARGING_ITEM_ID));
                     dto.setBillItemName(r.getValue(ci.PROJECT_LEVEL_NAME));
                     dto.setBillGroupRuleId(r.getValue(rule.ID));
+                    dto.setTaxRate(r.getValue(ci.TAX_RATE));//增加税率
                     list.add(dto);
                     return null;});
 
@@ -1368,6 +1369,7 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setAmountReceivableWithoutTax(var2);//增加应收（不含税）
                     item.setAmountReceivedWithoutTax(new BigDecimal("0"));//增加已收（不含税）
                     item.setTaxAmount(dto.getTaxAmount());//增加税额
+                    
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
