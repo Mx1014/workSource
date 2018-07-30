@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
+import com.everhomes.rest.rentalv2.admin.RentalOpenTimeDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul> 
@@ -64,6 +65,7 @@ public class FindRentalSiteYearStatusCommandResponse {
 	private List<AttachmentConfigDTO> attachments;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
+	private String openTimes;
 	
 	@Override
     public String toString() {
@@ -284,7 +286,12 @@ public class FindRentalSiteYearStatusCommandResponse {
 	public void setNotice(String notice) {
 		this.notice = notice;
 	}
- 
 
- 
+	public String getOpenTimes() {
+		return openTimes;
+	}
+
+	public void setOpenTimes(String openTimes) {
+		this.openTimes = openTimes;
+	}
 }

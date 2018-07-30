@@ -17,7 +17,7 @@ public class EvaluateTaskCommand {
 	private String ownerType;
     private Long ownerId;
     private Long id;
-    private Byte star;
+    private String star;
     private Byte operatorStar;
 
 	public Integer getNamespaceId() {
@@ -47,10 +47,10 @@ public class EvaluateTaskCommand {
 		this.id = id;
 	}
     
-	public Byte getStar() {
+	public String getStar() {
 		return star;
 	}
-	public void setStar(Byte star) {
+	public void setStar(String star) {
 		this.star = star;
 	}
 	public Byte getOperatorStar() {

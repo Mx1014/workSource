@@ -445,4 +445,6 @@ public interface RolePrivilegeService {
 	void updateTopAdminstrator(CreateOrganizationAdminCommand cmd);
 
 	String findTopAdminByOrgId(FindTopAdminByOrgIdCommand cmd);
+
+	boolean checkIsSystemOrAppAdmin(Long orgId, Long userId);
 }

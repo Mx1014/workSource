@@ -353,6 +353,22 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
+     * <b>URL: /aclink/serverDisconnected</b>
+     * <p>断开人脸识别服务器的websocket链接</p>
+     * @return
+     */
+    @RequestMapping("serverDisconnected")
+    @RestReturn(value=AclinkServerDTO.class)
+    public RestResponse serverDisconnected(@Valid AclinkDisconnectedCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setResponseObject(aclinkServerService.onServerDisconnecting(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
      * <b>URL: /aclink/syncWebsocketMessages</b>
      * <p>消息同步</p>
      * @return

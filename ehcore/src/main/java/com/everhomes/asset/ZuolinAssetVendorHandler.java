@@ -14,6 +14,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.organization.*;
@@ -21,6 +22,7 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
@@ -352,7 +354,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         }
         return list;
     }
-
+    
     @Override
     public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageNum, Integer pageSize,Long ownerId, ListBillItemsResponse response, Long billGroupId) {
         if (pageNum == null) {
@@ -651,12 +653,21 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         //先查看任务
         Boolean inWork = assetProvider.checkContractInWork(cmd.getContractId(),cmd.getContractNum());
         if(inWork){
-        	//change by tangcen
         	response.setGenerated((byte)0);
             return response;
             //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId());
+        
+        Contract contract = contractProvider.findContractById(cmd.getContractId());
+        for (PaymentExpectancyDTO dto : dtos) {
+        	//根据合同应用的categoryId去查找对应的缴费应用的categoryId
+			Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+			//显示客户自定义的收费项名称，需要使用缴费应用的categoryId来查
+			String projectChargingItemName = assetProvider.findProjectChargingItemNameByCommunityId(contract.getCommunityId(),contract.getNamespaceId(),assetCategoryId,dto.getChargingItemId());
+			dto.setChargingItemName(projectChargingItemName);
+		}
+        
         if(dtos.size() <= cmd.getPageSize()){
 //            response.setNextPageOffset(cmd.getPageOffset());
             response.setNextPageOffset(null);
@@ -667,7 +678,6 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
         BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(cmd.getContractNum(),cmd.getContractId());
         response.setList(dtos);
         response.setTotalAmount(totalAmount.toString());
-        //add by tangcen
         response.setGenerated((byte)1);
         return response;
     }
@@ -842,6 +852,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 	            .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte)0))//账单状态，0:待缴;1:已缴
 	            .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(cmd.getOwnerType()))
 	            .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(cmd.getOwnerId()))
+	            .and(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED.greaterThan(BigDecimal.ZERO))//web端新增修改都展示成未缴，除非有人手动去改状态才会改变，APP全部那边也是未缴，唯一特殊的是首页不展示待缴为0的
 	            .fetchInto(PaymentBills.class);
         	Iterator<PaymentBills> iter = paymentBills.iterator();  
         	while (iter.hasNext()) {
@@ -919,6 +930,7 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
 
         assemble:
         {
+        	List<Long> userIds = new ArrayList<Long>();//由于收款方账户名称可能存在修改的情况，故重新请求电商
             for (int j = 0; j < maps.size(); j++) {
                 Map<?, ?> map = maps.get(j);
                 if (map.size() < 1) continue;
@@ -929,35 +941,12 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         Long billGroupId = enclosedBills.get(0).getBillGroupId();
                         dto.setBillGroupName(assetProvider.getbillGroupNameById(billGroupId));
                         dto.setBillGroupId(billGroupId);
-                       //新增收款方账户类型、账户ID字段 
+                        //新增收款方账户类型、账户ID字段 
                         PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(billGroupId);
                         if(paymentBillGroup != null) {
                         	dto.setBizPayeeId(paymentBillGroup.getBizPayeeId());
                         	dto.setBizPayeeType(paymentBillGroup.getBizPayeeType());
-                        	//由于收款方审核状态存在修改的情况，故重新请求电商
-                            List<Long> userIds = new ArrayList<Long>();
-                            userIds.add(paymentBillGroup.getBizPayeeId());
-                            if(LOGGER.isDebugEnabled()) {
-                                LOGGER.debug("listBillGroups(request), cmd={}", userIds);
-                            }
-                            List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
-                            if(LOGGER.isDebugEnabled()) {
-                                LOGGER.debug("listBillGroups(response), response={}", payUserDTOs);
-                            }
-                            if(payUserDTOs != null && payUserDTOs.size() != 0) {
-                            	for(int i = 0;i < payUserDTOs.size();i++) {
-                            		if(payUserDTOs.get(i).getId() != null && dto.getBizPayeeId() != null &&
-                            			payUserDTOs.get(i).getId().equals(dto.getBizPayeeId())){
-                            			// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
-                                        Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
-                                        if(registerStatus != null && registerStatus.intValue() == 1) {
-                                            dto.setRegisterStatus(PaymentUserStatus.ACTIVE.getCode());
-                                        } else {
-                                            dto.setRegisterStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
-                                        }
-                                	}
-                                }
-                            }
+                        	userIds.add(paymentBillGroup.getBizPayeeId());//由于收款方账户名称可能存在修改的情况，故重新请求电商
                         }
                         if(enclosedBills.get(0).getContractId() != null){
                             dto.setContractId(String.valueOf(enclosedBills.get(0).getContractId()));
@@ -1023,6 +1012,31 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                     }
                     tabBills.add(dto);
                 }
+            }
+            //由于收款方账户名称可能存在修改的情况，故重新请求电商
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("showBillForClientV2(request), cmd={}", userIds);
+            }
+            List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(userIds);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("showBillForClientV2(response), response={}", payUserDTOs);
+            }
+            if(payUserDTOs != null && payUserDTOs.size() != 0) {
+            	for(int i = 0;i < payUserDTOs.size();i++) {
+            		for(int j = 0;j < tabBills.size();j++) {
+            			if(payUserDTOs.get(i) != null && tabBills.get(j) != null &&
+                    			payUserDTOs.get(i).getId() != null && tabBills.get(j).getBizPayeeId() != null &&
+                    			payUserDTOs.get(i).getId().equals(tabBills.get(j).getBizPayeeId())){
+            				// 企业账户：0未审核 1审核通过  ; 个人帐户：0 未绑定手机 1 绑定手机
+                            Integer registerStatus = payUserDTOs.get(i).getRegisterStatus();
+                            if(registerStatus != null && registerStatus.intValue() == 1) {
+                            	tabBills.get(j).setRegisterStatus(PaymentUserStatus.ACTIVE.getCode());
+                            } else {
+                            	tabBills.get(j).setRegisterStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+                            }
+            			}
+            		}
+            	}
             }
         }
         return tabBills;
@@ -1951,4 +1965,9 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
     	//支付模块回调接口，通知支付结果
     	assetPayService.payNotify(cmd, handler);
     }
+    
+    public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
+    	return assetProvider.showCreateBillSubItemList(cmd);
+    }
+    
 }

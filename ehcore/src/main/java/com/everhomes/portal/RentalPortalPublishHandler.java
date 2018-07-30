@@ -11,6 +11,7 @@ import com.everhomes.rest.portal.RentalInstanceConfig;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +39,9 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
         RentalInstanceConfig rentalInstanceConfig = (RentalInstanceConfig)StringHelper.fromJsonString(instanceConfig, RentalInstanceConfig.class);
         if(null == rentalInstanceConfig.getResourceTypeId()){
-            RentalResourceType rentalResourceType = createRentalResourceType(namespaceId, itemLabel, rentalInstanceConfig.getPageType(),
-                    rentalInstanceConfig.getPayMode(),rentalInstanceConfig.getIdentify());
-            rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
-            rentalInstanceConfig.setPayMode(rentalResourceType.getPayMode());
-            rentalInstanceConfig.setIdentify(rentalResourceType.getIdentify());
+            createRentalResourceType(namespaceId, itemLabel, rentalInstanceConfig);
         }else{
-            updateRentalResourceType(namespaceId, rentalInstanceConfig.getResourceTypeId(), rentalInstanceConfig.getPageType(), itemLabel,
-                    rentalInstanceConfig.getPayMode(),rentalInstanceConfig.getIdentify());
+            updateRentalResourceType(namespaceId, rentalInstanceConfig,itemLabel);
         }
         return StringHelper.toJsonString(rentalInstanceConfig);
     }
@@ -60,42 +56,47 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         return instanceConfig;
     }
 
-    private RentalResourceType createRentalResourceType(Integer namespaceId, String name, Byte pageType,Byte payMode,String identify){
+    private RentalResourceType createRentalResourceType(Integer namespaceId, String name,RentalInstanceConfig rentalInstanceConfig){
         RentalResourceType rentalResourceType = new RentalResourceType();
         rentalResourceType.setNamespaceId(namespaceId);
         rentalResourceType.setName(name);
-        if(null == pageType){
-            pageType = 0;
+        if(null == rentalInstanceConfig.getPageType()){
+            rentalInstanceConfig.setPageType((byte)0);
         }
-        if (null == payMode)
-            payMode = 0;
-        if (null == identify)
-            identify = RentalV2ResourceType.DEFAULT.getCode();
-        rentalResourceType.setPageType(pageType);
-        rentalResourceType.setPayMode(payMode);
-        rentalResourceType.setIdentify(identify);
+        if (null == rentalInstanceConfig.getPayMode())
+            rentalInstanceConfig.setPayMode((byte)0);
+
+        if (StringUtils.isBlank(rentalInstanceConfig.getIdentify()))
+            rentalInstanceConfig.setIdentify(RentalV2ResourceType.DEFAULT.getCode());
+        if (null == rentalInstanceConfig.getUnauthVisible())
+            rentalInstanceConfig.setUnauthVisible((byte)0);
+
+        rentalResourceType.setPageType(rentalInstanceConfig.getPageType());
+        rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());
+        rentalResourceType.setIdentify(rentalInstanceConfig.getIdentify());
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
-        rentalResourceType.setUnauthVisible((byte)0);
+        rentalResourceType.setUnauthVisible(rentalInstanceConfig.getUnauthVisible());
         rentalv2Provider.createRentalResourceType(rentalResourceType);
+        rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         return rentalResourceType;
     }
 
-    private RentalResourceType updateRentalResourceType(Integer namespaceId, Long resourceTypeId, Byte pageType, String name
-            ,Byte payMode,String identify){
-        RentalResourceType rentalResourceType = rentalv2Provider.findRentalResourceTypeById(resourceTypeId);
+    private RentalResourceType updateRentalResourceType(Integer namespaceId,RentalInstanceConfig rentalInstanceConfig, String name){
+        RentalResourceType rentalResourceType = rentalv2Provider.findRentalResourceTypeById(rentalInstanceConfig.getResourceTypeId());
         if(null != rentalResourceType){
-            if(null == pageType){
-                pageType = 0;
+            if(null == rentalInstanceConfig.getPageType()){
+                rentalResourceType.setPageType((byte)0);
             }
-            if (null != payMode)
-                rentalResourceType.setPayMode(payMode);
-            if (null != identify)
-                rentalResourceType.setIdentify(identify);
-            rentalResourceType.setPageType(pageType);
+            if (null != rentalInstanceConfig.getPayMode())
+                rentalResourceType.setPayMode(rentalInstanceConfig.getPayMode());
+            if (!StringUtils.isBlank(rentalInstanceConfig.getIdentify()))
+                rentalResourceType.setIdentify(rentalInstanceConfig.getIdentify());
+            if (null != rentalInstanceConfig.getUnauthVisible())
+                rentalResourceType.setUnauthVisible(rentalInstanceConfig.getUnauthVisible());
             rentalResourceType.setName(name);
             rentalv2Provider.updateRentalResourceType(rentalResourceType);
         }else{
-            LOGGER.error("rental resource type is null. resourceTypeId = {}", resourceTypeId);
+            LOGGER.error("rental resource type is null. resourceTypeId = {}", rentalInstanceConfig.getResourceTypeId());
         }
         return rentalResourceType;
     }

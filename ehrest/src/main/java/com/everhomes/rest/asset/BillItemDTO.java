@@ -18,7 +18,8 @@ import java.math.BigDecimal;
  * <li>buildingName:门牌</li>
  * <li>billGroupRuleId:计价标准id</li>
  * <li>lateFineAmount:滞纳金</li>
- * <li>chargingItemsId:收费项目对应的账单组费项字典id
+ * <li>chargingItemsId:收费项目对应的账单组费项字典id</li>
+ * <li>itemType:费项类型，eh_payment_bill_items：费项（如：物业费），eh_payment_late_fine：减免滞纳金（如：物业费滞纳金）参考{com.everhomes.rest.asset.AssetSubtractionType}</li>
  *</ul>
  */
 public class BillItemDTO {
@@ -33,6 +34,7 @@ public class BillItemDTO {
     private Long billGroupRuleId;
     private BigDecimal lateFineAmount;
     private Long chargingItemsId;
+    private String itemType;//增加费项类型
 
     @Override
     public String toString() {
@@ -130,5 +132,13 @@ public class BillItemDTO {
 
 	public void setChargingItemsId(Long chargingItemsId) {
 		this.chargingItemsId = chargingItemsId;
+	}
+	
+	public String getItemType() {
+		return itemType;
+	}
+
+	public void setItemType(String itemType) {
+		this.itemType = itemType;
 	}
 }

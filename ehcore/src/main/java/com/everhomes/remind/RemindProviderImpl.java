@@ -325,6 +325,7 @@ public class RemindProviderImpl implements RemindProvider {
         query.addConditions(Tables.EH_REMINDS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_REMINDS.USER_ID.eq(userId));
         query.addConditions(Tables.EH_REMINDS.TRACK_REMIND_ID.eq(subscribeRemindId));
+        query.addLimit(1);
         EhRemindsRecord remind = query.fetchOne();
         return ConvertHelper.convert(remind, Remind.class);
     }

@@ -14,7 +14,14 @@ public class ChartXData {
 	@ItemType(String.class)
 	private List<String> data;
 
-	public List<String> getData() {
+    public ChartXData() {
+    }
+
+    public ChartXData(List<String> data) {
+        this.data = data;
+    }
+
+    public List<String> getData() {
 		return data;
 	}
 

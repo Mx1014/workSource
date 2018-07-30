@@ -4398,6 +4398,14 @@ public class CommunityServiceImpl implements CommunityService {
 				if (StringUtils.isNotBlank(data.getRentArea())) {
 					community.setRentArea(Double.valueOf(data.getRentArea()));
 				}
+				if (StringUtils.isNotBlank(data.getCommunityType())) {
+					if (data.getCommunityType().equals("商用")) {
+						community.setCommunityType((byte)1);
+					}
+					if (data.getCommunityType().equals("住宅")) {
+						community.setCommunityType((byte)0);
+					}
+				}
 				//设置默认的forumId，要使用原有的项目里的forumId
 				ListingLocator locator = new ListingLocator();
 				List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
@@ -4410,7 +4418,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				community.setCityId(data.getCityId());
 				community.setAreaId(data.getAreaId());
-				community.setCommunityType((byte)1);
+				//community.setCommunityType((byte)1);
 				community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				community.setAptCount(0);
 				community.setNamespaceId(cmd.getNamespaceId());
@@ -4427,6 +4435,15 @@ public class CommunityServiceImpl implements CommunityService {
 				//园区和域空间关联
 				createNamespaceResource(cmd.getNamespaceId(), community.getId());
 				communitySearcher.feedDoc(community);
+				
+				//创建经纬度数据
+				CommunityGeoPoint geoPoint = new CommunityGeoPoint();
+				geoPoint.setCommunityId(community.getId());
+				geoPoint.setLongitude(Double.valueOf(data.getLongitude()));
+				geoPoint.setLatitude(Double.valueOf(data.getLatitude()));
+				String geohash = GeoHashUtils.encode(Double.valueOf(data.getLatitude()), Double.valueOf(data.getLongitude()));
+				geoPoint.setGeohash(geohash);
+				communityProvider.createCommunityGeoPoint(geoPoint);
 			}else {
 				community.setName(data.getName());
 				if (StringUtils.isNotBlank(data.getCommunityNumber())) {
@@ -4450,11 +4467,38 @@ public class CommunityServiceImpl implements CommunityService {
 				if (StringUtils.isNotBlank(data.getRentArea())) {
 					community.setRentArea(Double.valueOf(data.getRentArea()));
 				}
+				if (StringUtils.isNotBlank(data.getCommunityType())) {
+					if (data.getCommunityType().equals("商用")) {
+						community.setCommunityType((byte)1);
+					}
+					if (data.getCommunityType().equals("住宅")) {
+						community.setCommunityType((byte)0);
+					}
+				}
 				community.setCityId(data.getCityId());
 				community.setAreaId(data.getAreaId());
 				
 				communityProvider.updateCommunity(community);
 				communitySearcher.feedDoc(community);
+				
+				
+				CommunityGeoPoint geoPoint = communityProvider.findCommunityGeoPointByCommunityId(community.getId());
+				if (geoPoint != null) {
+					geoPoint.setLongitude(Double.valueOf(data.getLongitude()));
+					geoPoint.setLatitude(Double.valueOf(data.getLatitude()));
+					String geohash = GeoHashUtils.encode(Double.valueOf(data.getLatitude()), Double.valueOf(data.getLongitude()));
+					geoPoint.setGeohash(geohash);
+					communityProvider.updateCommunityGeoPoint(geoPoint);
+				}else {
+					CommunityGeoPoint geo = new CommunityGeoPoint();
+					geo.setCommunityId(community.getId());
+					geo.setLongitude(Double.valueOf(data.getLongitude()));
+					geo.setLatitude(Double.valueOf(data.getLatitude()));
+					String geohash = GeoHashUtils.encode(Double.valueOf(data.getLatitude()), Double.valueOf(data.getLongitude()));
+					geo.setGeohash(geohash);
+					communityProvider.createCommunityGeoPoint(geo);
+				}
+				
 			}
 		}
 		return list;
@@ -4502,6 +4546,64 @@ public class CommunityServiceImpl implements CommunityService {
 				log.setCode(CommunityServiceErrorCode.ERROR_AREASIZE_FORMAT);
 				log.setData(data);
 				log.setErrorLog("AreaSize format is error");
+				return log;
+			}
+		}
+		
+		if (StringUtils.isEmpty(data.getLongitude())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_LONGITUDE_EMPTY);
+			log.setData(data);
+			log.setErrorLog("Community longitude cannot be empty");
+			return log;
+		}else {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getLongitude()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_LONGITUDE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("longitude format is error");
+				return log;
+			}else {
+				if (Double.valueOf(data.getLongitude()).doubleValue() > 136 || Double.valueOf(data.getLongitude()).doubleValue() < 70) {
+					log.setCode(CommunityServiceErrorCode.ERROR_LONGITUDE_RANGE);
+					log.setData(data);
+					log.setErrorLog("longitude range is error");
+					return log;
+				}
+			}
+		}
+		
+		if (StringUtils.isEmpty(data.getLatitude())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_LATITUDE_EMPTY);
+			log.setData(data);
+			log.setErrorLog("Community latitude cannot be empty");
+			return log;
+		}else {
+			String reg = "^(([0-9]+\\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\\.[0-9]+)|([0-9]*[1-9][0-9]*))$";
+			if(!Pattern.compile(reg).matcher(data.getLatitude()).find()){
+				log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_FORMAT);
+				log.setData(data);
+				log.setErrorLog("latitude format is error");
+				return log;
+			}else {
+				if (Double.valueOf(data.getLatitude()).doubleValue() > 54 || Double.valueOf(data.getLatitude()).doubleValue() < 3) {
+					log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_RANGE);
+					log.setData(data);
+					log.setErrorLog("latitude range is error");
+					return log;
+				}
+			}
+		}
+		
+		if (StringUtils.isEmpty(data.getCommunityType())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_TYPE);
+			log.setData(data);
+			log.setErrorLog("Community type cannot be empty");
+			return log;
+		}else {
+			if (!data.getCommunityType().equals("商用") && !data.getCommunityType().equals("住宅")  ) {
+				log.setCode(CommunityServiceErrorCode.ERROR_COMMUNITY_TYPE_CONTENT);
+				log.setData(data);
+				log.setErrorLog("Community type content cannot be empty");
 				return log;
 			}
 		}
@@ -4558,7 +4660,7 @@ public class CommunityServiceImpl implements CommunityService {
 			RowResult r = (RowResult) resultList.get(i);
 			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
 					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || 
-					StringUtils.isNotBlank(r.getI())) {
+					StringUtils.isNotBlank(r.getI()) || StringUtils.isNotBlank(r.getJ()) || StringUtils.isNotBlank(r.getK()) || StringUtils.isNotBlank(r.getL())) {
 				ImportCommunityDataDTO data = new ImportCommunityDataDTO();
 				data.setName(trim(r.getA()));
 				data.setCommunityNumber(trim(r.getB()));
@@ -4569,7 +4671,9 @@ public class CommunityServiceImpl implements CommunityService {
 				data.setAddress(trim(r.getG()));
 				data.setAreaSize(trim(r.getH()));
 				data.setRentArea(trim(r.getI()));
-				
+				data.setLongitude(trim(r.getJ()));
+				data.setLatitude(trim(r.getK()));
+				data.setCommunityType(trim(r.getL()));
 				list.add(data);
 			}
 		}

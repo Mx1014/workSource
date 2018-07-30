@@ -32,7 +32,7 @@ public interface PmTaskProvider {
 	
 	List<Namespace> listNamespace();
 	
-	Integer countTask(Long ownerId, Byte status, Long taskCategoryId, Long categoryId, Byte star, Timestamp startDate, Timestamp endDate);
+	Integer countTask(Long ownerId, Byte status, Long taskCategoryId, Long categoryId, String star, Timestamp startDate, Timestamp endDate);
 	
 	void createTaskStatistics(PmTaskStatistics statistics);
 	
@@ -65,4 +65,27 @@ public interface PmTaskProvider {
     List<PmTask> listPmTasksByOrgId(Integer namespaceId, Long communityId, Long organizationId);
 
     List<PmTask> findTasksByOrg(Long communityId, Integer namespaceId, Long organizationId, Long taskCategoryId);
+
+	PmTask findTaskByFlowCaseId(Long flowCaseId);
+
+	PmTaskConfig createPmTaskConfig(PmTaskConfig bean);
+	PmTaskConfig updatePmTaskConfig(PmTaskConfig bean);
+	PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId, Long taskCategoryId);
+
+//	订单明细CRUD
+	void createOrderDetails(List<PmTaskOrderDetail> beans);
+	List<PmTaskOrderDetail> findOrderDetailsByTaskId(Integer namespaceId, String ownerType, Long ownerId, Long taskId);
+	void deleteOrderDetailsByOrderId(Long orderId);
+
+//	订单CRUD
+	PmTaskOrder createPmTaskOrder(PmTaskOrder bean);
+
+	PmTaskOrder updatePmTaskOrder(PmTaskOrder bean);
+
+	PmTaskOrder findPmTaskOrderById(Long id);
+
+	PmTaskOrder findPmTaskOrderByTaskId(Long taskId);
+
+	void clearOrderDetails();
+
 }

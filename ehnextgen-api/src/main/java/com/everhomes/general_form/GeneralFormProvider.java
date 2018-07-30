@@ -25,15 +25,6 @@ public interface GeneralFormProvider {
 
     GeneralForm getActiveGeneralFormByOriginIdAndVersion(Long formOriginId, Long formVersion);
 
-    //	added by R 20170828
-    GeneralFormGroup createGeneralFormGroup(GeneralFormGroup group);
-
-    void deleteGeneralFormGroupsByFormOriginId(Long formOriginId);
-
-    GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId);
-
-    void updateGeneralFormGroup(GeneralFormGroup group);
-
 	List<GeneralFormTemplate> listGeneralFormTemplate(Long moduleId);
 
     GeneralFormTemplate findGeneralFormTemplateByIdAndModuleId(Long id, Long moduleId);
