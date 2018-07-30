@@ -872,4 +872,22 @@ public class VisitorSysController extends ControllerBase {
 		return response;
 	}
 
+
+	/**
+	 * <b>URL: /visitorsys/getMessageReceiverForManage</b>
+	 * <p>
+	 * 7.园区访客管理决定接受（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("getMessageReceiverForManage")
+	@RestReturn(GetMessageReceiverForManageResponse.class)
+	public RestResponse getMessageReceiverForManage(BaseVisitorsysCommand cmd) {
+		GetMessageReceiverForManageResponse baseResponse = visitorSysService.getMessageReceiverForManage(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

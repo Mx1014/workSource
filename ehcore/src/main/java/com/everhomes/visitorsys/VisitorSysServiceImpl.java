@@ -1798,6 +1798,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
     }
 
+    @Override
+    public GetMessageReceiverForManageResponse getMessageReceiverForManage(BaseVisitorsysCommand cmd) {
+        VisitorSysMessageReceiver receiver = messageReceiverProvider.findMessageReceiverByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), UserContext.current().getUser().getId());
+        if (receiver == null) {
+            return new GetMessageReceiverForManageResponse(VisitorsysFlagType.NO.getCode());
+        }
+        return new GetMessageReceiverForManageResponse(VisitorsysFlagType.YES.getCode());
+    }
+
     /**
      * 检查owerid是否在系统中存在
      * @param ownerType
