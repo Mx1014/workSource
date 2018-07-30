@@ -4,19 +4,20 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralApprovalStatus;
-import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralApprovalScopeMapDao;
+import com.everhomes.server.schema.tables.daos.EhGeneralApprovalsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalScopeMap;
+import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalScopeMapRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralApprovalsRecord;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
@@ -27,13 +28,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhGeneralApprovalsDao;
-import com.everhomes.server.schema.tables.pojos.EhGeneralApprovals;
-import com.everhomes.server.schema.tables.records.EhGeneralApprovalsRecord;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
