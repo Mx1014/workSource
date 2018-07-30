@@ -10,6 +10,7 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.openapi.FunctionCardDto;
+import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
@@ -339,5 +340,5 @@ public interface UserService {
     String makeAnbangRedirectUrl(Long userId, String location,
             Map<String, String[]> paramMap);
 
-    Byte isUserAuth();
+    Byte isUserAuth(); 
 }

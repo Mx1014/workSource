@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
+import com.everhomes.rest.openapi.GetOrgCheckInDataResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
@@ -298,5 +300,7 @@ public interface PunchService {
 
 
 	public void fileMonthReport(FileMonthReportCommand cmd);
+
+	GetOrgCheckInDataResponse getOrgCheckInData(GetOrgCheckInDataCommand cmd);
 
 }
