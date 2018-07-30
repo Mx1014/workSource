@@ -11473,6 +11473,7 @@ public class PunchServiceImpl implements PunchService {
  
         PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId(), UserContext.currentUserId());
         GetUserPunchRuleInfoResponse response =  ConvertHelper.convert(pr, GetUserPunchRuleInfoResponse.class);
+        response.setGroupName(pr.getName());
         //打卡时间
         response.setTimeRules(processPunchTimeRuleDTOs(pr.getPunchOrganizationId(), pr.getStatus()));
         //打卡地点和WiFi
