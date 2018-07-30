@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
@@ -8,6 +9,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
@@ -50,6 +52,8 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
         }else {
             dto = ConvertHelper.convert(getDefaultGeneralForm(cmd.getSourceType()), GeneralFormDTO.class);
         }
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
         return dto;
     }
 

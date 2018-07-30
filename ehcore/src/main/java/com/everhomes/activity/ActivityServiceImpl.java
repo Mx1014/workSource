@@ -52,6 +52,7 @@ import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.archives.ArchivesLocaleStringCode;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ActivityDetailActionData;
@@ -61,7 +62,10 @@ import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -1334,7 +1338,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId());
+			List<ActivityRoster> rosters = getRostersFromExcel(files[0], result, activity.getId(),cmd);
 
 //			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 
@@ -1427,12 +1431,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
 	}
 
-	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId) {
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file, ImportSignupInfoResponse result, Long activityId,ImportSignupInfoCommand cmd) {
 		@SuppressWarnings("rawtypes")
 		List<ImportSignupErrorDTO> errorLists = new ArrayList<>();
 		ArrayList rows = processorExcel(file);
 		List<ActivityRoster> rosters = new ArrayList<>();
-
+        GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+        GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
 		//此处添加陈宫失败数，因为过着这个方法后就拿不到总数和失败数了。 add by yajun 20170827
 		result.setTotal(0);
 		result.setFail(0);
@@ -6453,6 +6458,38 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }else {
             LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
         }
+    }
+
+    @Override
+    public void exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse) {
+        GetTemplateBySourceIdCommand getTemplateBySourceIdCommand = ConvertHelper.convert(cmd, GetTemplateBySourceIdCommand.class);
+        GeneralFormDTO form = this.generalFormService.getTemplateBySourceId(getTemplateBySourceIdCommand);
+        String fileName = "活动报名模板";
+        ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, fileName);
+        List<String> titleNames = form.getFormFields().stream().map(GeneralFormFieldDTO::getFieldDisplayName).collect(Collectors.toList());
+        List<String> propertyNames = new ArrayList<>();
+        List<Integer> titleSizes = new ArrayList<>();
+        for (int i = 0; i < form.getFormFields().size(); i++) {
+            titleSizes.add(20);
+        }
+        excelSettings(excelUtils, form);
+        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
+    }
+
+    private void excelSettings(ExcelUtils excelUtils, GeneralFormDTO form) {
+        List<Integer> mandatoryTitle = new ArrayList<>();
+        for (GeneralFormFieldDTO formFieldDTO : form.getFormFields()) {
+            if (TrueOrFalseFlag.TRUE.getCode().equals(formFieldDTO.getRequiredFlag())) {
+                mandatoryTitle.add(1);
+            }else {
+                mandatoryTitle.add(0);
+            }
+        }
+        excelUtils.setNeedMandatoryTitle(true);
+        excelUtils.setMandatoryTitle(mandatoryTitle);
+        excelUtils.setTitleRemark(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, ActivityLocalStringCode.ACTIVITY_IMPORT_TEMPLATE_TITLE_REMARK+"", "zh_CN", "ActivitySignupImportRemark"), (short) 18, (short) 4480);
+        excelUtils.setNeedSequenceColumn(false);
+        excelUtils.setNeedTitleRemark(true);
     }
 
 //	@Override

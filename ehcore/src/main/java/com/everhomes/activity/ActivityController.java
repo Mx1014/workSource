@@ -901,5 +901,14 @@ public class ActivityController extends ControllerBase {
         return response;
     }
 
-    
+    /**
+     * <b>URL: /activity/exportActivitySignupTemplate</b>
+     * <p>活动报名导入模板</p>
+     */
+    @RequestMapping("exportActivitySignupTemplate")
+    @RestReturn(value = String.class)
+    public RestResponse exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse){
+        activityService.exportActivitySignupTemplate(cmd,httpResponse);
+        return new RestResponse();
+    }
 }

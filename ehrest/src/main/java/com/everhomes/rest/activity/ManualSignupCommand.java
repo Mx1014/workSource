@@ -11,7 +11,7 @@ import java.util.List;
  * <ul>
  * <li>activityId: 活动id</li>
  * <li>phone: 手机</li>
- * <li>formOriginId: 表单ID</li>
+ * <li>formOriginId: 表单formOriginId</li>
  * <li>values: 报名中，每项对应的值{@link PostApprovalFormItem} </li>
  * <li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
  * </ul>
