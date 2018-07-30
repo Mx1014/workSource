@@ -41,6 +41,8 @@ public class BillItemDTO {
     //增加费项类型字段
     private String itemFineType; 
     private String itemType;//增加费项类型
+    private BigDecimal amountReceivableWithoutTax;//增加应收（不含税）
+    private BigDecimal taxAmount;//增加税额
 
     @Override
     public String toString() {
@@ -162,5 +164,21 @@ public class BillItemDTO {
 
 	public void setItemType(String itemType) {
 		this.itemType = itemType;
+	}
+
+	public BigDecimal getAmountReceivableWithoutTax() {
+		return amountReceivableWithoutTax;
+	}
+
+	public void setAmountReceivableWithoutTax(BigDecimal amountReceivableWithoutTax) {
+		this.amountReceivableWithoutTax = amountReceivableWithoutTax;
+	}
+
+	public BigDecimal getTaxAmount() {
+		return taxAmount;
+	}
+
+	public void setTaxAmount(BigDecimal taxAmount) {
+		this.taxAmount = taxAmount;
 	}
 }

@@ -1250,6 +1250,9 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal amountReceivable = new BigDecimal("0");
             BigDecimal amountOwed = new BigDecimal("0");
             BigDecimal zero = new BigDecimal("0");
+            BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;//增加应收（不含税）
+            BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//增加待收（不含税）
+            BigDecimal taxAmount = BigDecimal.ZERO;//增加税额
 
             long nextBillId;
             if(billId != null) {
@@ -1307,6 +1310,8 @@ public class AssetProviderImpl implements AssetProvider {
 //                amountReceivable = amountReceivable.add(amountSupplement);
                 amountOwed = amountOwed.subtract(amountExemption);
                 amountOwed = amountOwed.add(amountSupplement);
+                amountOwedWithoutTax = amountOwedWithoutTax.subtract(amountExemption);//待收（不含税）
+                amountOwedWithoutTax = amountOwedWithoutTax.add(amountSupplement);//待收（不含税）
                 EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
                 exemptionItemsDao.insert(exemptionItems);
             }
@@ -1357,10 +1362,19 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setTargetName(targetName);
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setEnergyConsume(dto.getEnergyConsume());//增加用量
+                    BigDecimal var2 = dto.getAmountReceivableWithoutTax();
+                    var2 = DecimalUtils.negativeValueFilte(var2);
+                    item.setAmountOwedWithoutTax(var2);//增加待收（不含税）
+                    item.setAmountReceivableWithoutTax(var2);//增加应收（不含税）
+                    item.setAmountReceivedWithoutTax(new BigDecimal("0"));//增加已收（不含税）
+                    item.setTaxAmount(dto.getTaxAmount());//增加税额
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
                     amountOwed = amountOwed.add(var1);
+                    amountReceivableWithoutTax = amountReceivableWithoutTax.add(var2);//增加应收（不含税）
+                    amountOwedWithoutTax = amountOwedWithoutTax.add(var2);//增加应收（不含税）
+                    taxAmount = taxAmount.add(dto.getTaxAmount());//增加税额
                 }
             }
             
@@ -1397,6 +1411,7 @@ public class AssetProviderImpl implements AssetProvider {
 		                		  if(item.getChargingItemsId().equals(subtractionItem.getChargingItemId())) {
 		                			  //如果收费项明细和减免费项的charginItemId相等，那么该费项金额应该从账单中减掉
 		                			  amountOwed = amountOwed.subtract(item.getAmountReceivable());
+		                			  amountOwedWithoutTax = amountOwedWithoutTax.subtract(item.getAmountReceivableWithoutTax());//增加待收（不含税）的计算
 		                		  }
 		                	  }
 		                  }
@@ -1449,6 +1464,8 @@ public class AssetProviderImpl implements AssetProvider {
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
             amountOwed = DecimalUtils.negativeValueFilte(amountOwed);
             newBill.setAmountOwed(amountOwed);
+            amountOwedWithoutTax = DecimalUtils.negativeValueFilte(amountOwedWithoutTax);//增加待收（不含税）
+            newBill.setAmountOwedWithoutTax(amountOwedWithoutTax);//增加待收（不含税）
 //            if(amountOwed.compareTo(zero) == 0) {
 //                newBill.setStatus((byte)1);
 //            }else{
@@ -1456,8 +1473,12 @@ public class AssetProviderImpl implements AssetProvider {
 //            }
             newBill.setStatus(billStatus);
             amountReceivable = DecimalUtils.negativeValueFilte(amountReceivable);
+            amountReceivableWithoutTax = DecimalUtils.negativeValueFilte(amountReceivableWithoutTax);//增加应收（不含税）
             newBill.setAmountReceivable(amountReceivable);
+            newBill.setAmountReceivableWithoutTax(amountReceivableWithoutTax);//增加应收（不含税）
+            newBill.setTaxAmount(taxAmount);//增加税额
             newBill.setAmountReceived(zero);
+            newBill.setAmountReceivedWithoutTax(zero);//增加已收不含税
             newBill.setAmountSupplement(amountSupplement);
             newBill.setAmountExemption(amountExemption);
             newBill.setBillGroupId(billGroupId);
