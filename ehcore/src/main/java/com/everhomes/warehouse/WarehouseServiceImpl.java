@@ -2073,7 +2073,6 @@ public class WarehouseServiceImpl implements WarehouseService {
 			log.setErrorLog("WarehouseName cannot be empty");
 			return log;
 		}
-		
 		//校验仓库是否存在
 		if (StringUtils.isNotEmpty(data.getWarehouseName())) {
 			//查询仓库
@@ -2089,22 +2088,13 @@ public class WarehouseServiceImpl implements WarehouseService {
 			}
 			data.setWarehouse(warehouses.get(0));
 		}
-		
-		if (StringUtils.isEmpty(data.getMaterialName())) {
-			log.setCode(WarehouseServiceErrorCode.ERROR_MATERIALNAME_EMPTY);
-			log.setData(data);
-			log.setErrorLog("MaterialName cannot be empty");
-			return log;
-		}
-		
 		//校验物品信息是否存在
-		if (StringUtils.isNotEmpty(data.getMaterialName())) {
+		if (StringUtils.isNotEmpty(data.getMaterialNumber())) {
 			//查询物品
 			SearchWarehouseMaterialsCommand searchWarehouseMaterialsDTO = ConvertHelper.convert(cmd, SearchWarehouseMaterialsCommand.class);
-			searchWarehouseMaterialsDTO.setName(data.getMaterialName());
+			searchWarehouseMaterialsDTO.setName(data.getMaterialNumber());
 			searchWarehouseMaterialsDTO.setNamespaceId((long)cmd.getNamespaceId());
 			SearchWarehouseMaterialsResponse materialsResponse = warehouseMaterialSearcher.query(searchWarehouseMaterialsDTO);
-			
 			List<WarehouseMaterialDTO> materials = materialsResponse.getMaterialDTOs();
 			if (materials.size()<1) {
 				log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NOT_EXIST);
@@ -2112,6 +2102,15 @@ public class WarehouseServiceImpl implements WarehouseService {
 				log.setErrorLog("Material not exist");
 				return log;
 			}
+			if (StringUtils.isNotEmpty(data.getMaterialName())) {
+				if (!data.getMaterialName().equals(materials.get(0).getName())) {
+					log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NUMBERANDNAME_NOT_MATCH);
+					log.setData(data);
+					log.setErrorLog("Number and Name not match");
+					return log;
+				}
+			}
+			
 			data.setMaterial(materials.get(0));
 		}
 		
