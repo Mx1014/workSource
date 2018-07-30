@@ -81,6 +81,7 @@ import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.aclink.DeleteAuthByOwnerCommand;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -6845,6 +6846,32 @@ public class OrganizationServiceImpl implements OrganizationService {
         leaveOrganizaitonByUserId(userId, enterpriseId, userId);
         // 退出公司后，取消公司门禁 add by yanlong.liang 20180723
         this.doorAccessService.deleteAuthWhenLeaveFromOrg(user.getNamespaceId(),enterpriseId,userId);
+
+        //是否删除大堂门禁
+        boolean deleteLobbyFlag = true;
+        List<OrganizationMember> list = this.organizationProvider.listOrganizationMembersByUId(userId);
+        Long communityId = getOrganizationActiveCommunityId(enterpriseId);
+        if (!CollectionUtils.isEmpty(list)) {
+            List<OrganizationCommunityDTO> dtoList = this.organizationProvider.findOrganizationCommunityByCommunityId(communityId);
+            if (!CollectionUtils.isEmpty(dtoList)) {
+                for (OrganizationMember member : list) {
+                    for (OrganizationCommunityDTO dto : dtoList) {
+                        if (member.getOrganizationId().equals(dto.getOrganizationId())) {
+                            deleteLobbyFlag = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (deleteLobbyFlag) {
+            DeleteAuthByOwnerCommand deleteAuthByOwnerCommand = new DeleteAuthByOwnerCommand();
+            deleteAuthByOwnerCommand.setNamespaceId(user.getNamespaceId());
+            deleteAuthByOwnerCommand.setOwnerId(communityId);
+            deleteAuthByOwnerCommand.setOwnerType((byte)0);
+            deleteAuthByOwnerCommand.setUserId(userId);
+            this.doorAccessService.deleteAuthByOwner(deleteAuthByOwnerCommand);
+        }
 //        OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), userId, userId, tag);
 //        member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 //        updateEnterpriseContactStatus(userId, member);
