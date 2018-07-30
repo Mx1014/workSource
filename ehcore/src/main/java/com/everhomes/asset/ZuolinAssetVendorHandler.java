@@ -1200,7 +1200,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
                         "5、收费项以导出的为准，不可修改，修改后将导致导入不成功。\n" +
                         "6、企业客户需填写与系统内客户管理一致的企业名称，个人客户需填写与系统内个人客户资料一致的楼栋门牌，否则会导致无法定位客户。\n" +
                         "7、账单开始时间，账单结束时间的格式只能为 2018-01-12,2018/01/12。\n" +
-                        "8、导入账单时若组内有自用水电费、公摊水电费，且初始化时配置需要显示用量，则需录入用量字段，该字段非必填，不填则不显示。", (short)13, (short)2500)
+                        "8、导入账单时若组内有自用水电费、公摊水电费，且初始化时配置需要显示用量，则需录入用量字段，该字段非必填，不填则不显示。\n" +
+                        "9、各费项所填的金额都为含税金额", (short)13, (short)2500)
                 .setNeedSequenceColumn(false)
                 .setIsCellStylePureString(true)
                 .writeExcel(null, headers, true, null, null);
