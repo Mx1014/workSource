@@ -22,5 +22,5 @@ public class ActivityNotificationTemplateCode {
 
     public static final int ACTIVITY_CANCEL_NO_PAY = 18;   //非付费活动，活动报名人数未达到最低限制人数，活动被取消
     public static final int ACTIVITY_CANCEL_PAY = 19;   //付费活动，活动报名人数未达到最低限制人数，活动被取消
-
+    public static final int ACTIVITY_CANCEL_SEND_TO_CREATOR = 20; //活动报名人数未达到最低限制人数，通知发起人.
 }

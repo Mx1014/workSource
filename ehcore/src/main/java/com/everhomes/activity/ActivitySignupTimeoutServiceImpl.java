@@ -9,11 +9,13 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.activity.ActivityChargeFlag;
+import com.everhomes.rest.activity.ActivityLocalStringCode;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.activity.ActivityRosterStatus;
@@ -23,7 +25,9 @@ import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -93,6 +97,9 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
 
     @Autowired
     private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private LocaleStringService localeStringService;
 
     @Override
     public void pushTimeout(Post post) {
@@ -228,14 +235,29 @@ public class ActivitySignupTimeoutServiceImpl implements ActivitySignupTimeoutSe
         }
         Map<String, Object> map = new HashMap<>();
         map.put("subject", activity.getSubject());
+        String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+                String.valueOf(ActivityLocalStringCode.ACTIVITY_AUTO_CANCEL),
+                UserContext.current().getUser().getLocale(),
+                "Activity Have been Cancel");
+        Map meta = createActivityRouterMeta(subject);
         final String content = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
         if (activityRosters != null && activityRosters.size() > 0) {
             activityRosters.forEach(r->{
                 if (r.getUid().longValue() != userId.longValue()) {
-                    sendMessageToUser(r.getUid().longValue(), content, null);
+                    sendMessageToUser(r.getUid().longValue(), content, meta);
+                }else{
+                    final String creatorContent = localeTemplateService.getLocaleTemplateString(scope, ActivityNotificationTemplateCode.ACTIVITY_CANCEL_SEND_TO_CREATOR, user.getLocale(), map, "");
+                    sendMessageToUser(r.getUid().longValue(), creatorContent, meta);
                 }
             });
         }
+    }
+    private Map<String, String> createActivityRouterMeta(String subject){
+        Map<String, String> meta = new HashMap<String, String>();
+        if(subject != null){
+            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, subject);
+        }
+        return meta;
     }
 
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
