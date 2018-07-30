@@ -1369,7 +1369,7 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setAmountReceivableWithoutTax(var2);//增加应收（不含税）
                     item.setAmountReceivedWithoutTax(new BigDecimal("0"));//增加已收（不含税）
                     item.setTaxAmount(dto.getTaxAmount());//增加税额
-                    
+                    item.setTaxRate(dto.getTaxRate());//费项增加税率信息
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
@@ -1582,7 +1582,7 @@ public class AssetProviderImpl implements AssetProvider {
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
-        		, o.ENERGY_CONSUME,o.AMOUNT_RECEIVABLE_WITHOUT_TAX)
+        		, o.ENERGY_CONSUME,o.AMOUNT_RECEIVABLE_WITHOUT_TAX,o.TAX_AMOUNT,o.TAX_RATE)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -1596,7 +1596,6 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setBillItemName(f.getValue(o.CHARGING_ITEM_NAME));
                     itemDTO.setBillItemId(f.getValue(o.ID));
                     itemDTO.setAmountReceivable(f.getValue(o.AMOUNT_RECEIVABLE));
-                    itemDTO.setAmountReceivableWithoutTax(f.getValue(o.AMOUNT_RECEIVABLE_WITHOUT_TAX));//增加应收（不含税）
                     String apartFromAddr = f.getValue(t1.APARTMENT_NAME);
                     String buildingFromAddr = f.getValue(t1.BUILDING_NAME);
                     if(!org.jooq.tools.StringUtils.isBlank(apartFromAddr) || !org.jooq.tools.StringUtils.isBlank(buildingFromAddr)){
@@ -1610,6 +1609,9 @@ public class AssetProviderImpl implements AssetProvider {
                     itemDTO.setEnergyConsume(f.getValue(o.ENERGY_CONSUME));//费项增加用量字段
                     itemDTO.setItemFineType(AssetItemFineType.item.getCode());//增加费项类型字段
                     itemDTO.setItemType(AssetSubtractionType.item.getCode());//增加费项类型字段
+                    itemDTO.setAmountReceivableWithoutTax(f.getValue(o.AMOUNT_RECEIVABLE_WITHOUT_TAX));//增加应收（不含税）
+                    itemDTO.setTaxAmount(f.getValue(o.TAX_AMOUNT));//税额
+                    itemDTO.setTaxRate(f.getValue(o.TAX_RATE));//税率
                     list1.add(itemDTO);
                     return null;
                 });
