@@ -112,6 +112,7 @@ import com.everhomes.rest.activity.DeleteActivityGoodsCommand;
 import com.everhomes.rest.activity.DeleteSignupInfoCommand;
 import com.everhomes.rest.activity.DownloadActivityAttachmentCommand;
 import com.everhomes.rest.activity.ExportActivityCommand;
+import com.everhomes.rest.activity.ExportActivitySignupTemplateCommand;
 import com.everhomes.rest.activity.ExportOrganizationCommand;
 import com.everhomes.rest.activity.ExportSignupInfoCommand;
 import com.everhomes.rest.activity.ExportTagCommand;
