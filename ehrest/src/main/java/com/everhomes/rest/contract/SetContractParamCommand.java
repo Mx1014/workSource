@@ -41,6 +41,10 @@ public class SetContractParamCommand {
     private Integer paidPeriod;
     
     private Byte payorreceiveContractType;
+
+    private Long ownerId;
+
+    private String ownerType;
     
     @ItemType(GenerateContractNumberRule.class)
     private GenerateContractNumberRule generateContractNumberRule;
@@ -196,8 +200,24 @@ public class SetContractParamCommand {
     public void setReceivableUnit(Byte receivableUnit) {
         this.receivableUnit = receivableUnit;
     }
-    
-	@Override
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

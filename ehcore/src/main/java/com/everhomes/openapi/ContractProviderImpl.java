@@ -638,7 +638,7 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long categoryId) {
+	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long ownerId,Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractParamsRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAMS);
 		query.addConditions(Tables.EH_CONTRACT_PARAMS.NAMESPACE_ID.eq(namespaceId));
