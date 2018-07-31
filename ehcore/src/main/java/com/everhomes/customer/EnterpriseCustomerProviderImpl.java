@@ -2425,4 +2425,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .and(Tables.EH_ENTERPRISE_CUSTOMER_ADMINS.CUSTOMER_ID.eq(id))
                 .fetchInto(CustomerAdminRecord.class);
     }
+
+    @Override
+    public void updateCustomerAptitudeFlag(Long id, Integer approvalStatus){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class));
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        EhEnterpriseCustomers eepc = dao.findById(id);
+        //eepc.set
+
+    }
 }

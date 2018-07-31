@@ -34,4 +34,8 @@ create table `eh_general_form_filter_user_map`
    primary key (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_general_form_filter_user_map in dev mode';
 
+
+alter table eh_enterprise_customers add aptitude_flag TINYINT null comment '0-无资质，1-有资质' default 0;
+
+
 -- --------------------- SECTION END ---------------------------------------------------------
