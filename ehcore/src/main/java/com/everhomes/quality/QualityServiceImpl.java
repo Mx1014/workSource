@@ -552,7 +552,7 @@ public class QualityServiceImpl implements QualityService {
 
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
-Long nextPageAnchor = null;
+        Long nextPageAnchor = null;
         if(standards.size() > pageSize) {
         	standards.remove(standards.size() - 1);
             nextPageAnchor = standards.get(standards.size() - 1).getId();

@@ -17,12 +17,37 @@ public class EnterpriseCustomer extends EhEnterpriseCustomers {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> banner;
 
+    private Long ownerId;
+
+    private String ownerType;
+
+
     public List<AttachmentDescriptor> getBanner() {
         return banner;
     }
 
     public void setBanner(List<AttachmentDescriptor> banner) {
         this.banner = banner;
+    }
+
+    @Override
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    @Override
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    @Override
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    @Override
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override
