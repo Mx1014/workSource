@@ -12342,6 +12342,7 @@ public class PunchServiceImpl implements PunchService {
     public GetUserPunchRuleInfoResponse getUserPunchRuleInfo(GetUserPunchRuleInfoCommand cmd){
  
         PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getOwnerId(), UserContext.currentUserId());
+
         GetUserPunchRuleInfoResponse response =  ConvertHelper.convert(pr, GetUserPunchRuleInfoResponse.class);
         response.setGroupName(pr.getName());
         //打卡时间
