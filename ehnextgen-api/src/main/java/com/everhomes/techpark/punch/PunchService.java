@@ -454,4 +454,6 @@ public interface PunchService {
 
 	String getAdjustRuleUrl();
 
+	void punchDayLogInitializeByMonth(String initMonth);
+
 }

@@ -3210,7 +3210,7 @@ public class PunchServiceImpl implements PunchService {
             String depName = archivesService.convertToOrgNames(dptMap);
             statistic.setDeptName(depName);
         }
-        PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, detail.getTargetId());
+
 
 
         //2018年5月17日 by wh 删除statistics提前到这里
@@ -3218,17 +3218,7 @@ public class PunchServiceImpl implements PunchService {
         orgIds.add(ownerId);
         this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getDetailId());
 
-        //没有规则的也要保存,只是没考勤数据
-        if (null == pr){
-            this.punchProvider.createPunchStatistic(statistic);
-            return;
-        }
         try {
-            Organization punchOrg = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
-            if (null != punchOrg) {
-                statistic.setPunchOrgName(punchOrg.getName());
-            }
-
             List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
                     dateSF.get().format(endCalendar.getTime()));
             List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -3268,6 +3258,7 @@ public class PunchServiceImpl implements PunchService {
             // 计算本月的应出勤天数
             Calendar startDayOfThisMonth = Calendar.getInstance();
             startDayOfThisMonth.setTime(startCalendar.getTime());
+            PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), orgId, detail.getTargetId());
             statistic.setWorkDayCount(calculateWorkDayCountThisMonth(detail, dayLogList, startDayOfThisMonth, pr));
             int abnormalRequestCount = approvalRequestProvider.countAbnormalUserRequest(detail.getTargetId(), ownerId, new Date(startCalendar.getTime().getTime()),
                     new Date(endCalendar.getTime().getTime()));
@@ -12414,5 +12405,35 @@ public class PunchServiceImpl implements PunchService {
             deptIds.add(d.getId());
         });
         return deptIds;
+    }
+
+    @Override
+    public void punchDayLogInitializeByMonth(String initMonth) {
+        Calendar monthBegin = Calendar.getInstance();
+        Calendar monthEnd = Calendar.getInstance();
+        try {
+            monthBegin.setTime(monthSF.get().parse(initMonth));
+            //月初
+            monthBegin.set(Calendar.DAY_OF_MONTH, 1);
+            if (!monthSF.get().format(monthEnd.getTime()).equals(initMonth)) {
+                monthEnd.setTime(monthSF.get().parse(initMonth));
+                //月末
+                monthEnd.set(Calendar.DAY_OF_MONTH, monthEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+            }
+            PunchDayLogInitializeCommand cmd = new PunchDayLogInitializeCommand();
+            while (true) {
+                cmd.setInitialDateTime(monthBegin.getTimeInMillis());
+                punchDayLogInitialize(cmd);
+                monthBegin.add(Calendar.DAY_OF_MONTH, 1);
+                if (monthBegin.after(monthEnd)) {
+                    return;
+                }
+            }
+        } catch (ParseException e) {
+            throw RuntimeErrorException
+                    .errorWith(PunchServiceErrorCode.SCOPE,
+                            PunchServiceErrorCode.ERROR_QUERY_YEAR_ERROR,
+                            "there is something wrong with queryYear,please check again ");
+        }
     }
 }

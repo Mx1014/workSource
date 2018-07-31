@@ -16,6 +16,7 @@ import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.ListPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListPunchLogsResponse;
 import com.everhomes.rest.techpark.punch.PunchDayLogInitializeCommand;
+import com.everhomes.rest.techpark.punch.PunchDayLogInitializeMonthlyCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.BatchUpdateVacationBalancesCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
@@ -1217,6 +1218,22 @@ public class PunchAdminController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse punchDayLogInitialize(PunchDayLogInitializeCommand cmd) {
         punchService.punchDayLogInitialize(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /punch/punchDayLogInitializeByMonth</b>
+     * <p>
+     * 初始化某个月的每日统计数据
+     * </p>
+     */
+    @RequestMapping("punchDayLogInitializeByMonth")
+    @RestReturn(value = String.class)
+    public RestResponse punchDayLogInitializeByMonth(@Valid PunchDayLogInitializeMonthlyCommand cmd) {
+        punchService.punchDayLogInitializeByMonth(cmd.getInitialMonth());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
