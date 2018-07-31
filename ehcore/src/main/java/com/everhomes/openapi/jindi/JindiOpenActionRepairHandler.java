@@ -102,7 +102,7 @@ public class JindiOpenActionRepairHandler implements JindiOpenHandler {
 				data.setContent(pmTask.getContent());
 				data.setReceiveByName(getUser(src.getTargetId()).getNickName());
 				data.setReceiveEndTime(pmTask.getProcessedTime());
-				data.setStar(pmTask.getStar()==null?null:pmTask.getStar().intValue());
+				data.setStar(pmTask.getStar()==null?null:Integer.valueOf(pmTask.getStar()));
 				data.setStatus(src.getStatus());
 				data.setCreateTime(pmTask.getCreateTime());
 				data.setUpdateTime(src.getOperatorTime());

@@ -1,6 +1,6 @@
 -- ehcore.yml 新增如下配置项
 -- # 允许在 nashorn 中通过 Java.type 访问的类
--- nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.flow.NashornApiService, com.everhomes.flow.NashornConfigService
+-- nashorn.class.includes: java.lang.*, java.util.*, java.io.*, com.everhomes.oauth2client.handler.RestCallTemplate, com.everhomes.scriptengine.nashorn.NashornApiService, com.everhomes.scriptengine.nashorn.NashornConfigService
 -- 用于鼎峰汇测试支付功能
 -- 999951(鼎峰汇) 1041502 
 set @namespace_id=999951;

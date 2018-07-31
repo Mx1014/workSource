@@ -367,6 +367,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 */
 	@RequestMapping("getLeasePromotionConfig")
 	@RestReturn(value=LeasePromotionConfigDTO.class)
+    @RequireAuthentication(value = false)
 	public RestResponse getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd){
 
 		LeasePromotionConfigDTO dto = enterpriseApplyEntryService.getLeasePromotionConfig(cmd);

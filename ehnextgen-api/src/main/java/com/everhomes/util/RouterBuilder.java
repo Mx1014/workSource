@@ -69,7 +69,10 @@ public class RouterBuilder {
     private static String mapping(Router router, Object actionData, String displayName) {
         assert router != null;
 
-        Route route = new Route(router.getRouter()).withParam("displayName", displayName);
+        Route route = new Route(router.getRouter());
+        if (displayName != null) {
+            route.withParam("displayName", displayName);
+        }
 
         if (actionData == null || actionData instanceof NoParamActionData) {
             return route.build();
@@ -116,7 +119,7 @@ public class RouterBuilder {
         }
 
         Route withParam(String key, Object param) {
-            if (null == param) return this;
+            if (null == param) param = "";
             try {
                 this.params = params.append("&")
                         .append(key).append("=")

@@ -15,6 +15,7 @@ import java.util.List;
  * <li>displayNamesV2: 显示名称字符串</li>
  * <li>displayOrdersV2: 显示排序，与名称对应</li>
  * <li>rentAmountUnit: 租金单位</li>
+ * <li>hideAddress: 客户端是否隐藏门牌</li>
  * </ul>
  */
 public class LeasePromotionConfigDTO {
@@ -26,6 +27,7 @@ public class LeasePromotionConfigDTO {
     private Byte consultFlag;
     private String rentAmountUnit;
     private Byte buildingIntroduceFlag;
+    private Byte hideAddressFlag;
 
     @ItemType(String.class)
     private List<String> displayNames;
@@ -110,5 +112,13 @@ public class LeasePromotionConfigDTO {
 
     public void setRenewFlag(Byte renewFlag) {
         this.renewFlag = renewFlag;
+    }
+
+    public Byte getHideAddressFlag() {
+        return hideAddressFlag;
+    }
+
+    public void setHideAddressFlag(Byte hideAddressFlag) {
+        this.hideAddressFlag = hideAddressFlag;
     }
 }

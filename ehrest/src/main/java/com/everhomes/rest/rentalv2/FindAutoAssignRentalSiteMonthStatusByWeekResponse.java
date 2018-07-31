@@ -2,6 +2,7 @@ package com.everhomes.rest.rentalv2;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
+import com.everhomes.rest.rentalv2.admin.RentalOpenTimeDTO;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
@@ -72,6 +73,7 @@ public class FindAutoAssignRentalSiteMonthStatusByWeekResponse {
     private List<AttachmentConfigDTO> attachments;
     @ItemType(SiteItemDTO.class)
     private List<SiteItemDTO> siteItems;
+    private String openTimes;
 
     @Override
     public String toString() {
@@ -292,5 +294,13 @@ public class FindAutoAssignRentalSiteMonthStatusByWeekResponse {
 
     public void setSiteItems(List<SiteItemDTO> siteItems) {
         this.siteItems = siteItems;
+    }
+
+    public String getOpenTimes() {
+        return openTimes;
+    }
+
+    public void setOpenTimes(String openTimes) {
+        this.openTimes = openTimes;
     }
 }

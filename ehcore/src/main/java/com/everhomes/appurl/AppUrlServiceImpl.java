@@ -12,7 +12,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumServiceImpl;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.CreateAppInfoCommand;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.appurl.UpdateAppInfoCommand;
+import com.everhomes.service_agreement.ServiceAgreement;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -60,5 +63,17 @@ public class AppUrlServiceImpl implements AppUrlService {
 		
 		return dto;
 	}
+	
+	@Override
+	public void createAppInfo(CreateAppInfoCommand cmd){
 
+		AppUrls bo = ConvertHelper.convert(cmd, AppUrls.class);	
+		appUrlProvider.createAppInfo(bo);
+	}
+
+	@Override
+	public void updateAppInfo(UpdateAppInfoCommand cmd) {
+		AppUrls bo = ConvertHelper.convert(cmd, AppUrls.class);	
+		appUrlProvider.updateAppInfo(bo);
+	}
 }

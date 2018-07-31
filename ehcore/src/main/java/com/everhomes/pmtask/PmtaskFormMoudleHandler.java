@@ -14,6 +14,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -61,7 +62,8 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         cmd3.setValues(cmd.getValues());
 
         //将旧的清单删除
-        generalFormValProvider.deleteGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
+        if(null != pmTask)
+            generalFormValProvider.deleteGeneralFormVals(EntityType.PM_TASK.getCode(),pmTask.getId());
         generalFormService.addGeneralFormValues(cmd3);
         PostGeneralFormDTO response = ConvertHelper.convert(cmd,PostGeneralFormDTO.class);
         String url ="";
@@ -142,26 +144,50 @@ public class PmtaskFormMoudleHandler implements GeneralFormModuleHandler {
         Double serviceFee = Double.valueOf(getTextString(getFormItem(cmd.getValues(),"服务费").getFieldValue()));
         content += "服务费:"+serviceFee+"元\n";
         content += "物品费:"+(total-serviceFee)+"元\n";
+
+        PmTaskOrder order = new PmTaskOrder();
+        order.setTaskId(pmTask.getId());
+        order.setNamespaceId(pmTask.getNamespaceId());
+        order.setServiceFee(serviceFee.longValue() * 100);
+        order.setAmount(total.longValue() * 100);
+        order.setStatus((byte)0);
+        order = this.pmTaskProvider.createPmTaskOrder(order);
+
         PostApprovalFormItem subForm = getFormItem(cmd.getValues(),"物品");
         if (subForm!=null) {
             PostApprovalFormSubformValue subFormValue = JSON.parseObject(subForm.getFieldValue(), PostApprovalFormSubformValue.class);
             List<PostApprovalFormSubformItemValue> array = subFormValue.getForms();
             if (array.size()!=0) {
                 content += "物品费详情：\n";
-                Gson g=new Gson();
+                List<PmTaskOrderDetail> orderDetails = new ArrayList<>();
                 for (PostApprovalFormSubformItemValue itemValue : array){
                     List<PostApprovalFormItem> values = itemValue.getValues();
-                    content += getTextString(getFormItem(values,"物品名称").getFieldValue())+":";
-                    content += getTextString(getFormItem(values,"小计").getFieldValue())+"元";
-                    content += "("+getTextString(getFormItem(values,"单价").getFieldValue())+"元*"+
-                            getTextString(getFormItem(values,"数量").getFieldValue())+")\n";
+                    String name = getTextString(getFormItem(values,"物品名称").getFieldValue());
+                    String totalAmount = getTextString(getFormItem(values,"小计").getFieldValue());
+                    String price = getTextString(getFormItem(values,"单价").getFieldValue());
+                    String amount = getTextString(getFormItem(values,"数量").getFieldValue());
+                    PmTaskOrderDetail orderDetail = new PmTaskOrderDetail();
+                    orderDetail.setTaskId(pmTask.getId());
+                    orderDetail.setOrderId(order.getId());
+                    orderDetail.setProductName(name);
+                    if(StringUtils.isNotEmpty(price))
+                        orderDetail.setProductPrice(Long.valueOf(price) * 100);
+                    if(StringUtils.isNotEmpty(amount))
+                        orderDetail.setProductAmount(Integer.valueOf(amount));
+                    order.setProductFee(order.getProductFee() + orderDetail.getProductAmount() * orderDetail.getProductPrice());
+                    content += name +":";
+                    content += totalAmount +"元";
+                    content += "("+ price +"元*"+ amount +")\n";
+                    orderDetails.add(orderDetail);
                 }
-                content += "如对上述费用有疑义请附言说明";
+                pmTaskProvider.createOrderDetails(orderDetails);
             }
         }
+        content += "如对上述费用有疑义请附言说明";
         log.setLogContent(content);
         eventLogs.add(log);
         dto.setEventLogs(eventLogs);
+        pmTaskProvider.updatePmTaskOrder(order);
         flowService.processAutoStep(dto);
         return response;
     }

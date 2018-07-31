@@ -13,6 +13,8 @@ public interface GogsService {
 
     List<GogsObject> listObjects(GogsRepo repo, String path, String lastCommit);
 
+    List<GogsCommit> listCommits(GogsRepo repo, String path, Integer page, Integer size);
+
     GogsRepo getAnyRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId);
 
     byte[] getFile(GogsRepo repo, String path, String lastCommit) throws GogsFileNotExistException;

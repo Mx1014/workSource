@@ -1,6 +1,8 @@
 package com.everhomes.general_form;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
@@ -10,10 +12,10 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralFormVals;
 import com.everhomes.server.schema.tables.records.EhGeneralFormValsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
-import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +39,8 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
         obj.setCreateTime(new Timestamp(l2));
         EhGeneralFormValsDao dao = new EhGeneralFormValsDao(context.configuration());
         dao.insert(obj);
+        //add by RuiJia for publishing create action to customer listener 20180629
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhGeneralFormVals.class, id);
         return id;
     }
 
@@ -121,5 +125,33 @@ public class GeneralFormValProviderImpl implements GeneralFormValProvider {
 
         query.execute();
 
+    }
+
+    @Override
+    public Integer queryAmount(String sourceType, Long sourceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormVals.class));
+        SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+        if(null != sourceId)
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+        if(StringUtils.isNotEmpty(sourceType))
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
+        return  query.fetchCount();
+    }
+
+    @Override
+    public List<GeneralFormVal> queryGeneralFormVals(String sourceType, Long sourceId, Long pageAnchor, Integer pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralFormVals.class));
+        SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+        if(null != sourceId)
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+        if(StringUtils.isNotEmpty(sourceType))
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_TYPE.eq(sourceType));
+        if(null != pageAnchor && pageAnchor != 0)
+            query.addConditions(Tables.EH_GENERAL_FORM_VALS.ID.gt(pageAnchor));
+        if(null != pageSize)
+            query.addLimit(pageSize);
+        query.addOrderBy(Tables.EH_GENERAL_FORM_VALS.ID.asc());
+        List<GeneralFormVal> objs = query.fetch().map((r) -> ConvertHelper.convert(r, GeneralFormVal.class));
+        return objs;
     }
 }
