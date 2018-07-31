@@ -208,7 +208,7 @@ public class RequisitionServiceImpl implements RequisitionService{
     @Override
     public void updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd){
         GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
-        if(cmd.getFormOriginId() != null && cmd.getFormOriginId() > 0l && cmd.getFormVersion() > 0 && cmd.getFormVersion() != null) {
+        if(cmd.getFormOriginId() != null && cmd.getFormOriginId() >= 0l && cmd.getFormVersion() >= 0 && cmd.getFormVersion() != null) {
             approval.setFormOriginId(cmd.getFormOriginId());
             approval.setFormVersion(cmd.getFormVersion());
             generalApprovalProvider.updateGeneralApproval(approval);
