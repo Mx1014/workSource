@@ -10,7 +10,7 @@ public interface GeneralApprovalProvider {
 
 	Long createGeneralApproval(GeneralApproval obj);
 
-	void updateGeneralApproval(GeneralApproval obj);
+	Long updateGeneralApproval(GeneralApproval obj);
 
 	void deleteGeneralApproval(GeneralApproval obj);
 

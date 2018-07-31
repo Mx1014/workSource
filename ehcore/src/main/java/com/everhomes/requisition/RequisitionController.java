@@ -118,10 +118,10 @@ public class RequisitionController extends ControllerBase {
      * @return
      */
     @RequestMapping("updateRequisitionApprovalActiveForm")
-    @RestReturn(value=String.class)
+    @RestReturn(value=Long.class)
     public RestResponse updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd) {
-        requisitionService.updateRequisitionApprovalActiveForm(cmd);
-        RestResponse response = new RestResponse();
+        Long FormOriginId = requisitionService.updateRequisitionApprovalActiveForm(cmd);
+        RestResponse response = new RestResponse(FormOriginId);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

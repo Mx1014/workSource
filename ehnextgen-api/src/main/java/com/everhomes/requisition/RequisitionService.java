@@ -22,7 +22,7 @@ public interface RequisitionService {
 
     ListRequisitionsResponse listRequisitionsForSecondParty(ListRequisitionsCommand cmd);
 
-    void updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd);
+    Long updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd);
 
     void updateRequisitionApprovalActiveStatus(UpdateRequisitionActiveStatusCommond cmd);
 

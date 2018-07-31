@@ -206,13 +206,14 @@ public class RequisitionServiceImpl implements RequisitionService{
     //新增
 
     @Override
-    public void updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd){
+    public Long updateRequisitionApprovalActiveForm(UpdateRequisitionRunningFormCommand cmd){
         GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
         if(cmd.getFormOriginId() != null && cmd.getFormOriginId() >= 0l && cmd.getFormVersion() >= 0 && cmd.getFormVersion() != null) {
             approval.setFormOriginId(cmd.getFormOriginId());
             approval.setFormVersion(cmd.getFormVersion());
-            generalApprovalProvider.updateGeneralApproval(approval);
-        }else{
+            Long formOriginId = generalApprovalProvider.updateGeneralApproval(approval);
+            return formOriginId;
+        }else {
             LOGGER.error("form origin id or form version param cannot null. form_origin_id : " + cmd.getFormOriginId() + ", form_version : " + cmd.getFormVersion());
             throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
                     RequistionErrorCodes.ERROR_FORM_PARAM, "form origin id or form version param cannot null");
