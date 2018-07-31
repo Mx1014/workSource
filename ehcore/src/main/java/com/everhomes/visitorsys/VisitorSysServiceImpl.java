@@ -353,7 +353,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
         if(!hasSendMessage)
             sendMessageInviter(visitor);//发送消息给邀请者
-        sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         GetBookedVisitorByIdResponse convert = ConvertHelper.convert(visitor, GetBookedVisitorByIdResponse.class);
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
@@ -587,6 +586,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.createVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
         createVisitorActions(visitor);
+        sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
@@ -597,6 +597,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
         createVisitorActions(relatedVisitor);
+        sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
     }
 
@@ -649,6 +650,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
         visitorsysSearcher.syncVisitor(visitor);
         createVisitorActions(visitor);
+        sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
@@ -659,6 +661,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
         createVisitorActions(relatedVisitor);
+        sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
     }
 
