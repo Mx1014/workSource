@@ -21,6 +21,7 @@ import com.everhomes.rest.notice.ListEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeResponse;
 import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -188,6 +189,7 @@ public class EnterpriseNoticeController extends ControllerBase {
      */
     @RequestMapping("getSharedEnterpriseNoticeDetail")
     @RestReturn(value = EnterpriseNoticeDTO.class)
+    @RequireAuthentication(false)
     public RestResponse getSharedEnterpriseNoticeDetail(GetSharedEnterpriseNoticeCommand cmd) {
         RestResponse response = new RestResponse(enterpriseNoticeService.getSharedEnterpriseNoticeDetailInfo(cmd.getNoticeToken()));
         response.setErrorCode(ErrorCodes.SUCCESS);
