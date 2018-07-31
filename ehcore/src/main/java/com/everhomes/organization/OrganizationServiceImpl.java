@@ -14332,8 +14332,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if(UserContext.getCurrentNamespaceId() == 2){
             //标准版
-
-
+            ServiceModuleAppAuthorization serviceModuleAppAuthorization = serviceModuleAppAuthorizationService.findServiceModuleAppAuthorization(cmd.getProjectId(), cmd.getAppId());
+            if(serviceModuleAppAuthorization != null){
+                Organization organization = organizationProvider.findOrganizationById(serviceModuleAppAuthorization.getOrganizationId());
+                dto = ConvertHelper.convert(organization, OrganizationDTO.class);
+            }
 
         }else {
             //定制版
@@ -14342,6 +14345,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             if(organizationCommunities != null && organizationCommunities.size() > 0){
                 Organization organization = organizationProvider.findOrganizationById(organizationCommunities.get(0).getOrganizationId());
+
                 dto = ConvertHelper.convert(organization, OrganizationDTO.class);
             }
         }
@@ -14384,6 +14388,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
+            OrganizationCommunityRequest request = organizationProvider.findOrganizationCommunityRequestByOrganizationId(cmd.getProjectId(), org.getId());
+            if (request == null) {
+                //不是该项目的，跳过
+                continue;
+            }
+
+
             //Filter out the inactive organization add by sfyan 20130430
             OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
             if (orgStatus != OrganizationStatus.ACTIVE) {
@@ -14400,7 +14411,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
-            dtos.add(ConvertHelper.convert(org, OrganizationDTO.class));
+            OrganizationDTO dto = toOrganizationDTO(userId, org);
+            dtos.add(dto);
         }
 
         ListUserOrganizationsResponse response = new ListUserOrganizationsResponse();

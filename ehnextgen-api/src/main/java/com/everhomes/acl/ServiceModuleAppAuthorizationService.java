@@ -31,4 +31,6 @@ public interface ServiceModuleAppAuthorizationService {
     void removeAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId);
 
     ServiceModuleAppDTO getAppProfile(GetAppProfileCommand cmd);
+
+    ServiceModuleAppAuthorization findServiceModuleAppAuthorization(Long projectId, Long appId);
 }
