@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractChargingChange;
@@ -9,14 +13,7 @@ import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.news.NewsCategory;
-import com.everhomes.rest.contract.ContractAttachmentDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
-
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public interface ContractProvider {
 
@@ -51,7 +48,7 @@ public interface ContractProvider {
 	Map<Long, Contract> listContractsByIds(List<Long> ids);
 	List<Contract> listContracts(CrossShardListingLocator locator, Integer pageSize);
 
-	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber);
+	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber, Long categoryId);
 
 	List<Contract> listContractByAddressId(Long addressId);
 	List<Contract> listContractByBuildingName(String buildingName, Long communityId);
@@ -104,4 +101,12 @@ public interface ContractProvider {
 
     Long findContractCategoryIdByContractId(Long contractId);
 
+    //合同模板 by jm.ding
+	void createContractTemplate(ContractTemplate contractTemplate);
+	void updateContractTemplate(ContractTemplate contractTemplate);
+	ContractTemplate findContractTemplateById(Long id);
+	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, String name, Long pageAnchor, Integer pageSize);
+	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
+	Boolean getContractTemplateById(Long id);
+	
 }

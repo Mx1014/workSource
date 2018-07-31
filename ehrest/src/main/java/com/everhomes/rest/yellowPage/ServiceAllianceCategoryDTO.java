@@ -60,6 +60,7 @@ public class ServiceAllianceCategoryDTO {
 	private Byte displayMode;
 	private String displayModeName;
 	private Byte skipType;
+	private Integer entryId;
 
 	public Byte getSkipType() {
 		return skipType;
@@ -197,9 +198,17 @@ public class ServiceAllianceCategoryDTO {
 		this.selectedLogoUrl = selectedLogoUrl;
 	}
 
+	public Integer getEntryId() {
+		return entryId;
+	}
+
+	public void setEntryId(Integer entryId) {
+		this.entryId = entryId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	
+
 }

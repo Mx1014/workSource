@@ -25,5 +25,6 @@ public interface ServiceModuleConstants {
     long LEASE_PROJECT_MODULE = 40100L;
     long PARKING_MODULE = 40800L;
     long ASSET_MODULE = 20400L;
+    long PAYMENT_CONTRACT_MODULE = 21215L; // 付款合同管理模块
 
 }

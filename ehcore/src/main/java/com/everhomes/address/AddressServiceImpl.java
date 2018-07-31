@@ -2090,10 +2090,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				errorLogs.add(log);
 				continue;
             }
-			
+            //TODO 可能得增加对NamespaceAddressType和NamespaceAddressToken字段的校验 by tangcen
+            
 			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
 		}
-
         updateCommunityAptCount(community);
         
 		return errorLogs;
@@ -2134,8 +2134,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
-//            address.setNamespaceAddressType(data.getNamespaceAddressType());
-//            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
+            address.setNamespaceAddressType(data.getNamespaceAddressType());
+            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
             address.setOrientation(data.getOrientation());
@@ -2147,8 +2147,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setSharedArea(shareArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
-//            address.setNamespaceAddressType(data.getNamespaceAddressType());
-//            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
+            address.setNamespaceAddressType(data.getNamespaceAddressType());
+            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             if (StringUtils.isNotBlank(data.getOrientation())) {
             	address.setOrientation(data.getOrientation());
@@ -2169,7 +2169,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 				data.setBuildingName(trim(r.getA()));
 				data.setApartmentName(trim(r.getB()));
 				data.setStatus(trim(r.getC()));
-
                 //产品变更模板
 //                data.setBuildArea(trim(r.getD()));
                 data.setAreaSize(trim(r.getD()));
@@ -2178,8 +2177,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                 data.setRentArea(trim(r.getG()));
                 data.setOrientation(trim(r.getH()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
-//                data.setNamespaceAddressType(trim(r.getH()));
-//                data.setNamespaceAddressToken(trim(r.getI()));
+                data.setNamespaceAddressType(trim(r.getI()));
+                data.setNamespaceAddressToken(trim(r.getJ()));
 				list.add(data);
 			}
 		}

@@ -43,6 +43,10 @@ public class AclinkServerDTO {
 	private String localServerKey;
 	private List<LocalDoorAccessDTO> listDoorAccess;
 
+	public String getUuidNum(){
+		return uuid.replace(":", "");
+	}
+	
 	public Long getId() {
 		return id;
 	}

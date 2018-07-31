@@ -9,7 +9,7 @@ public interface GogsProvider {
 
     <T> List<T> listObjects(String repoName, String path, GogsRawFileParam param, Type type);
 
-    <T> List<T> listCommits(String repoName, String path, Type type);
+    <T> List<T> listCommits(String repoName, String path, GogsPaginationParam param, Type type);
 
     GogsCommit commitFile(String repoName, String path, GogsRawFileParam param);
 

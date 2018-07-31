@@ -135,7 +135,13 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         if(state != null) {
             Map<String, String> params = new HashMap<String, String>();
             params.put("id", state.getId().toString());
-            httpRestCallProvider.restCall("/aclink/disConnected", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+            params.put("uuid", uuid);
+            String coreUrl = "/aclink/disConnected";
+            if(uuid != null && (uuid.length() == 6 || uuid.length() == 12 || uuid.split(":").length == 6)){
+            	//人脸识别内网服务器的连接
+            	coreUrl = "/aclink/serverDisconnected";
+            }
+            httpRestCallProvider.restCall(coreUrl, params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
                 }

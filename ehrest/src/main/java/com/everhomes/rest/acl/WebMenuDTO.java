@@ -3,6 +3,7 @@ package com.everhomes.rest.acl;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
 /**
  * <ul>
@@ -21,6 +22,8 @@ import com.everhomes.discover.ItemType;
  *     <li>selected: 是否别选中 {@link WebMenuSelectedFlag}</li>
  *     <li>applyPolicy: 名称覆盖政策 {@link WebMenuScopeApplyPolicy}</li>
  *     <li>path: 路径</li>
+ *     <li>sortNum: sortNum</li>
+ *     <li>appConfig: appConfig {@link com.everhomes.rest.portal.ServiceModuleAppDTO}</li>
  * </ul>
  */
 public class WebMenuDTO {
@@ -49,6 +52,8 @@ public class WebMenuDTO {
 	private String path;
 
 	private Integer sortNum;
+
+	private ServiceModuleAppDTO appConfig;
 
 	public Long getId() {
 		return id;
@@ -176,5 +181,13 @@ public class WebMenuDTO {
 
 	public void setSortNum(Integer sortNum) {
 		this.sortNum = sortNum;
+	}
+
+	public ServiceModuleAppDTO getAppConfig() {
+		return appConfig;
+	}
+
+	public void setAppConfig(ServiceModuleAppDTO appConfig) {
+		this.appConfig = appConfig;
 	}
 }

@@ -1,6 +1,8 @@
 package com.everhomes.statistics.terminal;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 
 public interface StatTerminalProvider {
@@ -9,7 +11,7 @@ public interface StatTerminalProvider {
 	
 	void createTerminalHourStatistics(TerminalHourStatistics terminalHourStatistics);
 	
-	void createTerminalAppVersionStatistics(TerminalAppVersionStatistics terminalAppVersionStatistics);
+	void createTerminalAppVersionStatistics(List<TerminalAppVersionStatistics> terminalAppVersionStatistics);
 	
 	void deleteTerminalDayStatistics(Integer namespaceId, String date);
 
@@ -17,15 +19,15 @@ public interface StatTerminalProvider {
 
 	void deleteTerminalAppVersionStatistics(Integer namespaceId, String startDate);
 
-	TerminalDayStatistics statisticalUserActivity(String date, String hour, Integer namespaceId);
-
 	TerminalDayStatistics getTerminalDayStatisticsByDay(String date, Integer namespaceId);
 
-	Long getTerminalActiveUserNumberByDate(String startDate, String endDate, Integer namespaceId);
+	Map<String, Integer> statisticalByInterval(Integer namespaceId, LocalDateTime start, LocalDateTime end);
 
-	Long getTerminalCumulativeUserNumber(String version, Integer namespaceId);
+	List<Long> listUserIdByInterval(Integer namespaceId, LocalDateTime start, LocalDateTime end);
 
-	Long getTerminalAppVersionActiveUserNumberByDay(String date, String version, Integer namespaceId);
+	Integer countVersionCumulativeUserNumber(String version, Integer namespaceId, String date);
+
+	Integer countVersionActiveUserNumberByDay(String date, String version, Integer namespaceId);
 
 	List<TerminalHourStatistics> listTerminalHourStatisticsByDay(String date, Integer namespaceId);
 
@@ -45,17 +47,11 @@ public interface StatTerminalProvider {
 
 	void deleteTerminalAppVersionCumulativeById(Long id);
 
-	TerminalAppVersionCumulatives getTerminalAppVersionCumulative(String version, String imei, Integer namespaceId);
-
 	void createTerminalAppVersionActives(TerminalAppVersionActives terminalAppVersionActives);
 
 	void deleteTerminalAppVersionActivesById(Long id);
 
-	TerminalAppVersionActives getTerminalAppVersionActive(String date, String version, String imei, Integer namespaceId);
-
-	Long getTerminalAppVersionNewUserNumberByDay(String date, String version, Integer namespaceId);
-
-	Long getTerminalStartNumberByDay(String date, String version, Integer namespaceId);
+	List<TerminalAppVersionActives> getTerminalAppVersionActive(String date, String version, String imei, Integer namespaceId);
 
 	void createAppVersion(AppVersion appVersion);
 
@@ -68,4 +64,16 @@ public interface StatTerminalProvider {
     AppVersion findLastAppVersion(Integer namespaceId);
 
     void cleanUserActivitiesWithNullAppVersion(Integer namespaceId);
+
+    void createTerminalHourStatistics(List<TerminalHourStatistics> hourStats);
+
+    void deleteTerminalAppVersionCumulative(String imeiNumber, Integer namespaceId);
+
+	void deleteTerminalStatTask(Integer namespaceId, String taskNo);
+
+    void cleanInvalidAppVersion(Integer namespaceId);
+
+	List<String> listUserActivityAppVersions(Integer namespaceId);
+
+	void correctUserActivity(Integer namespaceId);
 }

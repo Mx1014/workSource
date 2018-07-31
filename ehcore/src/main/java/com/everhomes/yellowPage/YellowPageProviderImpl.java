@@ -1270,9 +1270,13 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	private Long getDateDefaultOrder(ServiceAlliances sa) {
 		long timeMillis = System.currentTimeMillis();
 		long ms = timeMillis % 1000; // 获得毫秒
+		long ms1 = ms/100;
+		long ms2 = (ms % 100) / 10;
+		long ms3 = (ms % 10);
+		
 		String timeHeadStr = DateUtil.dateToStr(sa.getEndTime(), "yyyyMMdd");
 		String timeMidStr = DateUtil.dateToStr(new Timestamp(timeMillis), "HHmmss");
-		return -Long.parseLong(timeHeadStr + timeMidStr + ms);
+		return -Long.parseLong(timeHeadStr + timeMidStr + ms1 + ms2 + ms3);
 	}
 	
 }

@@ -68,6 +68,7 @@ public interface Rentalv2Provider {
 	List<RentalOrder> listRentalBillsByUserOrgId(Long organizationId ,ListingLocator locator, Integer pageSize );
 	List<RentalOrder> listActiveBills(Long rentalSiteId, ListingLocator locator,Integer pageSize, Long startTime, Long endTime);
 
+	List<RentalOrder> listActiveBillsByInterval(Long rentalSiteId,Long startTime, Long endTime);
 
 	List<RentalOrder> listTargetRentalBills(Byte status);
 	
@@ -186,6 +187,8 @@ public interface Rentalv2Provider {
 
 	List<RentalCell> getRentalCellsByIds(List<Long> cellIds);
 
+	List<RentalCell> getRentalCellsByRange(Long minId,Long maxId);
+
 	Double countRentalSiteBillBySiteRuleId(Long cellId);
 
 	Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules);
@@ -233,5 +236,5 @@ public interface Rentalv2Provider {
 
 	List<RentalStatisticsDTO> listRentalBillValidTimeByOrgId(String resourceType, Long resourceTypeId,Long communityId,
 															 Long startTime, Long endTime,Integer order);
-
+	String getHolidayCloseDate (Byte holidayType);
 }

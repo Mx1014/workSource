@@ -86,6 +86,8 @@ public interface AddressProvider {
 
     int changeAddressLivingStatus(Long addressId, Byte status);
 
+  //Byte getAddressLivingStatus(Long addressId);
+
     Byte getAddressLivingStatus(Long addressId,String addressName);
 	int changeAddressLivingStatus(Long id, String address, byte code);
 	Address findNotInactiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName,

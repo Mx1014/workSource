@@ -50,7 +50,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
@@ -129,6 +128,7 @@ import com.everhomes.pushmessage.PushMessageResultProvider;
 import com.everhomes.pushmessage.PushMessageStatus;
 import com.everhomes.pushmessage.PushMessageTargetType;
 import com.everhomes.pushmessage.PushMessageType;
+import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -191,6 +191,7 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.AccountType;
+import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.BillTransactionResult;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -217,7 +218,162 @@ import com.everhomes.rest.organization.PaidType;
 import com.everhomes.rest.organization.TxType;
 import com.everhomes.rest.organization.UpdateReservationCommand;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.organization.pm.AddOrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.AddOrganizationOwnerCarUserCommand;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.CancelReservationCommand;
+import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
+import com.everhomes.rest.organization.pm.CommunityPropMemberCommand;
+import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
+import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
+import com.everhomes.rest.organization.pm.CreatePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.CreateReservationCommand;
+import com.everhomes.rest.organization.pm.DefaultChargingItemDTO;
+import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyDTO;
+import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
+import com.everhomes.rest.organization.pm.DeleteDefaultChargingItemCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerAttachmentCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerBehaviorCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.DeletePmBillCommand;
+import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
+import com.everhomes.rest.organization.pm.DeletePropMemberCommand;
+import com.everhomes.rest.organization.pm.DeletePropOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.DeleteRelationOfOrganizationOwnerAndCarCommand;
+import com.everhomes.rest.organization.pm.DeleteReservationCommand;
+import com.everhomes.rest.organization.pm.ExportOrganizationOwnerCarsCommand;
+import com.everhomes.rest.organization.pm.ExportOrganizationsOwnersCommand;
+import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
+import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
+import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
+import com.everhomes.rest.organization.pm.FindPmBillByOrderNoCommand;
+import com.everhomes.rest.organization.pm.GetFamilyStatisticCommand;
+import com.everhomes.rest.organization.pm.GetFamilyStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.GetOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.GetOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommand;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
+import com.everhomes.rest.organization.pm.GetRequestInfoCommand;
+import com.everhomes.rest.organization.pm.GetRequestInfoResponse;
+import com.everhomes.rest.organization.pm.ImportOrganizationOwnerCarsCommand;
+import com.everhomes.rest.organization.pm.ImportOrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.ImportOrganizationsOwnersCommand;
+import com.everhomes.rest.organization.pm.InsertPmBillCommand;
+import com.everhomes.rest.organization.pm.InsertPmBillsCommand;
+import com.everhomes.rest.organization.pm.ListApartmentOrganizationOwnerBehaviorsCommand;
+import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommand;
+import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListDefaultChargingItemsCommand;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommand;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerAddressesCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerAttachmentsCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerBehaviorsCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarByOrgOwnerCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarResponse;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerCarsByAddressCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticByAgeDTO;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnerTypesCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersByCarCommand;
+import com.everhomes.rest.organization.pm.ListOrganizationOwnersResponse;
+import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListParkingCardCategoriesCommand;
+import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropAddressMappingCommand;
+import com.everhomes.rest.organization.pm.ListPropAddressMappingCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropBillCommand;
+import com.everhomes.rest.organization.pm.ListPropBillCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropCommunityAddressCommand;
+import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropInvitedUserCommand;
+import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropMemberCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropPostCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.ListReservationsCommand;
+import com.everhomes.rest.organization.pm.ListReservationsDTO;
+import com.everhomes.rest.organization.pm.OnlinePayPmBillCommand;
+import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressCommand;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAddressDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerAttachmentDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorStatus;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
+import com.everhomes.rest.organization.pm.OrganizationOwnerCarAttachmentDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerCarDTO;
+import com.everhomes.rest.organization.pm.OrganizationOwnerCarStatus;
+import com.everhomes.rest.organization.pm.OrganizationOwnerLocaleStringScope;
+import com.everhomes.rest.organization.pm.OrganizationOwnerOwnerCarPrimaryFlag;
+import com.everhomes.rest.organization.pm.OrganizationOwnerStatus;
+import com.everhomes.rest.organization.pm.OrganizationOwnerTypeDTO;
+import com.everhomes.rest.organization.pm.OweFamilyDTO;
+import com.everhomes.rest.organization.pm.OwedType;
+import com.everhomes.rest.organization.pm.ParkingCardCategoryDTO;
+import com.everhomes.rest.organization.pm.PayPmBillByAddressIdCommand;
+import com.everhomes.rest.organization.pm.PmBillEntityType;
+import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
+import com.everhomes.rest.organization.pm.PmBillOperLogType;
+import com.everhomes.rest.organization.pm.PmBillsDTO;
+import com.everhomes.rest.organization.pm.PmMemberStatus;
+import com.everhomes.rest.organization.pm.PropAddressMappingDTO;
+import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
+import com.everhomes.rest.organization.pm.PropBillDTO;
+import com.everhomes.rest.organization.pm.PropBillItemDTO;
+import com.everhomes.rest.organization.pm.PropCommunityBillDateCommand;
+import com.everhomes.rest.organization.pm.PropCommunityBillIdCommand;
+import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
+import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
+import com.everhomes.rest.organization.pm.PropInvitedUserDTO;
+import com.everhomes.rest.organization.pm.PropOwnerDTO;
+import com.everhomes.rest.organization.pm.PropertyMemberDTO;
+import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
+import com.everhomes.rest.organization.pm.QueryPropTopicByCategoryCommand;
+import com.everhomes.rest.organization.pm.ReservationStatus;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnersByconditionCommand;
+import com.everhomes.rest.organization.pm.SearchOrganizationOwnersCommand;
+import com.everhomes.rest.organization.pm.SendNoticeCommand;
+import com.everhomes.rest.organization.pm.SendNoticeMode;
+import com.everhomes.rest.organization.pm.SendNoticeToPmAdminCommand;
+import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
+import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
+import com.everhomes.rest.organization.pm.SetOrganizationOwnerAsCarPrimaryCommand;
+import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
+import com.everhomes.rest.organization.pm.UpdateDefaultChargingItemCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressAuthTypeCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerAddressStatusCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCarCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillsDto;
+import com.everhomes.rest.organization.pm.UploadOrganizationOwnerAttachmentCommand;
+import com.everhomes.rest.organization.pm.UploadOrganizationOwnerCarAttachmentCommand;
+import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.pushmessagelog.PushMessageTypeCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.IdentifierType;
@@ -248,7 +404,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateStatisticHelper;
 import com.everhomes.util.PaginationHelper;
@@ -264,11 +422,12 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
-import jdk.nashorn.internal.parser.JSONParser;
 import net.greghaines.jesque.Job;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.slf4j.Logger;
@@ -278,18 +437,25 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.io.*;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -298,13 +464,26 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import net.greghaines.jesque.Job;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
@@ -447,6 +626,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
    	@Autowired
     private ScheduleProvider scheduleProvider;
+   	
+   	@Autowired
+   	private PushMessageLogService pushMessageLogService;
 
     private String queueName = "property-mgr-push";
 
@@ -465,6 +647,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			if(!isRunning) {
 				workerPoolFactory.getWorkerPool().addQueue(queueName);
 				isRunning = true;
+				LOGGER.info("WorkerPool addQueue queueName ={}",queueName);
 			}
 		}
         
@@ -1307,7 +1490,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void sendNotice(SendNoticeCommand cmd) {
 
-        this.checkCommunityIdIsNull(cmd.getCommunityId());
+       // this.checkCommunityIdIsNull(cmd.getCommunityId()); 
 
 		/*List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
@@ -1340,9 +1523,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}*/
 
         LOGGER.debug("push message task scheduling, cmd = {}", cmd);
-
+        //创建消息记录
+        Long logId = pushMessageLogService.createfromSendNotice(cmd, PushMessageTypeCode.APP.getCode());
+        cmd.setLogId(logId);
+        LOGGER.info("create pushMessageLog and set status waitting  .");
         // 调度执行一键推送
-        Job job = new Job(
+        /*Job job = new Job(
                 SendNoticeAction.class.getName(),
                 StringHelper.toJsonString(cmd),
                 String.valueOf(UserContext.currentUserId()),
@@ -1350,7 +1536,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 cmd.getNamespaceId()
         );
 
-        jesqueClientFactory.getClientPool().enqueue(queueName, job);
+               
+        jesqueClientFactory.getClientPool().enqueue(queueName, job);*/
+
+        //更换推送方式 add by huangliangming 20180723
+        HashMap<String, Object> paramMap = new HashMap<>();
+        paramMap.put("cmd", StringHelper.toJsonString(cmd));
+        paramMap.put("namespaceId", cmd.getNamespaceId());
+        paramMap.put("operatorUid", String.valueOf(UserContext.currentUserId()));
+        paramMap.put("schema", UserContext.current().getScheme());
+        String triggerName = queueName + System.currentTimeMillis();
+        String jobName = queueName + System.currentTimeMillis();
+        Long time = System.currentTimeMillis()+2*1000;
+        CronDateUtils.getCron(new Timestamp(time));
+        String cronExpression = CronDateUtils.getCron(new Timestamp(time));
+        LOGGER.info("triggerName:[" + triggerName+"];jobName:["+jobName+"];cronExpression:["+cronExpression+"];params:["+paramMap+"].");
+        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, SendNoticeNewAction.class, paramMap);
+
     }
 
     @Override
@@ -1365,7 +1567,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         if (sendNoticeMode == SendNoticeMode.NAMESPACE) {
             sendNoticeToNamespaceUser(cmd);
-        } else {
+        } 
+         //添加按项目推送的维度 20180712
+        else if(sendNoticeMode == SendNoticeMode.COMMUNITY){
+        	sendNoticeToCommunitsUser(cmd);
+        	
+        }
+        //按号码推送
+        else if(sendNoticeMode == SendNoticeMode.MOBILE){
+        	sendNoticeByPhone(cmd, operator);
+        }
+        //此代码目前暂时无用，但后续应该有借鉴之用，暂时不删，前面有很多坑要靠这段代码来填
+        else {
             // 八百年前的代码，看都不想看
             Community community = this.checkCommunity(cmd.getCommunityId());
 
@@ -1387,6 +1600,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             List<User> users = userProvider.listUserByNamespace(null, cmd.getNamespaceId(), locator, 200);
             for (User u : users) {
                 sendNoticeToUserById(u.getId(), messageBody, cmd.getMessageBodyType());
+            }
+        } while (locator.getAnchor() != null);
+    }
+    
+    /**
+     * 按项目推送
+     * @param cmd
+     */
+    private void sendNoticeToCommunitsUser(SendNoticeCommand cmd) {
+        String messageBody = processMessage(cmd.getMessage(), cmd.getMessageBodyType(),
+                cmd.getImgUri(), EntityType.NAMESPACE.getCode(), Long.valueOf(cmd.getNamespaceId()));
+
+        List<Integer> status = new ArrayList<Integer>();
+        status.add(AuthFlag.PENDING_AUTHENTICATION.getCode());
+        status.add(AuthFlag.AUTHENTICATED.getCode());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        do {
+            List<UserOrganizations> users = organizationProvider.findUserByCommunityIDAndAuthStatus(cmd.getNamespaceId(),
+            							cmd.getCommunityIds(), status, locator, 200);
+            for (UserOrganizations u : users) {
+                sendNoticeToUserById(u.getUserId(), messageBody, cmd.getMessageBodyType());
             }
         } while (locator.getAnchor() != null);
     }
@@ -1637,6 +1871,34 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             smsProvider.sendSms(user.getNamespaceId(), phoneArray, templateScope, templateId, user.getLocale(), variables);
         }
     }
+    /**
+     * 按号码发送
+     * @param cmd
+     * @param user
+     */
+    private void sendNoticeByPhone(SendNoticeCommand cmd, User user) {
+    	List<String> phones = cmd.getMobilePhones();
+    	Integer namespaceId = user.getNamespaceId();
+    	 //按电话号码发送
+        if (phones != null && phones.size() > 0) {
+            List<OrganizationMember> members = new ArrayList<>();
+            for (String phone : phones) {
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+                OrganizationMember member = new OrganizationMember();
+                member.setContactToken(phone);
+                member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+                if (null != userIdentifier) {
+                    member.setTargetId(userIdentifier.getOwnerUid());
+                    member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+                }
+                members.add(member);
+            }
+            if (members.size() > 0) {
+                this.processSmsByMembers(members, cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), user);
+            }
+        }
+    }
+
 
     private void sendNoticeToCommunityPmOwner(SendNoticeCommand cmd, User user) {
 
@@ -2737,6 +2999,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
+
         //删除关联的拆分合并计划
         AddressArrangement arrangement = null;
 		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getId());
@@ -2750,6 +3013,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		if (arrangement != null) {
 			addressProvider.deleteAddressArrangement(arrangement.getId());
 		}
+
+        enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(cmd.getId());
+
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
@@ -5186,7 +5452,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     //只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
 //                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
                     propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-                    getIntoFamily(address, cmd.getContactToken(), cmd.getNamespaceId());
+                    getIntoFamily(address, cmd.getCustomerExtraTels(), cmd.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -5224,6 +5490,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 createAuditLog(ownerAddress.getId(), ownerAddress.getClass());
             }
         }
+        CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
+        pmOwnerSearcher.feedDoc(owner);
 
         return convertOwnerToDTO(tuple.first());
     }
@@ -5316,7 +5584,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     //只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
 //                    autoApprovalOrganizationOwnerAddress(cmd.getCommunityId(), cmd.getContactToken(), ownerAddress);
                     propertyMgrProvider.createOrganizationOwnerAddress(ownerAddress);
-                    getIntoFamily(address, cmd.getContactToken(), cmd.getNamespaceId());
+                    getIntoFamily(address, cmd.getCustomerExtraTels(), cmd.getNamespaceId());
                 } else {
                     LOGGER.error("CreateOrganizationOwner: address id is wrong! addressId = {}", addressCmd.getAddressId());
                 }
@@ -5485,7 +5753,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 propertyMgrProvider.createPropOwner(owner);
                 pmOwnerSearcher.feedDoc(owner);
                 //jiarujiating
-                getIntoFamily(address, cmd.getContactToken(), namespaceId);
+                getIntoFamily(address, Collections.singletonList(cmd.getContactToken()), namespaceId);
 
                 return null;
             });
@@ -5496,14 +5764,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     }
 
-    private void getIntoFamily(Address address, String contactToken, Integer namespaceId) {
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, contactToken);
-        if (null != userIdentifier) {
-            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
-            if (null != user) {
-                address.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-                familyService.getOrCreatefamily(address, user);
-            }
+    private void getIntoFamily(Address address, List<String> contactToken, Integer namespaceId) {
+        if(contactToken!=null && contactToken.size()>0){
+            contactToken.forEach((c)->{
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, c);
+                if (null != userIdentifier) {
+                    User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                    if (null != user) {
+                        address.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+                        familyService.getOrCreatefamily(address, user);
+                    }
+                }
+            });
         }
     }
 
@@ -5548,7 +5820,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                         Address address = addressProvider.findAddressById(ownerAddress.getAddressId());
                         if (address != null) {
                             //jiarujiating
-                            getIntoFamily(address, identifier.getIdentifierToken(), identifier.getNamespaceId());
+                            getIntoFamily(address, Collections.singletonList(identifier.getIdentifierToken()), identifier.getNamespaceId());
                         }
                     }
                 }
@@ -6283,7 +6555,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         //只有在申请了才会自动通过，现要改为只要是注册用户不管申没申请都自动同步给客户 19558 by xiongying20171219
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getOrgOwnerId());
         if (pmOwner != null) {
-            getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+            getIntoFamily(address, (List<String>)StringHelper.fromJsonString(pmOwner.getContactExtraTels(),ArrayList.class), pmOwner.getNamespaceId());
 //            autoApprovalOrganizationOwnerAddress(address.getCommunityId(), pmOwner.getContactToken(), ownerAddress);
         }
         return buildOrganizationOwnerAddressDTO(cmd, address, ownerAddress);
@@ -6307,7 +6579,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(orgOwnerId);
         if (pmOwner != null) {
-            getIntoFamily(address, pmOwner.getContactToken(), pmOwner.getNamespaceId());
+            getIntoFamily(address, (List<String>)StringHelper.fromJsonString(pmOwner.getContactExtraTels(), ArrayList.class), pmOwner.getNamespaceId());
         }
     }
 
@@ -7036,6 +7308,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     createOrganizationOwnerBehavior(ownerId, address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
                 }
             }
+            pmOwnerSearcher.feedDoc(owner);
         }
         return resultLogs;
     }
@@ -7241,7 +7514,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
 
     private Address parseAddress(Integer namespaceId, Long communityId, String building, String apartment) {
-        Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+    	//issue-32652,在校验门牌是否存在时，应该去查正常的门牌（status为2）
+//    	Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
+//                StringUtils.trimAllWhitespace(apartment));
+    	Address address = addressProvider.findActiveAddressByBuildingApartmentName(namespaceId, communityId, StringUtils.trimAllWhitespace(building),
                 StringUtils.trimAllWhitespace(apartment));
         if (address == null) {
             String addressText = StringUtils.trimAllWhitespace(building) + "-" + StringUtils.trimAllWhitespace(apartment);

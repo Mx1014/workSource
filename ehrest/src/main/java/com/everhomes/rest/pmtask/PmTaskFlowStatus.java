@@ -8,13 +8,14 @@ package com.everhomes.rest.pmtask;
  * <li>2: 待分配</li>
  * <li>3: 处理中</li>
  * <li>4: 已完成</li>
- *  <li>5: 待确认费用</li>
- *  <li>6: 调整费用</li>
+ * <li>5: 待确认费用</li>
+ * <li>6: 调整费用</li>
+ * <li>7: 费用确认</li>
  * </ul>
  */
 public enum PmTaskFlowStatus {
 	INACTIVE((byte)0, "已取消"), ACCEPTING((byte)1, "待受理"), ASSIGNING((byte)2, "待分配"),
-    PROCESSING((byte)3, "处理中"), COMPLETED((byte)4, "已完成"),CONFIRM((byte)5, "待确认费用"),MOTIFY((byte)6, "调整费用");
+    PROCESSING((byte)3, "处理中"), COMPLETED((byte)4, "已完成"),CONFIRM((byte)5, "待确认费用"),MOTIFY((byte)6, "调整费用"),CONFIRMED((byte)7, "费用确认");
     
     private byte code;
     private String description;
