@@ -44,8 +44,10 @@ public class AclinkHandshakeInterceptor implements HandshakeInterceptor {
             Map<String, String> params = new HashMap<String, String>();
             params.put("uuid", vs[0]);
             params.put("encryptBase64", vs[1]);
-            
-            ResponseEntity<String> result = httpRestCallProvider.syncRestCall("/aclink/connecting", params);
+            //---by liuyilin 20180712 判断链接类型
+            ResponseEntity<String> result = httpRestCallProvider.syncRestCall(checkConnectionType(vs[0]), params);
+			//--- httpRestCallProvider.syncRestCall("/aclink/connecting", params);
+					
             if(result.getStatusCode() != HttpStatus.OK) {
                 response.setStatusCode(result.getStatusCode());
                 return false;
@@ -78,6 +80,16 @@ public class AclinkHandshakeInterceptor implements HandshakeInterceptor {
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
             Exception exception) {
+    }
+    
+    //简单判断是否是人脸识别服务器连接  by liuyilin 20180712
+    private String checkConnectionType(String msg){
+    	if(msg != null && (msg.length() == 6 || msg.length() == 12 || msg.split(":").length == 6)){
+    		return "/aclink/serverConnecting";
+    	}
+    	//若有其他类型再添加
+    	
+    	return "/aclink/connecting";
     }
 
 }

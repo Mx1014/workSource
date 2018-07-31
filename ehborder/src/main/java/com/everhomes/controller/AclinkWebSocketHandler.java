@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.controller;
 
 import java.io.IOException;
@@ -134,7 +135,13 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         if(state != null) {
             Map<String, String> params = new HashMap<String, String>();
             params.put("id", state.getId().toString());
-            httpRestCallProvider.restCall("/aclink/disConnected", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+            params.put("uuid", uuid);
+            String coreUrl = "/aclink/disConnected";
+            if(uuid != null && (uuid.length() == 6 || uuid.length() == 12 || uuid.split(":").length == 6)){
+            	//人脸识别内网服务器的连接
+            	coreUrl = "/aclink/serverDisconnected";
+            }
+            httpRestCallProvider.restCall(coreUrl, params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
                 }
@@ -216,7 +223,28 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         }
       });
     }
+    
+    public void excuteMessage(Map<String, String> params, WebSocketSession session, AclinkWebSocketState state, String coreUrl) {
+        String uuid = uuidFromSession(session);
+        params.put("uuid", uuid);
+        if(params.get("payload") != null) {
+            LOGGER.info("Got reply = {}", params);    
+        }
+        
+        httpRestCallProvider.restCall(coreUrl, params, new ListenableFutureCallback<ResponseEntity<String>> () {
 
+        @Override
+        public void onSuccess(ResponseEntity<String> result) {
+            LOGGER.info("success");
+        }
+
+        @Override
+        public void onFailure(Throwable ex) {
+            LOGGER.error("call core server error=", ex);
+        }
+      });
+    }
+    
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         AclinkWebSocketState state = session2State.get(session);
@@ -237,19 +265,37 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
             LOGGER.info("Message error, ignored, len=" + len);
             return;
         }
-
+        
+        //硬件实际数据格式与文档不一致，此处将实际数据补充成文档的格式 by liuyilin 20180320
+        if (buf.length == 18){
+        	byte[] convertArr = new byte[28];
+        	System.arraycopy(buf, 0, convertArr, 10, buf.length);
+        	buf = convertArr;
+        	buf[3] = (byte) 0x18;
+        	len = 24;
+        }
+        
+        //门禁日志 by liuyilin 20180622
+        if((buf.length == 31 || buf.length ==49) && buf[buf.length-21] == (byte) 0xf){
+        	state.onRequest(Arrays.copyOfRange(buf, buf.length-21, buf.length), session, this);
+        	return;
+        }
+        
         byte[] bDataSize = Arrays.copyOfRange(buf, 0, 4);
         int dataSize = DataUtil.byteArrayToInt(bDataSize);
         if(dataSize != len) {
             LOGGER.info("Message error length, ignored, dataSize=" + dataSize + ", len=" + len);
             return;
         }
-
-        state.onMessage(buf, session, this);
+        //硬件数据没有传DataType，在此处先按照CMD进行路由 by liuyilin 20180320
+        if(buf[10] == (byte) 0x10){
+        	state.onRequest(Arrays.copyOfRange(buf, 10, buf.length), session, this);
+        }else{
+        	state.onMessage(buf, session, this);
+        }
+        
     }
-
-
-
+    
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
         LOGGER.info("Got pong message from " + uuidFromSession(session));
