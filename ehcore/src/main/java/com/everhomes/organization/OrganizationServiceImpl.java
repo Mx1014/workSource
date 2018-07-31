@@ -14411,7 +14411,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
-            dtos.add(ConvertHelper.convert(org, OrganizationDTO.class));
+            OrganizationDTO dto = toOrganizationDTO(userId, org);
+            dtos.add(dto);
         }
 
         ListUserOrganizationsResponse response = new ListUserOrganizationsResponse();
