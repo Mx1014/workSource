@@ -41,4 +41,6 @@ public interface EnergyMeterCategoryProvider {
      * 删除分类
      */
     void deleteEnergyMeterCategory(EnergyMeterCategory category);
+
+    List<EnergyMeterCategory> listOrgGeneralMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, Long community);
 }

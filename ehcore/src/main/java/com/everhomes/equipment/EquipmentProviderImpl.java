@@ -3059,8 +3059,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         SelectQuery<EhEquipmentInspectionReviewDateRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_ID.eq(targetId));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_TYPE.eq(targetType));
+        if(targetId!=null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_ID.eq(targetId));
+        }
+        if(!StringUtils.isNullOrEmpty(targetType)) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_TYPE.eq(targetType));
+        }
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.STATUS.eq(PmNotifyConfigurationStatus.VAILD.getCode()));
         return query.fetchInto(EquipmentInspectionReviewDate.class);
 

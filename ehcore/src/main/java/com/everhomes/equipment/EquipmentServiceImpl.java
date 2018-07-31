@@ -412,6 +412,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Autowired
 	private ServiceModuleService serviceModuleService;
 
+	@Autowired
+	private EquipmentService equipmentService;
+
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(UpdateEquipmentStandardCommand cmd) {
 		//auth start
@@ -5114,9 +5117,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
 		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 		Long scopeId = cmd.getNamespaceId().longValue();
+		Long targetId = cmd.getTargetId();
+		String targetType = cmd.getTargetType();
 		if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
+			targetId = null;
+			targetType = null;
 		}
 		String ownerType = null;
 		if (EntityType.QUALITY_TASK.equals(EntityType.fromCode(cmd.getOwnerType()))) {
@@ -5124,13 +5131,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 		} else {
 			ownerType = EntityType.EQUIPMENT_TASK.getCode();
 		}
-		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId, cmd.getTargetId(), cmd.getTargetType());
+		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(ownerType, scopeType, scopeId, targetId,targetType);
 		if (configurations != null && configurations.size() > 0) {
 			return configurations.stream()
 					.map(configuration -> convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration))
 					.collect(Collectors.toList());
 		} else {
 			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置 ps以后可以再else一下 域空间的没有返回all的
+			//现在换成项目上查看的时候 organizationId 为空，在scope 为namespaceId 的时候 按照管理公司过滤
 			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
@@ -5169,7 +5177,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					receiverList.setReceivers(receivers);
 					configuration.setReceiverJson(receiverList.toString());
 				}
-				// this filed means ownerIa and ownerType
+				// this filed means ownerId and ownerType
 				configuration.setTargetId(cmd.getTargetId());
 				configuration.setTargetType(cmd.getTargetType());
 				if (params.getId() == null) {
@@ -5202,14 +5210,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 			reviewDate.setReviewExpiredDays(cmd.getReviewExpiredDays());
 			reviewDate.setTargetId(cmd.getTargetId());
 			reviewDate.setTargetType(cmd.getTargetType());
+			Long targetId = cmd.getTargetId();
+			String targetType = cmd.getTargetType();
 			if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
 				reviewDate.setScopeId(cmd.getCommunityId());
 				reviewDate.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
+				targetId = null;
+				targetType = null;
 			} else {
 				reviewDate.setScopeId(cmd.getNamespaceId().longValue());
 				reviewDate.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
 			}
-			equipmentProvider.deleteReviewExpireDaysByScope(reviewDate.getScopeType(), reviewDate.getScopeId(),cmd.getTargetId(),cmd.getTargetType());
+			equipmentProvider.deleteReviewExpireDaysByScope(reviewDate.getScopeType(), reviewDate.getScopeId(),targetId,targetType);
 			if (cmd.getId() == null) {
 				reviewDate.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
 				equipmentProvider.createReviewExpireDays(reviewDate);
@@ -5256,9 +5268,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public EquipmentInspectionReviewDateDTO listReviewExpireDays(SetReviewExpireDaysCommand cmd) {
 		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 		Long scopeId = cmd.getNamespaceId().longValue();
+		Long targetId = cmd.getTargetId();
+		String targetType = cmd.getTargetType();
 		if (cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
 			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
 			scopeId = cmd.getCommunityId();
+			//only namespace scope will use organization id
+			cmd.setTargetId(null);
+			cmd.setTargetType(null);
 		}
 		List<EquipmentInspectionReviewDate> reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType,cmd.getTargetId(),cmd.getTargetType());
 		List<Long> referId = new ArrayList<>();
@@ -5278,7 +5295,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
-				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType,cmd.getTargetId(),cmd.getTargetType());
+				reviewDate = equipmentProvider.getEquipmentInspectiomExpireDays(scopeId, scopeType,targetId,targetType);
 				if (reviewDate != null && reviewDate.size() > 0) {
 					if (!referId.contains(reviewDate.get(0).getId())) {
 						return ConvertHelper.convert(reviewDate.get(0), EquipmentInspectionReviewDateDTO.class);
@@ -5730,6 +5747,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 				ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
 				command.setCommunityId(task.getTargetId());
 				command.setNamespaceId(task.getNamespaceId());
+				command.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+				OrganizationDTO organization  = equipmentService.getAuthOrgByProjectIdAndModuleId(task.getTargetId(), task.getNamespaceId(), EquipmentConstant.EQUIPMENT_MODULE);
+				if(organization!=null){
+					// here targetId means organization id for searching notify params
+					command.setTargetId(organization.getId());
+					command.setTargetType(EntityType.ORGANIZATIONS.getCode());
+				}
 				//此处为拿到自定义通知参数的接收人ids
 				List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
 				if (paramDTOs != null && paramDTOs.size() > 0) {

@@ -30,22 +30,22 @@ public class EnterpriseCustomer extends EhEnterpriseCustomers {
         this.banner = banner;
     }
 
-    @Override
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     public Long getOwnerId() {
         return ownerId;
     }
 
-    @Override
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
 
-    @Override
     public String getOwnerType() {
         return ownerType;
     }
 
-    @Override
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
     }

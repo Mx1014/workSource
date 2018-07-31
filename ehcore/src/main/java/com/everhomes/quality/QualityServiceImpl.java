@@ -1814,6 +1814,12 @@ public class QualityServiceImpl implements QualityService {
 			command.setCommunityId(task.getTargetId());
 			command.setNamespaceId(task.getNamespaceId());
 			command.setOwnerType(EntityType.QUALITY_TASK.getCode());
+			OrganizationDTO organization  = equipmentService.getAuthOrgByProjectIdAndModuleId(task.getTargetId(), task.getNamespaceId(), QualityConstant.QUALITY_MODULE);
+			if(organization!=null){
+				// here targetId means organization id for searching notify params
+				command.setTargetId(organization.getId());
+				command.setTargetType(EntityType.ORGANIZATIONS.getCode());
+			}
 			//此处为拿到自定义通知参数的接收人ids
 			List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
 			if (paramDTOs != null && paramDTOs.size() > 0) {

@@ -1221,7 +1221,7 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,
+	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId,
 			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
         EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
@@ -1254,7 +1254,13 @@ public class ContractProviderImpl implements ContractProvider {
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.notEqual(0L)))));
+			// get all communities data and all organization owner general data
+			if (orgId != null) {
+				cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.ne(0L)));
+			}
 		}
+
+
 		
 		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
 		

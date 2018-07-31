@@ -60,7 +60,7 @@ public class EnergyMeterCategoryMapProviderImpl implements EnergyMeterCategoryMa
         List<EnergyMeterCategoryMap> maps = context.select().from(Tables.EH_ENERGY_METER_CATEGORY_MAP)
                 .where(Tables.EH_ENERGY_METER_CATEGORY_MAP.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_ENERGY_METER_CATEGORY_MAP.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
-                .and(Tables.EH_ENERGY_METER_CATEGORY_MAP.OWNER_ID.eq(ownerId))
+//                .and(Tables.EH_ENERGY_METER_CATEGORY_MAP.OWNER_ID.eq(ownerId))
                 .fetch().map((record)-> {
                     return ConvertHelper.convert(record, EnergyMeterCategoryMap.class);
                 });

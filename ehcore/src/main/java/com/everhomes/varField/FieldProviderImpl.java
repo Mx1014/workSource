@@ -906,23 +906,23 @@ public class FieldProviderImpl implements FieldProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         Condition itemCondition = Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName)
                 .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
-                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
+                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+//                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
         if (communityId != null) {
             itemCondition = itemCondition.and(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.eq(communityId));
         }
         Condition fieldCondition = Tables.EH_VAR_FIELD_SCOPES.MODULE_NAME.eq(moduleName)
                 .and(Tables.EH_VAR_FIELD_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
-                .and(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
+                .and(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId));
+//                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
         if (communityId != null) {
             fieldCondition = fieldCondition.and(Tables.EH_VAR_FIELD_SCOPES.COMMUNITY_ID.eq(communityId));
         }
 
         Condition groupCondition = Tables.EH_VAR_FIELD_GROUP_SCOPES.MODULE_NAME.eq(moduleName)
                 .and(Tables.EH_VAR_FIELD_GROUP_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
-                .and(Tables.EH_VAR_FIELD_GROUP_SCOPES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
+                .and(Tables.EH_VAR_FIELD_GROUP_SCOPES.NAMESPACE_ID.eq(namespaceId));
+//                .and(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
         if (communityId != null) {
             groupCondition = groupCondition.and(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.eq(communityId));
         }

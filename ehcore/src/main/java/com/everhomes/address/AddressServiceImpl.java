@@ -26,6 +26,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -97,6 +98,7 @@ import com.everhomes.rest.address.UploadApartmentAttachmentCommand;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
@@ -113,6 +115,7 @@ import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
@@ -272,6 +275,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private EquipmentService equipmentService;
     
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -2782,6 +2788,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             if(customers != null && customers.size() > 0) {
                 customers.forEach(customer -> {
                     EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+                    OrganizationDTO organization = equipmentService.getAuthOrgByProjectIdAndModuleId(customer.getCommunityId(), customer.getNamespaceId(), ServiceModuleConstants.ENTERPRISE_CUSTOMER_MODULE);
+                    if(organization!=null){
+                        customer.setOwnerId(organization.getId());
+                    }
                     ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), customer.getCategoryItemId());
                     if(categoryItem != null) {
                         dto.setCategoryItemName(categoryItem.getItemDisplayName());

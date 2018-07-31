@@ -2778,17 +2778,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
         List<EnergyMeterCategory> categoryList = new ArrayList<>();
-        //全部则查全部的和各个项目的
+        //全部则查全部的和各个项目的  标准版 这里不存在项目查不到,查询所有的概念，存在应用范围的概念
         if (cmd.getCommunityIds() == null && cmd.getCommunityIds().size() > 1) {
             categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
-                    cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityIds());
+                    null, null, cmd.getCommunityIds());
+            // get all scope general data of this owner
+            List<EnergyMeterCategory> categories =  meterCategoryProvider.listOrgGeneralMeterCategories(cmd.getNamespaceId(), cmd.getCategoryType(), cmd.getOwnerId(), 0L);
+            if(categories!=null && categories.size()>0){
+                categoryList.addAll(categories);
+            }
         }
 
         //单项目则查自己加的和关联的全部的
         else if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size() == 1) {
             categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
-                    cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityIds());
-            List<EnergyMeterCategoryMap> maps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityIds().get(0),cmd.getOwnerId());
+                    null,null, cmd.getCommunityIds());
+            List<EnergyMeterCategoryMap> maps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityIds().get(0),null);
             if(maps != null && maps.size() > 0) {
                 List<Long> categoryIds = maps.stream().map(EhEnergyMeterCategoryMap::getCategoryId).collect(Collectors.toList());
                 List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());

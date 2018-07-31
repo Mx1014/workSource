@@ -692,9 +692,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
 		/*生成合同编号不用校验权限，下面这个是校验参数的权限，权限也是不对的*/
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
 		if(communityExist == null && cmd.getCommunityId() != null && cmd.getCategoryId() !=null) {
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
 		}
 		
 		Calendar cal=Calendar.getInstance();
@@ -1946,7 +1946,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
 		param.setContractNumberRulejson(contractNumberRulejson);
 		param.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
 		if(cmd.getId() == null && communityExist == null) {
 			contractProvider.createContractParam(param);
 			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
@@ -2020,18 +2020,18 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 			return toContractParamDTO(communityExist);
 		} else if(communityExist == null && cmd.getCommunityId() != null) {
 			//设置的全部规则，又分为不同入口的全部规则，收付款
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(), cmd.getCategoryId());
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(),cmd.getOrgId(),cmd.getCategoryId());
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
 			}else {//原来的规则
-				communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, null);
+				communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null,cmd.getOrgId(), null);
 				if(communityExist != null) {
 					return toContractParamDTO(communityExist);
 				}
 			}
 		//原来的规则
 		} else if(communityExist == null && cmd.getPayorreceiveContractType() != null && cmd.getCategoryId() != null) {
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, null);
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, cmd.getOrgId(),null);
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
 			}
@@ -2979,10 +2979,11 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Override
 	public ListContractTemplatesResponse searchContractTemplates(listContractTemplateCommand cmd) {
+		// this module request param ownerId means communityId
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
-		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
+		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getOrgId(),
 				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize);
 		
 		ListContractTemplatesResponse response = new ListContractTemplatesResponse();
