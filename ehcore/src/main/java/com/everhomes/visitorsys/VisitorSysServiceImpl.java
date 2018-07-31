@@ -425,6 +425,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     //更新访客状态的时候，检查状态是否已经被提前更新
     private void checkConcurrentModify(CreateOrUpdateVisitorCommand cmd, VisitorSysVisitor oldVisitor) {
+        if(cmd == null || cmd.getVisitStatus()==null || cmd.getBookingStatus() == null){
+            return ;
+        }
+
         if((cmd.getBookingStatus()== VisitorsysStatus.REJECTED_VISIT.getCode()
                 && cmd.getVisitStatus()== VisitorsysStatus.REJECTED_VISIT.getCode()) ||
                 (cmd.getBookingStatus()== VisitorsysStatus.HAS_VISITED.getCode()
