@@ -378,7 +378,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
         String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "%s/visitor-management/build/index.html?ns=%s&ownerType=%s&id=%s&appId=%s&status=%s#/visitor-detail#sign_suffix");
 
-        String url = String.format(contextUrl, homeurl,visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId(),appId,visitor.getVisitStatus());
+        String url = String.format(contextUrl, homeurl,visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getId(),appId,visitor.getVisitStatus());
         List<VisitorSysMessageReceiver> list = messageReceiverProvider.listVisitorSysMessageReceiverByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
         if(list == null || list.size()==0)
             return;
