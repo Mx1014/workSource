@@ -2034,8 +2034,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             double areaSize = 0;
             double chargeArea = 0;
             double rentArea = 0;
-            double shareArea = 0;
-
+            //double shareArea = 0;
+            double freeArea = 0;
+            
 			if (StringUtils.isNotEmpty(data.getAreaSize())) {
 				try {
                     areaSize = Double.parseDouble(data.getAreaSize());
@@ -2072,13 +2073,24 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                 }
             }
 
-            if (StringUtils.isNotEmpty(data.getSharedArea())) {
+//            if (StringUtils.isNotEmpty(data.getSharedArea())) {
+//                try {
+//                    shareArea = Double.parseDouble(data.getSharedArea());
+//                } catch (Exception e) {
+//                    log.setData(data);
+//                    log.setErrorLog("share area is not number");
+//                    log.setCode(AddressServiceErrorCode.ERROR_SHARE_AREA_NOT_NUMBER);
+//                    errorLogs.add(log);
+//                    continue;
+//                }
+//            }
+            if (StringUtils.isNotEmpty(data.getFreeArea())) {
                 try {
-                    shareArea = Double.parseDouble(data.getSharedArea());
+                    freeArea = Double.parseDouble(data.getFreeArea());
                 } catch (Exception e) {
                     log.setData(data);
-                    log.setErrorLog("share area is not number");
-                    log.setCode(AddressServiceErrorCode.ERROR_SHARE_AREA_NOT_NUMBER);
+                    log.setErrorLog("free area is not number");
+                    log.setCode(AddressServiceErrorCode.ERROR_FREE_AREA_NOT_NUMBER);
                     errorLogs.add(log);
                     continue;
                 }
@@ -2092,14 +2104,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             }
             //TODO 可能得增加对NamespaceAddressType和NamespaceAddressToken字段的校验 by tangcen
             
-			importApartment(community, data, areaSize, chargeArea, rentArea, shareArea);
+			importApartment(community, data, areaSize, chargeArea, rentArea, freeArea);
 		}
         updateCommunityAptCount(community);
         
 		return errorLogs;
 	}
 	
-	private void importApartment(Community community, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double shareArea) {
+	private void importApartment(Community community, ImportApartmentDataDTO data, double areaSize, double chargeArea, double rentArea, double freeArea) {
 		Long organizationId = findOrganizationByCommunity(community);
 
         Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
@@ -2130,7 +2142,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
             address.setBuildingName(building.getName());
             address.setApartmentName(data.getApartmentName());
             address.setAreaSize(areaSize);
-            address.setSharedArea(shareArea);
+            //address.setSharedArea(shareArea);
+            address.setFreeArea(freeArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
@@ -2144,7 +2157,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		}else {
 //            address.setBuildArea(buildArea);
             address.setAreaSize(areaSize);
-            address.setSharedArea(shareArea);
+            //address.setSharedArea(shareArea);
+            address.setFreeArea(freeArea);
             address.setChargeArea(chargeArea);
             address.setRentArea(rentArea);
             address.setNamespaceAddressType(data.getNamespaceAddressType());
@@ -2173,7 +2187,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 //                data.setBuildArea(trim(r.getD()));
                 data.setAreaSize(trim(r.getD()));
                 data.setChargeArea(trim(r.getE()));
-                data.setSharedArea(trim(r.getF()));
+                data.setFreeArea(trim(r.getF()));
                 data.setRentArea(trim(r.getG()));
                 data.setOrientation(trim(r.getH()));
                 //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814

@@ -10,11 +10,20 @@ public class ImportApartmentDataDTO {
 	private String areaSize;
 	private String buildArea;
 	private String chargeArea;
-	private String sharedArea;
+	//private String sharedArea;
+	private String freeArea;
 	private String rentArea;
 	private String namespaceAddressType;
 	private String namespaceAddressToken;
 	private String orientation;
+	
+	public String getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(String freeArea) {
+		this.freeArea = freeArea;
+	}
 
 	public String getNamespaceAddressType() {
 		return namespaceAddressType;
@@ -86,14 +95,6 @@ public class ImportApartmentDataDTO {
 
 	public void setRentArea(String rentArea) {
 		this.rentArea = rentArea;
-	}
-
-	public String getSharedArea() {
-		return sharedArea;
-	}
-
-	public void setSharedArea(String sharedArea) {
-		this.sharedArea = sharedArea;
 	}
 
 	public String getAreaSize() {
