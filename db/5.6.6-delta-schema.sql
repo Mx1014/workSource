@@ -10,6 +10,17 @@ ALTER TABLE `eh_door_auth`
 ADD `valid_auth_amount` INT COMMENT '剩余的开门次数';
 -- End by liuyilin 
 
+-- 大沙河梯控
+-- by shiheng.ma 5.5.1
+-- 新增字段 第三方KeyU字段
+ALTER TABLE `eh_door_auth`
+ADD COLUMN `key_u` VARCHAR(16) NULL DEFAULT NULL COMMENT '第三方用户秘钥' AFTER `right_remote`;
+
+-- 新增字段 授权楼层
+ALTER TABLE `eh_door_access`
+ADD COLUMN `floor_id` VARCHAR(2000) NULL DEFAULT NULL COMMENT '授权楼层' AFTER `groupId`;
+-- 大沙河梯控 end
+
 -- ISSUE#26184 门禁人脸识别 by liuyilin 201180524 5.5.1
 -- 内网服务器表创建
 CREATE TABLE `eh_aclink_servers` (
