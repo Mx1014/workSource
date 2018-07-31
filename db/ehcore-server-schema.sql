@@ -221,7 +221,7 @@ CREATE TABLE `eh_aclink_servers` (
   `id` BIGINT NOT NULL,
   `name` VARCHAR(32),
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `uuid` VARCHAR(6) NOT NULL COMMENT '配对码',
+  `uuid` VARCHAR(64) NOT NULL,
   `ip_address` VARCHAR(128) COMMENT 'IP地址',
   `link_status` TINYINT NOT NULL DEFAULT 0 COMMENT '联网状态',
   `active_time` DATETIME COMMENT '激活时间',
@@ -235,8 +235,7 @@ CREATE TABLE `eh_aclink_servers` (
   `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
   `operator_uid` BIGINT COMMENT '记录更新人userId',
   `operate_time` DATETIME COMMENT '记录更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_aclink_servers_uuid` (`uuid`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='内网服务器表';
 
 DROP TABLE IF EXISTS `eh_aclink_undo_key`;
@@ -911,8 +910,15 @@ CREATE TABLE `eh_app_version` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_app_white_list`;
 
 -- 审批附件表
+CREATE TABLE `eh_app_white_list` (
+  `id` BIGINT NOT NULL COMMENT '主键',
+  `link` VARCHAR(128) NOT NULL COMMENT '第三方应用链接',
+  `name` VARCHAR(128) NOT NULL COMMENT '第三方应用名称',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='第三方应用白名单';
 DROP TABLE IF EXISTS  `eh_approval_attachments`;
 
 
@@ -1139,23 +1145,9 @@ CREATE TABLE `eh_apps` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_app_reg_app_key` (`app_key`),
   KEY `i_eh_app_reg_create_time` (`create_time`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-DROP TABLE IF EXISTS `eh_archives_configurations`;
 
 
-CREATE TABLE `eh_archives_configurations` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of organization',
-  `operation_type` TINYINT NOT NULL COMMENT 'the type of operation',
-  `operation_time` DATE COMMENT 'the time to execute the operation',
-  `operation_information` TEXT COMMENT 'information about the operation',
-  `remind_time` DATETIME COMMENT 'time to send email to the corresponding member',
-  `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'pending, execution',
-  `create_time` DATETIME COMMENT 'create time',
-  `operator_uid` BIGINT COMMENT 'the id of the operator',
-  PRIMARY KEY (`id`)
+
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_archives_dismiss_employees`;
@@ -1183,36 +1175,51 @@ CREATE TABLE `eh_archives_dismiss_employees` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_forms`;
+DROP TABLE IF EXISTS `eh_archives_form_groups`;
 
 
-CREATE TABLE `eh_archives_forms` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
+CREATE TABLE `eh_archives_form_groups` (
+  `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `organization_id` BIGINT NOT NULL COMMENT 'the id of organization',
-  `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
-  `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
-  `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
-  `update_time` DATETIME COMMENT 'last update time',
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT,
+  `form_id` BIGINT COMMENT 'the id of the archives form',
+  `form_groups` TEXT NOT NULL COMMENT 'the group of the form in json format',
+  `operator_uid` BIGINT,
+  `operator_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_logs`;
+DROP TABLE IF EXISTS `eh_archives_form_vals`;
 
 
-CREATE TABLE `eh_archives_logs` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
+CREATE TABLE `eh_archives_form_vals` (
+  `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the organization',
-  `detail_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the organization_member_detail',
-  `operation_type` TINYINT NOT NULL COMMENT 'the type of the operation',
-  `operation_time` DATE NOT NULL COMMENT 'the time of the operation',
-  `operation_category` TINYINT COMMENT 'the category of the operation',
-  `operation_reason` VARCHAR(1024) COMMENT 'the reason of the operation',
-  `operation_remark` VARCHAR(1024) COMMENT 'the remark',
-  `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the operator',
-  `operator_name` VARCHAR(64) NOT NULL DEFAULT 0 COMMENT 'the name of the operator',
-  `create_time` DATETIME COMMENT 'create time',
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT,
+  `form_id` BIGINT COMMENT 'the id of the archives form',
+  `source_id` BIGINT COMMENT 'the source id ',
+  `field_name` VARCHAR(128) COMMENT 'the name of the field',
+  `field_type` VARCHAR(128) COMMENT 'the type of the field',
+  `field_value` TEXT COMMENT 'the value of the field',
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_archives_forms`;
+
+CREATE TABLE `eh_archives_forms` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT,
+  `form_name` VARCHAR(64) NOT NULL COMMENT 'name of the form',
+  `static_fields` TEXT NOT NULL COMMENT 'static form fields in json format',
+  `dynamic_fields` TEXT COMMENT 'dynamic form fields in json format',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0. inactive, 1.active',
+  `operator_uid` BIGINT,
+  `operator_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -2987,6 +2994,29 @@ CREATE TABLE `eh_contract_payment_plans` (
   `delete_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `eh_contract_templates`;
+CREATE TABLE `eh_contract_templates` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `category_id` BIGINT NOT NULL COMMENT 'contract category id 用于多入口',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `name` VARCHAR(64) NOT NULL COMMENT '合同模板名称',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: confirming, 2: active',
+  `content_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'gogs:存储gogs的commitId txt:存储文本内容',
+  `contents` LONGTEXT COMMENT '模板内容',
+  `last_commit` VARCHAR(40) COMMENT 'repository last commit id',
+  `parent_id` BIGINT DEFAULT 0 COMMENT '复制于哪个合同模板',
+  `version` INTEGER DEFAULT 0 COMMENT '版本记录',
+  `contract_template_type` tinyint(2) DEFAULT 0 COMMENT '0 收款合同模板 1付款合同模板',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
+  `create_time` DATETIME NOT NULL COMMENT '创建时间',
+  `delete_uid` BIGINT DEFAULT 0 COMMENT 'record deleter user id',
+  `delete_time` DATETIME COMMENT '删除时间',
+  `update_uid` BIGINT DEFAULT 0 COMMENT 'record update user id',
+  `update_time` DATETIME COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='合同模板打印表';
 
 DROP TABLE IF EXISTS `eh_contracts`;
 
@@ -3075,6 +3105,7 @@ CREATE TABLE `eh_contracts` (
   `payment_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0:普通合同；1：付款合同',
   `update_time` DATETIME,
   `category_id` BIGINT COMMENT 'contract category id',
+  `template_id` BIGINT COMMENT 'contract template_id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -3155,6 +3186,19 @@ CREATE TABLE `eh_customer_apply_projects` (
   `description` TEXT COMMENT '主要项目介绍',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `eh_customer_attachments`;
+CREATE TABLE `eh_customer_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `name` VARCHAR(1024),
+  `namespace_id` INTEGER NOT NULL COMMENT 'namespaceId',
+  `customer_id` BIGINT NOT NULL DEFAULT 0,
+  `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+  `status` TINYINT NOT NULL COMMENT '0:inactive 2:active',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='企业管理1.0 附件表';
 
 DROP TABLE IF EXISTS `eh_customer_certificates`;
 
@@ -3227,6 +3271,20 @@ CREATE TABLE `eh_customer_commercials` (
   `shareholder_name` VARCHAR(256) COMMENT '股东姓名',
   `actual_capital_injection_situation` VARCHAR(256) COMMENT '实际注资情况',
   `shareholding_situation` VARCHAR(256) COMMENT '股权占比情况',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_customer_configutations`;
+
+CREATE TABLE `eh_customer_configutations` (
+  `id` BIGINT NOT NULL,
+  `scope_type` VARCHAR(64) COMMENT 'service_alliance or activity',
+  `scope_id` BIGINT NOT NULL COMMENT 'code',
+  `value` TINYINT NOT NULL DEFAULT 0,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: invalid, 2: valid',
+  `namespace_id` INTEGER NOT NULL,
+  `create_time` DATETIME COMMENT 'record create time',
+  `creator_uid` BIGINT COMMENT 'creatorUid',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -3402,6 +3460,24 @@ CREATE TABLE `eh_customer_patents` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_customer_potential_datas`;
+
+
+CREATE TABLE `eh_customer_potential_datas` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `name` TEXT COMMENT 'potential customer name',
+  `source_id` BIGINT COMMENT 'refer to service allance activity categoryId',
+  `source_type` VARCHAR(1024) COMMENT 'service_alliance or activity',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: invalid, 2: valid',
+  `operate_uid` BIGINT,
+  `update_time` DATETIME,
+  `create_time` DATETIME NOT NULL,
+  `delete_time` DATETIME,
+  `delete_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_customer_talents`;
 
 
@@ -3442,6 +3518,10 @@ CREATE TABLE `eh_customer_talents` (
   `thousand_talents_program` INTEGER COMMENT '千人计划人数',
   `fresh_graduates` INTEGER COMMENT '吸纳应届大学毕业生',
   `age` INTEGER COMMENT '年龄',
+  `register_status` TINYINT NOT NULL DEFAULT 0,
+  `origin_source_type` VARCHAR(64) COMMENT 'service_alliance or activity',
+  `origin_source_id` BIGINT COMMENT 'origin potential data primary key',
+  `talent_source_item_id` BIGINT COMMENT 'categoryId',
   `member_id` BIGINT NOT NULL DEFAULT 0 COMMENT '通讯录表中的id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -4757,6 +4837,8 @@ CREATE TABLE `eh_enterprise_customers` (
   `post_uri` VARCHAR(128),
   `unified_social_credit_code` VARCHAR(256),
   `admin_flag` TINYINT NOT NULL DEFAULT 0,
+  `source_id` BIGINT,
+  `source_type` VARCHAR(64),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -7068,22 +7150,6 @@ CREATE TABLE `eh_general_approvals` (
   `string_tag3` VARCHAR(128),
   `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the userId of the operator',
   `operator_name` VARCHAR(128) COMMENT 'the real name of the operator',
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-DROP TABLE IF EXISTS `eh_general_form_groups`;
-
-
-CREATE TABLE `eh_general_form_groups` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `form_origin_id` BIGINT DEFAULT 0 COMMENT 'the id of the original form',
-  `form_version` BIGINT DEFAULT 0 COMMENT 'the current using version',
-  `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
-  `template_text` TEXT COMMENT 'json 存放表单字段组',
-  `update_time` DATETIME COMMENT 'last update time',
-  `create_time` DATETIME COMMENT 'the time of data creating',
-  `operator_uid` BIGINT COMMENT 'the id of the operator',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -10888,7 +10954,7 @@ CREATE TABLE `eh_payment_late_fine` (
   `update_uid` BIGINT,
   `namespace_id` INTEGER COMMENT 'location info, for possible statistics later',
   `community_id` BIGINT,
-  `customer_id` BIGINT NOT NULL COMMENT 'allows searching taking advantage of it',
+  `customer_id` BIGINT COMMENT 'allows searching taking advantage of it',
   `customer_type` VARCHAR(20) NOT NULL COMMENT 'break of user info benefits',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -10959,6 +11025,25 @@ CREATE TABLE `eh_payment_service_configs` (
 	PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_payment_subtraction_items`;
+
+
+CREATE TABLE `eh_payment_subtraction_items` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT '多入口应用id，对应应用的origin_id',
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64),
+  `bill_id` BIGINT NOT NULL DEFAULT 0,
+  `bill_group_id` BIGINT,
+  `subtraction_type` VARCHAR(255) COMMENT '减免费项类型，eh_payment_bill_items：费项（如：物业费），eh_payment_late_fine：减免滞纳金（如：物业费滞纳金）',
+  `charging_item_id` BIGINT COMMENT '减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金',
+  `charging_item_name` VARCHAR(255) COMMENT '减免费项名称',
+  `creator_uid` BIGINT COMMENT '创建者ID',
+  `create_time` DATETIME,
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='减免费项配置表';
 
 DROP TABLE IF EXISTS `eh_payment_types`;
 
@@ -11153,6 +11238,25 @@ CREATE TABLE `eh_pm_task_attachments` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_pm_task_configs`;
+
+
+CREATE TABLE `eh_pm_task_configs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) COMMENT 'attachment object owner type',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id',
+  `payment_flag` TINYINT DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `payment_account` BIGINT COMMENT '收款方账号',
+  `payment_account_type` TINYINT COMMENT '收款方类型',
+  `content_hint` VARCHAR(64) DEFAULT '请描述服务具体内容' COMMENT '服务内容提示文本',
+  `creator_id` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `updater_id` BIGINT NOT NULL DEFAULT 0,
+  `update_time` DATETIME,
+  `task_category_id` BIGINT DEFAULT '6' COMMENT '应用类型：6为物业报修（1为正中会报修），9为投诉建议',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修通用配置表';
 
 DROP TABLE IF EXISTS `eh_pm_task_history_addresses`;
 
@@ -11198,6 +11302,48 @@ CREATE TABLE `eh_pm_task_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_pm_task_order_details`;
+
+
+CREATE TABLE `eh_pm_task_order_details` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(32),
+  `task_id` BIGINT NOT NULL COMMENT '报修单Id',
+  `order_id` BIGINT NOT NULL COMMENT '资源预订订单id',
+  `product_name` VARCHAR(60) COMMENT '产品名称',
+  `product_amount` INTEGER COMMENT '产品数量',
+  `product_price` DECIMAL(16,0) COMMENT '产品单价',
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修订单明细表';
+
+DROP TABLE IF EXISTS `eh_pm_task_orders`;
+
+
+CREATE TABLE `eh_pm_task_orders` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `task_id` BIGINT NOT NULL COMMENT '报修单Id',
+  `biz_order_num` VARCHAR(64) COMMENT '处理过的资源预订订单号',
+  `pay_order_id` BIGINT COMMENT '支付系统订单号',
+  `payment_order_type` tinyint(8) COMMENT '订单类型 1续费订单 2欠费订单 3支付订单 4退款订单',
+  `status` tinyint(8) COMMENT '订单状态0未支付 1已支付',
+  `amount` DECIMAL(16,0) COMMENT '订单金额',
+  `service_fee` DECIMAL(16,0) COMMENT '服务费',
+  `product_fee` DECIMAL(16,0) COMMENT '产品费',
+  `account_id` BIGINT COMMENT '收款方账号',
+  `order_commit_url` VARCHAR(1024),
+  `order_commit_token` VARCHAR(1024),
+  `order_commit_nonce` VARCHAR(128),
+  `order_commit_timestamp` BIGINT,
+  `pay_info` TEXT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修订单表';
 
 DROP TABLE IF EXISTS `eh_pm_task_statistics`;
 
@@ -11272,7 +11418,7 @@ CREATE TABLE `eh_pm_tasks` (
   `address` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'detail address',
   `content` TEXT COMMENT 'content data',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: allocated 3: completed 4: closed',
-  `star` TINYINT COMMENT 'evaluate score',
+  `star` VARCHAR(4) COMMENT 'evaluate score',
   `unprocessed_time` DATETIME,
   `processing_time` DATETIME,
   `processed_time` DATETIME,
@@ -11305,6 +11451,7 @@ CREATE TABLE `eh_pm_tasks` (
   `refer_type` VARCHAR(32) COMMENT '引用类型',
   `refer_id` BIGINT COMMENT '引用id',
   `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT '需求人公司Id',
+  `amount` DECIMAL(16,0) NOT NULL DEFAULT 0 COMMENT '订单费用',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -12589,7 +12736,20 @@ CREATE TABLE `eh_punch_workday_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_push_message_log`;
 
+CREATE TABLE `eh_push_message_log` (
+  `id` INTEGER NOT NULL COMMENT '主键',
+  `namespace_id` INTEGER NOT NULL COMMENT '域空间ID',
+  `content` TEXT COMMENT '推送内容',
+  `push_type` int(2) COMMENT '推送方式（1表示应用消息推送，2表示短信推送）',
+  `receiver_type` int(2) COMMENT '推送对象的类型（0表示所有人，1表示按项目，2表示按手机号）',
+  `operator_id` INTEGER COMMENT '操作者',
+  `create_time` DATETIME COMMENT '推送创建时间',
+  `push_status` int(2) COMMENT '推送状态(1表示等待推送，2表示推送中，3表示推送完成)',
+  `receivers` VARCHAR(600) COMMENT '推送对象(与推送对象类型对应，所有人为空，按项目为项目ID，按手机号为手机号)',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='一键推送消息(短信)记录表';
 DROP TABLE IF EXISTS `eh_push_message_results`;
 
 
@@ -13821,7 +13981,8 @@ CREATE TABLE `eh_rentalv2_cells` (
   `price_package_id` BIGINT,
   `resource_type` VARCHAR(64) COMMENT '资源类型',
   `user_price_type` TINYINT COMMENT '用户价格类型, 1:统一价格 2：用户类型价格',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_cell_id` (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
@@ -13914,9 +14075,15 @@ CREATE TABLE `eh_rentalv2_default_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-
+DROP TABLE IF EXISTS `eh_rentalv2_holiday`;
 --
 -- 物品表
+CREATE TABLE `eh_rentalv2_holiday` (
+  `id` INTEGER NOT NULL,
+  `holiday_type` tinyint(8) COMMENT '1:普通双休 2:法定节假日',
+  `close_date` TEXT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 --
 DROP TABLE IF EXISTS `eh_rentalv2_items`;
 
@@ -14218,10 +14385,13 @@ CREATE TABLE `eh_rentalv2_price_rules` (
   `rental_type` TINYINT COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天 4按月',
   `price_type` TINYINT,
   `workday_price` DECIMAL(10,2) COMMENT '工作日价格',
+  `original_price` DECIMAL(10,2),
   `initiate_price` DECIMAL(10,2),
   `org_member_workday_price` DECIMAL(10,2) COMMENT '企业内部工作日价格',
+  `org_member_original_price` DECIMAL(10,2),
   `org_member_initiate_price` DECIMAL(10,2),
   `approving_user_workday_price` DECIMAL(10,2) COMMENT '外部客户工作日价格',
+  `approving_user_original_price` DECIMAL(10,2),
   `approving_user_initiate_price` DECIMAL(10,2),
   `discount_type` TINYINT COMMENT '折扣信息：0不打折 1满减优惠 2满天减 3比例折扣',
   `full_price` DECIMAL(10,2) COMMENT '满XX',
@@ -15195,6 +15365,13 @@ CREATE TABLE `eh_servers`(
   KEY `i_eh_servers_config_tag`(`config_tag`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_service_agreement`;
+CREATE TABLE `eh_service_agreement` (
+  `id` INTEGER NOT NULL COMMENT '主键',
+  `namespace_id` INTEGER NOT NULL COMMENT '域空间ID',
+  `agreement_content` MEDIUMTEXT COMMENT '协议内容',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='服务协议信息表';
 
 DROP TABLE IF EXISTS `eh_service_alliance_apartment_requests`;
 
@@ -15606,7 +15783,7 @@ CREATE TABLE `eh_service_alliances` (
   `contact_name` VARCHAR(128),
   `contact_mobile` VARCHAR(128),
   `service_type` VARCHAR(128),
-  `service_url` VARCHAR(128),
+  `service_url` VARCHAR(512),
   `discount_desc` VARCHAR(128),
   `integral_tag1` BIGINT,
   `integral_tag2` BIGINT,
@@ -15829,6 +16006,8 @@ CREATE TABLE `eh_service_modules` (
   `multiple_flag` TINYINT,
   `module_control_type` VARCHAR(64) DEFAULT '' COMMENT 'community_control;org_control;unlimit',
   `access_control_type` TINYINT DEFAULT 1 COMMENT '0-all, 1-logon, 2-auth',
+  `menu_auth_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'if its menu need auth',
+  `category` VARCHAR(255) COMMENT 'classify, module, subModule',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -16338,7 +16517,7 @@ CREATE TABLE `eh_social_security_payments` (
   `organization_id` BIGINT,
   `user_id` BIGINT,
   `detail_id` BIGINT,
-  `pay_month` VARCHAR(8) COMMENT 'yyyymm',
+  `pay_month` VARCHAR(8) NOT NULL COMMENT 'yyyymm',
   `after_pay_flag` TINYINT DEFAULT 0 COMMENT '补缴标记',
   `household_type` VARCHAR(32) COMMENT '户籍类型',
   `pay_item` VARCHAR(32) COMMENT '缴费项:医疗/养老/失业/工伤/生育/大病/残障金/补充医疗',
@@ -17373,7 +17552,8 @@ CREATE TABLE `eh_terminal_day_statistics` (
   `thirty_active_user_number` BIGINT NOT NULL COMMENT '30 active number of users',
   `date` VARCHAR(32),
   `create_time` DATETIME,
-  
+  `average_active_user_number` BIGINT NOT NULL DEFAULT 0,
+  `average_active_user_change_rate` DECIMAL(10,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -17394,7 +17574,7 @@ CREATE TABLE `eh_terminal_hour_statistics` (
   `date` VARCHAR(32),
   `hour` VARCHAR(16),
   `create_time` DATETIME,
-  
+  `cumulative_active_user_number` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -18191,7 +18371,8 @@ CREATE TABLE `eh_var_field_group_scopes` (
   `community_id` BIGINT COMMENT '园区id',
   `group_parent_id` BIGINT COMMENT '父组系统id',
   `category_id` BIGINT COMMENT 'category id',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_field_group_scope` (`module_name`,`status`,`namespace_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_var_field_groups`;
@@ -18233,7 +18414,9 @@ CREATE TABLE `eh_var_field_item_scopes` (
   `community_id` BIGINT COMMENT '园区id',
   `business_value` TINYINT COMMENT 'the value defined in special business like status',
   `category_id` BIGINT COMMENT 'category id',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_field_item_scope` (`module_name`,`status`,`namespace_id`),
+  KEY `i_eh_item_scope_item_id` (`module_name`,`status`,`namespace_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_var_field_items`;
@@ -18275,7 +18458,8 @@ CREATE TABLE `eh_var_field_scopes` (
   `community_id` BIGINT COMMENT '园区id',
   `group_path` VARCHAR(128) COMMENT 'path from the root',
   `category_id` BIGINT COMMENT 'category id',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_filed_scope` (`module_name`,`status`,`namespace_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
 
 DROP TABLE IF EXISTS `eh_var_fields`; 

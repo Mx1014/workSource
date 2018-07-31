@@ -773,6 +773,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if (null != userIdentifier) {
 				requestorUid = userIdentifier.getOwnerUid();
 			}
+			cmd.setEnterpriseId(cmd.getOrganizationId());
 			return handler.createTask(cmd, requestorUid, requestorName, requestorPhone);
 		}
 	}
@@ -867,7 +868,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"RequestorName cannot be null.");
 		}
 		checkOrganizationId(cmd.getOrganizationId());
-		
+		cmd.setEnterpriseId(cmd.getOrganizationId());
 		cmd.setAddressType(PmTaskAddressType.FAMILY.getCode());
 
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
@@ -1114,9 +1115,34 @@ public class PmTaskServiceImpl implements PmTaskService {
 					cell8.setCellValue(category.getName());
 					Cell cell9 = tempRow.createCell(9);
 					cell9.setCellStyle(style);
-
-					PmTaskFlowStatus flowStatus = PmTaskFlowStatus.fromCode(task.getStatus());
-					cell9.setCellValue(null != flowStatus ? flowStatus.getDescription() : "");
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(task.getId(), "EhPmTasks", 20100L);
+					String status = "";
+					if (null != flowCase) {
+						switch (flowCase.getStatus()) {
+							case (byte) 0:
+								status = "无效";
+								break;
+							case (byte) 1:
+								status = "初始化";
+								break;
+							case (byte) 2:
+								status = "处理中";
+								break;
+							case (byte) 3:
+								status = "已取消";
+								break;
+							case (byte) 4:
+								status = "已完成";
+								break;
+							case (byte) 5:
+								status = "待评价";
+								break;
+							case (byte) 6:
+								status = "暂缓";
+								break;
+						}
+					}
+					cell9.setCellValue(status);
 
 					Cell cell10 = tempRow.createCell(10);
 					cell10.setCellStyle(style);
@@ -2915,7 +2941,7 @@ public class PmTaskServiceImpl implements PmTaskService {
         if(list==null || list.size()==0)
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
                     "OrderId does not exist.");
-        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>6)
+        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>7)
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_STATE_ID,
 					"Illegal stateId");
 		PmTask task = list.get(0);
@@ -2937,6 +2963,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
                     case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
                     case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
+					case CANCELED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
 					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				}
 				task.setStatus(flowCaseStatus);
