@@ -32,7 +32,16 @@ public class PropFamilyDTO {
     private Long relatedContractEndDate;
     private Long relatedAddressArrangementBeginDate;
     private Byte isFutureApartment;
+    private Byte arrangementInvolved;
     
+	public Byte getArrangementInvolved() {
+		return arrangementInvolved;
+	}
+
+	public void setArrangementInvolved(Byte arrangementInvolved) {
+		this.arrangementInvolved = arrangementInvolved;
+	}
+
 	public Double getRentArea() {
 		return rentArea;
 	}

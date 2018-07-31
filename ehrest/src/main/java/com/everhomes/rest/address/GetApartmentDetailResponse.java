@@ -55,7 +55,16 @@ public class GetApartmentDetailResponse {
 	private Long relatedContractEndDate;
 	private Double freeArea;
 	private Byte isPassiveApartment;
+	private Byte reservationInvolved;
 	
+	public Byte getReservationInvolved() {
+		return reservationInvolved;
+	}
+
+	public void setReservationInvolved(Byte reservationInvolved) {
+		this.reservationInvolved = reservationInvolved;
+	}
+
 	public Byte getIsPassiveApartment() {
 		return isPassiveApartment;
 	}

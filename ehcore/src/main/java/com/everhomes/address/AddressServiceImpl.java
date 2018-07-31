@@ -2933,7 +2933,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 		for (String addressId : targetIds) {
-			addressProvider.deleteAddressById(Long.parseLong(addressId));
+			DeleteApartmentCommand deleteApartmentCommand = new DeleteApartmentCommand();
+			deleteApartmentCommand.setId(Long.parseLong(addressId));
+			propertyMgrService.deleteApartment(deleteApartmentCommand);
 		}
 		addressProvider.deleteAddressArrangement(cmd.getId());
 	}

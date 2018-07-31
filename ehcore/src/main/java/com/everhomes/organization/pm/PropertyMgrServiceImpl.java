@@ -2618,12 +2618,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			}
 		}
         
-        
-        
         Contract latestEndDateContract = findLatestEndDateContract(cmd.getId());
         if (latestEndDateContract!=null) {
         	response.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
 		}
+        
+        if (propertyMgrProvider.isInvolvedWithReservation(cmd.getId())) {
+        	response.setReservationInvolved((byte)1);
+		}else {
+			response.setReservationInvolved((byte)0);
+		}
+        
         return response;
     }
     
@@ -2732,6 +2737,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
+        //删除关联的拆分合并计划
+        AddressArrangement arrangement = null;
+		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getId());
+		for (AddressArrangement addressArrangement : arrangements) {
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
+			if (originalIds.contains(cmd.getId().toString())) {
+				arrangement = addressArrangement;
+				break;
+			}
+		}
+		if (arrangement != null) {
+			addressProvider.deleteAddressArrangement(arrangement.getId());
+		}
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
@@ -2862,6 +2880,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		List<PropFamilyDTO>  filterEdResult = new ArrayList<>();
 		for(PropFamilyDTO dto : resultList){
 		    filterEdResult.add(dto);
+		    
 			if(cmd.getLivingStatus() != null){
                 Byte livingStatus = cmd.getLivingStatus();
                 if(dto.getLivingStatus() != livingStatus){
@@ -2869,13 +2888,29 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     continue;
                 }
 			}
+			
 			dto.setReservationInvolved((byte)0);
 			if(AddressLivingStatus.OCCUPIED.getCode() == dto.getLivingStatus()){
 				if(propertyMgrProvider.isInvolvedWithReservation(dto.getAddressId())){
 					dto.setReservationInvolved((byte)1);
 				}
 			}
+			
+			dto.setArrangementInvolved((byte)0);
+			AddressArrangement arrangement = null;
+			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(dto.getAddressId());
+			for (AddressArrangement addressArrangement : arrangements) {
+				List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
+				if (originalIds.contains(dto.getAddressId().toString())) {
+					arrangement = addressArrangement;
+					break;
+				}
+			}
+			if (arrangement != null) {
+				dto.setArrangementInvolved((byte)1);
+			}
 		}
+		
 		response.setResultList(filterEdResult);
 
 		return response;
