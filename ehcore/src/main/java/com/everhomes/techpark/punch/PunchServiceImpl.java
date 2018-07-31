@@ -6421,7 +6421,10 @@ public class PunchServiceImpl implements PunchService {
                 if (null != punchRules)
                     for (PunchRule pr : punchRules) {
                         try {
-                            if (!pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode())) {
+                        	if(PunchRuleStatus.DELETING == PunchRuleStatus.fromCode(pr.getStatus())){
+                        		deletepunchGroup(pr.getPunchOrganizationId(),pr.getOwnerId());
+                        	}
+                        	else if (!pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode())) {
 
                                 Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
                                 //对ptr表,psd表的处理
@@ -7841,26 +7844,53 @@ public class PunchServiceImpl implements PunchService {
 
         return response;
     }
-
+    public void deletepunchGroup(Long punchOrgId, Long ownerId){
+    	Organization organization = this.organizationProvider.findOrganizationById(punchOrgId);
+        checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
+        this.organizationProvider.deleteOrganization(organization);
+        //  组织架构删除薪酬组人员关联及配置
+        this.uniongroupService.deleteUniongroupConfigresByGroupId(punchOrgId, ownerId);
+        this.uniongroupService.deleteUniongroupMemberDetailByGroupId(punchOrgId, ownerId);
+        //删除考勤规则
+        punchProvider.deletePunchGeopointsByOwnerId(punchOrgId);
+        punchProvider.deletePunchWifisByOwnerId(punchOrgId);
+        PunchRule pr = punchProvider.getPunchruleByPunchOrgId(punchOrgId); 
+        // 新增一条修改状态的规则
+        punchProvider.updatePunchRule(pr);
+        punchProvider.deletePunchTimeRuleByPunchOrgId(punchOrgId);
+        punchProvider.deletePunchSpecialDaysByPunchOrgId(punchOrgId);
+        punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
+        punchProvider.deletePunchOvertimeRulesByPunchRuleId(pr.getId());
+        punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId());
+        punchProvider.deletePunchRule(pr);
+    }
     @Override
     public void deletePunchGroup(DeleteCommonCommand cmd) {
         this.dbProvider.execute((TransactionStatus status) -> {
-            Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
-            checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
-            this.organizationProvider.deleteOrganization(organization);
-            //  组织架构删除薪酬组人员关联及配置
-            this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(), cmd.getOwnerId());
-            this.uniongroupService.deleteUniongroupMemberDetailByGroupId(cmd.getId(), cmd.getOwnerId());
-            //删除考勤规则
-            punchProvider.deletePunchGeopointsByOwnerId(cmd.getId());
-            punchProvider.deletePunchWifisByOwnerId(cmd.getId());
+
             PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
-            punchProvider.deletePunchTimeRuleByPunchOrgId(cmd.getId());
-            punchProvider.deletePunchSpecialDaysByPunchOrgId(cmd.getId());
-            punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
-            punchProvider.deletePunchOvertimeRulesByPunchRuleId(pr.getId());
-            punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId());
-            punchProvider.deletePunchRule(pr);
+            pr.setStatus(PunchRuleStatus.DELETING.getCode());
+            pr.setOperatorUid(UserContext.current().getUser().getId());
+            pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            punchProvider.updatePunchRule(pr);
+//            Organization organization = this.organizationProvider.findOrganizationById(cmd.getId());
+//            checkAppPrivilege(organization.getDirectlyEnterpriseId(), organization.getDirectlyEnterpriseId(), PrivilegeConstants.PUNCH_RULE_DELETE);
+//            this.organizationProvider.deleteOrganization(organization);
+//            //  组织架构删除薪酬组人员关联及配置
+//            this.uniongroupService.deleteUniongroupConfigresByGroupId(cmd.getId(), cmd.getOwnerId());
+//            this.uniongroupService.deleteUniongroupMemberDetailByGroupId(cmd.getId(), cmd.getOwnerId());
+//            //删除考勤规则
+//            punchProvider.deletePunchGeopointsByOwnerId(cmd.getId());
+//            punchProvider.deletePunchWifisByOwnerId(cmd.getId());
+//            PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
+//            // 新增一条修改状态的规则
+//            punchProvider.updatePunchRule(pr);
+//            punchProvider.deletePunchTimeRuleByPunchOrgId(cmd.getId());
+//            punchProvider.deletePunchSpecialDaysByPunchOrgId(cmd.getId());
+//            punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
+//            punchProvider.deletePunchOvertimeRulesByPunchRuleId(pr.getId());
+//            punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId());
+//            punchProvider.deletePunchRule(pr);
             return null;
         });
 
