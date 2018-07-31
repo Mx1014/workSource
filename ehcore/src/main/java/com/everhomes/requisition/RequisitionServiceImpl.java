@@ -12,6 +12,7 @@ import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormTemplate;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -249,8 +250,9 @@ public class RequisitionServiceImpl implements RequisitionService{
             return ConvertHelper.convert(form, GeneralFormDTO.class);
         }else{
             LOGGER.error("未找到正在生效的表单，namespaceId:  " + cmd.getNamespaceId() + ", moduleId : " + cmd.getModuleId() + ", ownerId: " + cmd.getOwnerType());
-            throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
-                    RequistionErrorCodes.ERROR_FORM_NOT_FIND, "未找到正在生效的表单");
+            GeneralFormTemplate request = generalFormProvider.getDefaultFieldsByModuleId(cmd.getModuleId(), cmd.getNamespaceId());
+            return ConvertHelper.convert(request, GeneralFormDTO.class);
+
         }
 
     }

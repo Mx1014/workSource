@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.constants.ErrorCodes;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -1323,8 +1324,27 @@ public class ContractProviderImpl implements ContractProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractCategories.class));
 		EhContractCategoriesDao dao = new EhContractCategoriesDao(context.configuration());
 		EhContractCategories ecc = dao.findById(id);
-		//if(ecc.get)
-		return 0;
+
+		if(ecc != null){
+			return ecc.getAptitudeFlag();
+		}else{
+			LOGGER.error("not find categories,id : " + id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND, "not find categories");
+		}
+	}
+
+	@Override
+	public void updateAptitudeCustomer(Long id, Byte adptitudeFlag){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractCategories.class));
+		EhContractCategoriesDao dao = new EhContractCategoriesDao(context.configuration());
+		EhContractCategories ecc = dao.findById(id);
+		if(ecc != null) {
+			ecc.setAptitudeFlag(adptitudeFlag);
+			dao.update(ecc);
+		}else{
+			LOGGER.error("not find categories,id : " + id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND, "not find categories");
+		}
 	}
 
 }

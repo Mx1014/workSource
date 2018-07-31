@@ -111,5 +111,7 @@ public interface ContractProvider {
 
 	//合同模块筛选资质用户 by pengyu.huang
 	Byte filterAptitudeCustomer(Long id);
+
+	void updateAptitudeCustomer(Long id, Byte adptitudeFlag);
 	
 }
