@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>id: id</li>
  * <li>phone: 手机</li>
  * <li>nickName: 昵称</li>
+ * <li>gender: 性别，0未知1男2女，参考{@link com.everhomes.rest.user.UserGender}</li>
  * <li>values: values: 报名中，每项对应的值{@link PostApprovalFormItem}</li>
  * <li>type: 类型，1认证2非认证3非注册</li>
  * <li>sourceFlag: 来源，1自发报名2后台录入</li>
@@ -42,6 +43,7 @@ public class SignupInfoDTO {
 	private Long id;
 	private String phone;
 	private String nickName;
+	private Byte gender;
 	@ItemType(PostApprovalFormItem.class)
 	List<PostApprovalFormItem> values;
 	private Byte type;
@@ -69,7 +71,15 @@ public class SignupInfoDTO {
 	private Byte status;
 	private String signupStatusText;
 
-	public Byte getCreateFlag() {
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
+    public Byte getCreateFlag() {
 		return createFlag;
 	}
 	public void setCreateFlag(Byte createFlag) {
