@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.wx.WeChatService;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,6 +178,9 @@ public class BusinessOpenController extends ControllerBase {
 
     @Autowired
     private AssetProvider assetProvider;
+
+    @Autowired
+    private WeChatService wechatService;
 
 	private AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId){
         if(null == namespaceId) {
@@ -1142,4 +1146,22 @@ public class BusinessOpenController extends ControllerBase {
             return restResponse;
         }
     }
+
+
+
+    /**
+     *
+     * <b>URL: /openapi/getAccessToken</b>
+     * <p>获取微信access token</p>
+     */
+    @RequestMapping("getAccessToken")
+    @RestReturn(value = String.class)
+    public RestResponse getAccessToken() {
+        RestResponse response = new RestResponse(wechatService.getAccessToken());
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
