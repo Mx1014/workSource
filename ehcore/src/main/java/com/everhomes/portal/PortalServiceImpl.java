@@ -626,6 +626,11 @@ public class PortalServiceImpl implements PortalService {
 				config.setIconUrl(url);
 			}
 
+			if(!StringUtils.isEmpty(config.getAllOrMoreIconUri())){
+				String url = contentServerService.parserUri(config.getAllOrMoreIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				config.setAllOrMoreIconUrl(url);
+			}
+
 			dto.setInstanceConfig(StringHelper.toJsonString(config));
 		}
 		return dto;
@@ -1700,6 +1705,11 @@ public class PortalServiceImpl implements PortalService {
 				config.setColumnSpacing(instanceConfig.getMargin());
 				config.setLineSpacing(instanceConfig.getMargin());
 				config.setItemGroup(itemGroup.getName());
+				config.setAllOrMoreFlag(instanceConfig.getAllOrMoreFlag());
+				config.setAllOrMoreIconUri(instanceConfig.getAllOrMoreIconUri());
+				config.setAllOrMoreLabel(instanceConfig.getAllOrMoreLabel());
+				config.setAllOrMoreType(instanceConfig.getAllOrMoreType());
+
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.BANNERS){
 				BannersInstanceConfig config = new BannersInstanceConfig();
