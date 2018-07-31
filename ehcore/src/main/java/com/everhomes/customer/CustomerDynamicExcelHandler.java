@@ -170,6 +170,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             group = fieldProvider.findFieldGroup(Long.parseLong(sheetName));
         }
         ListFieldGroupCommand groupCommand = ConvertHelper.convert(params, ListFieldGroupCommand.class);
+        // dynamic fields now have diff owners
+        groupCommand.setOwnerId(groupCommand.getOrgId());
         List<FieldGroupDTO> groups = fieldService.listFieldGroups(groupCommand);
         String groupDisplayName = "";
         if (groups != null && groups.size() > 0) {
@@ -191,6 +193,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         List<DynamicField> dynamicFields = new ArrayList<>();
         ListFieldCommand command = ConvertHelper.convert(params, ListFieldCommand.class);
         command.setGroupPath(group.getPath());
+        // dynamic fields now have diff owners
+        command.setOwnerId(command.getOrgId());
         List<FieldDTO> fields = fieldService.listFields(command);
         LOGGER.debug("getDynamicSheet: headers: {}", StringHelper.toJsonString(headers));
         if(fields != null && fields.size() > 0) {

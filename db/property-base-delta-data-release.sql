@@ -30,4 +30,6 @@ update eh_quality_inspection_sample_score_stat set owner_type ='EhOrganizations'
 update eh_quality_inspection_sample_community_specification_stat set owner_type ='EhOrganizations';
 update eh_quality_inspection_logs set owner_type ='EhOrganizations';
 update eh_quality_inspection_evaluations set owner_type ='EhOrganizations';
+-- 能耗管理  by jiarui 20180731
+update eh_energy_meter_categories set owner_type ='EhOrganizations';
 

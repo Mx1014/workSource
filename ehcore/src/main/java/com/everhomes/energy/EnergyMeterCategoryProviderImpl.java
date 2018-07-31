@@ -5,6 +5,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterCategories;
 import com.everhomes.server.schema.tables.records.EhEnergyMeterCategoriesRecord;
@@ -60,7 +61,7 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
     }
 
     @Override
-    public List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId) {
+    public List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, List<Long> communityIds) {
         List<EnergyMeterCategory> categories = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
@@ -71,8 +72,8 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
         query.addConditions(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType));
         query.addConditions(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
 
-        if(communityId != null) {
-            query.addConditions(EH_ENERGY_METER_CATEGORIES.COMMUNITY_ID.eq(communityId));
+        if(communityIds != null && communityIds.size()>0) {
+            query.addConditions(EH_ENERGY_METER_CATEGORIES.COMMUNITY_ID.in(communityIds));
         }
 
         query.fetch().map((r) -> {
@@ -96,6 +97,10 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
 
         if(communityId != null) {
             query.addConditions(EH_ENERGY_METER_CATEGORIES.COMMUNITY_ID.eq(communityId));
+        }
+
+        if(ownerId!=null){
+            query.addConditions(Tables.EH_ENERGY_METER_CATEGORIES.OWNER_ID.eq(ownerId));
         }
 
         if(lastUpdateTime != null) {

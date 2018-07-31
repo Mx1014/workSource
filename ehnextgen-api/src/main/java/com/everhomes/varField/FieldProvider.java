@@ -25,10 +25,10 @@ public interface FieldProvider {
     FieldGroup findGroupByGroupLogicName(String groupLogicName);
 
     List<FieldItem> listFieldItems(Long fieldId);
-    List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId, Long categoryId);
+    List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId,Long ownerId, Long categoryId);
     Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds,Long ownerId, Integer namespaceId, Long communityId, Long categoryId);
-    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
-    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
+    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId,Long ownerId, Long communityId, Long itemId);
+    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId,Long ownerId, String moduleName, String displayName);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long ownerId,Long communityId, String moduleName, Long fieldId, String displayName);
     ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId,Long ownerId,String ownerType, Long communityId, String moduleName, Long fieldId, Byte businessValue);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long fieldId);
@@ -41,7 +41,7 @@ public interface FieldProvider {
 
     void createScopeField(ScopeField scopeField);
     void updateScopeField(ScopeField scopeField);
-    ScopeField findScopeField(Long id, Integer namespaceId, Long communityId, Long categoryId);
+    ScopeField findScopeField(Long id, Integer namespaceId,Long ownerId, Long communityId, Long categoryId);
 
     void createScopeFieldItem(ScopeFieldItem scopeFieldItem);
     void updateScopeFieldItem(ScopeFieldItem scopeFieldItem);

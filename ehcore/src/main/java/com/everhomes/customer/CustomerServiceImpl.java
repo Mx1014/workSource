@@ -574,6 +574,7 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_CREATE, cmd.getOrgId(), cmd.getCommunityId());
         checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
+        customer.setOwnerId(cmd.getOrgId());
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
         if (cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
@@ -901,6 +902,7 @@ public class CustomerServiceImpl implements CustomerService {
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
 
         updateCustomer.setNamespaceId(customer.getNamespaceId());
+        updateCustomer.setOwnerId(cmd.getOrgId());
         updateCustomer.setCommunityId(customer.getCommunityId());
         updateCustomer.setOrganizationId(customer.getOrganizationId());
         updateCustomer.setCreateTime(customer.getCreateTime());
@@ -1375,6 +1377,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public EnterpriseCustomerDTO getEnterpriseCustomer(GetEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        //zuolin base
+        customer.setOwnerId(cmd.getOrgId());
         EnterpriseCustomerDTO dto = convertToDTO(customer);
         popularCustomerUrl(dto);
         return dto;
@@ -3565,6 +3569,8 @@ public class CustomerServiceImpl implements CustomerService {
     public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
         //checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        //zuolin base
+        customer.setOwnerId(cmd.getOrgId());
         EnterpriseCustomer exist = enterpriseCustomerProvider.findById(cmd.getId());
         Long originalTrackingUid = exist.getTrackingUid();
         String orignalTrackingName = exist.getTrackingName();

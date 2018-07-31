@@ -376,6 +376,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ids.forEach(id -> {
                 EnterpriseCustomer customer = customers.get(id);
                 if(customer != null) {
+                    // zuolin base
+                    customer.setOwnerId(cmd.getOrgId());
                     EnterpriseCustomerDTO dto = convertToDTO(customer);
                     dtos.add(dto);
                 }
@@ -446,7 +448,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setLevelItemName(null);
         }
         if (null != dto.getCorpIndustryItemId()) {
-            ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpIndustryItemId());
+            ScopeFieldItem corpIndustryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getCorpIndustryItemId());
             if (null != corpIndustryItem) {
                 dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
             } else {
@@ -454,7 +456,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getSourceItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSourceItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getSourceItemId());
             if (null != item) {
                 dto.setSourceItemName(item.getItemDisplayName());
             } else {
@@ -462,7 +464,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getCorpPurposeItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpPurposeItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getCorpPurposeItemId());
             if (null != item) {
                 dto.setCorpPurposeItemName(item.getItemDisplayName());
             } else {
@@ -470,7 +472,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getCorpNatureItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpNatureItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getCorpNatureItemId());
             if (null != item) {
                 dto.setCorpNatureItemName(item.getItemDisplayName());
             } else {
@@ -478,18 +480,18 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getContactGenderItemId()) {
-            ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getContactGenderItemId());
+            ScopeFieldItem contactGenderItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getContactGenderItemId());
             if (null != contactGenderItem) {
                 dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
             } else {
                 dto.setContactGenderItemName(null);
             }
         }
-        if (dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+        if (dto.getTrackingUid() != null && dto.getTrackingUid() != 0) {
             dto.setTrackingName(dto.getTrackingName());
         }
         if (null != dto.getPropertyType()) {
-            ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getPropertyType());
+            ScopeFieldItem propertyTypeItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getPropertyType());
             if (null != propertyTypeItem) {
                 dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
             } else {
@@ -497,7 +499,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getCorpProductCategoryItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpProductCategoryItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getCorpProductCategoryItemId());
             if (null != item) {
                 dto.setCorpProductCategoryItemName(item.getItemDisplayName());
             } else {
@@ -505,7 +507,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
         if (null != dto.getCorpQualificationItemId()) {
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getCorpQualificationItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getCorpQualificationItemId());
             if (null != item) {
                 dto.setCorpQualificationItemName(item.getItemDisplayName());
             } else {
@@ -514,7 +516,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getRegistrationTypeId()) {
-            ScopeFieldItem registrationTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRegistrationTypeId());
+            ScopeFieldItem registrationTypeItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getRegistrationTypeId());
             if (null != registrationTypeItem) {
                 dto.setRegistrationTypeName(registrationTypeItem.getItemDisplayName());
             } else {
@@ -523,7 +525,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getTechnicalFieldId()) {
-            ScopeFieldItem technicalFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTechnicalFieldId());
+            ScopeFieldItem technicalFieldItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getTechnicalFieldId());
             if (null != technicalFieldItem) {
                 dto.setTechnicalFieldName(technicalFieldItem.getItemDisplayName());
             } else {
@@ -532,7 +534,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getTaxpayerTypeId()) {
-            ScopeFieldItem taxpayerTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getTaxpayerTypeId());
+            ScopeFieldItem taxpayerTypeItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getTaxpayerTypeId());
             if (null != taxpayerTypeItem) {
                 dto.setTaxpayerTypeName(taxpayerTypeItem.getItemDisplayName());
             } else {
@@ -541,7 +543,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getRelationWillingId()) {
-            ScopeFieldItem relationWillingItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getRelationWillingId());
+            ScopeFieldItem relationWillingItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getRelationWillingId());
             if (null != relationWillingItem) {
                 dto.setRelationWillingName(relationWillingItem.getItemDisplayName());
             } else {
@@ -550,7 +552,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getHighAndNewTechId()) {
-            ScopeFieldItem highAndNewTechItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getHighAndNewTechId());
+            ScopeFieldItem highAndNewTechItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getHighAndNewTechId());
             if (null != highAndNewTechItem) {
                 dto.setHighAndNewTechName(highAndNewTechItem.getItemDisplayName());
             } else {
@@ -559,7 +561,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getEntrepreneurialCharacteristicsId()) {
-            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
+            ScopeFieldItem entrepreneurialCharacteristicsItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getOwnerId(), customer.getCommunityId(), dto.getEntrepreneurialCharacteristicsId());
             if (null != entrepreneurialCharacteristicsItem) {
                 dto.setEntrepreneurialCharacteristicsName(entrepreneurialCharacteristicsItem.getItemDisplayName());
             } else {
@@ -568,7 +570,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         if (null != dto.getSerialEntrepreneurId()) {
-            ScopeFieldItem serialEntrepreneurItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getSerialEntrepreneurId());
+            ScopeFieldItem serialEntrepreneurItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getSerialEntrepreneurId());
             if (null != serialEntrepreneurItem) {
                 dto.setSerialEntrepreneurName(serialEntrepreneurItem.getItemDisplayName());
             } else {

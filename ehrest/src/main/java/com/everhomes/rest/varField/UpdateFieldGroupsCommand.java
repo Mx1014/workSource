@@ -28,6 +28,7 @@ public class UpdateFieldGroupsCommand {
 	private Long categoryId;
 
     private Long ownerId;
+    private String ownerType;
 
 	public Long getCategoryId() {
 		return categoryId;

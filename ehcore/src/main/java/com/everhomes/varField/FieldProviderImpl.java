@@ -1,6 +1,5 @@
 package com.everhomes.varField;
 
-import ch.qos.logback.core.util.StringCollectionUtil;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -45,7 +44,6 @@ import com.everhomes.server.schema.tables.records.EhVarFieldsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import org.apache.poi.util.StringUtil;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -54,7 +52,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -131,7 +128,7 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public ScopeField findScopeField(Long id, Integer namespaceId, Long communityId, Long categoryId) {
+    public ScopeField findScopeField(Long id, Integer namespaceId,Long  ownerId, Long communityId, Long categoryId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<ScopeField> fields = new ArrayList<>();
         SelectQuery<EhVarFieldScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_SCOPES);
@@ -144,6 +141,10 @@ public class FieldProviderImpl implements FieldProvider {
         }
         if(categoryId == null) {
             query.addConditions(Tables.EH_VAR_FIELD_SCOPES.CATEGORY_ID.isNull());
+        }
+
+        if(ownerId!=null){
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
         }
         
         if(communityId != null) {
@@ -679,7 +680,7 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId, Long categoryId) {
+    public List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId,Long ownerId, Long categoryId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<ScopeFieldItem> items = new ArrayList<>();
@@ -694,6 +695,10 @@ public class FieldProviderImpl implements FieldProvider {
 
         if(categoryId == null) {
             query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.CATEGORY_ID.isNull());
+        }
+
+        if(ownerId!=null){
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
         }
         
         if(communityId != null) {
@@ -749,13 +754,16 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId) {
+    public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId,Long ownerId, Long communityId, Long itemId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<ScopeFieldItem> item = new ArrayList<>();
         SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.ITEM_ID.eq(itemId));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+        if (ownerId != null) {
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
+        }
 
         if(communityId != null) {
             query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.eq(communityId));
@@ -776,7 +784,7 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName) {
+    public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId,Long ownerId, String moduleName, String displayName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<ScopeFieldItem> item = new ArrayList<>();
         SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
@@ -791,6 +799,10 @@ public class FieldProviderImpl implements FieldProvider {
 
         if(communityId == null) {
             query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.isNull());
+        }
+
+        if(ownerId!=null){
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.OWNER_ID.eq(ownerId));
         }
 
         query.fetch().map((r) -> {

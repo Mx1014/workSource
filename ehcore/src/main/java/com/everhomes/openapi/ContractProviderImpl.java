@@ -1,32 +1,6 @@
 // @formatter:off
 package com.everhomes.openapi;
 
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DefaultRecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
-
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
@@ -86,6 +60,31 @@ import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -1072,11 +1071,11 @@ public class ContractProviderImpl implements ContractProvider {
                                 field.getFieldName(), newData, oldData);
 						
                         if(field.getFieldName().lastIndexOf("ItemId") > -1){
-							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),contract.getOrgId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
 					        	newData = levelItemNew.getItemDisplayName();
 					        }
-					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),contract.getOrgId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
 					        if(levelItemOld != null) {
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
@@ -1128,11 +1127,11 @@ public class ContractProviderImpl implements ContractProvider {
 						}
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
                         if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
-                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCreateOrgId(),contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
                             if(levelItemNew != null) {
                                 newData = levelItemNew.getItemDisplayName();
                             }
-                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),contract.getCreateOrgId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
                             if(levelItemOld != null) {
                                 oldData = levelItemOld.getItemDisplayName();
                             }

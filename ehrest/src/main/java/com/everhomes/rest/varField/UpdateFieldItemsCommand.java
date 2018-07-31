@@ -30,6 +30,8 @@ public class UpdateFieldItemsCommand {
 
     private Long ownerId;
 
+    private String ownerType;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -76,6 +78,14 @@ public class UpdateFieldItemsCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

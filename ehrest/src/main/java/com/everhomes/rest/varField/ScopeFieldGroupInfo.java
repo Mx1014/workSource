@@ -32,6 +32,8 @@ public class ScopeFieldGroupInfo {
 
     private Long ownerId;
 
+    private String ownerType;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -94,6 +96,15 @@ public class ScopeFieldGroupInfo {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override
