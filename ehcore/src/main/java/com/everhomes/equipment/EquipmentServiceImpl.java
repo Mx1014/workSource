@@ -47,6 +47,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.Attachment;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
@@ -6558,5 +6559,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 		row.createCell(++i).setCellValue("设备名称");
 		row.createCell(++i).setCellValue("检查项");
 		row.createCell(++i).setCellValue("检查结果");
+	}
+
+	@Override
+	public OrganizationDTO getAuthOrgByProjectIdAndModuleId(Long communityId,Integer namespaceId,Long moduleId) {
+		ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+		listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+		listServiceModuleAppsCommand.setModuleId(moduleId);
+		ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+		if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+			GetAuthOrgByProjectIdAndAppIdCommand command = new GetAuthOrgByProjectIdAndAppIdCommand();
+			command.setAppId(apps.getServiceModuleApps().get(0).getId());
+			command.setProjectId(communityId);
+			return  organizationService.getAuthOrgByProjectIdAndAppId(command);
+		}
+		return null;
 	}
 }

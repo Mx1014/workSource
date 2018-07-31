@@ -11,8 +11,8 @@ ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  
 -- end
 
 -- 合同参数配置增加owner
-ALTER TABLE  eh_contract_params add COLUMN  owner_id  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  namespace_id;
-ALTER TABLE  eh_contract_params add COLUMN  owner_id VARCHAR(1024) NULL AFTER  namespace_id;
+ALTER TABLE  eh_contract_params add COLUMN  `owner_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+ALTER TABLE  eh_contract_params add COLUMN  `ownerType` VARCHAR(1024) NULL AFTER  `namespace_id`;
 
 
 
