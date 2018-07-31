@@ -659,6 +659,8 @@ public class ZuolinAssetVendorHandler extends AssetVendorHandler {
             return response;
             //throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in processStat");
         }
+        //根据合同应用的categoryId去查找对应的缴费应用的categoryId
+		cmd.setCategoryId(assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE));
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize(),cmd.getContractId(),cmd.getCategoryId(),cmd.getNamespaceId());
         
         Contract contract = contractProvider.findContractById(cmd.getContractId());

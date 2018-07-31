@@ -17,6 +17,8 @@ import java.math.BigDecimal;
  * <li>dateStrEnd:计费结束日期</li>
  * <li>amountReceivable:应收金额</li>
  * <li>dueDateStr:付款日期</li>
+ * <li>amountReceivableWithoutTax:应收不含税</li>
+ * <li>taxAmount:税额</li>
  *</ul>
  */
 public class PaymentExpectancyDTO {
@@ -25,6 +27,8 @@ public class PaymentExpectancyDTO {
     private String dateStrBegin;
     private String dateStrEnd;
     private BigDecimal amountReceivable;
+    private BigDecimal amountReceivableWithoutTax;
+    private BigDecimal taxAmount;
     private String dueDateStr;
 
     private Long billItemId;
@@ -53,9 +57,6 @@ public class PaymentExpectancyDTO {
 
         return getBillItemId() != null ? getBillItemId().equals(that.getBillItemId()) : that.getBillItemId() == null;
     }
-
-
-
 
     public Long getBillItemId() {
         return billItemId;
@@ -117,4 +118,20 @@ public class PaymentExpectancyDTO {
     public void setDueDateStr(String dueDateStr) {
         this.dueDateStr = dueDateStr;
     }
+
+	public BigDecimal getAmountReceivableWithoutTax() {
+		return amountReceivableWithoutTax;
+	}
+
+	public void setAmountReceivableWithoutTax(BigDecimal amountReceivableWithoutTax) {
+		this.amountReceivableWithoutTax = amountReceivableWithoutTax;
+	}
+
+	public BigDecimal getTaxAmount() {
+		return taxAmount;
+	}
+
+	public void setTaxAmount(BigDecimal taxAmount) {
+		this.taxAmount = taxAmount;
+	}
 }

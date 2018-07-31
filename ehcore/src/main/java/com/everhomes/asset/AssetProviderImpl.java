@@ -2785,7 +2785,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.NAMESPACE_ID.eq(namespaceId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
-        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID)
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
+        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT)
                 .from(t,t1)
                 .where(t.BILL_ID.in(fetch))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
@@ -2794,7 +2795,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetch()
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
-
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
@@ -2804,6 +2804,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
+                    dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
+                    dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     set.add(dto);
                     return null;
                 });
@@ -2814,7 +2816,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(bill.NAMESPACE_ID.eq(namespaceId))//解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .and(bill.CATEGORY_ID.eq(categoryId)) //解决issue-34161 签约一个正常合同，执行“/energy/calculateTaskFeeByTaskId”，会生成3条费用清单   by 杨崇鑫
                 .fetch(bill.ID);
-        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID)
+        context.select(t.ID,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME,t1.ID,
+        		t.AMOUNT_RECEIVABLE_WITHOUT_TAX,t.TAX_AMOUNT)
                 .from(t,t1)
                 .where(t.BILL_ID.in(fetch1))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
@@ -2832,6 +2835,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dto.setBillItemId(r.getValue(t.ID));
                     dto.setChargingItemId(r.getValue(t1.ID));
+                    dto.setAmountReceivableWithoutTax(r.getValue(t.AMOUNT_RECEIVABLE_WITHOUT_TAX));//应收不含税
+                    dto.setTaxAmount(r.getValue(t.TAX_AMOUNT));//税额
                     set.add(dto);
                     return null;
                 });
