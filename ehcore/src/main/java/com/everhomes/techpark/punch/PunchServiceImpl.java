@@ -60,6 +60,9 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.openapi.CheckInDataDTO;
+import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
+import com.everhomes.rest.openapi.GetOrgCheckInDataResponse;
 import com.everhomes.rest.organization.EmployeeStatus;
 import com.everhomes.rest.organization.ImportFileErrorType;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -9974,6 +9977,14 @@ public class PunchServiceImpl implements PunchService {
             Tuple<PunchMonthReport, Boolean> tuple = new Tuple<PunchMonthReport, Boolean>(report1,true);
             return tuple;
         }).first().first();
+	}
+
+	@Override
+	public GetOrgCheckInDataResponse getOrgCheckInData(GetOrgCheckInDataCommand cmd) {
+		// TODO Auto-generated method stub
+		GetOrgCheckInDataResponse response = new GetOrgCheckInDataResponse();
+		
+		return response;
 	}
 
 }
