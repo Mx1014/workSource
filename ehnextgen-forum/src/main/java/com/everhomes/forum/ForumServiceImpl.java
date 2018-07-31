@@ -3555,7 +3555,12 @@ public class ForumServiceImpl implements ForumService {
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
                 ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
-        
+        if (post.getStatus() != null && post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+            LOGGER.error("Forum post is deleted, operatorId=" + operatorId + ", forumId=" + forumId
+                    + ", postId=" + postId + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post is deleted");
+        }
         return post;
     }
     
