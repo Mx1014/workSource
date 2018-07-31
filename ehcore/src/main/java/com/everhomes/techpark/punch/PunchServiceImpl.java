@@ -1658,7 +1658,7 @@ public class PunchServiceImpl implements PunchService {
         if (punchRule == null || punchDayType == null) {
             return null;
         }
-        List<PunchOvertimeRule> punchOvertimeRules = punchProvider.findPunchOvertimeRulesByPunchRuleId(punchRule.getId(), punchRule.getStatus());
+        List<PunchOvertimeRule> punchOvertimeRules = punchProvider.findPunchOvertimeRulesByPunchRuleId(punchRule.getId(), PunchRuleStatus.ACTIVE.getCode());
         if (CollectionUtils.isEmpty(punchOvertimeRules)) {
             return null;
         }

@@ -167,7 +167,8 @@ public class PunchProviderImpl implements PunchProvider {
 
     @Override
     @Caching(evict = {@CacheEvict(value = "GetPunchRuleById", key = "#obj.id"),
-            @CacheEvict(value = "GetPunchRuleByPunchOrgId", key = "#obj.punchOrganizationId")})
+            @CacheEvict(value = "GetPunchRuleByPunchOrgId", key = "#obj.punchOrganizationId"),
+            @CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#obj.id")})
     public void updatePunchRule(PunchRule obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
@@ -176,7 +177,8 @@ public class PunchProviderImpl implements PunchProvider {
 
     @Override
     @Caching(evict = {@CacheEvict(value = "GetPunchRuleById", key = "#obj.id"),
-            @CacheEvict(value = "GetPunchRuleByPunchOrgId", key = "#obj.punchOrganizationId")})
+            @CacheEvict(value = "GetPunchRuleByPunchOrgId", key = "#obj.punchOrganizationId"),
+            @CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#obj.id")})
     public void deletePunchRule(PunchRule obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
@@ -3694,12 +3696,14 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    @Cacheable(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#punchRuleId", unless = "#result.size() == 0")
+    @Cacheable(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#punchRuleId")
     public List<PunchOvertimeRule> findPunchOvertimeRulesByPunchRuleId(Long punchRuleId, Byte status) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhPunchOvertimeRulesRecord> query = context.selectQuery(Tables.EH_PUNCH_OVERTIME_RULES);
         query.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.PUNCH_RULE_ID.eq(punchRuleId));
-        query.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.STATUS.eq(status));
+        if (status != null) {
+            query.addConditions(Tables.EH_PUNCH_OVERTIME_RULES.STATUS.eq(status));
+        }
 
         Result<EhPunchOvertimeRulesRecord> result = query.fetch();
 
