@@ -2921,6 +2921,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		dto.setName(apartmentDTO.getApartmentName());
 		dto.setAddressId(addressId);
 		dto.setAreaSize(apartmentDTO.getAreaSize());
+		dto.setRentArea(apartmentDTO.getRentArea());
+		dto.setFreeArea(apartmentDTO.getFreeArea());
+		dto.setChargeArea(apartmentDTO.getChargeArea());
 		dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
 		dto.setApartmentFloor(apartmentDTO.getApartmentFloor());
 		

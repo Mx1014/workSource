@@ -719,8 +719,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null,
                 (DSLContext context, Object reducingContext) -> {
 
-                    SelectConditionStep<Record5<Long, String, Double, String, Byte>> selectSql =
-                            context.selectDistinct(Tables.EH_ADDRESSES.ID, Tables.EH_ADDRESSES.APARTMENT_NAME, Tables.EH_ADDRESSES.AREA_SIZE, Tables.EH_ADDRESSES.APARTMENT_FLOOR, Tables.EH_ADDRESSES.LIVING_STATUS)
+                    SelectConditionStep<Record8<Long, String, Double, Double,Double, Double,String, Byte>> selectSql =
+                            context.selectDistinct(Tables.EH_ADDRESSES.ID, Tables.EH_ADDRESSES.APARTMENT_NAME,
+                            						Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.FREE_AREA,
+                            						Tables.EH_ADDRESSES.CHARGE_AREA,Tables.EH_ADDRESSES.RENT_AREA,
+                            						Tables.EH_ADDRESSES.APARTMENT_FLOOR, Tables.EH_ADDRESSES.LIVING_STATUS)
                                     .from(Tables.EH_ADDRESSES)
                                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                                             .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
@@ -746,12 +749,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                         apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
                         apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
                         apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
+                        apartment.setRentArea(r.getValue(Tables.EH_ADDRESSES.RENT_AREA));
+                        apartment.setChargeArea(r.getValue(Tables.EH_ADDRESSES.CHARGE_AREA));
+                        apartment.setFreeArea(r.getValue(Tables.EH_ADDRESSES.FREE_AREA));
                         apartment.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
                         apartment.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
                         results.add(apartment);
                         return null;
                     });
-
                     return true;
                 });
         Collections.sort(results);
@@ -2739,17 +2744,17 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 		address.setApartmentName(targetAddress.getApartmentName()+"-"+newInChinese);
 		address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
 		
-		address.setAreaSize((double) 0);
-		address.setRentArea((double)0);
-		address.setFreeArea((double)0);
-		address.setChargeArea((double)0);
+		address.setAreaSize(targetAddress.getAreaSize());
+		address.setRentArea(targetAddress.getRentArea());
+		address.setFreeArea(targetAddress.getFreeArea());
+		address.setChargeArea(targetAddress.getChargeArea());
 		
 		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
 		for (ArrangementApartmentDTO apartment : apartments) {
-			address.setAreaSize(address.getAreaSize() + (apartment.getAreaSize()!=null ? apartment.getAreaSize() : (double)0));
-			address.setRentArea(address.getRentArea() + (apartment.getRentArea()!=null ? apartment.getRentArea() : (double)0));
-			address.setFreeArea(address.getFreeArea() + (apartment.getFreeArea()!=null ? apartment.getFreeArea() : (double)0));
-			address.setChargeArea(address.getChargeArea() + (apartment.getChargeArea()!=null ? apartment.getChargeArea() : (double)0));
+			address.setAreaSize((address.getAreaSize()!=null ? address.getAreaSize() : (double)0) + (apartment.getAreaSize()!=null ? apartment.getAreaSize() : (double)0));
+			address.setRentArea((address.getRentArea()!=null ? address.getRentArea() : (double)0) + (apartment.getRentArea()!=null ? apartment.getRentArea() : (double)0));
+			address.setFreeArea((address.getFreeArea()!=null ? address.getFreeArea() : (double)0) + (apartment.getFreeArea()!=null ? apartment.getFreeArea() : (double)0));
+			address.setChargeArea((address.getChargeArea()!=null ? address.getChargeArea():(double)0) + (apartment.getChargeArea()!=null ? apartment.getChargeArea() : (double)0));
 			originalIds.add(apartment.getAddressId().toString());
 		}
 		Long newAddressId = addressProvider.createAddress3(address);

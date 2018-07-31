@@ -25,11 +25,38 @@ public class PropFamilyDTO {
     private Byte livingStatus;
     private String enterpriseName;
     private Double areaSize;
+    private Double rentArea;
+    private Double freeArea;
+    private Double chargeArea;
     private Byte reservationInvolved;
     private Long relatedContractEndDate;
     private Long relatedAddressArrangementBeginDate;
     private Byte isFutureApartment;
     
+	public Double getRentArea() {
+		return rentArea;
+	}
+
+	public void setRentArea(Double rentArea) {
+		this.rentArea = rentArea;
+	}
+
+	public Double getFreeArea() {
+		return freeArea;
+	}
+
+	public void setFreeArea(Double freeArea) {
+		this.freeArea = freeArea;
+	}
+
+	public Double getChargeArea() {
+		return chargeArea;
+	}
+
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
+	}
+
 	public Long getRelatedContractEndDate() {
 		return relatedContractEndDate;
 	}
