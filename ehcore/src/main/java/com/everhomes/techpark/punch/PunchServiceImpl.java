@@ -8986,7 +8986,7 @@ public class PunchServiceImpl implements PunchService {
                 ClockCode.SUCESS.getCode());
         PunchTimeRule ptr = null;
         if (null != pr) {
-            ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
+            ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, punchTime, userId);
         }
         if (refreshDayLogFlag && null != ptr && pdl == null) {
             //2018年4月11日 修改:
