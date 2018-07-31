@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>rightOpen: 0 开门未授权， 1 授权</li>
  * <li>rightVisitor: 0 访客未授权， 1 授权</li>
  * <li>rightRemote: 0 远程访问未授权， 1 授权</li>
+ * <li>photo:人脸识别照片{@link com.everhomes.rest.aclink.FaceRecognitionPhotoDTO}</li>
  * </ul>
  * @author janson
  *
@@ -31,6 +32,7 @@ public class AclinkUserDTO {
     private Long registerTime;
     private Byte isAuth;
     private Long authTime;
+    private FaceRecognitionPhotoDTO photo;
     
     public Long getId() {
         return id;
@@ -135,4 +137,12 @@ public class AclinkUserDTO {
     public void setAuthTime(Long authTime) {
         this.authTime = authTime;
     }
+    
+	public FaceRecognitionPhotoDTO getPhoto() {
+		return photo;
+	}
+	public void setPhoto(FaceRecognitionPhotoDTO photo) {
+		this.photo = photo;
+	}
+    
 }

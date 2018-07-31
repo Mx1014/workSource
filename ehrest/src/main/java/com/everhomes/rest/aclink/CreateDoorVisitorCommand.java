@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
@@ -8,6 +9,15 @@ import com.everhomes.util.StringHelper;
  * <ul> 添加访客授权。
  * <li>phone: 电话</li>
  * <li>doorId: 门禁ID</li>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>userName: 访客姓名</li>
+ * <li>organization: 公司名称</li>
+ * <li>description: 来访说明</li>
+ * <li>authMethod: 授权方式{@link com.everhomes.aclink.DoorAuthMethodType}</li>
+ * <li>authRuleType: 授权规则种类，0 时间，1 次数</li>
+ * <li>validFromMs: 有效期开始时间</li>
+ * <li>validEndMs: 有效期终止时间</li>
+ * <li>totalAuthAmount: 有效开门次数</li>
  * </ul>
  * @author janson
  *
@@ -30,6 +40,8 @@ public class CreateDoorVisitorCommand {
     private String authMethod;
 	private Long validFromMs;
 	private Long validEndMs;
+	private Byte authRuleType;
+	private Integer totalAuthAmount;
     
     public String getPhone() {
         return phone;
@@ -97,6 +109,18 @@ public class CreateDoorVisitorCommand {
 	}
 	public void setValidEndMs(Long validEndMs) {
 		this.validEndMs = validEndMs;
+	}
+	public Byte getAuthRuleType() {
+		return authRuleType;
+	}
+	public void setAuthRuleType(Byte authRuleType) {
+		this.authRuleType = authRuleType;
+	}
+	public Integer getTotalAuthAmount() {
+		return totalAuthAmount;
+	}
+	public void setTotalAuthAmount(Integer totalAuthAmount) {
+		this.totalAuthAmount = totalAuthAmount;
 	}
 	@Override
     public String toString() {

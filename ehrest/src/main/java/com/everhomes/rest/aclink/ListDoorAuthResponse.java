@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.aclink;
 
 import java.util.List;
@@ -5,6 +6,12 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>dtos:门禁授权列表 {@link com.everhomes.rest.aclink.DoorAuthDTO}</li>
+ * <li>nextPageAnchor: 下一页锚点</li>
+ * </ul>
+ */
 public class ListDoorAuthResponse {
     private Long nextPageAnchor;
     
