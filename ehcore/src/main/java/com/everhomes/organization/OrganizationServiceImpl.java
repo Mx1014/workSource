@@ -13002,6 +13002,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
+            OrganizationCommunityRequest request = organizationProvider.findOrganizationCommunityRequestByOrganizationId(cmd.getProjectId(), org.getId());
+            if (request == null) {
+                //不是该项目的，跳过
+                continue;
+            }
+
+
             //Filter out the inactive organization add by sfyan 20130430
             OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
             if (orgStatus != OrganizationStatus.ACTIVE) {

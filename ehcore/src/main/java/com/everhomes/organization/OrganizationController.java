@@ -1633,7 +1633,7 @@ public class OrganizationController extends ControllerBase {
      * @param cmd
      * @return
      */
-    @RequestMapping(value = "/org/getAuthOrgByProjectIdAndAppId")
+    @RequestMapping("getAuthOrgByProjectIdAndAppId")
     @RestReturn(value = OrganizationDTO.class)
     public RestResponse getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd) {
 
@@ -1648,11 +1648,9 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/listUserOrganizations</b>
-     * <p>查询用户加入的公司</p>
-     * @param cmd
-     * @return
+     * <p>通过项目id，获取当前项目用户认证的企业列表，</p>
      */
-    @RequestMapping(value = "/org/listUserOrganizations")
+    @RequestMapping("listUserOrganizations")
     @RestReturn(value = ListUserOrganizationsResponse.class)
     public RestResponse listUserOrganizations(ListUserOrganizationsCommand cmd){
 
