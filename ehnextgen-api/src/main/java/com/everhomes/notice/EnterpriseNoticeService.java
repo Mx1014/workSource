@@ -24,4 +24,6 @@ public interface EnterpriseNoticeService {
 
     boolean isNoticeSendToCurrentUser(Long enterpriseNoticeId);
 
+    EnterpriseNoticeDTO getSharedEnterpriseNoticeDetailInfo(String enterpriseNoticeToken);
+
 }

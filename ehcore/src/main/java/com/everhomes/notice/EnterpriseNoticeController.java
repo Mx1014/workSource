@@ -5,8 +5,22 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.notice.*;
-import com.everhomes.util.RequireAuthentication;
+import com.everhomes.rest.notice.CancelEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.CreateEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.DeleteEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.EnterpriseNoticeDTO;
+import com.everhomes.rest.notice.EnterpriseNoticePreviewDTO;
+import com.everhomes.rest.notice.EnterpriseNoticeShowType;
+import com.everhomes.rest.notice.EnterpriseNoticeStatus;
+import com.everhomes.rest.notice.GetCurrentUserContactInfoCommand;
+import com.everhomes.rest.notice.GetEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.GetSharedEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeAdminCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeAdminResponse;
+import com.everhomes.rest.notice.ListEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.ListEnterpriseNoticeResponse;
+import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -167,5 +181,18 @@ public class EnterpriseNoticeController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL : /enterpriseNotice/getSharedEnterpriseNoticeDetail</b>
+     * <p>获取分享公告的详细信息</p>
+     */
+    @RequestMapping("getSharedEnterpriseNoticeDetail")
+    @RestReturn(value = EnterpriseNoticeDTO.class)
+    public RestResponse getSharedEnterpriseNoticeDetail(GetSharedEnterpriseNoticeCommand cmd) {
+        RestResponse response = new RestResponse(enterpriseNoticeService.getSharedEnterpriseNoticeDetailInfo(cmd.getNoticeToken()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }
