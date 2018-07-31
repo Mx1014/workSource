@@ -2,6 +2,8 @@ package com.everhomes.bus;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.user.UserContext;
+import org.springframework.cloud.stream.annotation.Output;
+import org.springframework.messaging.support.GenericMessage;
 
 /**
  * Created by xq.tian on 2017/12/5.
@@ -11,9 +13,11 @@ public class LocalEventBus {
     private volatile static LocalEventBus localEventBus;
 
     private LocalBus localBus;
+    private BusEventChannel busEventChannel;
 
     private LocalEventBus() {
         localBus = PlatformContext.getComponent(LocalBusProvider.class);
+        busEventChannel = PlatformContext.getComponent(BusEventChannel.class);
     }
 
     private static LocalEventBus getLocalEventBus() {
@@ -30,6 +34,7 @@ public class LocalEventBus {
     public static void publish(LocalEvent event) {
         getLocalEventBus().populateEvent(event);
         getLocalEventBus().localBus.publish(getLocalEventBus(), event.getEventName(), event);
+        getLocalEventBus().busEventChannel.output().send(new GenericMessage<>(event.toString()));
     }
 
     public static void publish(LocalEventBuilder builder) {
@@ -74,5 +79,10 @@ public class LocalEventBus {
 
     public interface LocalEventBuilder {
         void build(LocalEvent event);
+    }
+
+    public interface BusEventChannel {
+        @Output("system-event-channel")
+        org.springframework.messaging.MessageChannel output();
     }
 }

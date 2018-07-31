@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.core;
 
+import com.everhomes.atomikos.AtomikosHelper;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.sequence.MysqlSequenceProviderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -8,13 +11,12 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
-//import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
-import com.everhomes.atomikos.AtomikosHelper;
-import com.everhomes.sequence.MysqlSequenceProviderImpl;
+//import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 
 /**
  * Spring boot main class. Its class name need to be packaged to let Spring boot bootstrap processStat
@@ -33,6 +35,7 @@ import com.everhomes.sequence.MysqlSequenceProviderImpl;
     HibernateJpaAutoConfiguration.class,
     FreeMarkerAutoConfiguration.class
 })
+@EnableBinding(LocalEventBus.BusEventChannel.class)
 public class CoreServerApp {
     final static Logger logger = LoggerFactory.getLogger(CoreServerApp.class);
     

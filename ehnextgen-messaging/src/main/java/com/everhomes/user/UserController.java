@@ -528,15 +528,31 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping("getUserInfo")
 	@RestReturn(UserInfo.class)
-	public RestResponse getUserInfo(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		UserInfo info = this.userService.getUserInfo();
-		if(info==null){
-			return new RestResponse(info);
-		}
-		if(EtagHelper.checkHeaderEtagOnly(30,info.hashCode()+"", request, response)) {
-			return new RestResponse(info);
-		}
-		return new RestResponse("OK");
+	public RestResponse getUserInfo(GetUserSnapshotInfoCommand cmd) {
+        UserInfo info;
+        if (cmd.getUid() != null) {
+            info = this.userService.getUserSnapshotInfoWithPhone(cmd.getUid());
+        } else {
+            info = this.userService.getUserInfo();
+        }
+		return new RestResponse(info);
+	}
+
+	/**
+	 * <b>URL: /user/validateToken</b>
+	 * <p>校验用户的登录 token</p>
+	 */
+	@RequestMapping("validateToken")
+	@RestReturn(UserInfo.class)
+	public RestResponse validateToken(ValidateUserTokenCommand cmd, HttpServletRequest request) {
+        LoginToken loginToken = userService.getLoginToken(request);
+        if (userService.isValid(loginToken)) {
+            return new RestResponse(userService.getUserSnapshotInfoWithPhone(loginToken.getUserId()));
+        }
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
+        response.setErrorDescription("invalid token");
+        return response;
 	}
 
 	/**

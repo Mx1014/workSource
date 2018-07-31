@@ -1,6 +1,7 @@
 package com.everhomes.contentserver;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ public class MessageQueue {
     private LocalBus localBus;
 
     @Autowired
+    @Qualifier("taskScheduler")
     private TaskExecutor taskExecutor;
 
     @Autowired
