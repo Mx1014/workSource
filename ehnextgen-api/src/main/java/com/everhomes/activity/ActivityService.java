@@ -3,6 +3,8 @@ package com.everhomes.activity;
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
@@ -18,6 +20,7 @@ import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.util.Tuple;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -229,5 +232,11 @@ public interface ActivityService {
 
 //	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 	void exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse);
+
+	void exportActivitySignupNew(ExportSignupInfoCommand cmd);
+
+    OutputStream getActivitySignupExportStream(ExportSignupInfoCommand cmd, Long taskId);
+
+    ListGeneralFormResponse listActivitySignupGeneralForms(ListGeneralFormsCommand cmd);
 }
 

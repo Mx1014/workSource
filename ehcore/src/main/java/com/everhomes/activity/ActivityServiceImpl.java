@@ -2,6 +2,7 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.general_form.GeneralForm;
@@ -112,6 +113,7 @@ import com.everhomes.rest.activity.DeleteActivityGoodsCommand;
 import com.everhomes.rest.activity.DeleteSignupInfoCommand;
 import com.everhomes.rest.activity.DownloadActivityAttachmentCommand;
 import com.everhomes.rest.activity.ExportActivityCommand;
+import com.everhomes.rest.activity.ExportActivitySignupDTO;
 import com.everhomes.rest.activity.ExportActivitySignupTemplateCommand;
 import com.everhomes.rest.activity.ExportOrganizationCommand;
 import com.everhomes.rest.activity.ExportSignupInfoCommand;
@@ -217,6 +219,8 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -309,7 +313,15 @@ import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import net.greghaines.jesque.Job;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -346,6 +358,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -512,6 +525,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     @Autowired
     private SensitiveWordService sensitiveWordService;
 
+    @Autowired
+    private ActivitySignupFormHandler activitySignupFormHandler;
     @Autowired
     private TaskService taskService;
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
@@ -6860,6 +6875,157 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
     }
 
+    @Override
+    public void exportActivitySignupNew(ExportSignupInfoCommand cmd) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("activityId",cmd.getActivityId());
+        String fileName = String.format("报名信息_%s.xlsx", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ActivitySignupExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+    @Override
+    public OutputStream getActivitySignupExportStream(ExportSignupInfoCommand cmd, Long taskId) {
+        Activity activity = checkActivityExist(cmd.getActivityId());
+        List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
+        List<ActivityRoster> rostersConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 1, 0, 100000);
+        List<ActivityRoster> rostersRejects = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 2, 0, 100000);
+        List<ActivityRoster> rostersUnConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 0, 0, 100000);
+
+        rosters.addAll(rostersConfirms);
+        rosters.addAll(rostersRejects);
+        rosters.addAll(rostersUnConfirms);
+
+        if (rosters.size() > 0) {
+            List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
+            List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "性别"));
+            List<PostApprovalFormItem> itemList = signupInfoDTOs.get(0).getValues();
+            if (!CollectionUtils.isEmpty(itemList)) {
+                for (PostApprovalFormItem postApprovalFormItem : itemList) {
+                    titleNames.add(postApprovalFormItem.getFieldDisplayName());
+                }
+            }
+            titleNames.addAll(Arrays.asList("报名时间", "报名来源", "报名状态"));
+            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
+                titleNames.add("已付金额");
+                titleNames.add("已退金额");
+            }
+
+
+            if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
+                titleNames.add("是否签到");
+            }
+            taskService.updateTaskProcess(taskId, 20);
+            List<ExportActivitySignupDTO> values = new ArrayList<>();
+            for (int i = 0; i<signupInfoDTOs.size();i++) {
+                SignupInfoDTO signupInfoDTO = signupInfoDTOs.get(i);
+                if (signupInfoDTO == null) {
+                    continue;
+                }
+                ExportActivitySignupDTO exportActivitySignupDTO = new ExportActivitySignupDTO();
+                List<String> signupValue = new ArrayList<>();
+                if (i == 0) {
+                    signupValue.add("创建者");
+                }else {
+                    signupValue.add(i+"");
+                }
+                signupValue.add(signupInfoDTO.getPhone());
+                signupValue.add(signupInfoDTO.getNickName());
+                signupValue.add(UserGender.fromCode(signupInfoDTO.getGender()).getText());
+                if (!CollectionUtils.isEmpty(signupInfoDTO.getValues())) {
+                    for (PostApprovalFormItem postApprovalFormItem : signupInfoDTO.getValues()) {
+                        signupValue.add(postApprovalFormItem.getFieldValue());
+                    }
+                }
+                signupValue.add(signupInfoDTO.getSignupTime());
+                signupValue.add(signupInfoDTO.getSourceFlagText());
+                signupValue.add(signupInfoDTO.getSignupStatusText());
+                if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
+                    signupValue.add(signupInfoDTO.getPayAmount().toString());
+                    signupValue.add(signupInfoDTO.getRefundAmount().toString());
+                }
+                if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
+                    signupValue.add(signupInfoDTO.getCheckinFlagText());
+                }
+                exportActivitySignupDTO.setVals(signupValue);
+                values.add(exportActivitySignupDTO);
+            }
+            taskService.updateTaskProcess(taskId, 75);
+
+            //  write excel
+            XSSFWorkbook workbook = exportActivitySignupFiles(titleNames, values);
+            taskService.updateTaskProcess(taskId, 95);
+
+            return writeExcel(workbook);
+        }else {
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_NO_ROSTER, "no roster in this activity");
+        }
+    }
+
+    @Override
+    public ListGeneralFormResponse listActivitySignupGeneralForms(ListGeneralFormsCommand cmd) {
+        GeneralForm initActivitySignupForm = this.activitySignupFormHandler.getDefaultGeneralForm(cmd.getOwnerType());
+        GeneralFormDTO dto = ConvertHelper.convert(initActivitySignupForm, GeneralFormDTO.class);
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
+        dto.setFormFields(fieldDTOs);
+        List<GeneralFormDTO> list = new ArrayList<>();
+        list.add(dto);
+        ListGeneralFormResponse response = this.generalFormService.listGeneralForms(cmd);
+        list.addAll(response.getForms());
+        response.setForms(list);
+        return response;
+    }
+
+    private XSSFWorkbook exportActivitySignupFiles(List<String> title, List<ExportActivitySignupDTO> value) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+
+        Sheet sheet = workbook.createSheet("报名信息");
+        sheet.createFreezePane(1,2,1,1);
+        //  2.title
+        Row titleRow = sheet.createRow(0);
+        createExcelTitle(workbook, sheet, titleRow, title);
+        //  3.data
+        for (int rowIndex = 1; rowIndex <= value.size(); rowIndex++) {
+            Row dataRow = sheet.createRow(rowIndex);
+            createActivityFileData(workbook, dataRow, value.get(rowIndex - 1).getVals());
+        }
+        return workbook;
+    }
+    private void createActivityFileData(XSSFWorkbook workbook, Row dataRow, List<String> list) {
+        //  设置样式
+        XSSFCellStyle contentStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 12);
+        font.setFontName("微软雅黑");
+        contentStyle.setAlignment(HorizontalAlignment.CENTER);
+        contentStyle.setFont(font);
+        for (int i = 0; i < list.size(); i++) {
+            Cell cell = dataRow.createCell(i);
+            cell.setCellStyle(contentStyle);
+            cell.setCellValue(list.get(i));
+        }
+    }
+    private void createExcelTitle(XSSFWorkbook workbook, Sheet sheet, Row titleRow, List<String> title) {
+        XSSFCellStyle commonStyle = commonTitleStyle(workbook);
+        for (int i = 0; i < title.size(); i++) {
+            Cell cell = titleRow.createCell(i);
+            sheet.setColumnWidth( i,18 * 256);
+            cell.setCellStyle(commonStyle);
+            cell.setCellValue(title.get(i));
+        }
+    }
+    private XSSFCellStyle commonTitleStyle(XSSFWorkbook workbook){
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 11);
+        font.setBold(true);
+        font.setFontName("微软雅黑");
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setFont(font);
+        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        titleStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        return titleStyle;
+    }
     private void excelSettings(ExcelUtils excelUtils, GeneralFormDTO form) {
         List<Integer> mandatoryTitle = new ArrayList<>();
         for (GeneralFormFieldDTO formFieldDTO : form.getFormFields()) {
@@ -6876,6 +7042,21 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         excelUtils.setNeedTitleRemark(true);
     }
 
+    private ByteArrayOutputStream writeExcel(XSSFWorkbook workbook) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            workbook.write(out);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        }finally {
+            try {
+                workbook.close();
+            } catch (IOException e) {
+                LOGGER.error("export error, e = {}", e);
+            }
+        }
+        return out;
+    }
 //	@Override
 //	public void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response) {
 //		List<ActivityRosterError> dtos = activityProvider.listActivityRosterErrorByJobId(cmd.getJobId());

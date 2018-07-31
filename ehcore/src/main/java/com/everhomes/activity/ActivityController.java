@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
@@ -182,8 +184,8 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("exportSignupInfo")
     @RestReturn(value=String.class)
-    public RestResponse exportSignupInfo(@Valid ExportSignupInfoCommand cmd, HttpServletResponse response) {
-    	activityService.exportSignupInfo(cmd, response);
+    public RestResponse exportSignupInfo(@Valid ExportSignupInfoCommand cmd) {
+    	activityService.exportActivitySignupNew(cmd);
     	RestResponse restResponse = new RestResponse();
     	restResponse.setErrorCode(ErrorCodes.SUCCESS);
     	restResponse.setErrorDescription("OK");
@@ -937,5 +939,21 @@ public class ActivityController extends ControllerBase {
     public RestResponse exportActivitySignupTemplate(ExportActivitySignupTemplateCommand cmd, HttpServletResponse httpResponse){
         activityService.exportActivitySignupTemplate(cmd,httpResponse);
         return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /activity/listActivityForms</b>
+     * <p> 获取活动报名表单列表 </p>
+     * @return
+     */
+    @RequestMapping("listActivityForms")
+    @RestReturn(value=ListGeneralFormResponse.class)
+    public RestResponse listApprovalForms(@Valid ListGeneralFormsCommand cmd) {
+        ListGeneralFormResponse result = activityService.listActivitySignupGeneralForms(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
     }
 }
