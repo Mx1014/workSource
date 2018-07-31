@@ -176,6 +176,7 @@ public class CreateEnterpriseCustomerCommand {
     private Long originPotentialSourceId;
 
 
+    //新增的客户字段
     private String bizAddress;
     private String bizLife;
     private String customerIntentionLevel;
