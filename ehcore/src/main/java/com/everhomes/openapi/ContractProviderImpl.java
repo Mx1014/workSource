@@ -1318,4 +1318,13 @@ public class ContractProviderImpl implements ContractProvider {
 		return true;
 	}
 
+	@Override
+	public Byte filterAptitudeCustomer(Long id){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractCategories.class));
+		EhContractCategoriesDao dao = new EhContractCategoriesDao(context.configuration());
+		EhContractCategories ecc = dao.findById(id);
+		//if(ecc.get)
+		return 0;
+	}
+
 }

@@ -36,6 +36,8 @@ create table `eh_general_form_filter_user_map`
 
 
 alter table eh_enterprise_customers add aptitude_flag TINYINT null comment '0-无资质，1-有资质' default 0;
+alter table eh_contract_categories add aptitude_flag TINYINT null comment '0-不过滤，1-过滤' default 0;
+
 
 
 -- --------------------- SECTION END ---------------------------------------------------------

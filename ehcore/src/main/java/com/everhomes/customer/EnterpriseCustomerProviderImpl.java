@@ -2427,11 +2427,12 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void updateCustomerAptitudeFlag(Long id, Integer approvalStatus){
+    public void updateCustomerAptitudeFlag(Long id, Byte approvalStatus){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class));
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         EhEnterpriseCustomers eepc = dao.findById(id);
-        //eepc.set
+        eepc.setAptitudeFlag(approvalStatus);
+
 
     }
 }

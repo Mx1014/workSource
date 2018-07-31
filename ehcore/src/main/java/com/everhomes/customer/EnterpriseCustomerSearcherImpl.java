@@ -240,6 +240,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        /*if()
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("aptitudeFlag", cmd.getAptitudeFlag()));*/
         if (cmd.getAddressId() != null) {
             MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
             qb = QueryBuilders.boolQuery().must(qb).must(addressId);

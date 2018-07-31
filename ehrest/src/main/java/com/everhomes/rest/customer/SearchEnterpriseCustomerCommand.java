@@ -85,7 +85,7 @@ public class SearchEnterpriseCustomerCommand {
 
     private String sourceType;
 
-    private Integer aptitudeFlag;
+    private Byte aptitudeFlag;
 
     public Long getOwnerId() {
         return ownerId;
@@ -297,11 +297,11 @@ public class SearchEnterpriseCustomerCommand {
         this.sourceType = sourceType;
     }
 
-    public Integer getAptitudeFlag() {
+    public Byte getAptitudeFlag() {
         return aptitudeFlag;
     }
 
-    public void setAptitudeFlag(Integer aptitudeFlag) {
+    public void setAptitudeFlag(Byte aptitudeFlag) {
         this.aptitudeFlag = aptitudeFlag;
     }
 
