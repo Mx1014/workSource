@@ -525,7 +525,7 @@ public class ForumServiceImpl implements ForumService {
     private Integer getSendMessage(List changeList, Map map, Activity activity){
         Integer code = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (activity.getAllDayFlag() == (byte)1) {
+        if (activity.getAllDayFlag() != null && activity.getAllDayFlag() == (byte)1) {
             sdf = new SimpleDateFormat("yyyy-MM-dd");
         }
         switch (changeList.size()) {
@@ -2028,23 +2028,26 @@ public class ForumServiceImpl implements ForumService {
 	        
 	         
 	         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId(), cmd.getContentCategory());
-	         
+
+             //             范围                帖子
+//
+//             一个园区            community + normal
+//             多个园区            all + clone,    community + real,   多个community + clone
+//             一个公司            organization + normal
+//             全部                all + normal
 	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
 	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
-
-             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
-             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
+//             communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 
 	         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
 	         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
-
-             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
              regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 
-             //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）  add by yanjun 20170807
+
 	         Condition condition = communityCondition
                      .or(regionCondition)
-                     .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()))
+                     .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+                             .and(Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())))
                      .and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
 
 	         if(null != cmd.getEmbeddedAppId()){
@@ -5016,7 +5019,19 @@ public class ForumServiceImpl implements ForumService {
         // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
         String creatorNickName = post.getCreatorNickName();
         String creatorAvatar = post.getCreatorAvatar();
-        
+
+        // 无昵称时直接使用USER表中的信息作为发帖人的信息
+        User creator = userProvider.findUserById(post.getCreatorUid());
+        if(creator != null) {
+            // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+                creatorNickName = creator.getNickName();
+            }
+            if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                creatorAvatar = creator.getAvatar();
+            }
+        }
+
         Long forumId = post.getForumId();
         if(forumId != null) {
             // 普通圈使用圈成员的信息
@@ -5034,18 +5049,6 @@ public class ForumServiceImpl implements ForumService {
                         creatorAvatar = member.getMemberAvatar();
                     }
                 }
-            }
-        }
-        
-        // 无昵称时直接使用USER表中的信息作为发帖人的信息
-        User creator = userProvider.findUserById(post.getCreatorUid());
-        if(creator != null) {
-            // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                creatorNickName = creator.getNickName();
-            }
-            if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
-                creatorAvatar = creator.getAvatar();
             }
         }
 
@@ -7080,6 +7083,9 @@ public class ForumServiceImpl implements ForumService {
 		    list.forEach(r ->{
 		        //更新帖子
                 r.setStatus(PostStatus.ACTIVE.getCode());
+                //编辑后发布需要重新设置创建时间.
+                Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+                r.setCreateTime(ts);
                 ActivityPostCommand tempCmd = (ActivityPostCommand) StringHelper.fromJsonString(r.getEmbeddedJson(),
                         ActivityPostCommand.class);
                 tempCmd.setStatus(PostStatus.ACTIVE.getCode());
@@ -7089,6 +7095,7 @@ public class ForumServiceImpl implements ForumService {
                 //更新活动
                 Activity r_activity = activityProvider.findSnapshotByPostId(r.getId());
                 r_activity.setStatus(PostStatus.ACTIVE.getCode());
+                r_activity.setCreateTime(ts);
                 activityProvider.updateActivity(r_activity);
 
                 //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609

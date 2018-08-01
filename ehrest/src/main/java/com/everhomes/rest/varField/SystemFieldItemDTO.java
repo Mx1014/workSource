@@ -18,6 +18,7 @@ public class SystemFieldItemDTO {
     private String displayName;
     private Integer defaultOrder;
     private Byte businessValue;
+    private String expandFlag;
 
     public Byte getBusinessValue() {
         return businessValue;
@@ -65,5 +66,13 @@ public class SystemFieldItemDTO {
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    public String getExpandFlag() {
+        return expandFlag;
+    }
+
+    public void setExpandFlag(String expandFlag) {
+        this.expandFlag = expandFlag;
     }
 }

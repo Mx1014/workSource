@@ -21,4 +21,8 @@ public interface GeneralFormValProvider {
 	GeneralFormVal getGeneralFormValBySourceIdAndName(Long sourceId, String sourceType, String fieldName);
 
 	void deleteGeneralFormValNotInFieldNameScope(Long sourceId, String sourceType, List<String> fieldNameScope);
+
+	Integer queryAmount(String sourceType, Long sourceId);
+
+	List<GeneralFormVal> queryGeneralFormVals(String sourceType, Long sourceId, Long pageAnchor, Integer pageSize);
 }

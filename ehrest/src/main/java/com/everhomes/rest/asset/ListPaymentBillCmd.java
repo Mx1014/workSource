@@ -109,6 +109,8 @@ public class ListPaymentBillCmd {
     private Long addressId;
     private String buildingName;
     private String apartmentName;
+    private Long targetId;
+    private Long ownerId;
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -297,5 +299,21 @@ public class ListPaymentBillCmd {
 
 	public void setApartmentName(String apartmentName) {
 		this.apartmentName = apartmentName;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }

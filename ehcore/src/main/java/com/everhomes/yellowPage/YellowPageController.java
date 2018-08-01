@@ -756,5 +756,20 @@ public class YellowPageController  extends ControllerBase {
 		rsp.setErrorDescription(ret);
 		return rsp;
 	}
+   	
+    /**
+   	 * <b>URL: /yellowPage/transferTime</b> 
+   	 */
+   	@RequestMapping("transferTime")
+   	@RestReturn(value = String.class)
+	public RestResponse transferTime(GetExtraAllianceEventCommand cmd) {
+
+		RestResponse rsp = new RestResponse();
+		String ret = yellowPageService.transferTime(cmd.getEventId());
+		rsp.setErrorCode(ErrorCodes.SUCCESS);
+		rsp.setErrorDescription(ret);
+		return rsp;
+	}
+    
     
 }

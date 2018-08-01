@@ -1,6 +1,7 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -195,4 +196,9 @@ public class SetContractParamCommand {
     public void setReceivableUnit(Byte receivableUnit) {
         this.receivableUnit = receivableUnit;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

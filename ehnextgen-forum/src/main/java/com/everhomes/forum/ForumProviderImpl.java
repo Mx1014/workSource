@@ -218,11 +218,10 @@ public class ForumProviderImpl implements ForumProvider {
         post.setId(id);
         post.setUuid(UUID.randomUUID().toString());
         post.setModifySeq(seq);
-        
-        if(post.getCreateTime() == null) {
-            Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
-            post.setCreateTime(ts);
-        }
+
+        //编辑后发布需要重新设置创建时间.
+        Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+        post.setCreateTime(ts);
         if(post.getUpdateTime() == null) {
             post.setUpdateTime(post.getCreateTime());
         }

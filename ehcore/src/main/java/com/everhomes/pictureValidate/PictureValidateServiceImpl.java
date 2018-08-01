@@ -6,6 +6,12 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.pictureValidate.GetNewPictureValidateCodeCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +32,8 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 @Component
 public class PictureValidateServiceImpl implements PictureValidateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PictureValidateServiceImpl.class);
@@ -41,10 +49,44 @@ public class PictureValidateServiceImpl implements PictureValidateService {
     @Autowired
     private BigCollectionProvider collectionProvider;
 
+    @Autowired
+    private UserProvider userProvider;
+
 
     @Override
     public String newPicture(HttpServletRequest request) {
         String sessionId = request.getSession().getId();
+        return this.newPicture(sessionId);
+    }
+
+    @Override
+    public String newPictureByApp(GetNewPictureValidateCodeCommand cmd) {
+        User user = UserContext.current().getUser();
+        if (user == null) {
+            LOGGER.error("cannot find user");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user");
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
+        if(userIdentifier==null){
+            LOGGER.error("cannot find user identifierToken.identifierToken={}",cmd.getIdentifier());
+            throw errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER, "can not find user identifierToken or status is error");
+        }
+
+        //判断手机号的用户与当前用户是否一致
+        if (userIdentifier.getOwnerUid() == null || !userIdentifier.getOwnerUid().equals(UserContext.currentUserId())) {
+            LOGGER.error("phone not match user error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+                    "phone not match user error");
+        }
+
+        if (cmd.getRegionCode() != null && userIdentifier.getRegionCode() != null && !cmd.getRegionCode().equals(userIdentifier.getRegionCode())) {
+            LOGGER.error("phone not match user error");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+                    "phone not match user error");
+        }
+        String sessionId = user.getId().toString();
         return this.newPicture(sessionId);
     }
 
@@ -68,6 +110,17 @@ public class PictureValidateServiceImpl implements PictureValidateService {
     public Boolean validateCode(HttpServletRequest request, String code) {
         String sessionId = request.getSession().getId();
         return this.validateCode(sessionId, code);
+    }
+
+    @Override
+    public Boolean validateCodeByApp(String code) {
+        User user = UserContext.current().getUser();
+        if (user == null) {
+            LOGGER.error("cannot find user");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "cannot find user");
+        }
+        String sessionId = user.getId().toString();
+        return this.validateCode(sessionId,code);
     }
 
     @Override

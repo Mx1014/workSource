@@ -11,7 +11,7 @@ package com.everhomes.rest.energy;
  */
 public enum EnergyMeterType {
 
-    WATER((byte)1), ELECTRIC((byte)2), ALL((byte)3),COMMON_WATER((byte)4),COMMON_ELECTRIC((byte)5);
+    WATER((byte)1), ELECTRIC((byte)2), ALL((byte)3),COMMON_WATER((byte)4),COMMON_ELECTRIC((byte)5),ADVERTISEMENT((byte)6),AIR_CONDITIONER((byte)7);
 
     private Byte code;
 
