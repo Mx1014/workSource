@@ -116,8 +116,7 @@ public interface PunchProvider {
 	public List<PunchDayLog> listPunchDayExceptionLogs(Long userId,
 			Long companyId, String startDay, String endDay);
 
-	List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long userId,
-													Long companyId, String startDay, String endDay);
+	List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long detailId, Long companyId, String startDay, String endDay);
 
 	public List<PunchExceptionRequest> listExceptionNotViewRequests(
 			Long userId, Long companyId, String startDay, String endDay);
@@ -272,7 +271,7 @@ public interface PunchProvider {
 	Long createPunchStatistic(PunchStatistic obj);
 
 	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
-			List<Long> userIds, CrossShardListingLocator locator, int i);
+			List<Long> detailIds, CrossShardListingLocator locator, int i);
 
 	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long detailId);
 

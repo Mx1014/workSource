@@ -11,6 +11,8 @@ public class PunchTimeRule extends EhPunchTimeRules {
     private static final long serialVersionUID = 3038821225471012801L;
 
     private PunchDayType punchDayType;
+    // 是排班，但未安排班次
+    private Byte unscheduledFlag;
 
     public PunchTimeRule() {
         setPunchDayType(PunchDayType.WORKDAY);
@@ -27,6 +29,14 @@ public class PunchTimeRule extends EhPunchTimeRules {
 
     public void setPunchDayType(PunchDayType punchDayType) {
         this.punchDayType = punchDayType;
+    }
+
+    public Byte getUnscheduledFlag() {
+        return unscheduledFlag;
+    }
+
+    public void setUnscheduledFlag(Byte unscheduledFlag) {
+        this.unscheduledFlag = unscheduledFlag;
     }
 
     @Override

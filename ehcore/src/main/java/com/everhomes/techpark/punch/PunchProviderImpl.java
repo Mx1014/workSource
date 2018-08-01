@@ -168,7 +168,7 @@ public class PunchProviderImpl implements PunchProvider {
     @Override
     @Caching(evict = {@CacheEvict(value = "GetPunchRuleById", key = "#obj.id"),
             @CacheEvict(value = "GetPunchRuleByPunchOrgId", key = "#obj.punchOrganizationId"),
-            @CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#obj.id")})
+            @CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", allEntries = true)})
     public void updatePunchRule(PunchRule obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
@@ -178,7 +178,7 @@ public class PunchProviderImpl implements PunchProvider {
     @Override
     @Caching(evict = {@CacheEvict(value = "GetPunchRuleById", key = "#obj.id"),
             @CacheEvict(value = "GetPunchRuleByPunchOrgId", key = "#obj.punchOrganizationId"),
-            @CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#obj.id")})
+            @CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", allEntries = true)})
     public void deletePunchRule(PunchRule obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
@@ -1257,13 +1257,12 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long userId,
-                                                           Long companyId, String startDay, String endDay) {
+    public List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long detailId, Long companyId, String startDay, String endDay) {
         // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
-        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
+        condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID.equal(detailId));
         if (!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
             Date startDate = Date.valueOf(startDay);
             Date endDate = Date.valueOf(endDay);
@@ -2500,9 +2499,9 @@ public class PunchProviderImpl implements PunchProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         if (null != locator && locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_PUNCH_STATISTICS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_PUNCH_STATISTICS.ID.le(locator.getAnchor()));
         }
-
+        query.addOrderBy(Tables.EH_PUNCH_STATISTICS.ID.desc());
         query.addLimit(count);
         List<PunchStatistic> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, PunchStatistic.class);
@@ -3669,7 +3668,7 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    @Caching(evict = {@CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#punchOvertimeRule.punchRuleId")})
+    @Caching(evict = {@CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", allEntries = true)})
     public Long createPunchOvertimeRule(PunchOvertimeRule punchOvertimeRule) {
         String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchOvertimeRules.class);
         long id = sequenceProvider.getNextSequence(key);
@@ -3685,7 +3684,7 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    @Caching(evict = {@CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#punchOvertimeRule.punchRuleId")})
+    @Caching(evict = {@CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", allEntries = true)})
     public Long updatePunchOvertimeRule(PunchOvertimeRule punchOvertimeRule) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchOvertimeRules.class));
         punchOvertimeRule.setUpdateTime(DateUtils.currentTimestamp());
@@ -3698,7 +3697,7 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    @Cacheable(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#punchRuleId")
+    @Cacheable(value = "FindPunchOvertimeRulesByPunchRuleId", key = "{#punchRuleId,#status}")
     public List<PunchOvertimeRule> findPunchOvertimeRulesByPunchRuleId(Long punchRuleId, Byte status) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhPunchOvertimeRulesRecord> query = context.selectQuery(Tables.EH_PUNCH_OVERTIME_RULES);
@@ -3719,7 +3718,7 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    @Caching(evict = {@CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", key = "#punchRuleId")})
+    @Caching(evict = {@CacheEvict(value = "FindPunchOvertimeRulesByPunchRuleId", allEntries = true)})
     public void deletePunchOvertimeRulesByPunchRuleId(Long punchRuleId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPunchOvertimeRules.class));
         DeleteQuery<EhPunchOvertimeRulesRecord> deleteQuery = context.deleteQuery(Tables.EH_PUNCH_OVERTIME_RULES);

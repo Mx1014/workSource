@@ -1202,28 +1202,8 @@ public class PunchServiceImpl implements PunchService {
 
 
         if (ptr == null || ptr.getId() == null || ptr.getId() == 0) {
-
-            if (ptr.getId() == 0) {
-                punchDayLog.setTimeRuleId(0L);
-                punchDayLog.setTimeRuleName("休息");
-            } else
-                punchDayLog.setTimeRuleId(null);
-            pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode() + "");
-            pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
-            pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
-            pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
-            pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
-            pdl.setExceptionStatus(null);
-            // 获取加班申请等
-            Timestamp dayStart = new Timestamp(punchDate.getTime());
-            Timestamp dayEnd = new Timestamp(punchDate.getTime() + ONE_DAY_MS);
-            List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, companyId, dayStart, dayEnd);
-
-            // 当天是休息日，不存在异常打卡申请的数据
-            punchExceptionRequestCountByPunchDayLog(punchDayLog, exceptionRequests, null);
-            // 计算加班时间
-            calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
-            return pdl;
+            // 休息日或未排班的处理
+            return processRestDayPunchDayLogs(userId, companyId, pdl, punchDayLog, ptr, punchDate, punchLogs, pr);
         }
 
         punchDayLog.setSplitDateTime(new Timestamp(punchDate.getTime() + ONE_DAY_MS + (ptr.getDaySplitTimeLong() != null ? ptr.getDaySplitTimeLong() : PunchConstants.DEFAULT_SPLIT_TIME)));
@@ -1488,6 +1468,40 @@ public class PunchServiceImpl implements PunchService {
         // 计算加班时间
         calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
 //		makeExceptionForDayList(userId, companyId, logDay, pdl);
+        return pdl;
+    }
+
+    private PunchLogsDay processRestDayPunchDayLogs(Long userId, Long companyId, PunchLogsDay pdl, PunchDayLog punchDayLog, PunchTimeRule ptr, java.sql.Date punchDate, List<PunchLog> punchLogs, PunchRule pr) {
+        pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode() + "");
+        pdl.setPunchTimesPerDay((byte) 0);
+        pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+        pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
+        pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
+        pdl.setExceptionStatus(null);
+        punchDayLog.setTimeRuleId(null);
+        // 获取加班申请等
+        Timestamp dayStart = new Timestamp(punchDate.getTime());
+        Timestamp dayEnd = new Timestamp(punchDate.getTime() + ONE_DAY_MS);
+        List<PunchExceptionRequest> exceptionRequests = punchProvider.listPunchExceptionRequestBetweenBeginAndEndTime(userId, companyId, dayStart, dayEnd);
+
+        // 当天是休息日，不存在异常打卡申请的数据
+        punchExceptionRequestCountByPunchDayLog(punchDayLog, exceptionRequests, null);
+        // 计算加班时间
+        calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
+
+        if (pr != null && PunchRuleType.GUDING == PunchRuleType.fromCode(pr.getRuleType())) {
+            return pdl;
+        }
+        // ptr.getId()==0  包含休息和未安排班次
+        if (ptr != null && ptr.getId() == 0) {
+            if (NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
+                pdl.setStatusList(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode() + "");
+            } else {
+                punchDayLog.setTimeRuleId(0L);
+                punchDayLog.setTimeRuleName("休息");
+                pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode() + "");
+            }
+        }
         return pdl;
     }
 
@@ -3149,11 +3163,16 @@ public class PunchServiceImpl implements PunchService {
     private PunchTimeRule getPunchTimeRuleScheduling(PunchRule pr, Date date, Long detailId) {
         PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(pr.getOwnerId(), detailId, date, pr.getId());
         if (null == punchScheduling || punchScheduling.getPunchRuleId() == null || punchScheduling.getTimeRuleId() == 0) {
+            PunchTimeRule rule = new PunchTimeRule(0L, PunchDayType.RESTDAY);
             PunchHoliday punchHoliday = checkHoliday(pr, new java.sql.Date(date.getTime()));
             if (punchHoliday != null && punchHoliday.getStatus().equals(NormalFlag.YES.getCode())) {
-                return new PunchTimeRule(0L, NormalFlag.YES == NormalFlag.fromCode(punchHoliday.getLegalFlag()) ? PunchDayType.HOLIDAY : PunchDayType.RESTDAY);
+                rule = new PunchTimeRule(0L, NormalFlag.YES == NormalFlag.fromCode(punchHoliday.getLegalFlag()) ? PunchDayType.HOLIDAY : PunchDayType.RESTDAY);
             }
-            return new PunchTimeRule(0L, PunchDayType.RESTDAY);
+            // punchScheduling==null意味着当天还没有排班
+            if (punchScheduling == null) {
+                rule.setUnscheduledFlag(NormalFlag.YES.getCode());
+            }
+            return rule;
         }
         return punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
     }
@@ -3219,7 +3238,7 @@ public class PunchServiceImpl implements PunchService {
         this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(), orgIds, statistic.getPunchMonth(), statistic.getDetailId());
 
         try {
-            List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
+            List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getId(), ownerId, dateSF.get().format(startCalendar.getTime()),
                     dateSF.get().format(endCalendar.getTime()));
             List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
 
@@ -6770,7 +6789,6 @@ public class PunchServiceImpl implements PunchService {
         punchDayLog.setUserId(memberDetail.getTargetId());
         punchDayLog.setDeptId(deptId);
         punchDayLog.setPunchDate(java.sql.Date.valueOf(punCalendar));
-        punchDayLog.setStatus(PunchStatus.NO_ASSIGN_PUNCH_RULE.getCode());
         punchDayLog.setStatusList(String.valueOf(PunchStatus.NO_ASSIGN_PUNCH_RULE.getCode()));
         punchDayLog.setApprovalStatusList("");
         punchDayLog.setViewFlag(NormalFlag.YES.getCode());
@@ -6784,18 +6802,18 @@ public class PunchServiceImpl implements PunchService {
         punchDayLog.setAbsentFlag(NormalFlag.NO.getCode());
         punchDayLog.setNormalFlag(NormalFlag.YES.getCode());
         if (pr != null) {
-            punchDayLog.setStatus(PunchStatus.UNPUNCH.getCode());
-            punchDayLog.setStatusList(String.valueOf(PunchStatus.UNPUNCH.getCode()));
             punchDayLog.setRuleType(pr.getRuleType());
             punchDayLog.setPunchOrganizationId(pr.getPunchOrganizationId());
             PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDateUseDetailId(pr, punchDayLog.getPunchDate(), memberDetail.getId());
             if (ptr != null && ptr.getId() != null && ptr.getId() != 0) {
+                punchDayLog.setStatusList(String.valueOf(PunchStatus.UNPUNCH.getCode()));
                 punchDayLog.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
                 punchDayLog.setTimeRuleId(ptr.getId());
                 punchDayLog.setTimeRuleName(ptr.getName());
                 punchDayLog.setRestFlag(NormalFlag.NO.getCode());
+            } else if (ptr != null && NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
+                punchDayLog.setStatusList(String.valueOf(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode()));
             } else {
-                punchDayLog.setStatus(PunchStatus.NOTWORKDAY.getCode());
                 punchDayLog.setStatusList(String.valueOf(PunchStatus.NOTWORKDAY.getCode()));
             }
         }
@@ -10066,13 +10084,14 @@ public class PunchServiceImpl implements PunchService {
         Long userId = UserContext.current().getUser().getId();
         if (null != cmd.getUserId()) {
             userId = cmd.getUserId();
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, cmd.getEnterpriseId());
-            if(null !=detail){
-            	response.setDetailId(detail.getId());	
-            }
-            response.setUserId(userId);
-            response.setEnterpriseId(cmd.getEnterpriseId());
         }
+
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, cmd.getEnterpriseId());
+        if (null != detail) {
+            response.setDetailId(detail.getId());
+        }
+        response.setUserId(userId);
+        response.setEnterpriseId(cmd.getEnterpriseId());
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.setTimeInMillis(cmd.getQueryTime());
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -10080,9 +10099,8 @@ public class PunchServiceImpl implements PunchService {
         Calendar endCalendar = Calendar.getInstance();
         endCalendar.setTime(startCalendar.getTime());
         endCalendar.add(Calendar.MONTH, 1);
-        List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(userId,
-                cmd.getEnterpriseId(), dateSF.get().format(startCalendar.getTime()),
-                dateSF.get().format(endCalendar.getTime()));
+        List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(detail.getId(), cmd.getEnterpriseId(),
+                dateSF.get().format(startCalendar.getTime()), dateSF.get().format(endCalendar.getTime()));
         for (; startCalendar.before(endCalendar); startCalendar.add(Calendar.DAY_OF_MONTH, 1)) {
             PunchDayLog log = findPunchDayLogByDate(startCalendar.getTime(), dayLogList);
             MonthDayStatusDTO dto = new MonthDayStatusDTO();
