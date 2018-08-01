@@ -8460,7 +8460,7 @@ public class PunchServiceImpl implements PunchService {
         String hourUnit = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.TIME_UNIT_OF_HOUR), locale, "小时");
         Map<String, String> model = new HashMap<>();
         for (ApprovalCategoryDTO category : categories) {
-            
+            model.put("timeStep", category.getTimeStep().toString());
             model.put("timeUnit", ApprovalCategoryTimeUnit.DAY == ApprovalCategoryTimeUnit.fromCode(category.getTimeUnit()) ? dayUnit : hourUnit);
             model.put("categoryName", category.getCategoryName());
             model.put("remainCountDisplay", "");
