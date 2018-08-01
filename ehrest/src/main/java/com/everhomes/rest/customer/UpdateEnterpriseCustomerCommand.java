@@ -162,6 +162,42 @@ public class UpdateEnterpriseCustomerCommand {
     private BigDecimal riskInvestmentAmount;
     private Byte deviceType;
 
+    //新增的客户字段
+    private Long buyOrLeaseItemId;
+    private String bizAddress;
+    private String bizLife;
+    private String customerIntentionLevel;
+    private String enterDevGoal;
+    private String controllerName;
+    private String controllerSunBirth;
+    private String controllerLunarBirth;
+    private Long financingDemandItemId;
+    private String stringTag1;
+    private String stringTag2;
+    private String stringTag3;
+    private String stringTag4;
+    private String stringTag5;
+    private String stringTag6;
+    private String stringTag7;
+    private String stringTag8;
+    private String stringTag9;
+    private String stringTag10;
+    private String stringTag11;
+    private String stringTag12;
+    private String stringTag13;
+    private String stringTag14;
+    private String stringTag15;
+    private String stringTag16;
+    private Long dropBox1;
+    private Long dropBox2;
+    private Long dropBox3;
+    private Long dropBox4;
+    private Long dropBox5;
+    private Long dropBox6;
+    private Long dropBox7;
+    private Long dropBox8;
+    private Long dropBox9;
+
 
     private String unifiedSocialCreditCode;
     private String postUri;
