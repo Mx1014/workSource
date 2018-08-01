@@ -18,6 +18,10 @@ import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PlatformContextNoWarnning;
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
@@ -710,6 +714,23 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 
+        //定制版的App广场item没有appId和moduleId，直接查询公司管理的项目
+        if(cmd.getModuleId() == null && cmd.getAppId() == null){
+
+            ListCommunitiesByOrganizationIdCommand listCmd = new ListCommunitiesByOrganizationIdCommand();
+            listCmd.setOrganizationId(cmd.getOrganizationId());
+            ListCommunityByNamespaceCommandResponse listRes = organizationService.listCommunityByOrganizationId(listCmd);
+
+            List<ProjectDTO> dtos = new ArrayList<>();
+            if(listRes != null && listRes.getCommunities() != null && listRes.getCommunities().size() > 0){
+                for (CommunityDTO community: listRes.getCommunities()){
+                    ProjectDTO dto = toProjectDto(community);
+                    dtos.add(dto);
+                }
+            }
+            return dtos;
+        }
+
         if(cmd.getModuleId() == null && cmd.getAppId() != null){
             ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
             if(app != null){
@@ -724,6 +745,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos);
 
     }
+
+
+    private ProjectDTO toProjectDto(CommunityDTO communityDto){
+        ProjectDTO dto = new ProjectDTO();
+        dto.setProjectId(communityDto.getId());
+        dto.setProjectName(communityDto.getName());
+        dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+        dto.setCommunityType(communityDto.getCommunityType());
+        return dto;
+    }
+
 
     @Override
     public List<ProjectDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
@@ -819,14 +851,14 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
         return serviceModule;
     }
-    
+
     // Added by janson, TODO for administrator in zuolin admin
     private boolean checkZuolinRoot(long userId) {
         if(aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
                 UserContext.current().getUser().getId(), Privilege.Write, null)) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -858,7 +890,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId, Long appId){
         boolean allProjectFlag = false;
         List<ProjectDTO> dtos = new ArrayList<>();
-        
+
         if(checkZuolinRoot(userId)) {
             //如果是左邻运营后台的项目导航，则左邻后台管理员可以拿到此域空间下所有的项目，与管理公司或者普通公司无关。
             ListingLocator locator = new ListingLocator();
@@ -873,7 +905,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
             return dtos;
         }
-        
+
         //物业超级管理员拿所有项目
         //这一步是校验是不是超级管理员，如果是超级管理员那么就将allProjectFlag状态置为true
         if(checkModuleManage(userId, organizationId, moduleId)){
