@@ -22,7 +22,7 @@ public class SetPmTaskConfigCommand {
     private Long taskCategoryId;
     private Byte paymentFlag;
     private Long paymentAccount;
-    private Byte paymentAccountType;
+    private String paymentAccountType;
     private String contentHint;
 
     public Long getId() {
@@ -73,11 +73,11 @@ public class SetPmTaskConfigCommand {
         this.paymentAccount = paymentAccount;
     }
 
-    public Byte getPaymentAccountType() {
+    public String getPaymentAccountType() {
         return paymentAccountType;
     }
 
-    public void setPaymentAccountType(Byte paymentAccountType) {
+    public void setPaymentAccountType(String paymentAccountType) {
         this.paymentAccountType = paymentAccountType;
     }
 
