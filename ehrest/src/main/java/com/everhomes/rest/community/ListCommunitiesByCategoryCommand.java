@@ -2,8 +2,6 @@ package com.everhomes.rest.community;
 
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * <ul>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
@@ -22,7 +20,7 @@ public class ListCommunitiesByCategoryCommand {
 	private String ownerId;
 
 	private Long pageAnchor;
-	
+
 	private Integer namespaceId;
 
 	private Integer pageSize;
@@ -34,6 +32,12 @@ public class ListCommunitiesByCategoryCommand {
 	private Long categoryId;
 
 	private String keywords;
+	//以下参数为openapi所需
+	private String appKey;
+	private String signature;
+	private Long timestamp;
+	private Integer nonce;
+	private String crypto;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -107,9 +111,50 @@ public class ListCommunitiesByCategoryCommand {
 		this.ownerId = ownerId;
 	}
 
+
+	public String getAppKey() {
+		return appKey;
+	}
+
+	public void setAppKey(String appKey) {
+		this.appKey = appKey;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		this.signature = signature;
+	}
+
+	public Long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public Integer getNonce() {
+		return nonce;
+	}
+
+	public void setNonce(Integer nonce) {
+		this.nonce = nonce;
+	}
+
+	public String getCrypto() {
+		return crypto;
+	}
+
+	public void setCrypto(String crypto) {
+		this.crypto = crypto;
+	}
+
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
+
 
 }

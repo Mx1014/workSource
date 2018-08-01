@@ -96,11 +96,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		if(null != flowCase.getReferId()){
 			order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
 		}
-		if (order.getStatus()!=SiteBillStatus.FAIL.getCode() && order.getStatus()!=SiteBillStatus.REFUNDING.getCode()
-				&& order.getStatus()!=SiteBillStatus.REFUNDED.getCode()) {
-			CancelRentalBillCommand cmd = new CancelRentalBillCommand();
-			cmd.setRentalBillId(order.getId());
-			rentalv2Service.cancelRentalBill(cmd,false);
+		if (order.getStatus()==SiteBillStatus.PAYINGFINAL.getCode() || order.getStatus()==SiteBillStatus.APPROVING.getCode()) {
+			order.setStatus(SiteBillStatus.FAIL.getCode());
+			rentalv2Provider.updateRentalBill(order);
 		}
 
 	}
@@ -190,11 +188,14 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
 		FlowCaseEntity e = new FlowCaseEntity();
+		//用户名
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 				"user", RentalNotificationTemplateCode.locale, ""));
 		User user = this.userProvider.findUserById(order.getRentalUid());
-		if (null != user)
+		if (order.getUserName() != null)
+			e.setValue(order.getUserName());
+		else if (null != user)
 			e.setValue(user.getNickName());
 		else {
 			LOGGER.debug("user is null...userId = " + order.getRentalUid());
@@ -202,6 +203,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 		entities.add(e);
 
+		//联系方式
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
@@ -215,21 +217,22 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 		entities.add(e);
 
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
-				"organization", RentalNotificationTemplateCode.locale, ""));
-
+		//公司名
 		Long orgId = order.getUserEnterpriseId();
-		e.setValue("无");
 		if (null != orgId) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"organization", RentalNotificationTemplateCode.locale, ""));
+
+			e.setValue("无");
 			Organization org = organizationProvider.findOrganizationById(orgId);
-			if (org!=null)
+			if (org != null)
 				e.setValue(org.getName());
+			entities.add(e);
 		}
 
-		entities.add(e);
-
+		//资源名
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
@@ -237,6 +240,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setValue(order.getResourceName());
 		entities.add(e);
 
+		//详情
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
@@ -244,6 +248,26 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setValue(order.getUseDetail());
 		entities.add(e);
 
+		//规格
+		if (!StringUtils.isEmpty(order.getAddress())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"spec", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(order.getSpec());
+			entities.add(e);
+		}
+		//资源地址
+		if (!StringUtils.isEmpty(order.getAddress())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"address", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(order.getAddress());
+			entities.add(e);
+		}
+
+		//套餐名
 		if (!StringUtils.isEmpty(order.getPackageName())){
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -253,6 +277,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
+		//门禁
 		if (order.getDoorAuthId()!=null){
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -274,21 +299,24 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 //		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
 //		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
 //				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign()) {
+		//预订数量
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 					"count", RentalNotificationTemplateCode.locale, ""));
-			e.setValue(order.getRentalCount() + "");
+			e.setValue(order.getRentalCount().intValue() + "");
 			entities.add(e);
 //		}
 
+		//价格
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 				"price", RentalNotificationTemplateCode.locale, ""));
-		e.setValue(order.getPayTotalMoney().toString());
+		e.setValue(order.getPayTotalMoney().toString()+"元");
 		entities.add(e);
 
+		//推荐员
 		List<RentalConfigAttachment> recommendUsers = rentalv2Provider
 				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId(),null);
 		if (null != recommendUsers && recommendUsers.size() != 0) {
@@ -313,6 +341,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
+		//免费物资
 		List<RentalConfigAttachment> goodItems = rentalv2Provider
 				.queryRentalConfigAttachmentByOwner(order.getResourceType(), AttachmentType.ORDER_GOOD_ITEM.name(), order.getId(),null);
 		if (null != goodItems && goodItems.size() != 0) {
@@ -335,6 +364,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
+		//付费商品
 		List<RentalItemsOrder> ribs = rentalv2Provider.findRentalItemsBillBySiteBillId(order.getId(), order.getResourceType());
 		if (null != ribs) { 
 			e = new FlowCaseEntity();

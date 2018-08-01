@@ -1,6 +1,7 @@
 package com.everhomes.rest.contract;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -575,4 +576,9 @@ public class CreateContractCommand {
     public void setOrgId(Long orgId) {
         this.orgId = orgId;
     }
+    
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

@@ -334,7 +334,7 @@ public class SyncOkHttpApnsClient implements ApnsClient {
     @Override
     public NotificationResponse push(Notification notification) {
         final Request request = buildRequest(notification);
-        logger.info("http2 headers :["+request.headers()+" ];bodys:["+request.body()+"]");
+        logger.info("http2 headers :["+request.headers()+" ];bodys:["+request.body()+"];gateway:["+gateway+"]");
         Response response = null;
 
         try {

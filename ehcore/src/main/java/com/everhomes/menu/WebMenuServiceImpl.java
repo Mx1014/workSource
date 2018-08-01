@@ -9,6 +9,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
@@ -16,6 +17,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
+import com.everhomes.server.schema.tables.pojos.EhServiceModules;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.WebMenuType;
@@ -355,6 +357,19 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		LOGGER.debug("Method listPmWebMenu's appOriginIds:" + appOriginIds.toString());
 
+
+		//查询默认的应用
+		List<Long> defaultMenuOriginId = getNoAuthOriginId(UserContext.getCurrentNamespaceId());
+		if(defaultMenuOriginId != null){
+			appOriginIds.addAll(defaultMenuOriginId);
+		}
+
+		//去重
+		Set<Long> appOriginIdSet = new HashSet<>();
+		appOriginIdSet.addAll(appOriginIds);
+		appOriginIds.clear();
+		appOriginIds.addAll(appOriginIdSet);
+
 		// 根据应用id拿菜单
 		List<WebMenuDTO> webMenuDTOS = listWebMenuByApp(WebMenuType.PARK.getCode(), appOriginIds);
 
@@ -362,6 +377,23 @@ public class WebMenuServiceImpl implements WebMenuService {
 		return webMenuDTOS;
 
 	}
+
+	private List<Long> getNoAuthOriginId(Integer namespaceId){
+
+		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModulesByMenuAuthFlag((byte)0);
+		if(serviceModules == null || serviceModules.size() == 0){
+			return null;
+		}
+		List<Long> moduleIds = serviceModules.stream().map(ServiceModule::getId).collect(Collectors.toList());
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(namespaceId, moduleIds);
+
+		if(apps == null || apps.size() == 0){
+			return  null;
+		}
+
+		return apps.stream().map(r -> r.getOriginId()).collect(Collectors.toList());
+	}
+
 
 	private List<WebMenuDTO> listWebMenuByApp(String webMenuType, List<Long> appOriginIds){
 
@@ -383,11 +415,115 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<WebMenuDTO> webMenuDtos  = new ArrayList<>();
 		for (WebMenu webMenu : webMenus) {
 			WebMenuDTO dto = ConvertHelper.convert(webMenu, WebMenuDTO.class);
+			ServiceModuleAppDTO appDTO = ConvertHelper.convert(webMenu.getAppConfig(), ServiceModuleAppDTO.class);
+			dto.setAppConfig(appDTO);
 			webMenuDtos.add(dto);
 		}
 
 		WebMenuDTO treeDto = processWebMenus(webMenuDtos, null);
-		return treeDto.getDtos();
+
+
+		List<WebMenuDTO> dtos = treeDto.getDtos();
+
+		addOaDefaultMenu(dtos, webMenuType);
+
+		return dtos;
+
+	}
+
+
+
+	//TODO 临时为"智谷汇"添加“企业办公”下的“协同办公”和“人力资源”资源菜单
+	private void addOaDefaultMenu(List<WebMenuDTO> dtos, String webMenuType){
+
+		if(WebMenuType.fromCode(webMenuType) != WebMenuType.PARK || UserContext.getCurrentNamespaceId() == null || (UserContext.getCurrentNamespaceId() != 999945 && UserContext.getCurrentNamespaceId() != 1)) {
+
+			return;
+
+		}
+
+		// 1. 编辑需要添加的菜单
+
+		WebMenuDTO dto1 = new WebMenuDTO();
+		dto1.setName("协同办公");
+
+		List<WebMenuDTO> dtos1 = new ArrayList<>();
+
+		WebMenuDTO dto11 = new WebMenuDTO();
+		dto11.setName("审批");
+		dto11.setDataType("approval-work");
+		dtos1.add(dto11);
+
+		WebMenuDTO dto12 = new WebMenuDTO();
+		dto12.setName("工作汇报");
+		dto12.setDataType("working-conference");
+		dtos1.add(dto12);
+
+		WebMenuDTO dto13 = new WebMenuDTO();
+		dto13.setName("文档");
+		dto13.setDataType("document-work");
+		dtos1.add(dto13);
+
+		WebMenuDTO dto14 = new WebMenuDTO();
+		dto14.setName("企业公告");
+		dto14.setDataType("notice-work");
+		dtos1.add(dto14);
+
+		WebMenuDTO dto15 = new WebMenuDTO();
+		dto15.setName("日程提醒");
+		dto15.setDataType("time-schedule");
+		dtos1.add(dto15);
+
+		WebMenuDTO dto16 = new WebMenuDTO();
+		dto16.setName("会议预订");
+		dto16.setDataType("meeting-work");
+		dtos1.add(dto16);
+
+		dto1.setDtos(dtos1);
+
+
+		WebMenuDTO dto2 = new WebMenuDTO();
+		dto2.setName("人力资源");
+		List<WebMenuDTO> dtos2 = new ArrayList<>();
+
+		WebMenuDTO dto21 = new WebMenuDTO();
+		dto21.setName("通讯录");
+		dto21.setDataType("address-book");
+		dtos2.add(dto21);
+
+		dto2.setDtos(dtos2);
+
+
+
+		List<WebMenuDTO> defaultDtos = new ArrayList<>();
+		defaultDtos.add(dto1);
+		defaultDtos.add(dto2);
+
+
+		// 2. 加到原有菜单中
+		if(dtos == null){
+			dtos = new ArrayList<>();
+		}
+
+		boolean isExists = false;
+
+		// 原来已经存在企业办公
+		for (WebMenuDTO dto: dtos){
+			if(dto.getId().longValue() == 40000010){
+				dto.getDtos().addAll(0, defaultDtos);
+				isExists = true;
+			}
+		}
+
+		// 原来不存在企业办公
+		if(!isExists){
+			WebMenuDTO dto = new WebMenuDTO();
+			dto.setName("企业办公");
+			dto.setId(40000010L);
+			dto.setDtos(defaultDtos);
+
+			dtos.add(0, dto);
+		}
 
 	}
 
@@ -762,8 +898,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 			for(WebMenu menu: allMenus){
 				if(app.getModuleId() != null && menu.getModuleId() != null && app.getModuleId().longValue() == menu.getModuleId().longValue()){
 					WebMenu selectMenu = ConvertHelper.convert(menu, WebMenu.class);
-					selectMenu.setConfigId(app.getId());
 					selectMenu.setName(app.getName());
+					selectMenu.setConfigId(app.getId());
+					selectMenu.setAppId(app.getOriginId());
+					selectMenu.setAppConfig(app);
 					menus.add(selectMenu);
 				}
 			}

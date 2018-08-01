@@ -1063,9 +1063,9 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
 
-    /**
+    /*
      * <b>URL: /org/listOrganizationContacts</b>
-     * <p>通讯录</p>
+     * <p>通讯录（停用 at 2018/04/06）</p>
      */
     @RequestMapping("listOrganizationContacts")
     @RestReturn(value = ListOrganizationContactCommandResponse.class)
@@ -1608,22 +1608,23 @@ public class OrganizationController extends ControllerBase {
      * @param cmd
      * @return
      */
-    @RequestMapping(value = "/org/getAdminType")
+    @RequestMapping("getAdminType")
     @RestReturn(value = GetAdminTypeResponse.class)
     public RestResponse getAdminType(GetAdminTypeCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         GetAdminTypeResponse  adminType = new GetAdminTypeResponse();
         adminType.setSuperAdminFlag(TrueOrFalseFlag.FALSE.getCode());
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
         try {
+            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
             adminType.setSuperAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-            resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);    
         } catch(Exception ex) {
+            //nothing
             
         }
-        
+        RestResponse response = new RestResponse(adminType);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
         return response;
     }
 

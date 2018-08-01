@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.border.BorderProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -23,6 +24,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.aclink.AclinkCameraDTO;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
+import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkIPadDTO;
 import com.everhomes.rest.aclink.AclinkListLocalServersCommand;
 import com.everhomes.rest.aclink.AclinkMessage;
@@ -35,6 +37,7 @@ import com.everhomes.rest.aclink.CreateMarchUUIDCommand;
 import com.everhomes.rest.aclink.CreateMarchUUIDResponse;
 import com.everhomes.rest.aclink.DeleteLocalServerCommand;
 import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessLinkStatus;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.DoorMessageType;
@@ -96,6 +99,9 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private BorderProvider borderProvider;
 
 	@Override
 	public CreateMarchUUIDResponse generateUUID(CreateMarchUUIDCommand cmd) {
@@ -171,7 +177,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	public void createLocalServer(CreateLocalServersCommand cmd) {
 		AclinkServer server = new AclinkServer();
 		User user = UserContext.current().getUser();
-		server.setUuid(cmd.getUuid());
+		server.setUuid(cmd.getUuid().toLowerCase());
 		server.setName(cmd.getName());
 		server.setOwnerId(cmd.getOwnerId());
 		server.setOwnerType(cmd.getOwnerType());
@@ -197,6 +203,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	public void updateLocalServer(UpdateLocalServersCommand cmd) {
 		AclinkServer server = aclinkServerProvider.findServerById(cmd.getId());
 		server.setName(cmd.getName());
+		server.setUuid(cmd.getUuid().toLowerCase());
 		aclinkServerProvider.updateLocalServer(server);
 	}
 
@@ -357,7 +364,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 		}
 		
         pdu.setType(1);
-        pdu.setUuid(server.getUuid());
+        pdu.setUuid(server.getUuidNum());
         long requestId = LocalSequenceGenerator.getNextSequence();
         borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
 		rsp.setListDoorAccess(doorDTOs);
@@ -369,6 +376,14 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	@Override
 	public PairLocalServerResponse pairLocalServer(String uuid, String ipAddress, String version) {
 		PairLocalServerResponse rsp = new PairLocalServerResponse();
+		StringBuffer macAddress = new StringBuffer(uuid);
+		if (uuid.length() == 12){
+			//mac地址补上冒号
+			for(int i = 1; i <6; i++){
+				macAddress.insert(3*i-1, ":");
+			}
+			uuid = macAddress.toString();
+		}
 		AclinkServer server = aclinkServerProvider.findLocalServersByUuid(uuid);
 		if(server == null ){
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_UUID, "匹配码错误");
@@ -433,6 +448,16 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 		
 		
 		serverDto.setLocalServerKey(server.getAesServerKey());
+		List<Border> borders = borderProvider.listAllBorders();
+		//把云服务器borderServer的地址及端口找到,供内网服务器连接  by liuyilin 20180707
+		if(borders != null && borders.size() > 0){
+	        String borderUrl = borders.get(0).getPublicAddress();
+	        if(borders.get(0).getPublicPort().equals(443)) {
+	        	rsp.setBorderIp("wss://" + borderUrl + "/aclink");
+	        } else {
+	        	rsp.setBorderIp("ws://" + borderUrl + ":" + borders.get(0).getPublicPort() + "/aclink");
+	        }
+		}
 		rsp.setAclinkServerDto(serverDto);
 		rsp.setListCameraDtos(cameraDtos);
 		rsp.setListDoorAccessDtos(doorAccessDtos);
@@ -443,6 +468,14 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 
 	@Override
 	public AclinkServerDTO onServerConnecting(AclinkConnectingCommand cmd) {
+		StringBuffer macAddress = new StringBuffer(cmd.getUuid());
+		if (cmd.getUuid().length() == 12){
+			//mac地址补上冒号
+			for(int i = 1; i <6; i++){
+				macAddress.insert(3*i-1, ":");
+			}
+			cmd.setUuid(macAddress.toString());
+		}
 		AclinkServer server = aclinkServerProvider.findLocalServersByUuid(cmd.getUuid());
 		if(server == null ){
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_UUID, "匹配码不匹配");
@@ -459,10 +492,30 @@ public class AclinkServerServiceImpl implements AclinkServerService {
             LOGGER.error("decrypt error", e);
         }
         
-        if( (decodeResult == "") || (decodeResult.indexOf(server.getUuid()) != 0) ) {
+        if( (decodeResult == "") || (decodeResult.indexOf(server.getUuidNum()) != 0) ) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "Auth error");
         }
-		
+        server.setLinkStatus(DoorAccessLinkStatus.SUCCESS.getCode());
+        aclinkServerProvider.updateLocalServer(server);
+		return ConvertHelper.convert(server, AclinkServerDTO.class);
+	}
+	
+	@Override
+	public AclinkServerDTO onServerDisconnecting(AclinkDisconnectedCommand cmd) {
+		StringBuffer macAddress = new StringBuffer(cmd.getUuid());
+		if (cmd.getUuid().length() == 12){
+			//mac地址补上冒号
+			for(int i = 1; i <6; i++){
+				macAddress.insert(3*i-1, ":");
+			}
+			cmd.setUuid(macAddress.toString());
+		}
+		AclinkServer server = aclinkServerProvider.findLocalServersByUuid(cmd.getUuid());
+		if(server == null ){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_UUID, "匹配码不匹配");
+		}
+        server.setLinkStatus(DoorAccessLinkStatus.FAILED.getCode());
+        aclinkServerProvider.updateLocalServer(server);
 		return ConvertHelper.convert(server, AclinkServerDTO.class);
 	}
 

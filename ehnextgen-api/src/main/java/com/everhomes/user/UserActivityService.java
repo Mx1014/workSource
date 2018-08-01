@@ -9,6 +9,7 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.util.Tuple;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,9 @@ public interface UserActivityService {
     void addFeedback(FeedbackCommand cmd);
     
     ListFeedbacksResponse listFeedbacks(ListFeedbacksCommand cmd);
-    
+
+    void exportFeedbacks(ExportFeedbacksCommand cmd);
+
     void updateFeedback(UpdateFeedbackCommand cmd);
     
     void cancelFavorite(CancelUserFavoriteCommand cmd);
