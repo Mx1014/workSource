@@ -278,7 +278,7 @@ public interface PunchProvider {
 
 	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
 
-	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, List<Long> dptIds, String startDay, String endDay,
+	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, List<Long> detailIds, List<Long> dptIds, String startDay, String endDay,
 			Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
 			Time workTime, Byte exceptionStatus,Integer pageOffset,Integer pageSize);
 

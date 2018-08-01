@@ -5907,6 +5907,7 @@ public class PunchServiceImpl implements PunchService {
             pageOffset = cmd.getPageAnchor().intValue();
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         List<Long> userIds = null;
+        List<Long> detailIds = null;
 //		Long organizationId = null;
         List<Long> deptIds = null;
         if (cmd.getUserId() != null) {
@@ -5933,6 +5934,14 @@ public class PunchServiceImpl implements PunchService {
             }else{
             	deptIds.add(cmd.getOwnerId());
             }
+            if (null != cmd.getUserName()) {
+                List<OrganizationMemberDetails> members = organizationProvider.listOrganizationMemberDetails(ownerId, cmd.getUserName());
+                if (null != members) {
+                    for (OrganizationMemberDetails member : members) {
+                        detailIds.add(member.getId());
+                    }
+                }
+            }
         }
         Long t1 = System.currentTimeMillis();
 
@@ -5945,7 +5954,7 @@ public class PunchServiceImpl implements PunchService {
             endDay = dateSF.get().format(new Date(cmd.getEndDay()));
 
         List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-                ownerId, deptIds, startDay, endDay,
+                ownerId, detailIds, deptIds, startDay, endDay,
                 cmd.getArriveTimeCompareFlag(), convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
                 convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
                 convertTime(cmd.getWorkTime()), cmd.getExceptionStatus(), pageOffset, pageSize + 1);

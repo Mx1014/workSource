@@ -5877,4 +5877,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .fetchAnyInto(OrganizationMember.class);
         return organizationMember;
     }
+
+    @Override
+    public List<OrganizationMemberDetails> listOrganizationMemberDetails(Long ownerId, String userName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(ownerId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like("%" + userName + "%"))
+                .fetchInto(OrganizationMemberDetails.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
 }

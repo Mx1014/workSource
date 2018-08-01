@@ -675,4 +675,6 @@ public interface OrganizationProvider {
 			List<Long> organizationIds);
 
     OrganizationMember findMemberByType(Long aLong, Long orgId, String code);
+
+    List<OrganizationMemberDetails>  listOrganizationMemberDetails(Long ownerId, String userName);
 }

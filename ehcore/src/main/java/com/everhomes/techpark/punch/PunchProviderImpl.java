@@ -2571,7 +2571,7 @@ public class PunchProviderImpl implements PunchProvider {
     }
 
     @Override
-    public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, List<Long> dptIds, String startDay, String endDay,
+    public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long ownerId, List<Long> detailIds, List<Long> dptIds, String startDay, String endDay,
                                               Byte arriveTimeCompareFlag, Time arriveTime, Byte leaveTimeCompareFlag, Time leaveTime, Byte workTimeCompareFlag,
                                               Time workTime, Byte exceptionStatus, Integer pageOffset, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2583,6 +2583,8 @@ public class PunchProviderImpl implements PunchProvider {
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
         if (userIds != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
+        if (detailIds != null)
+            condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID.in(detailIds));
         if (dptIds != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(dptIds));
         if (exceptionStatus != null)
