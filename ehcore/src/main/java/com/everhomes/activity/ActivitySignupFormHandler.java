@@ -89,6 +89,7 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
                         query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(ownerId));
                         query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
                         query.addConditions(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
+                        query.addOrderBy(Tables.EH_GENERAL_FORMS.ID.desc());
                         return query;
                     }
                 });
