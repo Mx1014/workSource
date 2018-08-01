@@ -1659,7 +1659,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void setArchivesNotification(ArchivesNotificationCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = cmd.getNamespaceId();
         ArchivesNotifications originNotify = archivesProvider.findArchivesNotificationsByOrganizationId(namespaceId, cmd.getOrganizationId());
         if (originNotify == null) {
             ArchivesNotifications newNotify = new ArchivesNotifications();
@@ -1854,6 +1854,18 @@ public class ArchivesServiceImpl implements ArchivesService {
                 message,
                 MessagingConstants.MSG_FLAG_STORED.getCode()
         );
+    }
+
+    @Override
+    public ArchivesNotificationDTO getArchivesNotification(ArchivesNotificationCommand cmd){
+        Integer namespaceId = cmd.getNamespaceId();
+        ArchivesNotifications notification = archivesProvider.findArchivesNotificationsByOrganizationId(namespaceId, cmd.getOrganizationId());
+        if (notification == null) {
+            return new ArchivesNotificationDTO();
+        }
+        ArchivesNotificationDTO res = ConvertHelper.convert(notification, ArchivesNotificationDTO.class);
+        res.setTargets(JSON.parseArray(notification.getNotifyTarget(), ArchivesNotificationTarget.class));
+        return res;
     }
 
     @Override
