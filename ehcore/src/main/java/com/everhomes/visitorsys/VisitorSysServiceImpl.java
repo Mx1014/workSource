@@ -1766,7 +1766,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListBookedVisitorsResponse listBookedVisitorsForManage(ListBookedVisitorsCommand cmd) {
         cmd.setSearchFlag(VisitorsysSearchFlagType.VISITOR_MANAGEMENT.getCode());
         checkMoblieManagePrivilege(cmd);
-        return listBookedVisitors(cmd);
+        return listBookedVisitorsWithOutACL(cmd);
     }
 
     @Override
