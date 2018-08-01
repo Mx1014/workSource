@@ -41,18 +41,18 @@ ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box9` TINYINT null defaul
 
 -- AUTHOR: 黄鹏宇 20180801
 -- REMARK:修复客户下拉框字段类型
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `buy_or_lease_item_id` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `financing_demand_item_id` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `financing_demand_item_id` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box1` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box2` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box3` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box4` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box5` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box6` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box7` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box8` LONG;
-ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box9` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `buy_or_lease_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `financing_demand_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `financing_demand_item_id` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box1` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box2` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box3` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box4` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box5` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box6` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box7` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box8` BIGINT;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box9` BIGINT;
 -- end
 -- --------------------- SECTION END ---------------------------------------------------------
 
