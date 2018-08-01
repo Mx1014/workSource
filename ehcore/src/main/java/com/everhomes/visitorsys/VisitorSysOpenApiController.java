@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
@@ -37,7 +38,10 @@ public class VisitorSysOpenApiController extends ControllerBase {
 	@RequestMapping("listOrganizations")
 	@RestReturn(OpenApiListOrganizationsResponse.class)
 	public RestResponse listOrganizations(OpenApiListOrganizationsCommand cmd) {
-		return null;
+		RestResponse response = new RestResponse(visitorSysService.openApiListOrganizations(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -49,7 +53,10 @@ public class VisitorSysOpenApiController extends ControllerBase {
 	@RequestMapping("createVisitor")
 	@RestReturn(OpenApiCreateVisitorResponse.class)
 	public RestResponse createVisitor(OpenApiCreateVisitorCommand cmd) {
-		return null;
+		RestResponse response = new RestResponse(visitorSysService.openApiCreateVisitor(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 }

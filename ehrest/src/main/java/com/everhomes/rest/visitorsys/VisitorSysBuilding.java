@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
 public class VisitorSysBuilding {
     private String building;
     private String doorplate;
+    private String communityName;
 
     public String getBuilding() {
         return building;
@@ -29,6 +30,15 @@ public class VisitorSysBuilding {
     public void setDoorplate(String doorplate) {
         this.doorplate = doorplate;
     }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

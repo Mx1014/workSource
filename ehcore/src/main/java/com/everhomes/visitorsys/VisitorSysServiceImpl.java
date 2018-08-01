@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.DoorAccessService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -20,6 +22,7 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalVersion;
@@ -118,6 +121,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public CommunityProvider communityProvider;
     @Autowired
     public OrganizationProvider organizationProvider;
+    @Autowired
+    public AddressProvider addressProvider;
     @Autowired
     public VisitorsysSearcher visitorsysSearcher;
     @Autowired
@@ -1817,6 +1822,63 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             return new GetMessageReceiverForManageResponse(VisitorsysFlagType.NO.getCode());
         }
         return new GetMessageReceiverForManageResponse(VisitorsysFlagType.YES.getCode());
+    }
+
+    @Override
+    public OpenApiListOrganizationsResponse openApiListOrganizations(OpenApiListOrganizationsCommand cmd) {
+        SearchOrganizationCommand orgCmd = new SearchOrganizationCommand();
+        orgCmd.setKeyword(cmd.getKeyWords());
+        orgCmd.setCommunityId(cmd.getOwnerId());
+        orgCmd.setSimplifyFlag((byte)1);
+        orgCmd.setPageSize(configurationProvider.getIntValue("visitorsys.organizationlist.pagesize",20));
+        OrganizationQueryResult organizationQueryResult = organizationSearcher.fuzzyQueryOrganizationByName(orgCmd);
+        if(organizationQueryResult==null || organizationQueryResult.getDtos()==null){
+            return null;
+        }
+        OpenApiListOrganizationsResponse response = new OpenApiListOrganizationsResponse();
+        response.setNextPageAnchor(organizationQueryResult.getPageAnchor());
+
+        List<OrganizationAddress> orgAddress= organizationProvider.findOrganizationAddressByOrganizationIds(organizationQueryResult.getDtos().stream().map(r -> r.getId()).collect(Collectors.toList()));
+        List<Address> address = addressProvider.listAddressOnlyByIds(orgAddress.stream().map(r -> r.getAddressId()).collect(Collectors.toList()));
+        //addressid -> 地址详情
+        Map<Long,Address> mapAddress = address.stream().collect(Collectors.toMap(Address::getId,r->r));
+
+        //公司id->地址列表
+        Map<Long,List<OrganizationAddress>> orgAddressMap = new HashMap<>();
+        for (OrganizationAddress organizationAddress : orgAddress) {
+            List<OrganizationAddress> addresses = orgAddressMap.get(organizationAddress.getOrganizationId());
+            if(addresses == null){
+                addresses = new ArrayList<>();
+                orgAddressMap.put(organizationAddress.getOrganizationId(),addresses);
+            }
+            addresses.add(organizationAddress);
+
+        }
+        response.setVisitorEnterpriseList(organizationQueryResult.getDtos().stream().map(r->{
+            BaseVisitorEnterpriseDTO dto = new BaseVisitorEnterpriseDTO();
+            dto.setEnterpriseId(r.getId());
+            dto.setEnterpriseName(r.getName());
+            List<OrganizationAddress> addresses = orgAddressMap.get(r.getId());
+            if(addresses!=null && addresses.size()>0) {
+                //设置楼栋门牌
+                dto.setBuildings(addresses.stream().map(addr->{
+                    VisitorSysBuilding building = new VisitorSysBuilding();
+                    Address address1 = mapAddress.get(addr.getAddressId());
+                    if(address1!=null){
+                        building.setDoorplate(address1.getApartmentName());
+                    }
+                    building.setBuilding(addr.getBuildingName());
+                    return building;
+                }).collect(Collectors.toList()));
+            }
+            return dto;
+        }).collect(Collectors.toList()));
+        return response;
+    }
+
+    @Override
+    public OpenApiCreateVisitorResponse openApiCreateVisitor(OpenApiCreateVisitorCommand cmd) {
+        return null;
     }
 
     /**

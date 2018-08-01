@@ -382,6 +382,15 @@ public class AddressProviderImpl implements AddressProvider {
     }
 
     @Override
+    public List<Address> listAddressOnlyByIds(List<Long> ids) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.ID.in(ids))
+                .and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchInto(Address.class);
+    }
+
+    @Override
     public List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_ADDRESSES)

@@ -517,5 +517,8 @@ public interface OrganizationProvider {
     
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(
 			String contactPhone, Long organizationId, String memberGroup);
+
+	List<OrganizationAddress> findOrganizationAddressByOrganizationIds(
+			List<Long> organizationIds);
  
 }

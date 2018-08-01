@@ -48,6 +48,8 @@ public interface AddressProvider {
      */
     List<Address> listAddressByIds(Integer namespaceId, List<Long> ids);
 
+    List<Address> listAddressOnlyByIds(List<Long> ids);
+
     List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName);
 	Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);
 	Address findActiveAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);

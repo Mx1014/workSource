@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.visitorsys;
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.visitorsys.*;
 import com.everhomes.rest.visitorsys.GetFormCommand;
 import com.everhomes.rest.visitorsys.ui.*;
@@ -137,4 +138,8 @@ public interface VisitorSysService {
     void updateMessageReceiverForManage(UpdateMessageReceiverCommand cmd);
 
     GetMessageReceiverForManageResponse getMessageReceiverForManage(BaseVisitorsysCommand cmd);
+
+    OpenApiListOrganizationsResponse openApiListOrganizations(OpenApiListOrganizationsCommand cmd);
+
+    OpenApiCreateVisitorResponse openApiCreateVisitor(OpenApiCreateVisitorCommand cmd);
 }
