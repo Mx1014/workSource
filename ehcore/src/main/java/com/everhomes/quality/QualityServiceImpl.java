@@ -2995,6 +2995,7 @@ public class QualityServiceImpl implements QualityService {
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%", null, null, cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}else {
+				// add all communities data without ownerId condition
 				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%", null, null, cmd.getScopeIds(), cmd.getInspectionType()));
 			}
 
