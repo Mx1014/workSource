@@ -60,7 +60,6 @@ ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box8` LONG;
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box9` LONG;
 -- end
 
-
 -- 通用脚本
 -- ADD BY xq.tian
 -- ISSUE-32697 运营统计重构
@@ -402,5 +401,4 @@ ALTER TABLE eh_var_field_item_scopes ADD INDEX `i_eh_item_scope_item_id`(`module
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
-
 
