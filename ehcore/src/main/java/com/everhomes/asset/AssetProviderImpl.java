@@ -16,9 +16,14 @@ import com.everhomes.pay.order.OrderDTO;
 import com.everhomes.pay.user.ListBusinessUserByIdsCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.PaymentUserStatus;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -103,6 +108,9 @@ public class AssetProviderImpl implements AssetProvider {
     
     @Autowired
     private AssetService assetService;
+    
+    @Autowired
+	private PortalService portalService;
 
     @Override
     public void creatAssetBill(AssetBill bill) {
@@ -3375,6 +3383,79 @@ public class AssetProviderImpl implements AssetProvider {
             }
             return null;
         });
+        
+        //判断一下是否该物业缴费模块是否配置了走合同变更的开关
+        if(isContractChangeFlag(namespaceId, ServiceModuleConstants.ASSET_MODULE, categoryId)) {
+        	//若开关关闭，则税率修改后，系统自动按照修改后的税率更新未出账单及未出账单对应的合同费用清单
+        	Set<Long> billIds = new HashSet<>();
+        	EhPaymentBills bill = Tables.EH_PAYMENT_BILLS.as("bill");
+        	//获取所有未出账单的id
+        	getReadOnlyContext().select(bill.ID)
+	            .from(bill)
+	            .where(bill.NAMESPACE_ID.eq(namespaceId))
+	            .and(bill.CATEGORY_ID.eq(categoryId))
+	            .and(bill.OWNER_ID.eq(communityId))
+	            .and(bill.SWITCH.eq((byte) 0))
+	            .fetch()
+	            .forEach(r -> {
+	            	billIds.add(r.getValue(bill.ID));
+            });
+        	//根据设置的税率重新计算费项
+        	EhPaymentBillItems billItems = Tables.EH_PAYMENT_BILL_ITEMS.as("billItems");
+            getReadOnlyContext().select(billItems.ID,billItems.BILL_ID,billItems.AMOUNT_RECEIVABLE,t.TAX_RATE)
+                    .from(billItems)
+                    .leftOuterJoin(t)
+                    .on(billItems.CHARGING_ITEMS_ID.eq(t.CHARGING_ITEM_ID))
+                    .where(billItems.NAMESPACE_ID.eq(namespaceId))
+                    .and(billItems.CATEGORY_ID.eq(categoryId))
+                    .and(billItems.OWNER_ID.eq(communityId))
+                    .and(t.NAMESPACE_ID.eq(namespaceId))
+                    .and(t.CATEGORY_ID.eq(categoryId))
+                    .and(t.OWNER_ID.eq(communityId))
+                    .and(billItems.BILL_ID.in(billIds))
+                    .fetch()
+                    .forEach(r -> {
+                    	//不含税金额=含税金额/（1+税率）    不含税金额=1000/（1+10%）=909.09
+                    	final BigDecimal[] amountReceivable = {new BigDecimal("0")};
+        		        final BigDecimal[] amountReceivableWithoutTax = {new BigDecimal("0")};
+        		        final BigDecimal[] amountReceived = {new BigDecimal("0")};
+        		        final BigDecimal[] amountReceivedWithoutTax = {new BigDecimal("0")};
+        		        //final BigDecimal[] amountOwed = {new BigDecimal("0")};
+        		        //final BigDecimal[] amountOwedWithoutTax = {new BigDecimal("0")};
+        		        final BigDecimal[] taxAmount = {new BigDecimal("0")};
+        		        final BigDecimal[] taxRate = {new BigDecimal("0")};
+        		        taxRate[0] = r.getValue(t.TAX_RATE);
+            			if(taxRate[0] != null) {
+            				Long billItemId = r.getValue(billItems.ID);
+            				amountReceivable[0] = r.getValue(billItems.AMOUNT_RECEIVABLE);
+            				BigDecimal taxRateDiv = taxRate[0].divide(new BigDecimal(100));
+                			amountReceivableWithoutTax[0] = amountReceivable[0].divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
+                			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+                			taxAmount[0] = amountReceivable[0].subtract(amountReceivableWithoutTax[0]);
+                			this.dbProvider.execute((TransactionStatus status) -> {
+                	            context.update(billItems)
+                	            		.set(billItems.AMOUNT_RECEIVABLE, amountReceivable[0])
+                	            		.set(billItems.AMOUNT_RECEIVABLE_WITHOUT_TAX, amountReceivableWithoutTax[0])
+                	            		.set(billItems.TAX_AMOUNT, taxAmount[0])
+                	            		.set(billItems.TAX_RATE, taxRate[0])
+                	            		.set(billItems.AMOUNT_RECEIVED, amountReceived[0])
+                	            		.set(billItems.AMOUNT_RECEIVED_WITHOUT_TAX, amountReceivedWithoutTax[0])
+                	            		.set(billItems.AMOUNT_OWED, amountReceivable[0])
+                	            		.set(billItems.AMOUNT_OWED_WITHOUT_TAX, amountReceivableWithoutTax[0])
+                	                    .where(billItems.NAMESPACE_ID.eq(namespaceId))
+                	                    .and(billItems.OWNER_ID.eq(communityId))
+                	                    .and(billItems.CATEGORY_ID.eq(categoryId))
+                	                    .and(billItems.ID.eq(billItemId))
+                	                    .execute();
+                	            return null;
+                	        });
+            			}
+                    });
+        	//重新计算账单
+            for (Long billId : billIds) {
+            	reCalBillById(billId);
+            }
+        }
     }
 
     @Override
@@ -4868,6 +4949,7 @@ public class AssetProviderImpl implements AssetProvider {
                 });
         //修复issue-32525 "导入一个账单，减免大于收费项，列表显示了负数"的bug
         amountOwed[0] = DecimalUtils.negativeValueFilte(amountOwed[0]);
+        amountOwedWithoutTax[0] = DecimalUtils.negativeValueFilte(amountOwedWithoutTax[0]);
         //更改金额，但不更改状态
         getReadWriteContext().update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE, amountReceivable[0])
@@ -6144,5 +6226,25 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return ret;
     }
+	
+	//判断一下是否该物业缴费模块是否配置了走合同变更的开关
+	public Boolean isContractChangeFlag(Integer namespaceId, Long moduleId, Long categoryId) {
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(namespaceId);
+		cmd.setModuleId(moduleId);
+		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(cmd);
+		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
+		for(ServiceModuleAppDTO serviceModuleAppDTO : serviceModuleApps) {
+			String instanceConfig = serviceModuleAppDTO.getInstanceConfig();
+			AssetInstanceConfigDTO assetInstanceConfigDTO = 
+					(AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
+			Byte contractChangeFlag = 0; //0：代表不走合同变更
+			if(assetInstanceConfigDTO != null && categoryId.equals(assetInstanceConfigDTO.getCategoryId()) 
+					&& contractChangeFlag.equals(assetInstanceConfigDTO.getContractChangeFlag())) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }
