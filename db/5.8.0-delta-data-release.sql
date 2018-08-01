@@ -14,6 +14,16 @@
 -- REMARK: 根据域空间判断是否展示能耗数据，测试环境初始化鼎峰汇支持展示能耗数据
 INSERT INTO `eh_service_module_functions`(`id`, `module_id`, `privilege_id`, `explain`) VALUES (101, 20400, 0, '账单显示用量');
 
+-- AUTHOR: 梁燕龙
+-- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
+INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
+VALUES( 'activity.notification', 18, 'zh_CN', '活动报名人数不足最低限制人数，活动取消', '您报名的活动「${subject}」由于未达到最低人数，已被取消。');
+INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
+VALUES( 'activity.notification', 19, 'zh_CN', '活动报名人数不足最低限制人数，活动取消', '您报名的活动「${subject}」由于未达到最低人数，已被取消，报名费用将在三个工作日内退回您的账户上。');
+INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
+VALUES( 'activity.notification', 20, 'zh_CN', '活动报名人数不足最低限制人数，活动取消', '您发起的活动「${subject}」由于未达到最低人数，已被自动取消。');
+INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('activity',28,'zh_CN','活动取消通知');
+UPDATE eh_locale_strings SET text = '来晚啦，活动已删除' WHERE scope = 'forum' and code = 10006;
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
