@@ -211,8 +211,7 @@ set @preId=(select max(id) from `eh_var_fields`);
 set @eeciId=(select max(id)+1 from `eh_var_field_items`);
 INSERT INTO `eh_var_fields`(`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) VALUES (@eecid, 'enterprise_customer', 'dropBox9', '预留下拉框9', 'Byte', 12, '/1/12/', 0, NULL, 2, 1, sysdate(), NULL, NULL, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}');
 
-
-
+-- END
 -- --------------------- SECTION END ---------------------------------------------------------
 
 
@@ -230,7 +229,8 @@ set @eecid=(select id from `eh_var_fields` where name='financingDemand');
 update `eh_var_field_items` set field_id = @eecid where field_id = @eecid-1 and display_name in ('有','无');
 update `eh_var_fields` set name = 'financingDemandItemId' where id = @eecid;
 
-UPDATE `eh_var_fields` set field_type = 'Long' where name in ('buyOrLeaseItemId',
-'financingDemandItemId','dropBox1','dropBox2','dropBox3','dropBox4','dropBox5','dropBox6','dropBox7','dropBox8','dropBox9');
+UPDATE `eh_var_fields` set field_type = 'Long' where name in ('buyOrLeaseItemId','financingDemandItemId',
+'dropBox1','dropBox2','dropBox3','dropBox4','dropBox5','dropBox6','dropBox7','dropBox8','dropBox9');
+
 -- END
 -- --------------------- SECTION END ---------------------------------------------------------
