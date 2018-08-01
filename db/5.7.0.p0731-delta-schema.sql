@@ -1,7 +1,7 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
--- AUTHOR: 黄鹏宇
+-- AUTHOR: 黄鹏宇 20180731
 -- REMARK:客户字段无法满足并导入，新增字段见详情
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `buy_or_lease_item_id` TINYINT null default null;
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `biz_address` varchar(1024) null default null;
@@ -38,5 +38,25 @@ ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box7` TINYINT null defaul
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box8` TINYINT null default null;
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box9` TINYINT null default null;
 
+-- end
+-- --------------------- SECTION END ---------------------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+-- AUTHOR: 黄鹏宇 20180801
+-- REMARK:修复客户下拉框字段类型
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `buy_or_lease_item_id` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `financing_demand_item_id` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `financing_demand_item_id` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box1` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box2` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box3` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box4` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box5` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box6` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box7` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box8` LONG;
+ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box9` LONG;
 -- end
 -- --------------------- SECTION END ---------------------------------------------------------
