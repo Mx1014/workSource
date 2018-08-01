@@ -354,6 +354,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             hasSendMessage = oldVisitor!=null && VisitorsysStatus.HAS_VISITED == VisitorsysStatus.fromCode(oldVisitor.getVisitStatus());
             checkConcurrentModify(cmd,oldVisitor);
             visitor = updateVisitor(cmd,oldVisitor);
+            callbackToQLFK(visitor);//回调访客机
         }
         sendVisitorSms(visitor,VisitorsysFlagType.fromCode(cmd.getSendSmsFlag()));//发送访客邀请函
         if(!hasSendMessage)
@@ -362,6 +363,15 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         convert.setVisitorPicUrl(contentServerService.parserUri(convert.getVisitorPicUri()));
         convert.setVisitorSignUrl(contentServerService.parserUri(convert.getVisitorSignUri()));
         return convert;
+    }
+
+    private void callbackToQLFK(VisitorSysVisitor visitor) {
+        VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+        VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
+        if(VisitorsysStatus.HAS_VISITED != visitStatus || ownerType!=VisitorsysOwnerType.COMMUNITY){
+            return;
+        }
+        String callbackurl = configurationProvider.getValue("visitorsys.lufu.callback", "");
     }
 
     private void sendMessageToAdmin(VisitorSysVisitor visitor,CreateOrUpdateVisitorCommand cmd) {
@@ -1878,7 +1888,23 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
     @Override
     public OpenApiCreateVisitorResponse openApiCreateVisitor(OpenApiCreateVisitorCommand cmd) {
-        return null;
+        CreateOrUpdateVisitorCommand createCmd = ConvertHelper.convert(cmd,CreateOrUpdateVisitorCommand.class);
+        if(cmd.getVisitorToken()!=null) {
+            Long visitorId = null;
+            try {
+                visitorId = WebTokenGenerator.getInstance().fromWebToken(cmd.getVisitorToken(), Long.class);
+            } catch (Exception e) {
+                LOGGER.error("visitorToken transform error , token = {}", cmd.getVisitorToken());
+            }
+            createCmd.setId(visitorId);
+        }
+
+        GetBookedVisitorByIdResponse orUpdateVisitor = this.createOrUpdateVisitor(createCmd);
+        OpenApiCreateVisitorResponse convert = ConvertHelper.convert(orUpdateVisitor, OpenApiCreateVisitorResponse.class);
+        String token = WebTokenGenerator.getInstance().toWebToken(orUpdateVisitor.getId());
+        convert.setVisitorToken(token);
+        convert.setBuildings(cmd.getBuildings());//第三方要求的楼栋门牌，我们这边貌似存了也没什么用，直接返回给第三方
+        return convert;
     }
 
     /**
