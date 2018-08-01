@@ -2188,13 +2188,13 @@ public class AssetProviderImpl implements AssetProvider {
                 if(varIden.equals("gdje")){
                 	PaymentVariable var1 = new PaymentVariable();
                     var1.setVariableIdentifier("gdjebhs");
-                    var1.setVariableName("固定金额（不含税）");
+                    var1.setVariableName("固定金额(不含税)");
                     vars.add(var1);
                 }
                 if(varIden.equals("dj")){
                 	PaymentVariable var2 = new PaymentVariable();
                     var2.setVariableIdentifier("djbhs");
-                    var2.setVariableName("单价（不含税）");
+                    var2.setVariableName("单价(不含税)");
                     vars.add(var2);
                 }
             }
