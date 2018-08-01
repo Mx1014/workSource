@@ -658,6 +658,10 @@ public class ContractProviderImpl implements ContractProvider {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(0L)
 					.or(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.isNull()));
 		}
+		// zuolin base
+		if(ownerId!=null){
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.OWNER_ID.eq(ownerId));
+		}
 
 		List<ContractParam> result = new ArrayList<>();
 		query.fetch().map((r) -> {

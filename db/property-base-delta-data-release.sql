@@ -35,4 +35,5 @@ update eh_energy_meter_categories set owner_type ='EhOrganizations';
 
 -- 合同管理 by jiarui 20180731
 update eh_contract_templates t1 set org_id = (select t2.id  from eh_organizations  t2 where t2.organization_type = 'PM' and t2.namespace_id =t1.namespace_id and t2.parent_id = 0 LIMIT 1);
-
+update eh_contract_params t1 set owner_id = (select id  from eh_organizations  t2 where organization_type = 'PM' and t2.namespace_id = t1.namespace_id and parent_id = 0 LIMIT 1 );
+update eh_contract_params set owner_type = 'EhOrganizations';
