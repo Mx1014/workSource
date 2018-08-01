@@ -708,6 +708,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             userId = user.getId();
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+
+        if(cmd.getModuleId() == null && cmd.getAppId() != null){
+            ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+            if(app != null){
+                cmd.setModuleId(app.getModuleId());
+            }
+        }
+
         List<ProjectDTO> dtos = getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId(), cmd.getAppId());
         if(cmd.getCommunityFetchType() != null){
             return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos, CommunityFetchType.fromCode(cmd.getCommunityFetchType()));

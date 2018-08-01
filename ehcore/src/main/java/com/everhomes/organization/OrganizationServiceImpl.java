@@ -14372,6 +14372,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         }
 
+
+        //查找项目的管理公司  add by yanjun 20180801
+        GetAuthOrgByProjectIdAndAppIdCommand authCmd = new GetAuthOrgByProjectIdAndAppIdCommand();
+        authCmd.setProjectId(cmd.getProjectId());
+        authCmd.setAppId(cmd.getAppId());
+        OrganizationDTO authOrg = getAuthOrgByProjectIdAndAppId(authCmd);
+
+
         List<OrganizationDTO> dtos = new ArrayList<>();
         for (OrganizationMember member : orgMembers) {
             // 如果机构不存在，则丢弃该成员对应的机构
@@ -14412,6 +14420,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 
             OrganizationDTO dto = toOrganizationDTO(userId, org);
+
+
+            if(authOrg != null && authOrg.getId().equals(dto.getId())){
+                dto.setProjectManageFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+            }else {
+                dto.setProjectManageFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+            }
+
             dtos.add(dto);
         }
 
