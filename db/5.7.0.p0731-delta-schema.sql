@@ -37,13 +37,8 @@ ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box6` TINYINT null defaul
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box7` TINYINT null default null;
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box8` TINYINT null default null;
 ALTER TABLE `eh_enterprise_customers` ADD COLUMN `drop_box9` TINYINT null default null;
-
 -- end
--- --------------------- SECTION END ---------------------------------------------------------
 
--- --------------------- SECTION BEGIN -------------------------------------------------------
--- ENV: ALL
--- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 -- AUTHOR: 黄鹏宇 20180801
 -- REMARK:修复客户下拉框字段类型
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `buy_or_lease_item_id` LONG;
@@ -60,3 +55,4 @@ ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box8` LONG;
 ALTER TABLE `eh_enterprise_customers` MODIFY COLUMN `drop_box9` LONG;
 -- end
 -- --------------------- SECTION END ---------------------------------------------------------
+
