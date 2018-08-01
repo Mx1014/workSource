@@ -2172,10 +2172,31 @@ public class AssetProviderImpl implements AssetProvider {
                 }
                 var.setVariableIdentifier(varIden);
                 var.setVariableName(varName);
+                if(varIden.equals("dj") || varIden.equals("gdje")){
+                	var.setVariableName(varName+"(含税)");
+                }
                 if(varIden.equals("dj")){
                     var.setVariableValue(suggestPrices.get(j)==null?null:new BigDecimal(suggestPrices.get(j)));
                 }
                 vars.add(var);
+                if(varIden.equals("dj") || varIden.equals("gdje")){
+                	PaymentVariable varRate = new PaymentVariable();
+                    varRate.setVariableIdentifier("taxRate");
+                    varRate.setVariableName("税率");
+                    vars.add(varRate);
+                }
+                if(varIden.equals("gdje")){
+                	PaymentVariable var1 = new PaymentVariable();
+                    var1.setVariableIdentifier("gdjebhs");
+                    var1.setVariableName("固定金额（不含税）");
+                    vars.add(var1);
+                }
+                if(varIden.equals("dj")){
+                	PaymentVariable var2 = new PaymentVariable();
+                    var2.setVariableIdentifier("djbhs");
+                    var2.setVariableName("单价（不含税）");
+                    vars.add(var2);
+                }
             }
             if(vars.size()>0){
                 dto.setVariables(vars);
