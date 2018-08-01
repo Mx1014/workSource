@@ -177,6 +177,7 @@ public class CreateEnterpriseCustomerCommand {
 
 
     //新增的客户字段
+    private Byte buyOrLeaseItemId;
     private String bizAddress;
     private String bizLife;
     private String customerIntentionLevel;
@@ -1168,6 +1169,14 @@ public class CreateEnterpriseCustomerCommand {
 
     public void setDropBox9(Byte dropBox9) {
         this.dropBox9 = dropBox9;
+    }
+
+    public Byte getBuyOrLeaseItemId() {
+        return buyOrLeaseItemId;
+    }
+
+    public void setBuyOrLeaseItemId(Byte buyOrLeaseItemId) {
+        this.buyOrLeaseItemId = buyOrLeaseItemId;
     }
 
     @Override
