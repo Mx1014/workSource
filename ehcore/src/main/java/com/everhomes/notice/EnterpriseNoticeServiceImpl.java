@@ -591,14 +591,14 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         String noticeToken = WebTokenGenerator.getInstance().toWebToken(enterpriseNoticeId);
         String homeUrl = configurationProvider.getValue(0, ConfigConstants.HOME_URL, "");
         String webUri = configurationProvider.getValue(0, ConfigConstants.ENTERPRISE_NOTICE_WEB_SHARE_URL,
-                "/announcement/?noticeToken=%s");
+                "/announcement/?ns=%s&noticeToken=%s");
         if (!StringUtils.hasText(homeUrl) || !StringUtils.hasText(webUri)) {
             LOGGER.error("Invalid home url or share uri, homeUrl={}, shareUrl={}", homeUrl, webUri);
             throw RuntimeErrorException.errorWith(EnterpriseNoticeErrorCode.SCOPE,
                     EnterpriseNoticeErrorCode.NOTICE_SHARE_URL_INVALID, "Invalid home url or share url");
         }
 
-        return homeUrl + String.format(webUri, noticeToken);
+        return homeUrl + String.format(webUri, UserContext.getCurrentNamespaceId(), noticeToken);
     }
 
 }
