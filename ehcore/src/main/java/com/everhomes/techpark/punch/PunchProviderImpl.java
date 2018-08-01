@@ -97,6 +97,7 @@ import com.everhomes.techpark.punch.recordmapper.PunchExceptionRequestStatistics
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -2580,11 +2581,11 @@ public class PunchProviderImpl implements PunchProvider {
 
         Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(ownerId));
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
-        if (userIds != null)
+        if (CollectionUtils.isNotEmpty(userIds))
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
-        if (detailIds != null)
+        if (CollectionUtils.isNotEmpty(detailIds))
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID.in(detailIds));
-        if (dptIds != null)
+        if (CollectionUtils.isNotEmpty(dptIds))
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(dptIds));
         if (exceptionStatus != null)
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.EXCEPTION_STATUS.eq(exceptionStatus));

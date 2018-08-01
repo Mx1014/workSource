@@ -5916,12 +5916,10 @@ public class PunchServiceImpl implements PunchService {
         if (cmd.getPageAnchor() != null)
             pageOffset = cmd.getPageAnchor().intValue();
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
-        List<Long> userIds = null;
-        List<Long> detailIds = null;
-//		Long organizationId = null;
-        List<Long> deptIds = null;
+        List<Long> userIds = new ArrayList<>();
+        List<Long> detailIds = new ArrayList<>();
+        List<Long> deptIds = new ArrayList<>();
         if (cmd.getUserId() != null) {
-        	userIds = new ArrayList<>();
             userIds.add(cmd.getUserId());
         } else if (PunchOwnerType.ORGANIZATION.equals(ownerType)) {
             //找到所有子部门 下面的用户
@@ -5933,7 +5931,6 @@ public class PunchServiceImpl implements PunchService {
 //				organizationId = org.getId();
         	
         	//2018-7-17,取子部门用户 用新的方式来搞 
-        	deptIds = new ArrayList<>();
             if (null == cmd.getIncludeSubDpt() || cmd.getIncludeSubDpt().equals(NormalFlag.YES.getCode())) {
                 Organization org = this.checkOrganization(cmd.getOwnerId());
                 List<Organization> orgs = findSubDepartments(org); 
@@ -6060,7 +6057,7 @@ public class PunchServiceImpl implements PunchService {
     public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r, Map<Long, Organization> cacheOrganizationMap, Map<Long, PunchTimeRule> cachePunchTimeRuleMap, List<PunchExceptionRequest> exceptionRequests) {
         PunchDayDetailDTO dto = ConvertHelper.convert(r, PunchDayDetailDTO.class);
         PunchRule pr = findPunchRuleByCache(PunchOwnerType.ORGANIZATION.getCode(), r.getEnterpriseId(), r.getUserId());
-        dto.setPunchOrgName(null);
+        dto.setPunchOrgName("未设置规则");
         if (null != pr) {
             Organization org = getOrganizationFromLocalCache(cacheOrganizationMap, pr.getPunchOrganizationId());
             if (null != org) {
