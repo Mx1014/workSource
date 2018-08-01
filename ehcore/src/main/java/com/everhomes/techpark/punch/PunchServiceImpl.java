@@ -9233,6 +9233,7 @@ public class PunchServiceImpl implements PunchService {
             dto1 = ConvertHelper.convert(pl, PunchLogDTO.class);
         } else {
             dto1.setPunchType(pl.getPunchType());
+            dto1.setIdentification(pl.getIdentification());
         }
         if (pl.getPunchDate() != null) {
             dto1.setPunchDate(pl.getPunchDate().getTime());
