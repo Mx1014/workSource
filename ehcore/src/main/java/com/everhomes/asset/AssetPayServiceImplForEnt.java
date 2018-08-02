@@ -182,6 +182,7 @@ public class AssetPayServiceImplForEnt implements AssetPayServiceForEnt{
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_CREATE_USER_ACCOUNT,
     					"创建个人付款账户失败");
     		}
+        	userIdenify = "18565607382";//数据-韦宁(625259020) 11:02:57  创建支付会员的时候如果拿不到手机号就先绑这个
         	String s = payServiceV2.bandPhone(payUserDTO.getId(), userIdenify);//绑定手机号
         }else {
         	payUserDTO = payUserDTOs.get(0);
