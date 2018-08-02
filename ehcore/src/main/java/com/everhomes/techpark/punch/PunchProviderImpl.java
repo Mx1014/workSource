@@ -2583,8 +2583,9 @@ public class PunchProviderImpl implements PunchProvider {
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
         if (CollectionUtils.isNotEmpty(userIds))
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
-        if (CollectionUtils.isNotEmpty(detailIds))
+        if (null != detailIds) {
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DETAIL_ID.in(detailIds));
+        }
         if (CollectionUtils.isNotEmpty(dptIds))
             condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(dptIds));
         if (exceptionStatus != null)

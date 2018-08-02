@@ -5917,7 +5917,7 @@ public class PunchServiceImpl implements PunchService {
             pageOffset = cmd.getPageAnchor().intValue();
         int pageSize = getPageSize(configurationProvider, cmd.getPageSize());
         List<Long> userIds = new ArrayList<>();
-        List<Long> detailIds = new ArrayList<>();
+        List<Long> detailIds = null;
         List<Long> deptIds = new ArrayList<>();
         if (cmd.getUserId() != null) {
             userIds.add(cmd.getUserId());
@@ -5942,6 +5942,7 @@ public class PunchServiceImpl implements PunchService {
             	deptIds.add(cmd.getOwnerId());
             }
             if (null != cmd.getUserName()) {
+                detailIds = new ArrayList<>();
                 List<OrganizationMemberDetails> members = organizationProvider.listOrganizationMemberDetails(ownerId, cmd.getUserName());
                 if (null != members) {
                     for (OrganizationMemberDetails member : members) {
