@@ -126,6 +126,7 @@ import java.util.stream.Collectors;
 
 import static com.everhomes.rest.ui.user.SceneType.DEFAULT;
 import static com.everhomes.rest.ui.user.SceneType.PARK_TOURIST;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class AddressServiceImpl implements AddressService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
@@ -2945,10 +2946,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	public void deleteAddressArrangement(DeleteAddressArrangementCommand cmd) {
 		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
+		//删除未来房源
 		for (String addressId : targetIds) {
-			DeleteApartmentCommand deleteApartmentCommand = new DeleteApartmentCommand();
-			deleteApartmentCommand.setId(Long.parseLong(addressId));
-			propertyMgrService.deleteApartment(deleteApartmentCommand);
+			Address futureAddress = addressProvider.findAddressById(Long.parseLong(addressId));
+			futureAddress.setStatus(AddressAdminStatus.INACTIVE.getCode());
+			addressProvider.updateAddress(futureAddress);
 		}
 		addressProvider.deleteAddressArrangement(cmd.getId());
 	}
@@ -3042,6 +3044,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	        				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
 	        				address.setStatus(AddressAdminStatus.INACTIVE.getCode());
 	        				addressProvider.updateAddress(address);
+	        				//删除个人客户及企业客户的关联关系
+	        		        addressProvider.updateOrganizationAddressMapping(address.getId());
+	        		        addressProvider.updateOrganizationAddress(address.getId());
+	        		        addressProvider.updateOrganizationOwnerAddress(address.getId());
+	        		        enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(address.getId());
+	        		        subBuildingAndCommunityArea(address);
 	        			}
 	        			//未来房源成为正式房源
 	        			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
@@ -3049,6 +3057,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 	        				Address address = addressProvider.findAddressById(Long.parseLong(addressId));
 	        				address.setIsFutureApartment((byte) 0);
 	        				addressProvider.updateAddress(address);
+	        				addBuildingAndCommunityArea(address);
 	        			}
 	        		}
 	            });
@@ -3058,6 +3067,100 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			e.printStackTrace();
 		}
 	}
+	
+	private void subBuildingAndCommunityArea(Address address){
+		Community community = checkCommunity(address.getCommunityId());
+        Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+        if (address.getRentArea() != null) {
+            Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+            building.setRentArea(buildingRentArea - address.getRentArea());
+
+            Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+            community.setRentArea(communityRentArea - address.getRentArea());
+        }
+        if (address.getSharedArea() != null) {
+            Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+            building.setSharedArea(buildingSharedArea - address.getSharedArea());
+
+            Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+            community.setSharedArea(communitySharedArea - address.getSharedArea());
+        }
+        if (address.getBuildArea() != null) {
+            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+            building.setBuildArea(buildingBuildArea - address.getBuildArea());
+
+            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+            community.setBuildArea(communityBuildArea - address.getBuildArea());
+        }
+        if (address.getChargeArea() != null) {
+            Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+            building.setChargeArea(buildingChargeArea - address.getChargeArea());
+
+            Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+            community.setChargeArea(communityChargeArea - address.getChargeArea());
+        }
+        if (address.getFreeArea() != null) {
+            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+            building.setFreeArea(buildingFreeArea - address.getFreeArea());
+
+            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+            community.setFreeArea(communityFreeArea - address.getFreeArea());
+        }
+        communityProvider.updateBuilding(building);
+        communityProvider.updateCommunity(community);
+	}
+	
+	private void addBuildingAndCommunityArea(Address address){
+		Community community = checkCommunity(address.getCommunityId());
+        Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+        if (address.getRentArea() != null) {
+            Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+            building.setRentArea(buildingRentArea + address.getRentArea());
+
+            Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+            community.setRentArea(communityRentArea + address.getRentArea());
+        }
+        if (address.getSharedArea() != null) {
+            Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+            building.setSharedArea(buildingSharedArea + address.getSharedArea());
+
+            Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+            community.setSharedArea(communitySharedArea + address.getSharedArea());
+        }
+        if (address.getBuildArea() != null) {
+            Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+            building.setBuildArea(buildingBuildArea + address.getBuildArea());
+
+            Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+            community.setBuildArea(communityBuildArea + address.getBuildArea());
+        }
+        if (address.getChargeArea() != null) {
+            Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+            building.setChargeArea(buildingChargeArea + address.getChargeArea());
+
+            Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+            community.setChargeArea(communityChargeArea + address.getChargeArea());
+        }
+        if (address.getFreeArea() != null) {
+            Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
+            building.setFreeArea(buildingFreeArea + address.getFreeArea());
+
+            Double communityFreeArea = community.getFreeArea() == null ? 0.0 : community.getFreeArea();
+            community.setFreeArea(communityFreeArea + address.getFreeArea());
+        }
+        communityProvider.updateBuilding(building);
+        communityProvider.updateCommunity(community);
+	}
+	
+	 private Community checkCommunity(Long communityId) {
+	        Community community = communityProvider.findCommunityById(communityId);
+	        if (community == null) {
+	            LOGGER.error("Unable to find the community");
+	            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	                    "Unable to find the community.");
+	        }
+	        return community;
+	    }
 	
 	@Override
 	public void excuteAddressArrangement(ExcuteAddressArrangementCommand cmd){
@@ -3070,6 +3173,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
 			address.setStatus(AddressAdminStatus.INACTIVE.getCode());
 			addressProvider.updateAddress(address);
+			//删除个人客户及企业客户的关联关系
+	        addressProvider.updateOrganizationAddressMapping(address.getId());
+	        addressProvider.updateOrganizationAddress(address.getId());
+	        addressProvider.updateOrganizationOwnerAddress(address.getId());
+	        enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(address.getId());
+	        subBuildingAndCommunityArea(address);
 		}
 		//未来房源成为正式房源
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
@@ -3077,6 +3186,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 			Address address = addressProvider.findAddressById(Long.parseLong(addressId));
 			address.setIsFutureApartment((byte) 0);
 			addressProvider.updateAddress(address);
+			addBuildingAndCommunityArea(address);
 		}
 	}
 }

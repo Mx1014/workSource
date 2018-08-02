@@ -10,4 +10,5 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 SET @id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),0);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20014', 'zh_CN', '可招租面积只能为数字');
--- --------------------- SECTION END ---------------------------------------------------------
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'address', '20015', 'zh_CN', '拆分/合并计划产生的未来房源已关联合同，删除失败');
+------------------------ SECTION END ---------------------------------------------------------

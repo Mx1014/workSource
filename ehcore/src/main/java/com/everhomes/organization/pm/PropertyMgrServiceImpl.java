@@ -2959,7 +2959,43 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 }
             });
         }
-
+        //删除房源时，需要判断该房源关联的未来房源是否有合同，如果有，则不能删除该房源
+        AddressArrangement arrangement = null;
+		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getId());
+		for (AddressArrangement addressArrangement : arrangements) {
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
+			if (originalIds.contains(cmd.getId().toString())) {
+				arrangement = addressArrangement;
+				break;
+			}
+		}
+		if (arrangement != null) {
+			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
+			List<Contract> contractsRelatedWithFutureApartment = new ArrayList<>();
+			for (String id : targetIds) {
+				contractsRelatedWithFutureApartment.addAll(contractProvider.listContractByAddressId(Long.parseLong(id)));
+			}
+			if (contractsRelatedWithFutureApartment != null && contractsRelatedWithFutureApartment.size() > 0) {
+				contractsRelatedWithFutureApartment.forEach(contract -> {
+	                if (contract.getStatus() == ContractStatus.ACTIVE.getCode() || contract.getStatus() == ContractStatus.WAITING_FOR_LAUNCH.getCode()
+	                        || contract.getStatus() == ContractStatus.WAITING_FOR_APPROVAL.getCode() || contract.getStatus() == ContractStatus.APPROVE_QUALITIED.getCode()
+	                        || contract.getStatus() == ContractStatus.EXPIRING.getCode() || contract.getStatus() == ContractStatus.DRAFT.getCode()) {
+	                    LOGGER.error("the address has attach to contract. address id: {}", cmd.getId());
+	                    throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_FUTURE_ADDRESS_HAS_CONTRACT,
+	                            "the related future address has attach to contract");
+	                }
+	            });
+	        }
+			//删除房源时，要删除关联的拆分合并计划产生的未来房源
+			for (String id : targetIds) {
+				Address futureAddress = addressProvider.findAddressById(Long.parseLong(id));
+				futureAddress.setStatus(AddressAdminStatus.INACTIVE.getCode());
+				addressProvider.updateAddress(futureAddress);
+			}
+			//删除房源时，要删除关联的拆分合并计划
+			addressProvider.deleteAddressArrangement(arrangement.getId());
+		}
+        
         address.setStatus(AddressAdminStatus.INACTIVE.getCode());
         addressProvider.updateAddress(address);
         addressProvider.updateOrganizationAddressMapping(address.getId());
@@ -3000,22 +3036,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
 
-        //删除关联的拆分合并计划
-        AddressArrangement arrangement = null;
-		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getId());
-		for (AddressArrangement addressArrangement : arrangements) {
-			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
-			if (originalIds.contains(cmd.getId().toString())) {
-				arrangement = addressArrangement;
-				break;
-			}
-		}
-		if (arrangement != null) {
-			addressProvider.deleteAddressArrangement(arrangement.getId());
-		}
-
         enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(cmd.getId());
-
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
@@ -5806,7 +5827,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     @Override
     public void processUserForOwner(UserIdentifier identifier) {
-        // TODO Auto-generated method stub
 //        List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByToken(
 //                identifier.getNamespaceId(), identifier.getIdentifierToken());
         List<CommunityPmOwner> owners = propertyMgrProvider.listCommunityPmOwnersByTel(identifier.getNamespaceId(), null, identifier.getIdentifierToken());
