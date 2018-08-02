@@ -223,7 +223,7 @@ update `eh_var_fields` set name = 'buyOrLeaseItemId' where id = 12079;
 update `eh_var_field_items` set field_id = 12087 where field_id = 12086 and display_name in ('有','无');
 update `eh_var_fields` set name = 'financingDemandItemId' where id = 12087;
 
-UPDATE `eh_var_fields` set field_type = 'Long' where field_id in (12079,12087,12104,12105,12106,12107,12108,12109,12110,12111,12112);
+UPDATE `eh_var_fields` set field_type = 'Long' where id in (12079,12087,12104,12105,12106,12107,12108,12109,12110,12111,12112);
 -- END
 -- --------------------- SECTION END ---------------------------------------------------------
 
