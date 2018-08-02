@@ -7,11 +7,20 @@ import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityRosterSourceFlag;
+import com.everhomes.rest.activity.ActivitySignupCommand;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormRenderType;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostGeneralFormDTO;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.server.schema.Tables;
@@ -21,19 +30,25 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP)
 public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActivitySignupFormHandler.class);
     public static final String GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP = "ActivitySignup";
 
     @Autowired
     private GeneralFormProvider generalFormProvider;
 
+    @Autowired
+    private ActivityService activityService;
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
@@ -53,13 +68,61 @@ public class ActivitySignupFormHandler implements GeneralFormModuleHandler{
             dto = ConvertHelper.convert(getDefaultGeneralForm(cmd.getSourceType()), GeneralFormDTO.class);
         }
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(dto.getTemplateText(), GeneralFormFieldDTO.class);
+        if (cmd.getOwnerId() != null) {
+            GeneralFormFieldDTO generalFormFieldDTO = new GeneralFormFieldDTO();
+            generalFormFieldDTO.setFieldName("ACTIVITY_ID");
+            generalFormFieldDTO.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+            generalFormFieldDTO.setRequiredFlag(TrueOrFalseFlag.TRUE.getCode());
+            generalFormFieldDTO.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+            generalFormFieldDTO.setFieldDisplayName("活动ID");
+            generalFormFieldDTO.setFieldValue(cmd.getOwnerId().toString());
+            generalFormFieldDTO.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+            fieldDTOs.add(generalFormFieldDTO);
+        }
         dto.setFormFields(fieldDTOs);
         return dto;
     }
 
     @Override
     public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
-        return null;
+        if (StringUtils.isBlank(cmd.getSourceType())) {
+            cmd.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+        }
+        List<GeneralForm> forms = getGeneralForum(cmd.getNamespaceId(), cmd.getSourceId(), cmd.getSourceType());
+        GeneralForm generalForm = new GeneralForm();
+        if (!CollectionUtils.isEmpty(forms)) {
+            generalForm = forms.get(0);
+        }else {
+            generalForm = getDefaultGeneralForm(cmd.getSourceType());
+        }
+        List<PostApprovalFormItem> values = cmd.getValues();
+        Long activityId = 0L;
+        for (PostApprovalFormItem item :values) {
+            if ("ACTIVITY_ID".equals(item.getFieldName())) {
+                activityId = Long.valueOf(item.getFieldValue());
+            }
+        }
+        ActivitySignupCommand activitySignupCommand = new ActivitySignupCommand();
+        activitySignupCommand.setActivityId(activityId);
+        activitySignupCommand.setAdultCount(1);
+        activitySignupCommand.setSignupSourceFlag(ActivityRosterSourceFlag.SELF.getCode());
+        activitySignupCommand.setFormOriginId(generalForm.getFormOriginId());
+        activitySignupCommand.setValues(cmd.getValues());
+        LOGGER.info("activity signup, cmd={}",activitySignupCommand);
+        ActivityDTO activityDTO = this.activityService.signup(activitySignupCommand);
+
+
+        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+
+        List<PostApprovalFormItem> items = new ArrayList<>();
+        PostApprovalFormItem item = new PostApprovalFormItem();
+        item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        item.setFieldValue(JSONObject.toJSONString(activityDTO));
+
+        items.add(item);
+        dto.setValues(items);
+        return dto;
     }
 
 
