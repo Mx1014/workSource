@@ -7,7 +7,6 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
 
 public interface ServiceModuleService {
 	List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd);
@@ -60,4 +59,16 @@ public interface ServiceModuleService {
     List<ServiceModuleDTO> listServiceModulesByAppType(ListServiceModulesByAppTypeCommand cmd);
 
 	void updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd);
+
+	ListAppCategoryResponse listAppCategory(ListAppCategoryCommand cmd);
+
+	void updateAppCategory(UpdateAppCategoryCommand cmd);
+
+	AppCategoryDTO createAppCategory(CreateAppCategoryCommand cmd);
+
+	void deleteAppCategory(DeleteAppCategoryCommand cmd);
+
+	void reorderAppCategory(ReorderAppCategoryCommand cmd);
+
+	void changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd);
 }

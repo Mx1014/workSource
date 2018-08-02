@@ -17,7 +17,7 @@ import java.util.List;
  *     <li>terminalType: 终端类型 {@link com.everhomes.rest.module.TerminalType}</li>
  *     <li>locationType: 位置类型 {@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
  *     <li>sceneType: 场景类型 {@link com.everhomes.rest.module.ServiceModuleSceneType}</li>
- *     <li>secondAppType: 二级分类</li>
+ *     <li>appCategoryId: appCategoryId</li>
  *     <li>defaultOrder: 排序</li>
  *     <li>iconUri: iconUri</li>
  *     <li>iconUrl: iconUrl</li>
@@ -31,7 +31,7 @@ public class ServiceModuleEntryDTO {
 	private Byte terminalType;
 	private Byte locationType;
 	private Byte sceneType;
-	private Integer secondAppType;
+	private Long appCategoryId;
 	private Integer defaultOrder;
 	private String iconUri;
 	private String iconUrl;
@@ -93,12 +93,12 @@ public class ServiceModuleEntryDTO {
 		this.sceneType = sceneType;
 	}
 
-	public Integer getSecondAppType() {
-		return secondAppType;
+	public Long getAppCategoryId() {
+		return appCategoryId;
 	}
 
-	public void setSecondAppType(Integer secondAppType) {
-		this.secondAppType = secondAppType;
+	public void setAppCategoryId(Long appCategoryId) {
+		this.appCategoryId = appCategoryId;
 	}
 
 	public Integer getDefaultOrder() {

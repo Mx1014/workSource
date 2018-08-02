@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ServiceModuleEntryProvider {
-    List<ServiceModuleEntry> listServiceModuleEntries(Long moduleId, Byte terminalType, Byte locationType, Byte sceneType);
+    List<ServiceModuleEntry> listServiceModuleEntries(Long moduleId, Long appCategoryId, Byte terminalType, Byte locationType, Byte sceneType);
 
     void delete(Long id);
 

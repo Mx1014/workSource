@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.serviceModuleApp;
 
+import com.everhomes.rest.launchpadbase.ListAllLaunchPadAppsCommand;
+import com.everhomes.rest.launchpadbase.ListAllLaunchPadAppsResponse;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
 import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
 import com.everhomes.rest.module.RouterInfo;
@@ -55,4 +57,6 @@ public interface ServiceModuleAppService {
 	void installDefaultAppByOrganizationId(Long organizationId);
 
 	void installAppForAllOrganizations(InstallAppForAllOrganizationsCommand cmd);
+
+    ListAllLaunchPadAppsResponse listAllLaunchPadApps(ListAllLaunchPadAppsCommand cmd);
 }

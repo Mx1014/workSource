@@ -6,10 +6,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>moduleId: moduleId</li>
+ *     <li>appCategoryId: appCategoryId</li>
  * </ul>
  */
 public class ListServiceModuleEntriesCommand {
     private Long moduleId;
+
+    private Long appCategoryId;
 
     public Long getModuleId() {
         return moduleId;
@@ -17,6 +20,14 @@ public class ListServiceModuleEntriesCommand {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public Long getAppCategoryId() {
+        return appCategoryId;
+    }
+
+    public void setAppCategoryId(Long appCategoryId) {
+        this.appCategoryId = appCategoryId;
     }
 
     @Override

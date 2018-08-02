@@ -1,27 +1,32 @@
 package com.everhomes.rest.servicemoduleapp;
 
+import com.everhomes.rest.acl.AppCategoryDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
  * <ul>
- *     <li>dtos: 系统原生应用参考{@link com.everhomes.rest.servicemoduleapp.AppCommunityConfigDTO}</li>
+ *      <li>appCategoryDtos: 应用分类列表，参考{@link AppCategoryDTO}</li>
  *     <li>thirdDtos: 第三方应用，此处暂时没有用到，永远是空 参考{@link com.everhomes.rest.servicemoduleapp.AppCommunityConfigDTO}</li>
  * </ul>
  */
 public class ListAppCommunityConfigsResponse {
-	private List<AppCommunityConfigDTO> dtos;
+
+	private List<AppCategoryDTO> appCategoryDtos;
+
+	//private List<AppCommunityConfigDTO> dtos;
 
 	private List<AppCommunityConfigDTO> thirdDtos;
 
-	public List<AppCommunityConfigDTO> getDtos() {
-		return dtos;
+	public List<AppCategoryDTO> getAppCategoryDtos() {
+		return appCategoryDtos;
 	}
 
-	public void setDtos(List<AppCommunityConfigDTO> dtos) {
-		this.dtos = dtos;
+	public void setAppCategoryDtos(List<AppCategoryDTO> appCategoryDtos) {
+		this.appCategoryDtos = appCategoryDtos;
 	}
+
 
 	public List<AppCommunityConfigDTO> getThirdDtos() {
 		return thirdDtos;

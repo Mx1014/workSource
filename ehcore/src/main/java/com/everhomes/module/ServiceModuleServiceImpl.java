@@ -16,7 +16,6 @@ import com.everhomes.menu.Target;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.portal.PlatformContextNoWarnning;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
@@ -39,8 +38,6 @@ import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -200,7 +197,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         User operator = userProvider.findUserById(module.getOperatorUid());
         if(null != operator) dto.setOperatorUName(operator.getNickName());
 
-        if(module.getIconUri != null){
+        if(module.getIconUri() != null){
             String url = contentServerService.parserUri(module.getIconUri(), module.getClass().getSimpleName(), module.getId());
             dto.setIconUrl(url);
         }
@@ -1347,7 +1344,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public ListServiceModuleEntriesResponse listServiceModuleEntries(ListServiceModuleEntriesCommand cmd) {
         ListServiceModuleEntriesResponse response = new ListServiceModuleEntriesResponse();
-        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, null, null);
+        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, null, null, null);
 
         List<ServiceModuleEntryDTO> dtos = new ArrayList<>();
         if(entries != null){
@@ -1380,7 +1377,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         dbProvider.execute((status) ->{
 
-            List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, null, null);
+            List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, null, null, null);
             if(entries != null){
                 for (ServiceModuleEntry entry: entries){
                     serviceModuleEntryProvider.delete(entry.getId());
@@ -1419,4 +1416,36 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     public void updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd) {
 
     }
+
+    @Override
+    public ListAppCategoryResponse listAppCategory(ListAppCategoryCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void updateAppCategory(UpdateAppCategoryCommand cmd) {
+
+    }
+
+
+    @Override
+    public AppCategoryDTO createAppCategory(CreateAppCategoryCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void deleteAppCategory(DeleteAppCategoryCommand cmd) {
+
+    }
+
+    @Override
+    public void reorderAppCategory(ReorderAppCategoryCommand cmd) {
+
+    }
+
+    @Override
+    public void changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd) {
+
+    }
+
 }

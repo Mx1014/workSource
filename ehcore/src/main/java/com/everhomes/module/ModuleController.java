@@ -310,7 +310,7 @@ public class ModuleController extends ControllerBase {
 
     /**
      * <b>URL: /module/listServiceModuleEntries</b>
-     * 查询模块入口
+     * <p>查询模块入口</p>
      */
     @RequestMapping("listServiceModuleEntries")
     @RestReturn(value = ServiceModuleEntryDTO.class)
@@ -325,7 +325,7 @@ public class ModuleController extends ControllerBase {
 
     /**
      * <b>URL: /module/updateServiceModuleEntries</b>
-     * 更新模块入口
+     * <p>更新模块入口</p>
      */
     @RequestMapping("updateServiceModuleEntries")
     @RestReturn(value = String.class)
@@ -340,12 +340,100 @@ public class ModuleController extends ControllerBase {
 
     /**
      * <b>URL: /module/updateServiceModuleEntry</b>
-     * 更新模块入口
+     * <p>编辑模块入口</p>
      */
     @RequestMapping("updateServiceModuleEntry")
     @RestReturn(value = String.class)
     public RestResponse updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd) {
         serviceModuleService.updateServiceModuleEntry(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/listAppCategory</b>
+     * <p>查询应用入口目录</p>
+     */
+    @RequestMapping("listAppCategory")
+    @RestReturn(value = ListAppCategoryResponse.class)
+    public RestResponse listAppCategory(ListAppCategoryCommand cmd) {
+        ListAppCategoryResponse res = serviceModuleService.listAppCategory(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/createAppCategory</b>
+     * <p>新增应用入口目录</p>
+     */
+    @RequestMapping("createAppCategory")
+    @RestReturn(value = AppCategoryDTO.class)
+    public RestResponse createAppCategory(CreateAppCategoryCommand cmd) {
+        AppCategoryDTO dto = serviceModuleService.createAppCategory(cmd);
+        RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/updateAppCategory</b>
+     * <p>编辑应用入口目录</p>
+     */
+    @RequestMapping("updateAppCategory")
+    @RestReturn(value = String.class)
+    public RestResponse updateAppCategory(UpdateAppCategoryCommand cmd) {
+        serviceModuleService.updateAppCategory(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/deleteAppCategory</b>
+     * <p>删除应用入口目录</p>
+     */
+    @RequestMapping("deleteAppCategory")
+    @RestReturn(value = String.class)
+    public RestResponse deleteAppCategory(DeleteAppCategoryCommand cmd) {
+        serviceModuleService.deleteAppCategory(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /module/deleteAppCategory</b>
+     * <p>排序应用入口目录</p>
+     */
+    @RequestMapping("deleteAppCategory")
+    @RestReturn(value = String.class)
+    public RestResponse reorderAppCategory(ReorderAppCategoryCommand cmd) {
+        serviceModuleService.reorderAppCategory(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/changeServiceModuleEntryCategory</b>
+     * <p>修改应用入口到某个分类</p>
+     */
+    @RequestMapping("changeServiceModuleEntryCategory")
+    @RestReturn(value = String.class)
+    public RestResponse changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd) {
+        serviceModuleService.changeServiceModuleEntryCategory(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

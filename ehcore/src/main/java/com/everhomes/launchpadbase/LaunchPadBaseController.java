@@ -75,6 +75,22 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /launchpadbase/listAllLaunchPadApps</b>
+     * <p>广场根据组件获取全部应用</p>
+     */
+    @RequestMapping("listAllLaunchPadApps")
+    @RestReturn(value=ListLaunchPadAppsResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listAllLaunchPadApps(ListAllLaunchPadAppsCommand cmd) {
+        ListAllLaunchPadAppsResponse res = serviceModuleAppService.listAllLaunchPadApps(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
      * <b>URL: /launchpadbase/listOPPushCards</b>
      * <p>获取运营板块信息</p>
      */

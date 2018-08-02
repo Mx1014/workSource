@@ -28,9 +28,7 @@ import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.launchpad.Widget;
-import com.everhomes.rest.launchpadbase.AppDTO;
-import com.everhomes.rest.launchpadbase.ListLaunchPadAppsCommand;
-import com.everhomes.rest.launchpadbase.ListLaunchPadAppsResponse;
+import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.module.ServiceModuleAppType;
@@ -897,5 +895,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		}
 
+	}
+
+	@Override
+	public ListAllLaunchPadAppsResponse listAllLaunchPadApps(ListAllLaunchPadAppsCommand cmd) {
+		return null;
 	}
 }

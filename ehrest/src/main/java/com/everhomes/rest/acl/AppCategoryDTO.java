@@ -1,0 +1,131 @@
+package com.everhomes.rest.acl;
+
+import com.everhomes.rest.launchpadbase.AppDTO;
+import com.everhomes.rest.servicemoduleapp.AppCommunityConfigDTO;
+import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
+/**
+ * <ul>
+ *     <li>id: 模块id</li>
+ *     <li>name: 模块名称</li>
+ *     <li>parentId: 父级id</li>
+ *     <li>locationType: 分类位置，参考{@link com.everhomes.rest.module.ServiceModuleLocationType}</li>
+ *     <li>appType: 应用类型0-OA，1-园区，2-服务应用 {@link com.everhomes.rest.module.ServiceModuleAppType}</li>
+ *     <li>defaultOrder: defaultOrder</li>
+ *     <li>leafFlag: 是否为叶子节点，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>dtos: 下级分类，参考{@link AppCategoryDTO}</li>
+ *     <li>appDtos: appDtos，广场应用，参考{@link AppDTO}</li>
+ *     <li>appCommunityConfigDtos: web端项目广场{@link AppCommunityConfigDTO}</li>
+ * </ul>
+ */
+public class AppCategoryDTO {
+
+
+	private Long id;
+
+	private String name;
+
+	private Long parentId;
+
+	private Byte locationType;
+
+	private Byte appType;
+
+	private Long defaultOrder;
+
+	private Byte leafFlag;
+
+	private List<AppCategoryDTO> dtos;
+
+	private List<AppDTO> appDtos;
+
+	List<AppCommunityConfigDTO> appCommunityConfigDtos;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	public Byte getLocationType() {
+		return locationType;
+	}
+
+	public void setLocationType(Byte locationType) {
+		this.locationType = locationType;
+	}
+
+	public Byte getAppType() {
+		return appType;
+	}
+
+	public void setAppType(Byte appType) {
+		this.appType = appType;
+	}
+
+	public Long getDefaultOrder() {
+		return defaultOrder;
+	}
+
+	public void setDefaultOrder(Long defaultOrder) {
+		this.defaultOrder = defaultOrder;
+	}
+
+	public List<AppCategoryDTO> getDtos() {
+		return dtos;
+	}
+
+	public void setDtos(List<AppCategoryDTO> dtos) {
+		this.dtos = dtos;
+	}
+
+	public Byte getLeafFlag() {
+		return leafFlag;
+	}
+
+	public void setLeafFlag(Byte leafFlag) {
+		this.leafFlag = leafFlag;
+	}
+
+
+	public List<AppDTO> getAppDtos() {
+		return appDtos;
+	}
+
+	public void setAppDtos(List<AppDTO> appDtos) {
+		this.appDtos = appDtos;
+	}
+
+	public List<AppCommunityConfigDTO> getAppCommunityConfigDtos() {
+		return appCommunityConfigDtos;
+	}
+
+	public void setAppCommunityConfigDtos(List<AppCommunityConfigDTO> appCommunityConfigDtos) {
+		this.appCommunityConfigDtos = appCommunityConfigDtos;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+}
