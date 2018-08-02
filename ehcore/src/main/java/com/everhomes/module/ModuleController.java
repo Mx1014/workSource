@@ -413,10 +413,10 @@ public class ModuleController extends ControllerBase {
 
 
     /**
-     * <b>URL: /module/deleteAppCategory</b>
+     * <b>URL: /module/reorderAppCategory</b>
      * <p>排序应用入口目录</p>
      */
-    @RequestMapping("deleteAppCategory")
+    @RequestMapping("reorderAppCategory")
     @RestReturn(value = String.class)
     public RestResponse reorderAppCategory(ReorderAppCategoryCommand cmd) {
         serviceModuleService.reorderAppCategory(cmd);
