@@ -8,7 +8,6 @@ ALTER TABLE `eh_second_app_types` ADD COLUMN `location_type`  tinyint(4) NULL CO
 ALTER TABLE `eh_second_app_types` ADD COLUMN `default_order`  bigint(22) NULL DEFAULT 0;
 
 
-
 CREATE TABLE `eh_app_categories` (
   `id` bigint(22) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
@@ -16,5 +15,6 @@ CREATE TABLE `eh_app_categories` (
   `location_type` tinyint(4) DEFAULT NULL COMMENT '参考枚举ServiceModuleLocationType',
   `app_type` tinyint(4) DEFAULT NULL COMMENT '一级分类，0-oa，1-community，2-service。参考ServiceModuleAppType',
   `default_order` bigint(22) DEFAULT '0',
+  `leaf_flag` tinyint(4) DEFAULT NULL COMMENT 'is leaf category, 0-no, 1-yes',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
