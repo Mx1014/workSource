@@ -50,6 +50,24 @@ public class CreateOrUpdateVisitorCommand extends BaseVisitorDTO{
 
     private String visitorSignUri;
     private String visitorSignCharacter;
+    private Byte source = VisitorsysSourceType.INTERNAL.getCode();
+    private Byte notifyThirdSuccessFlag = VisitorsysNotifyThirdType.NOT_YET.getCode();
+
+    public Byte getSource() {
+        return source;
+    }
+
+    public void setSource(Byte source) {
+        this.source = source;
+    }
+
+    public Byte getNotifyThirdSuccessFlag() {
+        return notifyThirdSuccessFlag;
+    }
+
+    public void setNotifyThirdSuccessFlag(Byte notifyThirdSuccessFlag) {
+        this.notifyThirdSuccessFlag = notifyThirdSuccessFlag;
+    }
 
     public List<VisitorsysApprovalFormItem> getCommunityFormValues() {
         return communityFormValues;

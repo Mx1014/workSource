@@ -7,6 +7,8 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -21,12 +23,16 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.parking.handler.Utils;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.CreateLocalVistorCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
@@ -55,6 +61,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.*;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +160,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private PortalVersionProvider portalVersionProvider;
     @Autowired
     private ServiceModuleAppProvider serviceModuleAppProvider;
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+    @Autowired
+    private AppProvider appProvider;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -368,10 +379,36 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private void callbackToQLFK(VisitorSysVisitor visitor) {
         VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
         VisitorsysOwnerType ownerType = checkOwnerType(visitor.getOwnerType());
-        if(VisitorsysStatus.HAS_VISITED != visitStatus || ownerType!=VisitorsysOwnerType.COMMUNITY){
+        VisitorsysSourceType sourceType = VisitorsysSourceType.fromCode(visitor.getSource());
+        VisitorsysNotifyThirdType visitorsysNotifyThirdType = VisitorsysNotifyThirdType.fromCode(visitor.getNotifyThirdSuccessFlag());
+        if(VisitorsysStatus.HAS_VISITED != visitStatus
+                || ownerType!=VisitorsysOwnerType.COMMUNITY
+                || sourceType != VisitorsysSourceType.OUTER
+                || visitorsysNotifyThirdType != VisitorsysNotifyThirdType.CALLBACK_SUCCESS){
             return;
         }
-        String callbackurl = configurationProvider.getValue("visitorsys.lufu.callback", "");
+        String callbackurl = configurationProvider.getValue(visitor.getNamespaceId(),"visitorsys.lufu.callback", "");
+        Map<String,String> params = new HashMap();
+        params.put("visitorToken", WebTokenGenerator.getInstance().toWebToken(visitor.getId()));
+        params.put("status", visitor.getVisitStatus()+"");
+        int i = 0;
+        while(i<3) {
+            try {
+                String result = Utils.post(callbackurl, params);
+                LOGGER.info(callbackurl+" result:"+result);
+                RestResponse o = (RestResponse) StringHelper.fromJsonString(result, RestResponse.class);
+                if (o.getErrorCode() == 200) {
+                    visitor.setNotifyThirdSuccessFlag(VisitorsysNotifyThirdType.CALLBACK_SUCCESS.getCode());
+                    visitorSysVisitorProvider.updateVisitorSysVisitor(visitor);
+                    break;
+                }
+            }catch (Exception e){
+                LOGGER.error("visitorsys post error:{}",e);
+            }
+            i++;
+        }
+
+
     }
 
     private void sendMessageToAdmin(VisitorSysVisitor visitor,CreateOrUpdateVisitorCommand cmd) {
@@ -1794,7 +1831,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public GetBookedVisitorByIdResponse createOrUpdateVisitorForManage(CreateOrUpdateVisitorCommand cmd) {
         checkMoblieManagePrivilege(cmd);
-        return createOrUpdateVisitorForManage(cmd);
+        return createOrUpdateVisitor(cmd);
     }
 
     @Override
@@ -1898,6 +1935,25 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             }
             createCmd.setId(visitorId);
         }
+        //设置namespaceid
+        AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+        createCmd.setNamespaceId(appNamespaceMapping.getNamespaceId());
+
+        ListOfficeLocationsCommand officeLocationsCommand = new ListOfficeLocationsCommand();
+        officeLocationsCommand.setOwnerType(VisitorsysOwnerType.ENTERPRISE.getCode());
+        officeLocationsCommand.setOwnerId(cmd.getEnterpriseId());
+        officeLocationsCommand.setNamespaceId(appNamespaceMapping.getNamespaceId());
+        ListOfficeLocationsResponse listOfficeLocationsResponse = this.listOfficeLocations(officeLocationsCommand);
+
+        //设置办公地点
+        if(listOfficeLocationsResponse!=null
+                && listOfficeLocationsResponse.getOfficeLocationList()!=null
+                && listOfficeLocationsResponse.getOfficeLocationList().size()>0){
+            createCmd.setOfficeLocationId(listOfficeLocationsResponse.getOfficeLocationList().get(0).getId());
+            createCmd.setOfficeLocationName(listOfficeLocationsResponse.getOfficeLocationList().get(0).getOfficeLocationName());
+        }
+        createCmd.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+        createCmd.setSource(VisitorsysSourceType.OUTER.getCode());
 
         GetBookedVisitorByIdResponse orUpdateVisitor = this.createOrUpdateVisitor(createCmd);
         OpenApiCreateVisitorResponse convert = ConvertHelper.convert(orUpdateVisitor, OpenApiCreateVisitorResponse.class);

@@ -26,6 +26,10 @@ import java.util.List;
   */
 
 public class OpenApiCreateVisitorCommand {
+    private String appKey;
+    private String timeStamp;
+    private String nonce;
+    private String signature;
     private String visitorToken;
     private String ownerType;
     private Long ownerId;
@@ -42,6 +46,38 @@ public class OpenApiCreateVisitorCommand {
 
     private Long enterpriseId;
     private String enterpriseName;
+
+    public String getAppKey() {
+        return appKey;
+    }
+
+    public void setAppKey(String appKey) {
+        this.appKey = appKey;
+    }
+
+    public String getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(String timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
 
     private List<VisitorSysBuilding> buildings;
 

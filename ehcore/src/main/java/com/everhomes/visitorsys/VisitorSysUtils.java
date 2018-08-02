@@ -42,7 +42,7 @@ public class VisitorSysUtils {
      * @return
      */
      public static <T>T copyNotNullProperties( Object source, T target) {
-        String[] s = {"getNamespaceId","getOwnerType","getOwnerId","setNamespaceId","setOwnerType","setOwnerId"};
+        String[] s = {"getNamespaceId","getOwnerType","getOwnerId","setNamespaceId","setOwnerType","setOwnerId","setNotifyThirdSuccessFlag","setSource"};
         List<String> ignoreProperties = new ArrayList<>(Arrays.asList(s));
         return copyNotNullProperties(source,target,ignoreProperties);
     }
