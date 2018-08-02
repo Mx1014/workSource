@@ -368,7 +368,34 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return record == null ? 0D : record.getValue(DSL.sum(maxRentalCount)) == null ? 0D : record.getValue(DSL.sum(maxRentalCount)).doubleValue();
 	}
 
-	@Override
+    @Override
+    public List<RentalResourceOrder> findAllRentalSiteBillByTime(RentalResource rentalResource, Long beginTime, Long endTime) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<RentalResourceOrder> list = context.select(Tables.EH_RENTALV2_RESOURCE_ORDERS.fields())
+				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
+				.join(Tables.EH_RENTALV2_ORDERS)
+				.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
+				.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
+				.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE.eq(rentalResource.getResourceType()))
+				.where(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.APPROVING.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.PAYINGFINAL.getCode()))
+				.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()))
+				.fetch().map(r -> {
+					RentalResourceOrder order = new RentalResourceOrder();
+					order.setRentalType(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE));
+					order.setBeginTime(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.BEGIN_TIME));
+					order.setEndTime(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.END_TIME));
+					order.setRentalCount(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT));
+					order.setResourceNumber(r.getValue(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_NUMBER));
+					return order;
+				});
+		return list;
+    }
+
+    @Override
 	public boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
 		List<Byte> rentalTypes = priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList());
 		rentalTypes.remove(rentalCell.getRentalType());
@@ -415,16 +442,22 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public boolean findCellClosedByTimeInterval(String resourceType, Long rentalSiteId,Long startTime,Long endTime) {
+	public List<RentalCell> findCellClosedByTimeInterval(String resourceType, Long rentalSiteId,Long startTime,Long endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		Record record = context.select().from(Tables.EH_RENTALV2_CELLS)
-				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
-				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
-				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
-				.and((Tables.EH_RENTALV2_CELLS.BEGIN_TIME.le(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.END_TIME.gt(new Timestamp(startTime))))
-						.or(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.gt(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.lt(new Timestamp(endTime)))))
-				.fetchAny();
-		return record != null;
+        List<RentalCell> map = context.select().from(Tables.EH_RENTALV2_CELLS)
+                .where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId))
+                .and(Tables.EH_RENTALV2_CELLS.RESOURCE_TYPE.eq(resourceType))
+                .and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
+                .and((Tables.EH_RENTALV2_CELLS.BEGIN_TIME.le(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.END_TIME.gt(new Timestamp(startTime))))
+                        .or(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.gt(new Timestamp(startTime)).and(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.lt(new Timestamp(endTime)))))
+                .fetch().map(r -> {
+                    RentalCell convert = ConvertHelper.convert(r, RentalCell.class);
+                    Long tmp = convert.getId();
+                    convert.setId(convert.getCellId());
+                    convert.setCellId(tmp);
+                    return convert;
+                });
+        return map;
 	}
 
 	private Date[] calculateBeginEndDate(RentalResource rentalResource, RentalCell rentalCell) {
@@ -1338,7 +1371,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalResourceOrder.class);
-				});;
+				});
 
 
 		return result;

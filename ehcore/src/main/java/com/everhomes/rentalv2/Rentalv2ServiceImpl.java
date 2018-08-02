@@ -1267,28 +1267,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
                 return true;
             }).collect(Collectors.toList());
         }
-        //是否有不允许预约时间
-        siteIds = siteIds.stream().filter(r-> {
-            RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
-                    cmd.getResourceType(), cmd.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), r);
-            java.util.Date now = new java.util.Date();
-            //至多提前时间，筛选结束时间减去至多提前时间，表示最早可以预订的时间
-            if (NormalFlag.NEED.getCode() == rule.getRentalStartTimeFlag()) {
-                Long time = cmd.getEndTime() - rule.getRentalStartTime();
-                if (now.before(new java.util.Date(time))) {
-                    return false;
-                }
-            }
-            //至少提前时间，筛选开始时间减去至少提前时间，表示最晚可以预订的时间
-            if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
-                Long time = cmd.getStartTime() - rule.getRentalEndTime();
-                if (now.after(new java.util.Date(time))) {
-                    return false;
-                }
-            }
 
-            return true;
-        }).collect(Collectors.toList());
 		return siteIds.stream().filter(r->{
 			Long startTime = cmd.getStartTime();
 			Long endTime = cmd.getEndTime();
@@ -1301,12 +1280,48 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				endTime += Double.valueOf(halfTimeIntervals.get(cmd.getEndTimeAmOrPm()).getBeginTime()*3600*1000).longValue();
 			}
 			//是否有格子被关闭
-			if (rentalv2Provider.findCellClosedByTimeInterval(cmd.getResourceType(),r,startTime,endTime))
+			List<RentalCell> rentalCells = rentalv2Provider.findCellClosedByTimeInterval(cmd.getResourceType(), r, startTime, endTime);
+			if (rentalCells != null && rentalCells.size()>0)
 				return false;
+
+			//是否有不允许预约的时间
+			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
+					cmd.getResourceType(), cmd.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), r);
+			java.util.Date now = new java.util.Date();
+			LocalDateTime startDateTime = new java.util.Date(startTime).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			LocalDateTime endDateTime = new java.util.Date(endTime).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			if (cmd.getRentalType().equals(RentalType.MONTH.getCode()))
+				endDateTime = endDateTime.minusMonths(1l);
+			else if (cmd.getRentalType().equals(RentalType.WEEK.getCode()))
+				endDateTime = endDateTime.minusWeeks(1l);
+			else if (cmd.getRentalType().equals(RentalType.DAY.getCode()))
+				endDateTime = endDateTime.minusDays(1l);
+			//至多提前时间，筛选结束时间减去至多提前时间，表示最早可以预订的时间
+			if (NormalFlag.NEED.getCode() == rule.getRentalStartTimeFlag()) {
+				Long time = endDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - rule.getRentalStartTime();
+				if (now.before(new java.util.Date(time))) {
+					return false;
+				}
+			}
+			//至少提前时间，筛选开始时间减去至少提前时间，表示最晚可以预订的时间
+			if (NormalFlag.NEED.getCode() == rule.getRentalEndTimeFlag()) {
+				Long time = startDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - rule.getRentalEndTime();
+				if (now.after(new java.util.Date(time))) {
+					return false;
+				}
+			}
+
 			//是否有格子被预约
 			List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(r, startTime, endTime);
-			if (rentalOrders != null && rentalOrders.size()>0)
-				return false;
+			if (rentalOrders != null && rentalOrders.size()>0) {
+				RentalResource resource = rentalv2Provider.getRentalSiteById(r);
+				SegmentTree segmentTree = new SegmentTree();
+				for (RentalOrder order:rentalOrders)
+					segmentTree.putSegment(order.getStartTime().getTime(),order.getEndTime().getTime(),order.getRentalCount().intValue());
+				if (segmentTree.getMaxCover(startTime,endTime) > resource.getResourceCounts())
+					return false;
+
+			}
 			return true;
 		}).collect(Collectors.toList());
 
@@ -4615,40 +4630,40 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return dto.getId();
 	}
 
-	private boolean validateItem(RentalItemsOrder rib) {
+//	private boolean validateItem(RentalItemsOrder rib) {
+//
+//		RentalItem rSiteItem = this.rentalv2Provider.getRentalSiteItemById(rib.getRentalResourceItemId());
+//		List<RentalResourceOrder> rentalSitesBills = this.rentalv2Provider.findRentalResourceOrderByOrderId(rib.getRentalOrderId());
+//		if (rSiteItem.getItemType().equals(RentalItemType.SALE.getCode())) {
+//			Integer soldSum = this.rentalv2Provider.countRentalSiteItemSoldCount(rSiteItem.getId());
+//			//如果订单的商品总数加此次订单的数量超过了商品的总数
+//			if (rSiteItem.getCounts() < soldSum + rib.getRentalCount())
+//				return true;
+//		} else if (rSiteItem.getItemType().equals(RentalItemType.RENTAL.getCode())) {
+//			//如果这个租用的 循环每一个单元格
+//			for (RentalResourceOrder rentalSitesBill : rentalSitesBills) {
+//				//由于商品订单不和单元格关联，所以要找到该单元格的所有订单
+//				List<Long> rentalBillIds = this.findRentalBillIdsByRuleId(rentalSitesBill.getRentalResourceRuleId(),
+//						rentalSitesBill.getResourceType());
+//				//查该单元格所有订单的预定商品总数
+//				Integer rentalSum = this.rentalv2Provider.countRentalSiteItemRentalCount(rentalBillIds);
+//				// 在单元格下租用的所有物品总数+此次订单租赁数，超过商品总数 则报异常
+//				if (rSiteItem.getCounts() < rentalSum + rib.getRentalCount())
+//					return true;
+//			}
+//		}
+//		return false;
+//	}
 
-		RentalItem rSiteItem = this.rentalv2Provider.getRentalSiteItemById(rib.getRentalResourceItemId());
-		List<RentalResourceOrder> rentalSitesBills = this.rentalv2Provider.findRentalResourceOrderByOrderId(rib.getRentalOrderId());
-		if (rSiteItem.getItemType().equals(RentalItemType.SALE.getCode())) {
-			Integer soldSum = this.rentalv2Provider.countRentalSiteItemSoldCount(rSiteItem.getId());
-			//如果订单的商品总数加此次订单的数量超过了商品的总数
-			if (rSiteItem.getCounts() < soldSum + rib.getRentalCount())
-				return true;
-		} else if (rSiteItem.getItemType().equals(RentalItemType.RENTAL.getCode())) {
-			//如果这个租用的 循环每一个单元格 
-			for (RentalResourceOrder rentalSitesBill : rentalSitesBills) {
-				//由于商品订单不和单元格关联，所以要找到该单元格的所有订单
-				List<Long> rentalBillIds = this.findRentalBillIdsByRuleId(rentalSitesBill.getRentalResourceRuleId(),
-						rentalSitesBill.getResourceType());
-				//查该单元格所有订单的预定商品总数
-				Integer rentalSum = this.rentalv2Provider.countRentalSiteItemRentalCount(rentalBillIds);
-				// 在单元格下租用的所有物品总数+此次订单租赁数，超过商品总数 则报异常
-				if (rSiteItem.getCounts() < rentalSum + rib.getRentalCount())
-					return true;
-			}
-		}
-		return false;
-	}
-
-	private List<Long> findRentalBillIdsByRuleId(Long ruleId, String resourceType) {
-		List<Long> result = new ArrayList<>();
-		List<RentalResourceOrder> rentalSitesBills = this.rentalv2Provider.findRentalSiteBillBySiteRuleId(ruleId, resourceType);
-		for (RentalResourceOrder sitesBill : rentalSitesBills) {
-			result.add(sitesBill.getRentalOrderId());
-		}
-		return result;
-		
-	}
+//	private List<Long> findRentalBillIdsByRuleId(Long ruleId, String resourceType) {
+//		List<Long> result = new ArrayList<>();
+//		List<RentalResourceOrder> rentalSitesBills = this.rentalv2Provider.findRentalSiteBillBySiteRuleId(ruleId, resourceType);
+//		for (RentalResourceOrder sitesBill : rentalSitesBills) {
+//			result.add(sitesBill.getRentalOrderId());
+//		}
+//		return result;
+//
+//	}
 
 
 	private void setSignatureParam(AddRentalBillItemCommandResponse response) {
@@ -5415,6 +5430,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		List<RentalSitePackagesDTO> resourcePackageDTOs = new ArrayList<>();
 		processPricePackage(resourcePackageDTOs, pricePackages);
 
+		List<RentalResourceOrder> rentalResourceOrders = this.rentalv2Provider.findAllRentalSiteBillByTime(rs, start.getTimeInMillis(),
+				end.getTimeInMillis());
+		List<RentalCell> closedCells = this.rentalv2Provider.findCellClosedByTimeInterval(rs.getResourceType(), rs.getId(), start.getTimeInMillis(),
+				end.getTimeInMillis());
+		SegmentTree usedSegment = new SegmentTree();
+		SegmentTree closedSegment = new SegmentTree();
+		if (rentalResourceOrders != null && rentalResourceOrders.size()>0)
+			for (RentalResourceOrder resourceOrder:rentalResourceOrders)
+				usedSegment.putSegment(resourceOrder.getBeginTime().getTime(),resourceOrder.getEndTime().getTime(),
+						resourceOrder.getRentalCount().intValue());
+		if (closedCells != null && closedCells.size() >0)
+			for (RentalCell cell : closedCells)
+				closedSegment.putSegment(cell.getBeginTime().getTime(),cell.getEndTime().getTime(),1);
+
 		for (; start.before(end); start.add(Calendar.DAY_OF_YEAR, 1)) {
 			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
 			rulesDTOS.add(dayDto);
@@ -5459,7 +5488,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 				// 支持复选，要换一种方式计算剩余数量
-				calculateAvailableCount(dto, rs, rsr, priceRules);
+				//calculateAvailableCount(dto, rs, rsr, priceRules);
+				Double rentedCount = rsr.getCounts() - usedSegment.getMaxCover(rsr.getBeginTime().getTime(), rsr.getEndTime().getTime());
+				dto.setCounts(rentedCount < 0 ?0.0:rentedCount);
 				//根据时间判断来设置status
 				setRentalCellStatus(reserveTime, dto, rsr, rule);
 				//当可预约数量为0时, 或者在后台手动关闭时
@@ -5469,7 +5500,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 				//如果多个模式，那么其它模式关的，当前模式对应时间也要关闭
 				if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
-					calculateCurrentStatus(dto, rs, rsr, priceRules);
+					if (closedSegment.getMaxCover(rsr.getBeginTime().getTime(),rsr.getEndTime().getTime()) > 0)
+						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
+					//calculateCurrentStatus(dto, rs, rsr, priceRules);
 				}
 
 				setRentalSiteRulesDTOExtraInfo(dto);

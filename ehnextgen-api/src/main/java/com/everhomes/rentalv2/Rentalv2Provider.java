@@ -199,12 +199,14 @@ public interface Rentalv2Provider {
 
 	Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules);
 
+	List<RentalResourceOrder> findAllRentalSiteBillByTime(RentalResource rentalResource,Long beginTime,Long endTime);
+
 	MaxMinPrice findMaxMinPrice(Long ownerId, Byte rentalType);
 
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
 
-	boolean findCellClosedByTimeInterval(String resourceType,Long rentalSiteId,Long startTime,Long endTime);
+	List<RentalCell> findCellClosedByTimeInterval(String resourceType,Long rentalSiteId,Long startTime,Long endTime);
 
 	RentalResourceType findRentalResourceTypeById(Long resourceTypeId);
 
